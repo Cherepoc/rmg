@@ -24,7 +24,7 @@ public sealed class DyadicRankThresholdPatternTest
             new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2)
         );
 
-        await Assert.That(Positions(pattern)).IsEquivalentTo(Enumerable.Range(0, 16).Select(x => x * 0.25).ToArray());
+        await Assert.That(Positions(pattern)).IsEquivalentTo(Enumerable.Range(0, 16).Select(x => x * 0.25).ToArray(), CollectionOrdering.Matching);
     }
 
     [Test]
@@ -45,7 +45,7 @@ public sealed class DyadicRankThresholdPatternTest
                 .Select(beat => Positions(pattern).Where(x => x >= beat && x < beat + 1).Select(x => x - beat).ToArray())
                 .ToArray();
             foreach (var cycle in cycles.Skip(1))
-                await Assert.That(cycle).IsEquivalentTo(cycles[0]).Because($"seed {seed}");
+                await Assert.That(cycle).IsEquivalentTo(cycles[0], CollectionOrdering.Matching).Because($"seed {seed}");
         }
     }
 
@@ -85,7 +85,7 @@ public sealed class DyadicRankThresholdPatternTest
 
             var pattern = DyadicRankThresholdPattern.Create(new GenerationContext(0), seed, weights, descriptor);
 
-            await Assert.That(Positions(pattern)).IsEquivalentTo(expected).Because($"seed {seed}");
+            await Assert.That(Positions(pattern)).IsEquivalentTo(expected, CollectionOrdering.Matching).Because($"seed {seed}");
         }
     }
 
@@ -118,8 +118,8 @@ public sealed class DyadicRankThresholdPatternTest
     {
         var slots = DyadicRankTimeline.GenerateSlots(BarDuration, 0, 2, 1, BarDuration, 2);
 
-        await Assert.That(slots.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 1, 2, 3]);
-        await Assert.That(slots.Select(x => x.Cycle).ToArray()).IsEquivalentTo([0, 0, 1, 1]);
-        await Assert.That(slots.Select(x => x.Slot).ToArray()).IsEquivalentTo([0, 1, 0, 1]);
+        await Assert.That(slots.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 1, 2, 3], CollectionOrdering.Matching);
+        await Assert.That(slots.Select(x => x.Cycle).ToArray()).IsEquivalentTo([0, 0, 1, 1], CollectionOrdering.Matching);
+        await Assert.That(slots.Select(x => x.Slot).ToArray()).IsEquivalentTo([0, 1, 0, 1], CollectionOrdering.Matching);
     }
 }

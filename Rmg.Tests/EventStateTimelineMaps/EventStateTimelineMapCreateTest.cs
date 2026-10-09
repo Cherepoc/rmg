@@ -136,7 +136,7 @@ public sealed class EventStateTimelineMapCreateTest
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => !(x.EventTimeline.ToImmutableArray()).Any(), assert => assert.IsTrue())
-            .And.Satisfies(x => x.StateTimelineMap.StateTimelines, assert => assert.IsEquivalentTo(stateTimelines.OrderBy(t => t.StateKind.Name)));
+            .And.Satisfies(x => x.StateTimelineMap.StateTimelines, assert => assert.IsEquivalentTo(stateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
     
     [Test]
@@ -157,7 +157,7 @@ public sealed class EventStateTimelineMapCreateTest
             .IsNotNull()
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
-            .And.Satisfies(x => x.EventTimeline.ToImmutableArray(), assert => assert.IsEquivalentTo(eventItems))
+            .And.Satisfies(x => x.EventTimeline.ToImmutableArray(), assert => assert.IsEquivalentTo(eventItems, CollectionOrdering.Matching))
             .And.Satisfies(x => !(x.StateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
 
@@ -200,8 +200,8 @@ public sealed class EventStateTimelineMapCreateTest
             .IsNotNull()
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
-            .And.Satisfies(x => x.EventTimeline, assert => assert.IsEquivalentTo(expectedEventTimeline))
-            .And.Satisfies(x => x.StateTimelineMap.StateTimelines, assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name)));
+            .And.Satisfies(x => x.EventTimeline, assert => assert.IsEquivalentTo(expectedEventTimeline, CollectionOrdering.Matching))
+            .And.Satisfies(x => x.StateTimelineMap.StateTimelines, assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
 
     [Test]
@@ -261,7 +261,7 @@ public sealed class EventStateTimelineMapCreateTest
             .IsNotNull()
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
-            .And.Satisfies(x => x.EventTimeline, assert => assert.IsEquivalentTo(eventTimeline))
-            .And.Satisfies(x => x.StateTimelineMap.StateTimelines, assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name)));
+            .And.Satisfies(x => x.EventTimeline, assert => assert.IsEquivalentTo(eventTimeline, CollectionOrdering.Matching))
+            .And.Satisfies(x => x.StateTimelineMap.StateTimelines, assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
 }

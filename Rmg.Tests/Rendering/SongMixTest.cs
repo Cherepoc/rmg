@@ -37,7 +37,7 @@ public sealed class SongMixTest
         var asMade = Kicks(Render.RenderSong(song));
 
         await Assert.That(asMade).IsNotEmpty();
-        await Assert.That(Kicks(Render.RenderSong(song, Group(DrumGroups.Kick.Name, new DrumGroupMix(0.5, true))))).IsEquivalentTo(asMade.Select(x => x * 0.5));
+        await Assert.That(Kicks(Render.RenderSong(song, Group(DrumGroups.Kick.Name, new DrumGroupMix(0.5, true))))).IsEquivalentTo(asMade.Select(x => x * 0.5), CollectionOrdering.Matching);
         await Assert.That(Kicks(Render.RenderSong(song, Group(DrumGroups.Kick.Name, new DrumGroupMix(1, false))))).IsEmpty();
     }
 

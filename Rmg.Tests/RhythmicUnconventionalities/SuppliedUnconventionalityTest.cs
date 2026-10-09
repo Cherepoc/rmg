@@ -28,7 +28,7 @@ public sealed class SuppliedUnconventionalityTest
     {
         var drawn = SongGenerator.GenerateSong(7, SongOverrides.None);
 
-        await Assert.That(Write(drawn)).IsEquivalentTo(Write(SongGenerator.GenerateSong(7)));
+        await Assert.That(Write(drawn)).IsEquivalentTo(Write(SongGenerator.GenerateSong(7)), CollectionOrdering.Matching);
         await Assert.That(drawn.Draws).IsNotNull();
     }
 

@@ -14,7 +14,7 @@ public sealed class DyadicRankDistributionGetHalfByRank
             new(0, 0),
         };
 
-        await Assert.That(items).IsEquivalentTo(expectedItems);
+        await Assert.That(items).IsEquivalentTo(expectedItems, CollectionOrdering.Matching);
     }
     
     [Test]
@@ -28,7 +28,7 @@ public sealed class DyadicRankDistributionGetHalfByRank
             new(0.5, 1),
         };
 
-        await Assert.That(items).IsEquivalentTo(expectedItems);
+        await Assert.That(items).IsEquivalentTo(expectedItems, CollectionOrdering.Matching);
     }
     
     [Test]
@@ -44,7 +44,7 @@ public sealed class DyadicRankDistributionGetHalfByRank
             new(0.75, 2),
         };
 
-        await Assert.That(items).IsEquivalentTo(expectedItems);
+        await Assert.That(items).IsEquivalentTo(expectedItems, CollectionOrdering.Matching);
     }
     
     [Test]
@@ -64,6 +64,6 @@ public sealed class DyadicRankDistributionGetHalfByRank
             new(0.875, 3),
         };
 
-        await Assert.That(items).IsEquivalentTo(expectedItems);
+        await Assert.That(items).IsEquivalentTo(expectedItems, CollectionOrdering.Matching);
     }
 }

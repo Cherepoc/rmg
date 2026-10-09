@@ -22,7 +22,7 @@ public sealed class VoiceLeaderTest
     {
         var result = VoiceLeader.Choose(FMajor, false, CMajor, 5, 1, MinNote, MaxNote);
 
-        await Assert.That(result!.Value.ToArray()).IsEquivalentTo([60, 65, 69]);
+        await Assert.That(result!.Value.ToArray()).IsEquivalentTo([60, 65, 69], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -30,7 +30,7 @@ public sealed class VoiceLeaderTest
     {
         var result = VoiceLeader.Choose(FMajor, false, CMajor, 5, 0, MinNote, MaxNote);
 
-        await Assert.That(result!.Value.ToArray()).IsEquivalentTo([65, 69, 72]);
+        await Assert.That(result!.Value.ToArray()).IsEquivalentTo([65, 69, 72], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -41,7 +41,7 @@ public sealed class VoiceLeaderTest
 
         var result = VoiceLeader.Choose(gMajor, false, CMajor, 7, 0, MinNote, MaxNote);
 
-        await Assert.That(result!.Value.ToArray()).IsEquivalentTo([55, 59, 62]);
+        await Assert.That(result!.Value.ToArray()).IsEquivalentTo([55, 59, 62], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -52,7 +52,7 @@ public sealed class VoiceLeaderTest
 
         var result = VoiceLeader.Choose(quartal, true, [48, 52, 55], 2, 1, MinNote, MaxNote);
 
-        await Assert.That(result!.Value.Select(x => x - result.Value[0]).ToArray()).IsEquivalentTo([0, 5, 10, 15]);
+        await Assert.That(result!.Value.Select(x => x - result.Value[0]).ToArray()).IsEquivalentTo([0, 5, 10, 15], CollectionOrdering.Matching);
         await Assert.That((result.Value[0] - 62) % 12).IsEqualTo(0);
     }
 
@@ -64,7 +64,7 @@ public sealed class VoiceLeaderTest
         await Assert.That(layouts.All(x => x.All(note => note is >= MinNote and <= MaxNote))).IsTrue();
         // every inversion keeps the notes of the chord
         await Assert.That(layouts.All(x => x.Select(n => n % 12).Order().SequenceEqual(new[] { 0, 4, 7 }))).IsTrue();
-        await Assert.That(layouts.Select(x => (x[0] % 12)).Distinct().Order().ToArray()).IsEquivalentTo([0, 4, 7]);
+        await Assert.That(layouts.Select(x => (x[0] % 12)).Distinct().Order().ToArray()).IsEquivalentTo([0, 4, 7], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -89,7 +89,7 @@ public sealed class VoiceLeaderTest
         var fAgain = leader.Place(FMajor, 65, false, 1, 0);
 
         await Assert.That(first).IsEqualTo(CMajor);
-        await Assert.That(f.ToArray()).IsEquivalentTo([60, 65, 69]);
+        await Assert.That(f.ToArray()).IsEquivalentTo([60, 65, 69], CollectionOrdering.Matching);
         await Assert.That(fAgain).IsEqualTo(f);
     }
 
@@ -104,7 +104,7 @@ public sealed class VoiceLeaderTest
 
         await Assert.That(reset).IsEqualTo(FMajor);
         // C after F-A-C holds the C and moves the others down a step or two
-        await Assert.That(afterInSameBar.ToArray()).IsEquivalentTo([64, 67, 72]);
+        await Assert.That(afterInSameBar.ToArray()).IsEquivalentTo([64, 67, 72], CollectionOrdering.Matching);
     }
 
     [Test]

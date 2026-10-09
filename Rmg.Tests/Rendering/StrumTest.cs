@@ -56,7 +56,7 @@ public sealed class StrumTest
                 if (strings.Select(x => x.Offset).Distinct().Count() != struck.Distinct().Count())
                     continue;
                 var pitches = strings.Select(x => x.Offset).ToArray();
-                await Assert.That(pitches).IsEquivalentTo(strum > 0 ? pitches.Order() : pitches.OrderDescending(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+                await Assert.That(pitches).IsEquivalentTo(strum > 0 ? pitches.Order() : pitches.OrderDescending(), CollectionOrdering.Matching);
                 strokes.Add(strings[^1].Shift - strings[0].Shift);
             }
         }

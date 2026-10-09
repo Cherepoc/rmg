@@ -75,6 +75,6 @@ public sealed class WeightUtilTest
         var result = new[] { 3, 1, 2 }.WeightUsing(x => x * 10.0);
 
         await Assert.That(result.AsEnumerable())
-            .IsEquivalentTo(new[] { new Weighted<int>(30, 3), new Weighted<int>(10, 1), new Weighted<int>(20, 2) });
+            .IsEquivalentTo(new[] { new Weighted<int>(30, 3), new Weighted<int>(10, 1), new Weighted<int>(20, 2) }, CollectionOrdering.Matching);
     }
 }

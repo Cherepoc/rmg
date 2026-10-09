@@ -32,7 +32,7 @@ public sealed class SongBatchTest
     public async Task GenerateSongSeeds_SameSeed_ResultsIn_SameSeeds()
     {
         await Assert.That(SongBatch.GenerateSongSeeds(77, 10).AsEnumerable())
-            .IsEquivalentTo(SongBatch.GenerateSongSeeds(77, 10).AsEnumerable());
+            .IsEquivalentTo(SongBatch.GenerateSongSeeds(77, 10).AsEnumerable(), CollectionOrdering.Matching);
     }
 
     [Test]
@@ -41,7 +41,7 @@ public sealed class SongBatchTest
         var small = SongBatch.GenerateSongSeeds(77, 3);
         var large = SongBatch.GenerateSongSeeds(77, 8);
 
-        await Assert.That(large.Take(3)).IsEquivalentTo(small.AsEnumerable());
+        await Assert.That(large.Take(3)).IsEquivalentTo(small.AsEnumerable(), CollectionOrdering.Matching);
     }
 
     [Test]
@@ -79,7 +79,7 @@ public sealed class SongBatchTest
                 .ToArray();
             var actualNames = Directory.GetFiles(directory).Select(Path.GetFileName).ToArray();
             await Assert.That(exitCode).IsEqualTo(SongBatch.Success);
-            await Assert.That(actualNames).IsEquivalentTo(expectedNames);
+            await Assert.That(actualNames).IsEquivalentTo(expectedNames, CollectionOrdering.Any);
             await Assert.That(error.ToString()).IsEqualTo(string.Empty);
         }
         finally
@@ -122,7 +122,7 @@ public sealed class SongBatchTest
             foreach (var file in Directory.GetFiles(directory))
             {
                 var header = File.ReadAllBytes(file).Take(4).ToArray();
-                await Assert.That(header).IsEquivalentTo(new byte[] { 0x4D, 0x54, 0x68, 0x64 });
+                await Assert.That(header).IsEquivalentTo(new byte[] { 0x4D, 0x54, 0x68, 0x64 }, CollectionOrdering.Matching);
             }
         }
         finally
@@ -144,9 +144,9 @@ public sealed class SongBatchTest
             var files1 = Directory.GetFiles(directory1).Order().ToArray();
             var files2 = Directory.GetFiles(directory2).Order().ToArray();
             await Assert.That(files1.Length).IsEqualTo(3);
-            await Assert.That(files1.Select(Path.GetFileName)).IsEquivalentTo(files2.Select(Path.GetFileName));
+            await Assert.That(files1.Select(Path.GetFileName)).IsEquivalentTo(files2.Select(Path.GetFileName), CollectionOrdering.Matching);
             for (var i = 0; i < files1.Length; i++)
-                await Assert.That(File.ReadAllBytes(files1[i])).IsEquivalentTo(File.ReadAllBytes(files2[i]));
+                await Assert.That(File.ReadAllBytes(files1[i])).IsEquivalentTo(File.ReadAllBytes(files2[i]), CollectionOrdering.Matching);
         }
         finally
         {
@@ -198,7 +198,7 @@ public sealed class SongBatchTest
                 SongFile.GetName(songSeeds[2]),
             };
             await Assert.That(exitCode).IsEqualTo(SongBatch.SongsFailed);
-            await Assert.That(Directory.GetFiles(directory).Select(Path.GetFileName)).IsEquivalentTo(expectedNames);
+            await Assert.That(Directory.GetFiles(directory).Select(Path.GetFileName)).IsEquivalentTo(expectedNames, CollectionOrdering.Any);
             await Assert.That(error.ToString().Contains(Rmg.Core.Base62.FromSeed(failingSeed))).IsTrue();
             await Assert.That(error.ToString().Contains("boom")).IsTrue();
         }

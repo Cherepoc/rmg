@@ -33,7 +33,7 @@ public sealed class DyadicRankItemPatternTest
         foreach (var cycle in Enumerable.Range(1, 3))
         {
             var values = items.Where(x => x.Position >= cycle && x.Position < cycle + 1).ToArray();
-            await Assert.That(values.Select(x => x.Value.Value).ToArray()).IsEquivalentTo(firstCycle);
+            await Assert.That(values.Select(x => x.Value.Value).ToArray()).IsEquivalentTo(firstCycle, CollectionOrdering.Matching);
             await Assert.That(values.All(x => x.Value.Position.Equals(x.Position))).IsTrue();
         }
     }

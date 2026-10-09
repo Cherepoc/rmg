@@ -36,7 +36,7 @@ public sealed class DyadicRankTimelineGenerateTest
     {
         var result = DyadicRankTimeline.Generate(BarDuration, BackbeatPhase, HalfBarPeriod, 0, BarDuration, 2);
 
-        await Assert.That(result.Select(x => x.Position)).IsEquivalentTo([1.0, 3.0]);
+        await Assert.That(result.Select(x => x.Position)).IsEquivalentTo([1.0, 3.0], CollectionOrdering.Matching);
         await Assert.That(result.All(x => x.Value == 0)).IsTrue();
     }
 
@@ -45,7 +45,7 @@ public sealed class DyadicRankTimelineGenerateTest
     {
         var result = DyadicRankTimeline.Generate(BarDuration, BackbeatPhase, HalfBarPeriod, 1, BarDuration, 2);
 
-        await Assert.That(result.Where(x => x.Value == 0).Select(x => x.Position)).IsEquivalentTo([1.0, 3.0]);
-        await Assert.That(result.Where(x => x.Value == 1).Select(x => x.Position)).IsEquivalentTo([0.0, 2.0]);
+        await Assert.That(result.Where(x => x.Value == 0).Select(x => x.Position)).IsEquivalentTo([1.0, 3.0], CollectionOrdering.Matching);
+        await Assert.That(result.Where(x => x.Value == 1).Select(x => x.Position)).IsEquivalentTo([0.0, 2.0], CollectionOrdering.Matching);
     }
 }

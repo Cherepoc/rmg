@@ -105,7 +105,7 @@ public sealed class EventStateTimelineMapShift
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => !(x.EventTimeline.ToImmutableArray()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => x.StateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name)));
+                assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
     
     [Test]
@@ -131,7 +131,7 @@ public sealed class EventStateTimelineMapShift
             .IsNotNull()
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
-            .And.Satisfies(x => x.EventTimeline, assert => assert.IsEquivalentTo(expectedEventTimeline))
+            .And.Satisfies(x => x.EventTimeline, assert => assert.IsEquivalentTo(expectedEventTimeline, CollectionOrdering.Matching))
             .And.Satisfies(x => !(x.StateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
 
@@ -182,8 +182,8 @@ public sealed class EventStateTimelineMapShift
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.EventTimeline.ToImmutableArray(),
-                assert => assert.IsEquivalentTo(expectedEventTimeline))
+                assert => assert.IsEquivalentTo(expectedEventTimeline, CollectionOrdering.Matching))
             .And.Satisfies(x => x.StateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name)));
+                assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
 }

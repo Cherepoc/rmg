@@ -24,7 +24,7 @@ public sealed class MelodyRhythmTest
     {
         var ended = LinePattern.EndPhrase(CreateBar(0, 1, 1.5, 2, 3), 2);
 
-        await Assert.That(ended.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 1.0, 1.5]);
+        await Assert.That(ended.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 1.0, 1.5], CollectionOrdering.Matching);
         await Assert.That(ended[2].Value.GetStateValue(StateKinds.HeldDuration)).IsEqualTo(4 - MelodyLayers.PhraseEndRest - 1.5);
         // only the last note is held
         await Assert.That(ended[1].Value.GetStateValue(StateKinds.HeldDuration)).IsEqualTo(0);
@@ -36,7 +36,7 @@ public sealed class MelodyRhythmTest
     {
         var ended = LinePattern.EndPhrase(CreateBar(1.5, 2.5), 1);
 
-        await Assert.That(ended.Select(x => x.Position).ToArray()).IsEquivalentTo([1.5]);
+        await Assert.That(ended.Select(x => x.Position).ToArray()).IsEquivalentTo([1.5], CollectionOrdering.Matching);
         await Assert.That(ended[0].Value.GetStateValue(StateKinds.HeldDuration)).IsEqualTo(4 - MelodyLayers.PhraseEndRest - 1.5);
     }
 

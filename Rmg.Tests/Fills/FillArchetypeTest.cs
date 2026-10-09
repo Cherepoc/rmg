@@ -109,7 +109,7 @@ public sealed class FillArchetypeTest
     public async Task NamedSounds_AreTheDrumsOwn()
     {
         // the toms' note numbers rise with their pitch, which a run's order of pitch goes by
-        await Assert.That(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray()).IsEquivalentTo(DrumSounds.TomsHighToLow.Reverse().ToArray());
+        await Assert.That(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray()).IsEquivalentTo(DrumSounds.TomsHighToLow.Reverse().ToArray(), CollectionOrdering.Matching);
         await Assert.That(DrumDefinitions.HiHat.ArticulationCodes).Contains(DrumSounds.OpenHiHat);
         await Assert.That(DrumDefinitions.Cymbal.ArticulationCodes).Contains(DrumSounds.CrashCymbal1);
         await Assert.That(() => DrumDefinitions.Tom.GetArticulationIndex(DrumSounds.OpenHiHat)).Throws<ArgumentException>();
@@ -121,7 +121,7 @@ public sealed class FillArchetypeTest
         var (generator, _, _) = Create(1);
         var toms = SoundsOf(generator, FillDrumRole.Toms);
 
-        await Assert.That(toms.Select(x => x.Code).ToArray()).IsEquivalentTo(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray());
+        await Assert.That(toms.Select(x => x.Code).ToArray()).IsEquivalentTo(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray(), CollectionOrdering.Matching);
         await Assert.That(toms.All(x => x.Track == Tom)).IsTrue();
         await Assert.That(SoundsOf(generator, FillDrumRole.Snare)).IsNotEmpty();
     }
@@ -187,7 +187,7 @@ public sealed class FillArchetypeTest
         await Assert.That(FillRhythm.Of(Backbeat, Layer(2), 0.1, Meter.FourFour).Fine).IsEqualTo(0.25);
         await Assert.That(FillRhythm.Of(Backbeat, Layer(2), 0.5, Meter.FourFour).Fine).IsEqualTo(0.5);
         // the strongest notes on the backbeats
-        await Assert.That(notes.Where(x => x.Rank == 0).Select(x => x.Position).ToArray()).IsEquivalentTo([5.0, 7.0]);
+        await Assert.That(notes.Where(x => x.Rank == 0).Select(x => x.Position).ToArray()).IsEquivalentTo([5.0, 7.0], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -216,10 +216,10 @@ public sealed class FillArchetypeTest
     {
         var context = new GenerationContext(1);
 
-        await Assert.That(FillSounds.Walk(context, FillPath.OneWay, 3, 6)).IsEquivalentTo([0, 0, 1, 1, 2, 2]);
-        await Assert.That(FillSounds.Walk(context, FillPath.Turn, 3, 5)).IsEquivalentTo([0, 1, 2, 1, 0]);
-        await Assert.That(FillSounds.Walk(context, FillPath.Loop, 3, 7)).IsEquivalentTo([0, 1, 2, 0, 1, 2, 0]);
-        await Assert.That(FillSounds.Walk(context, FillPath.Random, 1, 4)).IsEquivalentTo([0, 0, 0, 0]);
+        await Assert.That(FillSounds.Walk(context, FillPath.OneWay, 3, 6)).IsEquivalentTo([0, 0, 1, 1, 2, 2], CollectionOrdering.Matching);
+        await Assert.That(FillSounds.Walk(context, FillPath.Turn, 3, 5)).IsEquivalentTo([0, 1, 2, 1, 0], CollectionOrdering.Matching);
+        await Assert.That(FillSounds.Walk(context, FillPath.Loop, 3, 7)).IsEquivalentTo([0, 1, 2, 0, 1, 2, 0], CollectionOrdering.Matching);
+        await Assert.That(FillSounds.Walk(context, FillPath.Random, 1, 4)).IsEquivalentTo([0, 0, 0, 0], CollectionOrdering.Matching);
 
         var random = FillSounds.Walk(context, FillPath.Random, 6, 2_000);
         var steps = random.Zip(random.Skip(1), (a, b) => Math.Abs(b - a)).ToArray();
@@ -331,7 +331,7 @@ public sealed class FillArchetypeTest
         var hiHat = Events(filled, HiHat, Line - 0.5, Line);
 
         // on the last off-beat, and a 16th after it, as the run's rhythm has it
-        await Assert.That(hiHat.Select(x => x.Position).ToArray()).IsEquivalentTo([Line - 0.5, Line - 0.25]);
+        await Assert.That(hiHat.Select(x => x.Position).ToArray()).IsEquivalentTo([Line - 0.5, Line - 0.25], CollectionOrdering.Matching);
         await Assert.That(hiHat.All(x => Articulation(x) == DrumDefinitions.HiHat.GetArticulationIndex(DrumSounds.OpenHiHat))).IsTrue();
         // the groove plays on up to it
         await Assert.That(Events(filled, HiHat, 0, Line - 0.5).Length).IsEqualTo(Events(setup.Song, HiHat, 0, Line - 0.5).Length);

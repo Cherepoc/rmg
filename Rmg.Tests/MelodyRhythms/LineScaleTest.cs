@@ -20,9 +20,9 @@ public sealed class LineScaleTest
 
         await Assert.That(LineScales.Classes(LineScale.Section, g)).IsNull();
         // C major but F and B
-        await Assert.That(LineScales.Classes(LineScale.Pentatonic, g)!.Order()).IsEquivalentTo(new[] { 0, 2, 4, 7, 9 });
-        await Assert.That(LineScales.Classes(LineScale.WholeTone, g)!.Order()).IsEquivalentTo(new[] { 1, 3, 5, 7, 9, 11 });
-        await Assert.That(LineScales.Classes(LineScale.Blues, g)!.Order()).IsEquivalentTo(new[] { 0, 1, 2, 5, 7, 10 });
+        await Assert.That(LineScales.Classes(LineScale.Pentatonic, g)!.Order()).IsEquivalentTo(new[] { 0, 2, 4, 7, 9 }, CollectionOrdering.Matching);
+        await Assert.That(LineScales.Classes(LineScale.WholeTone, g)!.Order()).IsEquivalentTo(new[] { 1, 3, 5, 7, 9, 11 }, CollectionOrdering.Matching);
+        await Assert.That(LineScales.Classes(LineScale.Blues, g)!.Order()).IsEquivalentTo(new[] { 0, 1, 2, 5, 7, 10 }, CollectionOrdering.Matching);
         await Assert.That(LineScales.Classes(LineScale.Chromatic, g)!.Count).IsEqualTo(12);
         // harmonic minor has two tritones, and its pentatonic line keeps all of it
         await Assert.That(LineScales.Classes(LineScale.Pentatonic, On(0, [0, 2, 3, 5, 7, 8, 11]))).IsNull();

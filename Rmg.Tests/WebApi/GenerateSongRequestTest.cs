@@ -47,7 +47,7 @@ public sealed class GenerateSongRequestTest
         await Assert.That(request.TryRead(out _, out var overrides, out var mix, out _)).IsTrue();
         await Assert.That(overrides.Base).IsEqualTo(1.0);
         await Assert.That(overrides.Facets![Facet.Chords]).IsEqualTo(0.0);
-        await Assert.That(overrides.Parts!.ToArray()).IsEquivalentTo(new[] { KeyValuePair.Create(TrackRole.Bass, false), KeyValuePair.Create(TrackRole.CounterMelody, true) });
+        await Assert.That(overrides.Parts!.ToArray()).IsEquivalentTo(new[] { KeyValuePair.Create(TrackRole.Bass, false), KeyValuePair.Create(TrackRole.CounterMelody, true) }, CollectionOrdering.Matching);
         await Assert.That(mix.Volume).IsEqualTo(0.5);
         await Assert.That(mix.Parts[TrackRole.Bass]).IsEqualTo(new PartMix(73, 1, -1, true));
         await Assert.That(mix.Parts[TrackRole.CounterMelody].Pan).IsEqualTo(1.0);

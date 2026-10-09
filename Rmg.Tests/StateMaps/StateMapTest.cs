@@ -49,7 +49,7 @@ public sealed class StateMapTest
     {
         var result = Map(KeyOffset.CreateState(2), OctaveOffset.CreateState(0));
 
-        await Assert.That(result.Kinds.Select(x => x.Name)).IsEquivalentTo(new[] { KeyOffset.Name });
+        await Assert.That(result.Kinds.Select(x => x.Name)).IsEquivalentTo(new[] { KeyOffset.Name }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -74,7 +74,7 @@ public sealed class StateMapTest
         var result = Map(Tempo.CreateState(2), OctaveOffset.CreateState(1), KeyOffset.CreateState(1));
 
         var names = result.Kinds.Select(x => x.Name).ToArray();
-        await Assert.That(names).IsEquivalentTo(names.Order().ToArray());
+        await Assert.That(names).IsEquivalentTo(names.Order().ToArray(), CollectionOrdering.Matching);
         await Assert.That(names.Length).IsEqualTo(3);
     }
 
@@ -210,7 +210,7 @@ public sealed class StateMapTest
 
         var result = input.MergeWith(other);
 
-        await Assert.That(result.GetStateValue(ScaleOffsets).ToArray()).IsEquivalentTo([1, 2, 3, 3]);
+        await Assert.That(result.GetStateValue(ScaleOffsets).ToArray()).IsEquivalentTo([1, 2, 3, 3], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -222,7 +222,7 @@ public sealed class StateMapTest
 
         var result = input.MergeWith(other);
 
-        await Assert.That(result.GetStateValue(StateKinds.ArticulationOffset).ToArray()).IsEquivalentTo([0.25, 0.25]);
+        await Assert.That(result.GetStateValue(StateKinds.ArticulationOffset).ToArray()).IsEquivalentTo([0.25, 0.25], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -310,7 +310,7 @@ public sealed class StateMapTest
     {
         var result = Map(ScaleOffsets.CreateState([7, 0, 3]));
 
-        await Assert.That(result.GetStateValue(ScaleOffsets)).IsEquivalentTo(new[] { 0, 3, 7 });
+        await Assert.That(result.GetStateValue(ScaleOffsets)).IsEquivalentTo(new[] { 0, 3, 7 }, CollectionOrdering.Matching);
         await Assert.That(result.GetStateValue(ScaleOffsets)[0]).IsEqualTo(0);
     }
 
@@ -338,7 +338,7 @@ public sealed class StateMapTest
         await Assert.That(result.GetStateValue(KeyOffset)).IsEqualTo(50);
         await Assert.That(result.GetStateValue(pool).Select(x => x[0])).IsEquivalentTo(
             Enumerable.Range(0, 100).Where(i => i % 2 == 1)
-        );
+        , CollectionOrdering.Matching);
         await Assert.That(result.GetStateValue(pool)[0][0]).IsEqualTo(1);
         await Assert.That(result.GetStateValue(pool)[^1][0]).IsEqualTo(99);
     }

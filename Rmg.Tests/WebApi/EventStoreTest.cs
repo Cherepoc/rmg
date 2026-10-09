@@ -87,7 +87,7 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(summary.Events).IsEqualTo(0);
         await Assert.That(summary.SoundFontMs.Median).IsNull();
         await Assert.That(summary.Daily).IsEmpty();
-        await Check.That(summary.Funnel.Select(step => step.Visitors).Distinct()).IsEquivalentTo(new[] { 0 });
+        await Check.That(summary.Funnel.Select(step => step.Visitors).Distinct()).IsEquivalentTo(new[] { 0 }, CollectionOrdering.Matching);
         await Assert.That(summary.Server.MakeMs.Median).IsNull();
         await Assert.That(summary.Server.Outcomes).IsEmpty();
         await Assert.That(summary.Server.FifthsVersion).IsNull();
@@ -166,7 +166,7 @@ public sealed class EventStoreTest : IDisposable
         var summary = _store.Summarise(Now, 7);
 
         await Check.That(summary.Daily.Select(day => day.Day))
-            .IsEquivalentTo(new[] { EventStore.Day(Now.AddDays(-2)), EventStore.Day(Now) });
+            .IsEquivalentTo(new[] { EventStore.Day(Now.AddDays(-2)), EventStore.Day(Now) }, CollectionOrdering.Matching);
         await Assert.That(summary.Visitors).IsEqualTo(2);
     }
 
@@ -319,7 +319,7 @@ public sealed class EventStoreTest : IDisposable
 
         var versions = _store.Summarise(Now, 30).Versions;
 
-        await Assert.That(versions.Select(x => x.Version)).IsEquivalentTo(new[] { "0.5.001", "0.5.000" });
+        await Assert.That(versions.Select(x => x.Version)).IsEquivalentTo(new[] { "0.5.001", "0.5.000" }, CollectionOrdering.Matching);
         var first = versions.Single(x => x.Version == "0.5.000");
         await Assert.That(first.Songs).IsEqualTo(1);
         await Assert.That(first.Plays).IsEqualTo(1);
@@ -348,7 +348,7 @@ public sealed class EventStoreTest : IDisposable
 
         var versions = _store.Summarise(Now, 30).Versions.Select(x => x.Version).ToArray();
 
-        await Assert.That(versions).IsEquivalentTo(new[] { "0.6.000", "0.5.1000", "0.5.999" }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(versions).IsEquivalentTo(new[] { "0.6.000", "0.5.1000", "0.5.999" }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -397,7 +397,7 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(version.Likes).IsEqualTo(2);
         await Assert.That(version.Dislikes).IsEqualTo(1);
         await Assert.That(summary.RatedVersion).IsEqualTo("0.5.000");
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("3", "", "", 2, 0), new RatedSeed("1", "", "", 0, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("3", "", "", 2, 0), new RatedSeed("1", "", "", 0, 1) }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -424,8 +424,8 @@ public sealed class EventStoreTest : IDisposable
 
         var summary = _store.Summarise(Now, 30);
 
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("1", "", "", 1, 0), new RatedSeed("2", "", "", 1, 0), new RatedSeed("3", "", "", 1, 0), new RatedSeed("1", Heard(60, true).Identity, "", 0, 1) });
-        await Assert.That(summary.RatedFifths).IsEquivalentTo(new[] { new RatedFifth(false, 0, 2, 2, 0), new RatedFifth(true, 4, 1, 0, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("1", "", "", 1, 0), new RatedSeed("2", "", "", 1, 0), new RatedSeed("3", "", "", 1, 0), new RatedSeed("1", Heard(60, true).Identity, "", 0, 1) }, CollectionOrdering.Matching);
+        await Assert.That(summary.RatedFifths).IsEquivalentTo(new[] { new RatedFifth(false, 0, 2, 2, 0), new RatedFifth(true, 4, 1, 0, 1) }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -440,11 +440,11 @@ public sealed class EventStoreTest : IDisposable
 
         var summary = _store.Summarise(Now, 30);
 
-        await Assert.That(summary.Rated.Where(x => x.Seed == "1")).IsEquivalentTo(new[] { new RatedSeed("1", "", "", 1, 0), new RatedSeed("1", "", "rock", 0, 1) });
+        await Assert.That(summary.Rated.Where(x => x.Seed == "1")).IsEquivalentTo(new[] { new RatedSeed("1", "", "", 1, 0), new RatedSeed("1", "", "rock", 0, 1) }, CollectionOrdering.Matching);
         await Assert.That(summary.RatedGenres).IsEquivalentTo(new[]
         {
             new RatedGenre("own", 2, 2, 0), new RatedGenre("rock", 2, 1, 1), new RatedGenre("", 1, 1, 0)
-        });
+        }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -503,7 +503,7 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(rows.Read()).IsTrue();
         await Assert.That(rows.GetString(0)).IsEqualTo("made");
         await Assert.That(new[] { rows.GetInt64(1), rows.GetInt64(2), rows.GetInt64(3), rows.GetInt64(4), rows.GetInt64(5), rows.GetInt64(7), rows.GetInt64(8) })
-            .IsEquivalentTo(new long[] { 12, 340, 25, 3, 1, 40, 5000 });
+            .IsEquivalentTo(new long[] { 12, 340, 25, 3, 1, 40, 5000 }, CollectionOrdering.Matching);
         await Assert.That(rows.GetString(6)).IsEqualTo("0.6.000");
 
         var others = new List<string>();
@@ -513,7 +513,7 @@ public sealed class EventStoreTest : IDisposable
             await Assert.That(rows.IsDBNull(2) && rows.IsDBNull(3) && rows.IsDBNull(7) && rows.IsDBNull(8)).IsTrue();
         }
 
-        await Assert.That(others).IsEquivalentTo(new[] { "cancelled_waiting", "cancelled_making", "refused_client", "refused_full", "failed" });
+        await Assert.That(others).IsEquivalentTo(new[] { "cancelled_waiting", "cancelled_making", "refused_client", "refused_full", "failed" }, CollectionOrdering.Matching);
     }
 
     [Test]

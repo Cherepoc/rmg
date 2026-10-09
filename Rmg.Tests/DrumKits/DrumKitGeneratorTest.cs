@@ -114,7 +114,7 @@ public sealed class DrumKitGeneratorTest
     [Test]
     public async Task SameSeed_ResultsIn_SameKit()
     {
-        await Assert.That(Select(3).Kit.AsEnumerable()).IsEquivalentTo(Select(3).Kit.AsEnumerable());
+        await Assert.That(Select(3).Kit.AsEnumerable()).IsEquivalentTo(Select(3).Kit.AsEnumerable(), CollectionOrdering.Matching);
     }
 
     [Test]

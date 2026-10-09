@@ -53,9 +53,9 @@ public sealed class CadenceRaisedStepTest
     {
         ImmutableArray<int> minor = [0, 2, 3, 5, 7, 8, 10];
 
-        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([6], [])).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 8, 11]);
-        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([5, 6], [])).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 9, 11]);
-        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([2], [1])).ToArray()).IsEquivalentTo([0, 1, 4, 5, 7, 8, 10]);
+        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([6], [])).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 8, 11], CollectionOrdering.Matching);
+        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([5, 6], [])).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 9, 11], CollectionOrdering.Matching);
+        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([2], [1])).ToArray()).IsEquivalentTo([0, 1, 4, 5, 7, 8, 10], CollectionOrdering.Matching);
         await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.None)).IsEqualTo(minor);
     }
 

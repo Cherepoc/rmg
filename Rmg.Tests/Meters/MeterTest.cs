@@ -40,11 +40,11 @@ public sealed class MeterTreeTest
         var sixEight = new Meter([6, 6]);
         var fifteen = new Meter([4, 4, 4, 3]);
 
-        await Assert.That(LengthsOf(Meter.FourFour, 1)).IsEquivalentTo(new[] { 8, 8 });
-        await Assert.That(LengthsOf(Meter.FourFour, 2)).IsEquivalentTo(new[] { 4, 4, 4, 4 });
-        await Assert.That(LengthsOf(threeFour, 1)).IsEquivalentTo(new[] { 4, 4, 4 });
-        await Assert.That(LengthsOf(sixEight, 2)).IsEquivalentTo(new[] { 2, 2, 2, 2, 2, 2 });
-        await Assert.That(LengthsOf(fifteen, 2)).IsEquivalentTo(new[] { 2, 2, 2, 2, 2, 2, 1, 1, 1 });
+        await Assert.That(LengthsOf(Meter.FourFour, 1)).IsEquivalentTo(new[] { 8, 8 }, CollectionOrdering.Matching);
+        await Assert.That(LengthsOf(Meter.FourFour, 2)).IsEquivalentTo(new[] { 4, 4, 4, 4 }, CollectionOrdering.Matching);
+        await Assert.That(LengthsOf(threeFour, 1)).IsEquivalentTo(new[] { 4, 4, 4 }, CollectionOrdering.Matching);
+        await Assert.That(LengthsOf(sixEight, 2)).IsEquivalentTo(new[] { 2, 2, 2, 2, 2, 2 }, CollectionOrdering.Matching);
+        await Assert.That(LengthsOf(fifteen, 2)).IsEquivalentTo(new[] { 2, 2, 2, 2, 2, 2, 1, 1, 1 }, CollectionOrdering.Matching);
         await Assert.That(fifteen.Levels[^1].All(x => x.Length == 1)).IsTrue();
     }
 
@@ -54,9 +54,9 @@ public sealed class MeterTreeTest
         double[] Starts(Meter meter, double period) => [..meter.GetCycles(period, 0).Select(x => x.Start)];
 
         // a beat's cycle: 3/4's beats, 6/8's 8ths, the nearer of its dotted quarters and 8ths, and 15/16's groups
-        await Assert.That(Starts(new Meter([4, 4, 4]), 1)).IsEquivalentTo(new[] { 0.0, 1, 2 });
-        await Assert.That(Starts(new Meter([6, 6]), 0.5)).IsEquivalentTo(new[] { 0.0, 0.5, 1, 1.5, 2, 2.5 });
-        await Assert.That(Starts(new Meter([4, 4, 4, 3]), 1)).IsEquivalentTo(new[] { 0.0, 1, 2, 3 });
+        await Assert.That(Starts(new Meter([4, 4, 4]), 1)).IsEquivalentTo(new[] { 0.0, 1, 2 }, CollectionOrdering.Matching);
+        await Assert.That(Starts(new Meter([6, 6]), 0.5)).IsEquivalentTo(new[] { 0.0, 0.5, 1, 1.5, 2, 2.5 }, CollectionOrdering.Matching);
+        await Assert.That(Starts(new Meter([4, 4, 4, 3]), 1)).IsEquivalentTo(new[] { 0.0, 1, 2, 3 }, CollectionOrdering.Matching);
         // a node of three 16ths plays no finer than its 16ths
         await Assert.That(new Meter([4, 4, 4, 3]).GetCycles(1, 0)[^1].RankLimit).IsEqualTo(1);
     }
@@ -95,7 +95,7 @@ public sealed class MeterTreeTest
         var meter = new Meter([..groups]);
         var slots = DyadicRankTimeline.GenerateSlots(meter.BarDuration, meter.GetCycles(2, 1), 0);
 
-        await Assert.That(slots.Select(x => x.Position).ToArray()).IsEquivalentTo(beats);
+        await Assert.That(slots.Select(x => x.Position).ToArray()).IsEquivalentTo(beats, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -117,7 +117,7 @@ public sealed class MeterTreeTest
     {
         var cycles = new Meter([..groups]).GetCycles(0.75, 0);
 
-        await Assert.That(cycles.Select(x => x.Start).ToArray()).IsEquivalentTo(starts);
+        await Assert.That(cycles.Select(x => x.Start).ToArray()).IsEquivalentTo(starts, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -138,7 +138,7 @@ public sealed class MeterTreeTest
         var context = new Rmg.Core.Probabilities.GenerationContext(1);
         var sevens = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 1, null, Genre.None)).Where(x => x.Sixteenths == 14).Select(x => string.Join("+", x.Groups)).Distinct().Order().ToArray();
 
-        await Assert.That(sevens).IsEquivalentTo(["4+4+6", "4+6+4", "6+4+4"]);
+        await Assert.That(sevens).IsEquivalentTo(["4+4+6", "4+6+4", "6+4+4"], CollectionOrdering.Matching);
     }
 
     [Test]

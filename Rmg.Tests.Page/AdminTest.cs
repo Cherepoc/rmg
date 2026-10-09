@@ -53,8 +53,8 @@ public sealed class AdminTest(Site site)
 
         var genres = page.Page.Locator("#genres-panel");
         await Assertions.Expect(genres).ToBeVisibleAsync();
-        await Assert.That(await genres.Locator("tbody tr td:first-child").AllTextContentsAsync()).IsEquivalentTo(["made on the page", "rock", "none"]);
-        await Assert.That(await page.Page.Locator("#rated tbody tr td").AllTextContentsAsync()).IsEquivalentTo(["1", "drawn", "rock", "0", "1"]);
+        await Assert.That(await genres.Locator("tbody tr td:first-child").AllTextContentsAsync()).IsEquivalentTo(["made on the page", "rock", "none"], CollectionOrdering.Matching);
+        await Assert.That(await page.Page.Locator("#rated tbody tr td").AllTextContentsAsync()).IsEquivalentTo(["1", "drawn", "rock", "0", "1"], CollectionOrdering.Matching);
         await Assert.That(page.Errors).IsEmpty();
     }
 

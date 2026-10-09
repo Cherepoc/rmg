@@ -61,7 +61,7 @@ public sealed class RiffTwinTest
         await Assert.That(drawn.Count(x => !Absent(x).Contains(TrackRole.RiffTwin))).IsEqualTo(0);
 
         var given = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Melody(0, true)));
-        await Assert.That(given.SelectMany(Intervals).Distinct().Order()).IsEquivalentTo(new[] { -5, 2 });
+        await Assert.That(given.SelectMany(Intervals).Distinct().Order()).IsEquivalentTo(new[] { -5, 2 }, CollectionOrdering.Matching);
     }
 
     [Test]

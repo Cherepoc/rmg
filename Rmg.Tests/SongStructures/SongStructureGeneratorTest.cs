@@ -48,7 +48,7 @@ public sealed class SongStructureGeneratorTest
                 .Order()
                 .ToArray();
 
-            await Assert.That(ids).IsEquivalentTo(Enumerable.Range(0, ids.Length).ToArray());
+            await Assert.That(ids).IsEquivalentTo(Enumerable.Range(0, ids.Length).ToArray(), CollectionOrdering.Matching);
         }
     }
 
@@ -74,6 +74,6 @@ public sealed class SongStructureGeneratorTest
         var second = SongStructureGenerator.Generate(new GenerationContext(5), null, 0.5);
 
         await Assert.That(first.SelectMany(x => x.SectionIds).ToArray())
-            .IsEquivalentTo(second.SelectMany(x => x.SectionIds).ToArray());
+            .IsEquivalentTo(second.SelectMany(x => x.SectionIds).ToArray(), CollectionOrdering.Matching);
     }
 }

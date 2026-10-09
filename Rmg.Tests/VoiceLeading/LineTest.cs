@@ -169,8 +169,8 @@ public sealed class LineTest
         static int[] Steps(int[] notes) => [..notes.Zip(notes.Skip(1)).Select(x => Math.Sign(x.Second - x.First))];
 
         // it plays the rising shape, and starts on a note of its own chord
-        await Assert.That(Steps(first)).IsEquivalentTo([1, 1, 1]);
-        await Assert.That(Steps(second)).IsEquivalentTo([1, 1, 1]);
+        await Assert.That(Steps(first)).IsEquivalentTo([1, 1, 1], CollectionOrdering.Matching);
+        await Assert.That(Steps(second)).IsEquivalentTo([1, 1, 1], CollectionOrdering.Matching);
         await Assert.That(dTones).Contains(second[0] % 12);
     }
 
@@ -183,7 +183,7 @@ public sealed class LineTest
         var again = new[] { (Strong, 1, 1), (Weak, 1, 2), (Weak, 1, 3) }
             .Select(x => Place(line, C, CTones, x.Item1, x.Item2, 0, x.Item3)).ToArray();
 
-        await Assert.That(again).IsEquivalentTo(first);
+        await Assert.That(again).IsEquivalentTo(first, CollectionOrdering.Matching);
     }
 
     [Test]

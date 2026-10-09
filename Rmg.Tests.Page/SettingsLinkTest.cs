@@ -35,7 +35,7 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(asked.Body.TryGetProperty("swing", out _)).IsFalse();
         // every third drum piece, from the first, and the last, in the server's order, which the page keeps the same
         await Assert.That(asked.Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).IsEquivalentTo(
-            ["kick", "clap", "tambourine", "tom", "bongo", "agogo", "woodBlock", "cuica", "whistle"]);
+            ["kick", "clap", "tambourine", "tom", "bongo", "agogo", "woodBlock", "cuica", "whistle"], CollectionOrdering.Matching);
         // the counter-melody left out of the file, which the page no longer does, every part in it
         await Assert.That(Part(asked, "counterMelody").TryGetProperty("isOn", out _)).IsFalse();
         // and the solo part's, given in on its instrument

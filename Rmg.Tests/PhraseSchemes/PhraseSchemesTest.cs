@@ -111,7 +111,7 @@ public sealed class PhraseSchemesTest
             static double[] FirstBeat(DyadicRankThresholdPattern pattern) =>
                 [..pattern.OutcomeRankTimeline.Where(x => x.Position < 1).Select(x => x.Position)];
 
-            await Assert.That(FirstBeat(varied)).IsEquivalentTo(FirstBeat(first)).Because($"seed {seed}");
+            await Assert.That(FirstBeat(varied)).IsEquivalentTo(FirstBeat(first), CollectionOrdering.Matching).Because($"seed {seed}");
         }
     }
 }

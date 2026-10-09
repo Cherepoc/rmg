@@ -25,7 +25,7 @@ public sealed class BusyTest(Site site)
         await page.Until(async () => await page.Seed() != before && await page.IsGenerateEnabled(), "the song arriving", 15);
 
         var since = page.Since(asked);
-        await Assert.That(since.Select(x => x.Ended)).IsEquivalentTo(new[] { "503", "503", "200" });
+        await Assert.That(since.Select(x => x.Ended)).IsEquivalentTo(new[] { "503", "503", "200" }, CollectionOrdering.Matching);
 
         // after the Retry-After of 1 s, and up to half as long again
         foreach (var (earlier, later) in since.Zip(since.Skip(1)))
@@ -45,7 +45,7 @@ public sealed class BusyTest(Site site)
         await page.Until(async () => (await page.Status()).Contains("Could not generate"), "the page giving up", 15);
         await Task.Delay(500);
 
-        await Assert.That(page.Since(asked).Select(x => x.Ended)).IsEquivalentTo(new[] { "503", "503", "503", "503" });
+        await Assert.That(page.Since(asked).Select(x => x.Ended)).IsEquivalentTo(new[] { "503", "503", "503", "503" }, CollectionOrdering.Matching);
         await Assert.That(await page.Status()).Contains("busy");
         await Assert.That(await page.Seed()).IsEqualTo(before);
         await Assert.That(await page.IsGenerateEnabled()).IsTrue();

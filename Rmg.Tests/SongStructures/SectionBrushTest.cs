@@ -39,7 +39,7 @@ public sealed class SectionBrushTest
     {
         var result = SectionBrush.Alternation.Paint(2, 4, new GenerationContext(1));
 
-        await Assert.That(result.AsEnumerable()).IsEquivalentTo([0, 1, 0, 1]);
+        await Assert.That(result.AsEnumerable()).IsEquivalentTo([0, 1, 0, 1], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -47,7 +47,7 @@ public sealed class SectionBrushTest
     {
         var result = SectionBrush.PingPong.Paint(3, 4, new GenerationContext(1));
 
-        await Assert.That(result.AsEnumerable()).IsEquivalentTo([0, 1, 2, 1]);
+        await Assert.That(result.AsEnumerable()).IsEquivalentTo([0, 1, 2, 1], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -56,7 +56,7 @@ public sealed class SectionBrushTest
         var first = SectionBrush.Random.Paint(3, 4, new GenerationContext(9));
         var second = SectionBrush.Random.Paint(3, 4, new GenerationContext(9));
 
-        await Assert.That(first.AsEnumerable()).IsEquivalentTo(second.AsEnumerable());
+        await Assert.That(first.AsEnumerable()).IsEquivalentTo(second.AsEnumerable(), CollectionOrdering.Matching);
     }
 
     [Test]

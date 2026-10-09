@@ -69,7 +69,7 @@ public sealed class StateTimelineShiftTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(items.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(items));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(items, CollectionOrdering.Matching));
     }
     
     [Test]
@@ -95,7 +95,7 @@ public sealed class StateTimelineShiftTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
     
     [Test]
@@ -122,7 +122,7 @@ public sealed class StateTimelineShiftTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
     
     [Test]
@@ -150,7 +150,7 @@ public sealed class StateTimelineShiftTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
     
     [Test]
@@ -177,7 +177,7 @@ public sealed class StateTimelineShiftTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
     
     [Test]
@@ -205,7 +205,7 @@ public sealed class StateTimelineShiftTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
     
     [Test]

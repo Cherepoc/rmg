@@ -107,7 +107,7 @@ public sealed class GenreEditorTest(Site site)
         var count = page.Requests.Count;
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true }).ClickAsync();
         await page.Until(() => page.Requests.Count > count, "the song asked for in the genre made");
-        await Assert.That(page.Requests[^1].Body.GetProperty("genre").GetProperty("meter").EnumerateObject().Select(x => x.Name)).IsEquivalentTo(["3/4"]);
+        await Assert.That(page.Requests[^1].Body.GetProperty("genre").GetProperty("meter").EnumerateObject().Select(x => x.Name)).IsEquivalentTo(["3/4"], CollectionOrdering.Matching);
         await page.Settled();
 
         await page.Page.GotoAsync("/");
@@ -316,7 +316,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await name.InputValueAsync()).IsEqualTo("Rock 2");
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true }).ClickAsync();
         await dialog.Locator("> header .genre-close").ClickAsync();
-        await Assert.That(await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync()).IsEquivalentTo(["Rock 1", "Rock 2"]);
+        await Assert.That(await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync()).IsEquivalentTo(["Rock 1", "Rock 2"], CollectionOrdering.Matching);
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -377,7 +377,7 @@ public sealed class GenreEditorTest(Site site)
         await dialog.Locator("footer button", new() { HasTextString = "Save as" }).ClickAsync();
         await page.Until(() => page.Requests.Count > count, "the song asked for in the genre saved");
         var genre = page.Page.Locator("select[aria-label='Genre']");
-        await Assert.That(await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync()).IsEquivalentTo(["First", "Second"]);
+        await Assert.That(await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync()).IsEquivalentTo(["First", "Second"], CollectionOrdering.Matching);
         await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Second");
 
         // a preset's name refused, nothing kept
@@ -491,7 +491,7 @@ public sealed class GenreEditorTest(Site site)
         var dialog = await page.Manager();
         var count = page.Requests.Count;
         await dialog.Locator("ul[aria-label=\"This song's\"] li", new() { HasText = "Played" }).GetByRole(AriaRole.Button, new() { Name = "Keep", Exact = true }).ClickAsync();
-        await Assert.That((await yours.AllTextContentsAsync()).ToArray()).IsEquivalentTo(["Played"]);
+        await Assert.That((await yours.AllTextContentsAsync()).ToArray()).IsEquivalentTo(["Played"], CollectionOrdering.Matching);
         await Assert.That(await dialog.Locator("ul[aria-label=\"This song's\"]").CountAsync()).IsEqualTo(0);
         await Assert.That(page.Requests.Count).IsEqualTo(count);
 
@@ -503,7 +503,7 @@ public sealed class GenreEditorTest(Site site)
         // and read back as a list: every one kept, under its name or the first number free
         await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "genres.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes(exported) });
         await page.Until(async () => await dialog.Locator(".genre-told").TextContentAsync() == "One genre kept among yours.", "the list kept");
-        await Assert.That((await yours.AllTextContentsAsync()).ToArray()).IsEquivalentTo(["Played", "Played 1"]);
+        await Assert.That((await yours.AllTextContentsAsync()).ToArray()).IsEquivalentTo(["Played", "Played 1"], CollectionOrdering.Matching);
         await Assert.That(maker.Errors).IsEmpty();
         await Assert.That(page.Errors).IsEmpty();
     }
@@ -660,7 +660,7 @@ public sealed class GenreEditorTest(Site site)
         var tune = await Change(time, "meter");
         await LeaveOutAllBut(tune, "4/4");
 
-        await Assert.That(await Kept(tune)).IsEquivalentTo(["4/4"]);
+        await Assert.That(await Kept(tune)).IsEquivalentTo(["4/4"], CollectionOrdering.Matching);
         await Assert.That(await tune.Locator(".tune-row[data-option='4/4'] .tune-remove").IsDisabledAsync()).IsTrue();
         await Assert.That(await (await Pick(tune, "4/4")).IsDisabledAsync()).IsTrue();
         await tune.Locator(".genre-close").ClickAsync();
@@ -685,7 +685,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await tune.Locator("h2").TextContentAsync()).IsEqualTo("Bass – Instruments");
         await tune.Locator(".tune-pick-open").ClickAsync();
         await tune.Locator(".tune-popup input[type=search]").FillAsync("tuba");
-        await Assert.That(await tune.Locator(".tune-picks label:visible").AllTextContentsAsync()).IsEquivalentTo(["Tuba"]);
+        await Assert.That(await tune.Locator(".tune-picks label:visible").AllTextContentsAsync()).IsEquivalentTo(["Tuba"], CollectionOrdering.Matching);
         await tune.Locator(".tune-picks label[data-option='tuba'] input").CheckAsync();
         await Assert.That(await Kept(tune)).Contains("tuba");
         // the window open, the list closed by Escape
@@ -800,7 +800,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await time.GetAttributeAsync("open")).IsNotNull();
         await Assert.That(await Override(time, "meter").IsCheckedAsync()).IsTrue();
         var tune = await Change(time, "meter");
-        await Assert.That(await Kept(tune)).IsEquivalentTo(["3/4"]);
+        await Assert.That(await Kept(tune)).IsEquivalentTo(["3/4"], CollectionOrdering.Matching);
         await tune.Locator(".genre-close").ClickAsync();
 
         await file.SetInputFilesAsync(new FilePayload { Name = "other.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Other", "choices": { "nothing": {} } }""") });
@@ -925,7 +925,7 @@ public sealed class GenreEditorTest(Site site)
         var time = await Section(dialog, "Time and feel");
         var tune = await Change(time, "tempo");
         // its ends and its lean, none left out nor picked
-        await Assert.That(await Kept(tune)).IsEquivalentTo(["from", "to", "lean"]);
+        await Assert.That(await Kept(tune)).IsEquivalentTo(["from", "to", "lean"], CollectionOrdering.Matching);
         await Assert.That(await tune.Locator(".tune-remove").CountAsync()).IsEqualTo(0);
         await Assert.That(await tune.Locator(".tune-pick").IsHiddenAsync()).IsTrue();
         await tune.Locator(".tune-option[data-option='lean']").ClickAsync();
@@ -1029,7 +1029,7 @@ public sealed class GenreEditorTest(Site site)
 
         // the songs' own lines drawn, a pool's chances under them, and what each end draws, the commonest first
         await page.Until(async () => await tune.Locator(".tune-shares path").CountAsync() > 0, "the chances drawn");
-        await Assert.That(await tune.Locator(".tune-lists > div").First.Locator("li").AllTextContentsAsync()).IsEquivalentTo(["4/4 100%"]);
+        await Assert.That(await tune.Locator(".tune-lists > div").First.Locator("li").AllTextContentsAsync()).IsEquivalentTo(["4/4 100%"], CollectionOrdering.Matching);
         await tune.Locator(".tune-option[data-option='3/4']").ClickAsync();
         await tune.Locator("input[aria-label='3/4, experimental']").FillAsync("80");
         await tune.Locator("input[aria-label='3/4, experimental']").DispatchEventAsync("change");
@@ -1049,7 +1049,7 @@ public sealed class GenreEditorTest(Site site)
 
         var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("meter");
         await Assert.That(Ends(asked.GetProperty("3/4"))[2]).IsEqualTo(80);
-        await Assert.That(Ends(asked.GetProperty("7/8"))).IsEquivalentTo([0, 0, 30]);
+        await Assert.That(Ends(asked.GetProperty("7/8"))).IsEquivalentTo([0, 0, 30], CollectionOrdering.Matching);
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -1106,15 +1106,15 @@ public sealed class GenreEditorTest(Site site)
         await LeaveOutAllBut(pieces, "conga", "bongo");
         await Done(pieces);
         var setup = await Change(parts, "drumSetup");
-        await Assert.That(await Kept(setup)).IsEquivalentTo(["percussion"]);
+        await Assert.That(await Kept(setup)).IsEquivalentTo(["percussion"], CollectionOrdering.Matching);
         await setup.Locator(".tune-pick-open").ClickAsync();
-        await Assert.That(await setup.Locator(".tune-picks label").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["percussion"]);
+        await Assert.That(await setup.Locator(".tune-picks label").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["percussion"], CollectionOrdering.Matching);
         await setup.Locator(".genre-close").ClickAsync();
         var roles = parts.Locator(".genre-tabs .genre-tabs");
         await roles.GetByRole(AriaRole.Tab, new() { Name = "Ground (kick)", Exact = true }).ClickAsync();
         var ground = await Change(parts, "drumRole.ground");
         await ground.Locator(".tune-pick-open").ClickAsync();
-        await Assert.That(await ground.Locator(".tune-picks label").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["bongo", "conga"]);
+        await Assert.That(await ground.Locator(".tune-picks label").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["bongo", "conga"], CollectionOrdering.Matching);
         await Assert.That(page.Errors).IsEmpty();
     }
 

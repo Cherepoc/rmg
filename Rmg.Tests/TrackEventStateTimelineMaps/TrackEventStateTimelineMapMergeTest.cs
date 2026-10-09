@@ -80,9 +80,9 @@ public sealed class TrackEventStateTimelineMapMergeTest
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(inputDuration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
-                assert => assert.IsEquivalentTo(trackTimelineMap))
+                assert => assert.IsEquivalentTo(trackTimelineMap, CollectionOrdering.Matching))
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(commonStateTimelines.OrderBy(t => t.StateKind.Name)));
+                assert => assert.IsEquivalentTo(commonStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
 
     [Test]
@@ -392,8 +392,8 @@ public sealed class TrackEventStateTimelineMapMergeTest
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
-                assert => assert.IsEquivalentTo(expectedTrackTimelineMap))
+                assert => assert.IsEquivalentTo(expectedTrackTimelineMap, CollectionOrdering.Matching))
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Name)));
+                assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
 }

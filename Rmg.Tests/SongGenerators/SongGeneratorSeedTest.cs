@@ -20,7 +20,7 @@ public sealed class SongGeneratorSeedTest
     [Arguments(-7)]
     public async Task SameSeed_ResultsIn_IdenticalSong(int seed)
     {
-        await Assert.That(GenerateMidi(seed)).IsEquivalentTo(GenerateMidi(seed));
+        await Assert.That(GenerateMidi(seed)).IsEquivalentTo(GenerateMidi(seed), CollectionOrdering.Matching);
     }
 
     [Test]
@@ -36,7 +36,7 @@ public sealed class SongGeneratorSeedTest
         GenerateMidi(6);
         GenerateMidi(7);
 
-        await Assert.That(GenerateMidi(5)).IsEquivalentTo(first);
+        await Assert.That(GenerateMidi(5)).IsEquivalentTo(first, CollectionOrdering.Matching);
     }
 
     [Test]

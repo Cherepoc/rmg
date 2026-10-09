@@ -17,7 +17,7 @@ public sealed class SongDescriptionsTest
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
 
             // every section in the order it plays, named by its role, its bars adding up to the song's
-            await Assert.That(description.Sections.Select(x => x.Place)).IsEquivalentTo(Enumerable.Range(1, song.Map.Sections.Length));
+            await Assert.That(description.Sections.Select(x => x.Place)).IsEquivalentTo(Enumerable.Range(1, song.Map.Sections.Length), CollectionOrdering.Matching);
             foreach (var (section, span) in description.Sections.Zip(song.Map.Sections))
             {
                 var role = structure.Roles[span.SectionId];

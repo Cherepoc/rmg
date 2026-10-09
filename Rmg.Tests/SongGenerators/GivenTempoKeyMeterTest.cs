@@ -43,9 +43,9 @@ public sealed class GivenTempoKeyMeterTest
             await Assert.That(amount is 0 || Math.Abs(amount - 0.5) < 1e-9).IsTrue();
             swung += amount > 0 ? 1 : 0;
             // and the rest drawn as it was: the same form, tempo and instruments
-            await Assert.That(given.Map.Sections.Select(x => (x.SectionId, x.Duration))).IsEquivalentTo(drawn.Map.Sections.Select(x => (x.SectionId, x.Duration)));
+            await Assert.That(given.Map.Sections.Select(x => (x.SectionId, x.Duration))).IsEquivalentTo(drawn.Map.Sections.Select(x => (x.SectionId, x.Duration)), CollectionOrdering.Matching);
             await Assert.That(Start(given).GetStateValue(StateKinds.Tempo)).IsEqualTo(Start(drawn).GetStateValue(StateKinds.Tempo));
-            await Assert.That(given.Rendered.Tracks.Select(x => x.PitchInstrumentCode)).IsEquivalentTo(drawn.Rendered.Tracks.Select(x => x.PitchInstrumentCode));
+            await Assert.That(given.Rendered.Tracks.Select(x => x.PitchInstrumentCode)).IsEquivalentTo(drawn.Rendered.Tracks.Select(x => x.PitchInstrumentCode), CollectionOrdering.Matching);
         }
 
         await Assert.That(swung).IsGreaterThan(4);
@@ -72,7 +72,7 @@ public sealed class GivenTempoKeyMeterTest
                 Swing: drawn.Song.Draws.SwingAmount
             ));
 
-            await Assert.That(Write(given)).IsEquivalentTo(Write(drawn));
+            await Assert.That(Write(given)).IsEquivalentTo(Write(drawn), CollectionOrdering.Matching);
         }
     }
 

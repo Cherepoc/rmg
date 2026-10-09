@@ -106,7 +106,7 @@ public sealed class ProgressionsTest
         var weights = Rmg.Core.Composition.Progressions.GetCadenceWeights(scale.Offsets, 0);
         var strong = Enumerable.Range(0, 7).Where(x => weights[x] >= 0.8).ToArray();
 
-        await Assert.That(strong).IsEquivalentTo(expected.Cadences);
+        await Assert.That(strong).IsEquivalentTo(expected.Cadences, CollectionOrdering.Matching);
         await Assert.That(weights[0]).IsEqualTo(0);
     }
 
@@ -117,7 +117,7 @@ public sealed class ProgressionsTest
         var fromRelativeMajor = Rmg.Core.Composition.Progressions.GetCadenceWeights(Rmg.Core.Composition.Scales.NaturalMinor.Offsets, 2);
         var major = Rmg.Core.Composition.Progressions.GetCadenceWeights(Rmg.Core.Composition.Scales.Major.Offsets, 0);
 
-        await Assert.That(fromRelativeMajor).IsEquivalentTo(major);
+        await Assert.That(fromRelativeMajor).IsEquivalentTo(major, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -195,7 +195,7 @@ public sealed class ProgressionsTest
             .CountBy(x => x)
             .ToDictionary();
 
-        await Assert.That(homes.Keys.Order()).IsEquivalentTo(new[] { relative, 0, 3, -3 }.Order());
+        await Assert.That(homes.Keys.Order()).IsEquivalentTo(new[] { relative, 0, 3, -3 }.Order(), CollectionOrdering.Matching);
         await Assert.That(homes[0] / (double)PhraseCount).IsEqualTo(0.6).Within(0.02);
         await Assert.That(homes[relative] / (double)PhraseCount).IsEqualTo(0.2).Within(0.02);
     }
@@ -229,6 +229,6 @@ public sealed class ProgressionsTest
             seen.UnionWith(layers);
         }
 
-        await Assert.That(seen).IsEquivalentTo(new[] { "Progression", "Section" });
+        await Assert.That(seen).IsEquivalentTo(new[] { "Progression", "Section" }, CollectionOrdering.Any);
     }
 }

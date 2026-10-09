@@ -55,7 +55,7 @@ public sealed class StateTimelineGeneratorTest
         var result1 = generator.Generate(new GenerationContext(7), 16);
         var result2 = generator.Generate(new GenerationContext(7), 16);
 
-        await Assert.That(result1.AsEnumerable()).IsEquivalentTo(result2.AsEnumerable());
+        await Assert.That(result1.AsEnumerable()).IsEquivalentTo(result2.AsEnumerable(), CollectionOrdering.Matching);
     }
 
     [Test]

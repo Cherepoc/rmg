@@ -25,7 +25,7 @@ public sealed class GenreTest
     public async Task NoPool_WeighsTheOptionsAsTheyAre()
     {
         foreach (var conventionality in new[] { 0, 0.3, 0.5, 0.8, 1 })
-            await Assert.That(ByConvention.Weigh(Options, conventionality, null)).IsEquivalentTo(ByConvention.Weigh(Options, conventionality));
+            await Assert.That(ByConvention.Weigh(Options, conventionality, null)).IsEquivalentTo(ByConvention.Weigh(Options, conventionality), CollectionOrdering.Matching);
     }
 
     [Test]
@@ -34,9 +34,9 @@ public sealed class GenreTest
         foreach (var conventionality in new[] { 0, 0.5, 1 })
         {
             var plainOnly = ByConvention.Weigh(Options, conventionality, x => x == "plain" ? Alike(1) : null);
-            await Assert.That(plainOnly.Select(x => x.Value)).IsEquivalentTo(["plain"]);
+            await Assert.That(plainOnly.Select(x => x.Value)).IsEquivalentTo(["plain"], CollectionOrdering.Matching);
             var oddOnly = ByConvention.Weigh(Options, conventionality, x => x == "odd" ? Alike(1) : null);
-            await Assert.That(oddOnly.Select(x => x.Value)).IsEquivalentTo(["odd"]);
+            await Assert.That(oddOnly.Select(x => x.Value)).IsEquivalentTo(["odd"], CollectionOrdering.Matching);
         }
     }
 
@@ -63,7 +63,7 @@ public sealed class GenreTest
         await Assert.That(Share(ByConvention.Weigh(Options, 1, wildOnly), "odd")).IsEqualTo(0.5).Within(1e-9);
         // an end none weighs takes the middle's, and the middle with none the nearer end's
         foreach (var conventionality in new[] { 0, 0.5, 1 })
-            await Assert.That(ByConvention.Weigh(Options, conventionality, x => x == "odd" ? new ByConvention(0, 0, 1) : null).Select(x => x.Value)).IsEquivalentTo(["odd"]);
+            await Assert.That(ByConvention.Weigh(Options, conventionality, x => x == "odd" ? new ByConvention(0, 0, 1) : null).Select(x => x.Value)).IsEquivalentTo(["odd"], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -412,7 +412,7 @@ public sealed class GenreTest
         {
             static string[] Notes(CorpusSong song) =>
                 [..song.Song.Notes!.SelectMany(x => x.Value.Select(n => $"{x.Key} {n.Position:F4} {string.Join(",", n.Value.Pitches)} {n.Value.Duration:F4}"))];
-            await Assert.That(Notes(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).IsEquivalentTo(Notes(TestCorpus.Get(seed))).Because($"seed {seed}");
+            await Assert.That(Notes(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).IsEquivalentTo(Notes(TestCorpus.Get(seed)), CollectionOrdering.Matching).Because($"seed {seed}");
         }
     }
 

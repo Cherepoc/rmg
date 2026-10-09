@@ -54,7 +54,7 @@ public sealed class SongGeneratorSilentBarTest
             .AsEnumerable()
             .Select(x => x.Position)
             .ToArray();
-        await Assert.That(notePositions).IsEquivalentTo([0, 2 * BarDuration]);
+        await Assert.That(notePositions).IsEquivalentTo([0, 2 * BarDuration], CollectionOrdering.Matching);
         await Assert.That(pattern.Duration).IsEqualTo(3 * BarDuration);
     }
 

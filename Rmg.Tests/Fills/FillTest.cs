@@ -20,7 +20,7 @@ public sealed class FillTest
     {
         var timeline = Hits(0, 1, 2, 3, 4).RemoveSpan(1, 3);
 
-        await Assert.That(timeline.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 3.0, 4.0]);
+        await Assert.That(timeline.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 3.0, 4.0], CollectionOrdering.Matching);
         await Assert.That(timeline.Duration).IsEqualTo(8);
     }
 
@@ -61,7 +61,7 @@ public sealed class FillTest
         edits.Hit(1, 4, 0.8, 2, 0, "Test");
         var events = edits.ApplyTo(song).TrackTimelineMap[1].EventTimeline;
 
-        await Assert.That(events.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 4.0]);
+        await Assert.That(events.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 4.0], CollectionOrdering.Matching);
         await Assert.That(events[1].Value.GetStateValue(StateKinds.Velocity)).IsEqualTo(0.8);
         await Assert.That(events[1].Value.GetStateValue(StateKinds.ArticulationIndex)).IsEqualTo(2);
     }

@@ -33,7 +33,7 @@ public sealed class RealizedNoteTest
             var withoutNotes = new Song(song.Duration, song.Meter, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map);
 
             await Assert.That(song.Notes).IsNotNull();
-            await Assert.That(Midi(song)).IsEquivalentTo(Midi(withoutNotes));
+            await Assert.That(Midi(song)).IsEquivalentTo(Midi(withoutNotes), CollectionOrdering.Matching);
         }
     }
 

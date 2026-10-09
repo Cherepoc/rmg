@@ -65,7 +65,7 @@ public sealed class TiltTest
 
         var weighed = tilt.Weigh(options, x => x);
 
-        await Assert.That(weighed.Select(x => x.Weight).ToArray()).IsEquivalentTo([0.25, 1.0, 8.0]);
+        await Assert.That(weighed.Select(x => x.Weight).ToArray()).IsEquivalentTo([0.25, 1.0, 8.0], CollectionOrdering.Matching);
     }
 
     [Test]

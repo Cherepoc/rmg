@@ -49,7 +49,7 @@ public sealed class GivingAPartTest(Site site)
         var titles = await page.Page.EvaluateAsync<string[]>("() => [...document.querySelectorAll('.setting > input[type=checkbox], #mixer .given input')].map(x => x.title)");
         // every song setting's and every part's
         await Assert.That(titles.Length).IsGreaterThan(20);
-        await Assert.That(titles.Distinct()).IsEquivalentTo(["Check to override, uncheck to randomize"]);
+        await Assert.That(titles.Distinct()).IsEquivalentTo(["Check to override, uncheck to randomize"], CollectionOrdering.Matching);
     }
 
     /// <summary>Clicks a control of the melody's row, wherever its panel is folded away, and waits for the song made again.</summary>

@@ -41,7 +41,7 @@ public sealed class DoubleTrackingTest
                 await Assert.That(second.PitchInstrumentCode).IsEqualTo(DoubleTracking.SecondTake(first.PitchInstrumentCode));
                 await Assert.That(second.PitchInstrumentCode).IsNotEqualTo(first.PitchInstrumentCode);
                 await Assert.That((first.Volume, second.Volume)).IsEqualTo((DoubleTracking.Level, DoubleTracking.Level));
-                await Assert.That(second.NoteTimeline.Select(x => (x.Position, x.Value.Offset))).IsEquivalentTo(first.NoteTimeline.Select(x => (x.Position, x.Value.Offset)));
+                await Assert.That(second.NoteTimeline.Select(x => (x.Position, x.Value.Offset))).IsEquivalentTo(first.NoteTimeline.Select(x => (x.Position, x.Value.Offset)), CollectionOrdering.Matching);
                 foreach (var (a, b) in first.NoteTimeline.Zip(second.NoteTimeline))
                     await Assert.That(b.Value.Shift - a.Value.Shift).IsEqualTo(DoubleTracking.Delay * tempo.GetEffectiveValueAt(a.Position) * Meter.BaseTempo / 60).Within(1e-9);
             }
@@ -61,8 +61,8 @@ public sealed class DoubleTrackingTest
         var mixed = Render.RenderSong(song, SongMix.None with { Parts = ImmutableDictionary<TrackRole, PartMix>.Empty.Add(TrackRole.Riff, new PartMix(30, 0.5, 0.4, true)) });
         var takes = mixed.Tracks.Where(x => x.Role == TrackRole.Riff).OrderBy(x => x.IsDouble).ToArray();
 
-        await Assert.That(takes.Select(x => (x.PitchInstrumentCode, x.Pan))).IsEquivalentTo([(30, 0.4), (29, -0.4)], TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(takes.Select(x => x.Volume)).IsEquivalentTo([0.5 * DoubleTracking.Level, 0.5 * DoubleTracking.Level]);
+        await Assert.That(takes.Select(x => (x.PitchInstrumentCode, x.Pan))).IsEquivalentTo([(30, 0.4), (29, -0.4)], CollectionOrdering.Matching);
+        await Assert.That(takes.Select(x => x.Volume)).IsEquivalentTo([0.5 * DoubleTracking.Level, 0.5 * DoubleTracking.Level], CollectionOrdering.Matching);
         await Assert.That(mixed.GetDoubleChannels()[TrackRole.Riff]).IsNotEqualTo(mixed.GetPartChannels()[TrackRole.Riff]);
     }
 

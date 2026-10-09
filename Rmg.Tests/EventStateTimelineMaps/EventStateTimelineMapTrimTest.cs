@@ -114,8 +114,8 @@ public sealed class EventStateTimelineMapTrimTest
             .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.EventTimeline.ToImmutableArray(),
-                assert => assert.IsEquivalentTo(expectedEventTimeline))
+                assert => assert.IsEquivalentTo(expectedEventTimeline, CollectionOrdering.Matching))
             .And.Satisfies(x => x.StateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name)));
+                assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
 }

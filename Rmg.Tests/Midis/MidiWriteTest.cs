@@ -36,7 +36,7 @@ public sealed class MidiWriteTest
             0x0F, 0x00, 0xC0, 0x01, 0x00, 0x90, 0x40, 0x7F, 0x60, 0x80, 0x40, 0x40, 0x00, 0xFF, 0x2F, 0x00,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
     // the header and the system track of a one-track song of one beat
@@ -73,7 +73,7 @@ public sealed class MidiWriteTest
             0x30, 0x80, 0x40, 0x40, 0x00, 0xFF, 0x2F, 0x00,
         ];
 
-        await Assert.That(memoryStream.ToArray()).IsEquivalentTo(expected);
+        await Assert.That(memoryStream.ToArray()).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -94,7 +94,7 @@ public sealed class MidiWriteTest
             0x00, 0xFF, 0x2F, 0x00,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -114,7 +114,7 @@ public sealed class MidiWriteTest
             0x00, 0xFF, 0x2F, 0x00,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
     [Test]

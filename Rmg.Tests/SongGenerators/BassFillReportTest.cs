@@ -10,9 +10,9 @@ public sealed class BassFillReportTest
     {
         int[] scale = [36, 38, 40, 41, 43, 45, 47, 48];
 
-        await Assert.That(LineFills.Walk(scale, 36, 43, 3)).IsEquivalentTo(new[] { 38, 40, 41 });
-        await Assert.That(LineFills.Walk(scale, 48, 43, 2)).IsEquivalentTo(new[] { 47, 45 });
-        await Assert.That(LineFills.Walk(scale, 36, 43, 6)).IsEquivalentTo(new[] { 38, 38, 40, 40, 41, 41 });
+        await Assert.That(LineFills.Walk(scale, 36, 43, 3)).IsEquivalentTo(new[] { 38, 40, 41 }, CollectionOrdering.Matching);
+        await Assert.That(LineFills.Walk(scale, 48, 43, 2)).IsEquivalentTo(new[] { 47, 45 }, CollectionOrdering.Matching);
+        await Assert.That(LineFills.Walk(scale, 36, 43, 6)).IsEquivalentTo(new[] { 38, 38, 40, 40, 41, 41 }, CollectionOrdering.Matching);
     }
 
     [Test]

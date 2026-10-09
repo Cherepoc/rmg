@@ -21,6 +21,6 @@ public sealed class SongGeneratorStateScopeTest
             .ToArray();
 
         await Assert.That(kinds.Length).IsGreaterThan(0);
-        await Assert.That(kinds.Where(x => x.Scope != StateScope.Render).Select(x => x.Name)).IsEquivalentTo(Array.Empty<string>());
+        await Assert.That(kinds.Where(x => x.Scope != StateScope.Render).Select(x => x.Name)).IsEquivalentTo(Array.Empty<string>(), CollectionOrdering.Matching);
     }
 }

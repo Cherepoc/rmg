@@ -21,7 +21,7 @@ public sealed class StateKindsRegistryTest
             .Select(x => x.Name)
             .ToArray();
 
-        await Assert.That(notRender).IsEquivalentTo(Array.Empty<string>());
+        await Assert.That(notRender).IsEquivalentTo(Array.Empty<string>(), CollectionOrdering.Matching);
     }
 
     [Test]
@@ -31,7 +31,7 @@ public sealed class StateKindsRegistryTest
             .Where(x => x.IsShared)
             .ToArray();
 
-        await Assert.That(shared).IsEquivalentTo(new IStateKind[] { StateKinds.KeyOffset, StateKinds.ScaleOffsets, StateKinds.ScaleAlterations, StateKinds.Tempo, StateKinds.Fade, StateKinds.SwingDelay, StateKinds.SwingPeriod });
+        await Assert.That(shared).IsEquivalentTo(new IStateKind[] { StateKinds.KeyOffset, StateKinds.ScaleOffsets, StateKinds.ScaleAlterations, StateKinds.Tempo, StateKinds.Fade, StateKinds.SwingDelay, StateKinds.SwingPeriod }, CollectionOrdering.Matching);
     }
 
     [Test]

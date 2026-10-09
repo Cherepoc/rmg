@@ -87,8 +87,8 @@ public sealed class ProbabilityThresholdTest
 
         var result = input.ToProbabilityThresholds();
 
-        await Assert.That(result.Select(x => x.Threshold)).IsEquivalentTo(new[] { 0.25, 0.5, 1 });
-        await Assert.That(result.Select(x => x.Value)).IsEquivalentTo(new[] { "a", "b", "c" });
+        await Assert.That(result.Select(x => x.Threshold)).IsEquivalentTo(new[] { 0.25, 0.5, 1 }, CollectionOrdering.Matching);
+        await Assert.That(result.Select(x => x.Value)).IsEquivalentTo(new[] { "a", "b", "c" }, CollectionOrdering.Matching);
     }
 
     [Test]

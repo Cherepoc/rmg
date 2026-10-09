@@ -57,7 +57,7 @@ public sealed class StateTimelineMapTest
         await Assert.That(result.Duration).IsEqualTo(2);
         await Assert.That(result.StateTimelines.Length).IsEqualTo(1);
         await Assert.That(result.GetStateTimeline(KeyOffset).AsEnumerable())
-            .IsEquivalentTo(new[] { new TimelineItem<int>(0, 1), new TimelineItem<int>(1, 2) });
+            .IsEquivalentTo(new[] { new TimelineItem<int>(0, 1), new TimelineItem<int>(1, 2) }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -69,7 +69,7 @@ public sealed class StateTimelineMapTest
 
         await Assert.That(result.Duration).IsEqualTo(2);
         await Assert.That(result.GetStateTimeline(KeyOffset).AsEnumerable())
-            .IsEquivalentTo(new[] { new TimelineItem<int>(0, 1) });
+            .IsEquivalentTo(new[] { new TimelineItem<int>(0, 1) }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -84,7 +84,7 @@ public sealed class StateTimelineMapTest
         );
 
         var names = result.StateTimelines.Select(x => x.StateKind.Name).ToArray();
-        await Assert.That(names).IsEquivalentTo(names.Order().ToArray());
+        await Assert.That(names).IsEquivalentTo(names.Order().ToArray(), CollectionOrdering.Matching);
         await Assert.That(names.Length).IsEqualTo(2);
     }
 
@@ -192,7 +192,7 @@ public sealed class StateTimelineMapTest
 
         var positions = input.StateMapEventTimeline.AsEnumerable().Select(x => x.Position).ToArray();
 
-        await Assert.That(positions).IsEquivalentTo(new[] { 0d, 1d, 2d });
+        await Assert.That(positions).IsEquivalentTo(new[] { 0d, 1d, 2d }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -229,7 +229,7 @@ public sealed class StateTimelineMapTest
 
         await Assert.That(result.Duration).IsEqualTo(1);
         await Assert.That(result.GetStateTimeline(KeyOffset).AsEnumerable())
-            .IsEquivalentTo(new[] { new TimelineItem<int>(0, 1) });
+            .IsEquivalentTo(new[] { new TimelineItem<int>(0, 1) }, CollectionOrdering.Matching);
     }
 
     [Test]

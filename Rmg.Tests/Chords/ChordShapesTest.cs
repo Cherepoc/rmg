@@ -12,7 +12,7 @@ public sealed class ChordShapesTest
     {
         var levels = ChordShapes.All.Select(x => x.Unconventionality).Distinct().Order().ToArray();
 
-        await Assert.That(levels).IsEquivalentTo(Enumerable.Range(0, ChordShapes.MaxUnconventionality + 1).ToArray());
+        await Assert.That(levels).IsEquivalentTo(Enumerable.Range(0, ChordShapes.MaxUnconventionality + 1).ToArray(), CollectionOrdering.Matching);
     }
 
     [Test]

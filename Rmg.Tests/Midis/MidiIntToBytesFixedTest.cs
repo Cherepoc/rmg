@@ -14,7 +14,7 @@ public sealed class MidiIntToBytesFixedTest
             0xF2,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
     
     [Test]
@@ -28,7 +28,7 @@ public sealed class MidiIntToBytesFixedTest
             0xF3,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
     
     [Test]
@@ -43,7 +43,7 @@ public sealed class MidiIntToBytesFixedTest
             0xF4,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
     
     [Test]
@@ -59,6 +59,6 @@ public sealed class MidiIntToBytesFixedTest
             0xF4,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 }

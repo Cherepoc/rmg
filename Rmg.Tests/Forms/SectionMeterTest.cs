@@ -26,7 +26,7 @@ public sealed class SectionMeterTest
 
             // a time signature where the song starts and where a section changes the meter
             var changes = song.Map.Sections.Where((x, i) => i > 0 && !x.Meter.Equals(song.Map.Sections[i - 1].Meter)).Select(x => x.Start);
-            await Assert.That(song.Rendered.Meters.Select(x => x.Position).ToArray()).IsEquivalentTo(new[] { 0.0 }.Concat(changes).ToArray());
+            await Assert.That(song.Rendered.Meters.Select(x => x.Position).ToArray()).IsEquivalentTo(new[] { 0.0 }.Concat(changes).ToArray(), CollectionOrdering.Matching);
             changing += song.Rendered.Meters.Length > 1 ? 1 : 0;
         }
 

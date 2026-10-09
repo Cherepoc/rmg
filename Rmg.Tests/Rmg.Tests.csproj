@@ -21,4 +21,9 @@
       <ProjectReference Include="..\Rmg.WebApi\Rmg.WebApi.csproj" />
     </ItemGroup>
 
+    <!-- a collection compared in its order, or as a set where it says so -->
+    <ItemGroup>
+      <Using Include="TUnit.Assertions.Enums" />
+    </ItemGroup>
+
 </Project>

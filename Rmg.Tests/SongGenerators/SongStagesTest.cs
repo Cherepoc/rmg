@@ -21,7 +21,7 @@ public sealed class SongStagesTest
     {
         var (_, stages) = Generate(1);
 
-        await Assert.That(stages.Select(x => x.Name)).IsEquivalentTo(SongStages.All.Select(x => x.Name), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(stages.Select(x => x.Name)).IsEquivalentTo(SongStages.All.Select(x => x.Name), CollectionOrdering.Matching);
     }
 
     [Test]
@@ -35,7 +35,7 @@ public sealed class SongStagesTest
             await Assert.That(stages.Select(x => x.Name)).DoesNotContain("Lift cues");
             var (melodyWith, melodyWithout) = (with.Notes![SongTracks.MelodyTrack], without.Notes![SongTracks.MelodyTrack]);
             await Assert.That(melodyWithout.Select(x => (x.Position, x.Value.Pitches[0])))
-                .IsEquivalentTo(melodyWith.Select(x => (x.Position, x.Value.Pitches[0])), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+                .IsEquivalentTo(melodyWith.Select(x => (x.Position, x.Value.Pitches[0])), CollectionOrdering.Matching);
         }
     }
 

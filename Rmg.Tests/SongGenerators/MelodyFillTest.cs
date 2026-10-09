@@ -28,7 +28,7 @@ public sealed class MelodyFillTest
                 // its notes the walk's alone from its first to the line, three at most, and the note it leads into a step away
                 var walked = melody.Where(x => x.Position >= positions[0] - 1e-9 && x.Position < line - 1e-9).ToArray();
                 var target = melody.FirstOrDefault(x => x.Position >= line - 1e-9);
-                await Assert.That(walked.Select(x => Math.Round(x.Position, 6))).IsEquivalentTo(positions.Select(x => Math.Round(x, 6)));
+                await Assert.That(walked.Select(x => Math.Round(x.Position, 6))).IsEquivalentTo(positions.Select(x => Math.Round(x, 6)), CollectionOrdering.Matching);
                 await Assert.That(positions.Length).IsLessThanOrEqualTo(3);
                 if (target.Value is not null && walked.Length > 0 && Math.Abs(target.Value.Pitches[0] - walked[^1].Value.Pitches[0]) <= 4)
                     stepping++;

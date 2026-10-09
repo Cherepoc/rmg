@@ -14,7 +14,7 @@ public sealed class MidiIntToBytesVariableTest
             0x0,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
     
     [Test]
@@ -27,7 +27,7 @@ public sealed class MidiIntToBytesVariableTest
             0x7F,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
     
     [Test]
@@ -41,6 +41,6 @@ public sealed class MidiIntToBytesVariableTest
             0x7F,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 }

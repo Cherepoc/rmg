@@ -97,7 +97,7 @@ public sealed class StateTimelineCreateTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
 
     [Test]
@@ -122,7 +122,7 @@ public sealed class StateTimelineCreateTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
 
     [Test]
@@ -149,7 +149,7 @@ public sealed class StateTimelineCreateTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
 
     [Test]
@@ -180,7 +180,7 @@ public sealed class StateTimelineCreateTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
 
     [Test]
@@ -211,6 +211,6 @@ public sealed class StateTimelineCreateTest
             .IsNotNull()
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
-            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
+            .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems, CollectionOrdering.Matching));
     }
 }

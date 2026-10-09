@@ -21,7 +21,7 @@ public sealed class WalkingTheListTest(Site site)
         {
             await previous.ClickAsync();
             await page.Until(async () => await page.Seed() == seed && await page.IsGenerateEnabled(), $"song {seed} gone back to");
-            await Assert.That(await page.History()).IsEquivalentTo(heard, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await Assert.That(await page.History()).IsEquivalentTo(heard, CollectionOrdering.Matching);
         }
 
         // the oldest has nothing before it
@@ -42,7 +42,7 @@ public sealed class WalkingTheListTest(Site site)
         await page.Until(async () => await page.Seed() is var seed && seed != "" && seed != heard[0] && await page.IsGenerateEnabled(), "a new song");
 
         // the songs heard before under the one the page opens with
-        await Assert.That((await page.History()).Skip(1)).IsEquivalentTo(heard, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That((await page.History()).Skip(1)).IsEquivalentTo(heard, CollectionOrdering.Matching);
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -60,7 +60,7 @@ public sealed class WalkingTheListTest(Site site)
 
         await next.ClickAsync();
         await page.Until(async () => await page.Seed() == latest && await page.IsGenerateEnabled(), "the latest song gone on to");
-        await Assert.That(await page.History()).IsEquivalentTo(heard, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(await page.History()).IsEquivalentTo(heard, CollectionOrdering.Matching);
 
         // past the latest, a new random song on top
         var asked = page.Requests.Count;

@@ -69,9 +69,9 @@ public sealed class ByConventionTest
         var middle = ByConvention.Weigh(options, 0.5);
 
         // every end's weights as shares of the end's, as they are picked there
-        await Assert.That(plain.Select(x => x.Value)).IsEquivalentTo(["straight", "triplets"]);
+        await Assert.That(plain.Select(x => x.Value)).IsEquivalentTo(["straight", "triplets"], CollectionOrdering.Matching);
         await Assert.That(plain[1].Weight / plain[0].Weight).IsEqualTo(0.08).Within(1e-9);
-        await Assert.That(wild.Select(x => x.Value)).IsEquivalentTo(["triplets", "fives"]);
+        await Assert.That(wild.Select(x => x.Value)).IsEquivalentTo(["triplets", "fives"], CollectionOrdering.Matching);
         await Assert.That(wild[0].Weight / wild[1].Weight).IsEqualTo(0.5).Within(1e-9);
         await Assert.That(middle.Length).IsEqualTo(3);
         await Assert.That(middle.Sum(x => x.Weight)).IsEqualTo(1).Within(1e-9);

@@ -12,10 +12,10 @@ public sealed class TurnaroundTest
     [Test]
     public async Task ALastBar_TurnsToV_OrToIiV_TheChordsBeforeKept()
     {
-        await Assert.That(Rmg.Core.Composition.Progressions.TurnAround([0, 3, 2, 1], 1)).IsEquivalentTo(ImmutableArray.Create(0, 3, 2, -3), TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(Rmg.Core.Composition.Progressions.TurnAround([0, 3, 2, 3], 2)).IsEquivalentTo(ImmutableArray.Create(0, 3, 1, -3), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(Rmg.Core.Composition.Progressions.TurnAround([0, 3, 2, 1], 1)).IsEquivalentTo(ImmutableArray.Create(0, 3, 2, -3), CollectionOrdering.Matching);
+        await Assert.That(Rmg.Core.Composition.Progressions.TurnAround([0, 3, 2, 3], 2)).IsEquivalentTo(ImmutableArray.Create(0, 3, 1, -3), CollectionOrdering.Matching);
         // the first chord stays home
-        await Assert.That(Rmg.Core.Composition.Progressions.TurnAround([0, 3], 2)).IsEquivalentTo(ImmutableArray.Create(0, -3), TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(Rmg.Core.Composition.Progressions.TurnAround([0, 3], 2)).IsEquivalentTo(ImmutableArray.Create(0, -3), CollectionOrdering.Matching);
     }
 
     [Test]

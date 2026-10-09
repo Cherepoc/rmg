@@ -177,6 +177,6 @@ public sealed class SongDrumSelectionTest
     [Test]
     public async Task SameSeed_ResultsIn_SameSongDrums()
     {
-        await Assert.That(SongDrums(8).AsEnumerable()).IsEquivalentTo(SongDrums(8).AsEnumerable());
+        await Assert.That(SongDrums(8).AsEnumerable()).IsEquivalentTo(SongDrums(8).AsEnumerable(), CollectionOrdering.Matching);
     }
 }

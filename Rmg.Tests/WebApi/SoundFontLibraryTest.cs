@@ -27,7 +27,7 @@ public sealed class SoundFontLibraryTest : IDisposable
 
         var soundFonts = library.List().ToArray();
 
-        await Check.That(soundFonts.Select(soundFont => soundFont.File)).IsEquivalentTo(new[] { "a.sf2", "b.sf3" });
+        await Check.That(soundFonts.Select(soundFont => soundFont.File)).IsEquivalentTo(new[] { "a.sf2", "b.sf3" }, CollectionOrdering.Matching);
         await Assert.That(soundFonts[0].Name).IsEqualTo("a");
     }
 
@@ -82,7 +82,7 @@ public sealed class SoundFontLibraryTest : IDisposable
         var library = Given("a.sf2", "b.sf3", "License.md");
 
         await Check.That(library.List().Select(soundFont => soundFont.License))
-            .IsEquivalentTo(new[] { "License.md", "License.md" });
+            .IsEquivalentTo(new[] { "License.md", "License.md" }, CollectionOrdering.Matching);
     }
 
     [Test]

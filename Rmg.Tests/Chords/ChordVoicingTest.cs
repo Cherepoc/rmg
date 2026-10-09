@@ -14,7 +14,7 @@ public sealed class ChordVoicingTest
         var context = new GenerationContext(0);
 
         for (var i = 0; i < 100; i++)
-            await Assert.That(ChordVoicing.Apply(context, shape, 0.5)).IsEquivalentTo(shape.Targets);
+            await Assert.That(ChordVoicing.Apply(context, shape, 0.5)).IsEquivalentTo(shape.Targets, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -28,7 +28,7 @@ public sealed class ChordVoicingTest
             {
                 var voiced = ChordVoicing.Apply(context, shape, 0.5);
                 await Assert.That(voiced.Select(x => Math.Round(x.Mod(12), 6)).Order().ToArray())
-                    .IsEquivalentTo(pitchClasses)
+                    .IsEquivalentTo(pitchClasses, CollectionOrdering.Matching)
                     .Because(shape.Name);
             }
         }

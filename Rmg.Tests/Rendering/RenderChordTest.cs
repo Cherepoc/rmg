@@ -27,7 +27,7 @@ public sealed class RenderChordTest
         // Cm, D°, Eb, Fm, Gm, Ab, Bb: the scale's own triads
         var result = Realizer.SnapChordToScale(NaturalMinor, rootIndex, Triad);
 
-        await Assert.That(result).IsEquivalentTo([0, 2, 4]);
+        await Assert.That(result).IsEquivalentTo([0, 2, 4], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -36,7 +36,7 @@ public sealed class RenderChordTest
         // C, E, G, where rounding the scale's note count would give C, D, G
         var result = Realizer.SnapChordToScale(MajorPentatonic, 0, Triad);
 
-        await Assert.That(result).IsEquivalentTo([0, 2, 3]);
+        await Assert.That(result).IsEquivalentTo([0, 2, 3], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -45,7 +45,7 @@ public sealed class RenderChordTest
         // C, Eb, Gb: a fifth is as far from Gb as from Ab, and the lower note wins a tie
         var result = Realizer.SnapChordToScale(WholeHalfOctatonic, 0, Triad);
 
-        await Assert.That(result).IsEquivalentTo([0, 2, 4]);
+        await Assert.That(result).IsEquivalentTo([0, 2, 4], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -53,7 +53,7 @@ public sealed class RenderChordTest
     {
         var result = Realizer.SnapChordToScale(Chromatic, 0, Triad);
 
-        await Assert.That(result).IsEquivalentTo([0, 3, 7]);
+        await Assert.That(result).IsEquivalentTo([0, 3, 7], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -64,7 +64,7 @@ public sealed class RenderChordTest
         var shape = ChordShapes.All.Single(x => x.Name == "Split third");
         var result = Realizer.SnapChordToScale(hungarianMinor, 5, shape.Targets);
 
-        await Assert.That(result.Select(x => hungarianMinor[(5 + x) % 7] + 12 * ((5 + x) / 7) - 8).ToArray()).IsEquivalentTo(new[] { 0, 3, 4, 7 });
+        await Assert.That(result.Select(x => hungarianMinor[(5 + x) % 7] + 12 * ((5 + x) / 7) - 8).ToArray()).IsEquivalentTo(new[] { 0, 3, 4, 7 }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -73,7 +73,7 @@ public sealed class RenderChordTest
         // a ninth and a note below the root, as voicings give
         var result = Realizer.SnapChordToScale(NaturalMinor, 0, [-5, 0, 14]);
 
-        await Assert.That(result).IsEquivalentTo([-3, 0, 8]);
+        await Assert.That(result).IsEquivalentTo([-3, 0, 8], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -82,7 +82,7 @@ public sealed class RenderChordTest
         // C, Db, D, Eb in a scale of C, D, E, G, A: C, then D and E for the two next, and nothing left for the last
         var result = Realizer.SnapChordToScale(MajorPentatonic, 0, [0, 1, 2, 3]);
 
-        await Assert.That(result).IsEquivalentTo([0, 1, 2]);
+        await Assert.That(result).IsEquivalentTo([0, 1, 2], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -91,7 +91,7 @@ public sealed class RenderChordTest
         // octaves 5 and 6; the chord comes up an octave, as its lowest note would
         var result = Realizer.FitChordIntoRange(5, 2, [50, 55, 62]);
 
-        await Assert.That(result).IsEquivalentTo([62, 67, 74]);
+        await Assert.That(result).IsEquivalentTo([62, 67, 74], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -100,7 +100,7 @@ public sealed class RenderChordTest
         // A, C, E in a single octave from C: C and E come down under A
         var result = Realizer.FitChordIntoRange(5, 1, [69, 72, 76]);
 
-        await Assert.That(result).IsEquivalentTo([60, 64, 69]);
+        await Assert.That(result).IsEquivalentTo([60, 64, 69], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -108,6 +108,6 @@ public sealed class RenderChordTest
     {
         var result = Realizer.FitChordIntoRange(5, 1, [60, 72]);
 
-        await Assert.That(result).IsEquivalentTo([60]);
+        await Assert.That(result).IsEquivalentTo([60], CollectionOrdering.Matching);
     }
 }

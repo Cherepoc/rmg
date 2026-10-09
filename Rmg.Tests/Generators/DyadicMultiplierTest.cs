@@ -18,7 +18,7 @@ public sealed class DyadicMultiplierTest
         // rank 1 is 1/2 and 2 alone, so it has nothing between 3/4 and 3/2 and must never be chosen
         var result = Draw(Core.Probabilities.Generators.DyadicMultiplier(EvenWeight, 2, 0.75, 1.5));
 
-        await Assert.That(result.Distinct().Order().ToArray()).IsEquivalentTo([0.75, 1, 4.0 / 3]);
+        await Assert.That(result.Distinct().Order().ToArray()).IsEquivalentTo([0.75, 1, 4.0 / 3], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -27,7 +27,7 @@ public sealed class DyadicMultiplierTest
         var result = Draw(Core.Probabilities.Generators.DyadicMultiplier(EvenWeight, 3, 0.5, 2));
 
         double[] expected = [0.5, 0.625, 0.75, 0.875, 1, 8.0 / 7, 4.0 / 3, 1.6, 2];
-        await Assert.That(result.Distinct().Order().ToArray()).IsEquivalentTo(expected);
+        await Assert.That(result.Distinct().Order().ToArray()).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
     [Test]

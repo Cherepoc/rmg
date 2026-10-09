@@ -119,7 +119,7 @@ public sealed class ServerSettingsTest
         await Assert.That(settings.Interfaces).IsEqualTo(Interfaces.One);
         // compared as text: IPAddress throws from ScopeId when an assertion reflects over its properties
         await Assert.That(settings.Address?.ToString()).IsEqualTo("10.0.0.9");
-        await Check.That(settings.KnownProxies.Select(proxy => proxy.ToString())).IsEquivalentTo(new[] { "10.0.0.5", "10.0.0.6" });
+        await Check.That(settings.KnownProxies.Select(proxy => proxy.ToString())).IsEquivalentTo(new[] { "10.0.0.5", "10.0.0.6" }, CollectionOrdering.Matching);
         await Assert.That(settings.StateDirectory).IsEqualTo("/var/lib/rmg");
         await Assert.That(settings.DashboardToken).IsEqualTo("s3cret");
         await Assert.That(settings.RetentionDays).IsEqualTo(30);
@@ -190,7 +190,7 @@ public sealed class ServerSettingsTest
 
         await Assert.That(settings.Interfaces).IsEqualTo(Interfaces.One);
         await Assert.That(settings.Address?.ToString()).IsEqualTo("::1");
-        await Check.That(settings.KnownProxies.Select(proxy => proxy.ToString())).IsEquivalentTo(new[] { "::1" });
+        await Check.That(settings.KnownProxies.Select(proxy => proxy.ToString())).IsEquivalentTo(new[] { "::1" }, CollectionOrdering.Matching);
     }
 
     /// <summary>What the layering is for: a file for the defaults, the environment for this machine.</summary>

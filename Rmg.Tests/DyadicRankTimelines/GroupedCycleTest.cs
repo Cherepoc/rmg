@@ -21,7 +21,7 @@ public sealed class GroupedCycleTest
     public async Task ADotted8th_RestartsEveryHalfBar_OnTheGrid_As3And3And2()
     {
         var positions = DyadicRankTimeline.GenerateSlots(4, Meter.FourFour.GetCycles(0.75, 0), 0).Select(x => x.Position).ToArray();
-        await Assert.That(positions).IsEquivalentTo([0, 0.75, 1.5, 2, 2.75, 3.5]);
+        await Assert.That(positions).IsEquivalentTo([0, 0.75, 1.5, 2, 2.75, 3.5], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -42,7 +42,7 @@ public sealed class GroupedCycleTest
     {
         var slots = DyadicRankTimeline.Generate(1.5, 0, 1.5, 2, 1.5, ResolvedRhythm.SplitOf(1.5)).ToArray();
 
-        await Assert.That(slots.Select(x => x.Position)).IsEquivalentTo([0, 0.25, 0.5, 0.75, 1, 1.25]);
-        await Assert.That(slots.Select(x => x.Value)).IsEquivalentTo([0, 2, 1, 2, 1, 2]);
+        await Assert.That(slots.Select(x => x.Position)).IsEquivalentTo([0, 0.25, 0.5, 0.75, 1, 1.25], CollectionOrdering.Matching);
+        await Assert.That(slots.Select(x => x.Value)).IsEquivalentTo([0, 2, 1, 2, 1, 2], CollectionOrdering.Matching);
     }
 }

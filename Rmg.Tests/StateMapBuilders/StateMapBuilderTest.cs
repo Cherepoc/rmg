@@ -72,7 +72,7 @@ public sealed class StateMapBuilderTest
             .AddCollectionOfOne(ScaleOffsets, _ => 4)
             .ToStateMap(Context);
 
-        await Assert.That(result.GetStateValue(ScaleOffsets).AsEnumerable()).IsEquivalentTo(new[] { 4 });
+        await Assert.That(result.GetStateValue(ScaleOffsets).AsEnumerable()).IsEquivalentTo(new[] { 4 }, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -83,7 +83,7 @@ public sealed class StateMapBuilderTest
             .AddCollectionOfOne(ScaleOffsets, _ => 2)
             .ToStateMap(Context);
 
-        await Assert.That(result.GetStateValue(ScaleOffsets).AsEnumerable()).IsEquivalentTo(new[] { 2, 4 });
+        await Assert.That(result.GetStateValue(ScaleOffsets).AsEnumerable()).IsEquivalentTo(new[] { 2, 4 }, CollectionOrdering.Matching);
     }
 
     [Test]

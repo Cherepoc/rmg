@@ -29,7 +29,7 @@ public sealed class MidiPartChannelsTest
         var song = Song(Track(false, 1, role: TrackRole.Melody), Track(true, 0), Track(false, 2, role: TrackRole.Bass));
 
         await Assert.That(song.GetPartChannels())
-            .IsEquivalentTo(new Dictionary<TrackRole, byte> { [TrackRole.Melody] = 0, [TrackRole.Drum] = 9, [TrackRole.Bass] = 1 });
+            .IsEquivalentTo(new Dictionary<TrackRole, byte> { [TrackRole.Melody] = 0, [TrackRole.Drum] = 9, [TrackRole.Bass] = 1 }, CollectionOrdering.Any);
     }
 
     [Test]
@@ -49,7 +49,7 @@ public sealed class MidiPartChannelsTest
             0x0F, 0x00, 0xC0, 0x40, 0x00, 0x90, 0x40, 0x7F, 0x60, 0x80, 0x40, 0x40, 0x00, 0xFF, 0x2F, 0x00,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
     [Test]
@@ -70,7 +70,7 @@ public sealed class MidiPartChannelsTest
             0x00, 0xFF, 0x2F, 0x00,
         ];
 
-        await Assert.That(result).IsEquivalentTo(expected);
+        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
     [Test]

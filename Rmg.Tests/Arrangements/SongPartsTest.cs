@@ -56,7 +56,7 @@ public sealed class SongPartsTest
             var given = TestCorpus.Get(seed, Given(TrackRole.CounterMelody, true));
 
             await Assert.That(Absent(given).Contains(TrackRole.CounterMelody)).IsFalse();
-            await Assert.That(Write(TestCorpus.Get(seed, Given(TrackRole.Pad, isIn)))).IsEquivalentTo(Write(drawn));
+            await Assert.That(Write(TestCorpus.Get(seed, Given(TrackRole.Pad, isIn)))).IsEquivalentTo(Write(drawn), CollectionOrdering.Matching);
         }
     }
 

@@ -49,7 +49,7 @@ public sealed class BassLeadInTest
 
         var notes = PatternGenerator.LeadIn(Notes(0, 1), TrackState, barStates, 0, MaxRank, Meter.FourFour);
 
-        await Assert.That(notes.Select(x => x.Position)).IsEquivalentTo([0.0, 1, 3]);
+        await Assert.That(notes.Select(x => x.Position)).IsEquivalentTo([0.0, 1, 3], CollectionOrdering.Matching);
         var pickup = notes[^1].Value;
         await Assert.That(pickup.GetStateValue(StateKinds.ChordNotePitchOffsets).SequenceEqual(Seventh.Heights)).IsTrue();
         await Assert.That(pickup.GetStateValue(CompositionStateKinds.BeatRank)).IsEqualTo(MaxRank);
@@ -67,7 +67,7 @@ public sealed class BassLeadInTest
 
         var led = PatternGenerator.LeadIn(notes, TrackState, barStates, 0, MaxRank, Meter.FourFour);
 
-        await Assert.That(led.Select(x => x.Position)).IsEquivalentTo(notes.Select(x => x.Position));
+        await Assert.That(led.Select(x => x.Position)).IsEquivalentTo(notes.Select(x => x.Position), CollectionOrdering.Matching);
     }
 
     [Test]

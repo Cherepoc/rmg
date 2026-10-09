@@ -77,7 +77,7 @@ public sealed class GivenDrumPiecesTest
             var drawn = TestCorpus.Get(seed);
             var given = TestCorpus.Get(seed, new SongOverrides(DrumPieces: Drums(drawn)));
 
-            await Assert.That(Write(given)).IsEquivalentTo(Write(drawn)).Because($"seed {seed}");
+            await Assert.That(Write(given)).IsEquivalentTo(Write(drawn), CollectionOrdering.Matching).Because($"seed {seed}");
         }
     }
 
@@ -106,7 +106,7 @@ public sealed class GivenDrumPiecesTest
                 var from = Math.Max(AfterEntries(drawn), AfterEntries(given));
                 var (before, after) = (Notes(drawn, track, from), Notes(given, track, from));
                 if (!FollowsTheDrums(definition.Role, drawn, given))
-                    await Assert.That(after).IsEquivalentTo(before).Because($"seed {seed}, the {definition.Role}");
+                    await Assert.That(after).IsEquivalentTo(before, CollectionOrdering.Matching).Because($"seed {seed}, the {definition.Role}");
                 else
                     (notes, changed) = (notes + before.Length, changed + before.Except(after).Count());
             }

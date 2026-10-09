@@ -12,12 +12,12 @@ public sealed class ArpeggioTest
     [Test]
     public async Task APattern_PlaysTheChordsNotes_InItsOrder()
     {
-        await Assert.That(Play(ArpeggioPattern.Up, 6)).IsEquivalentTo(new[] { 60, 64, 67, 72, 60, 64 });
-        await Assert.That(Play(ArpeggioPattern.Down, 5)).IsEquivalentTo(new[] { 72, 67, 64, 60, 72 });
-        await Assert.That(Play(ArpeggioPattern.UpDown, 8)).IsEquivalentTo(new[] { 60, 64, 67, 72, 67, 64, 60, 64 });
-        await Assert.That(Play(ArpeggioPattern.Alberti, 4)).IsEquivalentTo(new[] { 60, 72, 67, 72 });
-        await Assert.That(Play(ArpeggioPattern.RootFifth, 4)).IsEquivalentTo(new[] { 60, 67, 60, 67 });
-        await Assert.That(Play(ArpeggioPattern.UpTwoOctaves, 8)).IsEquivalentTo(new[] { 60, 64, 67, 72, 72, 76, 79, 84 });
+        await Assert.That(Play(ArpeggioPattern.Up, 6)).IsEquivalentTo(new[] { 60, 64, 67, 72, 60, 64 }, CollectionOrdering.Matching);
+        await Assert.That(Play(ArpeggioPattern.Down, 5)).IsEquivalentTo(new[] { 72, 67, 64, 60, 72 }, CollectionOrdering.Matching);
+        await Assert.That(Play(ArpeggioPattern.UpDown, 8)).IsEquivalentTo(new[] { 60, 64, 67, 72, 67, 64, 60, 64 }, CollectionOrdering.Matching);
+        await Assert.That(Play(ArpeggioPattern.Alberti, 4)).IsEquivalentTo(new[] { 60, 72, 67, 72 }, CollectionOrdering.Matching);
+        await Assert.That(Play(ArpeggioPattern.RootFifth, 4)).IsEquivalentTo(new[] { 60, 67, 60, 67 }, CollectionOrdering.Matching);
+        await Assert.That(Play(ArpeggioPattern.UpTwoOctaves, 8)).IsEquivalentTo(new[] { 60, 64, 67, 72, 72, 76, 79, 84 }, CollectionOrdering.Matching);
     }
 
     [Test]

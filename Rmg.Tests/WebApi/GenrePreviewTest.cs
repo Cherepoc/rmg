@@ -45,10 +45,10 @@ public sealed class GenrePreviewTest
         var previews = GenrePreview.OfGenre(genre, out var error)!;
 
         await Assert.That(error).IsNull();
-        await Assert.That(previews.Choices.Keys).IsEquivalentTo(GenreChoices.All.Select(x => x.Name));
+        await Assert.That(previews.Choices.Keys).IsEquivalentTo(GenreChoices.All.Select(x => x.Name), CollectionOrdering.Any);
         // the named choice as the one choice's preview has it
         var meter = GenrePreview.Of(Request("meter", """{ "4/4": [100, 80, 0], "7/8": [0, 20, 100] }"""), out _)!;
-        await Assert.That(previews.Choices["meter"].Shares!["7/8"]).IsEquivalentTo(meter.Shares!["7/8"]);
+        await Assert.That(previews.Choices["meter"].Shares!["7/8"]).IsEquivalentTo(meter.Shares!["7/8"], CollectionOrdering.Matching);
         // a pool it does not name its shares as the songs draw them, no curves
         var scale = previews.Choices["scale"];
         await Assert.That(scale.Curves).IsNull();

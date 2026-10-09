@@ -21,7 +21,7 @@ public sealed class SongGeneratorSectionPoolTest
 
         var result = SectionGenerator.CreateSectionStateMap(song, StateMap.FromStates([Index.CreateState(-1)]), section);
 
-        await Assert.That(result.GetStateValue(Pool).Select(x => x.Heights[1])).IsEquivalentTo([0.1, 0.2, 0.3, 0.4]);
+        await Assert.That(result.GetStateValue(Pool).Select(x => x.Heights[1])).IsEquivalentTo([0.1, 0.2, 0.3, 0.4], CollectionOrdering.Matching);
         await Assert.That(result.GetStateValue(Pool)[0].Heights[1]).IsEqualTo(0.1);
         await Assert.That(result.GetStateValue(Pool)[3].Heights[1]).IsEqualTo(0.4);
         // the section's draws still add to the song's
