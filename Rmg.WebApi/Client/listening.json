@@ -23,21 +23,14 @@
       },
       {
         "seed": "H",
-        "at": 84.1,
+        "at": 82,
         "listen": [
           "Riff (Electric Guitar (clean))"
         ]
       },
       {
-        "seed": "S",
-        "at": 70.3,
-        "listen": [
-          "Riff (Acoustic Guitar (steel))"
-        ]
-      },
-      {
         "seed": "b",
-        "at": 231.2,
+        "at": 217.1,
         "listen": [
           "Riff (Acoustic Guitar (steel))"
         ]
@@ -50,8 +43,15 @@
         ]
       },
       {
+        "seed": "d",
+        "at": 0,
+        "listen": [
+          "Chords (Acoustic Guitar (steel))"
+        ]
+      },
+      {
         "seed": "j",
-        "at": 16.1,
+        "at": 17,
         "listen": [
           "Chords (Electric Guitar (clean))"
         ]
