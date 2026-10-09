@@ -15,19 +15,21 @@ public sealed class SongGeneratorTimekeepingTest
         var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
         for (var seed = 0; seed < 256; seed++)
         {
-            // in a meter of two halves alike, as 4/4 and 6/8 are, and a song in straight time
+            // a song in straight time, its sections in a meter of two halves alike, as 4/4 and 6/8 are, that keep the song's
+            // feel, bar by bar from each one's start
             var corpusSong = TestCorpus.Get(seed);
             var song = corpusSong.Song;
-            var meter = song.Map!.Meter;
             var map = song.TrackEventStateTimelineMap.TrackTimelineMap;
             var feel = (int)corpusSong.Trace.First(x => x.Point == TracePoints.Feel).Value!;
-            if (!map.TryGetValue(hiHat, out var track) || meter.Groups.Length != 2 || meter.Groups[0] != meter.Groups[1] || feel != Feels.Straight)
+            if (!map.TryGetValue(hiHat, out var track) || feel != Feels.Straight)
                 continue;
+            var ownFeels = corpusSong.Trace.Where(x => x.Point == TracePoints.Feel && x.Track == SectionGenerator.SectionTrace).Select(x => x.Section).ToHashSet();
 
-            var (length, half) = (meter.BarDuration, meter.BarDuration / 2);
-            foreach (var bar in track.EventTimeline.GroupBy(x => (int)(x.Position / length)))
+            foreach (var span in corpusSong.Map.Sections.Where(x => x.Meter.Groups.Length == 2 && x.Meter.Groups[0] == x.Meter.Groups[1] && !ownFeels.Contains(x.SectionId)))
+            foreach (var bar in track.EventTimeline.Where(x => x.Position >= span.Start && x.Position < span.End).GroupBy(x => (int)((x.Position - span.Start) / span.Meter.BarDuration)))
             {
-                var positions = bar.Select(x => Math.Round(x.Position % length, 3)).ToArray();
+                var (length, half) = (span.Meter.BarDuration, span.Meter.BarDuration / 2);
+                var positions = bar.Select(x => Math.Round((x.Position - span.Start) % length, 3)).ToArray();
                 var first = positions.Where(x => x < half).ToArray();
                 var second = positions.Where(x => x >= half).Select(x => Math.Round(x - half, 3)).ToArray();
                 bars++;

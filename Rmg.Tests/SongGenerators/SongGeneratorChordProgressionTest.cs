@@ -16,10 +16,10 @@ public sealed class SongGeneratorChordProgressionTest
         var changes = 0;
         for (var seed = 0; seed < 8; seed++)
         {
-            var song = TestCorpus.Get(seed).Song;
-            // a section is a 4-bar pattern played twice
-            changes += GetPitchedNotes(song)
-                .GroupBy(x => (x.TrackNumber, Section: Math.Floor(x.Position / (2 * song.Map!.Meter.PatternDuration))))
+            var corpus = TestCorpus.Get(seed);
+            // by the section each note is in
+            changes += GetPitchedNotes(corpus.Song)
+                .GroupBy(x => (x.TrackNumber, Section: corpus.Map.SectionAt(x.Position)?.Start))
                 .Count(x => x.Select(note => note.Shape).Distinct().Count() > 1);
         }
 

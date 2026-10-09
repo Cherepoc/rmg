@@ -15,7 +15,8 @@ public sealed class GenreRhythmReportTest
     /// <summary>Every part's, the drums' by their song roles, over a song's notes as it decides them, before its swing.</summary>
     internal static Dictionary<RhythmPart, Fall> Falls(CorpusSong song)
     {
-        var parts = new Dictionary<RhythmPart, List<double>>();
+        // a part's onsets once, whichever of its tracks plays them
+        var parts = new Dictionary<RhythmPart, HashSet<double>>();
         var bars = new Dictionary<RhythmPart, (int Same, int All)>();
         foreach (var (track, notes) in song.Song.Notes!)
         {
@@ -34,10 +35,10 @@ public sealed class GenreRhythmReportTest
 
             var onsets = notes.Select(x => x.Position).Distinct().ToArray();
             parts.TryAdd(of, []);
-            parts[of].AddRange(onsets);
-            var bar = song.Map.Meter.BarDuration;
-            var byBar = onsets.GroupBy(x => (int)Math.Floor(x / bar + 1e-9)).ToDictionary(x => x.Key, x => string.Join(",", x.Select(y => Math.Round(y % bar, 3))));
-            var same = byBar.Count(x => byBar.TryGetValue(x.Key - 1, out var before) && before == x.Value);
+            parts[of].UnionWith(onsets.Select(x => Math.Round(x, 6)));
+            // by the bars of each section, in its meter, from its start
+            var byBar = onsets.GroupBy(x => Math.Round(x - song.Map.BeatInBar(x), 6)).ToDictionary(x => x.Key, x => string.Join(",", x.Select(y => Math.Round(song.Map.BeatInBar(y), 3))));
+            var same = byBar.Count(x => byBar.TryGetValue(Math.Round(x.Key - song.Map.MeterAt(x.Key - 1e-6).BarDuration, 6), out var before) && before == x.Value);
             var (s, a) = bars.GetValueOrDefault(of);
             bars[of] = (s + same, a + byBar.Count);
         }

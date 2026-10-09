@@ -29,9 +29,10 @@ public sealed class StateTraceTest
         await Assert.That(trace.Entries.Count).IsGreaterThan(0);
         // a pad's chords come of the chord changes, not of bar patterns, a riff's twin plays the riff's and the solo part a solo's
         await Assert.That(tracks.IsSupersetOf(song.TrackDefinitions.Keys.Where(x => x < DrumGroups.FirstTrackNumber && song.TrackDefinitions[x].Role is not (Rmg.Core.Songs.TrackRole.Pad or Rmg.Core.Songs.TrackRole.RiffTwin or Rmg.Core.Songs.TrackRole.Solo)))).IsTrue();
-        // a bar of the 4-bar pattern, and a place in it, in the song's meter
+        // a bar of the 4-bar pattern, and a place in it, in its section's meter, the song's for an entry of no section
         await Assert.That(trace.Entries.All(x => x.Bar is >= 0 and < Meter.PhraseBarCount)).IsTrue();
-        await Assert.That(trace.Entries.All(x => x.Position >= 0 && x.Position < song.Map!.Meter.BarDuration)).IsTrue();
+        var meters = song.Map!.Sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First().Meter);
+        await Assert.That(trace.Entries.All(x => x.Position >= 0 && x.Position < meters.GetValueOrDefault(x.Section, song.Map.Meter).BarDuration)).IsTrue();
     }
 
     [Test]
