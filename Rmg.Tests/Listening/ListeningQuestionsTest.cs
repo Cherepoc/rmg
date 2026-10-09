@@ -55,19 +55,6 @@ public sealed class ListeningQuestionsTest
     /// <summary>Bars before a place, to hear what leads into it, never before the song's start.</summary>
     private static double? Before(CorpusSong song, double? at, int bars) => at is { } place ? Math.Max(0, place - bars * song.Song.MeterAt(place).BarDuration) : null;
 
-    /// <summary>A place in the song in seconds from its start, through its tempo.</summary>
-    private static double Seconds(CorpusSong song, double beat)
-    {
-        var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
-        var (seconds, at) = (0.0, 0.0);
-        foreach (var change in tempo.Select(x => x.Position).Where(x => x > 0 && x < beat).Append(beat))
-        {
-            seconds += (change - at) * 60 / (tempo.GetEffectiveValueAt(at) * Meter.BaseTempo);
-            at = change;
-        }
-
-        return seconds;
-    }
 
     private static readonly Question[] Questions =
     [
@@ -163,7 +150,7 @@ public sealed class ListeningQuestionsTest
             var measured = TestCorpus.InParallel(Enumerable.Range(0, 128).Except(question.Heard ?? []), seed =>
                 {
                     var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
-                    return question.At(song) is { } at ? (Seed: seed, Measure: (ValueTuple<double, double, string[]>?)Measure(question, seed, song, Seconds(song, at))) : (seed, null);
+                    return question.At(song) is { } at ? (Seed: seed, Measure: (ValueTuple<double, double, string[]>?)Measure(question, seed, song, song.Rendered.SecondsAt(at))) : (seed, null);
                 })
                 .Where(x => x.Measure is not null).Take(Candidates).Select(x => (x.Seed, Difference: x.Measure!.Value.Item1, At: x.Measure.Value.Item2, Listen: x.Measure.Value.Item3)).ToArray();
             var asked = measured.OrderByDescending(x => x.Difference).Take(Seeds).OrderBy(x => x.Seed).ToArray();

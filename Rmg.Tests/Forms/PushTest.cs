@@ -43,4 +43,19 @@ public sealed class PushTest
         await Assert.That(early / (double)pushed).IsGreaterThan(0.5);
         await Assert.That(kicked / (double)pushed).IsGreaterThan(0.3);
     }
+
+    /// <summary>The plainest songs never push, of no genre, whose chance is the songs' own.</summary>
+    [Test]
+    public async Task ThePlainestSongs_NeverPush()
+    {
+        var sections = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Push))
+        {
+            sections++;
+            await Assert.That((bool)entry.Value!).IsFalse().Because($"seed {song.Seed}");
+        }
+
+        await Assert.That(sections).IsGreaterThan(16);
+    }
 }

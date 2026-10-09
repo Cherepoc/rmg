@@ -63,7 +63,11 @@ public sealed class VelocityReportTest
         );
     }
 
-    /// <summary>A track's notes as rendered, each once, with its velocity and how many pitches it plays together.</summary>
+    /// <summary>
+    ///     A track's notes as rendered, each once, with its velocity and how many pitches it plays together; but a note
+    ///     the rendering moves or spreads out of its place, an ornament's or an up-strummed chord's, which is not measured
+    ///     rather than measured as silent.
+    /// </summary>
     private static (double Position, double Velocity, int Count)[] Rendered(CorpusSong song, int track)
     {
         var notes = song.Song.Notes![track];
@@ -78,7 +82,9 @@ public sealed class VelocityReportTest
             .ToDictionary(x => x.Key, x => x.First().Value.Velocity * 127);
         return
         [
-            ..notes.Select(n => (n.Position, rendered.GetValueOrDefault((Math.Round(swing.Apply(n.Position), 6), n.Value.Pitches[0])), n.Value.Pitches.Length))
+            ..notes.Select(n => (n.Position, Key: (Math.Round(swing.Apply(n.Position), 6), n.Value.Pitches[0]), n.Value.Pitches.Length))
+                .Where(n => rendered.ContainsKey(n.Key))
+                .Select(n => (n.Position, rendered[n.Key], n.Length))
         ];
     }
 

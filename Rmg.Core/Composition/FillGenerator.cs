@@ -135,7 +135,7 @@ internal sealed class FillGenerator
                 continue;
 
             var (position, sectionId, _, _) = landings[_unheard.GenerateInt(0, landings.Length)];
-            edits.Hit(sound.Track, position, FillLayers.LandingVelocity, sound.Articulation, sectionId, "Landing");
+            edits.Hit(sound.Track, position, FillLayers.LandingVelocity, sound.Articulation, sectionId, HitKind.Landing);
         }
     }
 
@@ -491,7 +491,7 @@ internal sealed class FillGenerator
                            + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank, 1)(_line);
             foreach (var sound in FillSounds.GetNoteSounds(run, places[k], x => drums[x].Has(position, line)))
             {
-                edits.Hit(sound.Track, position, loudness, sound.Articulation, sectionId, "Fill");
+                edits.Hit(sound.Track, position, loudness, sound.Articulation, sectionId, HitKind.Fill);
                 _filled.Add(sound.Track);
             }
         }
@@ -515,7 +515,7 @@ internal sealed class FillGenerator
     )
     {
         foreach (var sound in landing.Where(x => !edits.Strikes(song, x.Track, position)))
-            edits.Hit(sound.Track, position, FillLayers.LandingVelocity, sound.Articulation, sectionId, "Landing");
+            edits.Hit(sound.Track, position, FillLayers.LandingVelocity, sound.Articulation, sectionId, HitKind.Landing);
     }
 }
 

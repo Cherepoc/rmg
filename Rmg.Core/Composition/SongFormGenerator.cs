@@ -359,7 +359,7 @@ internal sealed class SongFormGenerator
                     if (position < rollFrom - 1e-9)
                         continue;
                     var share = (position - rollFrom) / (gap - rollFrom);
-                    edits.Hit(snare, position, FormLayers.BuildRollFrom + (FormLayers.BuildRollTo - FormLayers.BuildRollFrom) * share, 0, line.Ending.SectionId, "Build");
+                    edits.Hit(snare, position, FormLayers.BuildRollFrom + (FormLayers.BuildRollTo - FormLayers.BuildRollFrom) * share, 0, line.Ending.SectionId, HitKind.Build);
                 }
 
             lines[i] = line with { IsLandingForced = true };

@@ -39,7 +39,7 @@ public sealed class FillFeelTest
         new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5), Meter.FourFour, context, Genre.None).Generate(song, FillGenerator.GetSectionLines(sections));
 
         var decisions = trace.Entries.Where(x => x.Point == TracePoints.FillDecision).Select(x => (FillDecision)x.Value!).ToArray();
-        var hits = trace.Entries.Where(x => x.Point == TracePoints.Fill && x.Phrase != "Landing").ToArray();
+        var hits = trace.Entries.Where(x => x.Point == TracePoints.Fill && x.Value is not HitKind.Landing).ToArray();
         await Assert.That(decisions.Length).IsEqualTo(15);
         await Assert.That(decisions.Where(x => x.Span > 0).All(x => x.Tuplet == 3)).IsTrue();
         // triplet 8ths and sextuplets, a sixth of a beat apart at the finest

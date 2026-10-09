@@ -39,7 +39,15 @@ public sealed class GenrePresetsTest
     public async Task EveryChoice_HasADescription_ThatNamesNoFamilyLeftUnreplaced()
     {
         foreach (var choice in GenreChoices.All)
+        {
             await Assert.That(choice.Description.Length).IsGreaterThan(20).Because(choice.Name);
+            // a family member's names its part as the page shows it, never the family's key
+            if (choice.Name.Contains('.'))
+            {
+                await Assert.That(choice.Description.Contains(choice.Label, StringComparison.OrdinalIgnoreCase)).IsTrue().Because(choice.Name);
+                await Assert.That(choice.Description.Contains(choice.Name)).IsFalse().Because(choice.Name);
+            }
+        }
     }
 
     [Test]

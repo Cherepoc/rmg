@@ -83,6 +83,8 @@ public sealed class GateTest
         var songs = Gated(Gating, 16).ToArray();
         Console.WriteLine($"of 16 songs gating the riff, {riffs.Length} gated; of 64 Djent songs, {djent.Length} gating their pad");
         await Assert.That(riffs).IsNotEmpty();
+        await Assert.That(djent).IsNotEmpty();
+        await Assert.That(songs).IsNotEmpty();
         await Assert.That(riffs.All(x => x is TrackRole.Riff or TrackRole.RiffTwin)).IsTrue();
         await Assert.That(djent.All(x => x == TrackRole.Pad)).IsTrue();
         await Assert.That(songs.All(x => x is TrackRole.Pad or TrackRole.Chords or TrackRole.Rhythm)).IsTrue();

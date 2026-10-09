@@ -62,7 +62,8 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
 
     /// <summary>A hit of a track, in place of any it or a fill has there.</summary>
     /// <param name="articulation">The drum's sound, counted from 1; 0 for the groove's.</param>
-    public void Hit(int track, double position, double velocity, int articulation, int sectionId, string fill)
+    /// <param name="kind">What plays the hit, which the trace records.</param>
+    public void Hit(int track, double position, double velocity, int articulation, int sectionId, HitKind kind)
     {
         var builder = new StateMapBuilder("Fill", perTrack: true).Add(StateKinds.Velocity, velocity);
         if (articulation > 0)
@@ -73,7 +74,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         var (patternBar, beat) = map is null
             ? (bar.Mod(meter.PatternBarCount), position - bar * meter.BarDuration)
             : (map.PatternBarAt(position), map.BeatInBar(position));
-        StateTrace.Record(TracePoints.Fill, track, sectionId, patternBar, stateMap, beat, fill);
+        StateTrace.Record(TracePoints.Fill, track, sectionId, patternBar, stateMap, beat, $"{kind}", kind);
 
         Clear(track, position, position + Epsilon);
         if (!_hits.TryGetValue(track, out var hits))
@@ -156,4 +157,20 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         var soundsPast = note.Position < cut - Epsilon && note.Position + note.Value.Duration > cut + Epsilon;
         return isHeld || soundsPast ? (note.Value with { Duration = length }).ToTimelineItem(note.Position) : note;
     }
+}
+
+/// <summary>What plays a drum's hit in place of the groove's, as the trace records it (<see cref="TimelineEdits.Hit" />).</summary>
+public enum HitKind
+{
+    /// <summary>A fill's, into a line.</summary>
+    Fill,
+
+    /// <summary>The drums landing on the line after a fill.</summary>
+    Landing,
+
+    /// <summary>A drum solo's.</summary>
+    DrumSolo,
+
+    /// <summary>A build's roll into a drop.</summary>
+    Build
 }

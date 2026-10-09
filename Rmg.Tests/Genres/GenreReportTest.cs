@@ -24,8 +24,9 @@ public sealed class GenreReportTest
             ["swings"] = $"{draws.Swing.Delay > 0}",
             ["scale"] = draws.Scale.Name,
             ["drumSetup"] = $"{draws.DrumSetup}",
-            ["bass"] = GeneralMidi.Programs[pitched.First(x => x.Role == TrackRole.Bass).InstrumentCode],
-            ["melody"] = GeneralMidi.Programs[pitched.First(x => x.Role == TrackRole.Melody).InstrumentCode],
+            // none where the song leaves the part out
+            ["bass"] = pitched.FirstOrDefault(x => x.Role == TrackRole.Bass) is { } bass ? GeneralMidi.Programs[bass.InstrumentCode] : "none",
+            ["melody"] = pitched.FirstOrDefault(x => x.Role == TrackRole.Melody) is { } melody ? GeneralMidi.Programs[melody.InstrumentCode] : "none",
             ["lineUp"] = string.Join(",", pitched.OrderBy(x => x.Role).Select(x => x.InstrumentCode)),
             ["sections"] = $"{song.Map.Sections.Length}",
             ["key"] = $"{song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.KeyOffset)}"

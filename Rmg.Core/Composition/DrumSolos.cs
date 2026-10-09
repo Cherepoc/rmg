@@ -300,7 +300,7 @@ internal static class DrumSolos
                     var bar = whole.Meter.BarDuration;
                     for (var at = whole.Start + Math.Floor((start - whole.Start) / bar + 1e-9) * bar; at < end - 1e-9; at += bar)
                     foreach (var onset in OnsetsOf(feetPattern).Select(x => at + x * 0.25).Where(x => x >= start - 1e-9 && x < end - 1e-9))
-                        edits.Hit(footTrack, onset, TimeLoudness, footSound, whole.SectionId, "Drum solo");
+                        edits.Hit(footTrack, onset, TimeLoudness, footSound, whole.SectionId, HitKind.DrumSolo);
                 }
 
                 var loudness = Loudness + IntensityVelocity * (level - 0.5);
@@ -312,9 +312,9 @@ internal static class DrumSolos
                     {
                         case SoloGesture.Held:
                             if (player.IsKit && crash is not null)
-                                edits.Hit(crash.Track, start, loudness + CellAccent, crash.Articulation, whole.SectionId, "Drum solo");
+                                edits.Hit(crash.Track, start, loudness + CellAccent, crash.Articulation, whole.SectionId, HitKind.DrumSolo);
                             var low = player.IsKit ? kick ?? scale[^1] : scale[^1];
-                            edits.Hit(low.Track, start, loudness + CellAccent, low.Articulation, whole.SectionId, "Drum solo");
+                            edits.Hit(low.Track, start, loudness + CellAccent, low.Articulation, whole.SectionId, HitKind.DrumSolo);
                             break;
                         case SoloGesture.Run or SoloGesture.Lick when player.IsKit:
                         {
@@ -368,13 +368,13 @@ internal static class DrumSolos
                                 else
                                     sound = snare;
                                 var accent = i % limbs.Length == 0;
-                                edits.Hit(sound.Track, positions[i], loudness + (accent ? CellAccent : 0), sound.Articulation, whole.SectionId, "Drum solo");
+                                edits.Hit(sound.Track, positions[i], loudness + (accent ? CellAccent : 0), sound.Articulation, whole.SectionId, HitKind.DrumSolo);
                                 // a climax's gesture starting on a crash
                                 if (i == 0 && level >= ClimaxIntensity && crash is not null)
-                                    edits.Hit(crash.Track, positions[i], loudness + CellAccent, crash.Articulation, whole.SectionId, "Drum solo");
+                                    edits.Hit(crash.Track, positions[i], loudness + CellAccent, crash.Articulation, whole.SectionId, HitKind.DrumSolo);
                                 // and the kick under an accent, but where the accent is the kick's own
                                 if (stacksKick && accent && sound.Track != kick!.Track)
-                                    edits.Hit(kick.Track, positions[i], loudness + CellAccent, kick.Articulation, whole.SectionId, "Drum solo");
+                                    edits.Hit(kick.Track, positions[i], loudness + CellAccent, kick.Articulation, whole.SectionId, HitKind.DrumSolo);
                             }
 
                             player.At = at;
@@ -390,13 +390,13 @@ internal static class DrumSolos
                             var (hits, accents, _) = SoloLines.Cells([..Enumerable.Range(0, scale.Length)], player.Cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
                             for (var i = 0; i < hits.Length; i++)
                             {
-                                edits.Hit(scale[hits[i]].Track, positions[i], loudness + (accents[i] ? CellAccent : 0), scale[hits[i]].Articulation, whole.SectionId, "Drum solo");
+                                edits.Hit(scale[hits[i]].Track, positions[i], loudness + (accents[i] ? CellAccent : 0), scale[hits[i]].Articulation, whole.SectionId, HitKind.DrumSolo);
                                 // a climax's gesture starting on a crash
                                 if (player.IsKit && i == 0 && level >= ClimaxIntensity && crash is not null)
-                                    edits.Hit(crash.Track, positions[i], loudness + CellAccent, crash.Articulation, whole.SectionId, "Drum solo");
+                                    edits.Hit(crash.Track, positions[i], loudness + CellAccent, crash.Articulation, whole.SectionId, HitKind.DrumSolo);
                                 // and the kick under an accent, but where the accent is the kick's own
                                 if (player.IsKit && stacksKick && accents[i] && scale[hits[i]].Track != kick!.Track)
-                                    edits.Hit(kick.Track, positions[i], loudness + CellAccent, kick.Articulation, whole.SectionId, "Drum solo");
+                                    edits.Hit(kick.Track, positions[i], loudness + CellAccent, kick.Articulation, whole.SectionId, HitKind.DrumSolo);
                             }
                             if (hits.Length > 0)
                                 player.At = hits[^1];

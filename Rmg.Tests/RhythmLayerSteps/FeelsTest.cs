@@ -25,8 +25,11 @@ public sealed class FeelsTest
         var feels = Enumerable.Range(0, DrawCount).Select(_ => Feels.DrawSong(context, 1, Genre.None)).ToArray();
 
         await Assert.That(feels.All(x => x != Feels.Straight)).IsTrue();
-        foreach (var feel in Feels.Weights.Select(x => x.Feel).Where(x => x != Feels.Straight))
-            await Assert.That(feels.Count(x => x == feel) / (double)DrawCount).IsEqualTo(0.1).Within(0.01);
+        // each by its wild weight, as likely as the others
+        var others = Feels.Weights.Where(x => x.Feel != Feels.Straight).ToArray();
+        await Assert.That(others.Select(x => x.Weight.Wild).Distinct().Count()).IsEqualTo(1);
+        foreach (var (feel, _) in others)
+            await Assert.That(feels.Count(x => x == feel) / (double)DrawCount).IsEqualTo(1.0 / others.Length).Within(0.01);
         var changes = Enumerable.Range(0, 1000).Select(_ => Feels.DrawChange(context, 1, Feels.BarChange, 1, Genre.None)).ToArray();
         await Assert.That(changes.All(x => x is { } changed && changed != 1 && changed != Feels.Straight)).IsTrue();
     }

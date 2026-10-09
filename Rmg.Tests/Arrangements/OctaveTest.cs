@@ -56,6 +56,7 @@ public sealed class OctaveTest
     [Test]
     public async Task APartPlaysOneDoublingAtATime()
     {
+        var checkedOctaves = 0;
         foreach (var song in TestCorpus.Range(128))
         {
             var octaves = song.Trace.Where(x => x.Point == TracePoints.Octave).Select(x => ((int Index, TrackRole Role, double, bool InOctaves))x.Value!).Where(x => x.InOctaves).ToArray();
@@ -64,10 +65,13 @@ public sealed class OctaveTest
 
             foreach (var octave in octaves)
             {
+                checkedOctaves++;
                 await Assert.That(pairs.Any(x => x.Index == octave.Index && (x.Source == octave.Role || x.Target == octave.Role))).IsFalse();
                 await Assert.That(hasTwin && octave.Role == TrackRole.Riff).IsFalse();
             }
         }
+
+        await Assert.That(checkedOctaves).IsGreaterThan(0);
     }
 
     [Test]

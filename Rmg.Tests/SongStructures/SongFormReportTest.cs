@@ -12,6 +12,7 @@ public sealed class SongFormReportTest
     [Test]
     public async Task ASongOfAForm_PlaysASectionForEveryRole_NoneFollowingItself()
     {
+        var formed = 0;
         foreach (var song in TestCorpus.Range(32))
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
@@ -21,9 +22,12 @@ public sealed class SongFormReportTest
             if (roles.All(x => x == SectionRole.Free))
                 continue;
 
+            formed++;
             await Assert.That(structure.Roles.Values.Distinct().Count()).IsEqualTo(structure.Roles.Count);
             await Assert.That(SongForms.Forms.Any(x => x.Value.SequenceEqual(roles))).IsTrue();
         }
+
+        await Assert.That(formed).IsGreaterThan(0);
     }
 
     [Test]

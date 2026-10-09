@@ -58,7 +58,7 @@ public sealed class FillTest
         var edits = new TimelineEdits(new GenerationContext(1), Meter.FourFour, null);
 
         edits.Clear(1, 2, 3.5);
-        edits.Hit(1, 4, 0.8, 2, 0, "Test");
+        edits.Hit(1, 4, 0.8, 2, 0, HitKind.Fill);
         var events = edits.ApplyTo(song).TrackTimelineMap[1].EventTimeline;
 
         await Assert.That(events.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 4.0], CollectionOrdering.Matching);
@@ -129,7 +129,7 @@ public sealed class FillTest
             var song = TestCorpus.Get(seed);
             foreach (var entry in song.Trace)
             {
-                if (entry.Point == TracePoints.Fill && entry.Phrase == "Landing")
+                if (entry.Point == TracePoints.Fill && entry.Value is HitKind.Landing)
                     landings.Add(entry);
                 if (entry.Point != TracePoints.FillDecision)
                     continue;

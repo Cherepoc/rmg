@@ -55,10 +55,14 @@ public sealed class ArrangementReportTest
         // the parts a recurring section plays its first time and its last, as parts only join
         var (first, last, recurring, grown) = (0.0, 0.0, 0, 0);
         foreach (var song in TestCorpus.Range(256))
-        foreach (var group in song.Map.Sections.GroupBy(x => x.SectionId).Where(x => x.Count() > 1))
         {
-            var (f, l) = (6 - song.Resting(group.First()).Count, 6 - song.Resting(group.Last()).Count);
-            (first, last, recurring, grown) = (first + f, last + l, recurring + 1, grown + (l > f ? 1 : 0));
+            // the parts the song has, which its sections play or rest
+            var parts = song.Song.Notes!.Where(x => x.Value.Count > 0).Select(x => song.Song.TrackDefinitions[x.Key].Role).ToHashSet();
+            foreach (var group in song.Map.Sections.GroupBy(x => x.SectionId).Where(x => x.Count() > 1))
+            {
+                var (f, l) = (parts.Except(song.Resting(group.First())).Count(), parts.Except(song.Resting(group.Last())).Count());
+                (first, last, recurring, grown) = (first + f, last + l, recurring + 1, grown + (l > f ? 1 : 0));
+            }
         }
 
         Console.WriteLine($"{recurring} recurring sections play {first / recurring:F2} parts the first time and {last / recurring:F2} the last; {grown} grow");

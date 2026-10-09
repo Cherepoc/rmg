@@ -51,7 +51,7 @@ public sealed class SoloTest
 
             var span = song.Map.Sections[index];
             int Notes(TrackRole role) => song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role)
-                .Sum(x => x.Value.Count(n => n.Position >= span.Start + 1e-9 && n.Position < span.End - song.Map.Meter.BarDuration));
+                .Sum(x => x.Value.Count(n => n.Position >= span.Start + 1e-9 && n.Position < span.End - span.Meter.BarDuration));
             if (solo.IsDrumSolo)
             {
                 foreach (var part in Enum.GetValues<TrackRole>().Where(x => x != TrackRole.Drum))

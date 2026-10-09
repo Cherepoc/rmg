@@ -6,8 +6,8 @@ namespace Rmg.Tests.InstrumentRoles;
 
 public sealed class InstrumentRolesTest
 {
-    private static readonly InstrumentRole[] Roles =
-        [Rmg.Core.Composition.InstrumentRoles.Chords, Rmg.Core.Composition.InstrumentRoles.Melody, Rmg.Core.Composition.InstrumentRoles.Bass];
+    // every pitched part's instruments
+    private static readonly InstrumentRole[] Roles = [..Enum.GetValues<TrackRole>().Select(RoleOf).OfType<InstrumentRole>().Distinct()];
 
     [Test]
     public async Task Roles_HoldNoSoundEffectsOrDrums_AndNoInstrumentTwice()
@@ -41,6 +41,7 @@ public sealed class InstrumentRolesTest
     {
         // the plainest sound, its instruments those its plain end weighs, a switch's too
         var plain = new SongOverrides(Facets: System.Collections.Immutable.ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, 0));
+        var checkedPrograms = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, plain)))
         foreach (var (track, definition) in song.Song.TrackDefinitions)
         {
@@ -49,8 +50,13 @@ public sealed class InstrumentRolesTest
             var programs = song.Song.Notes!.GetValueOrDefault(track)?.Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) is var p and > 0 ? p - 1 : part.InstrumentCode).Distinct() ?? [];
             // but an articulation's variant, the same player's (InstrumentsOverTime.Variants)
             foreach (var program in programs.Append(part.InstrumentCode).Where(x => role.Instruments.Any(i => i.Program == x)))
+            {
+                checkedPrograms++;
                 await Assert.That(role.Instruments.Single(x => x.Program == program).Weight.Plain).IsGreaterThan(0).Because($"seed {song.Seed}, {part.Role} {program}");
+            }
         }
+
+        await Assert.That(checkedPrograms).IsGreaterThan(32);
     }
 
     [Test]
@@ -104,18 +110,16 @@ public sealed class InstrumentRolesTest
         await Assert.That(() => role.Pick(new GenerationContext(0), 0.5, null, 0)).Throws<InvalidOperationException>();
     }
 
+    /// <summary>The melody never on the chords' instrument (each on one of its role's, AnyInstrumentTest).</summary>
     [Test]
-    public async Task Songs_PlayEachPitchedTrackWithAnInstrumentOfItsRole_TheMelodyNotAsTheChords()
+    public async Task Songs_PlayTheMelody_NotAsTheChords()
     {
         for (var seed = 0; seed < 64; seed++)
         {
-            var tracks = TestCorpus.Get(seed).Song.TrackDefinitions;
-            int Program(int track) => ((PitchInstrumentTrack)tracks[track]).InstrumentCode;
+            var tracks = TestCorpus.Get(seed).Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().ToArray();
+            int Program(TrackRole role) => tracks.Single(x => x.Role == role).InstrumentCode;
 
-            await Assert.That(Rmg.Core.Composition.InstrumentRoles.Chords.Instruments.Any(x => x.Program == Program(4))).IsTrue();
-            await Assert.That(Rmg.Core.Composition.InstrumentRoles.Melody.Instruments.Any(x => x.Program == Program(5))).IsTrue();
-            await Assert.That(Rmg.Core.Composition.InstrumentRoles.Bass.Instruments.Any(x => x.Program == Program(6))).IsTrue();
-            await Assert.That(Program(5)).IsNotEqualTo(Program(4)).Because($"seed {seed}");
+            await Assert.That(Program(TrackRole.Melody)).IsNotEqualTo(Program(TrackRole.Chords)).Because($"seed {seed}");
         }
     }
 }
