@@ -214,7 +214,7 @@ genre first (see *Genres*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
 *Architecture*: plainer prose); and the music's: the
-songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listening data*).
+songs' own appoggiaturas (*Fills and lines*).
 
 **Done: the parked reviewed** (9 October 2026, each step through the implementation loop): the seven steps one rule, a
 scale of other than seven notes refused; Bossa nova's clave on the cross-stick (`?listen=bossa-clave`); the melody in
@@ -416,9 +416,6 @@ plain or wild the songs are.
   ratings against its values (`StateTraceEntry.Value`): which endings, intros, drum setups, modes, tempos, energies or
   improvisations are liked or skipped, with their counts, so that a small sample shows itself. Measured by: ratings
   per version, enough to tell two versions apart.
-- **Targets from outside** (P2, raised by the review of October 2026, as listening is one listener's and slow): a few
-  measures (the notes a bar by role, the intervals, the syncopation, the chord changes a bar) of a corpus of real MIDI
-  songs to tune towards.
 
 ## Open work
 
@@ -810,6 +807,9 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   ♭II, ♭VI or ♭VII into i, the most often, and a symphonic band's classical V–i now and then, its last chord V 22%, its
   leading tone raised 5% (`cadenceDegree`, `cadenceRaise`); the songs' chances of the raise and the chord into home as
   they were.
+- **Targets from outside, decided against** (10 October 2026): measures of a corpus of real MIDI songs to tune towards
+  (the notes a bar by role, the intervals, the syncopation, the chord changes a bar); the songs are tuned by listening
+  and the ratings alone.
 - **Decided against** (8 October 2026, the review of P3 and P4), each for little heard at its cost or a sound General
   MIDI has not: the drums one by one (GS drum parameters), a flanger, the percussive family's other sounds, sound effects,
   sound design beyond General MIDI, ping-pong echo, modulation (no soundfont maps it), a sustain pedal (notes are held to
