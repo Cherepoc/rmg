@@ -1,3 +1,4 @@
+using Rmg.Core;
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -65,6 +66,40 @@ public sealed class PlaningTest
         await Assert.That(planed).IsGreaterThan(20);
         await Assert.That(inModes / (double)planed).IsBetween(0.4, 0.95);
         await Assert.That(changed / (double)chords).IsGreaterThan(0.4);
+    }
+
+    /// <summary>
+    ///     A report of the melody across a change of chord, in planed sections and in the others: how often its move is the
+    ///     root's, in semitones, as a line transposed with its chord would move, and how often it keeps its note, a common
+    ///     tone.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task ReportTheMelodyAcrossPlanedChanges()
+    {
+        var counts = new Dictionary<bool, (int Changes, int WithTheRoot, int Kept)>();
+        foreach (var song in new[] { "fusion", "jazz" }.SelectMany(genre => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre(genre))))))
+        {
+            var planed = song.Trace.Where(x => x.Point == TracePoints.Planing && x.Value is not null).Select(x => x.Section).ToHashSet();
+            var melody = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Melody))?.ToArray() ?? [];
+            foreach (var (before, after) in melody.Zip(melody.Skip(1)))
+            {
+                int Root(RealizedNote note) => Realizer.GetChord(note.State).Chord.GetPitch(0);
+                var (from, to) = (Root(before.Value), Root(after.Value));
+                if (from == to || after.Position - before.Position > 2)
+                    continue;
+                if (song.Map.Sections.FirstOrDefault(x => after.Position >= x.Start - 1e-9 && after.Position < x.End - 1e-9) is not { } span)
+                    continue;
+                var key = planed.Contains(span.SectionId);
+                var (changes, withTheRoot, kept) = counts.GetValueOrDefault(key);
+                var moved = after.Value.Pitches.Max() - before.Value.Pitches.Max();
+                counts[key] = (changes + 1, withTheRoot + ((moved - (to - from)).Mod(12) == 0 && moved != 0 ? 1 : 0), kept + (moved == 0 ? 1 : 0));
+            }
+        }
+
+        foreach (var (key, (changes, withTheRoot, kept)) in counts)
+            Console.WriteLine($"{(key ? "planed" : "other")} sections: {changes} changes, the melody moving with the root {withTheRoot / (double)changes:P1}, keeping its note {kept / (double)changes:P1}");
+        await Task.CompletedTask;
     }
 
     [Test]
