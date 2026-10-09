@@ -38,9 +38,9 @@ internal static class DrumDefinitions
 
     public static PercussionInstrumentDefinition HiHat { get; } = new(
         "Hi-Hat",
-        // closed, pedal, open: the pedal quieter and the open louder, both played less than the closed, the open never
-        // as the stroke, a wash that would bury the kit, but now and then as an accent off the beat
-        [new DrumSound(42), new DrumSound(44, 0.3, -0.5, 0.15), new DrumSound(46, 0.5, 0.5, 0, DrumAccents.OpenHiHat, 1)],
+        // closed, pedal, open: the pedal quieter and the open louder, both played less than the closed, the open
+        // rarely as the stroke, a loud wash, and now and then as an accent off the beat
+        [new DrumSound(42), new DrumSound(44, 0.3, -0.5, 0.15), new DrumSound(46, 0.5, 0.5, 0.05, DrumAccents.OpenHiHat, 1)],
         1.0,
         roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.05), (DrumRole.Backbeat, 0.02))
     );
