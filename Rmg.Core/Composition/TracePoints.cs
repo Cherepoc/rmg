@@ -27,6 +27,9 @@ internal static class TracePoints
     /// <summary>A line the drums announce a bigger section at, opening the hi-hat and striking the snare's head (a <c>double</c>, the line's place).</summary>
     public const string LiftCue = "Lift cue";
 
+    /// <summary>The band's loudness rising into a louder section, at its change (a tuple of the change's position and how much more energy the section has, as far as the rhythm follows it).</summary>
+    public const string Lift = "Lift";
+
     /// <summary>A section's planed chords' moves from its home, in semitones, none where it does not plane (an <c>ImmutableArray&lt;int&gt;?</c>).</summary>
     public const string Planing = "Planing";
 

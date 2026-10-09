@@ -370,8 +370,12 @@ internal sealed class SongFormGenerator
                 $"into {line.Position}", line.Position);
         }
 
-        // the band grows louder into a louder section, over the phrase before a drop
-        songState = songState.MergeWith(CreateLifts(lines, end, drops, Math.Pow(FormLayers.GenreLiftReach, _genre.Shift(GenreChoices.Dynamics, "lift"))));
+        // the band grows louder into a louder section, over the phrase before a drop, at every change of section whether
+        // the drums mark it or not, a hook intro's into the first among them
+        List<(double Position, FillSection Ending, FillSection Next)> changes = [..map.Sections.Skip(1).Select((x, i) => (x.Start, fillSections[i], fillSections[i + 1]))];
+        if (plan.Intro == IntroKind.Hook)
+            changes.Insert(0, (origin, fillSections[hook.Index], fillSections[0]));
+        songState = songState.MergeWith(CreateLifts(changes, end, drops, Math.Pow(FormLayers.GenreLiftReach, _genre.Shift(GenreChoices.Dynamics, "lift"))));
 
         return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState, [..drops.Order()], [..filtered.Order()]);
     }
@@ -560,24 +564,24 @@ internal sealed class SongFormGenerator
     ///     follows its energy, a step every <see cref="FormLayers.FadeStep" />, the next section then as loud as it plays.
     /// </summary>
     /// <param name="bars">How many bars a lift swells over, a genre's, where no drop builds to it.</param>
-    private static StateTimelineMap CreateLifts(IReadOnlyList<FillLine> lines, double end, IReadOnlySet<double> drops, double bars)
+    /// <param name="changes">The changes of section, in order: where each is, the section it ends and the one it leads into.</param>
+    private static StateTimelineMap CreateLifts(IReadOnlyList<(double Position, FillSection Ending, FillSection Next)> changes, double end, IReadOnlySet<double> drops, double bars)
     {
         var items = new List<TimelineItem<double>>();
-        for (var i = 0; i < lines.Count; i++)
+        for (var i = 0; i < changes.Count; i++)
         {
-            var line = lines[i];
-            if (line.Ending == line.Next || line.Position >= end)
-                continue;
-            var lift = (line.Next.Energy - line.Ending.Energy) * line.Ending.Rhythm.Coupling;
-            if (lift <= 0)
+            var (position, ending, next) = changes[i];
+            var lift = (next.Energy - ending.Energy) * ending.Rhythm.Coupling;
+            if (position >= end || lift <= 0)
                 continue;
 
             // over the last bar of the section it ends, or the phrase before a drop, within the section
-            var length = line.Ending.Meter.BarDuration * (drops.Contains(line.Position) ? FormLayers.BuildBars : bars);
-            var start = Math.Max(line.Position - length, i > 0 ? lines[i - 1].Position : 0);
-            var count = (int)Math.Round((line.Position - start) / FormLayers.FadeStep);
+            var length = ending.Meter.BarDuration * (drops.Contains(position) ? FormLayers.BuildBars : bars);
+            var start = Math.Max(position - length, i > 0 ? changes[i - 1].Position : 0);
+            var count = (int)Math.Round((position - start) / FormLayers.FadeStep);
             items.AddRange(Enumerable.Range(1, count).Select(j => (FormLayers.LiftVelocity * lift * j / count).ToTimelineItem(start + j * FormLayers.FadeStep - FormLayers.FadeStep)));
-            items.Add(0.0.ToTimelineItem(line.Position));
+            items.Add(0.0.ToTimelineItem(position));
+            StateTrace.RecordSong(TracePoints.Lift, $"{lift:F2} into {position}", (position, lift));
         }
 
         IStateTimeline velocity = StateTimeline.Create(end, StateKinds.Velocity, items.OrderBy(x => x.Position)).WithLayer("Lift");
