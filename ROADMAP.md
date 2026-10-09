@@ -178,7 +178,6 @@ songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listeni
 
 **The parked reviewed** (P2, 9 October 2026, each step through the implementation loop): two of the three items parked
 where they stand were mostly built since; what is left of them is small and a genre's data.
-2. A melody in block harmony, a third voice beside the counter-melody's (*A melody in block harmony*).
 3. Roots off the scale: a planed section's chords each in a mode of its own (*Roots off the scale*).
 4. Long cycles for the generated patterns: a slow part's two-bar cycle played whole over a pair of bars (*Long cycles*).
 Patterns longer than two bars stay parked (*Long cycles*); scales of other sizes are decided against (*Decided, and
@@ -198,7 +197,7 @@ its song without lays its patch over the genre's options, the others kept (`with
 `tape`, whose song without had lost every other effect of its genre's, and `stop-time`; asked anew, `inversion`, the
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
 `lift-cues`, under 0.1, and `bossa-clave`, Bossa nova's cross-stick playing the clave in 74% of its sections, 0.07 as a
-rim's stroke is quiet.
+rim's stroke is quiet; `block`, Soul's melody harmonised in three voices, 0.15.
 
 Answered on 8 October 2026, late, and let go of: the clave, stop time and the ghost notes, heard as great; the tape and
 the tone, barely heard, so a tape's wow now drifts by the sound facet, 5 cents at the plain end to 26 at the wild, and a
@@ -540,22 +539,12 @@ Each item with its plan, and what it waits for.
   chord but the home, two chords passing where one does now; a chord solo's approaches on the strong beats at the wild
   end, and the dominant as its approach; the tritone substitute for a progression's own V7 in a reharmonised
   appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
-- **A melody in block harmony** (P2, reviewed 9 October 2026): two voices are built, the counter-melody harmonising the
-  melody a third or a sixth apart in 25% of sections, in the melody's sound half the time, twin leads
-  (`LineDoubling.Pairs`, `TwinTimbreChance`); a horn section's soli wants a third. Plan: where the counter-melody
-  harmonises the melody, a section draws a block from a stream of its own (`SongStream`), a genre's chance
-  (`GenreChoices.Doubling` "block", the songs' 0 at every end, so that no drawn song changes), and the pad plays the
-  melody's notes the counter-melody's interval mirrored, `-(c mod 7)` steps where the counter-melody plays `c`: thirds
-  give parallel triads in first inversion (melody C, E above, A below), fourths a quartal stack, seconds a cluster, so
-  any interval a genre names makes three distinct notes and the pad draws no interval of its own. The pad's own notes
-  give way from its first to its last as the pair's do; the melody's sound decided once a section for both voices, its
-  stream drawn as now (`SongStream.TwinTimbres`), so that the block is a section in one sound. Genres: Soul, Funk, Ska
-  and Latin, whose counter-melodies are horns; Jazz after listening, its soli four voices close rather than three in
-  parallel. Measured, in sections playing it: the pad's notes outside its chord's scale (a rule, none), the pad above
-  the counter-melody (crossings, the realizer's register), a second between the pad and the melody (none), and the
-  bass's octave reached by the pad under a low melody. `?listen=block`. Left out: chord tones under long notes with
-  diminished approaches on the passing ones, a voicing mechanism of its own, should the parallel triads sound naive;
-  a fourth voice, which no part is free to play.
+- **A melody in block harmony, the rest** (P3, by listening to `?listen=block`): a block is the counter-melody
+  stacking its chord's notes under its harmony note (`LineDoubling.BlockChance`, Soul's and Funk's 60%, Ska's and
+  Latin's 50% of their harmonised sections), its passing notes alone, three voices on 56% of the notes struck with the
+  melody, the melody on top 86%. Left: its passing notes harmonised too, a diminished chord or the scale's in parallel,
+  should the two-voice passing notes sound thin; Jazz's soli, four voices close, which no part is free to play; the pad
+  as a voice, which plays chords, not lines, and sat over the melody 81% of the time when tried.
 - **Roots off the scale** (P2, the parked reviewed, step 3): chord roots moving outside a seven-note scale with chords
   of their own qualities, Fusion's (*More genres*), the one thing scales of other sizes were wanted for that is not
   built (*Decided, and kept*). Planing moves roots off the scale already, by semitones, but always in the home chord's shape, a

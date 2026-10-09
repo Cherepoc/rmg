@@ -238,5 +238,6 @@ internal enum SongStream
     Ghosts = 101,
     SoloTwins = 102,
     QuieterForms = 103,
-    PartTracks = 104
+    PartTracks = 104,
+    BlockHarmony = 105
 }

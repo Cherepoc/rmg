@@ -118,5 +118,63 @@
         ]
       }
     ]
+  },
+  {
+    "id": "block",
+    "question": "Soul's melody harmonised in three voices, the counter-melody stacking its chord under its note, rather than two: a horn section, or thick?",
+    "decides": "The block's chance by genre.",
+    "genre": "soul",
+    "without": {
+      "skip": [],
+      "genre": {
+        "doubling": {
+          "block": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 39.4,
+        "listen": [
+          "Counter-melody (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 154.3,
+        "listen": [
+          "Counter-melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "1A",
+        "at": 92.3,
+        "listen": [
+          "Counter-melody (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "1U",
+        "at": 246.4,
+        "listen": [
+          "Counter-melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "1Z",
+        "at": 250.5,
+        "listen": [
+          "Counter-melody (Violin)"
+        ]
+      },
+      {
+        "seed": "1a",
+        "at": 165,
+        "listen": [
+          "Counter-melody (Electric Guitar (clean))"
+        ]
+      }
+    ]
   }
 ]

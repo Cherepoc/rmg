@@ -64,7 +64,10 @@ public sealed class ListeningQuestionsTest
                 .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min()),
         new("bossa-clave", "Bossa nova's cross-stick playing the clave, the 3-2 with its last stroke late, rather than the backbeat: a bossa drummer, or busier?",
             "The bossa clave's weight in Bossa nova's backbeat.", "bossa", [], new() { ["figure.backbeat"] = Only(GenreChoices.Figures[FigurePlayer.Backbeat], Figures.Own) },
-            x => Plays(x, FigurePlayer.Backbeat, "bossaClave"))
+            x => Plays(x, FigurePlayer.Backbeat, "bossaClave")),
+        new("block", "Soul's melody harmonised in three voices, the counter-melody stacking its chord under its note, rather than two: a horn section, or thick?",
+            "The block's chance by genre.", "soul", [], new() { ["doubling"] = new() { ["block"] = 0 } },
+            x => FirstSection(x, TracePoints.BlockHarmony, _ => true))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

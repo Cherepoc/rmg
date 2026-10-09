@@ -236,6 +236,7 @@ internal static class SongStages
                 song.Energies,
                 (pair, section) => song.Stream(SongStream.LineDoubling, pair, section),
                 section => song.Stream(SongStream.TwinTimbres, section),
+                section => song.Stream(SongStream.BlockHarmony, section),
                 index => song.Sections[index].RiffPowerChords || song.Sections[index].Chugs,
                 song.Tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Any(x => x.Role == TrackRole.Riff && InstrumentTraits.Has(x.InstrumentCode, InstrumentTrait.Driven)),
                 song.Genre

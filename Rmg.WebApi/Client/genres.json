@@ -499,6 +499,7 @@
     "name": "Latin",
     "description": "The kit and percussion, congas, bongos, claves, cowbell, timbales and a guiro, a time keeper in the tresillo's 3+3+2, the bass anticipating the beat, nylon guitar, piano and trumpet, minor and Dorian, fast.",
     "choices": {
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50 },
       "figure": { "claves": { "own": 5, "clave32": 60, "clave23": 30 } },
       "louderForms": { "guitars": 0 },
       "pins": { "time": [100, 100, 70], "ground": [80, 80, 50], "bass": [80, 80, 50] },
@@ -553,6 +554,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60 },
       "drumSetup": { "kit": 100, "kitAndPercussion": [20, 30, 40] },
       "ghosts": { "sections": [50, 70, 80] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 40, "tom": 50, "cymbal": 70, "tambourine": [30, 40, 50], "cowbell": [10, 20, 30], "conga": [10, 20, 30] },
@@ -1409,6 +1411,7 @@
     "name": "Ska",
     "description": "Fast, the guitar and the piano skanking on the offbeats, a walking bass, horns on a riff and in solos, trumpet and sax leads, major and Mixolydian.",
     "choices": {
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50 },
       "louderForms": { "guitars": 0, "quieter": 0 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 50, "tom": 50, "cymbal": 70 },
       "stopTime": { "sections": [5, 10, 15] },
@@ -1569,6 +1572,7 @@
     "name": "Soul",
     "description": "An organ, a piano and horns, sevenths and ninths passing through applied dominants, a laid-back backbeat, 4/4 or a swaying 6/8, a last chorus lifted, sax solos answering the tune.",
     "choices": {
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60 },
       "louderForms": { "guitars": 0, "quieter": 0 },
       "ghosts": { "sections": [40, 55, 70] },
       "stopTime": { "sections": [5, 10, 15] },

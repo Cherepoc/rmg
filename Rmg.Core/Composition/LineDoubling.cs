@@ -41,6 +41,16 @@ internal static class LineDoubling
     /// <summary>The chance the counter-melody harmonises the melody in a section, a third or a sixth apart.</summary>
     public static ByConvention HarmonyChance { get; } = new(0.25, 0.25, 0.25);
 
+    /// <summary>
+    ///     The chance a section's harmonised melody plays in a block, three voices, as a horn section plays a soli: the
+    ///     counter-melody's note stacking its chord's under it, from a minor third down, where its note is the chord's, and
+    ///     alone where not, as a passing note is (<see cref="CompositionStateKinds.LineVoices" />); a genre's alone.
+    /// </summary>
+    public static ByConvention BlockChance { get; } = new(0, 0, 0);
+
+    /// <summary>The notes a block's counter-melody stacks, its own and its chord's under it: with the melody's, three voices.</summary>
+    private const int BlockVoices = 2;
+
     /// <summary>The chance the bass plays the riff with it in a section, as a band plays a riff together.</summary>
     public static ByConvention RiffChance { get; } = new(0.35, 0.35, 0.35);
 
@@ -98,6 +108,7 @@ internal static class LineDoubling
     /// <param name="energies">Every appearance's energy, by its place, which the octaves lean by too.</param>
     /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords or chugs, which may make it power chords, by its place, which plays no twin.</param>
     /// <param name="drivenRiff">Whether the riff plays on a driven guitar, whose phrases the bass plays wherever it would rest in them.</param>
+    /// <param name="blocks">A section's sequence of whether its harmonised melody plays in a block, by the section's place.</param>
     /// <param name="genre">The genre whose chances of the doublings a section draws (<see cref="GenreChoices.Doubling" />).</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
@@ -108,6 +119,7 @@ internal static class LineDoubling
         IReadOnlyList<double> energies,
         Func<int, int, IGenerationContext> streams,
         Func<int, IGenerationContext> timbres,
+        Func<int, IGenerationContext> blocks,
         Func<int, bool> riffPowerChords,
         bool drivenRiff,
         Genre genre
@@ -147,12 +159,17 @@ internal static class LineDoubling
                 // than it would, as into an intro that brings it in
                 var own = events[isTwin ? sourceTrack : targetTrack].EventTimeline.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).Select(x => x.Position).ToArray();
                 var (from, to) = (own.Min(), own.Max());
-                // a counter-melody harmonising the melody in the melody's own sound now and then, as twin leads play
+                // a counter-melody harmonising the melody in the melody's own sound now and then, as twin leads play, and in
+                // a block now and then, its notes stacking their chord's
                 var inTimbre = source == TrackRole.Melody && !isTwin && timbres(index).TestProbability(TwinTimbreChance);
+                var block = source == TrackRole.Melody && !isTwin && blocks(index).TestProbability(BlockChance.At(melody, genre.Chance(GenreChoices.Doubling, "block")));
+                if (block)
+                    StateTrace.RecordSection(TracePoints.BlockHarmony, targetTrack, span.SectionId, $"{step}", index);
                 var doubled = events[sourceTrack].EventTimeline
                     .Where(x => x.Position >= from - 1e-9 && x.Position <= to + 1e-9)
                     .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, 0)
-                        .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0).ToTimelineItem(x.Position));
+                        .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0).ToTimelineItem(x.Position))
+                    .Select(x => block ? x.Value.With(CompositionStateKinds.LineVoices, Math.Max(x.Value.GetStateValue(CompositionStateKinds.LineVoices), BlockVoices)).ToTimelineItem(x.Position) : x);
                 song = song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
                 {
                     [targetTrack] = notes => EventTimeline.Create(

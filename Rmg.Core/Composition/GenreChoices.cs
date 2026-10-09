@@ -430,7 +430,8 @@ public static class GenreChoices
     public static GenreChoice Doubling { get; } = Chances("doubling", "Doubling",
     [
         ("octaves", "Lines in octaves", LineDoubling.OctaveChance), ("harmony", "The melody harmonised", LineDoubling.HarmonyChance),
-        ("riff", "The bass with the riff", LineDoubling.RiffChance)
+        ("riff", "The bass with the riff", LineDoubling.RiffChance),
+        ("block", "The melody harmonised in three voices", LineDoubling.BlockChance)
     ]);
 
     /// <summary>A part switching its instrument in a section (<see cref="InstrumentsOverTime" />).</summary>

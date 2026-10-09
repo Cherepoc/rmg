@@ -110,6 +110,12 @@ internal static class TracePoints
     public const string LineDoubling = "Line doubling";
 
     /// <summary>
+    ///     A section's harmonised melody in a block, the counter-melody stacking its chord under its note: the section's
+    ///     place in the song (an <c>int</c>).
+    /// </summary>
+    public const string BlockHarmony = "Block harmony";
+
+    /// <summary>
     ///     The bass playing a driven riff's phrase it would rest in: the section's place in the song and the phrase's start
     ///     (a tuple of an <c>int</c> and a <c>double</c>).
     /// </summary>
