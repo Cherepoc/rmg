@@ -78,7 +78,7 @@ internal sealed class SectionGenerator
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
         _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
-        _drums = new SectionDrumGenerator(tracks, genre, songStateMap, sectionEnergies, songPercussion, Stream, FirstRests, Facets, CreateSectionTrackLayer,
+        _drums = new SectionDrumGenerator(tracks, genre, songStateMap, sectionEnergies, songPercussion, Stream, TrackStream, FirstRests, Facets, CreateSectionTrackLayer,
             meter => _generators(meter).Patterns);
     }
 
@@ -122,6 +122,9 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The seed of <see cref="Stream" />, for a decision that derives its own sequences from it.</summary>
+    /// <summary>A track's own sequence of a section's decision, so that a change to one track leaves the others as they are.</summary>
+    private IGenerationContext TrackStream(int sectionId, SectionStream stream, int track) => new GenerationContext(Seeds.Derive(StreamSeed(sectionId, stream), track));
+
     private ulong StreamSeed(int sectionId, SectionStream stream)
     {
         return Seeds.Derive(Seeds.Derive(_seed, sectionId), (int)stream);
@@ -502,7 +505,7 @@ internal sealed class SectionGenerator
             }
 
             // each track from a sequence of its own
-            var context = new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.PitchedTracks), trackNumber));
+            var context = TrackStream(sectionId, SectionStream.PitchedTracks, trackNumber);
             var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal);
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
             {
@@ -995,5 +998,6 @@ internal enum SectionStream
     BarStates = 53,
     PhraseScheme = 54,
     MelodyBusyness = 55,
-    PitchedTracks = 56
+    PitchedTracks = 56,
+    DrumTracks = 57
 }
