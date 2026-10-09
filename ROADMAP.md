@@ -97,7 +97,10 @@ fixed; the review and the plan are kept outside the repository):
     layers' names as constants; tests checking what they say, loops counted, calibrations widened and printed; the
     listening measure, the media session and the pulse tested. Kept apart on purpose: the fill lines the tests state
     in their own words, as calling the fill generator would make its tests agree with it by construction.
-16. Dead code and stale docs.
+16. Done: dead code and stale docs. Unused members gone, among them a reharmonisation's shift layer that only wrote
+    zeros and a doubling's share that was always the same; every doc on the member it describes and saying what the
+    code does; redundant tests and test helpers removed; the server's documented scales and parts as they are. One
+    fix in passing: a pushed note held at most its own bar. All sixteen packages done.
 
 **Done before it** (the plan of 8 October 2026 from the review of P3 and P4, each step through the implementation loop,
 each device a genre's data on a mechanism there already where it can be, strong in its genres rather than a few
