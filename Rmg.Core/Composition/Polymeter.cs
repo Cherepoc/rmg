@@ -21,6 +21,9 @@ internal static class Polymeter
 {
     public static ByConvention Chance { get; } = new(0, 0.01, 0.5);
 
+    // the states that are a chord's shape, which a note takes from its place
+    private static readonly IStateKind[] ShapeKinds = [StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed];
+
     /// <summary>
     ///     The figure's length in 16ths, three against four, a dotted 8th's, and a dotted quarter's, the most common and the
     ///     plainest, which a genre playing a polymeter at its plain end plays, and any other wilder.
@@ -187,6 +190,21 @@ internal static class Polymeter
         var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
         var kicks = kickTracks.ToArray();
         var snares = snareTracks.ToArray();
+        // the chord's shape at a place, as the pitched parts' notes there have it, all alike, so that a note played again at
+        // another place takes its chord's rather than the one it was struck in
+        var changes = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        var shaped = song.TrackTimelineMap.Where(x => roles.TryGetValue(x.Key, out var role) && role != TrackRole.Drum).SelectMany(x => x.Value.EventTimeline)
+            .Where(x => !x.Value.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty).ToArray();
+        StateMap? ShapeAt(double position)
+        {
+            var from = changes.LastOrDefault(x => x <= position + 1e-9);
+            var to = changes.FirstOrDefault(x => x > position + 1e-9, double.PositiveInfinity);
+            return shaped.FirstOrDefault(x => x.Position >= from - 1e-9 && x.Position < to - 1e-9).Value?.Subset(ShapeKinds);
+        }
+
+        TimelineItem<StateMap> PlayedAt(StateMap note, double position) =>
+            (ShapeAt(position) is { } shape && !note.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty ? note.Except(ShapeKinds).MergeWith(shape) : note).ToTimelineItem(position);
+
         foreach (var span in map.Sections)
         {
             if (!plans.TryGetValue(span.SectionId, out var plan))
@@ -215,7 +233,7 @@ internal static class Polymeter
                     for (var repeat = start; repeat < end - 1e-9; repeat += plan.CellAt(cell++) * Sixteenth)
                     {
                         var length = plan.CellAt(cell) * Sixteenth;
-                        played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => x.Value.ToTimelineItem(x.Position - start + repeat)).Where(x => x.Position < end - 1e-9 && plays.Contains(Bar(x.Position))));
+                        played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => PlayedAt(x.Value, x.Position - start + repeat)).Where(x => x.Position < end - 1e-9 && plays.Contains(Bar(x.Position))));
                     }
                 }
 
@@ -241,7 +259,7 @@ internal static class Polymeter
                         var cell = 0;
                         for (var at = start; at < end - 1e-9; at += plan.CellAt(cell++) * Sixteenth)
                             if (plays.Contains(Bar(at)))
-                                struck.Add(inSpan[0].Value.ToTimelineItem(at));
+                                struck.Add(PlayedAt(inSpan[0].Value, at));
                     }
 
                     return EventTimeline.Create(notes.Duration, notes.Where(x => x.Position < span.Start - 1e-9 || x.Position >= span.End - 1e-9).Concat(struck).OrderBy(x => x.Position));

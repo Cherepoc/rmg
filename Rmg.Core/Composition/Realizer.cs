@@ -363,7 +363,11 @@ internal static class Realizer
     ///     its definition's and the song's.
     /// </summary>
     internal static ChordContext ChordAt(StateMap note, double position, EventStateTimelineMap<StateMap> track, IInstrumentTrack definition, StateTimelineMap common) =>
-        GetChord(StateMap.Aggregate([note, track.GetEffectiveStateMapAt(position), definition.StateMap.OfScope(StateScope.Render), common.GetEffectiveStateMapAt(position)])).Chord;
+        GetChord(StateAt(note, position, track, definition, common)).Chord;
+
+    /// <summary>A stored note's state at its place, as the realizer reads it: its own, its track's, its definition's and the song's.</summary>
+    internal static StateMap StateAt(StateMap note, double position, EventStateTimelineMap<StateMap> track, IInstrumentTrack definition, StateTimelineMap common) =>
+        StateMap.Aggregate([note, track.GetEffectiveStateMapAt(position), definition.StateMap.OfScope(StateScope.Render), common.GetEffectiveStateMapAt(position)]);
 
     /// <summary>
     ///     The chord a note is played over: the scale, with the steps the note's bar raises, the chord root's step in
