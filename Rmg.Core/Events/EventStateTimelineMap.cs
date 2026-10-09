@@ -101,7 +101,7 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
         for (var i = 0; i < EventTimeline.Count; i++)
         {
             var item = EventTimeline[i];
-            var effectiveState = GetEffectiveStateMapAt(item.Position);
+            var effectiveState = StateTimelineMap.GetStateMapAt(item.Position);
             var newValue = map(item.Value, effectiveState);
             newEventItems[i] = new TimelineItem<TDest>(item.Position, newValue);
         }

@@ -98,8 +98,8 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
     /// <summary>The map without the timelines of the given kinds.</summary>
     public StateTimelineMap Except(IEnumerable<IStateKind> stateKinds)
     {
-        var excluded = stateKinds.ToHashSet();
-        return Create(Duration, StateTimelines.Where(x => !excluded.Contains(x.StateKind)));
+        var excluded = stateKinds as IStateKind[] ?? [..stateKinds];
+        return Create(Duration, StateTimelines.Where(x => Array.IndexOf(excluded, x.StateKind) < 0));
     }
 
     public StateTimeline<T> GetStateTimeline<T>(StateKind<T> stateKind)
@@ -108,6 +108,21 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
         return _stateTimelineDictionary.TryGetValue(stateKind, out var stateTimeline)
             ? (StateTimeline<T>)stateTimeline
             : stateKind.CreateDefaultTimeline(Duration);
+    }
+
+    /// <summary>
+    ///     The state at a position, as <see cref="GetEffectiveStateMapAt" /> has it, read from the timelines there rather
+    ///     than from the state at every change, which it builds only where that is built already: for a map read at a few
+    ///     places, such as a track's notes, once each.
+    /// </summary>
+    public StateMap GetStateMapAt(double position)
+    {
+        if (_stateMapEventTimeline is not null || IsDefault || position >= Duration)
+            return GetEffectiveStateMapAt(position);
+        var states = new IState[StateTimelines.Length];
+        for (var i = 0; i < states.Length; i++)
+            states[i] = StateTimelines[i].GetEffectiveStateAt(position);
+        return StateMap.FromOrderedStates(states);
     }
 
     public StateMap GetEffectiveStateMapAt(double position)
@@ -148,12 +163,13 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
 
         var items =
             ImmutableArray.CreateBuilder<TimelineItem<StateMap>>(mergedStateTimelines.Sum(x => x.Positions.Length));
+        // one state of every timeline, which come in their kinds' order, a kind each, as a map keeps its states
+        var states = new IState[mergedStateTimelines.Length];
         foreach (var position in positions)
         {
-            var stateMap = mergedStateTimelines
-                .Select(x => x.GetEffectiveStateAt(position))
-                .ToStateMap();
-            items.Add(stateMap.ToTimelineItem(position));
+            for (var i = 0; i < states.Length; i++)
+                states[i] = mergedStateTimelines[i].GetEffectiveStateAt(position);
+            items.Add(StateMap.FromOrderedStates(states).ToTimelineItem(position));
         }
 
         return EventTimeline<StateMap>.Create(duration, items.ToImmutable());

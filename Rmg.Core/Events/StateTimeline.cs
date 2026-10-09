@@ -14,6 +14,10 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
     // empty otherwise
     private readonly ImmutableArray<StateTimeline<T>> _sources;
 
+    // every item's state, made when it is first read and read again from here, as one read outside a trace is no more
+    // than its kind and its value
+    private State<T>?[]? _states;
+
     public StateTimeline(double duration, StateKind<T> stateKind, ImmutableArray<TimelineItem<T>> items)
         : this(duration, stateKind, items, null, [])
     {
@@ -124,11 +128,12 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
 
         var items = new List<TimelineItem<T>>(positions.Length);
         var previousValue = stateKind.DefaultValue;
+        // every timeline's value at a position, one array for them all, which the aggregation only reads
+        var values = new T[timelineArray.Length];
         foreach (var position in positions)
         {
-            var values = timelineArray
-                .Select(x => x.GetEffectiveValueAt(position))
-                .ToArray();
+            for (var i = 0; i < values.Length; i++)
+                values[i] = timelineArray[i].GetEffectiveValueAt(position);
             var aggregatedValue = stateKind.AggregateValues(values);
             if (stateKind.CheckValuesEqual(aggregatedValue, previousValue))
                 continue;
@@ -239,9 +244,16 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
 
     public State<T> GetEffectiveStateAt(double position)
     {
-        var value = GetEffectiveValueAt(position);
         if (!StateTrace.IsExplaining)
-            return new State<T>(StateKind, value);
+        {
+            var index = position >= Duration ? -1 : _items.GetIndexAtFloor(position);
+            if (index < 0)
+                return StateKind.DefaultState;
+            var states = _states ??= new State<T>?[_items.Length];
+            return states[index] ??= new State<T>(StateKind, _items[index].Value);
+        }
+
+        var value = GetEffectiveValueAt(position);
 
         if (Layer is not null)
             return new State<T>(StateKind, value, [new StateContribution(Layer, value)]);

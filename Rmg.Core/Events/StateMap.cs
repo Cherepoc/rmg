@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Rmg.Core.Events;
@@ -84,6 +85,25 @@ public sealed class StateMap
             : new StateMap(ImmutableCollectionsMarshal.AsImmutableArray(items[..count]));
     }
 
+    /// <summary>
+    ///     The states, of different kinds already in the kinds' order, as a timeline map's are, those left at their kind's
+    ///     default value dropped: <see cref="FromStates" /> without its sort.
+    /// </summary>
+    internal static StateMap FromOrderedStates(ReadOnlySpan<IState> states)
+    {
+        var items = new IState[states.Length];
+        var count = 0;
+        foreach (var state in states)
+        {
+            Debug.Assert(count == 0 || CompareKinds(items[count - 1].Kind, state.Kind) < 0, "The states are not in their kinds' order.");
+            var aggregated = state.Kind.CheckStateIsAggregated(state) ? state : state.Kind.AggregateStates([state]);
+            if (!aggregated.IsDefault)
+                items[count++] = aggregated;
+        }
+
+        return count == 0 ? Default : new StateMap(ImmutableCollectionsMarshal.AsImmutableArray(count == items.Length ? items : items[..count]));
+    }
+
     public T GetStateValue<T>(StateKind<T> kind)
         where T : notnull
     {
@@ -140,16 +160,17 @@ public sealed class StateMap
         return GetState(kind).Contributions;
     }
 
+    // the kinds asked for are a few, so they are looked through rather than hashed
     public StateMap Subset(IEnumerable<IStateKind> stateKinds)
     {
-        var kinds = stateKinds.ToHashSet();
-        return Filter(x => kinds.Contains(x.Kind));
+        var kinds = stateKinds as IStateKind[] ?? [..stateKinds];
+        return Filter(x => Array.IndexOf(kinds, x.Kind) >= 0);
     }
 
     public StateMap Except(IEnumerable<IStateKind> stateKinds)
     {
-        var kinds = stateKinds.ToHashSet();
-        return Filter(x => !kinds.Contains(x.Kind));
+        var kinds = stateKinds as IStateKind[] ?? [..stateKinds];
+        return Filter(x => Array.IndexOf(kinds, x.Kind) < 0);
     }
 
     /// <summary>The map with the kind's state set to the value, in place of any it had.</summary>
@@ -310,17 +331,22 @@ public sealed class StateMap
     /// <summary>The states that pass, which are already ordered, aggregated and none of them default.</summary>
     private StateMap Filter(Func<IState, bool> predicate)
     {
-        var result = new IState[_states.Length];
+        // counted first, so that the map's array is made once at its size
         var count = 0;
         foreach (var state in _states)
             if (predicate(state))
-                result[count++] = state;
+                count++;
 
         if (count == 0)
             return Default;
         if (count == _states.Length)
             return this;
 
-        return new StateMap(ImmutableCollectionsMarshal.AsImmutableArray(result[..count]));
+        var result = new IState[count];
+        var index = 0;
+        foreach (var state in _states)
+            if (predicate(state))
+                result[index++] = state;
+        return new StateMap(ImmutableCollectionsMarshal.AsImmutableArray(result));
     }
 }
