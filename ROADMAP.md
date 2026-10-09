@@ -551,9 +551,12 @@ Each item with its plan, and what it waits for.
   Phrygian 3%), Fusion's 72% of its planed sections, a chord's mode changing on 78% of the moves. The melody over
   planed chords is placed by where it aims, not moved with them: across a change it moves as the root does 24% of the
   time, against 14% elsewhere, and keeps its note 8% against 11% (`PlaningTest.ReportTheMelodyAcrossPlanedChanges`,
-  Fusion's and Jazz's 128 songs). Should it sound aimless, a chord keeping the mode of the one
-  before now and then, a chance on the same draw; symmetric cycles (major or minor thirds) left out, Planing's moves
-  holding minor thirds already.
+  Fusion's and Jazz's 128 songs). A mode chosen to keep a note of the chord before was tried and let go of (9 October
+  2026): 38% of the planed moves keep one as drawn, a lean of odds 2 made it 42%, of 4 45%, and always the mode keeping
+  the most 50%, as a move of a semitone or a whole step keeps no note whatever the qualities, the moves deciding it
+  (`Planing.Moves`), which favour small steps so that the voices slide. Should the modes be heard as aimless, the move
+  is the lever, a planed chord's move drawn with its mode, or a chord keeping the mode of the one before now and then;
+  symmetric cycles (major or minor thirds) left out, Planing's moves holding minor thirds already.
 - **Long cycles** (P4, reviewed 9 October 2026, the generated patterns tried and put off the same day): a figure of two
   bars is built, its onsets over 32 16ths from a section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's
   on the cross-stick), and chords of two bars are a harmonic rhythm; a section's bars repeating, AABA to ABCD, give every
