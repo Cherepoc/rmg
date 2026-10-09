@@ -125,7 +125,7 @@ internal static class FormLayers
         new(0.6, IntroKind.Entries)
     ];
 
-    /// <summary>Where an intro's parts come in: bars of their own before the first section, or its first phrase.</summary>
+    /// <summary>Where an intro's parts come in: bars of their own before the first section, or its first phrase, as many bars as the section's phrase has (<see cref="SongDecisions" />).</summary>
     public static ImmutableArray<Weighted<IntroWindow>> IntroWindows { get; } =
     [
         new(0.12, new IntroWindow(1, true)),

@@ -246,6 +246,9 @@ internal sealed record SongDecisions(
             PhraseBars = PhraseLengths.Draw(SongGenerator.CreateStream(seed, SongStream.SectionPhraseBars, x.Key), songUnconventionality[Facet.Form], genre, x.Value.Phrases)
         });
         StateTrace.RecordSong(TracePoints.SectionMeter, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
+        // an intro's entries over the first section's first phrase, as long as its phrase is
+        if (plan.Intro == IntroKind.Entries && !plan.Window.IsBefore)
+            plan = plan with { Window = plan.Window with { Bars = sectionMeters[sectionIds[0]].PhraseBars } };
         // a hook intro where the song has a chorus to quote, and a cold start where it has none
         var hook = SongFormGenerator.HookOf(sectionIds, structure.Roles, sectionMeters);
         if (plan.Intro == IntroKind.Hook && hook is null)

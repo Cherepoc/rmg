@@ -61,8 +61,9 @@ public sealed class SongMapTest
             await Assert.That(sections[0].Start).IsEqualTo(map.Intro.Duration);
             await Assert.That(sections.Zip(sections.Skip(1)).All(x => x.First.End == x.Second.Start)).IsTrue();
             await Assert.That(map.Ending.Start).IsEqualTo(sections[^1].End);
-            // an intro has bars of its own for a count-in, or where its parts come in before the first section
-            var hasBars = map.Intro.Kind == IntroKind.CountIn || map.Intro.Kind == IntroKind.Entries && map.Intro.Window.IsBefore;
+            // an intro has bars of its own for a count-in, a hook's quote of its chorus, or where its parts come in before
+            // the first section
+            var hasBars = map.Intro.Kind is IntroKind.CountIn or IntroKind.Hook || map.Intro.Kind == IntroKind.Entries && map.Intro.Window.IsBefore;
             await Assert.That(map.Intro.Duration > 0).IsEqualTo(hasBars);
             await Assert.That(map.Ending.Duration > 0).IsEqualTo(FormLayers.HasFinalChord(map.Ending.Kind));
         }

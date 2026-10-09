@@ -29,7 +29,8 @@ public sealed class PolymeterTest
                 for (var start = span.Start; start < span.End - 1e-9; start += frame)
                 {
                     var length = Math.Min(frame, span.End - start);
-                    var onsets = song.Song.Notes![song.Song.Track(TrackRole.Riff)].Select(x => Math.Round(x.Position - start, 6)).Where(x => x >= -1e-6 && x < length - 1e-6).ToArray();
+                    // a riff resting through the song has none
+                    var onsets = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff), EventTimeline.Create<RealizedNote>(0)).Select(x => Math.Round(x.Position - start, 6)).Where(x => x >= -1e-6 && x < length - 1e-6).ToArray();
                     // the cells in turn from the frame's start, and the motif as the longest plays it whole where it first does
                     var cells = new List<(double At, double Length)>();
                     for (var (cell, at) = (0, 0.0); at < length - 1e-9; at += cells[^1].Length)
@@ -143,14 +144,14 @@ public sealed class PolymeterTest
     {
         var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
             .Add("polymeter", ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("sections", new(1, 1, 1))));
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => Plans(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre))));
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre)));
         // every plainest song playing one
-        await Assert.That(songs.All(x => !x.IsEmpty)).IsTrue();
-        var plans = songs.SelectMany(x => x.Values).ToArray();
-        foreach (var plan in plans)
+        await Assert.That(songs.All(x => !Plans(x).IsEmpty)).IsTrue();
+        foreach (var (plan, drums) in songs.SelectMany(x => Plans(x).Values.Select(plan => (plan, x.PlaysDrums))))
         {
             await Assert.That(plan.Cells.All(x => x is 3 or 6)).IsTrue().Because(string.Join("+", plan.Cells));
-            await Assert.That(plan.Kick || !plan.Parts.Contains(TrackRole.Riff)).IsTrue();
+            // the kick with the riff, where the song has drums
+            await Assert.That(plan.Kick || !plan.Parts.Contains(TrackRole.Riff) || !drums).IsTrue();
             await Assert.That(plan.Grows || plan.Snare).IsFalse();
         }
     }

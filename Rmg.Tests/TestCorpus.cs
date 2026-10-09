@@ -198,6 +198,9 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
             return (int)Math.Floor((line - span.Start) / span.Meter.PatternDuration + 1e-9) >= DrumsFrom(index);
         }
 
+        // none in a song without drums
+        if (!PlaysDrums)
+            return [];
         return
         [
             ..patterns

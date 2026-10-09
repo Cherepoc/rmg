@@ -95,12 +95,12 @@ public sealed class SongDescriptionsTest
         static byte[] Midi()
         {
             using var stream = new MemoryStream();
-            Rmg.Core.Midi.Write(Rmg.Core.Rendering.Render.RenderSong(Rmg.Core.Composition.SongGenerator.GenerateSong(3)), stream, null);
+            Rmg.Core.Midi.Write(Rmg.Core.Rendering.Render.RenderSong(Rmg.Core.Composition.SongGenerator.GenerateSong(TestCorpus.SongSeed(3))), stream, null);
             return stream.ToArray();
         }
 
         var before = Midi();
-        var described = SongDescriptions.Describe(3, Rmg.Core.Composition.SongOverrides.None, Rmg.Core.Rendering.SongMix.None, CancellationToken.None);
+        var described = SongDescriptions.Describe(TestCorpus.SongSeed(3), Rmg.Core.Composition.SongOverrides.None, Rmg.Core.Rendering.SongMix.None, CancellationToken.None);
         await Assert.That(described.Sections.Length).IsEqualTo(TestCorpus.Get(3).Map.Sections.Length);
         // the song made again after it is described, as it was
         await Assert.That(Midi().SequenceEqual(before)).IsTrue();

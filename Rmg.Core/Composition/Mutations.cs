@@ -99,15 +99,17 @@ internal static class Mutations
                 if (bar % span.Meter.PhraseBars == 0 && context.TestProbability(SnapBack.At(groove)))
                     edits.Clear();
                 var start = span.Start + bar * barLength;
+                // the bar as long as it is, a short last bar's (ShortBars)
+                var length = Math.Min(barLength, span.End - start);
                 var count = context.TestProbability(chance) ? context.TestProbability(SecondEdit) ? 2 : 1 : 0;
                 for (var edit = 0; edit < count; edit++)
-                    if (Draw(context, played, own, start, span.Meter, kicks, snares, anchored) is { } mutation)
+                    if (Draw(context, played, own, start, length, span.Meter, kicks, snares, anchored) is { } mutation)
                         edits.Add(mutation);
                 made += count;
                 if (edits.Count > 0)
                 {
                     foreach (var mutation in edits)
-                        Lay(mutation, played, own, start, barLength, kicks, snares);
+                        Lay(mutation, played, own, start, length, kicks, snares);
                     any = true;
                 }
             }
@@ -133,10 +135,10 @@ internal static class Mutations
         kicks.Contains(track) && at < 1e-9 || snares.Contains(track) && at > 1e-9 && meter.Levels[1].Any(x => Math.Abs(x.Start / 4.0 - at) < 1e-9);
 
     /// <summary>An edit drawn on the bar as it is, none where it finds nothing to edit; every draw made whatever it finds.</summary>
-    private static Mutation? Draw(IGenerationContext context, Dictionary<int, List<TimelineItem<StateMap>>> played, int[] drums, double start, Meter meter,
+    /// <param name="length">How long the bar is, in beats, a short last bar's shorter than its meter's.</param>
+    private static Mutation? Draw(IGenerationContext context, Dictionary<int, List<TimelineItem<StateMap>>> played, int[] drums, double start, double length, Meter meter,
         IReadOnlySet<int> kicks, IReadOnlySet<int> snares, bool anchored)
     {
-        var length = meter.BarDuration;
         var kind = context.Pick(Kinds);
         var track = drums.Length == 0 ? -1 : drums[context.GenerateInt(0, drums.Length)];
         var pick = context.GenerateDouble();
