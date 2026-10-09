@@ -76,7 +76,10 @@ fixed; the review and the plan are kept outside the repository):
     to be; every rule's loop counted; tests crashing on nothing guarded; each section's bars in its own meter;
     calibrations printed and bounded widely, their targets in the reports; rules checking what their names say. Left:
     a few tests that check less than their names (*Open work*).
-11. Duplication removed, the fingerprint kept.
+11. Done: duplication removed, the fingerprint kept: Mod and Normalize shared, tracks found by their role, one program
+    decoder, a meter's phrase length, the fills' spans on the draft, dead branches gone, silent defaults made explicit.
+    The octave and the alternating bass kept apart, as a bass may play both and the presets name both. Left: the drum
+    solo's parameters, with the song's decisions passed whole.
 12. Performance, behind a profile, the fingerprint kept.
 13. Test speed. 14. Page test reliability. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
 
