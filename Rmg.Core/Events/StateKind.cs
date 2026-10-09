@@ -63,11 +63,6 @@ public sealed class StateKind<T> : IStateKind
 
     IState IStateKind.DefaultState => DefaultState;
 
-    public IState AggregateStates(IEnumerable<IState> states)
-    {
-        return AggregateStates(states.ToArray().AsSpan());
-    }
-
     IState IStateKind.AggregateStates(ReadOnlySpan<IState> states)
     {
         return AggregateStates(states);
@@ -120,16 +115,6 @@ public sealed class StateKind<T> : IStateKind
     public bool CheckValueIsDefault(T value)
     {
         return CheckValuesEqual(value, DefaultValue);
-    }
-
-    public State<T> AggregateValuesToState(IEnumerable<T> values)
-    {
-        return new State<T>(this, AggregateValues(values));
-    }
-
-    public State<T> AggregateStates(IEnumerable<State<T>> states)
-    {
-        return AggregateStates(states.Cast<IState>().ToArray().AsSpan());
     }
 
     public State<T> CreateState(T value)
@@ -219,8 +204,6 @@ public interface IStateKind
     bool IsShared { get; }
 
     IState DefaultState { get; }
-
-    IState AggregateStates(IEnumerable<IState> values);
 
     /// <summary>The states aggregated in their order; every one must be of this kind.</summary>
     IState AggregateStates(ReadOnlySpan<IState> states);

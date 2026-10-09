@@ -44,7 +44,7 @@ export function createListeningIndex(questions, verdicts, genreName) {
     hint.className = "listening-where";
     hint.textContent = verdicts === null
         ? "This server makes songs whole: the listening mode is the test instance's."
-        : `A device heard with and without over six songs. Verdicts of version ${verdicts.version ?? "none yet"}.`;
+        : `A device heard with and without over a few songs. Verdicts of version ${verdicts.version ?? "none yet"}.`;
     const list = document.createElement("ul");
     list.className = "listening-questions";
     const counted = new Map((verdicts?.verdicts ?? []).map((x) => [x.question, x]));

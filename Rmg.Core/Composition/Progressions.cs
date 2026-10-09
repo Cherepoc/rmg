@@ -257,13 +257,6 @@ internal static class Progressions
     }
 
     /// <summary>
-    ///     The step of the scale, above the song's tonic, to raise a semitone on the cadence bar so that a minor chord
-    ///     on the fifth turns major and leads home as strongly as in harmonic minor; none when the cadence is another
-    ///     chord, when the fifth's chord is major already, or when raising its third would not make it major, as in
-    ///     phrygian. It is the step a whole step below the home, as in natural minor, dorian and mixolydian.
-    /// </summary>
-    /// <param name="cadenceRoot">The cadence bar's root, in steps above the home.</param>
-    /// <summary>
     ///     The chance a cadence raises the seventh where the scale allows it, by the progression facet: every time at the
     ///     plain end and the middle, as a minor key leads home, and never at the wild end, whose chord on the fifth stays
     ///     modal; a genre's where it names it, a modal band's never (<see cref="GenreChoices.CadenceRaise" />).
@@ -291,6 +284,13 @@ internal static class Progressions
         return turned.ToImmutable();
     }
 
+    /// <summary>
+    ///     The step of the scale, above the song's tonic, to raise a semitone on the cadence bar so that a minor chord
+    ///     on the fifth turns major and leads home as strongly as in harmonic minor; none when the cadence is another
+    ///     chord, when the fifth's chord is major already, or when raising its third would not make it major, as in
+    ///     phrygian. It is the step a whole step below the home, as in natural minor, dorian and mixolydian.
+    /// </summary>
+    /// <param name="cadenceRoot">The cadence bar's root, in steps above the home.</param>
     public static int? GetCadenceRaisedStep(ImmutableArray<int> scaleOffsets, int home, int cadenceRoot)
     {
         if (Mod(cadenceRoot) != 4 || GetQuality(scaleOffsets, home + 4) != TriadQuality.Minor)

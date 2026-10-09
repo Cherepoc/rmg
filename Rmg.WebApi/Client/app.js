@@ -71,7 +71,6 @@ const elements = {
     keep: document.getElementById("keep"),
     seed: document.getElementById("seed"),
     generate: document.getElementById("generate"),
-    settingsPanel: document.getElementById("settings-panel"),
     settingsState: document.getElementById("settings-state"),
     allOff: document.getElementById("all-off"),
     songSettings: document.getElementById("song-settings"),

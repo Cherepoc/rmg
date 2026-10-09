@@ -3,8 +3,8 @@ using Rmg.WebApi.Songs;
 namespace Rmg.WebApi.Analytics;
 
 /// <summary>
-///     What the page reports. The names are a closed set, and every event carries at most the four
-///     measurements below, so a public endpoint can only ever write shapes this server already knows.
+///     What the page reports. The names are a closed set, and every event carries at most the fields of
+///     <see cref="EventRequest" />, so a public endpoint can only ever write shapes this server already knows.
 /// </summary>
 public static class EventNames
 {

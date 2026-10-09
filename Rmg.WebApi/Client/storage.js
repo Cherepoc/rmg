@@ -215,7 +215,6 @@ function open() {
         request.onupgradeneeded = () => request.result.createObjectStore(STORE);
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
-        request.onblocked = () => reject(new Error("close other RMG tabs and try again"));
     });
 }
 

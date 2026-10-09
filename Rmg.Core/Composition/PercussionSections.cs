@@ -5,7 +5,7 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     Sections that play their percussion without the drum kit, so that a song switches to percussion and back at
 ///     section lines. A section plays percussion only by a chance of the song's lean and its own: the song's lean is
-///     drawn around none, and a song that leans far enough plays percussion in most of its sections; a section's leans
+///     drawn around none, and a song that leans far enough plays it in about a third of its sections; a section's leans
 ///     by how unconventional its rhythm is and, the other way, by its energy, as the percussion alone is the quieter
 ///     groove. Only a song with two or more percussion drums has such sections, so that the percussion can groove.
 /// </summary>

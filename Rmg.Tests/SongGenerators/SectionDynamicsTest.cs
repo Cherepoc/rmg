@@ -37,7 +37,7 @@ public sealed class SectionDynamicsTest
         var growth = TestCorpus.Measure(256, Growth).SelectMany(x => x).ToArray();
 
         await Assert.That(growth.Length).IsGreaterThan(100);
-        // as loud as before, the last a little quieter, where the energy's step played no part in the loudness
+        // louder the last time, a section growing as it comes back, on the average and in most of them
         await Assert.That(growth.Average()).IsGreaterThan(0.05);
         await Assert.That(growth.Count(x => x > 0) / (double)growth.Length).IsGreaterThan(0.8);
     }

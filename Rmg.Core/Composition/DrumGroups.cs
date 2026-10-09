@@ -180,6 +180,8 @@ internal static class DrumGroups
             .Select((drum, index) => (drum, index))
             .ToImmutableDictionary(x => x.drum, x => FirstTrackNumber + x.index);
 
+    private static readonly ImmutableDictionary<int, PercussionInstrumentDefinition> DrumsByTrack = TrackNumbers.ToImmutableDictionary(x => x.Value, x => x.Key);
+
     private static readonly ImmutableDictionary<PercussionInstrumentDefinition, DrumGroup> Groups =
         All.SelectMany(group => group.Drums.Select(drum => (drum, group))).ToImmutableDictionary(x => x.drum, x => x.group);
 
@@ -195,15 +197,5 @@ internal static class DrumGroups
     }
 
     /// <summary>The drum on the given track.</summary>
-    public static PercussionInstrumentDefinition GetDrum(int trackNumber)
-    {
-        return TrackNumbers.Single(x => x.Value == trackNumber).Key;
-    }
-
-    /// <summary>The group of the drum on the given track.</summary>
-    public static DrumGroup GetGroup(int trackNumber)
-    {
-        var drum = TrackNumbers.Single(x => x.Value == trackNumber).Key;
-        return All.Single(x => x.Drums.Contains(drum));
-    }
+    public static PercussionInstrumentDefinition GetDrum(int trackNumber) => DrumsByTrack[trackNumber];
 }

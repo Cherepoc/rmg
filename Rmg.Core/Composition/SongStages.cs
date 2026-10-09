@@ -11,7 +11,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 /// <param name="Notes">The notes, once realized (<see cref="SongStages.RealizeNotes" />); none before.</param>
 /// <param name="Runs">The drums' runs, which the fills play and the lines walk with (<see cref="SongStages.Fills" />).</param>
-/// <param name="MelodyWalks">Where the melody leads into a section, which the counter-melody leaves to it (<see cref="SongStages.Lines" />).</param>
 /// <param name="Chains">How each key change is led into, which the bass's pedal holds under (<see cref="SongStages.KeyChanges" />).</param>
 /// <param name="Figures">Every section's figures, by its id and the player, which a mutating groove leaves as they are (<see cref="Composition.Figures" />).</param>
 /// <param name="Polymeters">The sections a figure runs across the bar lines in, which a mutating groove leaves as they are (<see cref="SongStages.Polymeter" />).</param>
@@ -19,7 +18,6 @@ internal sealed record SongDraft(
     TrackEventStateTimelineMap<StateMap> Timeline,
     ImmutableSortedDictionary<int, EventTimeline<RealizedNote>>? Notes,
     IReadOnlyList<PlayedRun> Runs,
-    ImmutableHashSet<double> MelodyWalks,
     ImmutableArray<(double Change, ImmutableArray<double> Chords, KeyChange.Device Device)> Chains,
     ImmutableDictionary<int, ImmutableDictionary<FigurePlayer, string>> Figures,
     ImmutableHashSet<int> Polymeters
@@ -30,7 +28,11 @@ internal sealed record SongDraft(
 }
 
 /// <summary>A stage of the song after it is put together: its name, what it does, and whether a test may leave it out.</summary>
-/// <param name="CanSkip">Whether it only edits the song, nothing after it reading what it hands on, so that a test may leave it out.</param>
+/// <param name="CanSkip">
+///     Whether it only edits the song, so that a test may leave it out: nothing after it needs what it hands on, a
+///     stage that reads it only keeping out of its way, as the mutations keep a figure's and a polymeter's sections as
+///     they are, and with it left out keeping out of nothing.
+/// </param>
 internal sealed record SongStage(string Name, Func<SongDecisions, SongDraft, SongDraft> Apply, bool CanSkip);
 
 /// <summary>
@@ -217,7 +219,7 @@ internal static class SongStages
         if (timeline.TrackTimelineMap.ContainsKey(counter.Key))
             (timeline, _) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, draft.Runs, song.Stream(SongStream.CounterFills), map.MeterAt, LineFills.CounterMelody, melodyWalks);
         timeline = Place(timeline, riff, RiffLayers.Line);
-        return draft with { Timeline = timeline, MelodyWalks = melodyWalks };
+        return draft with { Timeline = timeline };
     }
 
     /// <summary>A line doubled in a section now and then, by another part or by its own an octave apart, each pair and section from a sequence of its own.</summary>

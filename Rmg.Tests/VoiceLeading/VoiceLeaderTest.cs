@@ -8,7 +8,7 @@ namespace Rmg.Tests.VoiceLeading;
 
 public sealed class VoiceLeaderTest
 {
-    // C4 to B5, about the range of a chord track
+    // C3 to B5, about the range of a chord track
     private const int MinNote = 48;
     private const int MaxNote = 83;
 

@@ -41,11 +41,8 @@ export function toStep(amount) {
 /** The facets, the parts, the drum setups and the drum groups, by the names the server takes, in the format's order. */
 export const FACETS = ["feel", "groove", "fills", "form", "chords", "progression", "scale", "melody", "sound"];
 
-/** The parts the format keeps a place for, every one the songs play. */
-export const FORMAT_PARTS = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm", "solo"];
-
-/** The parts the songs play. */
-export const PARTS = FORMAT_PARTS;
+/** The parts the songs play, every one, in the order the format keeps a place for each. */
+export const PARTS = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm", "solo"];
 
 export const DRUM_GROUPS = ["kick", "snare", "timekeepers", "toms", "accents", "percussion", "calls"];
 
@@ -76,8 +73,8 @@ const PROGRAM_BITS = 7;
 // part's volume and pan, and every drum group's volume; then the rest, bit by bit: whether each value is given, the key,
 // the meter and the scale, every part's plays, whether its pan and its instrument are given and its program, and whether
 // the drum pieces are given and every piece's being in
-const CHARACTER_COUNT = 1 + FACETS.length + 1 + 1 + 1 + 1 + 2 * FORMAT_PARTS.length + DRUM_GROUPS.length;
-const BIT_COUNT = GIVEN.length + KEY_BITS + METER_BITS + MODE_BITS + FORMAT_PARTS.length * (PLAYS_BITS + 2 + PROGRAM_BITS) + 1 + DRUM_PIECES.length;
+const CHARACTER_COUNT = 1 + FACETS.length + 1 + 1 + 1 + 1 + 2 * PARTS.length + DRUM_GROUPS.length;
+const BIT_COUNT = GIVEN.length + KEY_BITS + METER_BITS + MODE_BITS + PARTS.length * (PLAYS_BITS + 2 + PROGRAM_BITS) + 1 + DRUM_PIECES.length;
 
 // how many characters the fixed places take, behind the format's
 const FIXED_LENGTH = CHARACTER_COUNT + Math.ceil(BIT_COUNT / BITS_PER_CHARACTER);
@@ -144,7 +141,7 @@ export const MAX_GENRE_NAME_BYTES = 63;
 /** The settings as text, every facet, part, drum group and drum piece named, as parseSettings reads them. */
 export function formatSettings(settings) {
     const characters = [settings.unconventionality.value, ...FACETS.map((facet) => settings.facets[facet].value), settings.tempo.value, settings.swing.value, settings.length.value, settings.volume];
-    for (const name of FORMAT_PARTS) characters.push(settings.parts[name].volume, settings.parts[name].pan.value);
+    for (const name of PARTS) characters.push(settings.parts[name].volume, settings.parts[name].pan.value);
     for (const group of DRUM_GROUPS) characters.push(settings.drumGroups[group].volume);
     if (characters.some((x) => !Number.isInteger(x) || x < 0 || x > LAST_STEP)) throw new RangeError("A value does not fit in a character.");
 
@@ -156,7 +153,7 @@ export function formatSettings(settings) {
     write(settings.key.value, KEY_BITS);
     write(settings.meter.value, METER_BITS);
     write(settings.mode.value, MODE_BITS);
-    for (const name of FORMAT_PARTS) {
+    for (const name of PARTS) {
         const part = settings.parts[name];
         write(PLAYS.indexOf(part.plays), PLAYS_BITS);
         bits.push(part.pan.isGiven, part.instrument.isGiven);
@@ -184,7 +181,7 @@ export function parseSettings(text) {
     const swing = next();
     const length = next();
     const volume = next();
-    const mixes = FORMAT_PARTS.map(() => ({ volume: next(), pan: next() }));
+    const mixes = PARTS.map(() => ({ volume: next(), pan: next() }));
     const groupVolumes = DRUM_GROUPS.map(() => next());
     const bits = values.slice(at).flatMap((x) => [0, 1, 2, 3, 4].map((bit) => ((x >> bit) & 1) === 1));
 
@@ -209,7 +206,7 @@ export function parseSettings(text) {
         volume,
         genre: { name: "", choices: {} },
     };
-    for (const [i, name] of FORMAT_PARTS.entries()) {
+    for (const [i, name] of PARTS.entries()) {
         const plays = PLAYS[read(PLAYS_BITS)];
         const pan = { isGiven: bit(), value: mixes[i].pan };
         const instrumentGiven = bit();
@@ -234,7 +231,7 @@ export function identityOf(settings) {
     const given = GIVEN.map((name) => givenSetting(settings, name));
     const values = packSwitches(given.map((x) => x.isGiven));
     values.push(...given.filter((x) => x.isGiven).map((x) => x.value));
-    values.push(...FORMAT_PARTS.map((name) => PLAYS.indexOf(settings.parts[name].plays)));
+    values.push(...PARTS.map((name) => PLAYS.indexOf(settings.parts[name].plays)));
     if (settings.drumPieces.isGiven) values.push(1, ...packSwitches(DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece))));
     return values.map((x) => DIGITS[x]).join("").replace(/0+$/, "");
 }

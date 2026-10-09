@@ -1,4 +1,4 @@
-import { DRUM_GROUPS, FACETS, FORMAT_PARTS, LAST_STEP, MIDDLE_STEP, PARTS } from "./settings.js";
+import { DRUM_GROUPS, FACETS, LAST_STEP, MIDDLE_STEP, PARTS } from "./settings.js";
 
 /**
  *     The settings a song is asked for with and heard with, as settings.js writes them, and what the server says of the
@@ -17,7 +17,7 @@ export function defaultSettings() {
         mode: { isGiven: false, value: 0 },
         swing: { isGiven: false, value: 0 },
         length: { isGiven: false, value: MIDDLE_STEP },
-        parts: Object.fromEntries(FORMAT_PARTS.map((part) => [part, {
+        parts: Object.fromEntries(PARTS.map((part) => [part, {
             plays: "random",
             instrument: { isGiven: false, value: 0 },
             volume: LAST_STEP,
@@ -48,7 +48,7 @@ export function givenOnly(settings) {
         mode: keep(settings.mode, fresh.mode),
         swing: keep(settings.swing, fresh.swing),
         length: keep(settings.length, fresh.length),
-        parts: Object.fromEntries(FORMAT_PARTS.map((part) => {
+        parts: Object.fromEntries(PARTS.map((part) => {
             const given = settings.parts[part];
             return [part, { ...given, instrument: keep(given.instrument, fresh.parts[part].instrument), pan: keep(given.pan, fresh.parts[part].pan) }];
         })),

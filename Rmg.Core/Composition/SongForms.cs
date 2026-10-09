@@ -23,12 +23,6 @@ public enum SectionRole
 /// <summary>A song's sections in its order, and the role each plays.</summary>
 public sealed record SongStructure(ImmutableArray<int> SectionIds, ImmutableDictionary<int, SectionRole> Roles);
 
-/// <summary>
-///     A song's form: most often one of the forms songs are written in, its roles in their order, a verse and a
-///     chorus coming back, a pre-chorus before the chorus and a bridge before the last chorus, a section for every
-///     role; and otherwise a form of its own (<see cref="SongStructureGenerator" />), whose sections have no role, the
-///     likelier the less conventional the song's rhythm.
-/// </summary>
 internal static class SectionContrast
 {
     /// <summary>How far a section that contrasts with the verse leans to a key or a scale of its own, as odds.</summary>
@@ -44,6 +38,12 @@ internal static class SectionContrast
     }
 }
 
+/// <summary>
+///     A song's form: most often one of the forms songs are written in, its roles in their order, a verse and a
+///     chorus coming back, a pre-chorus before the chorus and a bridge before the last chorus, a section for every
+///     role; and otherwise a form of its own (<see cref="SongStructureGenerator" />), whose sections have no role, the
+///     likelier the less conventional the song's form.
+/// </summary>
 internal static class SongForms
 {
     /// <summary>The chance a song plays its last section once more, as a last chorus is played twice, by the form facet: never in a plain song.</summary>
@@ -57,7 +57,7 @@ internal static class SongForms
 
     public static ByConvention OutroChance { get; } = new(0, 0.15, 0.25);
 
-    /// <summary>The chance a song takes one of the forms, at a rhythm of middling conventionality.</summary>
+    /// <summary>The chance a song takes one of the forms, at a form facet of middling conventionality.</summary>
     public const double FormChance = 0.7;
 
     /// <summary>The forms, as their roles in order, and how often each is drawn.</summary>

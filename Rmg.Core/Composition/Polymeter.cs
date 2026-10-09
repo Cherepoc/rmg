@@ -70,7 +70,7 @@ internal static class Polymeter
     public static ByConvention RunsOnChance { get; } = new(0, 0.1, 0.4);
 
     /// <summary>
-    ///     The chance a cycle of one cell grows a sixteenth every time round, 3, 4, 5, to twice its length and from it again,
+    ///     The chance a cycle of one cell grows a sixteenth every time round, 3, 4, 5, up to a sixteenth short of twice its length and from it again,
     ///     its motif cut to each: the wilder, the oftener.
     /// </summary>
     public static ByConvention GrowChance { get; } = new(0, 0.1, 0.3);

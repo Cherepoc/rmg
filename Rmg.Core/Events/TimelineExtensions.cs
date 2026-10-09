@@ -29,12 +29,6 @@ public static class TimelineExtensions
         return TrackEventStateTimelineMap<T>.Create(duration, [], commonTimelineMap);
     }
 
-    public static T Merge<T>(IEnumerable<T> items)
-        where T : ITimelineLike<T>
-    {
-        return T.Merge(items);
-    }
-
     public static T MergeWith<T>(this T timeline1, T timeline2)
         where T : ITimelineLike<T>
     {

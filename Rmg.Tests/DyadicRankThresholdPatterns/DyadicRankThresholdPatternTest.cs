@@ -52,7 +52,7 @@ public sealed class DyadicRankThresholdPatternTest
     [Test]
     public async Task OneRankCycle_WithNoVariation_IsAPulse()
     {
-        // a half-beat cycle of one rank: a note on every 8th, or none at all
+        // a half-beat cycle of one rank: a note on every 8th, every time
         var pulses = Enumerable.Range(0, 50)
             .Select(seed => Positions(
                 DyadicRankThresholdPattern.Create(
@@ -65,8 +65,7 @@ public sealed class DyadicRankThresholdPatternTest
             ))
             .ToArray();
 
-        await Assert.That(pulses.All(x => x.Length is 0 or 8)).IsTrue();
-        await Assert.That(pulses.Count(x => x.Length == 8)).IsEqualTo(50);
+        await Assert.That(pulses.All(x => x.Length == 8)).IsTrue();
     }
 
     [Test]
@@ -108,7 +107,7 @@ public sealed class DyadicRankThresholdPatternTest
                 redrawn++;
         }
 
-        // a redrawn cycle can come out the same by chance, so fewer than half differ, but many do
+        // a redrawn cycle can come out the same by chance, so not every one differs, but many do
         await Assert.That(redrawn).IsGreaterThan(40);
         await Assert.That(redrawn).IsLessThan(160);
     }

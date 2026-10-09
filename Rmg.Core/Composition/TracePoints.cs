@@ -234,7 +234,7 @@ internal static class TracePoints
     /// <summary>The parts a song leaves out (an <c>ImmutableHashSet</c> of <see cref="Songs.TrackRole" />).</summary>
     public const string SongParts = "Song parts";
 
-    /// <summary>Where a song goes up a key, and by how many semitones (a <see cref="Composition.KeyChange" />, or null for none).</summary>
+    /// <summary>Where a song changes key, and by how many semitones, up or down (an <c>ImmutableArray</c> of <see cref="Composition.KeyChange" />, empty for none).</summary>
     public const string KeyChange = "Key change";
 
     /// <summary>Every appearance's tempo as a multiple of the song's, by its place among the song's sections (an <c>ImmutableArray&lt;double&gt;</c>).</summary>

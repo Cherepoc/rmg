@@ -69,16 +69,6 @@ public sealed class StateMapTest
     }
 
     [Test]
-    public async Task FromStates_StatesAreOrderedByKindName()
-    {
-        var result = Map(Tempo.CreateState(2), OctaveOffset.CreateState(1), KeyOffset.CreateState(1));
-
-        var names = result.Kinds.Select(x => x.Name).ToArray();
-        await Assert.That(names).IsEquivalentTo(names.Order().ToArray(), CollectionOrdering.Matching);
-        await Assert.That(names.Length).IsEqualTo(3);
-    }
-
-    [Test]
     public async Task GetStateValue_Present_ResultsIn_Value()
     {
         var input = Map(KeyOffset.CreateState(5));

@@ -171,7 +171,6 @@ internal static class MelodyLayers
     ///     starts again every period, drawn from its own sequence, so that a period of half the phrase makes a wave.
     /// </summary>
     /// <param name="periodContext">The sequence the period is drawn from.</param>
-    /// <param name="tilt">How unconventional the section is, which leans the shorter period.</param>
     /// <param name="unconventionality">The melody facet of the section's unconventionality, whose ends the contour's periods lean by.</param>
     public static ImmutableArray<double> GenerateContour(IGenerationContext context, IGenerationContext periodContext, double unconventionality)
     {

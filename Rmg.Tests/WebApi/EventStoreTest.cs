@@ -415,8 +415,8 @@ public sealed class EventStoreTest : IDisposable
             Parts = [..SongSettingsTest.Mixed.Parts.Select(x => x with { Plays = 0 })],
             DrumPieces = DrumPieceSettings.Drawn
         };
-        // seed 1 drawn at 10, liked, and asked for at 120, disliked; seed 2 drawn at 20, liked; seed 3 from before
-        // the settings were kept, liked
+        // seed 1 drawn at the step 5 of 61, liked, and asked for at 60, disliked; seed 2 drawn at 10, liked; seed 3
+        // from before the settings were kept, liked
         Write(EventNames.Rated, seed: 1, detail: "none>up", version: "0.5.000", settings: Heard(5, false));
         Write(EventNames.Rated, seed: 1, detail: "none>down", version: "0.5.000", settings: Heard(60, true));
         Write(EventNames.Rated, seed: 2, detail: "none>up", version: "0.5.000", settings: Heard(10, false));

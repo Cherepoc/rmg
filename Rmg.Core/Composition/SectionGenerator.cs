@@ -7,7 +7,8 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     A section of a song: its harmony (its unconventionality, chords, home and progression), its state over the
-///     song's, the drums it plays, the state that changes by bar, and the patterns of its tracks, played twice.
+///     song's, the drums it plays, the state that changes by bar, and the patterns of its tracks, played as many times
+///     as it plays its pattern (<see cref="SectionLength" />).
 /// </summary>
 internal sealed class SectionGenerator
 {
@@ -126,7 +127,7 @@ internal sealed class SectionGenerator
         return Seeds.Derive(Seeds.Derive(_seed, sectionId), (int)stream);
     }
 
-    /// <summary>The section: its 4-bar pattern played twice, with what the fills need to know of its rhythm.</summary>
+    /// <summary>The section: its pattern played as many times as it plays it, with what the fills need to know of its rhythm.</summary>
     /// <param name="plan">The section's place in the song's form, which some of its draws keep to.</param>
     public GeneratedSection Generate(SectionPlan plan)
     {
@@ -728,13 +729,6 @@ internal sealed class SectionGenerator
     }
 }
 
-/// <summary>A section's place in the song's form, which some of its draws keep to.</summary>
-/// <param name="HasTonicHome">Whether its home is the song's tonic, as the song's last section's is, where the song ends.</param>
-/// <param name="KeepsSongScale">Whether it plays in the song's scale, as the song's first does, which sets the key.</param>
-/// <param name="Role">What it does in the song's form, which leans its length and its home.</param>
-/// <param name="Meter">The meter its bars are in.</param>
-/// <param name="Drums">Its drums, as the song drew them before its sections (<see cref="SectionGenerator.DrawDrums" />).</param>
-/// <param name="PlaysLean">How far the song's length leans how many times the section plays its pattern (<see cref="SectionLength.Draw" />).</param>
 /// <summary>
 ///     A section's harmony (<see cref="SectionGenerator" />): its scale, its home, how often its chords change, its progression,
 ///     every chord's scale and its move by semitones, and the step its cadence may raise and raises.
@@ -750,6 +744,13 @@ internal sealed record SectionHarmony(
     int? Raised
 );
 
+/// <summary>A section's place in the song's form, which some of its draws keep to.</summary>
+/// <param name="HasTonicHome">Whether its home is the song's tonic, as the song's last section's is, where the song ends.</param>
+/// <param name="KeepsSongScale">Whether it plays in the song's scale, as the song's first does, which sets the key.</param>
+/// <param name="Role">What it does in the song's form, which leans its length and its home.</param>
+/// <param name="Meter">The meter its bars are in.</param>
+/// <param name="Drums">Its drums, as the song drew them before its sections (<see cref="SectionGenerator.DrawDrums" />).</param>
+/// <param name="PlaysLean">How far the song's length leans how many times the section plays its pattern (<see cref="SectionLength.Draw" />).</param>
 internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale, SectionRole Role, Meter Meter, SectionDrums Drums, double PlaysLean);
 
 /// <summary>A section's drums: whether it plays its percussion without the drum kit, and the kit it plays.</summary>
@@ -763,7 +764,7 @@ internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool 
 /// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
 /// <param name="DrumRoles">The role every one of the song's drums plays in the section.</param>
 /// <param name="Lines">The section's lines, such as its melody, before they are placed, placed afresh every time it plays.</param>
-/// <param name="Plays">How many times the section plays its 4-bar pattern: once, twice or four times (<see cref="SectionLength" />).</param>
+/// <param name="Plays">How many times the section plays its pattern, of a phrase of 4 bars or more: once, twice, four or eight times (<see cref="SectionLength" />).</param>
 /// <param name="Bindings">The drums bound to a lead, by their tracks, and their leads' tracks (<see cref="Doubling" />).</param>
 /// <param name="Resting">The parts the section leaves out as it plays (<see cref="Arrangement" />).</param>
 /// <param name="Absent">The parts the song leaves out, which every section rests (<see cref="SongParts" />).</param>
@@ -916,7 +917,7 @@ internal sealed record GeneratedSection(
 }
 
 /// <summary>
-///     A section's rhythm: how far it strays from convention, the scheme its 4-bar pattern follows, how busy its
+///     A section's rhythm: how far it strays from convention, the scheme its pattern's bars follow, how busy its
 ///     melody is, and how its energy leans its draws; and how far the section strays in every facet.
 /// </summary>
 internal sealed record SectionRhythm(

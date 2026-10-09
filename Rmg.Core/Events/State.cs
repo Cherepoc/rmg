@@ -42,24 +42,9 @@ public sealed class State<T> : IState, IEquatable<State<T>>
         return new State<T>(Kind, mapFunc(Value), Contributions);
     }
 
-    public State<T> ToKind(StateKind<T> kind)
-    {
-        return new State<T>(kind, Value, Contributions);
-    }
-
     IState IState.WithLayer(string layer)
     {
         return new State<T>(Kind, Value, [new StateContribution(layer, Value)]);
-    }
-
-    IState IState.ToKind(IStateKind kind)
-    {
-        if (kind is StateKind<T> stateKind)
-            return ToKind(stateKind);
-
-        throw new ArgumentException(
-            $"Cannot convert state with kind {Kind} to kind {kind} - only kinds with the same value type are allowed."
-        );
     }
 
     public bool Equals(State<T>? other)
@@ -111,6 +96,4 @@ public interface IState
 
     /// <summary>The state, recorded as the given layer's contribution.</summary>
     public IState WithLayer(string layer);
-
-    public IState ToKind(IStateKind kind);
 }

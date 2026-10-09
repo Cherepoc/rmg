@@ -10,8 +10,6 @@ public sealed class ExpressionTest
 {
     private static SongOverrides Sound(double sound) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, sound));
 
-    private static int Count(CorpusSong song, Func<RealizedNote, bool> has) => song.Song.Notes!.Values.Sum(x => x.Count(n => has(n.Value)));
-
     [Test]
     public async Task ThePlainestSongs_PlayAReverbAlone()
     {

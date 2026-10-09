@@ -738,9 +738,7 @@ input[type="range"] {
     font-size: 13px;
 }
 
-/* a list where a slider is, as far in as a slider's own margin, and narrower than its longest option where the row is,
-   as a scale's long name would make it on a phone */
-/* as wide as a slider, its margins a range's own */
+/* a list where a slider is, as wide as a slider, its margins a range's own */
 .setting-slider select {
     flex: 1;
     min-width: 0;
@@ -1450,10 +1448,6 @@ canvas.pulse {
     gap: 12px;
 }
 
-.library[hidden] {
-    display: none;
-}
-
 /* the licence sits beside the soundfont it belongs to, quietly, as a label rather than a button */
 .license {
     font-size: 13px;
@@ -1951,10 +1945,6 @@ canvas.pulse {
     box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
 }
 
-.tune-popup[hidden] {
-    display: none;
-}
-
 .tune-popup input[type="search"] {
     flex: none;
     height: 32px;
@@ -1985,10 +1975,6 @@ canvas.pulse {
     font-size: 13px;
     line-height: 20px;
     cursor: pointer;
-}
-
-.tune-picks label[hidden] {
-    display: none;
 }
 
 .tune-picks input {
@@ -2118,10 +2104,6 @@ canvas.pulse {
     align-items: start;
 }
 
-.tune-grid[hidden] {
-    display: none;
-}
-
 .tune-grid > :not(.tune-axis, .tune-legend) {
     grid-column: 2;
 }
@@ -2141,10 +2123,6 @@ canvas.pulse {
     height: 150px;
 }
 
-.tune-axis[hidden],
-.tune-grid > [hidden] {
-    display: none;
-}
 
 .tune-plot {
     height: 200px;

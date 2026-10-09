@@ -260,6 +260,6 @@ internal static class FormLayers
     /// <summary>The chance that the bar before a ringing ending slows down.</summary>
     public const double RitardandoChance = 0.5;
 
-    /// <summary>How the tempo slows over the bar before the ending, beat by beat, and stays for the ending.</summary>
+    /// <summary>How the tempo slows over the bar before the ending, in as many even steps over the bar whatever its meter, and stays for the ending.</summary>
     public static ImmutableArray<double> Ritardando { get; } = [0.96, 0.92, 0.88, 0.85];
 }

@@ -255,7 +255,7 @@ internal sealed class PatternGenerator
         if (doubling is not null)
         {
             var strong = notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank).ToArray();
-            var played = doubling.Binding != DrumBinding.Accent ? strong : strong.Where(x => IsAccented(seed, trackNumber, x.Position, doubling.Share)).ToArray();
+            var played = doubling.Binding != DrumBinding.Accent ? strong : strong.Where(x => IsAccented(seed, trackNumber, x.Position, DrumKitGenerator.AccentShare)).ToArray();
             notes = EventTimeline.Create(notes.Duration, played.Length > 0 || strong.Length == 0 ? played : [strong[^1]]);
         }
         // a bass bar that leads into the next chord plays a note in its last beat, for its approach to play on
@@ -672,7 +672,7 @@ internal static class IncrementalGenerators
 }
 
 /// <summary>
-///     A drum that doubles a lead: the lead's track, the weakest rank of its beats it plays, how it is bound to the lead,
-///     and the share of those beats it plays, for a drum that accents it.
+///     A drum that doubles a lead: the lead's track, the weakest rank of its beats it plays, and how it is bound to the
+///     lead; a drum that accents it plays <see cref="DrumKitGenerator.AccentShare" /> of those beats.
 /// </summary>
-public sealed record Doubling(int Lead, int MaxRank, DrumBinding Binding, double Share);
+public sealed record Doubling(int Lead, int MaxRank, DrumBinding Binding);

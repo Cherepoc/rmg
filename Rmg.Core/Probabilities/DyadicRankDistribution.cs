@@ -10,15 +10,12 @@ public static class DyadicRankDistribution
 
     private static readonly ImmutableArray<ImmutableArray<Item>> ExactRankedHalfDistributions;
 
-    private static readonly ImmutableArray<ImmutableArray<Item>> CombinedRankedHalfDistributions;
-
     private static readonly ImmutableArray<ImmutableArray<Item>> ExactRankedMultiplierDistributions;
 
     static DyadicRankDistribution()
     {
         ExactRankedDistributions = BuildExactRankedDistributions();
         ExactRankedHalfDistributions = BuildExactRankedHalfDistributions(ExactRankedDistributions);
-        CombinedRankedHalfDistributions = BuildCombinedRankedDistributions(ExactRankedHalfDistributions);
         ExactRankedMultiplierDistributions = BuildExactRankedMultiplierDistributions(ExactRankedDistributions);
     }
 
@@ -37,30 +34,6 @@ public static class DyadicRankDistribution
 
             for (var i = 0; i < itemCount; i++)
                 items[i] = new Item(phase + i * period, rank);
-
-            result[rank] = [..items];
-        }
-
-        return [..result];
-    }
-
-    private static ImmutableArray<ImmutableArray<Item>> BuildCombinedRankedDistributions(
-        ImmutableArray<ImmutableArray<Item>> exactRankedDistributions
-    )
-    {
-        var result = new ImmutableArray<Item>[exactRankedDistributions.Length];
-        result[0] = exactRankedDistributions[0];
-
-        for (var rank = 1; rank < result.Length; rank++)
-        {
-            var previousItems = result[rank - 1];
-            var newItems = exactRankedDistributions[rank];
-
-            var items = new Item[previousItems.Length + newItems.Length];
-            previousItems.CopyTo(items);
-            newItems.CopyTo(items, previousItems.Length);
-
-            Array.Sort(items);
 
             result[rank] = [..items];
         }
@@ -110,13 +83,6 @@ public static class DyadicRankDistribution
         }
 
         return [..result];
-    }
-
-    public static ImmutableArray<Item> GetCombinedHalfDistributionByRank(int rank)
-    {
-        ValidateRank(rank);
-
-        return CombinedRankedHalfDistributions[rank];
     }
 
     public static ImmutableArray<Item> GetMultiplierDistributionSlice(int rank, double minValue, double maxValue)

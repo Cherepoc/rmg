@@ -18,7 +18,7 @@ public sealed record DayCount(string Day, int Visitors, int Songs, int Plays);
 public sealed record SeedListening(string Seed, double Seconds, int Plays);
 
 /// <param name="Version">The songs' version, which a seed needs to name a song.</param>
-/// <param name="FirstDay">The first day an event of it arrived, as yyyy-MM-dd.</param>
+/// <param name="FirstDay">The first day an event of it arrived within the days summed, as yyyy-MM-dd.</param>
 /// <param name="Songs">Songs generated.</param>
 /// <param name="Plays">Presses of play.</param>
 /// <param name="Listens">Songs listened to, a visitor's song once however often it was paused.</param>

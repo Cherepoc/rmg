@@ -270,11 +270,6 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
         return new StateTimeline<T>(Duration, StateKind, _items, layer, []);
     }
 
-    public IEnumerable<TimelineItem<T>> AsEnumerable()
-    {
-        return this;
-    }
-
     private static bool CheckArrayNeedsPreprocessing(
         double duration,
         StateKind<T> stateKind,

@@ -122,7 +122,7 @@ public sealed class TextureTest
         Console.WriteLine("textures by the section's form facet, in fifths:");
         foreach (var band in rows.GroupBy(x => Math.Clamp((int)(x.Form * 5), 0, 4)).OrderBy(x => x.Key))
             Console.WriteLine($"  {band.Key}/5, {band.Count()} appearances: " + string.Join(", ", Enum.GetValues<TextureKind>().Select(k => $"{k} {band.Count(x => x.Texture.Kind == k) / (double)band.Count():P0}")));
-        var alone = rows.Where(x => x.Texture.Kind == TextureKind.Alone).Select(x => x.Song.Song.TrackDefinitions.Values.Select(d => d.Role).Distinct().Single(r => !x.Resting.Contains(r) && r != TrackRole.Drum || r == TrackRole.Drum && !x.Resting.Contains(r))).GroupBy(x => x);
+        var alone = rows.Where(x => x.Texture.Kind == TextureKind.Alone).Select(x => x.Song.Song.TrackDefinitions.Values.Select(d => d.Role).Distinct().Single(r => !x.Resting.Contains(r))).GroupBy(x => x);
         Console.WriteLine($"alone: {string.Join(", ", alone.Select(x => $"{x.Key} {x.Count()}"))}");
         await Task.CompletedTask;
     }

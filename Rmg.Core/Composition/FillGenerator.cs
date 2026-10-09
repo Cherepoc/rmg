@@ -43,7 +43,6 @@ internal sealed class FillGenerator
     // the chances of the fills' rarer choices, which the drummer's and the section's layers multiply
     private readonly StateMap _chances;
 
-    /// <param name="songRhythm">How far the song's rhythm strays, which makes a drummer's signature likelier.</param>
     // the meter the song's bars are in
     private readonly Meter _meter;
     private readonly Genre _genre;
@@ -55,6 +54,7 @@ internal sealed class FillGenerator
     private readonly HashSet<int> _filled = [];
     private readonly List<(double Position, int SectionId, bool IsPercussionOnly, ImmutableArray<RunSound> Sounds)> _landings = [];
 
+    /// <param name="songRhythm">How far the song's rhythm strays, which makes a drummer's signature likelier.</param>
     /// <param name="meter">The meter the song's bars are in.</param>
     /// <param name="unheard">The sequence a drum of the fills and landings that never sounded lands from (<see cref="LandTheUnheard" />).</param>
     /// <param name="genre">The genre whose pool of the feels a fill's change keeps to.</param>
@@ -555,15 +555,15 @@ internal sealed record FillDecision(
     double Lift
 );
 
+/// <summary>A run the drums played into a change of section: the line, the run's notes' positions, and the lift, the energy's rise into it as far as the rhythm follows it.</summary>
+internal sealed record PlayedRun(double Line, ImmutableArray<double> Positions, double Lift);
+
 /// <summary>A line the drums mark: where it is, the section it ends, the one that starts there, and how it weighs.</summary>
 /// <param name="Ending">The section the line ends, whose rhythm and feel its fill plays in.</param>
 /// <param name="Next">The section that starts at the line, which the drums land in.</param>
 /// <param name="Weight">How much the line weighs before the energy it leads into (<see cref="FillLayers.PhraseWeight" />).</param>
 /// <param name="HasFill">Whether a fill may play before it; none where the song's form has the drums wait.</param>
 /// <param name="IsLandingForced">Whether the drums always land on it, as where the band comes in.</param>
-/// <summary>A run the drums played into a change of section: the line, the run's notes' positions, and the lift, the energy's rise into it as far as the rhythm follows it.</summary>
-internal sealed record PlayedRun(double Line, ImmutableArray<double> Positions, double Lift);
-
 internal sealed record FillLine(
     double Position,
     FillSection Ending,

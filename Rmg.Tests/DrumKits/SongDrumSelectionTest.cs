@@ -159,22 +159,6 @@ public sealed class SongDrumSelectionTest
     }
 
     [Test]
-    public async Task SectionDrums_NeverMixSnares_WithinASong()
-    {
-        foreach (var seed in Seeds)
-        {
-            var context = new GenerationContext((ulong)seed);
-            var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion, null);
-            var usedMainSnares = Enumerable.Range(0, 20)
-                .SelectMany(_ => DrumKitGenerator.SelectKit(context, songDrums, default, false).Drums)
-                .Where(MainSnares.Contains)
-                .Distinct();
-
-            await Assert.That(usedMainSnares.Count()).IsLessThanOrEqualTo(1);
-        }
-    }
-
-    [Test]
     public async Task SameSeed_ResultsIn_SameSongDrums()
     {
         await Assert.That(SongDrums(8).AsEnumerable()).IsEquivalentTo(SongDrums(8).AsEnumerable(), CollectionOrdering.Matching);

@@ -109,7 +109,7 @@ public sealed class FillArchetypeTest
     public async Task NamedSounds_AreTheDrumsOwn()
     {
         // the toms' note numbers rise with their pitch, which a run's order of pitch goes by
-        await Assert.That(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray()).IsEquivalentTo(DrumSounds.TomsHighToLow.Reverse().ToArray(), CollectionOrdering.Matching);
+        await Assert.That(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray()).IsEquivalentTo([41, 43, 45, 47, 48, 50], CollectionOrdering.Matching);
         await Assert.That(DrumDefinitions.HiHat.ArticulationCodes).Contains(DrumSounds.OpenHiHat);
         await Assert.That(DrumDefinitions.Cymbal.ArticulationCodes).Contains(DrumSounds.CrashCymbal1);
         await Assert.That(() => DrumDefinitions.Tom.GetArticulationIndex(DrumSounds.OpenHiHat)).Throws<ArgumentException>();
@@ -293,7 +293,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var (_, song, snare) = setup;
+            var (_, _, snare) = setup;
             var filled = Apply(setup, new FillPlay(2, GrooveTreatment.Stop, FillRun.Rest, FillRhythm.PlainLayer));
             var silent = new[] { Kick, snare, HiHat }.Select(x => Events(filled, x, Line - 1, Line).Length).Sum();
 
@@ -311,7 +311,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var (generator, song, snare) = setup;
+            var (generator, _, snare) = setup;
             var crash = SoundsOf(generator, FillDrumRole.Cymbal).First(x => x.Code == DrumSounds.CrashCymbal1);
             var sounds = new[] { SoundsOf(generator, FillDrumRole.Kick)[0], SoundsOf(generator, FillDrumRole.Snare).First(x => x.Track == snare), crash };
             var filled = Apply(setup, new FillPlay(4, GrooveTreatment.Stop, Run(sounds, width: 3), StateMap.Default), FillGrooves.FromSource(bar));

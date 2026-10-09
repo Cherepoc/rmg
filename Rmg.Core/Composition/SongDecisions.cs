@@ -16,7 +16,7 @@ namespace Rmg.Core.Composition;
 /// <param name="Solos">The appearances played as solos, by their places.</param>
 /// <param name="Pinned">The parts the song pins to their figures, a genre's (<see cref="DrumRoles.DrawPinned" />).</param>
 /// <param name="Repeats">Whether the last section plays once more, as a last chorus.</param>
-/// <param name="GrooveContext">The groove's stream, its swing's draws made before, the rest of them here.</param>
+/// <param name="GrooveContext">The groove's stream, whose draws the swing made, which the swing's state is built with and draws nothing of.</param>
 /// <param name="Scale">The scale the song starts in.</param>
 /// <param name="Sound">The effects the song plays at all, and the part playing its strong one (<see cref="Expression.DrawSound" />).</param>
 /// <param name="DrumJob">What the song's drums do, keep time or mark its form, a genre's (<see cref="DrumMarks" />).</param>
@@ -413,10 +413,6 @@ internal sealed record SongDecisions(
             .ToStateMap(context);
     }
 
-    /// <summary>
-    ///     The song's state that Render reads, the same for every track: its key and tempo. Its scale is each section's,
-    ///     most often the song's.
-    /// </summary>
     /// <summary>The song's key and tempo, drawn, and replaced where given, so that giving one leaves every other draw as it was.</summary>
     /// <param name="feel">The feel facet of the song's unconventionality, by which a genre's range of tempos is eased between its ends.</param>
     private static StateMap CreateCommonStateMap(IGenerationContext context, double feel, SongOverrides overrides, Genre genre)

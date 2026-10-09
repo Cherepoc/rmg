@@ -77,14 +77,15 @@ internal static class Pushes
                 continue;
             // a part pushes a change where it played in the bar before, not where it comes in, and strikes the change, not
             // where it ties over it or anticipates it already
-            var own = pushes.Where(x => timeline.Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9)
-                                        && timeline.Any(n => Math.Abs(n.Position - x.At) < 1e-6)).Select(x => x.At).ToArray();
-            bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);
+            var pushed = pushes.Where(x => timeline.Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9)
+                                           && timeline.Any(n => Math.Abs(n.Position - x.At) < 1e-6)).ToArray();
+            var own = pushed.Select(x => x.At).ToArray();
+            // the bar of the push a note strikes, which it is held for at most
+            double? BarOf(double position) => pushed.Where(x => Math.Abs(x.At - position) < 1e-6).Select(x => (double?)x.BarDuration).FirstOrDefault();
             bool Before(double position) => own.Any(x => position > x - Early - 1e-6 && position < x - 1e-6);
-            var bar = pushes.Length > 0 ? pushes.Min(x => x.BarDuration) : 0;
             result[track] = EventTimeline.Create(timeline.Duration, timeline
                 .Where(note => !Before(note.Position))
-                .Select(note => On(note.Position) ? (note.Value with { Duration = Math.Min(note.Value.Duration + Early, bar) }).ToTimelineItem(note.Position - Early) : note)
+                .Select(note => BarOf(note.Position) is { } bar ? (note.Value with { Duration = Math.Min(note.Value.Duration + Early, bar) }).ToTimelineItem(note.Position - Early) : note)
                 .Select(note => own.FirstOrDefault(x => note.Position < x - Early - 1e-6 && note.Position + note.Value.Duration > x - Early + 1e-6) is var cut && cut > 0
                     ? (note.Value with { Duration = cut - Early - note.Position }).ToTimelineItem(note.Position)
                     : note)

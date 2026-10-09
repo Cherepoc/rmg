@@ -165,7 +165,10 @@ public static class GenreChoices
     /// <summary>The chance a section sits on its home chord, every chord of its pattern the home, a vamp (<see cref="SectionGenerator.Vamp" />); the songs never.</summary>
     public static GenreChoice Vamp { get; } = Chances("vamp", "Vamp", [("sections", "Sections on one chord", SectionGenerator.Vamp)]);
 
-    /// <summary>The chance a section's riff plays in power chords, a perfect fifth over every note, as rock's riffs are (<see cref="SectionGenerator.PowerChordChance" />).</summary>
+    /// <summary>
+    ///     The chances of a section's riff: in power chords, a perfect fifth over every note, as rock's riffs are, in
+    ///     palm-muted chugs, and with its weak notes on a drone (<see cref="SectionGenerator.PowerChordChance" />).
+    /// </summary>
     public static GenreChoice Riff { get; } = Chances("riff", "Riff",
     [
         ("powerChords", "In power chords", SectionGenerator.PowerChordChance),
@@ -229,7 +232,7 @@ public static class GenreChoices
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
         [("legato", "Slurred steps", Articulations.LegatoChance), ("roll", "Rolled piano chords", Articulations.RollChance), ("stabs", "Chords as stabs", Articulations.StabChance)]);
 
-    /// <summary>The chance a song pins a drum role to its figure, every bar alike: the ground, the backbeat and the time (<see cref="DrumRoles.Pins" />).</summary>
+    /// <summary>The chance a song pins a part to its rhythm, every bar alike: each pitched part, and each drum role but the colour (<see cref="DrumRoles.Pins" />).</summary>
     public static GenreChoice Pins { get; } = Chances("pins", "Parts pinned", [..Composition.DrumRoles.PinnedParts.Select(x => (Name(x.ToString()), Composition.DrumRoles.PinLabelOf(x), Composition.DrumRoles.Pins))]);
 
     /// <summary>How long a section plays, its pattern played over and over: four bars to thirty-two, a dance track's the longest, which the songs never play (<see cref="Composition.SectionLength" />).</summary>
@@ -380,7 +383,8 @@ public static class GenreChoices
 
     /// <summary>
     ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
-    ///     a vibrato, a chorus, a held chord's swell, a line's bends, a part's darker tone, a tape's wow and a guitar's pinch harmonics.
+    ///     a vibrato, a chorus, a held chord's swell, a line's bends, a part's darker tone, a tape's wow, a guitar's pinch
+    ///     harmonics and a riff's dive into a louder section.
     /// </summary>
     public static GenreChoice Effects { get; } = Chances("effects", "Effects",
     [
@@ -498,10 +502,12 @@ public static class GenreChoices
     ///     their shares of them.
     /// </summary>
     public static GenreChoice ChordShape { get; } = Described(Pool("chordShape", "Chord shapes",
-        ChordShapes.All.Select(x => (Name(x.Name), x.Name, ChordShapes.Levels.Single(l => l.Level == x.Unconventionality).Weight is var level
-            && x.Weight / ChordShapes.All.Where(y => y.Unconventionality == x.Unconventionality).Sum(y => y.Weight) is var share
-                ? new ByConvention(level.Plain * share, level.Tuned * share, level.Wild * share)
-                : default))),
+        ChordShapes.All.Select(x =>
+        {
+            var level = ChordShapes.Levels.Single(l => l.Level == x.Unconventionality).Weight;
+            var share = x.Weight / ChordShapes.All.Where(y => y.Unconventionality == x.Unconventionality).Sum(y => y.Weight);
+            return (Name(x.Name), x.Name, new ByConvention(level.Plain * share, level.Tuned * share, level.Wild * share));
+        })),
         ChordShapes.All.Select(x => $"{x.Description} {NotesOnC(x.Targets)}"));
 
     /// <summary>

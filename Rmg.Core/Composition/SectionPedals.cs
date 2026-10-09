@@ -8,7 +8,11 @@ namespace Rmg.Core.Composition;
 /// <summary>The section's pedals and the pedals leading into a key change: the bass holding a note under a phrase (<see cref="KeyChange.Pedal" />), a stage of the song after it is put together (<see cref="SongStages" />).</summary>
 internal static class SectionPedals
 {
-    /// <summary>The bass holding the new key's dominant under the bar before a key change led into by a pedal, over whatever it doubles or walks there.</summary>
+    /// <summary>
+    ///     The bass holding a note: a section's own pedal now and then, its home under its appearances' first phrase or its
+    ///     dominant under their last, and the new key's dominant under the bar before a key change led into by a pedal,
+    ///     over whatever it doubles or walks there.
+    /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var bass = song.Track(TrackRole.Bass);

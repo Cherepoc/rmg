@@ -23,7 +23,10 @@ namespace Rmg.WebApi.Songs;
 /// </param>
 /// <param name="Facets">A facet of the unconventionality given outright, by its name, such as "chords".</param>
 /// <param name="Volume">How loud the whole song plays, 61 as it is made. None is 61.</param>
-/// <param name="Parts">A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody" or "drum".</param>
+/// <param name="Parts">
+///     A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody", "riff", "rhythm",
+///     "riffTwin", "solo" or "drum".
+/// </param>
 /// <param name="DrumPieces">
 ///     The drum pieces the song plays, by their names (<c>/api/songs/options</c>), in place of those it draws, which make
 ///     its setup.

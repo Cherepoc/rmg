@@ -7,9 +7,9 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     The solo part answering the melody outside its solos, as a guitarist fills between a singer's phrases: in a section
 ///     the counter-melody leaves to it, now and then, by the melody facet, never in a plain song, it plays in the melody's
-///     longer gaps, a rest or a note held, now and then, a short line of its own in its soloist's vocabulary
-///     (<see cref="SoloLines" />), a held note of the chord in a short gap, a lick and a held note in a longer, under the
-///     melody, ending before the melody goes on.
+///     gaps of more than two beats, a rest or a note held, now and then, a short line of its own in its soloist's
+///     vocabulary (<see cref="SoloLines" />), planned over the gap as a solo's phrase is, under the melody, starting on
+///     the half beat a beat into the gap and ending before the melody goes on.
 /// </summary>
 internal static class SoloAnswers
 {
@@ -19,10 +19,10 @@ internal static class SoloAnswers
     /// <summary>The chance a gap of an answering section is answered, so that the answers stay sparse.</summary>
     public const double GapChance = 0.5;
 
-    /// <summary>How long a gap between the melody's notes is, in beats, before it is answered.</summary>
-    public const double ShortestGap = 2;
-
-    /// <summary>How far into a gap an answer starts, in beats, on the half beat after, and how long before the melody goes on it ends.</summary>
+    /// <summary>
+    ///     How far into a gap an answer starts, in beats, on the half beat after, and how long before the melody goes on it
+    ///     ends: a gap answered is at least a beat longer than both.
+    /// </summary>
     public const double After = 1;
 
     public const double Before = 0.25;
@@ -79,7 +79,7 @@ internal static class SoloAnswers
                 var answered = context.TestProbability(GapChance);
                 var start = Math.Ceiling(2 * (onsets[i] + After) - 1e-9) / 2;
                 var end = onsets[i + 1] - Before;
-                if (!answered || onsets[i + 1] - onsets[i] < ShortestGap - 1e-9 || end - start < 1 - 1e-9)
+                if (!answered || end - start < 1 - 1e-9)
                     continue;
 
                 var gap = span with { Start = start, Duration = end - start };

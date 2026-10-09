@@ -179,7 +179,6 @@ public sealed class DrumSoloTest
         await Assert.That(keeping.Average()).IsLessThan(soloing.Average());
     }
 
-    /// <summary>The drum solos' gestures, cells and hits a beat, and how far their intensity swings, of songs of wild solos.</summary>
     /// <summary>
     ///     A jazz drum solo's feet on the hi-hat's pedal, on 2 and 4 alone, where the feet keep time (<see cref="Rmg.Core.Composition.DrumSolos.Feet" />),
     ///     but where the solo quotes the groove; and the hands' stickings round the snare and the toms.
@@ -253,6 +252,7 @@ public sealed class DrumSoloTest
         await Assert.That(solos.All(x => x.Solo.Answered.All(p => p > 0))).IsTrue();
     }
 
+    /// <summary>The drum solos' gestures, cells and hits a beat, and how far their intensity swings, of songs of wild solos.</summary>
     [Test]
     [Explicit]
     public async Task Report()

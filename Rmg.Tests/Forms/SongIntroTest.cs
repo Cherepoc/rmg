@@ -14,10 +14,6 @@ public sealed class SongIntroTest
 
     private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(64).ToArray();
 
-    private static TimelineItem<RenderedNote>[] Notes(CorpusSong song, int track) => song.Notes(track);
-
-    private static TimelineItem<RenderedNote>[] Drums(CorpusSong song) => song.Drums;
-
     private static CorpusSong[] Of(IntroKind intro) => Songs.Where(x => x.Map.Intro.Kind == intro).ToArray();
 
     private static bool PercussionOnly(CorpusSong song, int sectionId) =>
@@ -103,7 +99,7 @@ public sealed class SongIntroTest
                 ? DrumGroups.Percussion.Drums.SelectMany(x => x.ArticulationCodes)
                 : DrumGroups.Accents.Drums.SelectMany(x => x.ArticulationCodes);
             // an 8th early in straight time, and a little more in a tuplet feel, whose step can be longer than an 8th
-            await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.75 && x.Position <= song.Origin && landsOn.Contains(x.Value.Offset)))
+            await Assert.That(song.Drums.Any(x => x.Position >= song.Origin - 0.75 && x.Position <= song.Origin && landsOn.Contains(x.Value.Offset)))
                 .IsTrue()
                 .Because($"seed {song.Seed}");
         }
@@ -131,7 +127,7 @@ public sealed class SongIntroTest
         var songs = Of(IntroKind.CountIn);
         foreach (var song in songs)
         {
-            var clicks = Drums(song).Where(x => x.Position < song.Origin).ToArray();
+            var clicks = song.Drums.Where(x => x.Position < song.Origin).ToArray();
             var sound = FormLayers.CountInSounds.First(x => song.Song.TrackDefinitions.ContainsKey(DrumGroups.GetTrackNumber(x.Drum))).Sound;
 
             // a bar of them, on the meter's pulses or its second half of them

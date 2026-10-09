@@ -118,7 +118,7 @@ internal static class FillLayers
     /// </summary>
     public static double GetSpanLoudness(double span) => span <= 0 ? -1 : Math.Clamp(Math.Log2(span) / 2, -1, 1);
 
-    /// <summary>What a fill does with the groove, and how likely each is; stopping's weight is multiplied by the chance scale.</summary>
+    /// <summary>What a fill does with the groove, and how likely each is in a middling section; stopping the unconventional one, never in the plainest section and as likely as the others in the wildest (<see cref="RhythmicUnconventionality.WeightEnds" />).</summary>
     public static ImmutableArray<Weighted<GrooveTreatment>> Treatments { get; } =
     [
         new(0.78, GrooveTreatment.Played),
@@ -150,8 +150,8 @@ internal static class FillLayers
 
     /// <summary>
     ///     The chances of a fill's rarer choices, in a section of conventionality in the middle: that it starts off the
-    ///     beat, that a run fades, and that its landing comes early. The section's chance scale and a drummer's
-    ///     signature multiply their odds (<see cref="FillGenerator.GetChance" />).
+    ///     beat, that a run fades, and that its landing comes early, each leaning by the section's fills facet to its ends
+    ///     and by a drummer's signature (<see cref="FillGenerator.GetChance" />).
     /// </summary>
     public static ImmutableArray<(StateKind<double> Kind, double Chance)> Chances { get; } =
     [
@@ -160,7 +160,7 @@ internal static class FillLayers
         (CompositionStateKinds.Fill.EarlyLandingChance, 0.01)
     ];
 
-    /// <summary>The chance a drummer has a signature, in a song of conventionality in the middle, times its chance scale.</summary>
+    /// <summary>The chance a drummer has a signature, in a song of conventionality in the middle: never in the plainest, every time in the wildest.</summary>
     public const double SignatureChance = 0.1;
 
     /// <summary>How much more likely a drummer's signature choice is than it would be.</summary>
@@ -181,7 +181,7 @@ internal static class FillLayers
 
     public const double PitchOrderLean = -2;
 
-    /// <summary>How a run walks its sounds, and how likely each is; the random walk's weight is multiplied by the chance scale.</summary>
+    /// <summary>How a run walks its sounds, and how likely each is in a middling song; the random walk the unconventional one, never in the plainest.</summary>
     public static ImmutableArray<Weighted<FillPath>> Paths { get; } =
     [
         new(0.55, FillPath.OneWay),
@@ -194,8 +194,8 @@ internal static class FillLayers
     public const double NeighbourStepChance = 0.8;
 
     /// <summary>
-    ///     How many sounds of the walk each note plays together, and how likely each is; the weights of more than one
-    ///     are multiplied by the chance scale.
+    ///     How many sounds of the walk each note plays together, and how likely each is in a middling section; more than
+    ///     one the unconventional, never in the plainest section.
     /// </summary>
     public static ImmutableArray<Weighted<int>> Widths { get; } = [new(0.85, 1), new(0.12, 2), new(0.03, 3)];
 
@@ -217,7 +217,7 @@ internal static class FillLayers
     /// </summary>
     public const double FullnessPerWeight = 0.45;
 
-    /// <summary>Whether a run changes speed halfway, and how likely each is; slowing down's weight is multiplied by the chance scale.</summary>
+    /// <summary>Whether a run changes speed halfway, and how likely each is in a middling section; slowing down the unconventional one, never in the plainest.</summary>
     public static ImmutableArray<Weighted<FillSpeed>> Speeds { get; } =
     [
         new(0.7, FillSpeed.Steady),

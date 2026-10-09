@@ -156,7 +156,7 @@ class Player {
         midiChannel.lockController(PAN, true);
     }
 
-    /** How loud a channel plays now, as the root mean square of its last samples, before reverb and chorus; 0 for silence. */
+    /** Silences a channel, or lets it sound again. */
     setChannelMuted(channel, isMuted) {
         this.#synth.midiChannels[channel]?.setSystemParameter("isMuted", isMuted);
     }
@@ -171,6 +171,7 @@ class Player {
         this.#synth.keyModifierManager.clearModifiers();
     }
 
+    /** How loud a channel plays now, as the root mean square of its last samples, before reverb and chorus; 0 for silence. */
     getLevel(channel) {
         const analyser = this.#analysers[channel];
         if (analyser === undefined) return 0;

@@ -8,8 +8,8 @@ namespace Rmg.WebApi;
 
 /// <summary>
 ///     Every type the API reads or writes as JSON, written out at compile time rather than discovered by
-///     reflection when a request arrives. A native build has no reflection to discover them with, and a type
-///     missing from here fails there on its first request, while the ordinary build would never notice.
+///     reflection when a request arrives, which is quicker and keeps the server ready for a trimmed or native
+///     build, where a type missing from here would fail on its first request.
 /// </summary>
 [JsonSourceGenerationOptions(JsonSerializerDefaults.Web)]
 [JsonSerializable(typeof(GenerateSongRequest))]

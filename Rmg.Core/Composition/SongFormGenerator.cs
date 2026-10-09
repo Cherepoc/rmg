@@ -554,7 +554,6 @@ internal sealed class SongFormGenerator
         );
     }
 
-    /// <summary>The band fading out from the start given to the end, a step every <see cref="FormLayers.FadeStep" />, to silence.</summary>
     /// <summary>
     ///     The lifts into the louder sections: the band's loudness rising over the bar before a change of section, from
     ///     as loud as it plays to louder by how much more energy the next section has, as far as the ending section's rhythm
@@ -585,6 +584,7 @@ internal sealed class SongFormGenerator
         return new[] { velocity }.ToStateTimelineMap(end);
     }
 
+    /// <summary>The band fading out from the start given to the end, a step every <see cref="FormLayers.FadeStep" />, to silence.</summary>
     private static StateTimelineMap CreateFade(double start, double end)
     {
         var count = (int)Math.Round((end - start) / FormLayers.FadeStep);

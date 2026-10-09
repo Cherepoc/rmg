@@ -26,8 +26,9 @@ internal static class Reharmonisation
     private static LayerValue<StepAlterations> SectionsScale { get; } = new(StateDepths.BarPattern, StepAlterations.None);
 
     /// <summary>
-    ///     The substitutes, as the song's state: a root moved and the section's scale, unmoved by semitones, from each
-    ///     substituted chord to the next change; none where the song does not reharmonise or has no section heard again.
+    ///     The substitutes, as the song's state: a root moved and the section's scale from each substituted chord to the
+    ///     next change, never a chord moved by semitones; none where the song does not reharmonise or has no section heard
+    ///     again.
     /// </summary>
     /// <param name="moved">Where a key change moves a chord or leads into one, which keeps it.</param>
     public static StateTimelineMap Apply(IGenerationContext context, double unconventionality, Genre genre, SongMap map, StateTimelineMap common, IEnumerable<double> moved)
@@ -41,7 +42,7 @@ internal static class Reharmonisation
         var kept = moved.Concat(changes.Where((x, i) => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordShift) != 0
                                                        || i > 0 && common.GetEffectiveStateMapAt(changes[i - 1]).GetStateValue(StateKinds.ChordShift) != 0
                                                        || common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } own && own.Value != StepAlterations.None)).ToHashSet();
-        var (roots, scales, shifts) = (new List<TimelineItem<int>>(), new List<TimelineItem<LayerValue<StepAlterations>>>(), new List<TimelineItem<int>>());
+        var (roots, scales) = (new List<TimelineItem<int>>(), new List<TimelineItem<LayerValue<StepAlterations>>>());
         if (later >= 0)
         {
             var span = sections[later];
@@ -56,7 +57,6 @@ internal static class Reharmonisation
                 var (at, next) = (inSpan[i], i + 1 < inSpan.Length ? inSpan[i + 1] : span.End);
                 roots.AddRange([step.ToTimelineItem(at), 0.ToTimelineItem(next)]);
                 scales.AddRange([SectionsScale.ToTimelineItem(at), LayerValue<StepAlterations>.Unset.ToTimelineItem(next)]);
-                shifts.AddRange([(-common.GetEffectiveStateMapAt(at).GetStateValue(StateKinds.ChordShift)).ToTimelineItem(at), 0.ToTimelineItem(next)]);
             }
         }
 
@@ -68,8 +68,7 @@ internal static class Reharmonisation
         return StateTimelineMap.Create(common.Duration,
         [
             StateTimeline.Create(common.Duration, StateKinds.ChordRoot, Once(roots)).WithLayer("Reharmonisation"),
-            StateTimeline.Create(common.Duration, StateKinds.ScaleAlterations, Once(scales)).WithLayer("Reharmonisation"),
-            StateTimeline.Create(common.Duration, StateKinds.ChordShift, Once(shifts)).WithLayer("Reharmonisation")
+            StateTimeline.Create(common.Duration, StateKinds.ScaleAlterations, Once(scales)).WithLayer("Reharmonisation")
         ]);
     }
 }

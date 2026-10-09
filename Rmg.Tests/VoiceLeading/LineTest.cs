@@ -46,7 +46,7 @@ public sealed class LineTest
     {
         var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
 
-        // the middle of the range is about G4 (67), so aiming 2 below is about F4, nearest E4 or G4
+        // the middle of the range is between F4 and F#4 (65.5), so aiming 2 below it is about E♭4, nearest a chord's note
         var note = Place(line, C, CTones, Strong, 0, -2);
 
         await Assert.That(CTones).Contains(note % 12);

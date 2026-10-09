@@ -5,7 +5,8 @@ using Rmg.Core.Songs;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     Decides the song's notes from its state, the last stage of its generation: every note's chord, pitches and
+///     Decides the song's notes from its state, the stage between the stages that edit the state and those that edit
+///     the notes (<see cref="SongStages" />): every note's chord, pitches and
 ///     length, in the song's order: the chords in the register that follows from the chord before, as they are led, and
 ///     the lines, the melody's and the bass's, as they were placed before it (<see cref="LinePlacement" />); and every
 ///     drum hit's sound. It sees the whole song, because the chords are led across its sections, and a section that
@@ -67,12 +68,6 @@ internal static class Realizer
             .MergeStateMap(definition.StateMap.OfScope(StateScope.Render))
             .MergeStateTimelineMap(commonStateTimelineMap)
             .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
-    }
-
-    /// <summary>A note moved by octaves into a pitched track's range (<see cref="FixNoteOffset" />).</summary>
-    internal static int FitNote(PitchInstrumentTrack track, int note)
-    {
-        return FixNoteOffset(track.MinOctaveOffset + ZeroOctaveOffset, track.MaxOctaveOffset - track.MinOctaveOffset + 1, note);
     }
 
     /// <summary>The lowest and the highest note of a pitched track's range.</summary>
@@ -337,10 +332,6 @@ internal static class Realizer
     }
 
     /// <summary>
-    ///     The chord a note is played over: the scale, with the steps the note's bar raises, the chord root's step in
-    ///     it, and the pitch of every step counted from the root, in the key and the octave.
-    /// </summary>
-    /// <summary>
     ///     The notes a line's stacked note plays under its own, from the highest down: the band's chord's where its note is
     ///     the chord's, none where not, or the chord's shape's from its top down where it planes.
     /// </summary>
@@ -362,6 +353,10 @@ internal static class Realizer
     /// <summary>How far under a stacked note its chord's notes start, in semitones: a minor third, so that a note beside the chord's stays clear of them.</summary>
     private const int MinStackGap = 3;
 
+    /// <summary>
+    ///     The chord a note is played over: the scale, with the steps the note's bar raises, the chord root's step in
+    ///     it, and the pitch of every step counted from the root, in the key and the octave.
+    /// </summary>
     internal static (ImmutableArray<int> ScaleOffsets, int RootIndex, ChordContext Chord) GetChord(StateMap stateMap)
     {
         var scaleOffsets = stateMap.GetStateValue(StateKinds.ScaleOffsets);

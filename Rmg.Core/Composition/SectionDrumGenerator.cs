@@ -84,8 +84,7 @@ internal sealed class SectionDrumGenerator
             x => new Doubling(
                 DrumGroups.GetTrackNumber(x.Value),
                 DrumRoles.DoublingRanks[x.Value.MainRole],
-                bindingContext.Pick(ByConvention.Weigh(x.Key.Bindings.Select(b => (b.Value, RhythmicUnconventionality.WeightEnds(b.Weight, b.Value == DrumBinding.Figure ? 1 : 0))), rhythm.Value)),
-                DrumKitGenerator.AccentShare
+                bindingContext.Pick(ByConvention.Weigh(x.Key.Bindings.Select(b => (b.Value, RhythmicUnconventionality.WeightEnds(b.Weight, b.Value == DrumBinding.Figure ? 1 : 0))), rhythm.Value))
             )
         );
         StateTrace.Record(TracePoints.Doubles, SectionGenerator.SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Doubles.Select(x => $"{x.Key.Name} on {x.Value.Name}")), doubles);

@@ -10,10 +10,10 @@ public enum TextureKind
     /// <summary>Every part that plays plays throughout, as the section starts.</summary>
     Steady,
 
-    /// <summary>The pitched parts come in phrase by phrase, all of them playing by the last.</summary>
+    /// <summary>The pitched parts come in phrase by phrase, their share of them more every phrase, all of them playing by the last.</summary>
     Build,
 
-    /// <summary>The pitched parts drop out phrase by phrase, one of them left in the last.</summary>
+    /// <summary>The pitched parts drop out phrase by phrase, the fewer every phrase, a share of them left in the last.</summary>
     Thin,
 
     /// <summary>One part plays the whole appearance, the drums or a pitched part, alone.</summary>
@@ -80,7 +80,6 @@ internal static class Texture
         // the order the pitched parts come in, drawn whatever the texture, so that the draws stay as they are
         var order = pitched.OrderBy(_ => context.GenerateDouble()).ToArray();
         // drawn whether any part plays or not, so that the draws stay as they are; among the parts that carry a section
-        // alone, the drums only where they keep time
         // alone, the drums only where they keep time, as likely each, or as a genre weighs them (GenreChoices.Alone), a
         // metal's clean arpeggio, an ambient piece's pad
         TrackRole[] carrying = [..playing.Where(x => x != TrackRole.Drum || !drumsMark).Order()];
@@ -107,7 +106,8 @@ internal static class Texture
         {
             case TextureKind.Build or TextureKind.Thin when phrases >= 2 && order.Length >= 2:
             {
-                // phrase p plays the first of the order, more every phrase, from one to all; a build's drums among them,
+                // phrase p plays the first of the order, a share more every phrase, the parts over the phrases rounded up, to
+                // all by the last; a build's drums among them,
                 // a thinning's playing through, as the drums never stop within a section
                 TrackRole[] parts = kind == TextureKind.Build && playing.Contains(TrackRole.Drum) ? [..order.Take(drumsAt), TrackRole.Drum, ..order.Skip(drumsAt)] : order;
                 var silent = Enumerable.Range(0, phrases)

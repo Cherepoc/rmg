@@ -376,7 +376,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         ...PITCHED.map(([part, label]) => ({
             label,
             part,
-            names: [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`, ...(PART_CHOICES[part] ?? [])],
+            // a soloist's line is its own, with no rhythm or feel of a part's
+            names: part === "solo" ? ["instrument.solo", ...PART_CHOICES.solo] : [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`, ...(PART_CHOICES[part] ?? [])],
             panel: part === "solo" ? solo : panels[part] ?? pitched,
             isShown: () => mayPlay(part),
         })),

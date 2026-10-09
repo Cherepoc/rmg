@@ -470,13 +470,8 @@ public static class Midi
 
     private readonly record struct MidiNote(uint OnDelta, uint OffDelta, byte Key, double Velocity);
 
-    private readonly record struct MidiEvent(uint Delta, byte[] Data) : IComparable<MidiEvent>
+    private readonly record struct MidiEvent(uint Delta, byte[] Data)
     {
-        public int CompareTo(MidiEvent other)
-        {
-            return Delta.CompareTo(other.Delta);
-        }
-
         public IEnumerable<byte> ToBytes()
         {
             var deltaBytes = IntToBytesVariable(Delta);

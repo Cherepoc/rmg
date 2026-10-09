@@ -9,15 +9,7 @@ internal static class DrumSounds
     public const int PedalHiHat = 44;
     public const int OpenHiHat = 46;
 
-    public const int LowFloorTom = 41;
-    public const int HighFloorTom = 43;
-    public const int LowTom = 45;
-    public const int LowMidTom = 47;
-    public const int HighMidTom = 48;
-    public const int HighTom = 50;
-
     public const int CrashCymbal1 = 49;
-    public const int CrashCymbal2 = 57;
 
     public const int CrossStick = 37;
     public const int RideBell = 53;
@@ -43,7 +35,4 @@ internal static class DrumSounds
         var odds = Leaned.ToDictionary(x => x.Code, x => Math.Pow(GenreOdds, genre.Shift(GenreChoices.DrumSounds, x.Name)));
         return code => odds.GetValueOrDefault(code, 1);
     }
-
-    /// <summary>The toms from the highest down: their note numbers fall with their pitch, which a run's order of pitch goes by.</summary>
-    public static ImmutableArray<int> TomsHighToLow { get; } = [HighTom, HighMidTom, LowMidTom, LowTom, HighFloorTom, LowFloorTom];
 }

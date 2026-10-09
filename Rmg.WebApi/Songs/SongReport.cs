@@ -8,7 +8,7 @@ using Rmg.Core.Songs;
 namespace Rmg.WebApi.Songs;
 
 /// <summary>
-///     What a song drew or was given, as the page shows it: every amount a step from 0 to 63, the names as the request
+///     What a song drew or was given, as the page shows it: every amount a step from 0 to 61, the middle 31 (<see cref="StepScale" />), the names as the request
 ///     takes them, and every part's channel, counted from 1, as its mix plays it.
 /// </summary>
 /// <param name="Unconventionality">How far it strays from convention as a whole.</param>
@@ -20,7 +20,7 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Key">Its key, as semitones above C.</param>
 /// <param name="Meter">Its meter, by its place among the meters (<c>/api/songs/options</c>).</param>
 /// <param name="Mode">The scale it starts in, by its place among the scales (<c>/api/songs/options</c>).</param>
-/// <param name="Swing">How much it swings, from 0, straight, to 63, a triplet's swing: 0 where its meter pairs no notes to swing.</param>
+/// <param name="Swing">How much it swings, from 0, straight, to 61, a triplet's swing: 0 where its meter pairs no notes to swing.</param>
 /// <param name="Length">How long it plays, by its step (<see cref="LengthScale" />), the nearest to its length, given or not.</param>
 /// <param name="Seconds">How long it plays, in seconds.</param>
 /// <param name="Sections">Every section it plays, in its order: where it starts, its role and the parts that solo it.</param>
@@ -105,5 +105,5 @@ public sealed record Drawn<T>(T Value, bool IsGiven);
 /// <param name="Channel">The channel it plays on, from 1; none where it is not written.</param>
 /// <param name="Double">The channel its second take plays on, from 1, a doubled driven guitar's; none for a part played once.</param>
 /// <param name="Instrument">The General MIDI program the song gives it, the drums' kit, whatever the mix plays.</param>
-/// <param name="Pan">Where the song sits it, from 0, left, through 64, the middle, to 127, right, whatever the mix does.</param>
+/// <param name="Pan">Where the song sits it, from 0, left, through 31, the middle, to 61, right, whatever the mix does.</param>
 public sealed record PartReport(Drawn<bool> Plays, int? Channel, int? Double, int Instrument, int Pan);

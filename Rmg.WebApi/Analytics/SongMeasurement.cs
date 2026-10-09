@@ -33,7 +33,7 @@ public static class SongOutcomes
 /// <param name="Running">How many songs were being made when it arrived.</param>
 /// <param name="Waiting">How many were waiting their turn when it arrived.</param>
 /// <param name="Version">The songs' version that made it.</param>
-/// <param name="Unconventionality">How far it strays from convention, from 0 to 63, for one that was generated.</param>
+/// <param name="Unconventionality">How far it strays from convention, a step from 0 to 61, for one that was generated.</param>
 /// <param name="Notes">How many notes it has, which is how much there was to make, for one that was generated.</param>
 public sealed record SongMeasurement(
     DateTimeOffset At,

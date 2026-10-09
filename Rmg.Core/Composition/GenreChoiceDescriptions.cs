@@ -24,12 +24,12 @@ public static class GenreChoiceDescriptions
         ["cadenceRaise"] = "How often a minor key's cadence raises its seventh, its chord on the fifth turned major to lead home as classical music does; a modal band's never.",
         ["sectionHome"] = "The key a section's chords move around: the song's tonic, its relative key (a minor song's major third, as a chorus lifts into it), or its fourth or fifth. A dark genre stays on its minor tonic.",
         ["rootMotion"] = "How the chords move from one to the next: by fifths for jazz's ii–V, by fourths for rock's IV–I, by steps and thirds for pop's loops. Above the middle a move is likelier, below rarer.",
-        ["chordScales"] = "Chords that borrow notes from outside the key: a dominant leading into a chord, a chord from the parallel minor or major, the blues' every chord a dominant.",
+        ["chordScales"] = "Chords that borrow notes from outside the key: a dominant leading into a chord, a chord from the parallel minor or major, the blues' every chord a dominant, or a chord on a scale of its own, a mode's colour.",
         ["harmonicRhythm"] = "How often the chords change: two a bar for busy harmony, one a bar for most songs, one every two bars for a loop or a groove.",
         ["vamp"] = "How often a section sits on one chord the whole way through, as a funk band or a techno track does.",
         ["turnaround"] = "How often a section's last bar leads back to its start through V, or ii–V, as jazz and the blues do.",
         ["passingKind"] = "How a passing chord leads into the next: by the next chord's dominant, the next chord sliding into it from a semitone above or below, the tritone substitute for its dominant, or a half-diminished chord a semitone below it between roots a whole step apart.",
-        ["passingChords"] = "How often a chord passes into the next through that chord's own dominant, a jazz and soul colour.",
+        ["passingChords"] = "How often a chord passes into the next through a chord between them, as the passing kind leads it, a jazz and soul colour.",
         ["planing"] = "How often a section slides its home chord's shape up and down by semitones, a modern, filmic colour.",
         ["harmonyDevices"] = "Reharmonising a section when it comes back, a chromatic line moving inside a held chord, and a bass note held under a section's changing chords.",
         ["loop"] = "How often a section plays the song's first section's chords again, as a beat loops one progression for the whole track.",
@@ -80,7 +80,7 @@ public static class GenreChoiceDescriptions
         ["pan"] = "How far each part sits from the middle: above the middle wider, below closer to the centre.",
         ["formChances"] = "How often a song takes one of the classic song forms, with verses and choruses, rather than a form of its own.",
         ["form"] = "Which classic forms a song may take: verse and chorus, with a pre-chorus or a bridge, or AABA's verses and bridge.",
-        ["sectionLength"] = "How long a section plays its pattern over and over: 8 bars for a song, 16 or 32 for a dance track.",
+        ["sectionLength"] = "How many times a section plays its pattern over: once, twice or four times, a verse or a chorus the longer, a dance track's the longest.",
         ["phraseScheme"] = "How a section's four bars repeat: AAAA for a loop, AAAB with a different last bar, ABAB, or every bar different for the wildest.",
         ["texture"] = "How a section brings its parts in: all through, building up, thinning out, or one part alone.",
         ["dynamics"] = "How loud and busy the song is, how much its sections differ, and how long the band swells into a louder section, from a beat to a whole phrase.",
@@ -116,7 +116,7 @@ public static class GenreChoiceDescriptions
         ["rhythm", _] => $"How the {Lower(label)} plays its rhythm: how fast, how far off the beat, how fine its notes, how much weight its weaker beats get, how full and how repetitive. Above the middle more, below less.",
         ["feel", _] => $"The {Lower(label)}'s own feel over the song's: straight, or in triplets, quintuplets or groupings such as the tresillo's 3+3+2.",
         ["drumRole", _] => $"Which drums play the {Lower(label)} role in the groove, and how likely each is.",
-        ["figure", _] => $"The {Lower(label)}s a section plays in place of its own rhythm, and how likely each is: the kick with the riff or a double kick, the louder the section the likelier, a riff's gallop, a clave's three and two, a bass rolling after the kick.",
+        ["figure", _] => $"The figures the {Lower(label)} plays in a section in place of its own rhythm, each named by what it plays, and how likely each is, the louder the section the likelier.",
         _ => ""
     };
 

@@ -20,8 +20,8 @@ internal static class BeatAccent
 
     /// <summary>
     ///     The accent of a beat: <see cref="StrongestAccent" /> at rank 0 and none at the max rank, falling faster than
-    ///     the ranks, every step towards the weakest half the one before, so 0.6, 0.07, 0 over three ranks. A pattern
-    ///     of a single rank has nothing to set apart.
+    ///     the ranks: the way left to the weakest halves with every rank, and the accent is the square of what is left,
+    ///     so 0.6, 0.07, 0 over three ranks. A pattern of a single rank has nothing to set apart.
     /// </summary>
     public static double GetAccent(int rank, int maxRank)
     {

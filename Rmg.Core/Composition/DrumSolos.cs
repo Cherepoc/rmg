@@ -389,15 +389,7 @@ internal static class DrumSolos
                             var positions = SoloLines.Positions(start, end, gesture, speed);
                             var (hits, accents, _) = SoloLines.Cells([..Enumerable.Range(0, scale.Length)], player.Cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
                             for (var i = 0; i < hits.Length; i++)
-                            {
                                 edits.Hit(scale[hits[i]].Track, positions[i], loudness + (accents[i] ? CellAccent : 0), scale[hits[i]].Articulation, whole.SectionId, HitKind.DrumSolo);
-                                // a climax's gesture starting on a crash
-                                if (player.IsKit && i == 0 && level >= ClimaxIntensity && crash is not null)
-                                    edits.Hit(crash.Track, positions[i], loudness + CellAccent, crash.Articulation, whole.SectionId, HitKind.DrumSolo);
-                                // and the kick under an accent, but where the accent is the kick's own
-                                if (player.IsKit && stacksKick && accents[i] && scale[hits[i]].Track != kick!.Track)
-                                    edits.Hit(kick.Track, positions[i], loudness + CellAccent, kick.Articulation, whole.SectionId, HitKind.DrumSolo);
-                            }
                             if (hits.Length > 0)
                                 player.At = hits[^1];
                             break;

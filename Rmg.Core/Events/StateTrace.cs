@@ -14,10 +14,10 @@ public sealed record StateContribution(string Layer, object Value)
 
 /// <summary>A point of the song's generation that a trace records, with the state it had there.</summary>
 /// <param name="Point">What was decided there, such as a track's rhythm for a bar or the chord shape of a note.</param>
-/// <param name="Bar">The bar of the section's 4-bar pattern.</param>
+/// <param name="Bar">The bar of the section's pattern, of a phrase of 4 bars or more.</param>
 /// <param name="Position">Where in the bar, in beats; 0 for what holds for the whole bar.</param>
 /// <param name="Phrase">
-///     The phrase scheme of the section's 4-bar pattern, such as AABA, where it is known, or what was decided, in words.
+///     The phrase scheme of the section's pattern, such as AABA, where it is known, or what was decided, in words.
 /// </param>
 /// <param name="Value">What was decided, as a value to read, such as a fill's span; none where the state says it.</param>
 public sealed record StateTraceEntry(

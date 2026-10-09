@@ -12,8 +12,8 @@ namespace Rmg.Core.Composition;
 internal static class VelocityLayers
 {
     /// <summary>
-    ///     A track's level by its role: the melody and the bass on top, as they lead the mix, the bass a little quieter
-    ///     for its even beats; the chords a little over the drums, their stacked notes already softened (<c>Render</c>),
+    ///     A track's level by its role: the melody and the bass on top, as they lead the mix, as loud, the bass's even
+    ///     beats making it sound a little quieter; the chords a little over the drums, their stacked notes already softened (<c>Render</c>),
     ///     which by measure alone sounded too quiet; a pad under them all, as it holds; the drums as they are.
     /// </summary>
     public static double GetLevel(TrackRole role) => role switch

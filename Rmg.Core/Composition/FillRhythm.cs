@@ -41,9 +41,6 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Me
     /// <summary>The fill's finest notes, in beats.</summary>
     public double Fine => Period / Math.Pow(2, MaxRank);
 
-    /// <summary>The notes a rank coarser, where the halves of a fill that changes speed meet; the finest where there are none.</summary>
-    public double Coarse => MaxRank > 0 ? 2 * Fine : Fine;
-
     /// <summary>
     ///     The note of the cycle's halvings nearest an 8th, finer or coarser than the fill's, by which a fill is moved off
     ///     the beat or a landing is pushed early.
