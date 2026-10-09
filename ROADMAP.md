@@ -57,7 +57,13 @@ fixed; the review and the plan are kept outside the repository):
    and the step fixed: a soloing bass's run octaved, the kick's doubles left behind by its push and its polymeter, a
    ghost counted a downbeat, a line cliché through a chord a later note voices otherwise, marking drums soloing into
    silence, and a strum's turn rounded the wrong way.
-8. The server's robustness: failing songs logged, malformed requests answered 400, ratings outside the telemetry's cap.
+8. Done: the server's robustness. A failing song logged with what it was given, the client told which song only; a
+   request with a null inside answered 400; a request's body a megabyte at most; ratings and verdicts under a cap of
+   their own; a listen without its seconds no longer breaking the summary; the analytics file shrunk after pruning;
+   the visitors' secret written private and whole; the admin area gated however its path is written, its password
+   compared by hash; a link's genre, a preset's or a kept one's, described with the song; a listening server refusing
+   to run without analytics; a question's id kept short enough for its verdicts. Left: analytics written off the
+   request (*Open work*).
 9. The page: the genre editor never losing a genre, a mix change during a request, Any genre after a Stop.
 10. Tests that cannot fail made to fail when their rule breaks.
 11. Duplication removed, the fingerprint kept.
@@ -520,6 +526,10 @@ Each item with its plan, and what it waits for.
   JavaScript.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
+- **Analytics written off the request** (P4, from the review of 9 October 2026): every tally and song measurement opens
+  SQLite and writes under one lock on a pool thread, so a burst of tallies holds threads that songs wait for; a queue
+  one writer drains, in batches, would answer at once. And the admin password tried without a limit: a pause after a
+  few wrong ones, should the area ever face the open internet without the proxy's.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than

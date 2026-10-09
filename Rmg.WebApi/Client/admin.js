@@ -16,19 +16,19 @@ function setStatus(message, isError = false) {
     elements.status.classList.toggle("error", isError);
 }
 
-/** The song a link asks for, its seed and its settings, or a seed given by itself. */
+/** The song a link asks for, its seed, its settings and its genre, or a seed given by itself. */
 function songOf(text) {
     const trimmed = text.trim();
     try {
         const parameters = new URL(trimmed).searchParams;
-        return { song: parameters.get("song"), settings: parameters.get("settings") };
+        return { song: parameters.get("song"), settings: parameters.get("settings"), genre: parameters.get("genre") };
     } catch {
-        return { song: trimmed, settings: null };
+        return { song: trimmed, settings: null, genre: null };
     }
 }
 
 async function describe() {
-    const { song, settings } = songOf(elements.link.value);
+    const { song, settings, genre } = songOf(elements.link.value);
     if (!song) {
         setStatus("That link has no song in it.", true);
         return;
@@ -36,6 +36,7 @@ async function describe() {
 
     const query = new URLSearchParams({ song });
     if (settings) query.set("settings", settings);
+    if (genre) query.set("genre", genre);
     elements.describe.disabled = true;
     setStatus("Making the song…");
     try {

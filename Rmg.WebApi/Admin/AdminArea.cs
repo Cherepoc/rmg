@@ -20,7 +20,9 @@ public static class AdminArea
     {
         app.Use(async (context, next) =>
         {
-            if (!context.Request.Path.StartsWithSegments(Path))
+            // the path as the static files read it, a run of slashes in front one, so that //admin is the admin area too
+            var path = new PathString("/" + (context.Request.Path.Value ?? "").TrimStart('/', '\\'));
+            if (!path.StartsWithSegments(Path, StringComparison.OrdinalIgnoreCase))
             {
                 await next();
                 return;
@@ -64,6 +66,7 @@ public static class AdminArea
             return false;
         }
 
-        return CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(credentials), Encoding.UTF8.GetBytes($"{User}:{password}"));
+        // their hashes compared, of one length whatever was offered, so that not even the length is told
+        return CryptographicOperations.FixedTimeEquals(SHA256.HashData(Encoding.UTF8.GetBytes(credentials)), SHA256.HashData(Encoding.UTF8.GetBytes($"{User}:{password}")));
     }
 }

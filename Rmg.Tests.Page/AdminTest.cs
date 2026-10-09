@@ -78,6 +78,20 @@ public sealed class AdminTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A link to a song of a genre, a preset's, described as that genre's song.</summary>
+    [Test]
+    public async Task AGenreSongsLink_IsDescribed_InItsGenre()
+    {
+        await using var page = await SongPage.Open(site, "admin/", admin: true);
+        await page.Page.Locator("#song-link").FillAsync($"{site.Address}?song=1A&genre=rock");
+        await page.Page.Locator("#describe").ClickAsync();
+
+        var description = page.Page.Locator("#description");
+        await Assertions.Expect(description).ToBeVisibleAsync(new() { Timeout = 30_000 });
+        await Assert.That(await description.InputValueAsync()).Contains("Genre: Rock");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task ALinkWithNoSong_IsSaidSo()
     {
@@ -87,6 +101,18 @@ public sealed class AdminTest(Site site)
 
         await Assertions.Expect(page.Page.Locator("#describe-status")).ToContainTextAsync("is not a seed");
         await Assert.That(await page.Page.Locator("#description").IsHiddenAsync()).IsTrue();
+    }
+
+    /// <summary>The admin area asks for its credentials however its path is written, a run of slashes in front or its case changed.</summary>
+    [Test]
+    [Arguments("admin/dashboard.html")]
+    [Arguments("/admin/dashboard.html")]
+    [Arguments("ADMIN/dashboard.html")]
+    public async Task TheAdminArea_AsksForItsCredentials_HoweverItsPathIsWritten(string path)
+    {
+        using var client = new HttpClient();
+        var response = await client.GetAsync(new Uri(site.Address.GetLeftPart(UriPartial.Authority) + "/" + path));
+        await Assert.That((int)response.StatusCode).IsEqualTo(401);
     }
 
     [Test]

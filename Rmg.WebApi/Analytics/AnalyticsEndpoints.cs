@@ -6,8 +6,8 @@ namespace Rmg.WebApi.Analytics;
 
 public static class AnalyticsEndpoints
 {
-    /// <summary>The longest a detail is allowed to be, since it is one word of context and nothing else.</summary>
-    private const int DetailLength = 40;
+    /// <summary>The longest a detail is allowed to be, since it is one word of context and nothing else: a verdict's question id and its choice.</summary>
+    public const int DetailLength = 40;
 
     /// <summary>
     ///     The events the pages send, and the summary of them, which is the operator's, served in the admin area only

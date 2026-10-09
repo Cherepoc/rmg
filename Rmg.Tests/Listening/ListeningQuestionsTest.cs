@@ -186,12 +186,16 @@ public sealed class ListeningQuestionsTest
         await File.WriteAllTextAsync(path, JsonSerializer.Serialize(written, new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }) + "\n");
     }
 
-    /// <summary>Every question's stages ones a song may leave out, and every question with songs to hear.</summary>
+    /// <summary>Every question's stages ones a song may leave out, its id short enough for its verdicts, and every question with songs to hear.</summary>
     [Test]
     public async Task EveryQuestion_LeavesOutStagesThatMayBe_AndHasSongs()
     {
         foreach (var question in Questions)
+        {
             await Assert.That(question.Skip.All(SongGenerator.SkippableStages.Contains)).IsTrue().Because(question.Id);
+            // its verdicts kept whole, the longest choice after its id
+            await Assert.That($"{question.Id}:without".Length).IsLessThanOrEqualTo(Rmg.WebApi.Analytics.AnalyticsEndpoints.DetailLength).Because(question.Id);
+        }
 
         var path = QuestionsFile();
         using var file = JsonDocument.Parse(await File.ReadAllTextAsync(path));

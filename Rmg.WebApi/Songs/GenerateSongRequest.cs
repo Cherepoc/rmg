@@ -115,6 +115,8 @@ public sealed record GenerateSongRequest(
         {
             if (!Enum.TryParse<TrackRole>(name, true, out var role) || !Enum.IsDefined(role))
                 return Fail($"{name} is not a part. Parts are {string.Join(", ", Enum.GetNames<TrackRole>())}.", out error);
+            if (part is null)
+                return Fail($"The {name} is given as nothing; leave it out instead.", out error);
             if (part.Instrument is < 0 or > 127)
                 return Fail($"The {name}'s instrument {part.Instrument} is not a General MIDI program from 0 to 127.", out error);
             if (!TryReadStep(part.Volume, $"The {name}'s volume", out error)
@@ -130,6 +132,8 @@ public sealed record GenerateSongRequest(
 
         if (DrumPieces is { Count: 0 })
             return Fail("No drum pieces are given; leave the drums out instead.", out error);
+        if (DrumPieces?.Any(x => x is null) == true)
+            return Fail("A drum piece is given as nothing.", out error);
         if (DrumPieces?.FirstOrDefault(x => !Core.Composition.DrumPieces.IsPiece(x)) is { } unknown)
             return Fail($"{unknown} is not a drum piece. Pieces are {string.Join(", ", Core.Composition.DrumPieces.All.Select(x => x.Name))}.", out error);
 
@@ -139,6 +143,8 @@ public sealed record GenerateSongRequest(
             var known = SongMix.DrumGroupNames.FirstOrDefault(x => string.Equals(x, name, StringComparison.OrdinalIgnoreCase));
             if (known is null)
                 return Fail($"{name} is not a drum group. Groups are {string.Join(", ", SongMix.DrumGroupNames)}.", out error);
+            if (group is null)
+                return Fail($"The {name} drums are given as nothing; leave them out instead.", out error);
             if (!TryReadStep(group.Volume, $"The {name}'s volume", out error))
                 return false;
             groups[known] = new DrumGroupMix(StepScale.ToAmount(group.Volume ?? StepScale.Last), group.IsOn);
@@ -161,6 +167,8 @@ public sealed record GenerateSongRequest(
             var amounts = new Dictionary<string, IReadOnlyDictionary<string, ByConvention>>();
             foreach (var (name, options) in Genre)
             {
+                if (options is null)
+                    return Fail($"The genre's {name} is given as nothing; leave it out instead.", out error);
                 if (GenreChoices.All.FirstOrDefault(x => x.Name == name) is not { } choice)
                     return Fail($"{name} is not a choice a genre may name (/api/genres/choices).", out error);
                 var read = new Dictionary<string, ByConvention>();

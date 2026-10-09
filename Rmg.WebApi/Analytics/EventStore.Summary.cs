@@ -140,7 +140,7 @@ public static class EventStoreSummary
         command.CommandText = $"""
             SELECT seed, SUM(seconds), COUNT(*)
             FROM events
-            WHERE name = '{EventNames.Listened}' AND seed IS NOT NULL AND day >= $since
+            WHERE name = '{EventNames.Listened}' AND seed IS NOT NULL AND seconds IS NOT NULL AND day >= $since
             GROUP BY seed
             ORDER BY SUM(seconds) DESC
             LIMIT 10
@@ -184,7 +184,7 @@ public static class EventStoreSummary
         listening.CommandText = $"""
             SELECT version, SUM(seconds)
             FROM events
-            WHERE name = '{EventNames.Listened}' AND version IS NOT NULL AND seed IS NOT NULL AND day >= $since
+            WHERE name = '{EventNames.Listened}' AND version IS NOT NULL AND seed IS NOT NULL AND seconds IS NOT NULL AND day >= $since
             GROUP BY version, visitor, seed
             """;
         listening.Parameters.AddWithValue("$since", since);

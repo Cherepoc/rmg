@@ -41,7 +41,7 @@ public sealed class SoundFontLibrary
     ///     The soundfont the page should take unasked, named with or without its extension. A name that
     ///     matches nothing in the directory is left to say so at startup rather than quietly ignored.
     /// </param>
-    public static SoundFontLibrary Create(string webRootPath, string? directory = null, string? preferred = null)
+    public static SoundFontLibrary Create(string webRootPath, string? directory, string? preferred)
     {
         var path = directory is null ? Path.Combine(webRootPath, DirectoryName) : Path.GetFullPath(directory);
         System.IO.Directory.CreateDirectory(path);

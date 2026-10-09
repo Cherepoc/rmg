@@ -50,6 +50,15 @@ public sealed class SongSettingsTest
         && first.DrumGroups.SequenceEqual(second.DrumGroups) && first.Volume == second.Volume
         && first.DrumPieces.IsGiven == second.DrumPieces.IsGiven && first.DrumPieces.Pieces.SequenceEqual(second.DrumPieces.Pieces);
 
+    /// <summary>The settings name every facet and every part a song may have but the riff's twin, so that a link and an event carry each.</summary>
+    [Test]
+    public async Task TheSettings_NameEveryFacet_AndEveryPart()
+    {
+        await Assert.That(SongSettings.FacetOrder.ToHashSet().SetEquals(Enum.GetValues<Facet>())).IsTrue();
+        // but the riff's twin, mixed as its riff is
+        await Assert.That(SongSettings.PartOrder.ToHashSet(StringComparer.OrdinalIgnoreCase).SetEquals(SongParts.All.Where(x => x != Rmg.Core.Songs.TrackRole.RiffTwin).Select(x => x.ToString()))).IsTrue();
+    }
+
     [Test]
     public async Task Settings_ReadBackAsTheyWereWritten_ACharacterAValue()
     {

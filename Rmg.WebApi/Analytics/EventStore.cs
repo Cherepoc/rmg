@@ -167,8 +167,9 @@ public sealed class EventStore
     }
 
     /// <summary>
-    ///     Writes one event, unless this visitor has already written more today than anybody honestly
-    ///     would, or everyone together more than the day keeps (<see cref="DailyEvents" />). Answers whether it was kept, which the endpoint does not pass on: a caller being
+    ///     Writes one event, unless this visitor has already written more today than anybody honestly would, of the
+    ///     page's telemetry or of its ratings and verdicts, each counted apart, or everyone together more than the day keeps
+    ///     (<see cref="DailyEvents" />). Answers whether it was kept, which the endpoint does not pass on: a caller being
     ///     quietly ignored is not something worth telling it.
     /// </summary>
     public bool Write(StoredEvent stored)
@@ -180,10 +181,13 @@ public sealed class EventStore
             if (_prunedDay != stored.Day)
                 PruneOlder(connection, stored.At);
 
+            // what a visitor tells on purpose, a rating or a verdict, counted apart from what the page tells by itself, so
+            // that a long session's telemetry never crowds out its ratings
             using var counting = connection.CreateCommand();
-            counting.CommandText = "SELECT COUNT(*) FROM events WHERE visitor = $visitor AND day = $day";
+            counting.CommandText = $"SELECT COUNT(*) FROM events WHERE visitor = $visitor AND day = $day AND (name IN ('{EventNames.Rated}', '{EventNames.Verdict}')) = $deliberate";
             counting.Parameters.AddWithValue("$visitor", stored.Visitor);
             counting.Parameters.AddWithValue("$day", stored.Day);
+            counting.Parameters.AddWithValue("$deliberate", stored.Name is EventNames.Rated or EventNames.Verdict ? 1 : 0);
 
             if (Convert.ToInt64(counting.ExecuteScalar()) >= DailyEventsPerVisitor) return false;
 
@@ -273,7 +277,7 @@ public sealed class EventStore
         }
     }
 
-    /// <summary>Throws away everything older than <see cref="RetentionDays" />, and says how much went.</summary>
+    /// <summary>Throws away everything older than <see cref="RetentionDays" />, the file shrunk after it, and says how much went.</summary>
     public int Prune(DateTimeOffset now)
     {
         lock (_writing)
@@ -290,6 +294,14 @@ public sealed class EventStore
         command.Parameters.AddWithValue("$oldest", Day(now.AddDays(-RetentionDays)));
         var pruned = command.ExecuteNonQuery();
         _prunedDay = Day(now);
+        // and the file shrunk to what it keeps, once a day at most, so that a busy day leaves no high-water mark
+        if (pruned > 0)
+        {
+            using var vacuum = connection.CreateCommand();
+            vacuum.CommandText = "VACUUM";
+            vacuum.ExecuteNonQuery();
+        }
+
         return pruned;
     }
 

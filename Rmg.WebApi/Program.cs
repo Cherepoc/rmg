@@ -33,6 +33,9 @@ builder.WebHost.ConfigureKestrel(options =>
         case Interfaces.One: options.Listen(settings.Address!, settings.Port); break;
         default: options.ListenAnyIP(settings.Port); break;
     }
+
+    // a request is a song's settings or a genre, a few kilobytes, never the 30 megabytes Kestrel would read by default
+    options.Limits.MaxRequestBodySize = MaxRequestBytes;
 });
 
 // Behind a reverse proxy the scheme, host and client address of a request are whatever the proxy says
@@ -149,6 +152,12 @@ if (events is not null)
 
     app.MapAnalytics(events, VisitorHasher.Create(settings.StateDirectory), settings.IsListening);
 }
+else if (settings.IsListening)
+{
+    // a listening server is there for its verdicts, which only analytics keep
+    app.Logger.LogCritical("A listening server keeps its verdicts, so AnalyticsEnabled must be true where it listens");
+    return 1;
+}
 else
 {
     app.Logger.LogInformation("AnalyticsEnabled is false, so nothing is counted and nothing is written");
@@ -157,3 +166,10 @@ else
 app.Run();
 
 return 0;
+
+/// <summary>The server's own constants.</summary>
+internal static partial class Program
+{
+    /// <summary>The longest request body the server reads: a genre of every choice, several times over.</summary>
+    internal const long MaxRequestBytes = 1 << 20;
+}

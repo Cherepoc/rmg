@@ -211,6 +211,30 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(Write(EventNames.MixChanged, "a different visitor")).IsTrue();
     }
 
+    /// <summary>A visitor's ratings and verdicts, which it tells on purpose, kept however much telemetry its day sent, under a cap of their own.</summary>
+    [Test]
+    public async Task AVisitorsRatings_AreCountedApartFromItsTelemetry()
+    {
+        for (var written = 0; written < _store.DailyEventsPerVisitor; written++)
+            Write(EventNames.MixChanged);
+
+        await Assert.That(Write(EventNames.Rated, detail: "1")).IsTrue();
+        for (var written = 1; written < _store.DailyEventsPerVisitor; written++)
+            Write(EventNames.Verdict, detail: "q:with");
+        await Assert.That(Write(EventNames.Rated, detail: "1")).IsFalse();
+    }
+
+    /// <summary>A listen sent with no seconds, which the page never sends, leaves the summary as it would be without it.</summary>
+    [Test]
+    public async Task AListenWithoutItsSeconds_DoesNotBreakTheSummary()
+    {
+        Write(EventNames.Listened, seconds: 40, seed: 7, version: "0.5.001");
+        Write(EventNames.Listened, "forged", seed: 7, version: "0.5.001");
+
+        var summary = _store.Summarise(Now, 30);
+        await Assert.That(summary.Seeds.Single().Seconds).IsEqualTo(40);
+    }
+
     [Test]
     public async Task ASharedSongIsASongTakenAway()
     {

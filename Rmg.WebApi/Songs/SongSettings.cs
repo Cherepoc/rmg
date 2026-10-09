@@ -48,7 +48,8 @@ public sealed record SongSettings(
         [Facet.Feel, Facet.Groove, Facet.Fills, Facet.Form, Facet.Chords, Facet.Progression, Facet.Scale, Facet.Melody, Facet.Sound];
 
     /// <summary>
-    ///     The parts, by the names a request takes them by, every one the songs play.
+    ///     The parts, by the names a request takes them by, every one the songs play but the riff's twin, which the page
+    ///     mixes as its riff.
     /// </summary>
     public static ImmutableArray<string> PartOrder { get; } = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm", "solo"];
 
@@ -162,8 +163,9 @@ public sealed record SongSettings(
         ).ToImmutableArray();
         var pieces = new DrumPieceSettings(Bit(), [..Core.Composition.DrumPieces.All.Select(_ => Bit())]);
 
-        // a part plays as its own, in or out; a key is one of twelve, and a meter and a scale one of their options
-        if (parts.Any(x => x.Plays > 2) || key > 11 || meter >= Core.Composition.Meter.Options.Length || mode >= Scales.All.Length)
+        // a part plays as its own, in or out; a key is one of twelve, a meter and a scale one of their options, and drum
+        // pieces given one or more, as a request takes them
+        if (parts.Any(x => x.Plays > 2) || key > 11 || meter >= Core.Composition.Meter.Options.Length || mode >= Scales.All.Length || pieces.IsGiven && !pieces.Pieces.Contains(true))
             return null;
 
         var facets = given[1..^1].Select((value, i) => new Setting(isGiven[1 + i], value));

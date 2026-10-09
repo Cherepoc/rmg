@@ -24,6 +24,11 @@
       <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     </ItemGroup>
 
+    <!-- the page's presets, which the server reads too, to describe a song of one (GenrePresetFile) -->
+    <ItemGroup>
+      <EmbeddedResource Include="Client\genres.json" LogicalName="genres.json" />
+    </ItemGroup>
+
     <!-- the page's JS and CSS, bundled from Client/ into wwwroot on every build -->
     <Import Project="Client.targets" />
 

@@ -14,7 +14,7 @@ public sealed class SoundFontLibraryTest : IDisposable
     [Test]
     public async Task DirectoryIsMadeWhenItIsNotThere()
     {
-        var library = SoundFontLibrary.Create(_root);
+        var library = SoundFontLibrary.Create(_root, null, null);
 
         await Assert.That(Directory.Exists(library.Directory)).IsTrue();
         await Assert.That(library.List().ToArray()).IsEmpty();
@@ -134,7 +134,7 @@ public sealed class SoundFontLibraryTest : IDisposable
     [Test]
     public async Task AnEmptyDirectoryHasNoDefaultAndNothingMissing()
     {
-        var library = SoundFontLibrary.Create(_root);
+        var library = SoundFontLibrary.Create(_root, null, null);
 
         await Assert.That(library.List().ToArray()).IsEmpty();
         await Assert.That(library.IsPreferredMissing()).IsFalse();
@@ -145,7 +145,7 @@ public sealed class SoundFontLibraryTest : IDisposable
     {
         var elsewhere = Path.Combine(_root, "elsewhere");
 
-        var library = SoundFontLibrary.Create(Path.Combine(_root, "web"), elsewhere);
+        var library = SoundFontLibrary.Create(Path.Combine(_root, "web"), elsewhere, null);
         File.WriteAllText(Path.Combine(library.Directory, "a.sf2"), "");
 
         await Assert.That(library.Directory).IsEqualTo(Path.GetFullPath(elsewhere));
@@ -167,7 +167,7 @@ public sealed class SoundFontLibraryTest : IDisposable
 
     private SoundFontLibrary Given(params (string File, string Content)[] files)
     {
-        var library = SoundFontLibrary.Create(_root);
+        var library = SoundFontLibrary.Create(_root, null, null);
         foreach (var (file, content) in files) File.WriteAllText(Path.Combine(library.Directory, file), content);
 
         return library;

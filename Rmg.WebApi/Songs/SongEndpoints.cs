@@ -16,8 +16,8 @@ public static class SongEndpoints
     /// <param name="isListening">Whether a song may be asked for with stages left out (<see cref="ServerSettings.IsListening" />).</param>
     public static void MapSongs(this IEndpointRouteBuilder routes, bool isListening)
     {
-        routes.MapPost("/api/songs/generate", (HttpContext context, SongQueue queue, SongLog log, Genres.GenreStore genres, GenerateSongRequest? request) =>
-            GenerateSong(context, queue, log, genres, request, isListening));
+        routes.MapPost("/api/songs/generate", (HttpContext context, SongQueue queue, SongLog log, Genres.GenreStore genres, ILoggerFactory loggers, GenerateSongRequest? request) =>
+            GenerateSong(context, queue, log, genres, loggers.CreateLogger(typeof(SongEndpoints)), request, isListening));
 
         // what a song may be given: its tempos, in beats a minute, and its lengths, in seconds, by their steps, its meters,
         // its drum pieces and its scales, in the order a request names them by
@@ -41,7 +41,8 @@ public static class SongEndpoints
     ///     How long it waited and took, and how it ended, is kept (<see cref="SongLog" />) once its turn is given back, so
     ///     that no core waits on the disk.
     /// </summary>
-    private static async Task<IResult> GenerateSong(HttpContext context, SongQueue queue, SongLog log, Genres.GenreStore genres, GenerateSongRequest? request, bool isListening)
+    private static async Task<IResult> GenerateSong(HttpContext context, SongQueue queue, SongLog log, Genres.GenreStore genres, ILogger logger, GenerateSongRequest? request,
+        bool isListening)
     {
         request ??= new GenerateSongRequest();
 
@@ -115,8 +116,10 @@ public static class SongEndpoints
             }
             catch (Exception ex)
             {
+                // kept with what the song was given, so that it can be made again; the client told which song, not why
                 ended = SongOutcome.Failed;
-                result = Results.Problem($"Song {Base62.FromSeed(songSeed)}: {ex.Message}", statusCode: 500);
+                logger.LogError(ex, "Song {Seed} failed, given {Overrides}, leaving out {Skipped}", Base62.FromSeed(songSeed), overrides, string.Join(", ", skipped));
+                result = Results.Problem($"Song {Base62.FromSeed(songSeed)} could not be made.", statusCode: 500);
             }
         }
 

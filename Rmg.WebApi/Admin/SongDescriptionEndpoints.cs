@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
@@ -15,10 +16,10 @@ public static class SongDescriptionEndpoints
     }
 
     /// <summary>
-    ///     The song of a link, its seed and its settings, described as the songs make it now, waiting its turn as any song
-    ///     does.
+    ///     The song of a link, its seed, its settings and its genre, a preset's id or a kept genre's key, described as the
+    ///     songs make it now, waiting its turn as any song does.
     /// </summary>
-    private static async Task<IResult> Describe(HttpContext context, SongQueue queue, string? song, string? settings)
+    private static async Task<IResult> Describe(HttpContext context, SongQueue queue, Genres.GenreStore genres, string? song, string? settings, string? genre)
     {
         if (song is null || Base62.ToSeed(song.Trim()) is not { } seed)
             return Results.BadRequest(new ErrorResponse($"'{song}' is not a seed. A seed is up to {Base62.SeedLength} letters and digits."));
@@ -28,7 +29,26 @@ public static class SongDescriptionEndpoints
         if (settings is not null && (given = SongSettings.Parse(settings.Trim())) is null)
             return Results.BadRequest(new ErrorResponse($"'{settings}' are not settings this version reads."));
 
-        if (!(given?.ToRequest(text) ?? new GenerateSongRequest(text)).TryRead(out _, out var overrides, out var mix, out var error))
+        var request = given?.ToRequest(text) ?? new GenerateSongRequest(text);
+        if (genre?.Trim() is { Length: > 0 } named)
+        {
+            if (Genres.GenrePresetFile.All.FirstOrDefault(x => x.Id == named) is { } preset)
+                request = request with { Genre = preset.Choices.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, JsonElement>)x.Value), GenreName = preset.Name };
+            else if (genres.Find(named) is { } body)
+            {
+                using var kept = JsonDocument.Parse(body);
+                request = request with
+                {
+                    Genre = kept.RootElement.GetProperty("choices").EnumerateObject()
+                        .ToDictionary(x => x.Name, x => (IReadOnlyDictionary<string, JsonElement>)x.Value.EnumerateObject().ToDictionary(o => o.Name, o => o.Value.Clone())),
+                    GenreName = kept.RootElement.GetProperty("name").GetString()
+                };
+            }
+            else
+                return Results.BadRequest(new ErrorResponse($"'{named}' is neither a preset nor a genre this server keeps."));
+        }
+
+        if (!request.TryRead(out _, out var overrides, out var mix, out var error))
             return Results.BadRequest(new ErrorResponse(error!));
 
         using var turn = await queue.Enter(SongQueue.ClientOf(context.Connection.RemoteIpAddress), context.RequestAborted);
@@ -45,7 +65,7 @@ public static class SongDescriptionEndpoints
             text,
             settingsText,
             description,
-            SongDescriptionText.ToMarkdown(description, text, settingsText, null, SongsVersion.Number)
+            SongDescriptionText.ToMarkdown(description, text, settingsText, request.GenreName, SongsVersion.Number)
         ));
     }
 }

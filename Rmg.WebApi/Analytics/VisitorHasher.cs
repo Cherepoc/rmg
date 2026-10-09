@@ -34,12 +34,16 @@ public sealed class VisitorHasher
     {
         var path = Path.Combine(directory, SecretFileName);
 
-        if (File.Exists(path)) return new VisitorHasher(File.ReadAllBytes(path));
+        // a secret of its whole length, a file cut short by a crash as it was written made again
+        if (File.Exists(path) && File.ReadAllBytes(path) is { Length: SecretLength } kept) return new VisitorHasher(kept);
 
         var secret = RandomNumberGenerator.GetBytes(SecretLength);
-        File.WriteAllBytes(path, secret);
-
-        // readable by nobody else: whoever holds it could ask whether a given address visited on a given day
+        // readable by nobody else from the moment it exists: whoever holds it could ask whether a given address visited on a
+        // given day
+        var options = new FileStreamOptions { Mode = FileMode.Create, Access = FileAccess.Write };
+        if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+        using (var file = new FileStream(path, options))
+            file.Write(secret);
         if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
 
         return new VisitorHasher(secret);
