@@ -35,16 +35,30 @@
   weight or anything else with `Tilt`: an option's weight times the odds to the power of its lean, a chance through its
   odds, a value around its middle by its skew. A lean is data on the option; never multiply or cap a chance by hand.
 - **Ask a track's role** (`TrackRole`), never its number.
-- **Streams.** Every stage and section draws from its own stream (`SongStream`, `Seeds.Derive`). A new decision
-  draws from a stream of its own, or keeps the number of draws, so that with its effect off the corpus is unchanged
-  (`CorpusFingerprintTest`); a refactor must keep the fingerprint.
+- **A decision reads what it is about.** A decision depends only on the things it concerns, never on another part's
+  decisions by the way: the band's lift into a louder section follows the sections, not the drums' fill lines. An edit
+  to the whole band, such as a stop, reaches every track of the song, not those one section's timeline happens to hold,
+  as later stages add parts such as a soloist or a riser. A part of the song made from another, such as a hook intro
+  from its chorus, is treated by every stage as its source is, so that it stays what it quotes.
+- **Streams.** Every stage, section and part draws from its own stream (`SongStream`, `Seeds.Derive`), a part's keyed by
+  its role or track and never shared with another part's, so that a change to one leaves the others as they were. A
+  new decision draws from a stream of its own, or keeps the number of draws, so that with its effect off the corpus is
+  unchanged (`CorpusFingerprintTest`). Seeds are 64-bit `ulong`s and keys 64-bit `long`s, never cut to `int` or `uint`.
+- **Songs change on purpose.** A refactor keeps the fingerprint where the right code keeps it, but code is never bent
+  to keep it (draw orders kept by hand, helpers shaped round a draw, lookups left mixed); the change is made
+  deliberately instead, and its commit says how many of 256 drawn songs it changed, their MIDI compared with the
+  build's label, which names its commit, left out.
 - **Measure.** Measure a change in behaviour on the corpus before and after it (`TestCorpus`, explicit report
   tests), and tune it against the numbers. Tests read the trace's typed values (`StateTraceEntry.Value`,
-  `TracePoints`), never its descriptions.
+  `TracePoints`), never its descriptions. A change that redraws the songs meets songs the tests never met, and some
+  fail for reasons older than it: each failure is checked against the committed code over the same songs (a
+  `git worktree`) before the change is blamed or the test relaxed; a rule that fails is a bug to fix, a calibration
+  that drifts a sample to widen.
 - **Rules and calibrations.** A test asserts a rule, what must hold of every song, such as every note in its chord's
   scale. A measured share is a calibration: its test keeps a wide bound against the mechanism breaking, prints what
   it measures, and its target lives in an explicit report, so that a musical change moves numbers rather than fails
-  tests.
+  tests. It measures 64 songs or more, the range seen written beside its bound, and compares the same songs with the
+  mechanism on and off rather than one genre's songs with another's, as a few songs otherwise decide the share.
 - **Drawn or given.** A value the song draws, such as its unconventionality, follows the generator's taste, which may
   keep songs away from the ends; a value supplied in its place (`SongOverrides`) is used as given, a facet set outright
   as it is and a base as the centre its facets and sections stray around, so that a supplied 0 or 1 is the plainest or
