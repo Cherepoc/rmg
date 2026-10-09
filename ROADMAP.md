@@ -88,7 +88,10 @@ fixed; the review and the plan are kept outside the repository):
     genre songs once, the corpus's renderings and trace read once, the songs a test makes twice made side by side, a
     duplicate test gone, four tests made to check what they say, a free form's kept parts tested. A cache of the
     songs with values supplied left out, as their thousands would not fit the tests' memory.
-14. Page test reliability. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
+14. Done: page tests reliable, five runs in a row passing: the listening questions fetched beside the page, the
+    tests serving their own (one patching a genre, one leaving out a stage, a question of its own for each test that
+    gives verdicts), a song's end stamped as it ends, negative checks waiting past the remake, a failed CDN fetch tried
+    again, the generator's tuned numbers read by their form. Left: the media session and the pulse have no page test. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
 
 **Done before it** (the plan of 8 October 2026 from the review of P3 and P4, each step through the implementation loop,
 each device a genre's data on a mechanism there already where it can be, strong in its genres rather than a few
