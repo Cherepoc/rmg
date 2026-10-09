@@ -600,10 +600,14 @@ internal readonly record struct ResolvedRhythm(
     /// </param>
     public static ResolvedRhythm Of(StateMap stateMap, double? minNote = null)
     {
+        // a cycle kept under the longest by its limit, a step shorter while its feel stretches it past it
+        var longest = 1 - Math.Max(0, stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Limit));
         var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
-            .BounceInBounds(-2, 1);
+            .BounceInBounds(-2, longest);
         var feel = Feels.Of(stateMap);
         var periodValue = Math.Pow(2, periodPower) * feel.ToRhythmPeriodValue();
+        while (periodValue > Math.Pow(2, longest) + 1e-9 && periodPower > -2)
+            periodValue = Math.Pow(2, --periodPower) * feel.ToRhythmPeriodValue();
 
         // a bar pattern's to its limit, and a fill's as fine as its shortest note; a grouped cycle's no finer than the grid
         var maxRankLimit = minNote is { } note

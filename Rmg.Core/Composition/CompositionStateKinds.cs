@@ -292,7 +292,7 @@ internal static class CompositionStateKinds
             Feel = StateKinds.CreateLowestLayerWins<int>(prefix + "Feel");
             All =
             [
-                Period.Value, Period.Power, Feel, Phase.Value, Phase.Rank, Phase.RankedOffset, MaxRank, Seed, RankOffset,
+                Period.Value, Period.Power, Period.Limit, Feel, Phase.Value, Phase.Rank, Phase.RankedOffset, MaxRank, Seed, RankOffset,
                 Fullness, Variation
             ];
         }
@@ -335,11 +335,18 @@ internal static class CompositionStateKinds
         {
             Value = StateKinds.CreateAdditive<double>(prefix + "Value");
             Power = StateKinds.CreateAdditive<int>(prefix + "Power");
+            Limit = StateKinds.CreateAdditive<int>(prefix + "Limit");
         }
 
         public StateKind<double> Value { get; }
 
         public StateKind<int> Power { get; }
+
+        /// <summary>
+        ///     How many steps under the longest cycle a part's is kept (<see cref="ResolvedRhythm.Of" />): 1 for a drum
+        ///     keeping a role, whose cycle is a bar at most, so that no bar goes without its backbeat or its time.
+        /// </summary>
+        public StateKind<int> Limit { get; }
     }
 
     public sealed class DyadicRhythmStateKinds

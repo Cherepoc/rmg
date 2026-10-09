@@ -49,6 +49,7 @@ internal static class DrumRoles
 
     /// <summary>The fixed rhythm a role gives a drum, as its steps of the rhythm settings.</summary>
     /// <param name="PeriodPower">Its cycle's steps, down for a faster one.</param>
+    /// <param name="PeriodLimit">How many steps under the longest its cycle is kept: a bar at most for a role with a rhythm of its own.</param>
     /// <param name="PhaseRank">Its cycle's shift, by rank: 1 for half a cycle, as the backbeat's.</param>
     /// <param name="MaxRank">How many ranks finer than its cycle it plays: fewer for no weaker hits of its own.</param>
     /// <param name="Fullness">How full it plays.</param>
@@ -58,7 +59,7 @@ internal static class DrumRoles
     ///     the backbeat, which the snare alone does not leave for double or half time while the kick and the hi-hat
     ///     play on, the drums' shared layers still moving the groove of them all.
     /// </param>
-    public sealed record Part(int PeriodPower, int PhaseRank, int MaxRank, double Fullness, double Variation, double GrooveLean)
+    public sealed record Part(int PeriodPower, int PeriodLimit, int PhaseRank, int MaxRank, double Fullness, double Variation, double GrooveLean)
     {
         /// <summary>The part as state, times the sign given, so that a section can take one part and add another.</summary>
         public StateMap ToStateMap(int sign = 1)
@@ -66,6 +67,7 @@ internal static class DrumRoles
             IState[] states =
             [
                 CompositionStateKinds.Rhythm.Period.Power.CreateState(sign * PeriodPower),
+                CompositionStateKinds.Rhythm.Period.Limit.CreateState(sign * PeriodLimit),
                 CompositionStateKinds.Rhythm.Phase.Rank.CreateState(sign * PhaseRank),
                 CompositionStateKinds.Rhythm.MaxRank.CreateState(sign * MaxRank),
                 CompositionStateKinds.Rhythm.Fullness.CreateState(sign * Fullness),
@@ -79,14 +81,15 @@ internal static class DrumRoles
     /// <summary>
     ///     Every role's part: the ground repeats its figure; the backbeat is a cycle of half a bar shifted by half of it,
     ///     its main hits on beats 2 and 4, with no weaker hits of its own unless the rhythm layers add ghost notes, and it
-    ///     keeps its figure; time plays faster than the other drums, full and steady; colour has no part of its own.
+    ///     keeps its figure; time plays faster than the other drums, full and steady; each of them in a cycle of a bar at
+    ///     most, every bar playing it; colour has no part of its own.
     /// </summary>
     public static ImmutableDictionary<DrumRole, Part> Parts { get; } = new Dictionary<DrumRole, Part>
     {
-        [DrumRole.Ground] = new(0, 0, 0, 0, -0.4, 0),
-        [DrumRole.Backbeat] = new(-1, 1, -2, 0, -0.3, -1),
-        [DrumRole.Time] = new(-1, 0, 0, 0.35, -0.5, 0),
-        [DrumRole.Colour] = new(0, 0, 0, 0, 0, 0)
+        [DrumRole.Ground] = new(0, 1, 0, 0, 0, -0.4, 0),
+        [DrumRole.Backbeat] = new(-1, 1, 1, -2, 0, -0.3, -1),
+        [DrumRole.Time] = new(-1, 1, 0, 0, 0.35, -0.5, 0),
+        [DrumRole.Colour] = new(0, 0, 0, 0, 0, 0, 0)
     }.ToImmutableDictionary();
 
     /// <summary>
