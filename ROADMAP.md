@@ -195,9 +195,13 @@ device where it is heard the most, by how much its song with the device and with
 its song without lays its patch over the genre's options, the others kept (`withoutDevice`). Asked again since:
 `tape`, whose song without had lost every other effect of its genre's, and `stop-time`; asked anew, `inversion`, the
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
-`lift-cues`, under 0.1, and `bossa-clave`, Bossa nova's cross-stick playing the clave in 74% of its sections, 0.07 as a
-rim's stroke is quiet; `block`, Soul's melody harmonised in three voices, 0.15; `own-modes`, Fusion's planed chords in modes of their
-own, 0.42; `mediant`, Orchestral's iii or vi turned major, 0.54.
+`lift-cues`, under 0.1. Asked anew: `own-modes`, Fusion's planed chords in modes of their own, 0.42; `mediant`,
+Orchestral's iii or vi turned major, 0.54.
+
+Answered on 9 October 2026, and kept: `bossa-clave`, Bossa nova's cross-stick playing the clave in 74% of its sections,
+0.07 as a rim's stroke is quiet, its velocity the kit's highest (88 against the snare's 81) and its sample 6 to 13 dB
+under the kick's at the same velocity in the soundfonts measured, the sound set's; and `block`, Soul's melody
+harmonised in three voices, 0.15.
 
 Answered on 8 October 2026, late, and let go of: the clave, stop time and the ghost notes, heard as great; the tape and
 the tone, barely heard, so a tape's wow now drifts by the sound facet, 5 cents at the plain end to 26 at the wild, and a
@@ -539,7 +543,7 @@ Each item with its plan, and what it waits for.
   chord but the home, two chords passing where one does now; a chord solo's approaches on the strong beats at the wild
   end, and the dominant as its approach; the tritone substitute for a progression's own V7 in a reharmonised
   appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
-- **A melody in block harmony, the rest** (P3, by listening to `?listen=block`): a block is the counter-melody
+- **A melody in block harmony, the rest** (P3; `block` heard and kept, 9 October 2026): a block is the counter-melody
   stacking its chord's notes under its harmony note (`LineDoubling.BlockChance`, Soul's and Funk's 60%, Ska's and
   Latin's 50% of their harmonised sections), its passing notes alone, three voices on 56% of the notes struck with the
   melody, the melody on top 86%. Left: its passing notes harmonised too, a diminished chord or the scale's in parallel,

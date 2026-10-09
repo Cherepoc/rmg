@@ -62,12 +62,6 @@ public sealed class ListeningQuestionsTest
             "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?
                 .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min()),
-        new("bossa-clave", "Bossa nova's cross-stick playing the clave, the 3-2 with its last stroke late, rather than the backbeat: a bossa drummer, or busier?",
-            "The bossa clave's weight in Bossa nova's backbeat.", "bossa", [], new() { ["figure.backbeat"] = Only(GenreChoices.Figures[FigurePlayer.Backbeat], Figures.Own) },
-            x => Plays(x, FigurePlayer.Backbeat, "bossaClave")),
-        new("block", "Soul's melody harmonised in three voices, the counter-melody stacking its chord under its note, rather than two: a horn section, or thick?",
-            "The block's chance by genre.", "soul", [], new() { ["doubling"] = new() { ["block"] = 0 } },
-            x => FirstSection(x, TracePoints.BlockHarmony, _ => true)),
         new("own-modes", "Fusion's planed chords each in a mode of its own, major and minor moving by semitones, rather than all the home's shape: fusion, or aimless?",
             "The planed modes' chance by genre.", "fusion", [], new() { ["planing"] = new() { ["modes"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.Planing && t.Value is not null
