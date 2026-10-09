@@ -89,6 +89,9 @@ export function requestFor(seed, settings) {
     };
 }
 
+/** The General MIDI program a riser plays whatever its part's instrument, the reverse cymbal (the server's `Risers.Program`). */
+const RISER_PROGRAM = 119;
+
 /**
  *     The settings with what the song drew where nothing was given, from the server's report of it, and what the song
  *     is made of: every part's channel, from 0, as the file has it, whether it is in the song, its own instrument and
@@ -120,10 +123,11 @@ export function applyReport(settings, report) {
         own[part] = { instrument: reported.instrument, pan: reported.pan };
     }
 
-    // a part's other channels, mixed as it is: its second take, a doubled driven guitar's, on the other side, and the
-    // riff's twin, on the other side too, with its own second take back on the riff's
+    // a part's other channels, mixed as it is: its second take, a doubled driven guitar's, on the other side, its riser,
+    // and the riff's twin, on the other side too, with its own second take back on the riff's
     const seconds = (part) => (report.parts[part]?.double == null ? [] : [report.parts[part].double - 1]);
-    const others = Object.fromEntries(PARTS.map((part) => [part, seconds(part).map((channel) => ({ channel, mirrored: true }))]));
+    const riser = (part) => (report.parts[part]?.riser == null ? [] : [{ channel: report.parts[part].riser - 1, mirrored: false, program: RISER_PROGRAM }]);
+    const others = Object.fromEntries(PARTS.map((part) => [part, [...seconds(part).map((channel) => ({ channel, mirrored: true })), ...riser(part)]]));
     const twin = report.parts.riffTwin?.channel;
     if (twin != null)
         others.riff.push({ channel: twin - 1, mirrored: true }, ...seconds("riffTwin").map((channel) => ({ channel, mirrored: false })));

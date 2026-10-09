@@ -187,5 +187,61 @@
         ]
       }
     ]
+  },
+  {
+    "id": "riser",
+    "question": "Techno's reverse cymbal swelling into a drop, the band muffled under it or silent: a build, or noise over the band?",
+    "decides": "The riser's loudness against the band, and whether it rises over a filtered drop.",
+    "genre": "techno",
+    "without": {
+      "skip": [
+        "Risers"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      {
+        "seed": "L",
+        "at": 581,
+        "listen": [
+          "Chords (Reverse Cymbal)"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 485,
+        "listen": [
+          "Chords (Reverse Cymbal)"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 717.7,
+        "listen": [
+          "Melody (Reverse Cymbal)"
+        ]
+      },
+      {
+        "seed": "e",
+        "at": 276.3,
+        "listen": [
+          "Chords (Reverse Cymbal)"
+        ]
+      },
+      {
+        "seed": "h",
+        "at": 194.6,
+        "listen": [
+          "Chords (Reverse Cymbal)"
+        ]
+      },
+      {
+        "seed": "n",
+        "at": 325.8,
+        "listen": [
+          "Pad (Reverse Cymbal)"
+        ]
+      }
+    ]
   }
 ]

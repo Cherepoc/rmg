@@ -51,6 +51,9 @@ public sealed class RenderedTrack
     /// <summary>Whether the track is its part's second take, which a mix doubles a driven guitar with on the other side (<see cref="Composition.DoubleTracking" />).</summary>
     public bool IsDouble { get; init; }
 
+    /// <summary>Whether the track is its part's riser into a drop, on a channel of its own (<see cref="Composition.Risers" />).</summary>
+    public bool IsRiser { get; init; }
+
     /// <summary>Where the track sits from left to right, from -1, left, through 0, the middle, to 1, right.</summary>
     public double Pan { get; }
 

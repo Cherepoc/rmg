@@ -65,9 +65,12 @@ public static class Render
         var percussionTrackNotes = new List<IEnumerable<TimelineItem<RenderedNote>>>();
         ImmutableArray<(double Position, int Controller, int Value)> percussionSends = [];
         var echoingDrums = new HashSet<int>();
-        foreach (var (trackNumber, trackNotes) in notes)
+        foreach (var (trackNumber, allNotes) in notes)
         {
             cancellation.ThrowIfCancellationRequested();
+            // a riser on a channel of its own, its part's mix over it, so that it swells where the part plays on
+            var risers = allNotes.Where(x => Risers.IsRiser(x.Value.State)).ToArray();
+            var trackNotes = risers.Length == 0 ? allNotes : EventTimeline.Create(allNotes.Duration, allNotes.Where(x => !Risers.IsRiser(x.Value.State)));
             // a drum plays as its group is asked to
             var group = song.TrackDefinitions[trackNumber] is PercussionInstrumentTrack && !mix.DrumGroups.IsEmpty
                 ? mix.DrumGroups.GetValueOrDefault(DrumGroups.GroupOf(DrumGroups.GetDrum(trackNumber)).Name)
@@ -130,6 +133,15 @@ public static class Render
                         Expression = expression.Expression
                     }
                 );
+                // its riser swung as its notes are, unfiltered by the mix's closing, sent to the part's reverb and chorus alone
+                if (risers.Length > 0)
+                    renderedTracks.Add(new RenderedTrack(false, pitchInstrumentTrack.Role, Risers.Program, EventTimeline.Create(allNotes.Duration, risers.Select(x =>
+                        new RenderedNote(Risers.Pitch, GetMidiVelocity(x.Value), swing.Apply(x.Position + x.Value.Duration) - swing.Apply(x.Position), 0).ToTimelineItem(swing.Apply(x.Position)))), pitchInstrumentTrack.Pan)
+                    {
+                        IsRiser = true,
+                        Controllers = [..ExpressionRender.Render(EventTimeline.Create(allNotes.Duration, risers.Take(1)), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, [])
+                            .Controllers.Where(x => x.Controller is ExpressionRender.ReverbController or ExpressionRender.ChorusController)]
+                    });
                 // and its second take, on the other side and the other driven guitar, a little late
                 if (doubles)
                 {
@@ -183,7 +195,7 @@ public static class Render
             .Select(x => new RenderedTrack(
                 x.Track.IsPercussionInstrument,
                 x.Track.Role,
-                x.Mix?.Instrument is { } given ? x.Track.IsDouble ? DoubleTracking.SecondTake(given) : given : x.Track.PitchInstrumentCode,
+                x.Mix?.Instrument is { } given && !x.Track.IsRiser ? x.Track.IsDouble ? DoubleTracking.SecondTake(given) : given : x.Track.PitchInstrumentCode,
                 x.Track.NoteTimeline,
                 // a second take on the other side of the pan given
                 x.Mix?.Pan is { } pan ? x.Track.IsDouble ? -pan : pan : x.Track.Pan,
@@ -191,6 +203,7 @@ public static class Render
             )
             {
                 IsDouble = x.Track.IsDouble,
+                IsRiser = x.Track.IsRiser,
                 ProgramChanges = x.Mix?.Instrument is null ? x.Track.ProgramChanges : [],
                 PitchBends = x.Track.PitchBends,
                 // a pan given holds throughout, its sweep let go of

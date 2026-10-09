@@ -166,16 +166,8 @@ beyond General MIDI left out). Of the six limits named, three are smaller than t
 several pitches and an ornament already, as the render plays both for any track; a fill already changes its feel
 within a bar; and swing already pairs by each section's meter. In order of what each gives for its cost:
 
-1. **A riser's own channel, and a riser over a filtered drop.** The riser borrows a pitched part's channel where a
-   silent drop frees it (`Risers`), so it cannot play where the band plays on. A track of its own (a `TrackRole` of its
-   own, a `PitchInstrumentTrack` on the reverse cymbal), made only in a song with a drop, its notes laid by the stage
-   as now: at most 9 pitched parts and 4 second takes leave it a channel (14 of 15). Its first use in the same step,
-   as the channel alone changes no note: the riser over a filtered drop's muffled bar. Measured: the songs changed are
-   those with a drop (MIDI only for the silent ones, their notes the same); every riser on its own channel and no
-   part's chord cut (a rule). The page's mix lists it as a part, a page test for it. Review: a role added touches
-   every switch over the roles (`SongParts.ChanceOf` throws for it, rightly, as no section plays it); musically a
-   riser over a band still playing may mask the build, its loudness under the band's to listen to (`?listen=riser`).
-   The lift cue's riser stays a listening item.
+1. Done: a riser's own channel, the render's, its part's track carrying it and its mix over it, the page's too; a
+   riser into every drop, a filtered one's as well, its part playing on under it (`?listen=riser`).
 2. **The bar patterns' finest note by the tempo.** A bar pattern stops at 16ths by a constant
    (`ResolvedRhythm.MaxRankLimit`), a fill at its shortest note in seconds (`FillLayers`), hat rolls and ratchets in
    32nds already. One rule for both: a bar pattern's finest rank by a shortest note in seconds of its own, 16ths at
@@ -260,7 +252,8 @@ its song without lays its patch over the genre's options, the others kept (`with
 `tape`, whose song without had lost every other effect of its genre's, and `stop-time`; asked anew, `inversion`, the
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
 `lift-cues`, under 0.1. Asked anew: `own-modes`, Fusion's planed chords in modes of their own, 0.42; `mediant`,
-Orchestral's iii or vi turned major, 0.54.
+Orchestral's iii or vi turned major, 0.54. And `riser`, Techno's reverse cymbal into every drop, the filtered ones too, on a channel of its
+own, under 0.01 as a short device is.
 
 Answered on 9 October 2026, and kept: `bossa-clave`, Bossa nova's cross-stick playing the clave in 74% of its sections,
 0.07 as a rim's stroke is quiet, its velocity the kit's highest (88 against the snare's 81) and its sample 6 to 13 dB
@@ -504,9 +497,6 @@ Each item with its plan, and what it waits for.
 - **A dance track's ending stripped back** (P3, from the review of 9 October 2026): House, Techno and Trance end
   by fading, opening or stopping; a DJ's ending drops the parts out one by one to the drums alone, an ending of its own
   beside the fade, the reverse of an intro of entries.
-- **A riser over a filtered drop** (P3, by listening, October 2026): a reverse cymbal swelling over the muffled bar
-  before a filtered drop, as the silent one has, which wants a channel of its own as the band plays on there (*A riser as
-  a lift cue*, under *Genres*).
 - **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
   the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
@@ -740,9 +730,8 @@ left:
 - **What the genres cannot play yet** (P3, each by what listening to the presets says; `GenreDevicesReportTest`,
   `GenreIdiomsReportTest` the measures):
   - The loop's figures shared, the bass's and the riff's, beside its harmony (`GenreChoices.Loop`).
-  - A riser as a lift cue, into a louder section where the band plays on, which the riser into a drop
-    (`Risers`) plays on a channel its silence leaves free: a program change there would cut the part's
-    chord, so a channel of its own, should a lift want one.
+  - A riser as a lift cue, into a louder section where the band plays on, the riser's own channel there now
+    (`Risers`), should a lift want one.
   - The pump on the kick wherever it falls, should a pumping genre's kick leave the beat; it ducks on the beat now.
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a
     role free.

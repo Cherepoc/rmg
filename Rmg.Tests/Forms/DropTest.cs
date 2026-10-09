@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 using Rmg.Tests.Genres;
@@ -78,6 +79,55 @@ public sealed class DropTest
         var silent = songs.Sum(x => x.Trace.Count(t => t.Point == TracePoints.Drop));
         Console.WriteLine($"of 32 Techno songs' drops, {drops} filtered and {silent} silent");
         await Assert.That(drops).IsGreaterThan(5);
+    }
+
+    /// <summary>
+    ///     Every drop, silent or filtered, takes one riser ending on it, on a channel of its own beside its part's, so that
+    ///     over a filtered drop the part plays on under it.
+    /// </summary>
+    [Test]
+    public async Task EveryDrop_TakesARiser_OnAChannelOfItsOwn_ItsPartPlayingOnOverAFilteredOne()
+    {
+        int silent = 0, filtered = 0, playingOn = 0;
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno"))));
+        foreach (var song in songs)
+        {
+            var risers = song.Rendered.Tracks.Where(x => x.IsRiser).ToArray();
+            var filteredDrops = song.Trace.Where(x => x.Point == TracePoints.FilteredDrop).Select(x => (double)x.Value!).ToHashSet();
+            var drops = song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!).Concat(filteredDrops).ToArray();
+            if (drops.Length == 0)
+            {
+                await Assert.That(risers).IsEmpty();
+                continue;
+            }
+
+            // one part carries them all, on a channel apart from its own and its second take's
+            await Assert.That(risers.Length).IsEqualTo(1).Because($"seed {song.Seed}");
+            var riser = risers[0];
+            await Assert.That(riser.PitchInstrumentCode).IsEqualTo(Risers.Program);
+            await Assert.That(song.Rendered.GetPartChannels()[riser.Role]).IsNotEqualTo(song.Rendered.GetRiserChannels()[riser.Role]);
+            var own = song.Rendered.Tracks.Single(x => x.Role == riser.Role && !x.IsDouble && !x.IsRiser);
+            foreach (var drop in drops)
+            {
+                var bar = song.Song.Map!.MeterAt(drop - 1e-6).BarDuration;
+                var swing = Rmg.Core.Rendering.Render.GetSwing(song.Song);
+                // its swell over the bar before, ending on the drop
+                await Assert.That(riser.NoteTimeline.Count(x => Math.Abs(x.Position + x.Value.Duration - swing.Apply(drop)) < 1e-6)).IsEqualTo(1).Because($"seed {song.Seed} at {drop}");
+                if (!filteredDrops.Contains(drop))
+                {
+                    silent++;
+                    continue;
+                }
+
+                filtered++;
+                if (own.NoteTimeline.Any(x => x.Position >= swing.Apply(drop - bar) - 1e-9 && x.Position < swing.Apply(drop) - 1e-9))
+                    playingOn++;
+            }
+        }
+
+        Console.WriteLine($"of 32 Techno songs' drops, {silent} silent and {filtered} filtered, the riser's part playing on under {playingOn} of these");
+        await Assert.That(silent).IsGreaterThan(5);
+        await Assert.That(filtered).IsGreaterThan(5);
     }
 
     /// <summary>A drop whose bar before it is no section's, an intro's, still takes its riser by the meter there.</summary>

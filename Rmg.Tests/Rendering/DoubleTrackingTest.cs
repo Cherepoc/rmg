@@ -25,7 +25,7 @@ public sealed class DoubleTrackingTest
             var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
             foreach (var part in song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>())
             {
-                var takes = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument && x.Role == part.Role).ToArray();
+                var takes = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument && !x.IsRiser && x.Role == part.Role).ToArray();
                 if (!DoubleTracking.Doubles(part.Role, part.InstrumentCode))
                 {
                     await Assert.That(takes.Any(x => x.IsDouble)).IsFalse();

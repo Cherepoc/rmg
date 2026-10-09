@@ -70,7 +70,10 @@ public sealed class ListeningQuestionsTest
         new("mediant", "Orchestral's iii or vi turned major, a chromatic mediant, as a film score lifts: a lift, or a wrong chord?",
             "The mediant's chance by genre.", "orchestral", [], new() { ["chordScales"] = new() { ["mediant"] = 0 } },
             x => Before(x, x.Trace.Where(t => t.Point == TracePoints.ChordScales && ((ImmutableArray<ChordScale>)t.Value!).Any(c => c.Kind == ChordScaleKind.Mediant))
-                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 2))
+                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 2)),
+        new("riser", "Techno's reverse cymbal swelling into a drop, the band muffled under it or silent: a build, or noise over the band?",
+            "The riser's loudness against the band, and whether it rises over a filtered drop.", "techno", ["Risers"], null,
+            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.FilteredDrop).Select(t => (double?)t.Value).Min(), 2))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

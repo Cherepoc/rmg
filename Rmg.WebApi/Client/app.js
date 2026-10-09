@@ -2007,7 +2007,7 @@ async function listChoices() {
     }
 }
 
-/** A part's channels, its own and its others', and whether each sits on the other side of the part's pan. */
+/** A part's channels, its own and its others', whether each sits on the other side of the part's pan, and the program of one that keeps its own. */
 function channelsOf(part) {
     return [...(channels[part] == null ? [] : [{ channel: channels[part], mirrored: false }]), ...(others[part] ?? [])];
 }
@@ -2449,7 +2449,8 @@ function setPartInstrument(part, instrument, isChange) {
     settingsChanged(false);
 
     // the page and the download are right whatever the audio does, so the player is told separately
-    for (const { channel } of channelsOf(part))
+    // a riser keeps its own sound
+    for (const { channel } of channelsOf(part).filter((x) => x.program == null))
         withPlayer((player) => player.setChannelInstrument(channel, instrument.value, instrument.isGiven), "Could not set the instrument");
 }
 
@@ -2515,10 +2516,10 @@ function createOption(value, name) {
  */
 function applyMix(player) {
     for (const part of PARTS)
-        for (const { channel, mirrored } of channelsOf(part)) {
+        for (const { channel, mirrored, program } of channelsOf(part)) {
             const mix = settings.parts[part];
             if (part === "drum") player.setChannelDrums(channel, true);
-            player.setChannelInstrument(channel, mix.instrument.value, mix.instrument.isGiven);
+            player.setChannelInstrument(channel, program ?? mix.instrument.value, program == null && mix.instrument.isGiven);
             player.setChannelVolume(channel, fromStep(settings.volume) * fromStep(mix.volume));
             player.setChannelPan(channel, toMidiPan(mirrored ? mirrorPan(mix.pan.value) : mix.pan.value));
         }
