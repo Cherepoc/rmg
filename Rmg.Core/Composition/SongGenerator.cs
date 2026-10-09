@@ -141,7 +141,7 @@ public static class SongGenerator
 internal enum SongStream
 {
     Rhythm = 1,
-    Tracks = 2,
+    Drums = 2,
     Harmony = 3,
     SongState = 4,
     Melody = 5,
@@ -160,15 +160,12 @@ internal enum SongStream
     Groove = 18,
     Panning = 19,
     SongForm = 20,
-    Pad = 21,
     KeyChange = 22,
-    CounterMelody = 23,
     BassFills = 24,
     Meter = 25,
     Unconventionality = 26,
     Feel = 27,
     Parts = 28,
-    Riff = 29,
     LineDoubling = 30,
     Solos = 31,
     SoloLines = 32,
@@ -176,12 +173,10 @@ internal enum SongStream
     Expression = 34,
     PartSound = 35,
     SectionKey = 36,
-    RhythmPart = 37,
     SectionTempo = 38,
     SectionMeter = 39,
     Polymeter = 40,
     Effects = 41,
-    SoloPart = 42,
     Soloist = 43,
     DrumSolo = 44,
     SoloChords = 45,
@@ -242,5 +237,6 @@ internal enum SongStream
     RiffIntro = 100,
     Ghosts = 101,
     SoloTwins = 102,
-    QuieterForms = 103
+    QuieterForms = 103,
+    PartTracks = 104
 }

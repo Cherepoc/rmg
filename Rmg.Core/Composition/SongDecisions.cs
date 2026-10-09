@@ -124,13 +124,9 @@ internal sealed record SongDecisions(
         var pinned = DrumRoles.DrawPinned(part => SongGenerator.CreateStream(seed, SongStream.Pins, (int)part), songUnconventionality[Facet.Groove], genre);
         StateTrace.RecordSong(TracePoints.PinnedDrums, string.Join(", ", pinned.Order()), pinned);
         var tracks = SongTracks.Create(
-            Stream(SongStream.Tracks),
+            Stream(SongStream.Drums),
             Stream(SongStream.Panning),
-            Stream(SongStream.Pad),
-            Stream(SongStream.CounterMelody),
-            Stream(SongStream.Riff),
-            Stream(SongStream.RhythmPart),
-            Stream(SongStream.SoloPart),
+            role => SongGenerator.CreateStream(seed, SongStream.PartTracks, (int)role),
             !absent.Contains(TrackRole.RiffTwin),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
