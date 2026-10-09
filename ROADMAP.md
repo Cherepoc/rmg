@@ -80,7 +80,10 @@ fixed; the review and the plan are kept outside the repository):
     decoder, a meter's phrase length, the fills' spans on the draft, dead branches gone, silent defaults made explicit.
     The octave and the alternating bass kept apart, as a bass may play both and the presets name both. Left: the drum
     solo's parameters, with the song's decisions passed whole.
-12. Performance, behind a profile, the fingerprint kept.
+12. Done: performance, behind a profile (dotTrace, 32 songs): the decisions 45% of a song's time, the stages 50%,
+    realizing 17%, no single hot spot. A chord's movement measured in loops, a meter's cycle templates and pulses
+    kept, a position's section found by halving: 7.4 s to 6.4 s for the 32, the fingerprint kept. Left: the state
+    maps every note's state is read from (*Open work*).
 13. Test speed. 14. Page test reliability. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
 
 **Done before it** (the plan of 8 October 2026 from the review of P3 and P4, each step through the implementation loop,
@@ -539,6 +542,10 @@ Each item with its plan, and what it waits for.
   JavaScript.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
+- **The note states read once** (P4, from the review of 9 October 2026): `Realizer.GetNoteStates` merges a track's
+  state with the whole song's and builds a state map at every position, again for every pass of `RealizeStruck`, for
+  every solo's loudness and every answered gap; reading it once a track, and a note's tempo without the whole map,
+  would take a share of the 17% realizing costs and the stages' few percent each. Measure with the profile first.
 - **Analytics written off the request** (P4, from the review of 9 October 2026): every tally and song measurement opens
   SQLite and writes under one lock on a pool thread, so a burst of tallies holds threads that songs wait for; a queue
   one writer drains, in batches, would answer at once. And the admin password tried without a limit: a pause after a

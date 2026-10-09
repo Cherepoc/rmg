@@ -126,11 +126,28 @@ internal sealed class VoiceLeader
     /// </summary>
     internal static double GetMovement(ImmutableArray<int> from, ImmutableArray<int> to)
     {
+        // in loops, as every chord of every part measures it against every layout
+        static int Nearest(ImmutableArray<int> notes, int note)
+        {
+            var nearest = int.MaxValue;
+            foreach (var x in notes)
+                nearest = Math.Min(nearest, Math.Abs(x - note));
+            return nearest;
+        }
+
+        static int Highest(ImmutableArray<int> notes)
+        {
+            var highest = int.MinValue;
+            foreach (var x in notes)
+                highest = Math.Max(highest, x);
+            return highest;
+        }
+
         double movement = 0;
         foreach (var note in to)
-            movement += from.Min(x => Math.Abs(x - note));
+            movement += Nearest(from, note);
         foreach (var note in from)
-            movement += to.Min(x => Math.Abs(x - note));
-        return movement + TopNoteWeight * Math.Abs(to.Max() - from.Max());
+            movement += Nearest(to, note);
+        return movement + TopNoteWeight * Math.Abs(Highest(to) - Highest(from));
     }
 }

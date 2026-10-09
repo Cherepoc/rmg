@@ -18,7 +18,18 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     /// <summary>The section a position is in; none before the first or after the last.</summary>
     public SectionSpan? SectionAt(double position)
     {
-        return Sections.FirstOrDefault(x => position >= x.Start && position < x.End);
+        // the sections one after another: the last starting at or before it, by halving, as every note asks
+        var (low, high) = (0, Sections.Length - 1);
+        while (low <= high)
+        {
+            var middle = (low + high) / 2;
+            if (Sections[middle].Start <= position)
+                low = middle + 1;
+            else
+                high = middle - 1;
+        }
+
+        return high >= 0 && position < Sections[high].End ? Sections[high] : null;
     }
 
     /// <summary>

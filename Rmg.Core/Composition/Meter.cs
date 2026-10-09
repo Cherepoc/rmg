@@ -184,7 +184,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
     public int PulseSixteenths => ModeLength(Tactus);
 
     /// <summary>Where the bar's pulses start, in beats: 4/4's four beats, 6/8's two dotted quarters.</summary>
-    public ImmutableArray<double> Pulses => [..Levels[Tactus].Select(x => x.Start / 4.0)];
+    public ImmutableArray<double> Pulses => _pulses ??= [..Levels[Tactus].Select(x => x.Start / 4.0)];
+
+    private ImmutableArray<double>? _pulses;
 
     /// <summary>How long a level's nodes most often are, in 16ths, the longer where two lengths are as common.</summary>
     private int ModeLength(int level) =>
@@ -297,7 +299,13 @@ public sealed record Meter(ImmutableArray<int> Groups)
     ///     descendants level by level, each rank the depth they first start at, and past the 16ths every part halved; with
     ///     its other parts first, its first child's start a rank weaker than its others'.
     /// </summary>
-    private ImmutableArray<(double Position, int Rank)> Template(int level, (int Start, int Length) node, bool weakFirst)
+    private ImmutableArray<(double Position, int Rank)> Template(int level, (int Start, int Length) node, bool weakFirst) =>
+        _templates.GetOrAdd((level, node, weakFirst), x => BuildTemplate(x.Level, x.Node, x.WeakFirst));
+
+    // every node's template once, as every pattern's cycles ask for the same few, from every thread making a song
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<(int Level, (int Start, int Length) Node, bool WeakFirst), ImmutableArray<(double Position, int Rank)>> _templates = new();
+
+    private ImmutableArray<(double Position, int Rank)> BuildTemplate(int level, (int Start, int Length) node, bool weakFirst)
     {
         var ranks = new SortedDictionary<double, int> { [0] = 0 };
         for (var depth = 1; depth <= DyadicRankDistribution.MaxRank; depth++)
