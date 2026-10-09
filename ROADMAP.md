@@ -78,8 +78,13 @@ fixed; the review and the plan are kept outside the repository):
     a few tests that check less than their names (*Open work*).
 11. Done: duplication removed, the fingerprint kept: Mod and Normalize shared, tracks found by their role, one program
     decoder, a meter's phrase length, the fills' spans on the draft, dead branches gone, silent defaults made explicit.
-    The octave and the alternating bass kept apart, as a bass may play both and the presets name both. Left: the drum
-    solo's parameters, with the song's decisions passed whole.
+    The octave and the alternating bass kept apart, as a bass may play both and the presets name both. The small merges
+    left then done after it: beats a second, a line's devices, the parts' states, a section's trace, the parts' labels,
+    a line note's chord and pitch, a stream's place, a section's first rests, the drums' one group, the spreads and the
+    server's nearest step; the MIDI tempo event rounded to the microsecond on the way. Kept apart: a triad's quality,
+    as the generator's major, minor or other and the chord names' fuller quality cost as much to join as to keep, and
+    the empty tracks and a span's notes replaced, one-liners a helper would not shorten. Left: the drum solo's
+    parameters, with the song's decisions passed whole.
 12. Done: performance, behind a profile (dotTrace, 32 songs): the decisions 45% of a song's time, the stages 50%,
     realizing 17%, no single hot spot. A chord's movement measured in loops, a meter's cycle templates and pulses
     kept, a position's section found by halving: 7.4 s to 6.4 s for the 32, the fingerprint kept. Left: the state
