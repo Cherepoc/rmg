@@ -325,12 +325,6 @@ public sealed record KeyChange(double Position, int Semitones)
             return song;
 
         var common = song.CommonStateTimelineMap;
-        ChordContext Chord(StateMap note, double position) => Realizer.GetChord(StateMap.Aggregate([
-            note,
-            track.GetEffectiveStateMapAt(position),
-            definition.StateMap.OfScope(StateScope.Render),
-            common.GetEffectiveStateMapAt(position)
-        ])).Chord;
         var events = track.EventTimeline.ToArray();
         foreach (var (from, change, at, root) in pedals)
         {
@@ -342,8 +336,8 @@ public sealed record KeyChange(double Position, int Semitones)
                 if (position < from - 1e-9 || position >= change - 1e-9)
                     continue;
 
-                var chord = Chord(note, position);
-                var pitch = chord.GetPitch(note.GetStateValue(StateKinds.ScaleStep)) + note.GetStateValue(StateKinds.Alteration);
+                var chord = Realizer.ChordAt(note, position, track, definition, common);
+                var pitch = LinePlacement.PitchOf(chord, note);
                 var held = pitch + ((dominant - pitch).Mod(12) is var up && up > 6 ? up - 12 : up);
                 var step = LinePlacement.GetScaleStep(chord, held);
                 events[i] = note.With(StateKinds.ScaleStep, step).With(StateKinds.Alteration, held - chord.GetPitch(step)).With(CompositionStateKinds.BassPedal, 1).ToTimelineItem(position);

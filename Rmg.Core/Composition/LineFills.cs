@@ -84,15 +84,9 @@ internal static class LineFills
         return (song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [lineTrack] = _ => filled }), [..walkedInto]);
 
         // the chord a note plays over, as Realizer reads its state there: its own, its track's, its definition's and the song's
-        ChordContext Chord(TimelineItem<StateMap> note) => Realizer.GetChord(StateMap.Aggregate([
-            note.Value,
-            track.GetEffectiveStateMapAt(note.Position),
-            definition.StateMap.OfScope(StateScope.Render),
-            common.GetEffectiveStateMapAt(note.Position)
-        ])).Chord;
+        ChordContext Chord(TimelineItem<StateMap> note) => Realizer.ChordAt(note.Value, note.Position, track, definition, common);
 
-        int Pitch(TimelineItem<StateMap> note) =>
-            Chord(note).GetPitch(note.Value.GetStateValue(StateKinds.ScaleStep)) + note.Value.GetStateValue(StateKinds.Alteration);
+        int Pitch(TimelineItem<StateMap> note) => LinePlacement.PitchOf(Chord(note), note.Value);
 
         // the scale's notes in the bass's range, of the chord the note before plays over
         int[] ScaleNotes(TimelineItem<StateMap> note, int from, int to)

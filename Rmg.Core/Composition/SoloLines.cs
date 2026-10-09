@@ -191,18 +191,12 @@ internal static class SoloLines
         var (bottom, top) = (Math.Max(low + 2, middle - reach), Math.Min(high - 2, middle + reach));
 
         // the chord a note plays over, as Realizer reads its state there
-        ChordContext Chord(StateMap note, double position) => Realizer.GetChord(StateMap.Aggregate([
-            note,
-            track.GetEffectiveStateMapAt(position),
-            definition.StateMap.OfScope(StateScope.Render),
-            common.GetEffectiveStateMapAt(position)
-        ])).Chord;
+        ChordContext Chord(StateMap note, double position) => Realizer.ChordAt(note, position, track, definition, common);
 
         // the melody's note sounding at a position, the first before it where none does, whose state a note there takes
         TimelineItem<StateMap> MelodyAt(double position) => melody.LastOrDefault(x => x.Position <= position + 1e-9, melody[0]);
         StateMap BandAt(double position) => band.Any(x => x.Position <= position + 1e-9) ? band.Last(x => x.Position <= position + 1e-9).Value : MelodyAt(position).Value;
-        int MelodyPitch(TimelineItem<StateMap> note) =>
-            Chord(note.Value, note.Position).GetPitch(note.Value.GetStateValue(StateKinds.ScaleStep)) + note.Value.GetStateValue(StateKinds.Alteration);
+        int MelodyPitch(TimelineItem<StateMap> note) => LinePlacement.PitchOf(Chord(note.Value, note.Position), note.Value);
         int[] Notes(double position, IEnumerable<int> steps)
         {
             var chord = Chord(MelodyAt(position).Value, position);

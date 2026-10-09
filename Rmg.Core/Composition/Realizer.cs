@@ -354,6 +354,13 @@ internal static class Realizer
     private const int MinStackGap = 3;
 
     /// <summary>
+    ///     The chord a stored line's note plays over at its place, as a note there reads its state: its own, its track's,
+    ///     its definition's and the song's.
+    /// </summary>
+    internal static ChordContext ChordAt(StateMap note, double position, EventStateTimelineMap<StateMap> track, IInstrumentTrack definition, StateTimelineMap common) =>
+        GetChord(StateMap.Aggregate([note, track.GetEffectiveStateMapAt(position), definition.StateMap.OfScope(StateScope.Render), common.GetEffectiveStateMapAt(position)])).Chord;
+
+    /// <summary>
     ///     The chord a note is played over: the scale, with the steps the note's bar raises, the chord root's step in
     ///     it, and the pitch of every step counted from the root, in the key and the octave.
     /// </summary>

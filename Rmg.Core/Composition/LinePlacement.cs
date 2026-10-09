@@ -66,6 +66,9 @@ internal static class LinePlacement
         );
     }
 
+    /// <summary>A stored line's note's pitch over its chord: its scale step's, raised or lowered by its alteration.</summary>
+    internal static int PitchOf(ChordContext chord, StateMap note) => chord.GetPitch(note.GetStateValue(StateKinds.ScaleStep)) + note.GetStateValue(StateKinds.Alteration);
+
     /// <summary>The scale step of a note, counted from the chord's root: the step whose note is nearest it.</summary>
     internal static int GetScaleStep(ChordContext chord, int note)
     {
