@@ -219,11 +219,10 @@ songs' own appoggiaturas (*Fills and lines*).
 **Done: the parked reviewed** (9 October 2026, each step through the implementation loop): the seven steps one rule, a
 scale of other than seven notes refused; Bossa nova's clave on the cross-stick (`?listen=bossa-clave`); the melody in
 block harmony, the counter-melody stacking its chord (`?listen=block`); roots off the scale, a planed section's chords
-each in a mode of its own (`?listen=own-modes`). Long cycles for the generated patterns tried and put off (*Long
-cycles*); scales of other sizes decided against (*Decided, and kept*).
+each in a mode of its own (`?listen=own-modes`). Long cycles for the generated patterns tried, and since
+decided against, as are scales of other sizes (*Decided, and kept*).
 
-**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where it stands: long cycles for the
-generated patterns.
+**Parked** (P4): see *Parked*, kept for their reasons, not planned.
 
 ## Listening
 
@@ -344,7 +343,8 @@ live deploy.
   rate and the swell's length.
 - **The ornaments** (`ornaments` heard better, 8 October 2026): one in eight to ten long notes, 2.5% of Folk's and Medieval's lines; a trill
   up to 1.5 s. Decides their rate and the trill's length.
-- **The polymeters:** the snare on every cell's start; the chords joining a cycle. Decides who joins a cycle.
+- **The polymeters** (`?listen=polymeter` to be asked first, Djent's sections with and without): the snare on every
+  cell's start; the chords joining a cycle. Decides who joins a cycle, and the frame below.
 - **The pocket** (`pocket` heard better, 8 October 2026): the backbeat a little late, the bass a touch ahead, the lead laid back. Decides
   the offsets.
 - **The figures** (`kick-lock`, `double-kick` and `gallop` heard better, 8 October 2026; `?listen=clave`): Metal's sections 27% with the riff, 14% a
@@ -440,6 +440,17 @@ Each item with its plan, and what it waits for.
 
 ### Form and sections
 
+- **A polymeter's frame, a power of two of bars** (P2, 10 October 2026, after `?listen=polymeter`): a cycle starts afresh
+  where its frame ends, every pattern (four bars) now, every second where a section draws it (`Polymeter.FrameChance`),
+  or at the section's end where it runs on (`RunsOnChance`); a band built on such cycles lets its riff drift over 8, 16
+  or 32 bars of a steady 4/4 before it snaps back on a downbeat, so that the bar line is lost and the return lands as
+  an arrival, where four bars cut an odd cycle before it is heard against the pulse. The frame drawn as a power of two
+  of bars, four to the section's length, in place of the second pattern's case, by the feel facet (four at the plain
+  end) and a genre's pool, Djent's leaned to 8 and 16; the last pass cut wherever the frame ends, as now. Then, should
+  it want it, the bar giving way to the riff rather than the riff to the bar: a section's last bar cut short or drawn
+  out by the cycle's leftover, so that the riff ends its cycle with the section and the next starts on it, the short
+  bar's own case (`ShortBars`) for a polymetric section, its cut the cycle's rather than half a bar. Measured by the
+  frames drawn by genre, and the bars a cycle runs before it starts afresh.
 - **Breakdowns beyond Djent** (P2, suggested 8 October 2026 after listening: Djent's bridge in half time, the kick
   following the chugs, heard as great): Metal's and Nu metal's already break down (42% and 41% of their songs); more of
   Nu metal's, and the other heavy genres', Punk's hardcore end and Black metal's slower passages, each a genre's
@@ -614,28 +625,6 @@ Each item with its plan, and what it waits for.
   (`Planing.Moves`), which favour small steps so that the voices slide. Should the modes be heard as aimless, the move
   is the lever, a planed chord's move drawn with its mode, or a chord keeping the mode of the one before now and then;
   symmetric cycles (major or minor thirds) left out, Planing's moves holding minor thirds already.
-- **Long cycles** (P4, reviewed 9 October 2026, the generated patterns tried and put off the same day): a figure of two
-  bars is built, its onsets over 32 16ths from a section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's
-  on the cross-stick), and chords of two bars are a harmonic rhythm; a section's bars repeating, AABA to ABCD, give every
-  part figures of two and four bars, a varied repeat (A′) near an answer. A kick answered in its second bar or a crash
-  every two bars, should listening miss one, is a figure's data or an edit after assembly as the lift's cues are. The
-  generated patterns: a period over a bar draws a two-bar cycle (`Meter.GetCycles`) a bar plays the first half of, and
-  that is common, not a slow part's alone (`TwoBarCyclesTest.ReportSlowPatterns`, 64 songs: the counter-melody's bar
-  patterns 70%, the bass's 33%, the chords', the riff's and the rhythm's 27-30%, the melody's 17%, the drums' 2%), a
-  bar of a sparser rhythm. Played whole over a pair of bars, the second bar its second half (tried 9 October 2026), it
-  changed 230 of 256 songs and mostly left the second bar empty, its half a rank weaker all through: the bars the bass
-  plays in fell 10% in a pair's second, the chords' 6%, the counter-melody's 17%, the riff's 13%
-  (`TwoBarCyclesTest.ReportBarsByPlace`), silence rather than a long note, a note held a bar at most and the chords' and
-  the bass's to the chord's change. Tried again the same day with its notes held as far as the cycle (a note's
-  `CycleBars`, the realizer's hold and its restrike at a change reaching as far): the lines' holes closed (the melody
-  sounding in 94% of a pair's second bars as before, the riff 93% against 95%), the bass's nearly (93% against 95%),
-  but the chords' and the rhythm part's stayed (88% against 93%, 91% against 97%), as a chord is struck again at a
-  change only on to a note of the same chord, and the counter-melody's (84% against 92%); and drawn over two bars a
-  cycle's notes spread over both, so that every slow part grew sparser, its first bars too (the counter-melody's struck
-  91% to 86%), the parts' densities having been tuned against a bar of the cycle. Taken up only as a retuning of the
-  rhythm's density with it, not as a mechanism alone; patterns longer than two bars and the pattern as the unit of a hyper-bar
-  meter stay an engine's change, the bar being the unit of the scheme's letters, the state's layers, the melody's
-  question and answer, the drums' presence, the fills' lines and the feels.
 - **Decided in the review of October 2026, not built:** a genre's one rule, which it keeps already, its amounts in
   place of the songs' but a choice drawn in roles, written down on `ByConvention`; a genre resolved once, which the
   request does already (`GenerateSongRequest` checks every choice and option); streams by name (they would move every seed and so lose the
@@ -807,6 +796,20 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   ♭II, ♭VI or ♭VII into i, the most often, and a symphonic band's classical V–i now and then, its last chord V 22%, its
   leading tone raised 5% (`cadenceDegree`, `cadenceRaise`); the songs' chances of the raise and the chord into home as
   they were.
+- **Long cycles, decided against** (10 October 2026, after two trials on 9 October): a part's drawn rhythm runs one
+  cycle over a pair of bars or more, its second bar going on from its first; a bar whose period is longer plays the
+  first half of a two-bar cycle (`Meter.GetCycles`), a sparser bar, which the counter-melody's bar patterns draw 70% of
+  the time, the bass's 33% (`TwoBarCyclesTest.ReportSlowPatterns`). Played whole over a pair, it changed 230 of 256
+  songs and left the second bars empty, its half a rank weaker (the counter-melody's 17% fewer, the bass's 10%,
+  `TwoBarCyclesTest.ReportBarsByPlace`); with its notes held across the cycle, the lines' holes closed but the chords',
+  the rhythm part's and the counter-melody's stayed, and every slow part grew sparser, the parts' densities tuned
+  against a bar of the cycle. The bar is the engine's unit, of the scheme's letters, the state's layers, the melody's
+  question and answer, the drums' presence, the fills' lines and the feels; and what two bars of a part give, a second
+  bar that answers the first, the schemes (AABA, ABAB), the varied repeat (A′), the question and answer, the phrases of
+  three and of four and two, two-bar figures (the claves) and chords of two bars give already. A cycle across the bar
+  would cost the engine's unit and a retuning of every slow part for a refinement no listening has missed. A kick
+  answered in its second bar or a crash every two bars, should listening miss one, is a figure's data or an edit after
+  assembly, as the lift's cues are.
 - **Targets from outside, decided against** (10 October 2026): measures of a corpus of real MIDI songs to tune towards
   (the notes a bar by role, the intervals, the syncopation, the chord changes a bar); the songs are tuned by listening
   and the ratings alone.
