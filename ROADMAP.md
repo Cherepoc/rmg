@@ -178,7 +178,6 @@ songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listeni
 
 **The parked reviewed** (P2, 9 October 2026, each step through the implementation loop): two of the three items parked
 where they stand were mostly built since; what is left of them is small and a genre's data.
-1. Bossa nova's clave, a two-bar figure on the cross-stick (*More figures*, under *Genres*).
 2. A melody in block harmony, a third voice beside the counter-melody's (*A melody in block harmony*).
 3. Roots off the scale: a planed section's chords each in a mode of its own (*Roots off the scale*).
 4. Long cycles for the generated patterns: a slow part's two-bar cycle played whole over a pair of bars (*Long cycles*).
@@ -198,7 +197,8 @@ device where it is heard the most, by how much its song with the device and with
 its song without lays its patch over the genre's options, the others kept (`withoutDevice`). Asked again since:
 `tape`, whose song without had lost every other effect of its genre's, and `stop-time`; asked anew, `inversion`, the
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
-`lift-cues`, under 0.1.
+`lift-cues`, under 0.1, and `bossa-clave`, Bossa nova's cross-stick playing the clave in 74% of its sections, 0.07 as a
+rim's stroke is quiet.
 
 Answered on 8 October 2026, late, and let go of: the clave, stop time and the ghost notes, heard as great; the tape and
 the tone, barely heard, so a tape's wow now drifts by the sound facet, 5 cents at the plain end to 26 at the wild, and a
@@ -571,7 +571,7 @@ Each item with its plan, and what it waits for.
   songs changed counted from the planed sections first (`TracePoints.Planing`). `?listen=own-modes` in Fusion. Left
   out: symmetric cycles (major or minor thirds), Planing's moves holding minor thirds already.
 - **Long cycles** (reviewed 9 October 2026; P2 for two bars, P4 beyond): a figure of two bars is built, its onsets over 32 16ths from a
-  section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's after *More figures*), and chords of two bars
+  section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's on the cross-stick), and chords of two bars
   are a harmonic rhythm; a section's bars repeating, AABA to ABCD, give every part figures of two and four bars, a
   varied repeat (A′) near an answer. So a kick answered in its second bar or a crash every two bars, should listening
   miss one, is a figure's data or an edit after assembly as the lift's cues are. The generated patterns: a part's
@@ -671,7 +671,7 @@ left:
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
 - **More genres** (P3). What the genres made in October 2026 still want: Fusion's
   roots off the scale (*Roots off the scale*, a planed section's own modes) and a lead's wide-interval legato lines (*A melody's leaping by
-  genre*); and Bossa nova's two-bar clave (*More figures*, below).
+  genre*).
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
 - **Harmony for Jazz and Soul** (P3): a ii–V elsewhere (*Approach chords*, *Harmony's devices*); call and response
@@ -690,11 +690,6 @@ left:
   - A snare's drag, two quick strokes before a backbeat, should the ghost notes want it.
   - The piano's montuno, a broken chord off the beat, an arpeggio's pattern of its own (`Arpeggios`) rather than a
     figure, the figures striking a player's chord or note; a second time keeper playing straight under the tresillo.
-  - Bossa nova's clave (P2, the parked reviewed, 9 October 2026): a figure of two bars, `bossa32`, onsets 0, 6, 12, 20
-    and 26, the son clave's with its last stroke an 8th later, played by the backbeat, so that Bossa nova's stroke, the
-    cross-stick, plays it on the rim as its drummer does, in Bossa nova's pool beside its own rhythm. No drawn song
-    changes, Bossa nova's songs do. Measured by Bossa nova's bars whose backbeat strikes the clave's onsets;
-    `?listen=bossa-clave`.
   - More figures (P3, by listening): a figure for the hi-hat or the snare, a figure of more than
     two bars; the double kick following the riff's accents alone, should every 16th sound a machine.
   - A hook of one or two bars sung through a whole section, its phrase ends let go of; a hooked melody's bars repeat

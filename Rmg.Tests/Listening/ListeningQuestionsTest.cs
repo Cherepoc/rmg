@@ -61,7 +61,10 @@ public sealed class ListeningQuestionsTest
         new("quieter-form", "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
             "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?
-                .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min())
+                .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min()),
+        new("bossa-clave", "Bossa nova's cross-stick playing the clave, the 3-2 with its last stroke late, rather than the backbeat: a bossa drummer, or busier?",
+            "The bossa clave's weight in Bossa nova's backbeat.", "bossa", [], new() { ["figure.backbeat"] = Only(GenreChoices.Figures[FigurePlayer.Backbeat], Figures.Own) },
+            x => Plays(x, FigurePlayer.Backbeat, "bossaClave"))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

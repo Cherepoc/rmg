@@ -8,10 +8,11 @@ namespace Rmg.Tests.Drums;
 /// <summary>A genre's figures (<see cref="Figures" />): a player's rhythm in a section given by its figure, the kick with the riff, a double kick, a clave.</summary>
 public sealed class FiguresTest
 {
-    /// <summary>The sections, by their ids, whose player plays the figure named.</summary>
+    /// <summary>The sections, by their ids, whose player plays the figure named, but a drum solo's, whose drums the solo plays.</summary>
     private static ImmutableHashSet<int> Playing(CorpusSong song, FigurePlayer player, string figure) =>
     [
         ..song.Trace.Where(t => t.Point == TracePoints.Figures && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).GetValueOrDefault(player) == figure).Select(t => t.Section)
+            .Except(song.Trace.Where(t => t.Point == TracePoints.DrumSolo).Select(t => t.Section))
     ];
 
     /// <summary>
@@ -92,16 +93,27 @@ public sealed class FiguresTest
         await Assert.That(on).IsEqualTo(hits);
     }
 
+    /// <summary>A clave strikes only on its onsets: Latin's on the claves, Bossa nova's on the snare's stroke, its cross-stick.</summary>
     [Test]
-    public async Task AClave_StrikesOnlyOnItsThreeAndTwo()
+    [Arguments("latin", FigurePlayer.Claves, new[] { "clave32", "clave23" })]
+    [Arguments("bossa", FigurePlayer.Backbeat, new[] { "bossaClave" })]
+    public async Task AClave_StrikesOnlyOnItsThreeAndTwo(string genre, FigurePlayer player, string[] names)
     {
-        var claves = new HashSet<int> { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) };
-        var hits = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("latin")))))
-        foreach (var name in new[] { "clave32", "clave23" })
+        IReadOnlySet<int> tracks = player == FigurePlayer.Claves
+            ? new HashSet<int> { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }
+            : DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var (hits, sections, playing) = (0, 0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
-            var figure = Figures.All.Single(x => x.Name == name);
-            foreach (var (span, bar, position) in Hits(song, claves, Playing(song, FigurePlayer.Claves, name)))
+            sections += song.Trace.Count(t => t.Point == TracePoints.Figures);
+            playing += names.Sum(name => Playing(song, player, name).Count);
+        }
+
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var name in names)
+        {
+            var figure = Figures.All.Single(x => x.Player == player && x.Name == name);
+            foreach (var (span, bar, position) in Hits(song, tracks, Playing(song, player, name)))
             {
                 hits++;
                 // its 16th in the figure's two bars, counted from the section's start
@@ -111,6 +123,7 @@ public sealed class FiguresTest
             }
         }
 
+        Console.WriteLine($"{genre}: {playing} of {sections} sections play a clave, {hits} hits");
         await Assert.That(hits).IsGreaterThan(30);
     }
 

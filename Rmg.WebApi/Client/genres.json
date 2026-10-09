@@ -1711,6 +1711,7 @@
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 80, "ride": 60, "cabasa": 70, "maracas": 60, "claves": 50, "conga": 30 },
       "drumStrokes": { "crossStick": 100 },
       "pins": { "backbeat": 90, "ground": 80 },
+      "figure": { "backbeat": { "own": 30, "bossaClave": 100 } },
       "feel": { "straight": 100 },
       "rhythm": {
         "ground": { "syncopation": 76, "fullness": 38 },

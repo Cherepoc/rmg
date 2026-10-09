@@ -23,7 +23,7 @@
       },
       {
         "seed": "H",
-        "at": 82,
+        "at": 84.1,
         "listen": [
           "Riff (Electric Guitar (clean))"
         ]
@@ -43,17 +43,78 @@
         ]
       },
       {
-        "seed": "d",
-        "at": 0,
-        "listen": [
-          "Chords (Acoustic Guitar (steel))"
-        ]
-      },
-      {
         "seed": "j",
         "at": 17,
         "listen": [
           "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "13",
+        "at": 10,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "bossa-clave",
+    "question": "Bossa nova's cross-stick playing the clave, the 3-2 with its last stroke late, rather than the backbeat: a bossa drummer, or busier?",
+    "decides": "The bossa clave's weight in Bossa nova's backbeat.",
+    "genre": "bossa",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.backbeat": {
+          "own": 100,
+          "blast": 0,
+          "breakbeat": 0,
+          "bossaClave": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "7",
+        "at": 60,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 0,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 72.1,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 50.8,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 6.9,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 124,
+        "listen": [
+          "Acoustic Snare"
         ]
       }
     ]
