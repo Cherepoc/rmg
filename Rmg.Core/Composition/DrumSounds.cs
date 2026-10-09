@@ -27,8 +27,8 @@ internal static class DrumSounds
     public const double GenreOdds = 8;
 
     /// <summary>
-    ///     How much likelier a genre has each sound, by its note number, as its steady stroke, an accent and in a fill: 1 for
-    ///     a sound it does not lean.
+    ///     How much likelier a genre has each sound, by its note number, as its steady stroke where it may be one, an accent
+    ///     and in a fill: 1 for a sound it does not lean.
     /// </summary>
     public static Func<int, double> OddsOf(Genre genre)
     {
