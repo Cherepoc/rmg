@@ -62,15 +62,6 @@ public sealed class ListeningQuestionsTest
             "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?
                 .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min()),
-        new("own-modes", "Fusion's planed chords each in a mode of its own, major and minor moving by semitones, rather than all the home's shape: fusion, or aimless?",
-            "The planed modes' chance by genre.", "fusion", [], new() { ["planing"] = new() { ["modes"] = 0 } },
-            x => x.Trace.Where(t => t.Point == TracePoints.Planing && t.Value is not null
-                    && ((ImmutableArray<ChordScale>)x.Trace.Last(c => c.Point == TracePoints.ChordScales && c.Section == t.Section).Value!).Any(c => c.Kind == ChordScaleKind.Own))
-                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min()),
-        new("mediant", "Orchestral's iii or vi turned major, a chromatic mediant, as a film score lifts: a lift, or a wrong chord?",
-            "The mediant's chance by genre.", "orchestral", [], new() { ["chordScales"] = new() { ["mediant"] = 0 } },
-            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.ChordScales && ((ImmutableArray<ChordScale>)t.Value!).Any(c => c.Kind == ChordScaleKind.Mediant))
-                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 2)),
         new("riser", "Techno's reverse cymbal swelling into a drop, the band muffled under it or silent: a build, or noise over the band?",
             "The riser's loudness against the band, and whether it rises over a filtered drop.", "techno", ["Risers"], null,
             x => Before(x, x.Trace.Where(t => t.Point == TracePoints.FilteredDrop).Select(t => (double?)t.Value).Min(), 2)),

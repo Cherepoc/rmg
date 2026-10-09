@@ -236,9 +236,12 @@ device where it is heard the most, by how much its song with the device and with
 its song without lays its patch over the genre's options, the others kept (`withoutDevice`). Asked again since:
 `tape`, whose song without had lost every other effect of its genre's, and `stop-time`; asked anew, `inversion`, the
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
-`lift-cues`, under 0.1. Asked anew: `own-modes`, Fusion's planed chords in modes of their own, 0.42; `mediant`,
-Orchestral's iii or vi turned major, 0.54. And `riser`, Techno's reverse cymbal into every drop, the filtered ones too, on a channel of its
-own, under 0.01 as a short device is.
+`lift-cues`, under 0.1. Asked anew: `riser`, Techno's reverse cymbal into every drop, the filtered ones too, on a
+channel of its own, under 0.01 as a short device is; `rudiments`, Jazz's flams and drags, 0.02; `phrase-length`,
+Orchestral's phrases of four and two and of three, 1.41; `short-bar`, Djent's sections ending on a bar cut short, 1.22.
+
+Answered on 9 October 2026, late, and kept: `own-modes`, Fusion's planed chords in modes of their own; and `mediant`,
+Orchestral's iii or vi turned major.
 
 Answered on 9 October 2026, and kept: `bossa-clave`, Bossa nova's cross-stick playing the clave in 74% of its sections,
 0.07 as a rim's stroke is quiet, its velocity the kit's highest (88 against the snare's 81) and its sample 6 to 13 dB
@@ -471,9 +474,13 @@ Each item with its plan, and what it waits for.
   melody with an open string, the string the key's own (its tonic or fifth, not every chord's root), in a pattern of
   the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it.
 - **Acoustic sections, fitted** (P2, heard 8 October 2026: acoustic sections are great for metal and rock, but not every
-  quieter section fits one): a driven guitar turned acoustic only where no other part plays a heavy riff, the riff, its
-  twin and the rhythm all turning together or the section left as it is, rather than one part at a time; and the
-  acoustic guitar breaking its chords there (`Arpeggios`), as a band's quiet passage is picked; for Metal and Rock
+  quieter section fits one; and 9 October 2026, on Black metal's: turning every part from heavy is not enough): a driven
+  guitar turned acoustic only where no other part plays a heavy riff, the riff, its twin and the rhythm all turning
+  together or the section left as it is, rather than one part at a time. The section itself slower, a tempo of its own
+  under the song's (`SectionTempo`) or half time, as a metal band's acoustic passage is a calm, not the storm unplugged;
+  its guitars never tremolo-picked there, the tremolo's figure given up, but breaking their chords in slower
+  arpeggios (`Arpeggios`, 8ths or slower); and those arpeggios dissonant as a metal band's are, a note a semitone from
+  another, a minor second or a major seventh against the chord's (a colour, `GenreChoices.Colour`). For Metal and Rock
   beside Black metal, whose quieter form plays 36% of its songs now (`?listen=quieter-form`).
 - **A breakdown's snare** (P2, suggested 8 October 2026 after listening): Djent's breakdown plays its backbeat on the
   cross-stick, where a breakdown wants the snare itself, struck on the riff's accents with the kick or on the song's
@@ -586,7 +593,7 @@ Each item with its plan, and what it waits for.
   melody, the melody on top 86%. Left: its passing notes harmonised too, a diminished chord or the scale's in parallel,
   should the two-voice passing notes sound thin; Jazz's soli, four voices close, which no part is free to play; the pad
   as a voice, which plays chords, not lines, and sat over the melody 81% of the time when tried.
-- **Roots off the scale, the rest** (P3, by listening to `?listen=own-modes`): a planed section's chords each in a mode
+- **Roots off the scale, the rest** (P3; `own-modes` heard and kept, 9 October 2026): a planed section's chords each in a mode
   of its own, major or minor as it makes them (`Planing.ModesChance`, `ChordScales.Planed`), the modes weighed by the
   progression facet and a genre's pool (`ChordScales.OwnModes`, `ownMode`: Fusion's Lydian, Dorian and melodic minor 82%,
   Phrygian 3%), Fusion's 72% of its planed sections, a chord's mode changing on 78% of the moves. The melody over
