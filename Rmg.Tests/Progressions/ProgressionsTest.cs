@@ -227,7 +227,7 @@ public sealed class ProgressionsTest
         var chordEntries = TestCorpus.InParallel(Enumerable.Range(0, 4), seed =>
         {
             using var trace = StateTrace.Start();
-            SongGenerator.GenerateSong((ulong)seed);
+            SongGenerator.GenerateSong(TestCorpus.SongSeed(seed));
             return trace.Entries.Where(x => x.Point == TracePoints.Chord).ToArray();
         }).SelectMany(x => x).ToArray();
 

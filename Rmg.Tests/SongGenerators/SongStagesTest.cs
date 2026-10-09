@@ -12,7 +12,7 @@ public sealed class SongStagesTest
     private static (Song Song, (string Name, ImmutableSortedDictionary<int, int> Counts)[] Stages) Generate(int seed, params string[] skipped)
     {
         using var trace = StateTrace.Start(explains: false);
-        var song = SongGenerator.GenerateSong((ulong)seed, SongOverrides.None, skipped.ToImmutableHashSet(), (_, _) => { }, CancellationToken.None);
+        var song = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), SongOverrides.None, skipped.ToImmutableHashSet(), (_, _) => { }, CancellationToken.None);
         return (song, [..trace.Entries.Where(x => x.Point == TracePoints.SongStage).Select(x => ((string, ImmutableSortedDictionary<int, int>))x.Value!)]);
     }
 
@@ -45,7 +45,7 @@ public sealed class SongStagesTest
         var problems = TestCorpus.InParallel(Enumerable.Range(0, 32), seed =>
         {
             var found = new List<string>();
-            SongGenerator.GenerateSong((ulong)seed, SongOverrides.None, ImmutableHashSet<string>.Empty, (stage, draft) =>
+            SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), SongOverrides.None, ImmutableHashSet<string>.Empty, (stage, draft) =>
             {
                 var duration = draft.Timeline.Duration;
                 foreach (var (track, events) in draft.Timeline.TrackTimelineMap)

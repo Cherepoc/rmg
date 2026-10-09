@@ -12,7 +12,7 @@ public sealed class ReharmonisationTest
     {
         using var trace = StateTrace.Start(explains: false);
         var overrides = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, 0.5));
-        var song = SongGenerator.GenerateSong((ulong)seed, overrides, skipped.ToImmutableHashSet(), (_, _) => { }, CancellationToken.None);
+        var song = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), overrides, skipped.ToImmutableHashSet(), (_, _) => { }, CancellationToken.None);
         return (song, ((int, ImmutableArray<double>)?)trace.Entries.SingleOrDefault(x => x.Point == TracePoints.Reharmonisation)?.Value);
     }
 

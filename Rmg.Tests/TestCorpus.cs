@@ -9,10 +9,20 @@ namespace Rmg.Tests;
 
 /// <summary>
 ///     The songs the tests look at, generated once per seed with the default settings and shared by every test, as they
-///     are immutable: each with its rendering and the trace of its generation.
+///     are immutable: each with its rendering and the trace of its generation. A seed is the corpus's, its song the seed
+///     moved by <see cref="Offset" />, so that the suite can run on other songs now and then.
 /// </summary>
 internal static class TestCorpus
 {
+    /// <summary>
+    ///     How far the corpus's seeds are moved, from the setting RMG_CORPUS_OFFSET: none where it is not set, the songs
+    ///     every calibration was measured on; another, other songs, which meet the rules with songs they never met. A seed
+    ///     a test names is then the corpus's, its song made again with the same offset.
+    /// </summary>
+    public static ulong Offset { get; } = Environment.GetEnvironmentVariable("RMG_CORPUS_OFFSET") is { Length: > 0 } offset
+        ? ulong.Parse(offset)
+        : 0;
+
     private static readonly ConcurrentDictionary<int, Lazy<CorpusSong>> Songs = new();
 
     public static CorpusSong Get(int seed)
@@ -81,7 +91,10 @@ internal static class TestCorpus
 
     private static CorpusSong Generate(int seed) => Generate(seed, SongOverrides.None);
 
-    private static CorpusSong Generate(int seed, SongOverrides overrides) => Generate((ulong)seed, overrides);
+    private static CorpusSong Generate(int seed, SongOverrides overrides) => Generate(SongSeed(seed), overrides) with { Seed = seed };
+
+    /// <summary>The seed the song of a corpus's seed is made from, moved by the offset, for a test that makes the song itself.</summary>
+    public static ulong SongSeed(int seed) => unchecked((ulong)seed + Offset);
 
     /// <summary>The song of a seed as the page writes it, such as one heard on the site, with what the overrides set; its <see cref="CorpusSong.Seed" /> the seed's low bits.</summary>
     public static CorpusSong Get(string seed, SongOverrides overrides) =>

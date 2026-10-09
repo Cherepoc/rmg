@@ -109,7 +109,7 @@ public sealed class StateTraceTest
         static byte[] Midi(int seed)
         {
             var stream = new MemoryStream();
-            Rmg.Core.Rendering.Render.RenderSong(SongGenerator.GenerateSong((ulong)seed)).Write(stream, null);
+            Rmg.Core.Rendering.Render.RenderSong(SongGenerator.GenerateSong(TestCorpus.SongSeed(seed))).Write(stream, null);
             return stream.ToArray();
         }
 
