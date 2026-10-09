@@ -193,7 +193,8 @@ public static class GenreChoices
     public static GenreChoice StopTime { get; } = Chances("stopTime", "Stop time", [("sections", "Sections in stop time", Composition.StopTime.Chance)]);
 
     /// <summary>The chance a section planes, every chord the home's shape moved by semitones, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Composition.Planing" />).</summary>
-    public static GenreChoice Planing { get; } = Chances("planing", "Planing", [("sections", "Sections planed", Composition.Planing.Chance)]);
+    public static GenreChoice Planing { get; } = Chances("planing", "Planing",
+        [("sections", "Sections planed", Composition.Planing.Chance), ("modes", "Planed chords each in a mode of its own", Composition.Planing.ModesChance)]);
 
     /// <summary>The chances a song's last section that came back lifts its key, a section plays in a key of its own, and any pattern's start changes it (<see cref="KeyChange" />): a ballad's last chorus up, a blues in one key.</summary>
     public static GenreChoice KeyChanges { get; } = Chances("keyChanges", "Key changes",

@@ -329,8 +329,13 @@ internal sealed class SectionGenerator
         var planes = planingContext.TestProbability(Planing.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "sections")))
                      && (!plan.HasTonicHome || progression.Length >= 3);
         var planed = Planing.Draw(planingContext, progression.Length, plan.HasTonicHome);
+        // its chords each in a mode of their own now and then, rather than the home's structure, by the progression facet and
+        // a genre's, from a sequence of its own
+        var modesContext = Stream(sectionId, SectionStream.PlaningModes);
+        var inModes = modesContext.TestProbability(Planing.ModesChance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "modes")));
+        var modes = ChordScales.Planed(modesContext, scale, home, progression.Length, plan.HasTonicHome);
         if (planes)
-            (progression, chordScales, shifts) = ([..progression.Select(_ => 0)], [..chordScales.Select(_ => ChordScale.Section)], planed);
+            (progression, chordScales, shifts) = ([..progression.Select(_ => 0)], inModes ? modes : [..chordScales.Select(_ => ChordScale.Section)], planed);
         StateTrace.RecordSection(TracePoints.Planing, SectionTrace, sectionId, planes ? string.Join(" ", planed) : "none", planes ? planed : null);
         // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
         // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
@@ -999,5 +1004,6 @@ internal enum SectionStream
     PhraseScheme = 54,
     MelodyBusyness = 55,
     PitchedTracks = 56,
-    DrumTracks = 57
+    DrumTracks = 57,
+    PlaningModes = 58
 }

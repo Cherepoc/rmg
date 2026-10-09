@@ -131,6 +131,22 @@ public static class ChordScales
     }
 
     /// <summary>
+    ///     Every planed chord's mode on the home, which its move by semitones carries to its root, drawn evenly among the own
+    ///     modes the section's scale reaches a semitone a step at most, so that its quality is the mode's, major in Lydian or
+    ///     Mixolydian, minor in Dorian, melodic minor or Phrygian; the section's where the mode is or is out of reach, and the
+    ///     first chord's, the home, and the last's where the section leads home.
+    /// </summary>
+    internal static ImmutableArray<ChordScale> Planed(IGenerationContext context, Scale scale, int home, int count, bool endsHome) =>
+    [
+        ..Enumerable.Range(0, count).Select(chord =>
+        {
+            // drawn for every chord, so that its draws are as many
+            var mode = OwnModes[(int)(context.GenerateDouble() * OwnModes.Length)];
+            return chord == 0 || endsHome && chord == count - 1 ? ChordScale.Section : Toward(scale.Offsets, home, mode.Offsets, ChordScaleKind.Own) ?? ChordScale.Section;
+        })
+    ];
+
+    /// <summary>
     ///     The steps of the scale to raise and lower for the mode given to sound on one of its steps, none where that
     ///     takes more than a semitone a step, puts the scale out of order or changes nothing.
     /// </summary>

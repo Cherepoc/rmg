@@ -178,7 +178,6 @@ songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listeni
 
 **The parked reviewed** (P2, 9 October 2026, each step through the implementation loop): two of the three items parked
 where they stand were mostly built since; what is left of them is small and a genre's data.
-3. Roots off the scale: a planed section's chords each in a mode of its own (*Roots off the scale*).
 4. Long cycles for the generated patterns: a slow part's two-bar cycle played whole over a pair of bars (*Long cycles*).
 Patterns longer than two bars stay parked (*Long cycles*); scales of other sizes are decided against (*Decided, and
 kept*).
@@ -197,7 +196,8 @@ its song without lays its patch over the genre's options, the others kept (`with
 `tape`, whose song without had lost every other effect of its genre's, and `stop-time`; asked anew, `inversion`, the
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
 `lift-cues`, under 0.1, and `bossa-clave`, Bossa nova's cross-stick playing the clave in 74% of its sections, 0.07 as a
-rim's stroke is quiet; `block`, Soul's melody harmonised in three voices, 0.15.
+rim's stroke is quiet; `block`, Soul's melody harmonised in three voices, 0.15; `own-modes`, Fusion's planed chords in modes of their
+own, 0.42.
 
 Answered on 8 October 2026, late, and let go of: the clave, stop time and the ghost notes, heard as great; the tape and
 the tone, barely heard, so a tape's wow now drifts by the sound facet, 5 cents at the plain end to 26 at the wild, and a
@@ -545,20 +545,11 @@ Each item with its plan, and what it waits for.
   melody, the melody on top 86%. Left: its passing notes harmonised too, a diminished chord or the scale's in parallel,
   should the two-voice passing notes sound thin; Jazz's soli, four voices close, which no part is free to play; the pad
   as a voice, which plays chords, not lines, and sat over the melody 81% of the time when tried.
-- **Roots off the scale** (P2, the parked reviewed, step 3): chord roots moving outside a seven-note scale with chords
-  of their own qualities, Fusion's (*More genres*), the one thing scales of other sizes were wanted for that is not
-  built (*Decided, and kept*). Planing moves roots off the scale already, by semitones, but always in the home chord's shape, a
-  planed section's chords all in the section's scale (`SectionGenerator`), so Fusion's own modes (40-60% of its chords)
-  never reach its planed sections (20-40% of them). Plan (P2, the parked reviewed, step 3): a planed section draws, from
-  a stream of its own, whether its chords keep the home's structure or each take a mode of its own on its moved root
-  (`ChordScales.OwnModes`: Lydian, Mixolydian, Dorian, melodic minor, Phrygian, each from a stream of its own by the
-  chord), the moved root being the home's so that a mode is drawn as on the home and the shift carries it; a section
-  leading home, as the song's last, ends in the section's scale on its tonic. How planing is played, not whether: the
-  songs' share 0.5 at the middle and the wild end alike, a genre's `planing` "ownModes", Fusion's high, Black metal's,
-  Djent's and Techno's 0, their planing a constant structure. Measured, over the planed sections: the share of chords
-  whose quality differs from the chord's before, and the melody's notes in their chord's scale (a rule, as now);
-  songs changed counted from the planed sections first (`TracePoints.Planing`). `?listen=own-modes` in Fusion. Left
-  out: symmetric cycles (major or minor thirds), Planing's moves holding minor thirds already.
+- **Roots off the scale, the rest** (P3, by listening to `?listen=own-modes`): a planed section's chords each in a mode
+  of its own, major or minor as it makes them (`Planing.ModesChance`, `ChordScales.Planed`), Fusion's 73% of its planed
+  sections, a chord's mode changing on 80% of the moves. Should it sound aimless, a chord keeping the mode of the one
+  before now and then, a chance on the same draw; symmetric cycles (major or minor thirds) left out, Planing's moves
+  holding minor thirds already.
 - **Long cycles** (reviewed 9 October 2026; P2 for two bars, P4 beyond): a figure of two bars is built, its onsets over 32 16ths from a
   section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's on the cross-stick), and chords of two bars
   are a harmonic rhythm; a section's bars repeating, AABA to ABCD, give every part figures of two and four bars, a
@@ -659,7 +650,7 @@ left:
     figures' grid in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
 - **More genres** (P3). What the genres made in October 2026 still want: Fusion's
-  roots off the scale (*Roots off the scale*, a planed section's own modes) and a lead's wide-interval legato lines (*A melody's leaping by
+  roots off the scale (built: a planed section's own modes, *Roots off the scale, the rest*) and a lead's wide-interval legato lines (*A melody's leaping by
   genre*).
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.

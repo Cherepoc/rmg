@@ -6,12 +6,20 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     A section planing: every chord the home chord's shape, a constant structure, moved by semitones, each move one a
 ///     voice moves little by, so that the chords drift by their voices rather than by the scale's steps, as planing in film
-///     scores and modern jazz does. A wild song's.
+///     scores and modern jazz does, now and then each chord in a mode of its own, roots off the scale with qualities of
+///     their own, as fusion moves. A wild song's.
 /// </summary>
 internal static class Planing
 {
     /// <summary>The chance a section planes, by the progression facet: a wild song's alone.</summary>
     public static ByConvention Chance { get; } = new(0, 0, 0.25);
+
+    /// <summary>
+    ///     The chance a planed section's chords each take a mode of their own, major or minor as it makes them, rather than
+    ///     the home's structure (<see cref="ChordScales.Planed" />): how planing is played, not whether, as often in a middling
+    ///     song as in a wild one.
+    /// </summary>
+    public static ByConvention ModesChance { get; } = new(0, 0.5, 0.5);
 
     /// <summary>
     ///     The moves from a chord to the next, in semitones, and how likely each is: by a semitone or a whole step, its

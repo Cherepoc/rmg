@@ -38,6 +38,35 @@ public sealed class PlaningTest
         await Assert.That(lastPlaned).IsGreaterThan(0);
     }
 
+    /// <summary>
+    ///     A planed section's chords keep the home's structure, in the section's scale, or each take a mode of its own, the
+    ///     first the home's; a calibration of how often, in Fusion's, and of how often a chord's mode differs from the one
+    ///     before.
+    /// </summary>
+    [Test]
+    public async Task APlanedSectionsChords_KeepTheHomesStructure_OrEachTakeAModeOfItsOwn()
+    {
+        var (planed, inModes, chords, changed) = (0, 0, 0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre("fusion")))))
+        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Planing && x.Value is not null))
+        {
+            planed++;
+            var scales = (ImmutableArray<ChordScale>)song.Trace.Last(x => x.Point == TracePoints.ChordScales && x.Section == entry.Section).Value!;
+            await Assert.That(scales[0]).IsEqualTo(ChordScale.Section).Because($"seed {song.Seed}");
+            await Assert.That(scales.All(x => x.Kind is ChordScaleKind.Section or ChordScaleKind.Own)).IsTrue().Because($"seed {song.Seed}");
+            if (scales.All(x => x == ChordScale.Section))
+                continue;
+            inModes++;
+            chords += scales.Length - 1;
+            changed += scales.Zip(scales.Skip(1)).Count(x => x.First != x.Second);
+        }
+
+        Console.WriteLine($"of {planed} planed sections, {inModes / (double)planed:P1} in modes, their chords' modes changing {changed / (double)chords:P1} of the moves");
+        await Assert.That(planed).IsGreaterThan(20);
+        await Assert.That(inModes / (double)planed).IsBetween(0.4, 0.95);
+        await Assert.That(changed / (double)chords).IsGreaterThan(0.4);
+    }
+
     [Test]
     public async Task AMiddlingSong_NeverPlanes()
     {

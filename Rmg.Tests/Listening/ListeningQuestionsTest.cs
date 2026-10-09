@@ -67,7 +67,12 @@ public sealed class ListeningQuestionsTest
             x => Plays(x, FigurePlayer.Backbeat, "bossaClave")),
         new("block", "Soul's melody harmonised in three voices, the counter-melody stacking its chord under its note, rather than two: a horn section, or thick?",
             "The block's chance by genre.", "soul", [], new() { ["doubling"] = new() { ["block"] = 0 } },
-            x => FirstSection(x, TracePoints.BlockHarmony, _ => true))
+            x => FirstSection(x, TracePoints.BlockHarmony, _ => true)),
+        new("own-modes", "Fusion's planed chords each in a mode of its own, major and minor moving by semitones, rather than all the home's shape: fusion, or aimless?",
+            "The planed modes' chance by genre.", "fusion", [], new() { ["planing"] = new() { ["modes"] = 0 } },
+            x => x.Trace.Where(t => t.Point == TracePoints.Planing && t.Value is not null
+                    && ((ImmutableArray<ChordScale>)x.Trace.Last(c => c.Point == TracePoints.ChordScales && c.Section == t.Section).Value!).Any(c => c.Kind == ChordScaleKind.Own))
+                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min())
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

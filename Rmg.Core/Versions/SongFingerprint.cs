@@ -50,7 +50,8 @@ public static class SongFingerprint
         return Convert.ToHexString(hash.GetHashAndReset())[..16];
     }
 
-    private static byte[] Write(int seed, SongOverrides overrides)
+    /// <summary>A song's MIDI file as the fingerprint hashes it, without the build's label.</summary>
+    internal static byte[] Write(int seed, SongOverrides overrides)
     {
         using var stream = new MemoryStream();
         Render.RenderSong(SongGenerator.GenerateSong((ulong)seed, overrides)).Write(stream, null);

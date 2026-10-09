@@ -16,6 +16,16 @@ public sealed class CorpusFingerprintTest
         await Task.CompletedTask;
     }
 
+    /// <summary>Each corpus song's hash, by its seed, so that two builds' lists compared count the songs a change changed.</summary>
+    [Test]
+    [Explicit]
+    public async Task ReportBySong()
+    {
+        foreach (var (seed, file) in Enumerable.Range(0, SongFingerprint.CorpusSize).AsParallel().AsOrdered().Select(seed => (seed, SongFingerprint.Write(seed, Rmg.Core.Composition.SongOverrides.None))))
+            Console.WriteLine($"song {seed} {Convert.ToHexString(SHA256.HashData(file))[..16]}");
+        await Task.CompletedTask;
+    }
+
     /// <summary>The songs of every preset of the page's, a few seeds each, which the corpus does not play, to show that a refactor leaves them as they were.</summary>
     [Test]
     [Explicit]

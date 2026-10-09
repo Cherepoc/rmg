@@ -176,5 +176,70 @@
         ]
       }
     ]
+  },
+  {
+    "id": "own-modes",
+    "question": "Fusion's planed chords each in a mode of its own, major and minor moving by semitones, rather than all the home's shape: fusion, or aimless?",
+    "decides": "The planed modes' chance by genre.",
+    "genre": "fusion",
+    "without": {
+      "skip": [],
+      "genre": {
+        "planing": {
+          "modes": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 87.9,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Riff (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 12.6,
+        "listen": [
+          "Solo (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 186.1,
+        "listen": [
+          "Bass (Fretless Bass)",
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 155.7,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Bass (Fretless Bass)"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 200.5,
+        "listen": [
+          "Rhythm part (Clavinet)",
+          "Melody (Electric Guitar (clean))",
+          "Bass (Fretless Bass)"
+        ]
+      },
+      {
+        "seed": "V",
+        "at": 163.8,
+        "listen": [
+          "Melody (Soprano Sax)",
+          "Counter-melody (Soprano Sax)",
+          "Bass (Electric Bass (finger))"
+        ]
+      }
+    ]
   }
 ]
