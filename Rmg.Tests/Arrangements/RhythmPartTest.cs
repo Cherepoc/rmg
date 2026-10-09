@@ -14,6 +14,7 @@ public sealed class RhythmPartTest
     public async Task TheRhythmPart_PlaysTheChordsInASoundOfItsOwn_AsTheChordsPlayThem()
     {
         var songs = TestCorpus.Range(64).Where(Plays).ToArray();
+        var checkedChords = 0;
         foreach (var song in songs)
         {
             var rhythm = (PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.RhythmTrack];
@@ -21,15 +22,16 @@ public sealed class RhythmPartTest
             await Assert.That(rhythm.InstrumentCode).IsNotEqualTo(chords.InstrumentCode);
 
             // whole chords, but where broken or soloing
-            var smallest = song.Song.Notes![SongTracks.RhythmTrack]
+            var whole = song.Song.Notes![SongTracks.RhythmTrack]
                 .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
                 .Select(x => x.Value.Pitches.Distinct().Count())
-                .DefaultIfEmpty(2)
-                .Min();
-            await Assert.That(smallest).IsGreaterThanOrEqualTo(2).Because($"seed {song.Seed}");
+                .ToArray();
+            await Assert.That(whole.All(x => x >= 2)).IsTrue().Because($"seed {song.Seed}");
+            checkedChords += whole.Length;
         }
 
         await Assert.That(songs.Length).IsGreaterThan(10);
+        await Assert.That(checkedChords).IsGreaterThan(100);
     }
 
     [Test]

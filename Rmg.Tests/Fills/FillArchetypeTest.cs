@@ -135,6 +135,8 @@ public sealed class FillArchetypeTest
             var filled = ApplyRun(setup, Run(SoundsOf(setup.Generator, FillDrumRole.Toms).Reverse()));
             var toms = Events(filled, Tom, 0, 12);
 
+            // a run of toms to go down, their places and their order checked
+            await Assert.That(toms.Length).IsGreaterThan(2);
             await Assert.That(toms.All(x => x.Position is >= 4 and < Line)).IsTrue();
             // down the toms, whose sounds count up with their pitch
             await Assert.That(toms.Select(Articulation).Zip(toms.Skip(1).Select(Articulation)).All(x => x.Second <= x.First)).IsTrue();

@@ -383,6 +383,7 @@ public sealed class GenreTest
         var never = Of(None(GenreChoices.SectionChanges), None(GenreChoices.Polymeter), None(GenreChoices.SoloAnswers), None(GenreChoices.LastRepeat),
             None(GenreChoices.Doubling), None(GenreChoices.InstrumentSwitches), (GenreChoices.Parts, [("solo", 1), ("counterMelody", 1), ("riff", 1)]));
         var always = Of((GenreChoices.SoloAnswers, [("sections", 1)]), (GenreChoices.Doubling, [("octaves", 1), ("harmony", 0), ("riff", 0)]));
+        var (answers, octaves) = (0, 0);
         foreach (var seed in Enumerable.Range(0, 16))
         {
             // a wild song's, which plays them oftenest
@@ -400,7 +401,12 @@ public sealed class GenreTest
             var given = TestCorpus.Get(seed, new SongOverrides(Genre: always));
             await Assert.That(given.Trace.Where(x => x.Point == TracePoints.SoloAnswers).All(x => (((int, bool Answers))x.Value!).Answers)).IsTrue();
             await Assert.That(given.Trace.Where(x => x.Point == TracePoints.Octave).All(x => (((int, TrackRole, double, bool InOctaves))x.Value!).InOctaves)).IsTrue();
+            (answers, octaves) = (answers + given.Trace.Count(x => x.Point == TracePoints.SoloAnswers), octaves + given.Trace.Count(x => x.Point == TracePoints.Octave));
         }
+
+        // the 'always' checked on some appearances of each
+        await Assert.That(answers).IsGreaterThan(0);
+        await Assert.That(octaves).IsGreaterThan(0);
     }
 
     [Test]

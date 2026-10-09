@@ -85,5 +85,6 @@ public sealed class LineScaleTest
         await Assert.That(scales.Where(x => x.Track == Rmg.Core.Composition.SongTracks.RiffTrack).All(x => x.Scale == LineScale.Chromatic)).IsTrue();
         await Assert.That(scales.Where(x => x.Track == Rmg.Core.Composition.SongTracks.MelodyTrack).All(x => x.Scale == LineScale.Section)).IsTrue();
         await Assert.That(scales.Count(x => x.Track == Rmg.Core.Composition.SongTracks.RiffTrack)).IsGreaterThan(0);
+        await Assert.That(scales.Count(x => x.Track == Rmg.Core.Composition.SongTracks.MelodyTrack)).IsGreaterThan(0);
     }
 }

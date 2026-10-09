@@ -117,8 +117,9 @@ public sealed class SongBatchTest
         var directory = CreateTempDirectory();
         try
         {
-            SongBatch.Run(new CliOptions(directory, 2, 5), SongGenerator.GenerateSong, new StringWriter(), new StringWriter());
+            await Assert.That(SongBatch.Run(new CliOptions(directory, 2, 5), SongGenerator.GenerateSong, new StringWriter(), new StringWriter())).IsEqualTo(0);
 
+            await Assert.That(Directory.GetFiles(directory).Length).IsEqualTo(2);
             foreach (var file in Directory.GetFiles(directory))
             {
                 var header = File.ReadAllBytes(file).Take(4).ToArray();

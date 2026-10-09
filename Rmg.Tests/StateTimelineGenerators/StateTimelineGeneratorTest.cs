@@ -44,7 +44,7 @@ public sealed class StateTimelineGeneratorTest
 
         var result = generator.Generate(new GenerationContext(1), 64);
 
-        await Assert.That(result.Select(x => x.Value).Distinct().Count()).IsLessThanOrEqualTo(2);
+        await Assert.That(result.Select(x => x.Value).Distinct().Count()).IsEqualTo(2);
     }
 
     [Test]

@@ -77,9 +77,15 @@ public sealed class PhraseSchemesTest
     [Test]
     public async Task Songs_BarsFollowTheirSectionsScheme_EveryTrackTheSame_ButARiffItsOwn()
     {
-        // but a riff, which plays a riff's scheme of its own
-        foreach (var riff in TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track == SongTracks.RiffTrack).GroupBy(x => x.Section))
+        // but a riff, which plays a riff's scheme of its own, in the songs of a few seeds, one with a riff among them
+        var riffs = 0;
+        foreach (var riff in TestCorpus.Range(8).SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track == SongTracks.RiffTrack).GroupBy(x => x.Section)))
+        {
             await Assert.That(RiffLayers.Schemes.Select(x => x.Value.ToString())).Contains(riff.Select(x => x.Phrase).Distinct().Single()!);
+            riffs++;
+        }
+
+        await Assert.That(riffs).IsGreaterThan(0);
         foreach (var section in TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track != SongTracks.RiffTrack).GroupBy(x => x.Section))
         {
             var phrases = section.Select(x => x.Phrase).Distinct().ToArray();

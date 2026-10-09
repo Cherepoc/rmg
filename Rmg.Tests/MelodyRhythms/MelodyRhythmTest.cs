@@ -96,12 +96,16 @@ public sealed class MelodyRhythmTest
     [Test]
     public async Task Melody_PlaysOneNoteAtATime()
     {
+        var pairs = 0;
         for (var seed = 0; seed < 32; seed++)
         {
             var melody = RenderMelody(seed);
             for (var i = 1; i < melody.Length; i++)
                 await Assert.That(melody[i - 1].Position + melody[i - 1].Value.Duration).IsLessThanOrEqualTo(melody[i].Position + 1e-9);
+            pairs += Math.Max(0, melody.Length - 1);
         }
+
+        await Assert.That(pairs).IsGreaterThan(1000);
     }
 
     [Test]

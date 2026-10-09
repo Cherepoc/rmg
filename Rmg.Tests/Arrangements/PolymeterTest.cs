@@ -13,7 +13,7 @@ public sealed class PolymeterTest
     [Test]
     public async Task APolymetricPart_PlaysItsCycleCellByCellAcrossTheBars_FromEveryFramesStart_EachCellItsFirstsMotifCut()
     {
-        var (checkedSections, composite) = (0, 0);
+        var (checkedSections, composite, frames) = (0, 0, 0);
         foreach (var song in TestCorpus.Range(256).Where(x => !Plans(x).IsEmpty))
         {
             var plans = Plans(song);
@@ -35,8 +35,14 @@ public sealed class PolymeterTest
                     for (var (cell, at) = (0, 0.0); at < length - 1e-9; at += cells[^1].Length)
                         cells.Add((at, plan.CellAt(cell++) * 0.25));
                     var longest = cells.FirstOrDefault(x => x.Length.Equals(plan.Longest * 0.25) && x.At + x.Length <= length + 1e-9);
-                    if (longest == default && cells[0].Length < plan.Longest * 0.25)
-                        continue;
+                    // where the longest fits in no whole cell, the first's motif cut to the frame, as the generator takes it,
+                    // where the first is the longest; no motif to check otherwise
+                    if (longest == default)
+                    {
+                        if (cells[0].Length < plan.Longest * 0.25)
+                            continue;
+                        longest = (0, Math.Min(cells[0].Length, length));
+                    }
 
                     var motif = onsets.Where(x => x >= longest.At - 1e-6 && x < longest.At + longest.Length - 1e-6).Select(x => Math.Round(x - longest.At, 6)).ToHashSet();
                     // a part silent there, coming in later in the frame, its first note on every cell's start
@@ -46,6 +52,7 @@ public sealed class PolymeterTest
                     foreach (var (at, cellLength) in cells)
                         await Assert.That(onsets.Where(x => x >= at - 1e-6 && x < at + cellLength - 1e-6).All(x => motif.Contains(Math.Round(x - at, 6))))
                             .IsTrue().Because($"seed {song.Seed} at {start + at}");
+                    frames++;
                 }
 
                 checkedSections++;
@@ -55,6 +62,7 @@ public sealed class PolymeterTest
         }
 
         await Assert.That(checkedSections).IsGreaterThan(3);
+        await Assert.That(frames).IsGreaterThan(3);
         await Assert.That(composite).IsGreaterThan(0);
     }
 
@@ -135,9 +143,10 @@ public sealed class PolymeterTest
     {
         var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
             .Add("polymeter", ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("sections", new(1, 1, 1))));
-        var plans = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => Plans(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre))))
-            .SelectMany(x => x.Values).ToArray();
-        await Assert.That(plans.Length).IsGreaterThan(0);
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => Plans(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre))));
+        // every plainest song playing one
+        await Assert.That(songs.All(x => !x.IsEmpty)).IsTrue();
+        var plans = songs.SelectMany(x => x.Values).ToArray();
         foreach (var plan in plans)
         {
             await Assert.That(plan.Cells.All(x => x is 3 or 6)).IsTrue().Because(string.Join("+", plan.Cells));

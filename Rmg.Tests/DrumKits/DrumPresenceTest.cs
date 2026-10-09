@@ -73,6 +73,7 @@ public sealed class DrumPresenceTest
     [Test]
     public async Task ADrumSittingOut_PlaysNoNotes_InTheBarsOfItsLetter()
     {
+        var checkedBars = 0;
         foreach (var song in TestCorpus.Range(32).Where(x => x.PlaysDrums))
         {
             var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
@@ -92,9 +93,12 @@ public sealed class DrumPresenceTest
                 {
                     var start = span.Start + bar * span.Meter.BarDuration;
                     await Assert.That(notes.Count(x => x.Position >= start && x.Position < start + span.Meter.BarDuration)).IsEqualTo(0);
+                    checkedBars++;
                 }
             }
         }
+
+        await Assert.That(checkedBars).IsGreaterThan(0);
     }
 
     [Test]

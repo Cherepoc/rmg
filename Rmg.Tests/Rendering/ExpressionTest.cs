@@ -87,6 +87,7 @@ public sealed class ExpressionTest
     [Test]
     public async Task ABend_StartsAndEndsOnTheScale_AStepOrTwoAway()
     {
+        var bent = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var note in song.Song.Notes!.Values.SelectMany(x => x))
         {
@@ -98,7 +99,10 @@ public sealed class ExpressionTest
             var direction = kind is BendKind.BendAndRelease or BendKind.PrebendRelease ? 1 : -1;
             await Assert.That(depth == Expression.ScaleDistance(note.Value, direction) || depth == Expression.ScaleDistance(note.Value, 2 * direction)).IsTrue();
             await Assert.That(Math.Abs(depth)).IsBetween(1, 4);
+            bent++;
         }
+
+        await Assert.That(bent).IsGreaterThan(50);
     }
 
     [Test]

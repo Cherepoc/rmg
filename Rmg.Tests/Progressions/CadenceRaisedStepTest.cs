@@ -106,6 +106,8 @@ public sealed class CadenceRaisedStepTest
         var plain = Raises(0);
         await Assert.That(plain.Length).IsGreaterThan(0);
         await Assert.That(plain.All(x => x.IsRaised)).IsTrue();
-        await Assert.That(Raises(1).Any(x => x.IsRaised)).IsFalse();
+        var wild = Raises(1);
+        await Assert.That(wild.Length).IsGreaterThan(0);
+        await Assert.That(wild.Any(x => x.IsRaised)).IsFalse();
     }
 }
