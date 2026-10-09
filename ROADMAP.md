@@ -737,7 +737,7 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   counting them in semitones would leave most without a meaning in a pentatonic (from E in C's, a fifth up is not in
   it) and the code with a branch for every scale that is not seven, for harmony no preset plays; the trial failed at
   once at the cadence (`Progressions.GetCadenceWeights`). What it was wanted for is built or planned: the line scales,
-  the shapes, planing, a chord's own scale, and roots off the scale (*Roots off the scale*). Taken up only for a genre
+  the shapes, planing, a chord's own scale, and roots off the scale (a planed section's own modes, *Roots off the scale, the rest*). Taken up only for a genre
   whose harmony itself is gapped, an East Asian pop or a modal pentatonic folk, as that genre's own progressions beside
   these rather than these resized.
 
