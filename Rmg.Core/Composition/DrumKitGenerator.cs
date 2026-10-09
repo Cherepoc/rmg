@@ -14,8 +14,8 @@ internal static class DrumKitGenerator
     ///     so that a section keeps its backbeat and its time together, each drawn by weight among the drums that play the
     ///     role in the section, or where none does among those whose main role it is
     ///     (<see cref="PercussionInstrumentDefinition.MainRole" />), which then play it, the loud ones likelier the more
-    ///     energy the section has, from the drum kit, or from the percussion in a section of percussion only, and beside a
-    ///     lead of another main role a drum whose main role it is, in the role it plays; then the drums that colour the groove, none to <see cref="MaxColourGroups" />
+    ///     energy the section has, from the drum kit, or from the percussion in a section of percussion only, and in a kit
+    ///     beside a lead of another main role a drum whose main role it is, in the role it plays; then the drums that colour the groove, none to <see cref="MaxColourGroups" />
     ///     groups of them (the toms, the accents, the percussion), more the more energy. What a drum plays there is its
     ///     role in the section, which a wild one may draw away from its main one, such as the snare keeping time while the
     ///     hi-hat plays the backbeat. A section
@@ -53,8 +53,9 @@ internal static class DrumKitGenerator
             leads[lead] = picked;
             if (!kit.Contains(picked))
                 kit.Add(picked);
-            // and a drum whose main role it is, in the role it plays, as a jazz snare comps while the hi-hat plays the backbeat
-            if (!kit.Any(x => x.MainRole == lead) && grooving.Where(x => x.MainRole == lead).ToArray() is { Length: > 0 } own)
+            // and in a kit a drum whose main role it is, in the role it plays, as a jazz snare comps while the hi-hat plays the
+            // backbeat; a section of percussion only fills its room with more of its drums after its leads
+            if (!isPercussionOnly && !kit.Any(x => x.MainRole == lead) && grooving.Where(x => x.MainRole == lead).ToArray() is { Length: > 0 } own)
                 kit.Add(Pick(own));
         }
 
@@ -63,7 +64,7 @@ internal static class DrumKitGenerator
         if (isPercussionOnly)
         {
             var more = family.Except(kit).Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x));
-            kit.AddRange(PickWeighted(context, more, Math.Max(0, PercussionSections.MaxActiveDrums - kit.Count)));
+            kit.AddRange(PickWeighted(context, more, PercussionSections.MaxActiveDrums - kit.Count));
             return new SectionKit([..kit], leads.ToImmutable(), sectionRoles, ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition>.Empty);
         }
 

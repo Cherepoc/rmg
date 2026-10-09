@@ -615,13 +615,10 @@ left:
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
 - **A heavy band's time and backbeat heard together** (P2, heard 9 October 2026 in Black metal, `ADFFnPdywKu` among
-  other songs): a section's leads are now the drums that play their roles in it, and every section keeps time, so a
-  kit's bars sound both 77.6% → 95.3% of the corpus's, Black metal's 78.7% → 94.0% (`KitRolesReportTest`). Left, by
-  listening: a role's drum silent through a bar outside stop time and breakdowns, Black metal's backbeat in 3.8% of its
-  bars and both in 1.8%. Measured: Black metal's snare on a cycle of 1.5 to 2 bars, half time and the layers slowing it
-  together, mostly under a tremolo riff, so that every other bar has none; Rock's backbeat thinned to a fullness of
-  0.05, its bar empty, often under a fill. Should a snare every other bar sound wrong rather than heavy, a lead's cycle
-  kept to a bar at most.
+  other songs): a section's leads are the drums that play their roles in it, every section keeps time, and a drum
+  keeping a role plays in a cycle of a bar at most, so a kit's bars with drums sound both 98.5% of the corpus's, Black
+  metal's 98.8% (`KitRolesTest`). Left: a blast's cymbal, and the drums' loudness against the guitars (the steps of 9
+  October 2026).
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:

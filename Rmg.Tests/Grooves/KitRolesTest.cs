@@ -5,21 +5,60 @@ using Rmg.Core.Songs;
 namespace Rmg.Tests.Grooves;
 
 /// <summary>
-///     How often a kit section's bar sounds its backbeat without its time, or its time without its backbeat, and why: no
-///     drum of the section holds the role, the role's lead drawn to another role, or the role's drums silent in the bar.
+///     A kit section's backbeat and time: every section leads each role its drums can play, and its bars sound both, but
+///     where a breakdown or stop time takes one out; how often a bar sounds one without the other, and why: no drum of the
+///     section holds the role, the role's lead drawn to another role, or the role's drums silent in the bar. A bar no drum
+///     plays in, as an arrangement leaves the drums out, counts for neither.
 /// </summary>
-public sealed class KitRolesReportTest
+public sealed class KitRolesTest
 {
     private const int Count = 64;
 
-    private sealed record Bar(int Seed, bool Backbeat, bool Time, string Cause, string Section);
+    private sealed record Bar(int Seed, bool Backbeat, bool Time, string Cause, string Section)
+    {
+        /// <summary>Whether a breakdown or stop time may take its backbeat or its time out.</summary>
+        public bool IsExcepted => Section.Length > 0;
+    }
+
+    [Test]
+    public async Task ASection_LeadsEveryRoleItsDrumsCanPlay_WithADrumPlayingIt()
+    {
+        var sections = 0;
+        foreach (var song in TestCorpus.Range(Count))
+        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Kit))
+        {
+            var kit = (SectionKit)entry.Value!;
+            var family = (bool)song.Trace.First(x => x.Point == TracePoints.PercussionOnly && x.Section == entry.Section).Value! ? DrumFamily.Percussion : DrumFamily.Kit;
+            var grooving = kit.Roles.Keys.Where(x => x.Family.HasFlag(family) && DrumGroups.GroupOf(x).GrooveChance >= 1).ToArray();
+            foreach (var role in DrumKitGenerator.LeadRoles.Where(r => grooving.Any(x => x.MainRole == r || kit.Roles[x] == r)))
+            {
+                await Assert.That(kit.Leads.ContainsKey(role)).IsTrue().Because($"seed {song.Seed}, section {entry.Section}, {role}");
+                await Assert.That(kit.Roles[kit.Leads[role]]).IsEqualTo(role);
+                await Assert.That(kit.Drums.Contains(kit.Leads[role])).IsTrue();
+            }
+
+            sections++;
+        }
+
+        await Assert.That(sections).IsGreaterThan(Count);
+    }
+
+    [Test]
+    public async Task AKitSectionsBars_SoundTheirBackbeatAndTimeTogether()
+    {
+        // measured 99.0% of 64 songs' bars
+        var bars = TestCorpus.Measure(Count, x => Measure(x).ToArray()).SelectMany(x => x).Where(x => !x.IsExcepted).ToArray();
+        var both = bars.Count(x => x.Backbeat && x.Time) / (double)bars.Length;
+        Console.WriteLine($"{bars.Length} bars, both {both:P1}");
+        await Assert.That(both).IsGreaterThan(0.9);
+    }
 
     [Test]
     [Explicit]
     public async Task Report()
     {
         Print("the corpus", TestCorpus.Range(Count * 4));
-        foreach (var name in new[] { "blackMetal", "metal", "rock" })
+        foreach (var name in new[] { "blackMetal", "metal", "rock", "jazz" })
             Print(name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre(name)))));
         await Task.CompletedTask;
     }
@@ -28,7 +67,7 @@ public sealed class KitRolesReportTest
     {
         var bars = songs.SelectMany(Measure).ToArray();
         string Share(Func<Bar, bool> of) => $"{bars.Count(of) / (double)Math.Max(1, bars.Length):P1}";
-        Console.WriteLine($"{name}: {bars.Length} kit bars of {bars.Select(x => x.Seed).Distinct().Count()} songs: both {Share(x => x.Backbeat && x.Time)}, " +
+        Console.WriteLine($"{name}: {bars.Length} kit bars with drums of {bars.Select(x => x.Seed).Distinct().Count()} songs: both {Share(x => x.Backbeat && x.Time)}, " +
                           $"backbeat without time {Share(x => x.Backbeat && !x.Time)} in {bars.Where(x => x.Backbeat && !x.Time).Select(x => x.Seed).Distinct().Count()} songs, " +
                           $"time without backbeat {Share(x => !x.Backbeat && x.Time)} in {bars.Where(x => !x.Backbeat && x.Time).Select(x => x.Seed).Distinct().Count()} songs, " +
                           $"neither {Share(x => !x.Backbeat && !x.Time)}");
@@ -64,6 +103,8 @@ public sealed class KitRolesReportTest
                 var start = span.Start + bar * span.Meter.BarDuration;
                 var end = start + span.Meter.BarDuration;
                 var sounding = drums.Where(t => notes[t].Any(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9)).ToArray();
+                if (sounding.Length == 0)
+                    continue;
                 var backbeat = sounding.Any(t => RoleOf(t) == DrumRole.Backbeat);
                 var time = sounding.Any(t => RoleOf(t) == DrumRole.Time);
                 string Cause(DrumRole role)
