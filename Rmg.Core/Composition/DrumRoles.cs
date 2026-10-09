@@ -175,14 +175,22 @@ internal static class DrumRoles
 
     /// <summary>
     ///     A section's role of a drum, now and then drawn again by its affinities at the groove facet, never at the plain
-    ///     end and always at the wild; the role and the difference of its part from the song's, the genre's rhythm of the
-    ///     role's too, or none for the song's. Always two draws.
+    ///     end and always at the wild, else the song's. Always two draws.
     /// </summary>
-    public static StateMap DrawSection(IGenerationContext context, PercussionInstrumentDefinition drum, DrumRole songRole, double unconventionality, Genre genre)
+    public static DrumRole DrawSection(IGenerationContext context, PercussionInstrumentDefinition drum, DrumRole songRole, double unconventionality, Genre genre)
     {
         var drawsAgain = context.TestProbability(RhythmicUnconventionality.Ends(SectionChangeChance, 1).At(unconventionality));
         var role = Pick(context, drum, unconventionality, genre);
-        if (!drawsAgain || role == songRole)
+        return drawsAgain ? role : songRole;
+    }
+
+    /// <summary>
+    ///     A section's role of a drum as state: the role and the difference of its part from the song's, the genre's rhythm
+    ///     of the role's too, or none for the song's.
+    /// </summary>
+    public static StateMap SectionPart(DrumRole songRole, DrumRole role, Genre genre)
+    {
+        if (role == songRole)
             return StateMap.Default;
 
         return At(StateDepths.Section, role).MergeWith(Parts[songRole].ToStateMap(-1)).MergeWith(Parts[role].ToStateMap())

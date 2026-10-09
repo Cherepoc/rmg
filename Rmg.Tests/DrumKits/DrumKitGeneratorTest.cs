@@ -16,28 +16,53 @@ public sealed class DrumKitGeneratorTest
     {
         var context = new GenerationContext((ulong)seed);
         var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion, null);
-        var kit = DrumKitGenerator.SelectKit(context, songDrums, tilt, isPercussionOnly);
+        var kit = DrumKitGenerator.SelectKit(context, songDrums, tilt, isPercussionOnly, songDrums.ToDictionary(x => x, x => x.MainRole));
         return (songDrums, kit.Drums, kit);
     }
 
     private static DrumGroup GroupOf(PercussionInstrumentDefinition drum) => DrumGroups.All.Single(x => x.Drums.Contains(drum));
 
     [Test]
-    public async Task ADrumKitSection_HasAGroundAndABackbeat_AndMostlyTime()
+    public async Task ADrumKitSection_HasAGroundABackbeatAndTime()
     {
-        var withTime = 0;
         foreach (var seed in Seeds)
         {
-            var (_, drums, section) = Select(seed);
+            var (song, drums, section) = Select(seed);
             // its leads, not the drums that double them
             var kit = drums.Except(section.Doubles.Keys).ToArray();
 
             await Assert.That(kit.Count(x => x.MainRole == DrumRole.Ground && GroupOf(x) != DrumGroups.Percussion)).IsEqualTo(1);
             await Assert.That(kit.Count(x => x.MainRole == DrumRole.Backbeat && GroupOf(x) != DrumGroups.Percussion)).IsEqualTo(1);
-            withTime += kit.Any(x => x.MainRole == DrumRole.Time && GroupOf(x) == DrumGroups.Timekeepers) ? 1 : 0;
+            // a timekeeper wherever the song has one of the kit
+            if (song.Any(x => GroupOf(x) == DrumGroups.Timekeepers && x.Family.HasFlag(DrumFamily.Kit)))
+                await Assert.That(section.Leads[DrumRole.Time]).IsNotNull();
         }
+    }
 
-        await Assert.That(withTime / (double)Seeds.Count()).IsEqualTo(DrumKitGenerator.TimeChance).Within(0.05);
+    [Test]
+    public async Task ALead_IsADrumThatPlaysItsRoleInTheSection_OrWhereNoneDoes_OneWhoseMainRoleItIs_PlayingIt()
+    {
+        var songDrums = ImmutableArray.Create(DrumDefinitions.Kick, DrumDefinitions.AcousticSnare, DrumDefinitions.HiHat);
+        foreach (var seed in Enumerable.Range(0, 32))
+        {
+            // the hi-hat on the backbeat and the snare keeping time
+            var swapped = DrumKitGenerator.SelectKit(new GenerationContext((ulong)seed), songDrums, default, false, new Dictionary<PercussionInstrumentDefinition, DrumRole>
+            {
+                [DrumDefinitions.Kick] = DrumRole.Ground, [DrumDefinitions.AcousticSnare] = DrumRole.Time, [DrumDefinitions.HiHat] = DrumRole.Backbeat
+            });
+            await Assert.That(swapped.Leads[DrumRole.Backbeat]).IsEqualTo(DrumDefinitions.HiHat);
+            await Assert.That(swapped.Leads[DrumRole.Time]).IsEqualTo(DrumDefinitions.AcousticSnare);
+            await Assert.That(swapped.Roles[DrumDefinitions.HiHat]).IsEqualTo(DrumRole.Backbeat);
+
+            // the snare keeping time beside the hi-hat, and no drum on the backbeat: the snare plays it after all
+            var doubled = DrumKitGenerator.SelectKit(new GenerationContext((ulong)seed), songDrums, default, false, new Dictionary<PercussionInstrumentDefinition, DrumRole>
+            {
+                [DrumDefinitions.Kick] = DrumRole.Ground, [DrumDefinitions.AcousticSnare] = DrumRole.Time, [DrumDefinitions.HiHat] = DrumRole.Time
+            });
+            await Assert.That(doubled.Leads[DrumRole.Backbeat]).IsEqualTo(DrumDefinitions.AcousticSnare);
+            await Assert.That(doubled.Roles[DrumDefinitions.AcousticSnare]).IsEqualTo(DrumRole.Backbeat);
+            await Assert.That(doubled.Leads[DrumRole.Time]).IsEqualTo(DrumDefinitions.HiHat);
+        }
     }
 
     [Test]

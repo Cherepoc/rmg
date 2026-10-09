@@ -14,7 +14,7 @@ public sealed class DrumPresenceTest
         foreach (var song in TestCorpus.Range(32))
         {
             var leads = song.Trace.Where(x => x.Point == TracePoints.Kit)
-                .ToDictionary(x => x.Section, x => ((SectionKit)x.Value!).Leads.Select(DrumGroups.GetTrackNumber).ToHashSet());
+                .ToDictionary(x => x.Section, x => ((SectionKit)x.Value!).Leads.Values.Select(DrumGroups.GetTrackNumber).ToHashSet());
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
             {
                 var bars = (BarDrums)entry.Value!;

@@ -8,7 +8,7 @@ namespace Rmg.Tests.DrumKits;
 public sealed class DrumCoverageTest
 {
     private static SectionDrums Section(bool isPercussionOnly, bool playsDrums, params PercussionInstrumentDefinition[] drums) =>
-        new(isPercussionOnly, new SectionKit([..drums], [..drums.Take(1)], ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition>.Empty), playsDrums);
+        new(isPercussionOnly, new SectionKit([..drums], drums.Take(1).ToImmutableDictionary(x => x.MainRole), Song.ToImmutableDictionary(x => x, x => x.MainRole), ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition>.Empty), playsDrums);
 
     private static readonly ImmutableArray<PercussionInstrumentDefinition> Song =
         [DrumDefinitions.Kick, DrumDefinitions.AcousticSnare, DrumDefinitions.HiHat, DrumDefinitions.Cabasa, DrumDefinitions.Conga, DrumDefinitions.Bongo, DrumDefinitions.Tom];

@@ -10,12 +10,15 @@ namespace Rmg.Core.Composition;
 internal static class DrumKitGenerator
 {
     /// <summary>
-    ///     The drums a section plays, out of the song's: a lead for the ground, one for the backbeat, and mostly one to
-    ///     keep time, each drawn among the drums whose main role it is (<see cref="PercussionInstrumentDefinition.MainRole" />)
-    ///     by weight, the loud ones likelier the more energy the section has, from the drum kit, or from the percussion in
-    ///     a section of percussion only; then the drums that colour the groove, none to <see cref="MaxColourGroups" />
+    ///     The drums a section plays, out of the song's: a lead for the ground, one for the backbeat and one to keep time,
+    ///     so that a section keeps its backbeat and its time together, each drawn by weight among the drums that play the
+    ///     role in the section, or where none does among those whose main role it is
+    ///     (<see cref="PercussionInstrumentDefinition.MainRole" />), which then play it, the loud ones likelier the more
+    ///     energy the section has, from the drum kit, or from the percussion in a section of percussion only, and beside a
+    ///     lead of another main role a drum whose main role it is, in the role it plays; then the drums that colour the groove, none to <see cref="MaxColourGroups" />
     ///     groups of them (the toms, the accents, the percussion), more the more energy. What a drum plays there is its
-    ///     role in the section, which a wild one may draw away from its main one, such as the snare keeping time. A section
+    ///     role in the section, which a wild one may draw away from its main one, such as the snare keeping time while the
+    ///     hi-hat plays the backbeat. A section
     ///     of percussion only plays its percussion's leads and more of it, up to
     ///     <see cref="PercussionSections.MaxActiveDrums" />. Last, now and then a drum doubles a lead, such as the clap on
     ///     the snare's backbeat or a shaker over the hi-hat: one that doubles (<see cref="PercussionInstrumentDefinition.Doubling" />)
@@ -23,33 +26,45 @@ internal static class DrumKitGenerator
     ///     section doubles the likelier the more energy it has and the more eager the drum (<see cref="PercussionInstrumentDefinition.DoublingOdds" />).
     /// </summary>
     /// <param name="tilt">The section's pull of its energy.</param>
+    /// <param name="roles">Every one of the song's drums' role in the section, as the song and the section draw it.</param>
     public static SectionKit SelectKit(
         IGenerationContext context,
         ImmutableArray<PercussionInstrumentDefinition> songDrums,
         Tilt tilt,
-        bool isPercussionOnly
+        bool isPercussionOnly,
+        IReadOnlyDictionary<PercussionInstrumentDefinition, DrumRole> roles
     )
     {
         var family = songDrums.Where(x => x.Family.HasFlag(isPercussionOnly ? DrumFamily.Percussion : DrumFamily.Kit)).ToArray();
+        PercussionInstrumentDefinition Pick(IEnumerable<PercussionInstrumentDefinition> drums) =>
+            PickWeighted(context, drums.Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x)), 1)[0];
         var kit = new List<PercussionInstrumentDefinition>();
-        var leads = new List<PercussionInstrumentDefinition>();
+        var leads = ImmutableDictionary.CreateBuilder<DrumRole, PercussionInstrumentDefinition>();
         foreach (var lead in LeadRoles)
         {
             // a lead of a group that grooves, not of one that all but never does, such as the calls
-            var candidates = family.Where(x => x.MainRole == lead && DrumGroups.GroupOf(x).GrooveChance >= 1).ToArray();
-            if (candidates.Length == 0 || !context.TestProbability(tilt.Chance(lead == DrumRole.Time ? TimeChance : 1, 1)))
+            var grooving = family.Where(x => !leads.ContainsValue(x) && DrumGroups.GroupOf(x).GrooveChance >= 1).ToArray();
+            var playing = grooving.Where(x => roles[x] == lead).ToArray();
+            var candidates = playing.Length > 0 ? playing : grooving.Where(x => x.MainRole == lead).ToArray();
+            if (candidates.Length == 0)
                 continue;
 
-            var picked = PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x)), 1);
-            kit.AddRange(picked);
-            leads.AddRange(picked);
+            var picked = Pick(candidates);
+            leads[lead] = picked;
+            if (!kit.Contains(picked))
+                kit.Add(picked);
+            // and a drum whose main role it is, in the role it plays, as a jazz snare comps while the hi-hat plays the backbeat
+            if (!kit.Any(x => x.MainRole == lead) && grooving.Where(x => x.MainRole == lead).ToArray() is { Length: > 0 } own)
+                kit.Add(Pick(own));
         }
 
+        // every drum's role in the section, a lead's the one it leads
+        var sectionRoles = songDrums.ToImmutableDictionary(x => x, x => roles[x]).SetItems(leads.Select(x => KeyValuePair.Create(x.Value, x.Key)));
         if (isPercussionOnly)
         {
             var more = family.Except(kit).Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x));
-            kit.AddRange(PickWeighted(context, more, PercussionSections.MaxActiveDrums - kit.Count));
-            return new SectionKit([..kit], [..leads], ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition>.Empty);
+            kit.AddRange(PickWeighted(context, more, Math.Max(0, PercussionSections.MaxActiveDrums - kit.Count)));
+            return new SectionKit([..kit], leads.ToImmutable(), sectionRoles, ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition>.Empty);
         }
 
         // the colour: the groups that hold no role, those of a lower chance of grooving now and then
@@ -76,7 +91,7 @@ internal static class DrumKitGenerator
 
         var doubles = ImmutableDictionary.CreateBuilder<PercussionInstrumentDefinition, PercussionInstrumentDefinition>();
         // a lead that doubles itself, such as a shaker keeping time, is not doubled
-        foreach (var lead in leads.Where(x => x.Doubling <= 0))
+        foreach (var lead in leads.Values.Where(x => x.Doubling <= 0))
         {
             // any of the song's drums that doubles and has an affinity for the lead's role, the percussion too, likelier
             // the more it has, so that a clap mostly doubles the snare and now and then the kick
@@ -94,7 +109,7 @@ internal static class DrumKitGenerator
             doubles[PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(x.Doubling * x.AffinityFor(lead.MainRole), x)), 1)[0]] = lead;
         }
 
-        return new SectionKit([..kit, ..doubles.Keys], [..leads], doubles.ToImmutable());
+        return new SectionKit([..kit, ..doubles.Keys], leads.ToImmutable(), sectionRoles, doubles.ToImmutable());
     }
 
     /// <summary>The chance a section has a drum double a lead that one may double, with no lean; the more energy, the likelier.</summary>
@@ -109,11 +124,8 @@ internal static class DrumKitGenerator
     /// </summary>
     public const double FeelChance = 0.85;
 
-    /// <summary>The roles a section has a lead for, the ground and the backbeat always, time by <see cref="TimeChance" />.</summary>
+    /// <summary>The roles a section has a lead for, in the order it draws them.</summary>
     public static ImmutableArray<DrumRole> LeadRoles { get; } = [DrumRole.Ground, DrumRole.Backbeat, DrumRole.Time];
-
-    /// <summary>The chance a section has a drum to keep time, with no lean; the more energy, the likelier.</summary>
-    public const double TimeChance = 0.9;
 
     /// <summary>How many groups of drums that colour the groove a section plays at most.</summary>
     public const int MaxColourGroups = 2;
@@ -146,11 +158,12 @@ internal static class DrumKitGenerator
 }
 
 /// <summary>
-///     The drums a section plays; those of them that lead a role, the ground, the backbeat or time; and those that double
-///     a lead, by the lead they double.
+///     The drums a section plays; those of them that lead a role, the ground, the backbeat or time, by the role; every one
+///     of the song's drums' role in the section; and those that double a lead, by the lead they double.
 /// </summary>
 public sealed record SectionKit(
     ImmutableArray<PercussionInstrumentDefinition> Drums,
-    ImmutableArray<PercussionInstrumentDefinition> Leads,
+    ImmutableDictionary<DrumRole, PercussionInstrumentDefinition> Leads,
+    ImmutableDictionary<PercussionInstrumentDefinition, DrumRole> Roles,
     ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition> Doubles
 );

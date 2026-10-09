@@ -39,10 +39,10 @@ public sealed class PercussionFeelReportTest
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Kit))
             {
                 var kit = (SectionKit)entry.Value!;
-                foreach (var drum in kit.Drums.Where(x => !kit.Leads.Contains(x)))
+                foreach (var drum in kit.Drums.Where(x => !kit.Leads.ContainsValue(x)))
                 {
                     var isFigure = kit.Doubles.ContainsKey(drum);
-                    var lead = isFigure ? kit.Doubles[drum] : kit.Leads.FirstOrDefault(x => x.MainRole == drum.MainRole);
+                    var lead = isFigure ? kit.Doubles[drum] : kit.Leads.GetValueOrDefault(drum.MainRole);
                     if (lead is null || (isFigure && song.Trace.Any(e => e.Point == TracePoints.Doubles && e.Section == entry.Section
                                                                      && ((ImmutableDictionary<int, Doubling>)e.Value!)[DrumGroups.GetTrackNumber(drum)].Binding != DrumBinding.Figure)))
                         continue;

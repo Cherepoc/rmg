@@ -49,17 +49,16 @@ internal sealed class SectionDrumGenerator
     }
 
     /// <summary>
-    ///     The section's drums as parts: the roles it draws again for the song's drums, the kit it plays, the drums that
+    ///     The section's drums as parts: the roles its kit plays the song's drums in, the kit, the drums that
     ///     double a lead and how, and the leads whose feel the others play on, each from a sequence of its own.
     /// </summary>
     public (ImmutableDictionary<int, StateMap> Roles, SectionKit Kit, bool IsPercussionOnly, ImmutableDictionary<int, Doubling> Doubles, ImmutableDictionary<int, int> FeelLeads)
         DrawDrumParts(int sectionId, SectionDrums planned, RhythmicUnconventionality rhythm)
     {
-        // the roles the section draws again for the song's drums, as their parts in its grooves and its fills, from a
-        // sequence of its own
-        var roleContext = _stream(sectionId, SectionStream.DrumRoles);
+        // the roles the section plays the song's drums in, as their parts in its grooves and its fills, as its kit has them
+        var (isPercussionOnly, kit, _) = planned;
         var sectionRoles = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order()
-            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Value, _genre));
+            .ToImmutableDictionary(x => x, x => DrumRoles.SectionPart(SongRole(x), kit.Roles[DrumGroups.GetDrum(x)], _genre));
         StateTrace.Record(
             TracePoints.DrumRoles,
             SectionGenerator.SectionTrace,
@@ -73,7 +72,6 @@ internal sealed class SectionDrumGenerator
 
         // the drums: the kit's or, now and then, the percussion's alone, by the roles they play, as the song drew them
         // (DrawDrums)
-        var (isPercussionOnly, kit, _) = planned;
         StateTrace.RecordSection(TracePoints.PercussionOnly, SectionGenerator.SectionTrace, sectionId, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
         StateTrace.RecordSection(TracePoints.Kit, SectionGenerator.SectionTrace, sectionId, string.Join(", ", kit.Drums.Select(x => x.Name)), kit);
         // a drum that doubles a lead plays its lead's beats up to the rank its role doubles, all of them, a share, or a
@@ -93,12 +91,12 @@ internal sealed class SectionDrumGenerator
         // lead of its main role's by a chance, drawn from a sequence of its own, crossing it the less conventional the section
         var feelContext = _stream(sectionId, SectionStream.DrumFeels);
         var feelLeads = ImmutableDictionary.CreateBuilder<int, int>();
-        foreach (var drum in kit.Drums.Except(kit.Leads).OrderBy(DrumGroups.GetTrackNumber))
+        foreach (var drum in kit.Drums.Except(kit.Leads.Values).OrderBy(DrumGroups.GetTrackNumber))
         {
             var track = DrumGroups.GetTrackNumber(drum);
             if (doubles.TryGetValue(track, out var doubling))
                 feelLeads[track] = doubling.Lead;
-            else if (kit.Leads.FirstOrDefault(x => x.MainRole == drum.MainRole) is { } lead && feelContext.TestProbability(RhythmicUnconventionality.Ends(DrumKitGenerator.FeelChance, -1).At(rhythm.Value)))
+            else if (kit.Leads.GetValueOrDefault(drum.MainRole) is { } lead && feelContext.TestProbability(RhythmicUnconventionality.Ends(DrumKitGenerator.FeelChance, -1).At(rhythm.Value)))
                 feelLeads[track] = DrumGroups.GetTrackNumber(lead);
         }
 
@@ -121,7 +119,7 @@ internal sealed class SectionDrumGenerator
             _stream(sectionId, SectionStream.DrumPresence),
             activeDrumTrackNumbers,
             scheme,
-            kit.Leads.Select(DrumGroups.GetTrackNumber).ToHashSet(),
+            kit.Leads.Values.Select(DrumGroups.GetTrackNumber).ToHashSet(),
             track => sectionStrokes.TryGetValue(track, out var stroke) ? stroke : SongStroke(track),
             rhythm.Value,
             tilt,
@@ -134,7 +132,8 @@ internal sealed class SectionDrumGenerator
     /// <summary>
     ///     A section's drums, drawn before the sections are made, so that the song sees them all (<see cref="DrumCoverage" />):
     ///     whether it plays percussion only, a percussion song's every section and now and then a section of a song of the
-    ///     kit and percussion, unless the song says, and its kit, each from a sequence of its own.
+    ///     kit and percussion, unless the song says, the roles it draws again for the song's drums, and its kit by them,
+    ///     each from a sequence of its own.
     /// </summary>
     public SectionDrums DrawDrums(int sectionId, SectionRole role, bool? isPercussionOnly = null)
     {
@@ -147,7 +146,10 @@ internal sealed class SectionDrumGenerator
                                                    PercussionSections.Draw(_stream(sectionId, SectionStream.Percussion), _songPercussion, rhythm.Value, tilt, songPercussion)));
         // whether its drums play where it first plays, as its arrangement draws them there (Generate)
         var playsDrums = !_firstRests(sectionId, role, tilt).Contains(TrackRole.Drum);
-        return new SectionDrums(percussionOnly, DrumKitGenerator.SelectKit(_stream(sectionId, SectionStream.Kit), _tracks.SongDrums, tilt, percussionOnly), playsDrums);
+        var roleContext = _stream(sectionId, SectionStream.DrumRoles);
+        var roles = _tracks.SongDrums.OrderBy(DrumGroups.GetTrackNumber)
+            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, x, SongRole(DrumGroups.GetTrackNumber(x)), rhythm.Value, _genre));
+        return new SectionDrums(percussionOnly, DrumKitGenerator.SelectKit(_stream(sectionId, SectionStream.Kit), _tracks.SongDrums, tilt, percussionOnly, roles), playsDrums);
     }
 
     /// <summary>The role a drum plays in the section: its own, where it draws the drum's again, or the song's.</summary>

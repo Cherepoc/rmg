@@ -19,7 +19,7 @@ public sealed class DrumRolesTest
     {
         var context = new GenerationContext(1);
         var changed = Enumerable.Range(0, 2_000)
-            .Select(_ => DrumRoles.DrawSection(context, Spread, DrumRole.Ground, 1, Genre.None))
+            .Select(_ => DrumRoles.SectionPart(DrumRole.Ground, DrumRoles.DrawSection(context, Spread, DrumRole.Ground, 1, Genre.None), Genre.None))
             .First(x => !x.IsDefault);
         var role = (DrumRole)changed.GetStateValue(CompositionStateKinds.DrumRole).Value;
         var rhythm = DrumRoles.Parts[DrumRole.Ground].ToStateMap().MergeWith(changed);

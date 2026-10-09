@@ -101,7 +101,7 @@ public sealed class DoublingTest
                 var kit = (SectionKit)song.Trace.Single(x => x.Point == TracePoints.Kit && x.Section == entry.Section).Value!;
                 foreach (var drum in kit.Doubles.Keys)
                     await Assert.That(feelLeads[DrumGroups.GetTrackNumber(drum)]).IsEqualTo(DrumGroups.GetTrackNumber(kit.Doubles[drum]));
-                var colouring = kit.Drums.Where(x => !kit.Leads.Contains(x) && !kit.Doubles.ContainsKey(x) && kit.Leads.Any(l => l.MainRole == x.MainRole)).ToArray();
+                var colouring = kit.Drums.Where(x => !kit.Leads.ContainsValue(x) && !kit.Doubles.ContainsKey(x) && kit.Leads.ContainsKey(x.MainRole)).ToArray();
                 colours += colouring.Length;
                 following += colouring.Count(x => feelLeads.ContainsKey(DrumGroups.GetTrackNumber(x)));
 

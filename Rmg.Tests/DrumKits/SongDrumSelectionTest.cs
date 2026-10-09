@@ -37,9 +37,9 @@ public sealed class SongDrumSelectionTest
         foreach (var seed in Seeds)
         {
             var context = new GenerationContext((ulong)seed);
-            var kit = DrumKitGenerator.SelectKit(context, SongDrums(seed), default, false);
+            var kit = DrumKitGenerator.SelectKit(context, SongDrums(seed), default, false, SongDrums(seed).ToDictionary(x => x, x => x.MainRole));
 
-            await Assert.That(kit.Leads.Any(DrumGroups.Calls.Drums.Contains)).IsFalse();
+            await Assert.That(kit.Leads.Values.Any(DrumGroups.Calls.Drums.Contains)).IsFalse();
         }
     }
 
@@ -151,7 +151,7 @@ public sealed class SongDrumSelectionTest
 
             for (var i = 0; i < 5; i++)
             {
-                var sectionDrums = DrumKitGenerator.SelectKit(context, songDrums, default, false).Drums;
+                var sectionDrums = DrumKitGenerator.SelectKit(context, songDrums, default, false, songDrums.ToDictionary(x => x, x => x.MainRole)).Drums;
 
                 await Assert.That(sectionDrums.All(songDrums.Contains)).IsTrue();
             }
