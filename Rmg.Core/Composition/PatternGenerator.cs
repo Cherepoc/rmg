@@ -301,7 +301,7 @@ internal sealed class PatternGenerator
             _ => null
         };
         // a drum that strikes may accent a note with another of its sounds
-        var soundOdds = DrumSounds.OddsOf(_genre);
+        var soundOdds = DrumSounds.OddsOf(_genre, GenreChoices.DrumSounds);
         var accentSounds = _trackDefinitions[trackNumber] is PercussionInstrumentTrack drum && drum.Sounds.Any(x => x.Accent > 0) ? drum.Sounds : [];
         var dynamics = stateMap.GetStateValue(CompositionStateKinds.NoteDynamics);
         // a note's values, which a note of a repeated cycle takes from the note it repeats

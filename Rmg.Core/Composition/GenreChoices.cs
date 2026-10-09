@@ -267,11 +267,18 @@ public static class GenreChoices
         PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo), Facet.Sound);
 
     /// <summary>
-    ///     How often each of a drum's own sounds plays, from 0, an eighth as often, through 50, as the songs have it, to 100,
-    ///     eight times as often, as its steady stroke, an accent and in a fill, one a wild song's alone played at the plain end
-    ///     where a genre leans it up: the cross-stick of a reggae or a ballad, a jazz drummer's hi-hat foot (<see cref="DrumSounds.OddsOf" />).
+    ///     How often each of a drum's own sounds plays as an accent and in a fill, from 0, an eighth as often, through 50, as
+    ///     the songs have it, to 100, eight times as often, one a wild song's alone played at the plain end where a genre leans
+    ///     it up: a metal china, a disco's open hi-hat off the beat (<see cref="DrumSounds.OddsOf" />).
     /// </summary>
     public static GenreChoice DrumSounds { get; } = Values("drumSounds", "Drum sounds", Composition.DrumSounds.Leaned.Select(x => (x.Name, x.Label)), Facet.Sound);
+
+    /// <summary>
+    ///     How often each of a drum's own sounds is its steady stroke, as the song, a section or a bar draws it, from 0, an
+    ///     eighth as often, through 50, as the songs have it, to 100, eight times as often: the cross-stick of a reggae or a
+    ///     ballad, a jazz drummer's hi-hat foot, a loud rock chorus's open hi-hat (<see cref="DrumSounds.OddsOf" />).
+    /// </summary>
+    public static GenreChoice DrumStrokes { get; } = Values("drumStrokes", "Drum strokes", Composition.DrumSounds.Leaned.Select(x => (x.Name, x.Label)), Facet.Sound);
 
     /// <summary>The chance a part's guitar turns driven in the song's louder appearances, a clean verse's guitar distorted in the chorus (<see cref="LouderForms" />).</summary>
     public static GenreChoice LouderForms { get; } = Chances("louderForms", "Louder forms",
@@ -622,7 +629,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Inversion, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
-        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
+        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

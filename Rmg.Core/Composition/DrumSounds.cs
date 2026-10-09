@@ -27,12 +27,13 @@ internal static class DrumSounds
     public const double GenreOdds = 8;
 
     /// <summary>
-    ///     How much likelier a genre has each sound, by its note number, as its steady stroke, an accent and in a fill: 1 for
-    ///     a sound it does not lean.
+    ///     How much likelier a genre has each sound, by its note number, as the choice given has it: its steady stroke
+    ///     (<see cref="GenreChoices.DrumStrokes" />), or an accent and in a fill (<see cref="GenreChoices.DrumSounds" />); 1
+    ///     for a sound it does not lean.
     /// </summary>
-    public static Func<int, double> OddsOf(Genre genre)
+    public static Func<int, double> OddsOf(Genre genre, GenreChoice choice)
     {
-        var odds = Leaned.ToDictionary(x => x.Code, x => Math.Pow(GenreOdds, genre.Shift(GenreChoices.DrumSounds, x.Name)));
+        var odds = Leaned.ToDictionary(x => x.Code, x => Math.Pow(GenreOdds, genre.Shift(choice, x.Name)));
         return code => odds.GetValueOrDefault(code, 1);
     }
 }

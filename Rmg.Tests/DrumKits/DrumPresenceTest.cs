@@ -111,7 +111,7 @@ public sealed class DrumPresenceTest
         {
             var context = new GenerationContext(1);
             return Enumerable.Range(0, 2_000)
-                .Average(_ => DrumPresence.Draw(context, tracks, scheme, new HashSet<int>(), _ => 0, unconventionality, Tilt.None, DrumSounds.OddsOf(Genre.None)).Resting.Count / 2.0);
+                .Average(_ => DrumPresence.Draw(context, tracks, scheme, new HashSet<int>(), _ => 0, unconventionality, Tilt.None, DrumSounds.OddsOf(Genre.None, GenreChoices.DrumStrokes)).Resting.Count / 2.0);
         }
 
         await Assert.That(Share(0)).IsLessThan(0.15);

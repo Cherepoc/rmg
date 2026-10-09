@@ -193,7 +193,7 @@ internal static class SongStages
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
                 song.Genre,
                 song.Meter,
-                DrumSounds.OddsOf(song.Genre)
+                DrumSounds.OddsOf(song.Genre, GenreChoices.DrumSounds)
             )
         };
 

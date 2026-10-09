@@ -112,7 +112,7 @@ internal sealed class SectionDrumGenerator
         var strokeContext =_stream(sectionId, SectionStream.DrumStrokes);
         var sectionStrokes = ImmutableDictionary.CreateBuilder<int, int>();
         foreach (var track in activeDrumTrackNumbers.Order().Where(x => DrumGroups.GetDrum(x).HasStrokes))
-            if (DrumStrokes.DrawChange(strokeContext, DrumGroups.GetDrum(track), SongStroke(track), DrumStrokes.SectionChangeChance, rhythm.Value, tilt, DrumSounds.OddsOf(_genre)) is { } change)
+            if (DrumStrokes.DrawChange(strokeContext, DrumGroups.GetDrum(track), SongStroke(track), DrumStrokes.SectionChangeChance, rhythm.Value, tilt, DrumSounds.OddsOf(_genre, GenreChoices.DrumStrokes)) is { } change)
                 sectionStrokes[track] = change;
         StateTrace.RecordSection(TracePoints.DrumStrokes, SectionGenerator.SectionTrace, sectionId, string.Join(", ", sectionStrokes), sectionStrokes.ToImmutable());
         var barDrums = DrumPresence.Draw(
@@ -123,7 +123,7 @@ internal sealed class SectionDrumGenerator
             track => sectionStrokes.TryGetValue(track, out var stroke) ? stroke : SongStroke(track),
             rhythm.Value,
             tilt,
-            DrumSounds.OddsOf(_genre)
+            DrumSounds.OddsOf(_genre, GenreChoices.DrumStrokes)
         );
         StateTrace.RecordSection(TracePoints.DrumPresence, SectionGenerator.SectionTrace, sectionId, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
         return (sectionStrokes.ToImmutable(), barDrums);
