@@ -296,13 +296,17 @@ internal sealed class SongFormGenerator
 
             if (plan.Ending == EndingKind.Stop)
             {
-                // the band stops before the line, every part of it, a soloist too, and the drums land on it with the rest
+                // the band stops before the line, every part of it, a soloist too, and the drums land on it with the rest; a
+                // pitched part kept silent there once its notes are decided, as a held note struck again at a change would sound
                 var stop = end - plan.Stop;
                 description += $", stopping {plan.Stop} beats before it";
-                foreach (var track in _roles.Keys)
+                foreach (var (track, role) in _roles)
                 {
-                    edits.Cut(track, stop);
                     edits.Clear(track, stop, end);
+                    if (role == TrackRole.Drum)
+                        edits.Cut(track, stop);
+                    else
+                        edits.Silence(track, stop, end);
                 }
             }
 
@@ -344,6 +348,12 @@ internal sealed class SongFormGenerator
             var line = lines[i];
             if (line.Ending == line.Next || line.Position >= end || (line.Next.Energy - line.Ending.Energy) * line.Ending.Rhythm.Coupling <= LiftCues.Threshold
                 || !_dropContext.TestProbability(drop))
+                continue;
+            // but where the band does not come back on it, the section's first bar leaving every pitched part out, as a
+            // texture building it up does
+            var landing = map.Sections.Select((x, index) => (x, index)).FirstOrDefault(x => Math.Abs(x.x.Start - line.Position) < 1e-9);
+            if (landing.x is { } next && !timelines[landing.index].TrackTimelineMap.Any(x => _roles.TryGetValue(x.Key, out var role) && role != TrackRole.Drum
+                    && x.Value.EventTimeline.Any(n => n.Position < next.Meter.BarDuration - 1e-9)))
                 continue;
             var gap = line.Position - line.Ending.Meter.BarDuration;
             // the band silent over the bar before it, or playing on, filtered (MixFilter)

@@ -165,8 +165,14 @@ internal static class LineDoubling
                 var block = source == TrackRole.Melody && !isTwin && blocks(index).TestProbability(BlockChance.At(melody, genre.Chance(GenreChoices.Doubling, "block")));
                 if (block)
                     StateTrace.RecordSection(TracePoints.BlockHarmony, targetTrack, span.SectionId, $"{step}", index);
+                // in every pattern the doubled part plays, its own kept where a texture rests the doubled part
+                var patterns = Enumerable.Range(0, (int)Math.Ceiling(span.Duration / span.Meter.PatternDuration - 1e-9))
+                    .Select(k => (Start: span.Start + k * span.Meter.PatternDuration, End: Math.Min(span.End, span.Start + (k + 1) * span.Meter.PatternDuration)))
+                    .Where(p => events[sourceTrack].EventTimeline.Any(x => x.Position >= p.Start - 1e-9 && x.Position < p.End - 1e-9))
+                    .ToArray();
+                bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && patterns.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
                 var doubled = events[sourceTrack].EventTimeline
-                    .Where(x => x.Position >= from - 1e-9 && x.Position <= to + 1e-9)
+                    .Where(x => Doubles(x.Position))
                     .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, 0)
                         .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0).ToTimelineItem(x.Position))
                     .Select(x => block ? x.Value.With(CompositionStateKinds.LineVoices, Math.Max(x.Value.GetStateValue(CompositionStateKinds.LineVoices), BlockVoices)).ToTimelineItem(x.Position) : x);
@@ -174,7 +180,7 @@ internal static class LineDoubling
                 {
                     [targetTrack] = notes => EventTimeline.Create(
                         notes.Duration,
-                        notes.Where(x => x.Position < from - 1e-9 || x.Position > to + 1e-9).Concat(doubled).OrderBy(x => x.Position)
+                        notes.Where(x => !Doubles(x.Position)).Concat(doubled).OrderBy(x => x.Position)
                     )
                 });
             }

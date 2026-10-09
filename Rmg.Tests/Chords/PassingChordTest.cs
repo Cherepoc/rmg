@@ -63,8 +63,10 @@ public sealed class PassingChordTest
                     continue;
                 (above, below) = shift == 1 ? (above + 1, below) : (above, below + 1);
                 await Assert.That(((chord.GetPitch(0) - next.GetPitch(0)) % 12 + 12) % 12).IsEqualTo((shift % 12 + 12) % 12).Because($"seed {song.Seed} at {changes[i]}");
-                // a diminished fifth over its root a semitone below alone
-                if (((chord.GetPitch(4) - chord.GetPitch(0)) % 12 + 12) % 12 == 6)
+                // a diminished fifth over its root a semitone below alone, the half-diminished's, where the next has none; a
+                // chromatic chord moving a half-diminished one has it too, from above
+                static bool Diminished(ChordContext x) => ((x.GetPitch(4) - x.GetPitch(0)) % 12 + 12) % 12 == 6;
+                if (Diminished(chord) && !Diminished(next))
                     await Assert.That(shift).IsEqualTo(-1).Because($"seed {song.Seed} at {changes[i]}");
             }
         }

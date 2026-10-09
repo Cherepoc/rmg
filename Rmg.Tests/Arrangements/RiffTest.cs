@@ -131,8 +131,8 @@ public sealed class RiffTest
         foreach (var (index, source, target, _) in Doublings(song))
         {
             var span = song.Map.Sections[index];
-            // a solo plays over a doubling
-            if (song.IsSolo(span))
+            // a solo plays over a doubling, and stop time's hits the band strikes together, the bass walking out of them
+            if (song.IsSolo(span) || song.Trace.Any(x => x.Point == TracePoints.StopTime && x.Section == span.SectionId && x.Value is true))
                 continue;
             double[] At(TrackRole role) => [..song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == role).Value
                 .Where(x => x.Position >= span.Start && x.Position < span.End).Select(x => x.Position)];
@@ -140,9 +140,16 @@ public sealed class RiffTest
             if (targetAt.Length == 0)
                 continue;
 
-            // the doubling part's notes are the doubled part's, where it plays, and a held note struck again where a chord changes
+            // the doubling part's notes are the doubled part's in every pattern that part plays, and a held note struck again
+            // where a chord changes; its own where a texture rests the doubled part
             var changes = song.ChordChanges;
-            await Assert.That(targetAt.All(x => sourceAt.Concat(changes).Any(y => Math.Abs(x - y) < 1e-6))).IsTrue().Because($"seed {song.Seed}, section {index}");
+            bool InPlayedPattern(double position)
+            {
+                var start = span.Start + Math.Floor((position - span.Start) / span.Meter.PatternDuration + 1e-9) * span.Meter.PatternDuration;
+                return sourceAt.Any(y => y >= start - 1e-9 && y < start + span.Meter.PatternDuration - 1e-9);
+            }
+
+            await Assert.That(targetAt.Where(InPlayedPattern).All(x => sourceAt.Concat(changes).Any(y => Math.Abs(x - y) < 1e-6))).IsTrue().Because($"seed {song.Seed}, section {index}");
             doubled++;
         }
 

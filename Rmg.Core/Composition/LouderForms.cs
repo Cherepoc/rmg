@@ -67,12 +67,14 @@ internal static class LouderForms
             {
                 if (program is not { } played || spans.Length == 0)
                     continue;
+                bool Takes(TimelineItem<RealizedNote> x) => x.Value.State.GetStateValue(CompositionStateKinds.Program) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0
+                                                            && spans.Any(s => x.Position >= s.Start - 1e-9 && x.Position < s.End - 1e-9);
+                // recorded where a note takes it, none where the part rests in those appearances
+                if (!result[track].Any(Takes))
+                    continue;
                 StateTrace.RecordSection(trace, track, 0, $"{played}", played);
                 result[track] = EventTimeline.Create(result[track].Duration, result[track].Select(x =>
-                    x.Value.State.GetStateValue(CompositionStateKinds.Program) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0
-                    && spans.Any(s => x.Position >= s.Start - 1e-9 && x.Position < s.End - 1e-9)
-                        ? (x.Value with { State = x.Value.State.With(CompositionStateKinds.Program, played + 1) }).ToTimelineItem(x.Position)
-                        : x));
+                    Takes(x) ? (x.Value with { State = x.Value.State.With(CompositionStateKinds.Program, played + 1) }).ToTimelineItem(x.Position) : x));
             }
         }
 

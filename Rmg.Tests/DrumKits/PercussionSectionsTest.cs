@@ -15,7 +15,9 @@ public sealed class PercussionSectionsTest
         foreach (var song in TestCorpus.Range(128))
         {
             var only = song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
-            foreach (var span in song.Map.Sections.Where(x => only[x.SectionId] && song.HasDrums(x)))
+            // but the first under an intro of entries, whose drums may come in with the section after it
+            var entering = song.Map.Intro.Kind == IntroKind.Entries && !song.Map.Intro.Window.IsBefore ? song.Map.Sections[0] : null;
+            foreach (var span in song.Map.Sections.Where(x => only[x.SectionId] && song.HasDrums(x) && x != entering))
             {
                 sections++;
                 var kitNotes = song.Song.Notes!
