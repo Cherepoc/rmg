@@ -29,8 +29,8 @@ public sealed class RhythmBusynessReportTest
             var amounts = song.Trace.Where(x => x.Point == TracePoints.MelodyAnswer).ToDictionary(x => x.Section, x => (double)x.Value!);
             string Band(int sectionId) => Bands.First(x => Unconventionality(amounts[sectionId]) >= x.From && Unconventionality(amounts[sectionId]) < x.To).Name;
             var notes = song.Song.Notes!;
-            var drums = notes.Where(x => x.Key >= DrumGroups.FirstTrackNumber).SelectMany(x => x.Value).Select(x => x.Position).Order().ToArray();
-            var pitched = notes.Where(x => x.Key < DrumGroups.FirstTrackNumber).SelectMany(x => x.Value).Select(x => x.Position).Order().ToArray();
+            var drums = notes.Where(x => song.IsDrum(x.Key)).SelectMany(x => x.Value).Select(x => x.Position).Order().ToArray();
+            var pitched = notes.Where(x => !song.IsDrum(x.Key)).SelectMany(x => x.Value).Select(x => x.Position).Order().ToArray();
             foreach (var span in song.Map.Sections)
             {
                 var band = Band(span.SectionId);

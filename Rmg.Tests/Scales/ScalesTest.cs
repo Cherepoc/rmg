@@ -126,7 +126,6 @@ public sealed class ScalesTest
         var approaches = common.GetStateTimeline(StateKinds.ChordApproach);
         // a bass note leads into a change of chord in the beat before it
         var changes = TestCorpus.Get(seed).ChordChanges;
-        var bassProgram = ((PitchInstrumentTrack)song.TrackDefinitions[6]).InstrumentCode;
         // a section whose melody or riff takes a line scale of its own, whose notes any part may play as a solo or a doubling
         var ownLineScales = TestCorpus.Get(seed).Trace
             .Where(x => x.Point == TracePoints.LineScale && (LineScale)x.Value! > LineScale.Pentatonic)
@@ -155,10 +154,10 @@ public sealed class ScalesTest
             // wherever it falls
             var approach = (ChordApproach)approaches.GetEffectiveValueAt(note.Position);
             var nextChange = changes.Where(x => x > note.Position + 1e-9).DefaultIfEmpty(double.MaxValue).Min();
-            var isChromaticApproach = track.PitchInstrumentCode == bassProgram
+            var isChromaticApproach = track.Role == TrackRole.Bass
                 && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9)
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
-            var isPedal = track.PitchInstrumentCode == bassProgram && pedals.Any(x => note.Position >= x.From - 0.2 && note.Position < x.To);
+            var isPedal = track.Role == TrackRole.Bass && pedals.Any(x => note.Position >= x.From - 0.2 && note.Position < x.To);
             if (isChromaticApproach || isPedal || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End) || pinched.Any(x => Math.Abs(x - note.Position) < 1e-3))
                 continue;
 

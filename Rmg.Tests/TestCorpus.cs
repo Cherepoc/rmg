@@ -101,6 +101,16 @@ internal static class TestCorpus
     }
 }
 
+/// <summary>A song's tracks found by their parts, as the tests ask for them, never by their numbers.</summary>
+internal static class SongRoles
+{
+    /// <summary>The track that plays the part in the song.</summary>
+    public static int Track(this Song song, TrackRole role) => song.TrackDefinitions.Single(x => x.Value.Role == role).Key;
+
+    /// <summary>Whether the track is one of the song's drums.</summary>
+    public static bool IsDrum(this Song song, int track) => song.TrackDefinitions[track].Role == TrackRole.Drum;
+}
+
 /// <summary>A song of the corpus, its rendering, and what its generation's trace recorded.</summary>
 internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, ImmutableArray<StateTraceEntry> Trace)
 {
@@ -187,15 +197,21 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
         ];
     }
 
+    /// <summary>The track that plays the part in the song.</summary>
+    public int Track(TrackRole role) => Song.Track(role);
+
+    /// <summary>Whether the track is one of the song's drums.</summary>
+    public bool IsDrum(int track) => Song.IsDrum(track);
+
     /// <summary>Where the first section starts, after any bars of an intro.</summary>
     public double Origin => Map.Origin;
 
-    /// <summary>The rendered notes of a pitched track, in order.</summary>
+    /// <summary>The rendered notes of a pitched track, its part's, in order.</summary>
     public TimelineItem<RenderedNote>[] Notes(int track)
     {
-        var program = ((PitchInstrumentTrack)Song.TrackDefinitions[track]).InstrumentCode;
+        var role = Song.TrackDefinitions[track].Role;
         return Rendered.Tracks
-            .Where(x => !x.IsPercussionInstrument && !x.IsDouble && x.PitchInstrumentCode == program)
+            .Where(x => !x.IsPercussionInstrument && !x.IsDouble && x.Role == role)
             .SelectMany(x => x.NoteTimeline)
             .OrderBy(x => x.Position)
             .ToArray();

@@ -29,12 +29,12 @@ public sealed class BassLeadingReportTest
         var byLeading = new Dictionary<double, Measures>();
         foreach (var song in songs)
         {
-            var program = ((PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.BassTrack]).InstrumentCode;
+            var program = ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Bass)]).InstrumentCode;
             var leading = Core.Composition.InstrumentRoles.Bass.Instruments.Single(x => x.Program == program).Leading;
             var m = byLeading.GetValueOrDefault(leading, new Measures(0, 0, 0, 0, 0, 0, 0, 0));
-            var bass = song.Song.Notes![SongTracks.BassTrack].ToArray();
+            var bass = song.Song.Notes![song.Song.Track(TrackRole.Bass)].ToArray();
             // the rendered velocities, by position, where the song's swing moved them
-            var velocities = song.Notes(SongTracks.BassTrack).GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.Max(y => y.Value.Velocity));
+            var velocities = song.Notes(song.Track(TrackRole.Bass)).GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.Max(y => y.Value.Velocity));
             double Velocity(double position) => velocities[Math.Round(song.Swing.Apply(position), 6)];
             var changes = song.ChordChanges;
             for (var i = 0; i + 1 < bass.Length; i++)
@@ -107,10 +107,10 @@ public sealed class BassArrivalReportTest
         var counts = new Dictionary<(double Leading, bool IsWild), (int Changes, int RootDrawn, int OnRoot, int Free, int FreeOnRoot)>();
         foreach (var song in TestCorpus.Range(SongCount))
         {
-            var program = ((PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.BassTrack]).InstrumentCode;
+            var program = ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Bass)]).InstrumentCode;
             var leading = Core.Composition.InstrumentRoles.Bass.Instruments.Single(x => x.Program == program).Leading;
             var amounts = song.Trace.Where(x => x.Point == TracePoints.MelodyAnswer).ToDictionary(x => x.Section, x => (double)x.Value!);
-            var bass = song.Song.Notes![SongTracks.BassTrack].ToArray();
+            var bass = song.Song.Notes![song.Song.Track(TrackRole.Bass)].ToArray();
             for (var i = 0; i + 1 < bass.Length; i++)
             {
                 var (last, next) = (bass[i], bass[i + 1]);
@@ -162,7 +162,7 @@ public sealed class BassLineReportTest
         int recurring = 0, recurringSame = 0;
         foreach (var song in TestCorpus.Range(SongCount))
         {
-            var bass = song.Song.Notes![SongTracks.BassTrack].ToArray();
+            var bass = song.Song.Notes![song.Song.Track(TrackRole.Bass)].ToArray();
             moves.AddRange(bass.Zip(bass.Skip(1), (a, b) => Math.Abs(b.Value.Pitches[0] - a.Value.Pitches[0])));
             spans.Add(bass.Max(x => x.Value.Pitches[0]) - bass.Min(x => x.Value.Pitches[0]));
             var pitches = bass.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);

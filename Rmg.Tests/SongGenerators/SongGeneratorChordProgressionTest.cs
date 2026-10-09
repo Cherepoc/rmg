@@ -50,14 +50,13 @@ public sealed class SongGeneratorChordProgressionTest
     {
         // the chord track does not move its root from note to note, so its root is only the progression's: the
         // section's offset, the same for the whole section, and the offset of the bar it plays in
-        const int chordTrackNumber = 4;
         for (var seed = 0; seed < 8; seed++)
         {
             var corpusSong = TestCorpus.Get(seed);
             var song = corpusSong.Song;
             var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-            var notes = song.TrackEventStateTimelineMap.TrackTimelineMap[chordTrackNumber]
-                .MergeStateMap(song.TrackDefinitions[chordTrackNumber].StateMap)
+            var notes = song.TrackEventStateTimelineMap.TrackTimelineMap[song.Track(TrackRole.Chords)]
+                .MergeStateMap(song.TrackDefinitions[song.Track(TrackRole.Chords)].StateMap)
                 .MergeStateTimelineMap(commonStateTimelineMap)
                 .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
 

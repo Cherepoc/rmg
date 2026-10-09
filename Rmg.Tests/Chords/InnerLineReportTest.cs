@@ -18,8 +18,8 @@ public sealed class InnerLineReportTest
     private static ((int Clashes, int Notes) Moved, (int Clashes, int Notes) Other) Clashes(CorpusSong song)
     {
         var notes = song.Song.Notes!;
-        var chords = notes.GetValueOrDefault(SongTracks.ChordsTrack)?.ToArray() ?? [];
-        var melody = notes.GetValueOrDefault(SongTracks.MelodyTrack)?.ToArray() ?? [];
+        var chords = notes.GetValueOrDefault(song.Track(TrackRole.Chords))?.ToArray() ?? [];
+        var melody = notes.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
         (int, int) moved = (0, 0), other = (0, 0);
         foreach (var note in melody.Where(x => Math.Abs(x.Position - Math.Round(x.Position)) < 1e-6))
         {
@@ -55,7 +55,7 @@ public sealed class InnerLineReportTest
                               + $"{100.0 * moved / Math.Max(1, movedNotes):F1}%; elsewhere {other} of {otherNotes}, {100.0 * other / Math.Max(1, otherNotes):F1}%");
         }
 
-        var lined = TestCorpus.Measure(256, song => song.Song.Notes!.GetValueOrDefault(SongTracks.ChordsTrack)?.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0) == true);
+        var lined = TestCorpus.Measure(256, song => song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0) == true);
         Console.WriteLine($"songs sounding an inner line: {lined.Count(x => x)} of {lined.Length}");
         await Task.CompletedTask;
     }

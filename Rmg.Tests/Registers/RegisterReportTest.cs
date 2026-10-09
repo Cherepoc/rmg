@@ -32,8 +32,8 @@ public sealed class RegisterReportTest
                 }
             }
 
-            var melody = song.Song.Notes!.GetValueOrDefault(SongTracks.MelodyTrack);
-            var chords = song.Song.Notes!.GetValueOrDefault(SongTracks.ChordsTrack);
+            var melody = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Melody));
+            var chords = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords));
             if (melody is not { Count: > 0 } || chords is not { Count: > 0 })
                 continue;
             melodyMiddles.Add(melody.Average(x => x.Value.Pitches.Average()));

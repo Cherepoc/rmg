@@ -18,14 +18,14 @@ public sealed class DubEchoTest
             songs++;
             var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).Where(notes.ContainsKey).ToArray();
             var snareEcho = snares.Select(Echo).FirstOrDefault(x => x > 0);
-            if (Echo(SongTracks.RhythmTrack) is not (> 0 and var delay))
+            if (Echo(song.Track(TrackRole.Rhythm)) is not (> 0 and var delay))
             {
                 await Assert.That(snareEcho).IsEqualTo(0);
                 continue;
             }
 
             dubbed++;
-            await Assert.That(notes[SongTracks.RhythmTrack].Any(x => x.Value.Pitches.Length > 1 && x.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0)).IsTrue();
+            await Assert.That(notes[song.Track(TrackRole.Rhythm)].Any(x => x.Value.Pitches.Length > 1 && x.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0)).IsTrue();
             // the snare on the beat at the part's delay, off it none, in the sections, which the effects play in
             foreach (var note in snares.SelectMany(x => notes[x]).Where(x => song.Map.Sections.Any(s => x.Position >= s.Start - 1e-9 && x.Position < s.End - 1e-9)))
                 await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Echo))

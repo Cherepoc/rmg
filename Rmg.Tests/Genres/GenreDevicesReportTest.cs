@@ -21,8 +21,8 @@ public sealed class GenreDevicesReportTest
             song.Trace.Where(x => x.Point == point).Select(x => plays(x.Value) ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average();
         var scales = song.Trace.Where(x => x.Point == TracePoints.ChordScales).SelectMany(x => (ImmutableArray<ChordScale>)x.Value!).ToArray();
         double Chords(ChordScaleKind kind) => scales.Length > 0 ? scales.Count(x => x.Kind == kind) / (double)scales.Length : double.NaN;
-        var chords = song.Song.Notes!.GetValueOrDefault(SongTracks.ChordsTrack)?.Where(x => x.Value.Pitches.Length >= 3).ToArray() ?? [];
-        var lines = new[] { SongTracks.MelodyTrack, SongTracks.CounterMelodyTrack, SongTracks.RiffTrack, SongTracks.SoloTrack }
+        var chords = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.Where(x => x.Value.Pitches.Length >= 3).ToArray() ?? [];
+        var lines = new[] { song.Track(TrackRole.Melody), song.Track(TrackRole.CounterMelody), song.Track(TrackRole.Riff), song.Track(TrackRole.Solo) }
             .SelectMany(x => song.Song.Notes!.GetValueOrDefault(x) ?? EventTimeline.Create<RealizedNote>(0, [])).ToArray();
         double Lines(Func<RealizedNote, bool> plays) => lines.Length > 0 ? lines.Count(x => plays(x.Value)) / (double)lines.Length : double.NaN;
         var lifts = song.Trace.Count(x => x.Point == TracePoints.LiftCue);
@@ -68,7 +68,7 @@ public sealed class GenreDevicesReportTest
             ["songs swung in 16ths"] = song.Swing.Delay > 0 && song.Swing.Period < 1 ? 1 : 0,
             ["songs with a guitar driven when loud"] = song.Trace.Any(x => x.Point == TracePoints.LouderForm) ? 1 : 0,
             ["line notes bent or slid"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Bend) > 0),
-            ["bass's changes of pitch slid into"] = song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack)?.ToArray() is { Length: > 1 } bass
+            ["bass's changes of pitch slid into"] = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass))?.ToArray() is { Length: > 1 } bass
                 && bass.Skip(1).Where((x, i) => x.Value.Pitches[0] != bass[i].Value.Pitches[0]).ToArray() is { Length: > 0 } changes
                 ? changes.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Bend) == (int)BendKind.Slide) / (double)changes.Length
                 : double.NaN,

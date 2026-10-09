@@ -9,7 +9,7 @@ public sealed class MelodyFillTest
     /// <summary>The melody's walks into a change of section: the line and its notes' places.</summary>
     private static (double Line, double[] Positions)[] Walks(CorpusSong song) =>
     [
-        ..song.Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == SongTracks.MelodyTrack).Select(x => ((double, double[]))x.Value!)
+        ..song.Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == song.Track(TrackRole.Melody)).Select(x => ((double, double[]))x.Value!)
     ];
 
     [Test]
@@ -18,7 +18,7 @@ public sealed class MelodyFillTest
         var (walks, stepping) = (0, 0);
         foreach (var song in TestCorpus.Range(256))
         {
-            var melody = song.Song.Notes![SongTracks.MelodyTrack].OrderBy(x => x.Position).ToArray();
+            var melody = song.Song.Notes![song.Song.Track(TrackRole.Melody)].OrderBy(x => x.Position).ToArray();
             foreach (var (line, positions) in Walks(song))
             {
                 // a solo's melody rests, its walk with it; a walk in the intro, into the first section, none's
@@ -50,8 +50,8 @@ public sealed class MelodyFillTest
         foreach (var song in TestCorpus.Range(256))
         {
             double[] Lines(int track) => [..song.Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == track).Select(x => (((double Line, double[]))x.Value!).Line)];
-            var counter = Lines(SongTracks.CounterMelodyTrack);
-            await Assert.That(counter.Intersect(Lines(SongTracks.MelodyTrack))).IsEmpty().Because($"seed {song.Seed}");
+            var counter = Lines(song.Track(TrackRole.CounterMelody));
+            await Assert.That(counter.Intersect(Lines(song.Track(TrackRole.Melody)))).IsEmpty().Because($"seed {song.Seed}");
             walks += counter.Length;
         }
 

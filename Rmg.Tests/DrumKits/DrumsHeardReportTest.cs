@@ -18,7 +18,7 @@ public sealed class DrumsHeardReportTest
     {
         if (!song.Song.Draws!.Parts.Contains(TrackRole.Drum))
             return ([], []);
-        var silent = song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber)
+        var silent = song.Song.TrackDefinitions.Keys.Where(x => song.IsDrum(x))
             .Where(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0)
             .Select(DrumGroups.GetDrum).ToArray();
         return ([..silent.Where(Grooves).Select(x => x.Name)], [..silent.Where(x => !Grooves(x)).Select(x => x.Name)]);
@@ -60,7 +60,7 @@ public sealed class DrumsHeardReportTest
         var poolSizes = new List<int>();
         foreach (var song in songs)
         {
-            var drums = song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
+            var drums = song.Song.TrackDefinitions.Keys.Where(x => song.IsDrum(x)).ToArray();
             if (drums.Length == 0 || drums.All(x => !song.Song.Notes!.TryGetValue(x, out var n) || n.Count == 0)) { drumless++; continue; }
             var kits = song.Trace.Where(x => x.Point == TracePoints.Kit).ToDictionary(x => x.Section, x => (SectionKit)x.Value!);
             distinct += kits.Count;
@@ -84,7 +84,7 @@ public sealed class DrumsHeardReportTest
         foreach (var song in songs.Where(x => x.Song.Draws!.Parts.Contains(TrackRole.Drum)))
         {
             var kits = song.Trace.Where(x => x.Point == TracePoints.Kit).ToDictionary(x => x.Section, x => (SectionKit)x.Value!);
-            var drums = song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
+            var drums = song.Song.TrackDefinitions.Keys.Where(x => song.IsDrum(x)).ToArray();
             bool Plays(int track, SectionSpan span) => song.Song.Notes!.TryGetValue(track, out var n) && n.Any(x => x.Position >= span.Start && x.Position < span.End);
             foreach (var track in drums.Where(x => Grooves(DrumGroups.GetDrum(x)) && !(song.Song.Notes!.TryGetValue(x, out var n) && n.Count > 0)))
             {

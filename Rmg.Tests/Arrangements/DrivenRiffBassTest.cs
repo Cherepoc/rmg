@@ -11,7 +11,7 @@ public sealed class DrivenRiffBassTest
     private static readonly string[] Genres = ["rock", "metal", "djent", "nuMetal", "punk"];
 
     private static bool IsDriven(CorpusSong song) =>
-        song.Song.TrackDefinitions.TryGetValue(SongTracks.RiffTrack, out var riff) && InstrumentTraits.Has(((PitchInstrumentTrack)riff).InstrumentCode, InstrumentTrait.Driven);
+        song.Song.TrackDefinitions.TryGetValue(song.Track(TrackRole.Riff), out var riff) && InstrumentTraits.Has(((PitchInstrumentTrack)riff).InstrumentCode, InstrumentTrait.Driven);
 
     private static CorpusSong[] Songs(string genre) => TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))));
 
@@ -37,10 +37,10 @@ public sealed class DrivenRiffBassTest
                 // the song with its sections in their bars, where the bass plays what it plays without the cycle
                 var unrolled = SongGenerator.GenerateSong((ulong)song.Seed, new SongOverrides(Genre: GenrePresets.Genre(genre)),
                     new HashSet<string> { "Polymeter" }, (_, _) => { }, CancellationToken.None);
-                foreach (var span in spans.Where(x => unrolled.Notes![SongTracks.BassTrack].Any(n => n.Position >= x.Start && n.Position < x.End)))
+                foreach (var span in spans.Where(x => unrolled.Notes![unrolled.Track(TrackRole.Bass)].Any(n => n.Position >= x.Start && n.Position < x.End)))
                 {
                     sections++;
-                    await Assert.That(Sounds(song, SongTracks.BassTrack, span.Start, span.End)).IsTrue().Because($"{genre} seed {song.Seed}, section at {span.Start}");
+                    await Assert.That(Sounds(song, song.Track(TrackRole.Bass), span.Start, span.End)).IsTrue().Because($"{genre} seed {song.Seed}, section at {span.Start}");
                 }
             }
 
@@ -54,17 +54,17 @@ public sealed class DrivenRiffBassTest
         foreach (var song in Genres.SelectMany(Songs).Where(IsDriven))
         {
             var events = song.Song.TrackEventStateTimelineMap.TrackTimelineMap;
-            if (!events.ContainsKey(SongTracks.BassTrack))
+            if (!events.ContainsKey(song.Track(TrackRole.Bass)))
                 continue;
             bool Plays(int track, double start, double end) => events[track].EventTimeline.Any(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9);
-            foreach (var span in song.Map.Sections.Skip(1).Where(x => Plays(SongTracks.BassTrack, x.Start, x.End)))
+            foreach (var span in song.Map.Sections.Skip(1).Where(x => Plays(song.Track(TrackRole.Bass), x.Start, x.End)))
                 for (var start = span.Start; start < span.End - 1e-9; start += span.Meter.PatternDuration)
                 {
                     var end = Math.Min(start + span.Meter.PatternDuration, span.End);
-                    if (!Plays(SongTracks.RiffTrack, start, end))
+                    if (!Plays(song.Track(TrackRole.Riff), start, end))
                         continue;
                     phrases++;
-                    await Assert.That(Plays(SongTracks.BassTrack, start, end)).IsTrue().Because($"seed {song.Seed}, phrase at {start}");
+                    await Assert.That(Plays(song.Track(TrackRole.Bass), start, end)).IsTrue().Because($"seed {song.Seed}, phrase at {start}");
                 }
         }
 
@@ -81,22 +81,22 @@ public sealed class DrivenRiffBassTest
             foreach (var song in Songs(genre).Where(IsDriven))
             {
                 for (var (t, bar) = (0.0, song.Map.Meter.BarDuration); t < song.Origin - 1e-9; t += bar)
-                    if (Sounds(song, SongTracks.RiffTrack, t, t + bar))
+                    if (Sounds(song, song.Track(TrackRole.Riff), t, t + bar))
                     {
                         bars++;
-                        if (!Sounds(song, SongTracks.BassTrack, t, t + bar))
+                        if (!Sounds(song, song.Track(TrackRole.Bass), t, t + bar))
                             without["intro"] = without.GetValueOrDefault("intro") + 1;
                     }
 
                 foreach (var span in song.Map.Sections)
                 {
-                    var whole = !Sounds(song, SongTracks.BassTrack, span.Start, span.End);
+                    var whole = !Sounds(song, song.Track(TrackRole.Bass), span.Start, span.End);
                     for (var t = span.Start; t < span.End - 1e-9; t += span.Meter.BarDuration)
                     {
-                        if (!Sounds(song, SongTracks.RiffTrack, t, t + span.Meter.BarDuration))
+                        if (!Sounds(song, song.Track(TrackRole.Riff), t, t + span.Meter.BarDuration))
                             continue;
                         bars++;
-                        if (Sounds(song, SongTracks.BassTrack, t, t + span.Meter.BarDuration))
+                        if (Sounds(song, song.Track(TrackRole.Bass), t, t + span.Meter.BarDuration))
                             continue;
                         var cause = whole ? "whole section" : span.Start < song.Origin + 1e-9 ? "opening" : "within a section";
                         without[cause] = without.GetValueOrDefault(cause) + 1;

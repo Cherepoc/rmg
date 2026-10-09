@@ -14,7 +14,7 @@ public sealed class InnerLineTest
         var lined = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
                      new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Chords, 0.8)))))
-        foreach (var note in song.Song.Notes![SongTracks.ChordsTrack].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0))
+        foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0))
         {
             lined++;
             var root = Realizer.GetChord(note.Value.State).Chord.Root.Mod(12);

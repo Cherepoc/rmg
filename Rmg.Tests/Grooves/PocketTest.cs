@@ -20,7 +20,7 @@ public sealed class PocketTest
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var (slow, fast) = (TestCorpus.Get(seed, new SongOverrides(Tempo: 0.6)), TestCorpus.Get(seed, new SongOverrides(Tempo: 1.4)));
-            foreach (var track in new[] { SongTracks.MelodyTrack, SongTracks.BassTrack })
+            foreach (var track in new[] { TrackRole.Melody, TrackRole.Bass }.Select(slow.Track))
                 if (Seconds(slow, track) is { } a && Seconds(fast, track) is { } b)
                 {
                     await Assert.That(a).IsEqualTo(b).Within(1e-9).Because($"seed {seed}, track {track}");

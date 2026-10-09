@@ -12,7 +12,7 @@ public sealed class ChorusRegisterReportTest
         var spans = song.Map.Sections.Where(x => structure.Roles[x.SectionId] == role && !song.IsSolo(x)).ToArray();
         int[] pitches =
         [
-            ..song.Song.Notes!.GetValueOrDefault(SongTracks.MelodyTrack)?.Where(x => spans.Any(s => x.Position >= s.Start && x.Position < s.End)).Select(x => x.Value.Pitches.Min()) ?? []
+            ..song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Melody))?.Where(x => spans.Any(s => x.Position >= s.Start && x.Position < s.End)).Select(x => x.Value.Pitches.Min()) ?? []
         ];
         return pitches.Length == 0 ? null : pitches.Order().ElementAt(pitches.Length / 2);
     }

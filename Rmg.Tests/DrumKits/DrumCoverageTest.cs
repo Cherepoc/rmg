@@ -73,7 +73,7 @@ public sealed class DrumCoverageTest
     {
         var songs = TestCorpus.Range(256).Where(x => x.Song.Draws!.Parts.Contains(TrackRole.Drum)).ToArray();
         var silent = songs.Count(song => song.Song.TrackDefinitions.Keys
-            .Where(x => x >= DrumGroups.FirstTrackNumber)
+            .Where(song.IsDrum)
             .Any(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0));
 
         // a drum the form leaves out of every section that has it landing once after all (82% of these songs had a drum

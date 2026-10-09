@@ -17,7 +17,7 @@ public sealed class SongGeneratorScaleTest
     public async Task EveryPitchedNote_PlaysInOneScaleOfSevenNotes()
     {
         foreach (var song in TestCorpus.Range(32))
-        foreach (var (track, notes) in song.Song.Notes!.Where(x => x.Key < DrumGroups.FirstTrackNumber))
+        foreach (var (track, notes) in song.Song.Notes!.Where(x => !song.IsDrum(x.Key)))
         foreach (var note in notes)
             await Assert.That(note.Value.State.GetStateValue(StateKinds.ScaleOffsets).Length).IsEqualTo(7);
     }
@@ -30,7 +30,7 @@ public sealed class SongGeneratorScaleTest
             var scales = SectionScales(song);
             // but where the chords solo, their notes a solo's line in a line scale of its own (LineScales)
             foreach (var span in song.Map.Sections.Where(x => !(song.Solos.TryGetValue(song.Map.Sections.IndexOf(x), out var solo) && solo.Soloists.Contains(TrackRole.Chords))))
-            foreach (var note in song.Song.Notes![SongTracks.ChordsTrack].Where(x => x.Position >= span.Start && x.Position < span.End))
+            foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Position >= span.Start && x.Position < span.End))
             {
                 var state = note.Value.State;
                 var scale = Realizer.AlterScaleSteps(scales[span.SectionId].Offsets, state.GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } altered ? altered.Value : StepAlterations.None);

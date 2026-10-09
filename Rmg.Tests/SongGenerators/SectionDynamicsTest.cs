@@ -125,7 +125,7 @@ public sealed class SectionDynamicsTest
             .Select(span =>
                 {
                     var (energy, unconventionality) = energies.GetValueOrDefault(span.SectionId, (0, 0.5));
-                    return new SectionMeasures(span.SectionId, [..Bars(span, song.Map.Meter).Select(bar => MeasureBar(notes, bar, song.Map.Meter))], energy, unconventionality);
+                    return new SectionMeasures(span.SectionId, [..Bars(span, song.Map.Meter).Select(bar => MeasureBar(song.Song, notes, bar, song.Map.Meter))], energy, unconventionality);
                 }
             )
             .ToArray();
@@ -139,7 +139,7 @@ public sealed class SectionDynamicsTest
                 yield return span.Start + bar * meter.BarDuration;
     }
 
-    private static double[] MeasureBar(IReadOnlyDictionary<int, Core.Events.EventTimeline<RealizedNote>> notes, double start, Meter meter)
+    private static double[] MeasureBar(Song song, IReadOnlyDictionary<int, Core.Events.EventTimeline<RealizedNote>> notes, double start, Meter meter)
     {
         var end = start + meter.BarDuration;
         var inBar = notes.ToDictionary(x => x.Key, x => x.Value.Where(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9).ToArray());
@@ -148,15 +148,15 @@ public sealed class SectionDynamicsTest
             .Where(x => Math.Abs(x.Position - Math.Round(x.Position)) < 1e-6)
             .Select(x => x.Value.Velocity)
             .ToArray();
-        var drums = inBar.Where(x => x.Key >= DrumGroups.FirstTrackNumber).ToArray();
+        var drums = inBar.Where(x => song.IsDrum(x.Key)).ToArray();
         return
         [
             velocities.Length == 0 ? 0 : velocities.Average(),
             drums.Sum(x => x.Value.Length),
             drums.Count(x => x.Value.Length > 0),
-            inBar.GetValueOrDefault(SongTracks.BassTrack)?.Length ?? 0,
-            inBar.GetValueOrDefault(SongTracks.ChordsTrack)?.Length ?? 0,
-            inBar.GetValueOrDefault(SongTracks.MelodyTrack)?.Length ?? 0
+            inBar.GetValueOrDefault(song.Track(TrackRole.Bass))?.Length ?? 0,
+            inBar.GetValueOrDefault(song.Track(TrackRole.Chords))?.Length ?? 0,
+            inBar.GetValueOrDefault(song.Track(TrackRole.Melody))?.Length ?? 0
         ];
     }
 

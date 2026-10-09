@@ -14,7 +14,7 @@ public sealed class LegatoTest
     {
         int slurred = 0, lineNotes = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Sound(0.5))))
-        foreach (var track in new[] { SongTracks.MelodyTrack, SongTracks.CounterMelodyTrack, SongTracks.RiffTrack })
+        foreach (var track in new[] { song.Track(TrackRole.Melody), song.Track(TrackRole.CounterMelody), song.Track(TrackRole.Riff) })
         {
             if (!song.Song.Notes!.TryGetValue(track, out var notes))
                 continue;

@@ -19,13 +19,13 @@ public sealed class PowerChordRiffTest
             foreach (var span in song.Map.Sections.Where(x => power.Contains(x.SectionId)))
             {
                 sections++;
-                var riff = song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTrack)?.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray() ?? [];
+                var riff = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff))?.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray() ?? [];
                 foreach (var note in riff)
                 {
                     notes++;
                     fifths += note.Value.Pitches.Length > 1 && note.Value.Pitches.Contains(note.Value.Pitches.Min() + 7) ? 1 : 0;
                 }
-                twinNotes += song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTwinTrack)?.Count(x => x.Position >= span.Start && x.Position < span.End) ?? 0;
+                twinNotes += song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.RiffTwin))?.Count(x => x.Position >= span.Start && x.Position < span.End) ?? 0;
             }
         }
 
@@ -46,7 +46,7 @@ public sealed class PowerChordRiffTest
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             foreach (var span in song.Map.Sections.Where(x => chugs.Contains(x.SectionId) && !song.IsSolo(x)))
             {
-                var riff = song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTrack)?.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray() ?? [];
+                var riff = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff))?.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray() ?? [];
                 if (riff.Length == 0)
                     continue;
                 var fast = riff.Length / span.Duration >= Chugs.FastNotes;

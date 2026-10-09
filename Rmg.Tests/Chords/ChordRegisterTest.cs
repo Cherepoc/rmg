@@ -6,7 +6,7 @@ namespace Rmg.Tests.Chords;
 public sealed class ChordRegisterTest
 {
     // whether each bar of the chords in the song's sections starts afresh in a register of its own
-    private static bool[] Afresh(CorpusSong song) => song.Song.Notes![SongTracks.ChordsTrack]
+    private static bool[] Afresh(CorpusSong song) => song.Song.Notes![song.Song.Track(TrackRole.Chords)]
         .Where(x => song.Map.SectionAt(x.Position) is not null)
         .GroupBy(x => (int)Math.Floor(x.Position / song.Map.Meter.BarDuration + 1e-9))
         .Select(x => x.First().Value.State.GetStateValue(StateKinds.ChordVoicingReset) > 0)

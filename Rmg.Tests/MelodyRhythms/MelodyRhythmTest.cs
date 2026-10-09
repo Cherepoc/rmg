@@ -9,7 +9,6 @@ namespace Rmg.Tests.MelodyRhythms;
 
 public sealed class MelodyRhythmTest
 {
-    private const int MelodyTrackNumber = 5;
 
     private static EventTimeline<StateMap> CreateBar(params double[] positions)
     {
@@ -87,9 +86,8 @@ public sealed class MelodyRhythmTest
     private static (TimelineItem<RenderedNote>[] Melody, double Origin) RenderMelodyFrom(int seed)
     {
         var (song, origin) = TestCorpus.Get(seed);
-        var program = ((PitchInstrumentTrack)song.TrackDefinitions[MelodyTrackNumber]).InstrumentCode;
         return (Render.RenderSong(TestCorpus.Unornamented(song))
-            .Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)
+            .Tracks.First(x => x.Role == TrackRole.Melody && !x.IsDouble)
             .NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray(), origin);
     }
 
@@ -117,7 +115,7 @@ public sealed class MelodyRhythmTest
             var (melody, origin) = RenderMelodyFrom(seed);
             var map = TestCorpus.Get(seed).Map;
             // a walk into a section is the next phrase's pickup, not this one's end (LineFills), however swung
-            var walks = TestCorpus.Get(seed).Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == MelodyTrackNumber)
+            var walks = TestCorpus.Get(seed).Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == TestCorpus.Get(seed).Track(TrackRole.Melody))
                 .SelectMany(x => (((double, double[]))x.Value!).Item2).ToArray();
             melody = [..melody.Where(x => !walks.Any(w => Math.Abs(x.Position - w) < 0.2))];
             // a phrase is a section's 4-bar pattern, so its last bar ends at every pattern's end in its section's meter

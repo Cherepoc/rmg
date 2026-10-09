@@ -61,7 +61,7 @@ public sealed class OctaveTest
         {
             var octaves = song.Trace.Where(x => x.Point == TracePoints.Octave).Select(x => ((int Index, TrackRole Role, double, bool InOctaves))x.Value!).Where(x => x.InOctaves).ToArray();
             var pairs = song.Trace.Where(x => x.Point == TracePoints.LineDoubling).Select(x => ((int Index, TrackRole Source, TrackRole Target, int))x.Value!).ToArray();
-            var hasTwin = song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTwinTrack)?.Count > 0;
+            var hasTwin = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.RiffTwin))?.Count > 0;
 
             foreach (var octave in octaves)
             {

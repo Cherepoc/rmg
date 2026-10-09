@@ -79,14 +79,14 @@ public sealed class PhraseSchemesTest
     {
         // but a riff, which plays a riff's scheme of its own, in the songs of a few seeds, one with a riff among them
         var riffs = 0;
-        foreach (var riff in TestCorpus.Range(8).SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track == SongTracks.RiffTrack).GroupBy(x => x.Section)))
+        foreach (var riff in TestCorpus.Range(8).SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track == song.Track(TrackRole.Riff)).GroupBy(x => x.Section)))
         {
             await Assert.That(RiffLayers.Schemes.Select(x => x.Value.ToString())).Contains(riff.Select(x => x.Phrase).Distinct().Single()!);
             riffs++;
         }
 
         await Assert.That(riffs).IsGreaterThan(0);
-        foreach (var section in TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track != SongTracks.RiffTrack).GroupBy(x => x.Section))
+        foreach (var section in TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track != TestCorpus.Get(1).Track(TrackRole.Riff)).GroupBy(x => x.Section))
         {
             var phrases = section.Select(x => x.Phrase).Distinct().ToArray();
             await Assert.That(phrases.Length).IsEqualTo(1).Because("every track follows the section's scheme");

@@ -7,7 +7,6 @@ namespace Rmg.Tests.SongGenerators;
 
 public sealed class SongGeneratorChordTrackTest
 {
-    private const int ChordTrackNumber = 4;
 
     [Test]
     public async Task ChordTrack_PlaysEveryChordWithAtLeastTwoNotes()
@@ -16,7 +15,7 @@ public sealed class SongGeneratorChordTrackTest
         for (var seed = 0; seed < 64; seed++)
         {
             // as the song realizes them, but a solo's line, which the chords may play, and broken chords, one note at a time
-            var smallestChord = TestCorpus.Get(seed).Song.Notes![ChordTrackNumber]
+            var smallestChord = TestCorpus.Get(seed).Song.Notes![TestCorpus.Get(seed).Track(TrackRole.Chords)]
                 .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
                 .Select(x => x.Value.Pitches.Distinct().Count())
                 .DefaultIfEmpty(2)

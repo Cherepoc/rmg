@@ -23,7 +23,7 @@ public sealed class TimeFeelReportTest
                 var s = stats.GetValueOrDefault(feel, (0, 0, 0, new int[4], 0));
                 s.Sections++;
                 s.Energy += energy[span.SectionId];
-                foreach (var (track, notes) in song.Song.Notes!.Where(x => x.Key >= DrumGroups.FirstTrackNumber))
+                foreach (var (track, notes) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
                 foreach (var note in notes.Where(x => x.Position >= span.Start && x.Position < span.End))
                 {
                     s.Drums++;

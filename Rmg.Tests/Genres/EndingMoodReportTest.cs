@@ -30,7 +30,7 @@ public sealed class EndingMoodReportTest
                 foreach (var (id, planes) in planing.Where(x => x.Key != last)) { others++; planedOthers += planes ? 1 : 0; }
                 planedLast += planing.GetValueOrDefault(last) ? 1 : 0;
                 raised += song.Trace.Where(t => t.Point == TracePoints.CadenceRaise && t.Section == last).Select(t => (((int?, bool))t.Value!).Item2).FirstOrDefault() ? 1 : 0;
-                if (!song.Song.Notes!.TryGetValue(SongTracks.ChordsTrack, out var chords) || chords.Count == 0)
+                if (!song.Song.Notes!.TryGetValue(song.Song.Track(TrackRole.Chords), out var chords) || chords.Count == 0)
                     continue;
                 var body = chords.Where(x => x.Position < song.Map.Sections[^1].Start && x.Value.Pitches.Length >= 3).ToArray();
                 if (chords.LastOrDefault(x => x.Value.Pitches.Length >= 2) is not { Value: not null } final)

@@ -79,13 +79,13 @@ public sealed class HarmonyReportTest
         var sectionHarmony = song.Trace.Where(x => x.Point == TracePoints.SectionHarmony).ToDictionary(x => x.Section, x => (HarmonicUnconventionality)x.Value!);
         var rhythms = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).ToDictionary(x => x.Section, x => (HarmonicRhythm)x.Value!);
         var scales = song.Trace.Where(x => x.Point == TracePoints.SectionScale).Select(x => (Scale)x.Value!).ToArray();
-        var pentatonic = song.Trace.Count(x => x.Point == TracePoints.LineScale && x.Track == SongTracks.MelodyTrack && (LineScale)x.Value! == LineScale.Pentatonic);
+        var pentatonic = song.Trace.Count(x => x.Point == TracePoints.LineScale && x.Track == song.Track(TrackRole.Melody) && (LineScale)x.Value! == LineScale.Pentatonic);
         var keyChanges = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).Length;
 
         // a chord of every section's pattern once, as the chords track plays it: the role chord where the bar has one,
         // the pool's pick otherwise
         var chords = song.Trace
-            .Where(x => x.Point == TracePoints.Chord && x.Track == SongTracks.ChordsTrack)
+            .Where(x => x.Point == TracePoints.Chord && x.Track == song.Track(TrackRole.Chords))
             .GroupBy(x => x.Section)
             .Select(section =>
             {
@@ -111,7 +111,7 @@ public sealed class HarmonyReportTest
 
         var songFacets = (Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!;
         // the chords' bars that start afresh in a register of their own, rather than led from the chord before
-        var bars = song.Song.Notes![SongTracks.ChordsTrack]
+        var bars = song.Song.Notes![song.Song.Track(TrackRole.Chords)]
             .Where(x => song.Map.SectionAt(x.Position) is not null)
             .GroupBy(x => (int)Math.Floor(x.Position / song.Map.Meter.BarDuration + 1e-9))
             .Select(x => (Band: ChordsBand(sectionHarmony[song.Map.SectionAt(x.First().Position)!.SectionId]), IsReset: x.First().Value.State.GetStateValue(StateKinds.ChordVoicingReset) > 0));

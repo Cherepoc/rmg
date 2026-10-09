@@ -50,7 +50,7 @@ public sealed class FillGrooveTest
                 var from = lines[i] - span;
                 (int Track, double Position, double Velocity)[] Hands(double a, double b) =>
                 [
-                    ..notes.Where(x => x.Key >= DrumGroups.FirstTrackNumber && x.Key != kick)
+                    ..notes.Where(x => song.IsDrum(x.Key) && x.Key != kick)
                         .SelectMany(x => x.Value.Where(n => n.Position >= a - 1e-6 && n.Position < b - 1e-6)
                             .Select(n => (x.Key, n.Position, n.Value.Velocity)))
                 ];

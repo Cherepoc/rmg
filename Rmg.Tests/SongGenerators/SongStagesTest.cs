@@ -33,7 +33,7 @@ public sealed class SongStagesTest
             var (with, _) = Generate(seed);
             var (without, stages) = Generate(seed, "Lift cues");
             await Assert.That(stages.Select(x => x.Name)).DoesNotContain("Lift cues");
-            var (melodyWith, melodyWithout) = (with.Notes![SongTracks.MelodyTrack], without.Notes![SongTracks.MelodyTrack]);
+            var (melodyWith, melodyWithout) = (with.Notes![with.Track(TrackRole.Melody)], without.Notes![without.Track(TrackRole.Melody)]);
             await Assert.That(melodyWithout.Select(x => (x.Position, x.Value.Pitches[0])))
                 .IsEquivalentTo(melodyWith.Select(x => (x.Position, x.Value.Pitches[0])), CollectionOrdering.Matching);
         }

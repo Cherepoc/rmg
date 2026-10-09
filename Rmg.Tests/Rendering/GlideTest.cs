@@ -10,7 +10,7 @@ public sealed class GlideTest
     /// <summary>The share of a bass's changes of pitch it slides into, over the songs given.</summary>
     private static double Slid(IEnumerable<CorpusSong> songs)
     {
-        var changes = songs.SelectMany(song => song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack)?.ToArray() is { } bass
+        var changes = songs.SelectMany(song => song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass))?.ToArray() is { } bass
             ? bass.Skip(1).Where((x, i) => x.Value.Pitches[0] != bass[i].Value.Pitches[0])
             : []).ToArray();
         return changes.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Bend) == (int)BendKind.Slide) / (double)changes.Length;

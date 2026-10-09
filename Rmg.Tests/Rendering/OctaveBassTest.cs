@@ -11,7 +11,7 @@ public sealed class OctaveBassTest
     /// <summary>The share of a bass's notes an octave from the note before, in the songs given that have a bass.</summary>
     private static double Octaves(IEnumerable<CorpusSong> songs)
     {
-        var notes = songs.Select(x => x.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack)?.ToArray()).OfType<TimelineItem<RealizedNote>[]>().ToArray();
+        var notes = songs.Select(x => x.Song.Notes!.GetValueOrDefault(x.Song.Track(TrackRole.Bass))?.ToArray()).OfType<TimelineItem<RealizedNote>[]>().ToArray();
         return notes.Sum(bass => bass.Skip(1).Where((x, i) => Math.Abs(x.Value.Pitches[0] - bass[i].Value.Pitches[0]) == 12).Count()) / (double)notes.Sum(x => x.Length);
     }
 

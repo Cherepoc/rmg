@@ -102,7 +102,7 @@ public sealed class DrumSoloTest
                 continue;
 
             var drummer = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).Single(x => x.Role == TrackRole.Drum).Soloist;
-            var drums = song.Song.Notes!.Where(x => x.Key >= DrumGroups.FirstTrackNumber).ToArray();
+            var drums = song.Song.Notes!.Where(x => song.IsDrum(x.Key)).ToArray();
             foreach (var (span, plan, feet, _) in KitSolos(song))
             {
                 solos++;
@@ -160,7 +160,7 @@ public sealed class DrumSoloTest
             var tracksOf = (int[] players) => players.SelectMany(x => solo.Tracks[x]).ToHashSet();
             var (soloTracks, keptTracks) = (tracksOf(solo.Soloists), tracksOf(solo.Keepers));
             foreach (var segment in plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick))
-            foreach (var (track, notes) in song.Song.Notes!.Where(x => x.Key >= DrumGroups.FirstTrackNumber))
+            foreach (var (track, notes) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
             foreach (var note in notes.Where(n => n.Position >= segment.Start - 1e-9 && n.Position < segment.End - 1e-9))
             {
                 await Assert.That(soloTracks.Contains(track) || keptTracks.Contains(track)).IsTrue().Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {note.Position}");
@@ -224,7 +224,7 @@ public sealed class DrumSoloTest
             for (var at = span.Start; at < span.End - 1e-9; at += turn)
             {
                 var end = Math.Min(span.End, at + turn);
-                var pitched = song.Song.Notes!.Where(x => x.Key < DrumGroups.FirstTrackNumber).Sum(x => x.Value.Count(n => n.Position >= at - 1e-9 && n.Position < end - 1e-9));
+                var pitched = song.Song.Notes!.Where(x => !song.IsDrum(x.Key)).Sum(x => x.Value.Count(n => n.Position >= at - 1e-9 && n.Position < end - 1e-9));
                 if (solo.TurnAt(span, at) == solo.Soloists.IndexOf(TrackRole.Drum))
                 {
                     drumTurns++;
@@ -264,7 +264,7 @@ public sealed class DrumSoloTest
         var runs = segments.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick).ToArray();
         Console.WriteLine($"  runs and licks: shapes {string.Join(", ", runs.GroupBy(x => x.Shape).Select(x => $"{x.Key} {x.Count() / (double)runs.Length:P0}"))}; " +
                           $"cells {string.Join(", ", runs.SelectMany(x => x.Sizes).GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}"))}; speeds {string.Join(", ", runs.GroupBy(x => x.Speed).OrderBy(x => x.Key).Select(x => $"{x.Key} a beat {x.Count()}"))}");
-        var hitsABeat = solos.Select(x => x.Song.Song.Notes!.Where(n => n.Key >= DrumGroups.FirstTrackNumber).Sum(n => n.Value.Count(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End)) / (x.Plan[^1].End - x.Span.Start)).ToArray();
+        var hitsABeat = solos.Select(x => x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key)).Sum(n => n.Value.Count(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End)) / (x.Plan[^1].End - x.Span.Start)).ToArray();
         Console.WriteLine($"  hits a beat {hitsABeat.Average():F2}, from {hitsABeat.Min():F2} to {hitsABeat.Max():F2}; intensity swings {solos.SelectMany(x => x.Plan.Zip(x.Plan.Skip(1), (a, b) => Math.Abs(b.Intensity - a.Intensity))).Average():F2} a segment");
         // the players of the songs with percussion: how many solo, the percussion among them, how, and the others keeping time
         var played = solos.Where(x => x.Solo.Tracks.Length > 1).ToArray();
@@ -276,19 +276,19 @@ public sealed class DrumSoloTest
         var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
         var kicks = solos.Select(x => x.Song.Song.Notes!.GetValueOrDefault(kick)?.Where(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End).ToArray() ?? []).ToArray();
         var bars = solos.Select(x => (x.Plan[^1].End - x.Span.Start) / x.Span.Meter.BarDuration).ToArray();
-        var handsABeat = solos.Select((x, i) => x.Song.Song.Notes!.Where(n => n.Key >= DrumGroups.FirstTrackNumber && n.Key != kick).Sum(n => n.Value.Count(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End)) / (x.Plan[^1].End - x.Span.Start)).ToArray();
+        var handsABeat = solos.Select((x, i) => x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key) && n.Key != kick).Sum(n => n.Value.Count(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End)) / (x.Plan[^1].End - x.Span.Start)).ToArray();
         var pausing = solos.Select((x, i) => x.Plan.Any(p => p.Gesture == SoloGesture.Pause && kicks[i].Any(h => h.Position >= p.Start - 1e-9 && h.Position < p.End - 1e-9))).ToArray();
         // by the song's drum setup: how many solos, and the drums playing in them
         foreach (var setup in solos.GroupBy(x => x.Song.Song.Draws!.DrumSetup).OrderBy(x => x.Key))
             Console.WriteLine($"  {setup.Key}: {setup.Count()} solos of {Songs.Count(x => x.Song.Draws!.DrumSetup == setup.Key && x.PlaysDrums)} songs; drums " +
-                              string.Join(", ", setup.SelectMany(x => x.Song.Song.Notes!.Where(n => n.Key >= DrumGroups.FirstTrackNumber && n.Value.Any(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End)).Select(n => DrumGroups.GetDrum(n.Key).Name))
+                              string.Join(", ", setup.SelectMany(x => x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key) && n.Value.Any(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End)).Select(n => DrumGroups.GetDrum(n.Key).Name))
                                   .GroupBy(x => x).OrderByDescending(x => x.Count()).Take(10).Select(x => $"{x.Key} {x.Count()}")));
         Console.WriteLine($"  the kick {kicks.Select((x, i) => x.Length / bars[i]).Average():F2} hits a bar, velocity {kicks.SelectMany(x => x).Select(x => (double)x.Value.Velocity).DefaultIfEmpty().Average():F2}; " +
                           $"under a pause in {pausing.Count(x => x) / (double)solos.Length:P0} of the solos; the hands {handsABeat.Average():F2} hits a beat");
         // its arc, its runs and licks: the hands' hits a beat and their loudness by the intensity's third, and the intensity by the solo's third
         var arc = solos.SelectMany(x => x.Plan.Where(p => p.Gesture is SoloGesture.Run or SoloGesture.Lick).Select(p =>
         {
-            var hits = x.Song.Song.Notes!.Where(n => n.Key >= DrumGroups.FirstTrackNumber && n.Key != kick).SelectMany(n => n.Value).Where(h => h.Position >= p.Start - 1e-9 && h.Position < p.End - 1e-9).ToArray();
+            var hits = x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key) && n.Key != kick).SelectMany(n => n.Value).Where(h => h.Position >= p.Start - 1e-9 && h.Position < p.End - 1e-9).ToArray();
             return (p.Intensity, Place: (p.Start - x.Span.Start) / (x.Plan[^1].End - x.Span.Start), ABeat: hits.Length / (p.End - p.Start), Velocity: hits.Select(h => h.Value.Velocity).DefaultIfEmpty().Average());
         })).ToArray();
         Console.WriteLine($"  the arc: by intensity, " + string.Join(", ", arc.GroupBy(x => Math.Min(2, (int)(x.Intensity * 3))).OrderBy(x => x.Key)

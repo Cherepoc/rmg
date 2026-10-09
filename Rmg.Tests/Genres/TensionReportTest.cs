@@ -14,7 +14,7 @@ public sealed class TensionReportTest
     private static (int Off, int OnBeat) OffChord(CorpusSong song, TrackRole role)
     {
         var part = song.Song.TrackDefinitions.FirstOrDefault(x => x.Value.Role == role && song.Song.Notes!.ContainsKey(x.Key)).Key;
-        if (part == 0 || !song.Song.Notes!.TryGetValue(SongTracks.ChordsTrack, out var chordNotes))
+        if (part == 0 || !song.Song.Notes!.TryGetValue(song.Song.Track(TrackRole.Chords), out var chordNotes))
             return (0, 0);
         var changes = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         int Change(double position) => Array.FindLastIndex(changes, x => x <= position + 1e-9);

@@ -17,12 +17,12 @@ public sealed class RhythmPartTest
         var checkedChords = 0;
         foreach (var song in songs)
         {
-            var rhythm = (PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.RhythmTrack];
-            var chords = (PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.ChordsTrack];
+            var rhythm = (PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Rhythm)];
+            var chords = (PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Chords)];
             await Assert.That(rhythm.InstrumentCode).IsNotEqualTo(chords.InstrumentCode);
 
             // whole chords, but where broken or soloing
-            var whole = song.Song.Notes![SongTracks.RhythmTrack]
+            var whole = song.Song.Notes![song.Song.Track(TrackRole.Rhythm)]
                 .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
                 .Select(x => x.Value.Pitches.Distinct().Count())
                 .ToArray();
@@ -42,9 +42,9 @@ public sealed class RhythmPartTest
         var songs = TestCorpus.Range(256);
         var with = songs.Where(Plays).ToArray();
         double PerBar(CorpusSong song, int track) => song.Notes(track).Select(x => x.Position).Distinct().Count() / (song.Map.Sections[^1].End / song.Map.Meter.BarDuration);
-        var rhythm = with.Average(x => PerBar(x, SongTracks.RhythmTrack));
-        var chords = with.Average(x => PerBar(x, SongTracks.ChordsTrack));
-        var programs = with.GroupBy(x => ((PitchInstrumentTrack)x.Song.TrackDefinitions[SongTracks.RhythmTrack]).InstrumentCode).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}");
+        var rhythm = with.Average(x => PerBar(x, x.Track(TrackRole.Rhythm)));
+        var chords = with.Average(x => PerBar(x, x.Track(TrackRole.Chords)));
+        var programs = with.GroupBy(x => ((PitchInstrumentTrack)x.Song.TrackDefinitions[x.Song.Track(TrackRole.Rhythm)]).InstrumentCode).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}");
         Console.WriteLine($"  {with.Length} of {songs.Length} songs have a rhythm part; strikes a bar {rhythm:F2} against the chords' {chords:F2}; programs {string.Join(", ", programs)}");
         await Task.CompletedTask;
     }

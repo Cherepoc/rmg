@@ -16,7 +16,7 @@ public sealed class SectionPedalTest
                      new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, 0.9)))))
         {
             var pedalling = song.Trace.Where(x => x.Point == TracePoints.SectionPedal && x.Value is not null).ToDictionary(x => x.Section, x => (int)x.Value!);
-            var bass = song.Song.Notes![SongTracks.BassTrack];
+            var bass = song.Song.Notes![song.Song.Track(TrackRole.Bass)];
             foreach (var span in song.Song.Map!.Sections.Where(x => pedalling.ContainsKey(x.SectionId)))
             {
                 var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;

@@ -39,9 +39,9 @@ public sealed class PhraseArcReportTest
     [Explicit]
     public async Task Report()
     {
-        foreach (var (name, track) in new[] { ("melody", SongTracks.MelodyTrack), ("counter-melody", SongTracks.CounterMelodyTrack), ("solo", SongTracks.SoloTrack) })
+        foreach (var (name, role) in new[] { ("melody", TrackRole.Melody), ("counter-melody", TrackRole.CounterMelody), ("solo", TrackRole.Solo) })
         {
-            var arcs = TestCorpus.Measure(128, song => Arcs(song, track)).SelectMany(x => x).ToArray();
+            var arcs = TestCorpus.Measure(128, song => Arcs(song, song.Track(role))).SelectMany(x => x).ToArray();
             Console.WriteLine($"{name}: {arcs.Length} phrases, the highest note {arcs.Average():+0.0;-0.0} velocity steps over the lowest, louder in {100.0 * arcs.Count(x => x > 0) / arcs.Length:0}%");
         }
 

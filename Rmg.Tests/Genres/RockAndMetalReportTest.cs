@@ -47,7 +47,7 @@ public sealed class RockAndMetalReportTest
                 every.AddRange(bars.Select(x => x.Hits));
                 loudest.Add(bars.MaxBy(x => energies.GetValueOrDefault(x.SectionId))!.Hits);
 
-                if (song.Song.Notes!.GetValueOrDefault(SongTracks.ChordsTrack) is { } chords && song.Song.TrackDefinitions[SongTracks.ChordsTrack] is PitchInstrumentTrack own)
+                if (song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords)) is { } chords && song.Song.TrackDefinitions[song.Song.Track(TrackRole.Chords)] is PitchInstrumentTrack own)
                 {
                     int[] Programs(SectionSpan span) => [..chords.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9)
                         .Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : own.InstrumentCode)];
@@ -60,7 +60,7 @@ public sealed class RockAndMetalReportTest
 
             var solos = songs.Where(x => x.Solos.Count > 0).ToArray();
             var organs = solos.Count(x => SoloProgram(x) is >= 16 and <= 20);
-            static int SoloProgram(CorpusSong x) => x.Song.TrackDefinitions.TryGetValue(SongTracks.SoloTrack, out var solo) && solo is PitchInstrumentTrack pitched ? pitched.InstrumentCode : -1;
+            static int SoloProgram(CorpusSong x) => x.Song.TrackDefinitions.TryGetValue(x.Track(TrackRole.Solo), out var solo) && solo is PitchInstrumentTrack pitched ? pitched.InstrumentCode : -1;
             var structures = songs.Select(x => (SongStructure)x.Trace.Single(t => t.Point == TracePoints.SongForm).Value!).ToArray();
 
             Console.WriteLine($"{name}: songs with a solo {solos.Length / (double)songs.Length:P0}, an organ soloing {organs / (double)Math.Max(1, solos.Length):P0} of them; " +

@@ -53,7 +53,7 @@ public sealed class RhythmicUnconventionalityTest
             {
                 var song = TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Feel, feel)));
                 var hits = song.Song.TrackEventStateTimelineMap.TrackTimelineMap
-                    .Where(x => x.Key >= DrumGroups.FirstTrackNumber)
+                    .Where(x => song.IsDrum(x.Key))
                     .SelectMany(x => x.Value.EventTimeline.Select(e => e.Position))
                     .ToArray();
                 // a tuplet's note is off every dyadic grid, where a fill's 32nds are on one

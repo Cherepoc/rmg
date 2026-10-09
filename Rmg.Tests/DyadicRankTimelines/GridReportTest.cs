@@ -16,7 +16,7 @@ public sealed class GridReportTest
         var songs = TestCorpus.Measure(256, song =>
         {
             var (notes, offGrid, rushed) = (0, 0, 0);
-            foreach (var (_, drum) in song.Song.Notes!.Where(x => x.Key >= DrumGroups.FirstTrackNumber))
+            foreach (var (_, drum) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
             {
                 var positions = drum.Select(x => x.Position).ToArray();
                 notes += positions.Length;

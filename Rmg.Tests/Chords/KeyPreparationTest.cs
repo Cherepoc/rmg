@@ -75,7 +75,7 @@ public sealed class KeyPreparationTest
             foreach (var (change, from, _) in Preparations(song).Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Change, x.Chords[0], x.Device)))
             {
                 var dominant = Realizer.GetChord(common.GetEffectiveStateMapAt(change).With(StateKinds.ChordRoot, 4)).Chord.GetPitch(0).Mod(12);
-                foreach (var note in song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0)).Where(x => x.Position >= from - 1e-9 && x.Position < change - 1e-9))
+                foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass), EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0)).Where(x => x.Position >= from - 1e-9 && x.Position < change - 1e-9))
                 {
                     notes++;
                     if (note.Value.Pitches[0].Mod(12) == dominant)

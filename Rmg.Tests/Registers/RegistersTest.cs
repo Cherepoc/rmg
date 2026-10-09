@@ -25,12 +25,12 @@ public sealed class RegistersTest
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var (song, lowered) = (TestCorpus.Get(seed), TestCorpus.Get(seed, new SongOverrides(Genre: down)));
-            var riff = (PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.RiffTrack];
-            var low = (PitchInstrumentTrack)lowered.Song.TrackDefinitions[SongTracks.RiffTrack];
+            var riff = (PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Riff)];
+            var low = (PitchInstrumentTrack)lowered.Song.TrackDefinitions[lowered.Song.Track(TrackRole.Riff)];
             // the part's whole range an octave down, its twin's with it
             await Assert.That(low.MinOctaveOffset).IsEqualTo(riff.MinOctaveOffset - 1).Because($"seed {seed}");
             await Assert.That(low.MaxOctaveOffset).IsEqualTo(riff.MaxOctaveOffset - 1).Because($"seed {seed}");
-            await Assert.That(((PitchInstrumentTrack)lowered.Song.TrackDefinitions[SongTracks.RiffTwinTrack]).MinOctaveOffset).IsEqualTo(low.MinOctaveOffset).Because($"seed {seed}");
+            await Assert.That(((PitchInstrumentTrack)lowered.Song.TrackDefinitions[lowered.Song.Track(TrackRole.RiffTwin)]).MinOctaveOffset).IsEqualTo(low.MinOctaveOffset).Because($"seed {seed}");
         }
     }
 }

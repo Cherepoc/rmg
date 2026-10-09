@@ -31,7 +31,7 @@ public sealed class HarmonicRhythmReportTest
     {
         var (played, struck) = (0, 0);
         foreach (var song in TestCorpus.Range(16))
-        foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack })
+        foreach (var track in new[] { song.Track(TrackRole.Chords), song.Track(TrackRole.Bass) })
         {
             var notes = song.Song.Notes![track];
             var (low, high) = Realizer.GetRange((Rmg.Core.Songs.PitchInstrumentTrack)song.Song.TrackDefinitions[track]);
@@ -68,7 +68,7 @@ public sealed class HarmonicRhythmReportTest
             }
 
             var changes = song.ChordChanges;
-            foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack })
+            foreach (var track in new[] { song.Track(TrackRole.Chords), song.Track(TrackRole.Bass) })
             {
                 var onsets = song.Song.Notes![track].Select(x => Math.Round(x.Position, 6)).ToHashSet();
                 // the changes the track plays through, from its first note to its last
@@ -76,7 +76,7 @@ public sealed class HarmonicRhythmReportTest
                 var (all, struck) = struckChanges.GetValueOrDefault(track);
                 struckChanges[track] = (all + played.Length, struck + played.Count(x => onsets.Contains(Math.Round(x, 6))));
             }
-            foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack, SongTracks.MelodyTrack })
+            foreach (var track in new[] { song.Track(TrackRole.Chords), song.Track(TrackRole.Bass), song.Track(TrackRole.Melody) })
             foreach (var note in song.Song.Notes![track])
             {
                 var end = note.Position + note.Value.Duration;

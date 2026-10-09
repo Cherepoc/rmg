@@ -16,7 +16,7 @@ public sealed class MelodyGoalTest
         var (ends, roots, thirds, tones) = (0, 0, 0, 0);
         foreach (var song in songs)
         // but a solo's, which ends its phrases its own way
-        foreach (var note in song.Song.Notes![SongTracks.MelodyTrack].Where(x => x.Value.State.GetStateValue(StateKinds.HeldDuration) > 0 && x.Value.Pitches.Length == 1
+        foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Melody)].Where(x => x.Value.State.GetStateValue(StateKinds.HeldDuration) > 0 && x.Value.Pitches.Length == 1
                                                                               && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
         {
             var (chord, _, classes) = Realizer.GetChordNotes(note.Value.State);
@@ -44,7 +44,7 @@ public sealed class MelodyGoalTest
     public async Task APlainMelody_NeverInvertsItsFigures_AWildOneNowAndThen()
     {
         double Chance(SongOverrides overrides) => TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, overrides))
-            .SelectMany(x => x.Song.Notes![SongTracks.MelodyTrack]).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.LineInversion)).DefaultIfEmpty().Max();
+            .SelectMany(x => x.Song.Notes![x.Song.Track(TrackRole.Melody)]).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.LineInversion)).DefaultIfEmpty().Max();
         await Assert.That(Chance(Melody(0))).IsEqualTo(0);
         await Assert.That(Chance(Melody(1))).IsGreaterThan(0.3);
     }

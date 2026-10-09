@@ -39,7 +39,7 @@ public sealed class CorpusFingerprintTest
     {
         var text = new StringBuilder();
         foreach (var song in TestCorpus.Range(SongFingerprint.CorpusSize))
-        foreach (var (track, notes) in song.Song.Notes!.Where(x => x.Key != Rmg.Core.Composition.SongTracks.MelodyTrack))
+        foreach (var (track, notes) in song.Song.Notes!.Where(x => x.Key != song.Track(TrackRole.Melody)))
         foreach (var note in notes)
             text.Append($"{track} {note.Position:R} {note.Value.Velocity:R} {note.Value.Duration:R} {string.Join(",", note.Value.Pitches)};");
 

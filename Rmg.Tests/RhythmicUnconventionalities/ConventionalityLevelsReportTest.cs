@@ -37,7 +37,7 @@ public sealed class ConventionalityLevelsReportTest
         var trace = song.Trace;
         T Value<T>(string point) => (T)trace.First(x => x.Point == point).Value!;
         var (_, scale) = Value<(HarmonicUnconventionality, Scale)>(TracePoints.SongHarmony);
-        var chords = trace.Where(x => x.Point == TracePoints.Chord && x.Track == SongTracks.ChordsTrack)
+        var chords = trace.Where(x => x.Point == TracePoints.Chord && x.Track == song.Track(TrackRole.Chords))
             .Select(x =>
             {
                 var role = x.StateMap.GetStateValue(CompositionStateKinds.RoleChord);

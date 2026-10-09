@@ -46,13 +46,13 @@ public sealed class RealizedNoteTest
 
             // but the melody's in octaves, its own note first and the note an octave from it, and its stacked notes, a double
             // stop or a solo's chord, its own note on top
-            await Assert.That(notes[SongTracks.MelodyTrack].All(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1
+            await Assert.That(notes[corpusSong.Track(TrackRole.Melody)].All(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1
                 ? x.Value.Pitches.Skip(1).All(p => p < x.Value.Pitches[0])
                 : x.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0
                     ? x.Value.Pitches.Length == 2 && Math.Abs(x.Value.Pitches[1] - x.Value.Pitches[0]) == 12 || x.Value.Pitches.Length == 1
                     : x.Value.Pitches.Length == 1)).IsTrue();
-            await Assert.That(notes[SongTracks.BassTrack].All(x => x.Value.Pitches.Length == 1)).IsTrue();
-            await Assert.That(notes[SongTracks.ChordsTrack].Any(x => x.Value.Pitches.Length > 1)).IsTrue();
+            await Assert.That(notes[corpusSong.Track(TrackRole.Bass)].All(x => x.Value.Pitches.Length == 1)).IsTrue();
+            await Assert.That(notes[corpusSong.Track(TrackRole.Chords)].Any(x => x.Value.Pitches.Length > 1)).IsTrue();
             // every note keeps the state it was decided from, and a drum's plays as loud as its sound is over the drum
             double SoundLoudness(int track, int pitch) => corpusSong.Song.TrackDefinitions[track] is PercussionInstrumentTrack drum
                 ? VelocityLayers.SoundLevel * drum.Sounds.Single(x => x.Code == pitch).Loudness
@@ -68,16 +68,16 @@ public sealed class RealizedNoteTest
     public async Task Render_PlaysTheNotes_AsTheyAreAfterAChange()
     {
         var song = TestCorpus.Get(0).Song;
-        var melody = song.Notes![SongTracks.MelodyTrack];
+        var melody = song.Notes![song.Track(TrackRole.Melody)];
         var last = melody[^1];
         // a change made after the notes are decided, such as a stage that sets the final note outright
         var changed = EventTimeline.Create(
             melody.Duration,
             melody.Take(melody.Count - 1).Append((last.Value with { Pitches = [last.Value.Pitches[0] + 12] }).ToTimelineItem(last.Position))
         );
-        var edited = new Song(song.Duration, song.Meter, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map, song.Notes.SetItem(SongTracks.MelodyTrack, changed), song.Draws);
+        var edited = new Song(song.Duration, song.Meter, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map, song.Notes.SetItem(song.Track(TrackRole.Melody), changed), song.Draws);
 
-        var program = ((PitchInstrumentTrack)song.TrackDefinitions[SongTracks.MelodyTrack]).InstrumentCode;
+        var program = ((PitchInstrumentTrack)song.TrackDefinitions[song.Track(TrackRole.Melody)]).InstrumentCode;
         var rendered = Render.RenderSong(edited).Tracks.Single(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program);
 
         await Assert.That(rendered.NoteTimeline.OrderBy(x => x.Position).Last().Value.Offset).IsEqualTo(last.Value.Pitches[0] + 12);

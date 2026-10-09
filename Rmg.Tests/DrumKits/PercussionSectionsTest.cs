@@ -36,7 +36,7 @@ public sealed class PercussionSectionsTest
     {
         foreach (var song in TestCorpus.Range(128))
         {
-            var percussion = song.Song.TrackDefinitions.Keys.Count(x => x >= DrumGroups.FirstTrackNumber && IsPercussion(x));
+            var percussion = song.Song.TrackDefinitions.Keys.Count(x => song.IsDrum(x) && IsPercussion(x));
             if (percussion < PercussionSections.MinDrums)
                 await Assert.That(song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).Any(x => (bool)x.Value!)).IsFalse();
         }
@@ -79,7 +79,7 @@ public sealed class PercussionSectionsTest
         foreach (var song in TestCorpus.Range(256).Where(x => x.Map.Intro.Kind == IntroKind.CountIn))
         {
             countIns++;
-            var clicks = song.Song.Notes!.Where(x => x.Key >= DrumGroups.FirstTrackNumber).SelectMany(x => x.Value).Count(x => x.Position < song.Origin);
+            var clicks = song.Song.Notes!.Where(x => song.IsDrum(x.Key)).SelectMany(x => x.Value).Count(x => x.Position < song.Origin);
             await Assert.That(clicks).IsGreaterThanOrEqualTo(2);
         }
 

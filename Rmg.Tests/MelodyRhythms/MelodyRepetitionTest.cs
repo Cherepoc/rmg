@@ -42,8 +42,8 @@ public sealed class MelodyRepetitionTest
         double moveSum = 0;
         foreach (var song in songs)
         {
-            var melody = song.Song.Notes![SongTracks.MelodyTrack].ToArray();
-            var chords = song.Song.Notes[SongTracks.ChordsTrack].GroupBy(x => x.Position)
+            var melody = song.Song.Notes![song.Song.Track(TrackRole.Melody)].ToArray();
+            var chords = song.Song.Notes[song.Song.Track(TrackRole.Chords)].GroupBy(x => x.Position)
                 .Select(x => (Position: x.Key, Classes: x.SelectMany(n => n.Value.Pitches).Select(p => p.Mod(12)).ToHashSet()))
                 .ToArray();
             notes += melody.Length;
@@ -142,7 +142,7 @@ public sealed class MelodyRepetitionTest
         int onsets = 0, keptSecond = 0, keptThird = 0, contourSecond = 0, contourThird = 0, sameSecond = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
         {
-            var notes = song.Notes(SongTracks.MelodyTrack).OrderBy(x => x.Position).ToArray();
+            var notes = song.Notes(song.Track(TrackRole.Melody)).OrderBy(x => x.Position).ToArray();
             var at = notes.Select((x, i) => (Position: Math.Round(x.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
             int? Step(int i) => i + 1 < notes.Length ? notes[i + 1].Value.Offset - notes[i].Value.Offset : null;
             foreach (var span in song.Map.Sections.Where(x => x.Meter.Phrases == 3).DistinctBy(x => x.SectionId))
@@ -182,7 +182,7 @@ public sealed class MelodyRepetitionTest
         int changes = 0, roots = 0, middleChanges = 0, middleRoots = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
         {
-            if (song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack) is not { } bass)
+            if (song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass)) is not { } bass)
                 continue;
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             var at = bass.GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.First().Value);
@@ -216,7 +216,7 @@ public sealed class MelodyRepetitionTest
             var improvises = (double)song.Trace.Single(x => x.Point == TracePoints.MelodyImprovisation).Value! > 0 ? 1 : 0;
             // every note in the song's key where it plays, which a key change for a last section moves
             var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
-            var melody = song.Song.Notes![SongTracks.MelodyTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0] - keys.GetEffectiveValueAt(x.Position));
+            var melody = song.Song.Notes![song.Song.Track(TrackRole.Melody)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0] - keys.GetEffectiveValueAt(x.Position));
             var firsts = song.Map.Sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
             foreach (var span in song.Map.Sections)
             {
@@ -316,7 +316,7 @@ public sealed class MelodyRepetitionTest
             if ((double)song.Trace.Single(x => x.Point == TracePoints.MelodyImprovisation).Value! <= 0)
                 continue;
 
-            var melody = song.Song.Notes![SongTracks.MelodyTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
+            var melody = song.Song.Notes![song.Song.Track(TrackRole.Melody)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
             var sections = song.Map.Sections;
             var firsts = sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
             for (var i = 0; i < sections.Length; i++)

@@ -9,7 +9,7 @@ public sealed class SpreadVoicingTest
 {
     private static double TwoOctaves(double chords) => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed,
             new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Chords, chords))))
-        .SelectMany(x => x.Song.Notes![SongTracks.ChordsTrack]).Where(x => x.Value.Pitches.Length >= 3)
+        .SelectMany(x => x.Song.Notes![x.Song.Track(TrackRole.Chords)]).Where(x => x.Value.Pitches.Length >= 3)
         .Average(x => x.Value.Pitches.Max() - x.Value.Pitches.Min() >= 24 ? 1.0 : 0);
 
     [Test]

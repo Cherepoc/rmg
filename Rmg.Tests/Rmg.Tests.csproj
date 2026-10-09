@@ -24,6 +24,7 @@
     <!-- a collection compared in its order, or as a set where it says so -->
     <ItemGroup>
       <Using Include="TUnit.Assertions.Enums" />
+      <Using Include="Rmg.Core.Songs" />
     </ItemGroup>
 
 </Project>

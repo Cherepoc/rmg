@@ -30,9 +30,9 @@ public sealed class RiffTest
         var (starts, stacked) = (0, 0);
         foreach (var song in TestCorpus.Range(256).Where(x => !Absent(x).Contains(TrackRole.Riff)))
         {
-            var riff = (PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.RiffTrack];
+            var riff = (PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Riff)];
             var sectionStarts = song.Map.Sections.Select(x => Math.Round(x.Start, 6)).ToHashSet();
-            foreach (var note in song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTrack, Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0))
+            foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff), Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0))
                          .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
             {
                 var isStart = sectionStarts.Contains(Math.Round(note.Position, 6));
@@ -63,11 +63,11 @@ public sealed class RiffTest
         var (sections, stacking) = (0, 0);
         foreach (var song in TestCorpus.Range(256))
         {
-            var melody = (PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.MelodyTrack];
+            var melody = (PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Melody)];
             if (!Rmg.Core.Composition.InstrumentRoles.PlaysChords(melody.InstrumentCode))
                 continue;
 
-            var notes = song.Song.Notes![SongTracks.MelodyTrack].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0).ToArray();
+            var notes = song.Song.Notes![song.Song.Track(TrackRole.Melody)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0).ToArray();
             foreach (var span in song.Map.Sections)
             {
                 var stacked = notes.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9 && x.Value.Pitches.Length == 2 && x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) == 2).ToArray();
@@ -93,8 +93,8 @@ public sealed class RiffTest
         {
             var program = (int track, TimelineItem<RealizedNote> note) => note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0
                 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
-            var melody = song.Song.Notes!.GetValueOrDefault(SongTracks.MelodyTrack, Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0));
-            var counter = song.Song.Notes!.GetValueOrDefault(SongTracks.CounterMelodyTrack, Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0));
+            var melody = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Melody), Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0));
+            var counter = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.CounterMelody), Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0));
             foreach (var (index, source, _, _) in Doublings(song).Where(x => x.Source == TrackRole.Melody && x.Target == TrackRole.CounterMelody))
             {
                 var span = song.Map.Sections[index];
@@ -114,7 +114,7 @@ public sealed class RiffTest
                 {
                     // the melody's note sounding there, or the nearest
                     var near = melody.MinBy(x => x.Position <= note.Position + 1e-9 && x.Position + x.Value.Duration > note.Position ? -1 : Math.Abs(x.Position - note.Position));
-                    await Assert.That(program(SongTracks.CounterMelodyTrack, note)).IsEqualTo(program(SongTracks.MelodyTrack, near)).Because($"seed {song.Seed} at {note.Position}");
+                    await Assert.That(program(song.Track(TrackRole.CounterMelody), note)).IsEqualTo(program(song.Track(TrackRole.Melody), near)).Because($"seed {song.Seed} at {note.Position}");
                 }
             }
         }

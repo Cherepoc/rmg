@@ -22,7 +22,7 @@ public sealed class BassFillReportTest
         var (changes, steps, leaps, moved) = (0, 0, 0, 0.0);
         foreach (var song in TestCorpus.Range(256))
         {
-            var bass = song.Song.Notes![SongTracks.BassTrack].ToArray();
+            var bass = song.Song.Notes![song.Song.Track(TrackRole.Bass)].ToArray();
             foreach (var span in song.Map.Sections.Skip(1))
             {
                 var last = bass.LastOrDefault(x => x.Position < span.Start - 1e-9);

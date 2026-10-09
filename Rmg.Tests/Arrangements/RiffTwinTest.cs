@@ -19,9 +19,9 @@ public sealed class RiffTwinTest
         foreach (var song in TestCorpus.Range(64))
         {
             var absent = Absent(song);
-            var riffPan = ((PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.RiffTrack]).Pan;
-            var twinPan = ((PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.RiffTwinTrack]).Pan;
-            var twin = song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTwinTrack)?.ToArray() ?? [];
+            var riffPan = ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Riff)]).Pan;
+            var twinPan = ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.RiffTwin)]).Pan;
+            var twin = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.RiffTwin))?.ToArray() ?? [];
             if (absent.Contains(TrackRole.RiffTwin))
             {
                 await Assert.That(twin).IsEmpty();
@@ -34,7 +34,7 @@ public sealed class RiffTwinTest
             await Assert.That(twinPan).IsEqualTo(-riffPan);
             // every note where the riff plays one, but where the riff solos, which the twin keeps the riff under: its scale
             // step one of a twin's apart from the riff's, the same in a section
-            var riff = song.Song.Notes![SongTracks.RiffTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State);
+            var riff = song.Song.Notes![song.Song.Track(TrackRole.Riff)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State);
             foreach (var span in song.Map.Sections)
             {
                 var apart = twin.Where(x => x.Position >= span.Start && x.Position < span.End && riff.TryGetValue(Math.Round(x.Position, 6), out var r) && r.GetStateValue(CompositionStateKinds.LineSolo) == 0)
@@ -76,8 +76,8 @@ public sealed class RiffTwinTest
     /// <summary>The steps a twin plays apart from the riff in each section it plays, where the riff does not solo.</summary>
     private static IEnumerable<int> Intervals(CorpusSong song)
     {
-        var riff = song.Song.Notes![SongTracks.RiffTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State);
-        var twin = song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTwinTrack)?.ToArray() ?? [];
+        var riff = song.Song.Notes![song.Song.Track(TrackRole.Riff)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State);
+        var twin = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.RiffTwin))?.ToArray() ?? [];
         return song.Map.Sections.SelectMany(span => twin
             .Where(x => x.Position >= span.Start && x.Position < span.End && riff.TryGetValue(Math.Round(x.Position, 6), out var r) && r.GetStateValue(CompositionStateKinds.LineSolo) == 0)
             .Select(x => x.Value.State.GetStateValue(StateKinds.ScaleStep) - riff[Math.Round(x.Position, 6)].GetStateValue(StateKinds.ScaleStep))

@@ -283,7 +283,7 @@ public sealed class GenrePresetsReportTest
                 Console.WriteLine($"  {choice,-10} " + string.Join(" | ", ends.Select(x => Top(x.SelectMany(of)))));
             Row("meter", x => [Meter.NameOf(x.Map.Meter)]);
             // by the melody's first note, which every song has, the chords not
-            Row("feel", x => [Feels.NameOf(Feels.Of(x.Song.Notes![SongTracks.MelodyTrack].First().Value.State))]);
+            Row("feel", x => [Feels.NameOf(Feels.Of(x.Song.Notes![x.Song.Track(TrackRole.Melody)].First().Value.State))]);
             Row("scale", x => [x.Song.Draws!.Scale.Name]);
             Row("shapes", x => GenreReportTest.Shapes(x).Select(y => y.Name));
             Row("setup", x => [$"{x.Song.Draws!.DrumSetup}"]);

@@ -9,7 +9,7 @@ public sealed class GenreMelodyRangeTest
 {
     /// <summary>The melody's span in a section's appearance, its tenth highest note over its tenth lowest, on average over the songs of a genre.</summary>
     private static double Span(string? genre) => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre))))
-        .SelectMany(song => song.Song.Map!.Sections.Select(span => song.Song.Notes![SongTracks.MelodyTrack].Where(x => x.Position >= span.Start && x.Position < span.End)
+        .SelectMany(song => song.Song.Map!.Sections.Select(span => song.Song.Notes![song.Song.Track(TrackRole.Melody)].Where(x => x.Position >= span.Start && x.Position < span.End)
             .Select(x => x.Value.Pitches[0]).Order().ToArray()))
         .Where(x => x.Length >= 10)
         .Average(x => x[^(x.Length / 10 + 1)] - x[x.Length / 10]);

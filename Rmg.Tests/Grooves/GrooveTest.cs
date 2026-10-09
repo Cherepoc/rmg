@@ -68,10 +68,10 @@ public sealed class GrooveTest
         foreach (var song in TestCorpus.Range(32))
         {
             var pans = (ImmutableDictionary<int, double>)song.Trace.Single(x => x.Point == TracePoints.Panning).Value!;
-            await Assert.That(pans[SongTracks.BassTrack]).IsEqualTo(0);
-            await Assert.That(Math.Abs(pans[SongTracks.MelodyTrack])).IsLessThanOrEqualTo(Panning.GetSpread(Rmg.Core.Songs.TrackRole.Melody));
+            await Assert.That(pans[song.Track(TrackRole.Bass)]).IsEqualTo(0);
+            await Assert.That(Math.Abs(pans[song.Track(TrackRole.Melody)])).IsLessThanOrEqualTo(Panning.GetSpread(Rmg.Core.Songs.TrackRole.Melody));
             // on sides apart, neither in the middle
-            await Assert.That(pans[SongTracks.ChordsTrack] * pans[SongTracks.RhythmTrack]).IsLessThan(0);
+            await Assert.That(pans[song.Track(TrackRole.Chords)] * pans[song.Track(TrackRole.Rhythm)]).IsLessThan(0);
         }
     }
 

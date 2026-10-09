@@ -21,7 +21,7 @@ public sealed class NewGenresReportTest
             string Figure(FigurePlayer player, string figure) => $"{figure} {figures.Count(x => x.GetValueOrDefault(player) == figure) / (double)figures.Length:P0}";
             var tempos = songs.Select(x => x.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(x.Map.Sections[0].Start).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo).ToArray();
             var meters = songs.Select(x => (Meter)x.Trace.Single(t => t.Point == TracePoints.Meter).Value!).ToArray();
-            var chords = songs.SelectMany(x => x.Song.Notes!.GetValueOrDefault(SongTracks.ChordsTrack)?.Where(n => n.Value.Pitches.Length >= 3) ?? []).ToArray();
+            var chords = songs.SelectMany(x => x.Song.Notes!.GetValueOrDefault(x.Song.Track(TrackRole.Chords))?.Where(n => n.Value.Pitches.Length >= 3) ?? []).ToArray();
             var effects = songs.Select(x => ((SongEffects)x.Trace.Single(t => t.Point == TracePoints.SongEffects).Value!).Strong).ToArray();
             // the guitars' notes in pinch harmonics, General MIDI's 31, those shorter than an 8th apart
             var guitarNotes = songs.SelectMany(x => x.Song.Notes!.Where(n => x.Song.TrackDefinitions[n.Key] is PitchInstrumentTrack { InstrumentCode: 29 or 30 }).SelectMany(n => n.Value)).ToArray();

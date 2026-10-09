@@ -51,7 +51,7 @@ public sealed class GenreIdiomsReportTest
         var changes = map.Sections.Sum(x => song.ChordChanges.Count(c => c >= x.Start - 1e-9 && c < x.End - 1e-9));
         var phrases = map.Sections.Sum(x => x.Duration / (Meter.PhraseBarCount * x.Meter.BarDuration));
 
-        var melody = notes.GetValueOrDefault(SongTracks.MelodyTrack)?.ToArray() ?? [];
+        var melody = notes.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
         var drumVelocities = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack && notes.ContainsKey(x.Key)).SelectMany(x => notes[x.Key]).Select(x => 127 * Render.GetMidiVelocity(x.Value)).ToArray();
         var melodyVelocities = melody.Select(x => 127 * Render.GetMidiVelocity(x.Value)).ToArray();
         var moves = melody.Zip(melody.Skip(1)).Select(x => Math.Abs(x.Second.Value.Pitches[0] - x.First.Value.Pitches[0])).ToArray();
@@ -60,9 +60,9 @@ public sealed class GenreIdiomsReportTest
             string.Join(" ", melody.Where(x => x.Position >= start - 1e-9 && x.Position < start + length - 1e-9).Select(x => $"{Math.Round(x.Position - start, 3)}:{x.Value.Pitches[0]}"));
         var melodyBars = map.Sections.SelectMany(x => Enumerable.Range(1, (int)Math.Round(x.Duration / x.Meter.BarDuration) - 1).Select(b => (Start: x.Start + b * x.Meter.BarDuration, x.Meter.BarDuration))).ToArray();
         var played = melodyBars.Where(x => BarOf(x.Start, x.BarDuration).Length > 0).ToArray();
-        var lineScales = song.Trace.Where(x => x.Point == TracePoints.LineScale && x.Track == SongTracks.MelodyTrack).Select(x => (LineScale)x.Value!).ToArray();
+        var lineScales = song.Trace.Where(x => x.Point == TracePoints.LineScale && x.Track == song.Track(TrackRole.Melody)).Select(x => (LineScale)x.Value!).ToArray();
         // the bass where a chord changes: its note there on the chord's root, and the one before a step or a half step from it
-        var bass = notes.GetValueOrDefault(SongTracks.BassTrack)?.ToArray() ?? [];
+        var bass = notes.GetValueOrDefault(song.Track(TrackRole.Bass))?.ToArray() ?? [];
         var stateMaps = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
         var arrivals = song.ChordChanges.Select(c => (Change: c, Index: Array.FindIndex(bass, x => Math.Abs(x.Position - c) < 1e-6))).Where(x => x.Index > 0).ToArray();
         bool OnRoot(int index, double change) => (bass[index].Value.Pitches.Min() - Realizer.GetChord(stateMaps.GetEffectiveStateMapAt(change)).Chord.GetPitch(0)) % 12 == 0;
@@ -84,7 +84,7 @@ public sealed class GenreIdiomsReportTest
         // the melody's span in each section's appearance, its tenth highest note over its tenth lowest, on average
         double MelodyRange()
         {
-            if (!notes.TryGetValue(SongTracks.MelodyTrack, out var melodyNotes))
+            if (!notes.TryGetValue(song.Track(TrackRole.Melody), out var melodyNotes))
                 return double.NaN;
             var spans = map.Sections.Select(span => melodyNotes.Where(x => x.Position >= span.Start && x.Position < span.End).Select(x => x.Value.Pitches[0]).Order().ToArray())
                 .Where(x => x.Length >= 10).Select(x => x[^(x.Length / 10 + 1)] - x[x.Length / 10]).ToArray();
@@ -115,11 +115,11 @@ public sealed class GenreIdiomsReportTest
             ["kick hits a bar"] = bars.Length > 0 ? bars.Average(x => kicks.Sum(t => notes[t].Count(n => n.Position >= x - 1e-9 && n.Position < x + 4 - 1e-9))) : double.NaN,
             ["kick on every beat"] = bars.Length > 0 ? bars.Count(x => Enumerable.Range(0, 4).All(b => HitsAt(kicks, x + b))) / (double)bars.Length : double.NaN,
             ["one drop (kick and snare on 3 alone)"] = bars.Length > 0 ? bars.Count(x => HitsAt(kicks, x + 2) && HitsAt(snares, x + 2) && !HitsAt(kicks, x) && !HitsAt(snares, x + 1) && !HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
-            ["chords on the offbeat 8ths"] = notes.GetValueOrDefault(SongTracks.ChordsTrack) is { Count: > 0 } chordNotes
+            ["chords on the offbeat 8ths"] = notes.GetValueOrDefault(song.Track(TrackRole.Chords)) is { Count: > 0 } chordNotes
                 ? chordNotes.Average(x => Math.Abs(x.Position % 1 - 0.5) < 0.05 ? 1.0 : 0)
                 : double.NaN,
             ["time in the tresillo (1 and-of-2 4 alone)"] = bars.Length > 0 ? bars.Count(x => HitsAt(times, x) && HitsAt(times, x + 1.5) && HitsAt(times, x + 3) && !HitsAt(times, x + 1) && !HitsAt(times, x + 2)) / (double)bars.Length : double.NaN,
-            ["chords stabbed (a 16th or shorter)"] = notes.GetValueOrDefault(SongTracks.ChordsTrack) is { Count: > 0 } chordStabs
+            ["chords stabbed (a 16th or shorter)"] = notes.GetValueOrDefault(song.Track(TrackRole.Chords)) is { Count: > 0 } chordStabs
                 ? chordStabs.Average(x => x.Value.Duration <= 0.25 + 1e-9 ? 1.0 : 0)
                 : double.NaN,
             ["tom hits a minute"] = Tracks(DrumGroups.Toms).Sum(t => notes[t].Count) / minutes,
@@ -137,7 +137,7 @@ public sealed class GenreIdiomsReportTest
             ["bass leads into a change"] = arrivals.Length > 0 ? arrivals.Count(x => Math.Abs(bass[x.Index].Value.Pitches.Min() - bass[x.Index - 1].Value.Pitches.Min()) is 1 or 2) / (double)arrivals.Length : double.NaN,
             ["bass a half step into a change"] = arrivals.Length > 0 ? arrivals.Count(x => Math.Abs(bass[x.Index].Value.Pitches.Min() - bass[x.Index - 1].Value.Pitches.Min()) == 1) / (double)arrivals.Length : double.NaN,
             ["bass on the root at a change"] = arrivals.Length > 0 ? arrivals.Count(x => OnRoot(x.Index, x.Change)) / (double)arrivals.Length : double.NaN,
-            ["riff notes off the scale"] = notes.GetValueOrDefault(SongTracks.RiffTrack) is { Count: > 0 } riffNotes
+            ["riff notes off the scale"] = notes.GetValueOrDefault(song.Track(TrackRole.Riff)) is { Count: > 0 } riffNotes
                 ? riffNotes.Average(x =>
                 {
                     var state = stateMaps.GetEffectiveStateMapAt(x.Position);
@@ -147,7 +147,7 @@ public sealed class GenreIdiomsReportTest
                 })
                 : double.NaN,
             ["riff sections in power chords"] = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
-            ["guitars' notes palm-muted"] = notes.Where(x => x.Key is SongTracks.RiffTrack or SongTracks.RhythmTrack).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
+            ["guitars' notes palm-muted"] = notes.Where(x => x.Key == song.Track(TrackRole.Riff) || x.Key == song.Track(TrackRole.Rhythm)).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["solo appearances"] = song.Solos.Count / (double)map.Sections.Length,
             ["sections in stop time"] = song.Trace.Where(x => x.Point == TracePoints.StopTime).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["sections the drums rest"] = Rests(TrackRole.Drum),

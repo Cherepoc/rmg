@@ -132,9 +132,8 @@ public sealed class VoiceLeaderTest
         for (var seed = 0; seed < 16; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
-            var instrument = ((PitchInstrumentTrack)song.TrackDefinitions[4]).InstrumentCode;
-            var chords = Render.RenderSong(song).Tracks
-                .First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == instrument)
+            var chords = TestCorpus.Get(seed).Rendered.Tracks
+                .First(x => x.Role == TrackRole.Chords && !x.IsDouble)
                 .NoteTimeline.GroupBy(x => x.Position)
                 .Select(x => x.Select(note => note.Value.Offset).ToArray())
                 .Where(x => x.Length >= 2)
@@ -160,10 +159,10 @@ public sealed class VoiceLeaderTest
         for (var seed = 0; seed < 64; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
-            var definition = (PitchInstrumentTrack)song.TrackDefinitions[4];
+            var definition = (PitchInstrumentTrack)song.TrackDefinitions[song.Track(TrackRole.Chords)];
             var instrument = Rmg.Core.Composition.InstrumentRoles.Chords.Instruments.Single(x => x.Program == definition.InstrumentCode);
             // a section's smoothness is the track's state along the section, not a note's own
-            var smoothness = song.TrackEventStateTimelineMap.TrackTimelineMap[4].StateTimelineMap
+            var smoothness = song.TrackEventStateTimelineMap.TrackTimelineMap[song.Track(TrackRole.Chords)].StateTimelineMap
                 .GetStateTimeline(StateKinds.VoiceLeading)
                 .Select(x => x.Value)
                 .Distinct()

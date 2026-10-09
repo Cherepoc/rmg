@@ -48,8 +48,8 @@ public sealed class LineScaleTest
         var sections = TestCorpus.Measure(256, song =>
         {
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-            var melody = song.Notes(SongTracks.MelodyTrack);
-            return song.Trace.Where(x => x.Point == TracePoints.LineScale && x.Track == SongTracks.MelodyTrack).Select(x =>
+            var melody = song.Notes(song.Track(TrackRole.Melody));
+            return song.Trace.Where(x => x.Point == TracePoints.LineScale && x.Track == song.Track(TrackRole.Melody)).Select(x =>
             {
                 var span = song.Map.Sections.First(s => s.SectionId == x.Section);
                 var facet = ((Unconventionality)song.Trace.First(t => t.Point == TracePoints.SectionUnconventionality && t.Section == x.Section).Value!)[Facet.Scale];
@@ -80,11 +80,11 @@ public sealed class LineScaleTest
             .Add("lineScale", System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("section", new(1, 1, 1)))
             .Add("riffScale", System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("chromatic", new(1, 1, 1))));
         var scales = TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
-            .SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.LineScale).Select(x => (x.Track, Scale: (LineScale)x.Value!))).ToArray();
+            .SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.LineScale).Select(x => (Role: song.Song.TrackDefinitions[x.Track].Role, Scale: (LineScale)x.Value!))).ToArray();
 
-        await Assert.That(scales.Where(x => x.Track == Rmg.Core.Composition.SongTracks.RiffTrack).All(x => x.Scale == LineScale.Chromatic)).IsTrue();
-        await Assert.That(scales.Where(x => x.Track == Rmg.Core.Composition.SongTracks.MelodyTrack).All(x => x.Scale == LineScale.Section)).IsTrue();
-        await Assert.That(scales.Count(x => x.Track == Rmg.Core.Composition.SongTracks.RiffTrack)).IsGreaterThan(0);
-        await Assert.That(scales.Count(x => x.Track == Rmg.Core.Composition.SongTracks.MelodyTrack)).IsGreaterThan(0);
+        await Assert.That(scales.Where(x => x.Role == TrackRole.Riff).All(x => x.Scale == LineScale.Chromatic)).IsTrue();
+        await Assert.That(scales.Where(x => x.Role == TrackRole.Melody).All(x => x.Scale == LineScale.Section)).IsTrue();
+        await Assert.That(scales.Count(x => x.Role == TrackRole.Riff)).IsGreaterThan(0);
+        await Assert.That(scales.Count(x => x.Role == TrackRole.Melody)).IsGreaterThan(0);
     }
 }

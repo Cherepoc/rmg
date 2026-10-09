@@ -18,7 +18,7 @@ public sealed class PitchedEnergyReportTest
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             var answers = song.Trace.Where(x => x.Point == TracePoints.MelodyAnswer).ToDictionary(x => x.Section, x => (double)x.Value!);
             var notes = song.Song.Notes!;
-            var melody = notes.GetValueOrDefault(SongTracks.MelodyTrack)?.ToArray() ?? [];
+            var melody = notes.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
             if (melody.Length == 0)
                 return [];
             var songPitch = melody.Average(x => x.Value.Pitches[0]);
@@ -30,7 +30,7 @@ public sealed class PitchedEnergyReportTest
                 if (inSpan.Length == 0)
                     continue;
                 var rhythm = 0.5 + Math.Log(answers[span.SectionId] / (1 - answers[span.SectionId])) / Math.Log(16);
-                songRows.Add((energy[span.SectionId], rhythm, PerBar(SongTracks.MelodyTrack), PerBar(SongTracks.ChordsTrack), PerBar(SongTracks.BassTrack),
+                songRows.Add((energy[span.SectionId], rhythm, PerBar(song.Track(TrackRole.Melody)), PerBar(song.Track(TrackRole.Chords)), PerBar(song.Track(TrackRole.Bass)),
                     inSpan.Average(x => x.Value.Pitches[0]) - songPitch));
             }
 

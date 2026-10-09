@@ -29,7 +29,7 @@ public sealed class PolymeterTest
                 for (var start = span.Start; start < span.End - 1e-9; start += frame)
                 {
                     var length = Math.Min(frame, span.End - start);
-                    var onsets = song.Song.Notes![SongTracks.RiffTrack].Select(x => Math.Round(x.Position - start, 6)).Where(x => x >= -1e-6 && x < length - 1e-6).ToArray();
+                    var onsets = song.Song.Notes![song.Song.Track(TrackRole.Riff)].Select(x => Math.Round(x.Position - start, 6)).Where(x => x >= -1e-6 && x < length - 1e-6).ToArray();
                     // the cells in turn from the frame's start, and the motif as the longest plays it whole where it first does
                     var cells = new List<(double At, double Length)>();
                     for (var (cell, at) = (0, 0.0); at < length - 1e-9; at += cells[^1].Length)
@@ -85,7 +85,7 @@ public sealed class PolymeterTest
             joined++;
             longJoined += isLong ? 1 : 0;
             // the chords' events, as decided, every one in a frame the first cell's again from where its cell starts
-            var events = song.Song.TrackEventStateTimelineMap.TrackTimelineMap.GetValueOrDefault(SongTracks.ChordsTrack)?.EventTimeline.Select(x => x.Position).ToArray() ?? [];
+            var events = song.Song.TrackEventStateTimelineMap.TrackTimelineMap.GetValueOrDefault(song.Track(TrackRole.Chords))?.EventTimeline.Select(x => x.Position).ToArray() ?? [];
             var frame = (plan.Patterns == Polymeter.Plan.Section ? span.Duration : span.Meter.PatternDuration * plan.Patterns);
             for (var start = span.Start; start < span.End - 1e-9; start += frame)
             {

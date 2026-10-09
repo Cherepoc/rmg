@@ -11,7 +11,7 @@ public sealed class GivenDrumPiecesTest
     /// <summary>The drums a song plays, by their names.</summary>
     private static ImmutableHashSet<string> Drums(CorpusSong song) =>
     [
-        ..song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).Select(x => DrumPieces.NameOf(DrumGroups.GetDrum(x)))
+        ..song.Song.TrackDefinitions.Keys.Where(x => song.IsDrum(x)).Select(x => DrumPieces.NameOf(DrumGroups.GetDrum(x)))
     ];
 
     /// <summary>A pitched track's notes from <paramref name="from" /> on, as text, which two songs alike in everything but their drums share.</summary>
@@ -55,7 +55,7 @@ public sealed class GivenDrumPiecesTest
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var song = TestCorpus.Get(seed, new SongOverrides(DrumPieces: ["kick", "bongo", "conga"], Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Groove, groove)));
-            var silent = song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber)
+            var silent = song.Song.TrackDefinitions.Keys.Where(x => song.IsDrum(x))
                 .Where(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0)
                 .Select(x => DrumPieces.NameOf(DrumGroups.GetDrum(x)));
             await Assert.That(silent).IsEmpty().Because($"seed {seed}");
@@ -101,7 +101,7 @@ public sealed class GivenDrumPiecesTest
             if (!SameForm(drawn.Map, given.Map) || drawn.Trace.Concat(given.Trace).Any(x => x.Point == TracePoints.DrumSolo || x.Point == TracePoints.StopTime && (bool)x.Value!))
                 continue;
             compared++;
-            foreach (var (track, definition) in drawn.Song.TrackDefinitions.Where(x => x.Key < DrumGroups.FirstTrackNumber))
+            foreach (var (track, definition) in drawn.Song.TrackDefinitions.Where(x => !drawn.IsDrum(x.Key)))
             {
                 var from = Math.Max(AfterEntries(drawn), AfterEntries(given));
                 var (before, after) = (Notes(drawn, track, from), Notes(given, track, from));

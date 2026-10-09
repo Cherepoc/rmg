@@ -10,6 +10,7 @@ namespace Rmg.Tests.Forms;
 
 public sealed class SongEndingTest
 {
+    // the tracks of the songs this builds itself
     private const int MelodyTrack = 5;
     private const int BassTrack = 6;
 
@@ -25,8 +26,8 @@ public sealed class SongEndingTest
     public async Task ClosedEndings_LandOnTheTonic()
     {
         var closed = Songs.Where(x => FormLayers.HasFinalChord(Ending(x).Kind)).ToArray();
-        var bassOnTonic = closed.Count(x => x.Notes(BassTrack)[^1].Value.Offset.Mod(12) == Tonic(x));
-        var melodyOnTonic = closed.Count(x => x.Notes(MelodyTrack)[^1].Value.Offset.Mod(12) == Tonic(x));
+        var bassOnTonic = closed.Count(x => x.Notes(x.Track(TrackRole.Bass))[^1].Value.Offset.Mod(12) == Tonic(x));
+        var melodyOnTonic = closed.Count(x => x.Notes(x.Track(TrackRole.Melody))[^1].Value.Offset.Mod(12) == Tonic(x));
 
         await Assert.That(closed.Length).IsGreaterThan(20);
         await Assert.That(bassOnTonic).IsEqualTo(closed.Length);
@@ -75,7 +76,7 @@ public sealed class SongEndingTest
     {
         foreach (var song in Songs.Where(x => FormLayers.HasFinalChord(Ending(x).Kind)))
         {
-            var bass = song.Notes(BassTrack)[^1];
+            var bass = song.Notes(song.Track(TrackRole.Bass))[^1];
 
             await Assert.That(bass.Position).IsEqualTo(Ending(song).Start);
             await Assert.That(bass.Value.Duration).IsEqualTo(Ending(song).Held);

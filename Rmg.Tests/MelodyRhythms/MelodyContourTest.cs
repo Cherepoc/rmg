@@ -31,7 +31,7 @@ public sealed class MelodyContourTest
         int songCount = 0, finalLeaps = 0;
         foreach (var song in songs)
         {
-            var melody = song.Song.Notes![SongTracks.MelodyTrack];
+            var melody = song.Song.Notes![song.Song.Track(TrackRole.Melody)];
             spans.Add(melody.Max(x => x.Value.Pitches[0]) - melody.Min(x => x.Value.Pitches[0]));
             songCount++;
             finalLeaps += Math.Abs(melody[^1].Value.Pitches[0] - melody[^2].Value.Pitches[0]) >= MelodyLayers.Line.LeapSize ? 1 : 0;

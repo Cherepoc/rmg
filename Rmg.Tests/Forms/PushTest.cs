@@ -20,7 +20,7 @@ public sealed class PushTest
         {
             var pushing = song.Trace.Where(x => x.Point == TracePoints.Push && (bool)x.Value!).Select(x => x.Section).ToHashSet();
             var changes = song.ChordChanges;
-            var chords = song.Song.Notes!.GetValueOrDefault(SongTracks.ChordsTrack)?.ToArray() ?? [];
+            var chords = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.ToArray() ?? [];
             var kick = song.Song.Notes!.Where(x => kicks.Contains(x.Key)).SelectMany(x => x.Value).Select(x => x.Position).ToArray();
             // but in and at the end of a phrase in stop time, which a push leaves be, its fill landing there
             var stopped = song.Trace.Where(x => x.Point == TracePoints.StopTime && (bool)x.Value!).Select(x => x.Section).ToHashSet();

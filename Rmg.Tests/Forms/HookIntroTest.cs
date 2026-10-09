@@ -41,7 +41,7 @@ public sealed class HookIntroTest
             // every line's notes as the chorus plays them, but in the last bar, which leads into the first section
             var quoted = song.Origin - chorus.Meter.BarDuration;
             // in its key, and where the chorus doubles a line an octave apart, the intro's notes among its own
-            foreach (var track in new[] { SongTracks.MelodyTrack, SongTracks.CounterMelodyTrack })
+            foreach (var track in new[] { song.Track(TrackRole.Melody), song.Track(TrackRole.CounterMelody) })
             {
                 var played = InKey(song, track, chorus.Start, quoted).ToDictionary(x => x.At, x => x.Classes);
                 // where the chorus plays them, which may rest a part the intro plays
@@ -73,8 +73,8 @@ public sealed class HookIntroTest
             if (song.Map.Intro.Kind != IntroKind.Hook || song.IsSolo(Chorus(song)))
                 return (0, 0);
             var chorus = Chorus(song);
-            var played = InKey(song, SongTracks.MelodyTrack, chorus.Start, song.Origin).ToDictionary(x => x.At, x => x.Classes);
-            var intro = InKey(song, SongTracks.MelodyTrack, 0, song.Origin).Where(x => played.ContainsKey(x.At)).ToArray();
+            var played = InKey(song, song.Track(TrackRole.Melody), chorus.Start, song.Origin).ToDictionary(x => x.At, x => x.Classes);
+            var intro = InKey(song, song.Track(TrackRole.Melody), 0, song.Origin).Where(x => played.ContainsKey(x.At)).ToArray();
             return (intro.Count(x => x.Classes.All(played[x.At].Contains)), intro.Length);
         });
         Console.WriteLine($"the hook's melody notes as the chorus plays them, in their keys, where it plays: {same.Sum(x => x.Item1)} of {same.Sum(x => x.Item2)}");

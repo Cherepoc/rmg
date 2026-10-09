@@ -12,7 +12,7 @@ public sealed class PalmMuteTest
     {
         int muted = 0, shorter = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("rock")))))
-        foreach (var track in new[] { SongTracks.RiffTrack, SongTracks.RhythmTrack, SongTracks.BassTrack })
+        foreach (var track in new[] { song.Track(TrackRole.Riff), song.Track(TrackRole.Rhythm), song.Track(TrackRole.Bass) })
         {
             if (!song.Song.Notes!.TryGetValue(track, out var notes))
                 continue;

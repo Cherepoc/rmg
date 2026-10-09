@@ -35,7 +35,7 @@ public sealed class GenreReportTest
 
     /// <summary>The shapes the chords play, a pick of every bar's chord.</summary>
     internal static IEnumerable<ChordShape> Shapes(CorpusSong song) => song.Trace
-        .Where(x => x.Point == TracePoints.Chord && x.Track == SongTracks.ChordsTrack)
+        .Where(x => x.Point == TracePoints.Chord && x.Track == song.Track(TrackRole.Chords))
         .Select(x => x.StateMap.GetStateValue(CompositionStateKinds.RoleChord) is { IsEmpty: false } role ? role[0] : CompositionStateKinds.ChordPool.Pick(x.StateMap))
         .Select(x => x.Shape);
 
