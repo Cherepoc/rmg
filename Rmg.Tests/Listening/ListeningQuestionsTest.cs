@@ -72,7 +72,11 @@ public sealed class ListeningQuestionsTest
             "The planed modes' chance by genre.", "fusion", [], new() { ["planing"] = new() { ["modes"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.Planing && t.Value is not null
                     && ((ImmutableArray<ChordScale>)x.Trace.Last(c => c.Point == TracePoints.ChordScales && c.Section == t.Section).Value!).Any(c => c.Kind == ChordScaleKind.Own))
-                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min())
+                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min()),
+        new("mediant", "Orchestral's iii or vi turned major, a chromatic mediant, as a film score lifts: a lift, or a wrong chord?",
+            "The mediant's chance by genre.", "orchestral", [], new() { ["chordScales"] = new() { ["mediant"] = 0 } },
+            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.ChordScales && ((ImmutableArray<ChordScale>)t.Value!).Any(c => c.Kind == ChordScaleKind.Mediant))
+                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 2))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

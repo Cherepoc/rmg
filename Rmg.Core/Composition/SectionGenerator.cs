@@ -302,7 +302,7 @@ internal sealed class SectionGenerator
         // a section of dominants, a genre's, from a sequence of its own, so that a song in none draws as it did
         var dominants = Stream(sectionId, SectionStream.DominantChords)
             .TestProbability(ChordScales.Dominant.At(facets[Facet.Progression], _genre.Chance(GenreChoices.ChordScales, "dominant")));
-        var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), Stream(sectionId, SectionStream.ChordOwnScales), scale, home, progression, raisedStep,
+        var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), Stream(sectionId, SectionStream.ChordOwnScales), Stream(sectionId, SectionStream.Mediants), scale, home, progression, raisedStep,
             dominants, facets[Facet.Progression], _genre);
         // the home held over the first two chords now and then, a slower start, the rest changing as they were, from a
         // sequence of its own
@@ -1005,5 +1005,6 @@ internal enum SectionStream
     MelodyBusyness = 55,
     PitchedTracks = 56,
     DrumTracks = 57,
-    PlaningModes = 58
+    PlaningModes = 58,
+    Mediants = 59
 }

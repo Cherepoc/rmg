@@ -197,7 +197,7 @@ its song without lays its patch over the genre's options, the others kept (`with
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
 `lift-cues`, under 0.1, and `bossa-clave`, Bossa nova's cross-stick playing the clave in 74% of its sections, 0.07 as a
 rim's stroke is quiet; `block`, Soul's melody harmonised in three voices, 0.15; `own-modes`, Fusion's planed chords in modes of their
-own, 0.42.
+own, 0.42; `mediant`, Orchestral's iii or vi turned major, 0.54.
 
 Answered on 8 October 2026, late, and let go of: the clave, stop time and the ghost notes, heard as great; the tape and
 the tone, barely heard, so a tape's wow now drifts by the sound facet, 5 cents at the plain end to 26 at the wild, and a

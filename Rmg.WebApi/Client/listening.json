@@ -240,5 +240,71 @@
         ]
       }
     ]
+  },
+  {
+    "id": "mediant",
+    "question": "Orchestral's iii or vi turned major, a chromatic mediant, as a film score lifts: a lift, or a wrong chord?",
+    "decides": "The mediant's chance by genre.",
+    "genre": "orchestral",
+    "without": {
+      "skip": [],
+      "genre": {
+        "chordScales": {
+          "mediant": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 535.1,
+        "listen": [
+          "Melody (Violin)",
+          "Chords (String Ensemble 2)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 124.1,
+        "listen": [
+          "Chords (Tremolo Strings)",
+          "Bass (Contrabass)",
+          "Melody (Violin)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 241.2,
+        "listen": [
+          "Chords (Choir Aahs)",
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "Z",
+        "at": 190.8,
+        "listen": [
+          "Melody (Trumpet)",
+          "Chords (Pizzicato Strings)",
+          "Pad (Choir Aahs)"
+        ]
+      },
+      {
+        "seed": "r",
+        "at": 5,
+        "listen": [
+          "Melody (Flute)"
+        ]
+      },
+      {
+        "seed": "15",
+        "at": 552.8,
+        "listen": [
+          "Melody (French Horn)",
+          "Counter-melody (Viola)",
+          "Bass (Tuba)"
+        ]
+      }
+    ]
   }
 ]

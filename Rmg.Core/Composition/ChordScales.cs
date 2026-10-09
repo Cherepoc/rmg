@@ -23,7 +23,10 @@ public enum ChordScaleKind
     Dominant,
 
     /// <summary>A mode on the chord's own root that keeps its triad, such as Lydian over a major chord or melodic minor over a minor one.</summary>
-    Own
+    Own,
+
+    /// <summary>A minor chord a third from the home turned major, Mixolydian on its root, moving on as it likes: a film's or a pop song's III or VI.</summary>
+    Mediant
 }
 
 /// <summary>
@@ -61,6 +64,12 @@ public static class ChordScales
     ///     its scale's, I7 in Mixolydian and i7 in Dorian: a genre's alone, which the songs never play.
     /// </summary>
     public static ByConvention Dominant { get; } = new(0, 0, 0);
+
+    /// <summary>
+    ///     The chance a minor chord a third from the home, iii or vi, turns major, a chromatic mediant, whatever follows it,
+    ///     as an applied dominant does only before a root a fifth below: never at the plain end, a convention by the middle.
+    /// </summary>
+    public static ByConvention Mediant { get; } = new(0, 0.1, 0.1);
 
     /// <summary>The chance a chord but the home sounds in a mode of its own on its root, by the progression facet: a wild song's alone.</summary>
     public static ByConvention Own { get; } = new(0, 0, 0.3);
@@ -109,9 +118,11 @@ public static class ChordScales
     /// <param name="progression">The chords' roots, in steps above the home.</param>
     /// <param name="cadenceRaised">The step the cadence raises, none for a cadence that keeps the scale.</param>
     /// <param name="ownContext">The sequence a chord's own scale is drawn from, apart from the rest, so that a song that plays none draws as it did.</param>
-    internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, IGenerationContext ownContext, Scale scale, int home, ImmutableArray<int> progression, int? cadenceRaised,
-        bool dominants, double unconventionality, Genre genre)
+    /// <param name="mediantContext">The sequence a chromatic mediant is drawn from, apart from the rest.</param>
+    internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, IGenerationContext ownContext, IGenerationContext mediantContext, Scale scale, int home,
+        ImmutableArray<int> progression, int? cadenceRaised, bool dominants, double unconventionality, Genre genre)
     {
+        var mediant = Mediant.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "mediant"));
         var own = Own.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "own"));
         var applied = Applied.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "applied"));
         var borrowing = Borrowed.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "borrowed"));
@@ -140,6 +151,7 @@ public static class ChordScales
                 // drawn for every chord, so that its draws are as many
                 var ownsScale = ownContext.TestProbability(own);
                 var ownScale = OwnScale(root);
+                var mediates = mediantContext.TestProbability(mediant);
                 if (Mod(root) == 0)
                     return ChordScale.Section;
                 if (dominants && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant), home + root) is { } dominant)
@@ -150,6 +162,10 @@ public static class ChordScales
                     && context.TestProbability(applied)
                     && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Applied), home + root) is { } dominantOfNext)
                     return dominantOfNext;
+                // a minor chord a third from the home turned major, its third raised
+                if (mediates && Mod(root) is 2 or 5
+                    && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Mediant) is { } major && major.Steps.Moves(Mod(home + root + 2)))
+                    return major;
                 if (borrowed is not null && context.TestProbability(borrowing)
                     && Heard(Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed), home + root) is { } lent)
                     return lent;

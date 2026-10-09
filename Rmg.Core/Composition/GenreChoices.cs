@@ -94,7 +94,8 @@ public static class GenreChoices
         ("applied", "Applied dominants", Composition.ChordScales.Applied),
         ("borrowed", "Borrowed chords", Composition.ChordScales.Borrowed),
         ("dominant", "Every chord its dominant", Composition.ChordScales.Dominant),
-        ("own", "A chord's own scale", Composition.ChordScales.Own)
+        ("own", "A chord's own scale", Composition.ChordScales.Own),
+        ("mediant", "Chromatic mediants, iii or vi turned major", Composition.ChordScales.Mediant)
     ]);
 
     /// <summary>The parts a trance gate chops, held chords' and, a genre's, the riff (<see cref="Expression.GateParts" />).</summary>
