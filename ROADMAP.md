@@ -161,6 +161,70 @@ section left to drums that only mark the form; the listening tool, *Listening* c
 degrees leaned by a genre; the render reading the song's map, stop time decided once; the song's sound decided before
 its notes; figures as a genre's data, the kick with the riff, the double kick, the gallop and the clave.
 
+**Planned: the engine** (9 October 2026, reviewed the same day, each step through the implementation loop; output
+beyond General MIDI left out). Of the six limits named, three are smaller than they looked: a drum note may hold
+several pitches and an ornament already, as the render plays both for any track; a fill already changes its feel
+within a bar; and swing already pairs by each section's meter. In order of what each gives for its cost:
+
+1. **A riser's own channel, and a riser over a filtered drop.** The riser borrows a pitched part's channel where a
+   silent drop frees it (`Risers`), so it cannot play where the band plays on. A track of its own (a `TrackRole` of its
+   own, a `PitchInstrumentTrack` on the reverse cymbal), made only in a song with a drop, its notes laid by the stage
+   as now: at most 9 pitched parts and 4 second takes leave it a channel (14 of 15). Its first use in the same step,
+   as the channel alone changes no note: the riser over a filtered drop's muffled bar. Measured: the songs changed are
+   those with a drop (MIDI only for the silent ones, their notes the same); every riser on its own channel and no
+   part's chord cut (a rule). The page's mix lists it as a part, a page test for it. Review: a role added touches
+   every switch over the roles (`SongParts.ChanceOf` throws for it, rightly, as no section plays it); musically a
+   riser over a band still playing may mask the build, its loudness under the band's to listen to (`?listen=riser`).
+   The lift cue's riser stays a listening item.
+2. **The bar patterns' finest note by the tempo.** A bar pattern stops at 16ths by a constant
+   (`ResolvedRhythm.MaxRankLimit`), a fill at its shortest note in seconds (`FillLayers`), hat rolls and ratchets in
+   32nds already. One rule for both: a bar pattern's finest rank by a shortest note in seconds of its own, 16ths at
+   every tempo the songs play, 32nds reached only where a genre's fineness (`GenreRhythm`, "fineness", now capped at
+   0) leans above it and the tempo allows, IDM's wildest first. Measured: the songs unchanged without a genre
+   (fingerprint over the drawn songs), IDM's notes a beat by rank and its shortest note in seconds. Review,
+   overengineering: figures in 32nds are left out, as none asks for one; musicality: 32nd hats in a groove are trap's
+   and IDM's, a blur past about 12 notes a second, which the seconds cap.
+3. **Two drum sounds at once, flams and drags.** No engine change: a fill's or a solo's accent landing on two toms
+   at once puts two sounds in one note (`FillSounds`), and a flam or a drag on a snare's accent is an ornament on a drum
+   note, its grace strokes the same sound a 32nd or less before (the render's ornament plays on the beat now; a drum's
+   before it). Taken up with the drum solos' genre idioms (*Drum solos rethought*, step 6), metal's tom cascades and a
+   march's flams, rather than alone. Measured: the notes of two sounds and the flams per fill by genre; the rules that
+   read one sound a drum note made to read every one. Review: a run's two toms together sound heavy, an accent's
+   device, not a run's, so on accents and landings only.
+4. **A phrase's length a meter's** (a refactor). `Meter.PhraseBarCount`, the constant 4, made the meter's own
+   (`PhraseBars`, 4 by default, beside `Phrases`), every use through the meter, and the tables of four bars read by a
+   bar's place in its phrase: the answer's second half (`MelodyLayers.AnswerBars`), the register's peak and period, a
+   melody answer's bars (`MelodyAnswer.RedrawsRhythm`), the fills' and marks' phrase lines, a phrase end's pinch, the
+   mutation's snap back, the intro's window, the hook intro, the section lengths' names (kept as names, their labels
+   in patterns). Measured: the fingerprint kept, every test as it was. Review, overengineering: the place-by-fraction
+   tables must read exactly as now at four, or the step redraws songs; a table that cannot is left at four with a
+   phrase of other lengths falling back to its nearest, not generalised for its own sake.
+5. **Phrases of three and six bars, and four and two.** A section's phrase length drawn from a stream of its own by
+   the form facet (four only at the plain end, the others rare at the middle) and a genre's pool (`phraseBars`), beside
+   its pattern's phrases; a phrase scheme of its length (three: AAB, ABA, ABB, ABC; six as four and two); a progression
+   of as many chords. The 4 + 2 is a six-bar phrase whose last two bars play its third and fourth again, its letters
+   and chords, the first cadence evaded (to vi or IV) so that the second is the arrival, as a repeated cadence alone
+   sounds stuck. A harmonic rhythm that does not divide the phrase (two bars a chord in three) is not drawn with it.
+   Measured: by `PhraseLengthReportTest`, the sections' phrase lengths by fifths and genre, the fills on every
+   phrase's end, the cadences of the extended; songs changed only where a pool or the wild end draws one. Review:
+   a three-bar phrase is heard as a bar missing by most, so the plain end keeps four and no preset takes three until
+   heard (`?listen=phrase-length`); every place that counts by the pattern counts by the meter after step 4.
+6. **A short bar before a section.** A section's last bar cut to half its length, its first groups, before the next
+   section (a 2/4 bar before a chorus), a section's draw by the form facet and a genre's chance: the span shorter by
+   it (`SectionSpan`), its notes trimmed, the MIDI's time signature written for it, every bar counted from its
+   section's start as now; the fill into the next section falls in the short bar, two beats of it as a drummer
+   plays. Measured: the sections with one, a rule that no note crosses a section's end and every time signature
+   matches its bars. Review: the bars of a section stay alike but the last, which nothing past it counts from; the
+   melody's held phrase end is cut, which is the idiom; a stage that counts bars to a section's end by its duration
+   divided (mutations, stop time) to be checked in the step.
+7. **Feels mixed within a bar,** let go of after review: a bar's change of feel taking effect from one of its groups
+   rather than its start, generated as two spans spliced. A fill does it already where a drummer does, and a soloist's
+   tuplets give a run its fives and sevens; a groove changing feel mid-bar outside a fill is the wild end's alone and
+   would be heard as one. Kept in *Parked* (*Segments in any pattern*) unless listening asks.
+
+The tag stays put off: the extension (step 5) covers a phrase's last bars played again within its section, and a tag
+at a section's end alone would make its last pattern unlike the others, which nothing in steps 4 to 6 needs.
+
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
 ratings by conventionality once enough are in, continuously and never as a gate.
@@ -446,8 +510,7 @@ Each item with its plan, and what it waits for.
 - **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
   the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
-- **A bar of two beats before a section,** which would make the bars of a section unlike each other; and swing by a
-  section's own meter, which the song's meter decides now.
+- **A bar of two beats before a section:** planned (*Planned: the engine*, step 6), its last bar cut short.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a
   section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`), the chorus 2.6 semitones over
   the verse, higher in 61% of the songs.
