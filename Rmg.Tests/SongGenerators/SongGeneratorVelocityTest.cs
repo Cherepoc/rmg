@@ -9,7 +9,8 @@ public sealed class SongGeneratorVelocityTest
     public async Task NotesAtBarStart_AreLouder_ThanNotesOffTheEighthGrid()
     {
         // the accent follows each pattern's own beats, not the bar's, so this only sees part of it: over 128 songs the bar
-        // start is about 6 steps of 127 louder, over fewer too unsteady to tell
+        // start is about 4.5 steps of 127 louder, a loud note's accent held back as the scale holds it, over fewer too
+        // unsteady to tell
         var barStart = new List<double>();
         var offGrid = new List<double>();
         foreach (var seed in Enumerable.Range(0, 128))
@@ -29,7 +30,8 @@ public sealed class SongGeneratorVelocityTest
             }
         }
 
-        await Assert.That(barStart.Average() - offGrid.Average()).IsGreaterThan(5.0 / 127);
+        Console.WriteLine($"bar start {(barStart.Average() - offGrid.Average()) * 127:F2} steps louder");
+        await Assert.That(barStart.Average() - offGrid.Average()).IsGreaterThan(3.5 / 127);
     }
 
     private static bool IsOnGrid(double position, double step)

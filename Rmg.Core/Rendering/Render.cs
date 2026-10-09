@@ -9,7 +9,8 @@ public static class Render
 {
     // a note's velocity, the sum its layers drew, plays on a fixed scale, the same for every song, so that a quiet section
     // or an evenly played bass is heard as such: the sum at the centre plays at the middle velocity, and the further
-    // from it, the less it moves, towards the quietest and the loudest velocities
+    // from it, the less it moves, towards the quietest and the loudest velocities; slower above the middle, as a player
+    // strikes again and again at about 111 at the most and harder only now and then, as an accent
     internal const double VelocityCentre = 0.2;
 
     /// <summary>How much of its length a palm-muted note sounds, and the least, in beats, and how loud against its own.</summary>
@@ -31,6 +32,7 @@ public static class Render
     /// <summary>How many strings an up stroke's chord has at least for its lowest to be missed.</summary>
     internal const int UpStrokeFullest = 4;
     internal const double VelocityScale = 1.03;
+    private const double LoudVelocityScale = 1.4;
     private const double MiddleVelocity = 0.6;
     private const double VelocityReach = 0.4;
 
@@ -256,7 +258,7 @@ public static class Render
     /// <summary>A velocity sum on the fixed scale, from 0.2 to 1.</summary>
     internal static double ToMidiVelocity(double sum)
     {
-        return MiddleVelocity + VelocityReach * Math.Tanh((sum - VelocityCentre) / VelocityScale);
+        return MiddleVelocity + VelocityReach * Math.Tanh((sum - VelocityCentre) / (sum > VelocityCentre ? LoudVelocityScale : VelocityScale));
     }
 
     /// <summary>
@@ -270,6 +272,6 @@ public static class Render
     internal static double FromMidiVelocity(double velocity)
     {
         var reach = Math.Clamp((velocity - MiddleVelocity) / VelocityReach, -0.999, 0.999);
-        return VelocityCentre + VelocityScale * Math.Atanh(reach);
+        return VelocityCentre + (reach > 0 ? LoudVelocityScale : VelocityScale) * Math.Atanh(reach);
     }
 }
