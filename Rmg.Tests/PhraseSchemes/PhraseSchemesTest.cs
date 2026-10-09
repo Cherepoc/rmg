@@ -79,9 +79,10 @@ public sealed class PhraseSchemesTest
     {
         // but a riff, which plays a riff's scheme of its own, in the songs of a few seeds, one with a riff among them
         var riffs = 0;
-        foreach (var riff in TestCorpus.Range(8).SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track == song.Track(TrackRole.Riff)).GroupBy(x => x.Section)))
+        foreach (var (song, riff) in TestCorpus.Range(8).SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track == song.Track(TrackRole.Riff)).GroupBy(x => x.Section).Select(x => (song, x))))
         {
-            await Assert.That(RiffLayers.Schemes.Select(x => x.Value.ToString())).Contains(riff.Select(x => x.Phrase).Distinct().Single()!);
+            // fitted to its section's phrase
+            await Assert.That(RiffLayers.Schemes.Select(x => x.Value.Fitted(song.MeterOf(riff.Key).PhraseBars).ToString())).Contains(riff.Select(x => x.Phrase).Distinct().Single()!);
             riffs++;
         }
 
@@ -96,8 +97,8 @@ public sealed class PhraseSchemesTest
             {
                 // a melody's answer plays the same bar patterns again, recorded at their places
                 var seeds = track.GroupBy(x => x.Bar).OrderBy(x => x.Key).Select(x => x.First().StateMap.GetStateValue(CompositionStateKinds.ValueSeed)).ToArray();
-                for (var a = 0; a < 4; a++)
-                for (var b = 0; b < 4; b++)
+                for (var a = 0; a < letters.Length; a++)
+                for (var b = 0; b < letters.Length; b++)
                     await Assert.That(seeds[a] == seeds[b]).IsEqualTo(letters[a] == letters[b]).Because($"{letters}, bars {a} and {b}");
             }
         }

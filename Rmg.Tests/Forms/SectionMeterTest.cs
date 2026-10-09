@@ -24,8 +24,8 @@ public sealed class SectionMeterTest
                 await Assert.That(Math.Abs(patterns - Math.Round(patterns))).IsLessThan(1e-9);
             }
 
-            // a time signature where the song starts and where a section changes the meter
-            var changes = song.Map.Sections.Where((x, i) => i > 0 && !x.Meter.Equals(song.Map.Sections[i - 1].Meter)).Select(x => x.Start);
+            // a time signature where the song starts and where a section changes the bar, whatever its phrases
+            var changes = song.Map.Sections.Where((x, i) => i > 0 && !x.Meter.HasSameBar(song.Map.Sections[i - 1].Meter)).Select(x => x.Start);
             await Assert.That(song.Rendered.Meters.Select(x => x.Position).ToArray()).IsEquivalentTo(new[] { 0.0 }.Concat(changes).ToArray(), CollectionOrdering.Matching);
             changing += song.Rendered.Meters.Length > 1 ? 1 : 0;
         }

@@ -25,7 +25,7 @@ internal static class VoiceLeadingLayers
     public const double Section = 0.4;
 
     /// <summary>
-    ///     The chance of a 4-bar pattern starting afresh, which marks a new section by a new register, by the chords
+    ///     The chance of a pattern starting afresh, which marks a new section by a new register, by the chords
     ///     facet: never at the plain end and every time at the wild.
     /// </summary>
     public static ByConvention ResetAtPatternStart { get; } = new(0, 0.25, 1);

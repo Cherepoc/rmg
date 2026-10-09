@@ -131,11 +131,11 @@ public sealed class SectionDynamicsTest
             .ToArray();
     }
 
-    /// <summary>The bars of a section where it plays, but the last of each 4-bar pattern.</summary>
+    /// <summary>The bars of a section where it plays, but the last of each phrase.</summary>
     private static IEnumerable<double> Bars(SectionSpan span, Meter meter)
     {
         for (var bar = 0; bar * meter.BarDuration < span.Duration; bar++)
-            if (bar % Meter.DefaultPhraseBars != Meter.DefaultPhraseBars - 1)
+            if (bar % span.Meter.PhraseBars != span.Meter.PhraseBars - 1)
                 yield return span.Start + bar * meter.BarDuration;
     }
 

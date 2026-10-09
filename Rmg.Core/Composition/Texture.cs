@@ -21,7 +21,7 @@ public enum TextureKind
 }
 
 /// <summary>
-///     The texture of an appearance of a section: which of the parts that play play in each of its phrases, its 4-bar
+///     The texture of an appearance of a section: which of the parts that play play in each of its phrases, its
 ///     patterns, so that a section can build up as an intro does, thin out, or play one instrument alone; by the form
 ///     facet: the plainest songs play every part through each section, their textures changing only where a section
 ///     does, the wildest take every texture as likely; those of fewer parts leaned to the quieter sections, as a band
@@ -57,7 +57,7 @@ internal static class Texture
     ///     out in each phrase; a texture that needs more phrases or parts than the appearance has plays steady.
     /// </summary>
     /// <param name="form">The form facet of the section's unconventionality.</param>
-    /// <param name="phrases">How many 4-bar patterns the appearance plays.</param>
+    /// <param name="phrases">How many patterns the appearance plays.</param>
     /// <param name="playing">The parts the appearance plays, of those the song has.</param>
     /// <param name="genre">The genre whose pool of textures it is drawn among, where it names one.</param>
     /// <param name="energy">The appearance's energy, which the textures of fewer parts lean against.</param>

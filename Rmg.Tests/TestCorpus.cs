@@ -206,6 +206,9 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     /// <summary>Whether the track is one of the song's drums.</summary>
     public bool IsDrum(int track) => Song.IsDrum(track);
 
+    /// <summary>The meter a section of the song is in, its phrases' bars with it.</summary>
+    public Meter MeterOf(int section) => Map.Sections.First(x => x.SectionId == section).Meter;
+
     /// <summary>Where the first section starts, after any bars of an intro.</summary>
     public double Origin => Map.Origin;
 

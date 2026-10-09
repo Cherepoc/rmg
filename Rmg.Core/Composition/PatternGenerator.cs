@@ -6,8 +6,8 @@ using Rmg.Core.Songs;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The notes of the tracks of a section, bar by bar. A section's 4-bar pattern gives every track four bars, each
-///     picked from four seeded bar patterns, so bars come back; a bar pattern has its own rhythm and its notes' state,
+///     The notes of the tracks of a section, bar by bar. A section's pattern gives every track its bars, each
+///     picked from the seeded bar patterns of its scheme's letters, so bars come back; a bar pattern has its own rhythm and its notes' state,
 ///     and takes the chord of the bar it plays in.
 /// </summary>
 internal sealed class PatternGenerator
@@ -41,15 +41,15 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>
-    ///     The four bars of the tracks' pattern in a section, as the section's phrase scheme has them: a set of seeds is
+    ///     The bars of the tracks' pattern in a section, as the section's phrase scheme has them: a set of seeds is
     ///     drawn for every letter of the scheme, one seed per track, and every bar takes its letter's, so the tracks
     ///     change their patterns together and bars come back where the scheme repeats them.
     /// </summary>
     /// <param name="trackStateMaps">Every track's state in the section.</param>
     /// <param name="barDrums">How the drums play the bars of a letter: the bars a track sits out, keeping its state there with no notes, and the strokes it changes to.</param>
-    /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the 4-bar pattern.</param>
+    /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the pattern.</param>
     /// <param name="answer">
-    ///     For a track that answers its 4-bar pattern, as the melody does, how its answer plays: the pattern's bars again,
+    ///     For a track that answers its pattern, as the melody does, how its answer plays: the pattern's bars again,
     ///     of the same bar patterns, a bar as the question's did or, drawing its rhythm afresh, of the same settings on
     ///     another rhythm, and the phrase ending where the answer has it; none for no answer.
     /// </param>
@@ -268,7 +268,7 @@ internal sealed class PatternGenerator
     ///     The notes of a bar pattern: one on every beat its rhythm plays, each with its offsets walked on from the note
     ///     before, its velocity accented by how strong its beat is, and the chord of the bar at its position.
     /// </summary>
-    /// <param name="barStateTimelineMap">The state along the 4-bar pattern, in which this bar starts at patternStart.</param>
+    /// <param name="barStateTimelineMap">The state along the pattern, in which this bar starts at patternStart.</param>
     private DyadicRankItemPattern<StateMap> GenerateNotes(
         StateMap stateMap,
         StateTimelineMap barStateTimelineMap,
@@ -504,7 +504,7 @@ internal sealed class PatternGenerator
 internal sealed record GeneratedBars(TrackEventStateTimelineMap<StateMap> Timeline, ImmutableArray<BarFeel> Feels);
 
 /// <summary>The feel of a track's bar: the state its rhythm is resolved from, and how many notes it has.</summary>
-/// <param name="Bar">The bar of the section's 4-bar pattern.</param>
+/// <param name="Bar">The bar of the section's pattern.</param>
 internal readonly record struct BarFeel(int Track, int Bar, StateMap Rhythm, int NoteCount);
 
 /// <summary>

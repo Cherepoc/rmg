@@ -98,7 +98,7 @@ public sealed class KitRolesTest
             var label = (Section<bool>(TracePoints.Breakdown, span.SectionId) ? ", a breakdown" : "") + (Section<bool>(TracePoints.StopTime, span.SectionId) ? ", stop time" : "");
             var from = song.DrumsFrom(index);
             var bars = (int)Math.Round(span.Duration / span.Meter.BarDuration);
-            for (var bar = from * Meter.DefaultPhraseBars; bar < bars; bar++)
+            for (var bar = from * span.Meter.PatternBarCount; bar < bars; bar++)
             {
                 var start = span.Start + bar * span.Meter.BarDuration;
                 var end = start + span.Meter.BarDuration;

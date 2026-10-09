@@ -141,7 +141,7 @@ internal sealed class FillGenerator
     /// <summary>
     ///     The lines between a song's sections and in the middle of each, as the fills mark them where the song has no
     ///     intro or ending of its own: a section change before every section but the first, and a phrase line between
-    ///     every section's 4-bar pattern and its repeat.
+    ///     every section's pattern and its repeat.
     /// </summary>
     /// <param name="start">Where the first section starts.</param>
     public static ImmutableArray<FillLine> GetSectionLines(IReadOnlyList<FillSection> sections, double start = 0)
@@ -577,7 +577,7 @@ internal sealed record FillLine(
 ///     A section as the fills see it: where it is, how far its rhythm strays, the drums' feel before its lines, and its
 ///     energy.
 /// </summary>
-/// <param name="Groove">The states of the rhythm the fills play from, in the last bar of the section's 4-bar pattern.</param>
+/// <param name="Groove">The states of the rhythm the fills play from, in the last bar of the section's pattern.</param>
 /// <param name="Energy">How loud and busy the section is meant to be (<see cref="SectionEnergy" />).</param>
 /// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
 /// <param name="Meter">The meter the section's bars are in, which its fills are counted in.</param>

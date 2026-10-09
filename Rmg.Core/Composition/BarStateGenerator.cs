@@ -5,7 +5,7 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The state of a section that changes from bar to bar along its 4-bar pattern, the same for every track: its
+///     The state of a section that changes from bar to bar along its pattern, the same for every track: its
 ///     scale, which holds for all of it, the progression's roots, the raised seventh of the cadence, the home and cadence chords, the pick from the chord
 ///     pool, the bar's loudness and note lengths, how the chords and the bass move into the next bar, and the shape of
 ///     the melody's phrase and where it ends.

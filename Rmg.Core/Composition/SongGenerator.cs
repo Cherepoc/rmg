@@ -240,5 +240,6 @@ internal enum SongStream
     QuieterForms = 103,
     PartTracks = 104,
     BlockHarmony = 105,
-    DrumOrnaments = 106
+    DrumOrnaments = 106,
+    SectionPhraseBars = 107
 }

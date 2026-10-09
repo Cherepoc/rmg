@@ -77,7 +77,10 @@ public sealed class ListeningQuestionsTest
         new("rudiments", "Jazz's snare dragging into its backbeat and flamming in its fills, soft strokes just before a note: a drummer's touch, or a stumble?",
             "The flams' and drags' chances by genre, and their strokes' loudness.", "jazz", ["Drum ornaments"], null,
             x => x.Song.Notes!.Where(n => x.IsDrum(n.Key)).SelectMany(n => n.Value).Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Ornament) is { IsDefaultOrEmpty: false })
-                .Select(n => (double?)n.Position).Min() is { } at ? Before(x, at, 2) : null)
+                .Select(n => (double?)n.Position).Min() is { } at ? Before(x, at, 2) : null),
+        new("phrase-length", "Orchestral's phrases of four bars and two, the cadence's bars played again before it arrives, and now and then of three: a phrase drawn out, or a bar too many?",
+            "The phrase lengths' weights by genre, and whether three bars are kept.", "orchestral", [], new() { ["phraseBars"] = new() { ["threeBars"] = 0, ["sixBars"] = 0 } },
+            x => Before(x, x.Map.Sections.Where(s => s.Meter.PhraseBars != Meter.DefaultPhraseBars).Select(s => (double?)s.Start).Min(), 1))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

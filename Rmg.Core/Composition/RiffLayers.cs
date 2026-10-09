@@ -36,7 +36,7 @@ internal static class RiffLayers
     /// <summary>How often it leads into a chord change by step.</summary>
     public const double Leading = 0.3;
 
-    /// <summary>The schemes a riff's four bars follow, and how likely each is: one bar, two in turn, a turnaround.</summary>
+    /// <summary>The schemes a riff's phrase of four follows, fitted to its section's phrase, and how likely each is: one bar, two in turn, a turnaround.</summary>
     public static ImmutableArray<Weighted<PhraseScheme>> Schemes { get; } =
     [
         new(0.45, new PhraseScheme([0, 0, 0, 0], [false, false, false, false])),

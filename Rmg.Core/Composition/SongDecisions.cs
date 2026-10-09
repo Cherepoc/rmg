@@ -240,6 +240,11 @@ internal sealed record SongDecisions(
                 Phrases = SongGenerator.CreateStream(seed, SongStream.SectionPhrases, x.Key)
                     .Pick(ByConvention.Weigh(GenreChoices.PhraseCounts.Select(p => (p, p == 1 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Form], phrasePool))
             });
+        // a section's phrase of three bars or of four and two now and then, each from a stream of its own
+        sectionMeters = sectionMeters.ToImmutableDictionary(x => x.Key, x => x.Value with
+        {
+            PhraseBars = PhraseLengths.Draw(SongGenerator.CreateStream(seed, SongStream.SectionPhraseBars, x.Key), songUnconventionality[Facet.Form], genre, x.Value.Phrases)
+        });
         StateTrace.RecordSong(TracePoints.SectionMeter, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
         // a hook intro where the song has a chorus to quote, and a cold start where it has none
         var hook = SongFormGenerator.HookOf(sectionIds, structure.Roles, sectionMeters);

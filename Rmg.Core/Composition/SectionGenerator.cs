@@ -196,7 +196,7 @@ internal sealed class SectionGenerator
         StateTrace.RecordSection(TracePoints.MelodyContour, SectionTrace, sectionId, string.Join(", ", contour), contour);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
-        var scheme = PhraseSchemes.Pick(Stream(sectionId, SectionStream.PhraseScheme), facets[Facet.Form], _genre);
+        var scheme = PhraseSchemes.Pick(Stream(sectionId, SectionStream.PhraseScheme), facets[Facet.Form], _genre).Fitted(meter.PhraseBars);
         StateTrace.RecordSection(TracePoints.PhraseScheme, SectionTrace, sectionId, scheme.ToString(), scheme);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(Stream(sectionId, SectionStream.MelodyBusyness), tilt), tilt, facets);
 
@@ -282,9 +282,14 @@ internal sealed class SectionGenerator
             home = 0;
         // how often its chords change, from a sequence of its own, faster the more energy it has
         var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter, facets[Facet.Progression], _genre);
-        var progression = Progressions.Generate(Stream(sectionId, SectionStream.Progression), scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count, meter.Phrases,
+        // a phrase of four and two its first four bars' chords and its last two's again
+        var extended = meter.PhraseBars > Meter.DefaultPhraseBars;
+        var drawnCount = extended ? harmonicRhythm.Changes.Count(x => x < Meter.DefaultPhraseBars * meter.BarDuration - 1e-9) : harmonicRhythm.Count;
+        var progression = Progressions.Generate(Stream(sectionId, SectionStream.Progression), scale, home, Progressions.Strictness.At(facets[Facet.Progression]), drawnCount, meter.Phrases,
             motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name), step => _genre.Shift(GenreChoices.RootDegrees, Progressions.Degrees[step].Name),
             step => _genre.Shift(GenreChoices.CadenceDegrees, Progressions.Degrees[step].Name));
+        if (extended)
+            progression = PhraseLengths.Extend(progression, harmonicRhythm.Changes, meter);
         // a turnaround now and then, the pattern's last bar leading back to its start, by the progression facet and a genre's,
         // from a sequence of its own
         var turnaround = Stream(sectionId, SectionStream.Turnaround).TestProbability(Progressions.Turnaround.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Turnaround, "sections")));
@@ -532,7 +537,7 @@ internal sealed class SectionGenerator
             // a riff's bars follow a riff's scheme, from a sequence of its own, rather than the section's phrase
             var isRiff = _tracks.Definitions[trackNumber].Role == TrackRole.Riff;
             // and a hook's repeats are its first bar's, none varied
-            var trackRhythm = isRiff ? sectionRhythm with { Scheme = Stream(sectionId, SectionStream.Riff).Pick(RiffLayers.Schemes) }
+            var trackRhythm = isRiff ? sectionRhythm with { Scheme = Stream(sectionId, SectionStream.Riff).Pick(RiffLayers.Schemes).Fitted(meter.PhraseBars) }
                 : isMelody && hooks ? sectionRhythm with { Scheme = sectionRhythm.Scheme.Unvaried() }
                 : sectionRhythm;
             var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, trackRhythm.Scheme);

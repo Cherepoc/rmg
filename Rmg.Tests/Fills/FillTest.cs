@@ -92,7 +92,7 @@ public sealed class FillTest
 
             var expected = song.FillLines().Length;
             await Assert.That(decisions.Length).IsEqualTo(expected).Because($"seed {seed}");
-            await Assert.That(decisions.All(x => x.Track == FillGenerator.DrumsTrace && (x.Bar + 1) % Meter.DefaultPhraseBars == 0)).IsTrue();
+            await Assert.That(decisions.All(x => x.Track == FillGenerator.DrumsTrace && (x.Bar + 1) % song.MeterOf(x.Section).PhraseBars == 0)).IsTrue();
         }
     }
 

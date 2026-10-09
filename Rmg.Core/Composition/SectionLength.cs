@@ -4,7 +4,7 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     How many times a section plays its 4-bar pattern: twice the most, its melody a question and its answer, and now
+///     How many times a section plays its pattern: twice the most, its melody a question and its answer, and now
 ///     and then once, a phrase alone, as a short section between others plays, or four times, as a long chorus or a
 ///     groove that settles plays. A section's role leans it to its own length, a verse and a chorus to sixteen bars, a
 ///     pre-chorus to four and a bridge to eight, which is where the convention is, so that no length leans by the form's

@@ -4,7 +4,7 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     Which bar pattern each bar of a 4-bar pattern plays, as letters: bars of the same letter play the same bar
+///     Which bar pattern each bar of a pattern plays, as letters: bars of the same letter play the same bar
 ///     pattern, so AABA plays one pattern three times and another once. A repeat can be varied (A′): it plays the same
 ///     bar pattern with its cycles drawn afresh more often, so it starts as the first did and then changes.
 /// </summary>
@@ -18,6 +18,20 @@ public sealed record PhraseScheme(ImmutableArray<int> Letters, ImmutableArray<bo
     public PhraseScheme Across(int phrases) => phrases == 1
         ? this
         : new PhraseScheme([..Enumerable.Repeat(Letters, phrases).SelectMany(x => x)], [..Enumerable.Repeat(IsVaried, phrases).SelectMany(x => x)]);
+
+    /// <summary>
+    ///     The scheme of a phrase of four played over a phrase of another length (<see cref="PhraseLengths.BarsOf" />), its
+    ///     letters counted again in the order they come, a bar varied only where its letter came before.
+    /// </summary>
+    public PhraseScheme Fitted(int phraseBars)
+    {
+        if (phraseBars == Letters.Length)
+            return this;
+        var bars = PhraseLengths.BarsOf(phraseBars);
+        var order = bars.Select(x => Letters[x]).Distinct().ToArray();
+        ImmutableArray<int> letters = [..bars.Select(x => Array.IndexOf(order, Letters[x]))];
+        return new PhraseScheme(letters, [..bars.Select((x, i) => IsVaried[x] && letters[..i].Contains(letters[i]))]);
+    }
 
     /// <summary>The scheme with every repeat played as it was first, none varied.</summary>
     public PhraseScheme Unvaried() => this with { IsVaried = [..IsVaried.Select(_ => false)] };

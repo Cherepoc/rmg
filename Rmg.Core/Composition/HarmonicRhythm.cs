@@ -5,8 +5,8 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     How often a section's chords change: every chord as long as the others, a number of bars that the section's
-///     4-bar pattern holds a whole number of, such as a chord a bar, two a bar or one every two bars, in the section's
-///     meter.
+///     phrase holds a whole number of, two at least, such as a chord a bar, two a bar or one every two bars, in the
+///     section's meter.
 /// </summary>
 /// <param name="Bars">How long a chord lasts, in bars.</param>
 internal sealed record HarmonicRhythm(double Bars, Meter Meter)
@@ -66,8 +66,16 @@ internal sealed record HarmonicRhythm(double Bars, Meter Meter)
         var leans = Spans.ToDictionary(x => x.Span.Value, x => x.Lean);
         var spans = ByConvention.Weigh(Spans.Select(x => (x.Span.Value, new ByConvention(x.Span.Weight, x.Span.Weight, x.Span.Weight))), unconventionality,
             genre.Pool<double>(GenreChoices.HarmonicRhythm, NameOf));
+        // as many chords in every phrase, a span of two bars none in a phrase of three: a chord a bar where none of the
+        // genre's fits
+        var fitting = spans.Where(x => Fits(x.Value, meter) && x.Weight > 0).ToImmutableArray();
+        if (fitting.Length < spans.Count(x => x.Weight > 0))
+            spans = fitting.IsEmpty ? [new Weighted<double>(1, 1)] : fitting;
         return new HarmonicRhythm(context.Pick(energy.Weigh(spans, span => leans[span])), meter);
     }
+
+    /// <summary>Whether a span shares a phrase of the meter alike, two chords a phrase at least, so that its progression has a home and a cadence.</summary>
+    private static bool Fits(double bars, Meter meter) => meter.PhraseBars / bars is var chords && Math.Abs(chords - Math.Round(chords)) < 1e-9 && chords >= 2;
 
     /// <summary>Where a passing chord starts in the pattern, between the drawn chords, in beats (<see cref="PassingChords" />); none for most.</summary>
     public ImmutableArray<double> Passing

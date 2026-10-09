@@ -179,21 +179,14 @@ within a bar; and swing already pairs by each section's meter. In order of what 
    (`rudiments`), none in the machines' genres (`?listen=rudiments`). Two toms at once put off: a drum note plays one
    sound by its articulation (`StateKinds.ArticulationIndex`), so two would want a list of them, an engine's change
    for an accent no listening asks for; with the drum solos' idioms, should their tom cascades want it.
-4. Done: a phrase's length the meter's (`Meter.PhraseBars`, four by default, `DefaultPhraseBars` where the genres'
-   lengths and an intro's window count four), the answer's half, the contour's peak and period by a bar's place in its
-   phrase, the fills', the mutations' and the pinches' phrase lines through the meter; the fingerprint kept. Left to
-   step 5, which counts in other lengths: the phrase schemes' and the riff's four letters, the tests that read a trace's
-   bars by four, and the comments on "4-bar patterns".
-5. **Phrases of three and six bars, and four and two.** A section's phrase length drawn from a stream of its own by
-   the form facet (four only at the plain end, the others rare at the middle) and a genre's pool (`phraseBars`), beside
-   its pattern's phrases; a phrase scheme of its length (three: AAB, ABA, ABB, ABC; six as four and two); a progression
-   of as many chords. The 4 + 2 is a six-bar phrase whose last two bars play its third and fourth again, its letters
-   and chords, the first cadence evaded (to vi or IV) so that the second is the arrival, as a repeated cadence alone
-   sounds stuck. A harmonic rhythm that does not divide the phrase (two bars a chord in three) is not drawn with it.
-   Measured: by `PhraseLengthReportTest`, the sections' phrase lengths by fifths and genre, the fills on every
-   phrase's end, the cadences of the extended; songs changed only where a pool or the wild end draws one. Review:
-   a three-bar phrase is heard as a bar missing by most, so the plain end keeps four and no preset takes three until
-   heard (`?listen=phrase-length`); every place that counts by the pattern counts by the meter after step 4.
+4. Done: a phrase's length the meter's (`Meter.PhraseBars`), every phrase line through the meter, the fingerprint kept.
+5. Done: phrases of three bars and of four and two (`PhraseLengths`), by the form facet and a genre's `phraseBars`, for a
+   pattern of one phrase: a scheme of four fitted to them, three leaving out its second bar and four and two playing its
+   last two again, its cadence's chords with them, which go back to their preparation before they arrive; a span that
+   fits no phrase not drawn, a chord a bar where none of a genre's does; the loops' genres in fours, Orchestral's four
+   and two 14% of its sections (`?listen=phrase-length`). Left: the genres' section lengths named in bars of four
+   (`bars16`) play their patterns as often whatever their phrase, so a section of "16 bars" in threes has 12; and an
+   intro's window of four bars, which a first section in threes does not end a phrase with.
 6. **A short bar before a section.** A section's last bar cut to half its length, its first groups, before the next
    section (a 2/4 bar before a chorus), a section's draw by the form facet and a genre's chance: the span shorter by
    it (`SectionSpan`), its notes trimmed, the MIDI's time signature written for it, every bar counted from its
@@ -629,11 +622,6 @@ Each item with its plan, and what it waits for.
   rhythm's density with it, not as a mechanism alone; patterns longer than two bars and the pattern as the unit of a hyper-bar
   meter stay an engine's change, the bar being the unit of the scheme's letters, the state's layers, the melody's
   question and answer, the drums' presence, the fills' lines and the feels.
-- **Phrases of other than four bars** (P3, postponed October 2026: a section is whole 4-bar patterns, and 89 places in
-  26 files count its bars by them, the fills, the phrase ends, stop time, the energy, the polymeters; an extension's bars
-  would count as its pattern's first, not its last): a phrase extended before its cadence (4 + 2, the cadence's bars
-  played again), a 2-bar tag closing a section (*A tag*), a phrase of three or six bars, once the pattern is no longer
-  the unit (*Long cycles*). Leaned by the form facet, the plain end keeping four.
 - **Decided in the review of October 2026, not built:** a genre's one rule, which it keeps already, its amounts in
   place of the songs' but a choice drawn in roles, written down on `ByConvention`; a genre resolved once, which the
   request does already (`GenerateSongRequest` checks every choice and option); streams by name (they would move every seed and so lose the

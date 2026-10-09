@@ -106,7 +106,7 @@ public sealed class DoublingTest
                 following += colouring.Count(x => feelLeads.ContainsKey(DrumGroups.GetTrackNumber(x)));
 
                 foreach (var (track, lead) in feelLeads)
-                for (var bar = 0; bar < Meter.DefaultPhraseBars; bar++)
+                for (var bar = 0; bar < song.MeterOf(entry.Section).PhraseBars; bar++)
                 {
                     bars++;
                     await Assert.That(patterns[(entry.Section, track, bar)].Feel).IsEqualTo(patterns[(entry.Section, lead, bar)].Feel);

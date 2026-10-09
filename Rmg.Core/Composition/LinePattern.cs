@@ -336,7 +336,7 @@ internal sealed class LinePattern
     }
 
     /// <summary>
-    ///     How each bar of the 4-bar pattern leads into the next, the same in the question and in its answer: by a scale
+    ///     How each bar of the pattern leads into the next, the same in the question and in its answer: by a scale
     ///     step, by the section's chance of leading into a chord change (<see cref="MelodyLayers.Leading" />), or not at
     ///     all; into the next phrase too, where the phrase runs on into it rather than ending on a held note.
     /// </summary>
@@ -351,7 +351,7 @@ internal sealed class LinePattern
     ///     (<see cref="Mutate" />, <see cref="MelodyLayers.AnswerShare" />), so that they are placed by the rules where
     ///     they echoed the question.
     /// </summary>
-    /// <param name="bars">The section's bars, its 4-bar pattern's question and answer.</param>
+    /// <param name="bars">The section's bars, its pattern's question and answer.</param>
     /// <param name="seed">The seed of the answer's mutations.</param>
     /// <param name="amount">The chance a note of the answer's later bars is mutated.</param>
     /// <param name="meter">The section's meter, whose pattern the question is, and every phrase of the answer after it.</param>
@@ -481,8 +481,8 @@ internal sealed class LinePattern
 /// <param name="BuildBars">The section's 8 bars built afresh, the answer's mutated, every bar drawing its rhythm afresh by its key, 0 for none.</param>
 /// <param name="Letters">Every bar's letter in the section's phrase scheme.</param>
 /// <param name="HarmonicRhythm">Where the section's chords change.</param>
-/// <param name="Approaches">How each chord of the 4-bar pattern leads into the next (<see cref="LinePattern.DrawApproaches" />).</param>
-/// <param name="Landings">What the first note of each chord of the 4-bar pattern lands on.</param>
+/// <param name="Approaches">How each chord of the pattern leads into the next (<see cref="LinePattern.DrawApproaches" />).</param>
+/// <param name="Landings">What the first note of each chord of the pattern lands on.</param>
 /// <param name="RegisterFreedom">The chance a phrase of the line starts afresh at where it aims, rather than going on from the note before.</param>
 /// <param name="Seed">The seed of its appearances' draws.</param>
 internal sealed record SectionLine(

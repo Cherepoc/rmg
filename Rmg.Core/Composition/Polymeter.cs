@@ -8,7 +8,7 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     A section's polymeter: a cycle of a length of its own, in 16ths, that divides no bar, played again and again across
 ///     the bar lines, as a guitar and a kick run against the hi-hat and the snare, and meeting the bar
-///     again where every 4-bar pattern, or every second at the wilder, starts it afresh. A cycle is a cell, or a cell
+///     again where every pattern, or every second at the wilder, starts it afresh. A cycle is a cell, or a cell
 ///     played again and then a closing one of another length, as 7, 7 and 9 make 23; each cell plays the same motif, cut
 ///     to its length. The riff plays it, or the bass where the song has no riff, the bass with the riff now and then, and
 ///     the kick with them, the oftener the wilder, and the snare on its cells' starts against the hi-hat's pulse; each

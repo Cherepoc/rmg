@@ -4,7 +4,7 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The chord progression of a section: the root of every chord of its 4-bar pattern, in scale steps from the
+///     The chord progression of a section: the root of every chord of its pattern, in scale steps from the
 ///     section's home. The first chord is the home chord, the last the cadence, which resolves to the first when the
 ///     pattern plays again, the one before it prepares the cadence, and the others move away; four chords, a chord a
 ///     bar, are home, away, preparation and cadence, two are home and cadence. Each chord's root is drawn by how

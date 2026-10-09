@@ -36,7 +36,7 @@ public sealed class RhythmBusynessReportTest
                 var band = Band(span.SectionId);
                 for (var bar = 0; bar < span.Duration / song.Map.Meter.BarDuration; bar++)
                 {
-                    if (bar % Meter.DefaultPhraseBars == Meter.DefaultPhraseBars - 1)
+                    if (bar % span.Meter.PhraseBars == span.Meter.PhraseBars - 1)
                         continue;
 
                     var start = span.Start + bar * song.Map.Meter.BarDuration;

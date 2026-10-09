@@ -73,6 +73,15 @@
     },
     "seeds": [
       {
+        "seed": "1",
+        "at": 60.6,
+        "listen": [
+          "Melody (Flute)",
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Fretless Bass)"
+        ]
+      },
+      {
         "seed": "3",
         "at": 296.6,
         "listen": [
@@ -96,24 +105,15 @@
       },
       {
         "seed": "J",
-        "at": 188.2,
+        "at": 180.6,
         "listen": [
           "Bass (Fretless Bass)",
           "Chords (Electric Piano 1)"
         ]
       },
       {
-        "seed": "S",
-        "at": 223.7,
-        "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Solo (Overdriven Guitar)",
-          "Rhythm part (Electric Guitar (clean))"
-        ]
-      },
-      {
         "seed": "V",
-        "at": 163.8,
+        "at": 159.6,
         "listen": [
           "Melody (Soprano Sax)",
           "Counter-melody (Soprano Sax)",
@@ -138,7 +138,7 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 535.1,
+        "at": 532.9,
         "listen": [
           "Melody (Violin)",
           "Chords (String Ensemble 2)"
@@ -162,12 +162,20 @@
         ]
       },
       {
-        "seed": "Z",
-        "at": 190.8,
+        "seed": "N",
+        "at": 174.8,
         "listen": [
-          "Melody (Trumpet)",
-          "Chords (Pizzicato Strings)",
-          "Pad (Choir Aahs)"
+          "Bass (Contrabass)",
+          "Chords (String Ensemble 2)",
+          "Melody (Trumpet)"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 249.3,
+        "listen": [
+          "Chords (Tremolo Strings)",
+          "Melody (Violin)"
         ]
       },
       {
@@ -175,15 +183,6 @@
         "at": 5,
         "listen": [
           "Melody (Flute)"
-        ]
-      },
-      {
-        "seed": "15",
-        "at": 552.8,
-        "listen": [
-          "Melody (French Horn)",
-          "Counter-melody (Viola)",
-          "Bass (Tuba)"
         ]
       }
     ]
@@ -296,6 +295,72 @@
         "at": 27.5,
         "listen": [
           "Acoustic Snare"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "phrase-length",
+    "question": "Orchestral's phrases of four bars and two, the cadence's bars played again before it arrives, and now and then of three: a phrase drawn out, or a bar too many?",
+    "decides": "The phrase lengths' weights by genre, and whether three bars are kept.",
+    "genre": "orchestral",
+    "without": {
+      "skip": [],
+      "genre": {
+        "phraseBars": {
+          "threeBars": 0,
+          "sixBars": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 4.9,
+        "listen": [
+          "Chords (Pizzicato Strings)",
+          "Pad (Voice Oohs)"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 254.5,
+        "listen": [
+          "Melody (Violin)"
+        ]
+      },
+      {
+        "seed": "4",
+        "at": 48.4,
+        "listen": [
+          "Melody (Oboe)",
+          "Bass (Tuba)",
+          "Pad (Voice Oohs)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 161.9,
+        "listen": [
+          "Chords (String Ensemble 2)",
+          "Bass (Contrabass)",
+          "Melody (Trumpet)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 88.3,
+        "listen": [
+          "Bass (Tuba)",
+          "Melody (Violin)"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 234.1,
+        "listen": [
+          "Bass (Tuba)",
+          "Melody (Oboe)"
         ]
       }
     ]

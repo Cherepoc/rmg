@@ -30,7 +30,7 @@ public sealed class GenreIdiomsReportTest
         var drums = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack && notes.ContainsKey(x.Key)).Select(x => x.Key).ToArray();
         bool DrumsPlay(double start) => drums.Any(t => notes[t].Any(x => x.Position >= start - 1e-9 && x.Position < start + 4 - 1e-9));
         var bars = common.SelectMany(x => Enumerable.Range(0, (int)Math.Round(x.Duration / x.Meter.BarDuration))
-                .Where(b => b % Meter.DefaultPhraseBars != Meter.DefaultPhraseBars - 1)
+                .Where(b => b % x.Meter.PhraseBars != x.Meter.PhraseBars - 1)
                 .Select(b => x.Start + b * x.Meter.BarDuration))
             .Where(DrumsPlay)
             .ToArray();

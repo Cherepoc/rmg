@@ -69,7 +69,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         if (articulation > 0)
             builder.Add(StateKinds.ArticulationIndex, articulation);
         var stateMap = builder.ToStateMap(context);
-        // sections are made of whole 4-bar patterns, so the bar of the pattern and the beat in it follow from the song's
+        // sections are made of whole patterns, so the bar of the pattern and the beat in it follow from the song's
         var bar = (int)Math.Floor(position / meter.BarDuration);
         var (patternBar, beat) = map is null
             ? (bar.Mod(meter.PatternBarCount), position - bar * meter.BarDuration)

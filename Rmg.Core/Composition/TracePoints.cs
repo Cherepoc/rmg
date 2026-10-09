@@ -174,7 +174,7 @@ internal static class TracePoints
     /// </summary>
     public const string InstrumentOverTime = "Instrument over time";
 
-    /// <summary>How many times a section plays its 4-bar pattern (an <c>int</c>).</summary>
+    /// <summary>How many times a section plays its pattern (an <c>int</c>).</summary>
     public const string SectionLength = "Section length";
 
     /// <summary>A section's scale (<see cref="Scale" />).</summary>

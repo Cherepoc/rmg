@@ -313,7 +313,7 @@ public static class GenreChoices
     /// <summary>The chance a verse leaves its melody out, the room a rap's voice takes over the beat (<see cref="Arrangement.VoiceChance" />).</summary>
     public static GenreChoice Voice { get; } = Chances("voice", "Verses for a voice", [("verses", "Verses without a melody", Arrangement.VoiceChance)]);
 
-    /// <summary>Which bars of a 4-bar pattern repeat which, AAAA to ABCD: a loop's one bar over and over (<see cref="PhraseSchemes" />).</summary>
+    /// <summary>Which bars of a pattern repeat which, AAAA to ABCD: a loop's one bar over and over (<see cref="PhraseSchemes" />).</summary>
     public static GenreChoice PhraseScheme { get; } = Pool("phraseScheme", "Bars repeating", PhraseSchemes.Weights.Select(x => (x.Scheme.ToLowerInvariant(), x.Scheme, x.Weight)));
 
     /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
@@ -487,6 +487,10 @@ public static class GenreChoices
     public static GenreChoice Phrases { get; } = Pool("phrases", "Section's pattern",
         PhraseCounts.Select(x => (PhrasesName(x), $"{x * Composition.Meter.DefaultPhraseBars} bars", x == 1 ? new ByConvention(1, 1, 1) : default)));
 
+    /// <summary>How many bars a section's phrase has: four, three, or four and two, its last two again (<see cref="PhraseLengths" />).</summary>
+    public static GenreChoice PhraseBars { get; } = Pool("phraseBars", "Phrase length",
+        PhraseLengths.Options.Select(x => (PhraseLengths.NameOf(x.Bars), PhraseLengths.LabelOf(x.Bars), x.Weight)));
+
     /// <summary>Whether a song takes one of the forms songs are written in, or one of its own (<see cref="SongForms" />).</summary>
     public static GenreChoice FormChances { get; } = Chances("formChances", "Form or its own", [("forms", "One of the forms", SongForms.OwnFormChance)]);
 
@@ -639,7 +643,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Inversion, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, Rudiments, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Inversion, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, Rudiments, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

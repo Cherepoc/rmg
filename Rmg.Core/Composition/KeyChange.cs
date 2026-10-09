@@ -6,7 +6,7 @@ using Rmg.Core.Songs;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     A song changing key at the start of a 4-bar pattern, by the scale facet of its unconventionality: never in the
+///     A song changing key at the start of a pattern, by the scale facet of its unconventionality: never in the
 ///     plainest song, which keeps its key; at the middle, now and then for a last section that came back before, as a
 ///     last chorus goes up a whole step or a half, or for a section in a key of its own, a chorus or a bridge the
 ///     likelier, up or down a fourth most often, every time it plays; and at the wild end at every pattern's start and in
