@@ -78,7 +78,7 @@ internal sealed class SectionGenerator
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
         _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
-        _drums = new SectionDrumGenerator(tracks, genre, songStateMap, sectionEnergies, songPercussion, absent, Stream, StreamSeed, Facets, CreateSectionTrackLayer,
+        _drums = new SectionDrumGenerator(tracks, genre, songStateMap, sectionEnergies, songPercussion, Stream, FirstRests, Facets, CreateSectionTrackLayer,
             meter => _generators(meter).Patterns);
     }
 
@@ -126,6 +126,13 @@ internal sealed class SectionGenerator
     {
         return Seeds.Derive(Seeds.Derive(_seed, sectionId), (int)stream);
     }
+
+    /// <summary>
+    ///     The parts a section leaves out the first time it plays, from a sequence of its own, the likelier the less energy it
+    ///     has, which its drums are drawn by before it is made; a later appearance draws them again (<see cref="GeneratedSection.Appear(int, double)" />).
+    /// </summary>
+    private ImmutableHashSet<TrackRole> FirstRests(int sectionId, SectionRole role, Tilt tilt) =>
+        Arrangement.DrawRests(new GenerationContext(StreamSeed(sectionId, SectionStream.Arrangement)), tilt, role, _absent, _genre, Facets(sectionId)[Facet.Form]);
 
     /// <summary>The section: its pattern played as many times as it plays it, with what the fills need to know of its rhythm.</summary>
     /// <param name="plan">The section's place in the song's form, which some of its draws keep to.</param>
@@ -221,10 +228,9 @@ internal sealed class SectionGenerator
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
         StateTrace.RecordSection(TracePoints.SectionLength, SectionTrace, sectionId, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap, meter).Repeat(plays);
-        // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
-        // it has; a later appearance draws them again (Appear)
+        // the parts the section leaves out the first time it plays
         var arrangementSeed = StreamSeed(sectionId, SectionStream.Arrangement);
-        var resting = Arrangement.DrawRests(new GenerationContext(arrangementSeed), tilt, plan.Role, _absent, _genre, facets[Facet.Form]);
+        var resting = FirstRests(sectionId, plan.Role, tilt);
         ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
         var section = new GeneratedSection(
             timeline,
