@@ -176,14 +176,14 @@ genre first (see *Genres*).
 *Architecture*: plainer prose); and the music's: the
 songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listening data*).
 
-**The parked reviewed** (P2, 9 October 2026, each step through the implementation loop): two of the three items parked
-where they stand were mostly built since; what is left of them is small and a genre's data.
-4. Long cycles for the generated patterns: a slow part's two-bar cycle played whole over a pair of bars (*Long cycles*).
-Patterns longer than two bars stay parked (*Long cycles*); scales of other sizes are decided against (*Decided, and
-kept*).
+**Done: the parked reviewed** (9 October 2026, each step through the implementation loop): the seven steps one rule, a
+scale of other than seven notes refused; Bossa nova's clave on the cross-stick (`?listen=bossa-clave`); the melody in
+block harmony, the counter-melody stacking its chord (`?listen=block`); roots off the scale, a planed section's chords
+each in a mode of its own (`?listen=own-modes`). Long cycles for the generated patterns tried and put off (*Long
+cycles*); scales of other sizes decided against (*Decided, and kept*).
 
-**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where it stands: patterns longer
-than two bars.
+**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where it stands: long cycles for the
+generated patterns.
 
 ## Listening
 
@@ -550,23 +550,22 @@ Each item with its plan, and what it waits for.
   sections, a chord's mode changing on 80% of the moves. Should it sound aimless, a chord keeping the mode of the one
   before now and then, a chance on the same draw; symmetric cycles (major or minor thirds) left out, Planing's moves
   holding minor thirds already.
-- **Long cycles** (reviewed 9 October 2026; P2 for two bars, P4 beyond): a figure of two bars is built, its onsets over 32 16ths from a
-  section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's on the cross-stick), and chords of two bars
-  are a harmonic rhythm; a section's bars repeating, AABA to ABCD, give every part figures of two and four bars, a
-  varied repeat (A′) near an answer. So a kick answered in its second bar or a crash every two bars, should listening
-  miss one, is a figure's data or an edit after assembly as the lift's cues are. The generated patterns: a part's
-  period over a bar draws a cycle of two bars already (`Meter.GetCycles`) but cuts it at the bar line, so that a slow
-  part plays its first half in every bar and never its second. Plan (P2, the parked reviewed, step 4): such a bar
-  pattern draws its rhythm over two bars (`PatternGenerator.GenerateRhythmPattern`, its descriptor two bars long) and a
-  pair of bars plays it whole, the first bar its first half and the second its second, both of the pair's first
-  bar's letter, so that a cycle is never stitched from two seeds; a 4-bar pattern holds two pairs, the phrase's halves.
-  Measured first: the bar patterns whose period is over a bar, by role, from the trace (`TracePoints.BarPattern`); if
-  few, the period's range is a decision of its own. Then: the notes of a slow part's second bars that differ from its
-  first's, and a note held over a chord change into a clash. Songs changed: every song with a slow part, counted in
-  the commit. To check in its plan: an answer that redraws its rhythm in a pair's second bar, a lead-in, the feels'
-  count by bar, a polymeter's cells, a short bar ending a phrase. Left parked: patterns longer than two bars, and the
-  pattern as the unit of a hyper-bar meter, an engine's change, the bar being the unit of the scheme's letters, the
-  state's layers, the melody's question and answer, the drums' presence, the fills' lines and the feels.
+- **Long cycles** (P4, reviewed 9 October 2026, the generated patterns tried and put off the same day): a figure of two
+  bars is built, its onsets over 32 16ths from a section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's
+  on the cross-stick), and chords of two bars are a harmonic rhythm; a section's bars repeating, AABA to ABCD, give every
+  part figures of two and four bars, a varied repeat (A′) near an answer. A kick answered in its second bar or a crash
+  every two bars, should listening miss one, is a figure's data or an edit after assembly as the lift's cues are. The
+  generated patterns: a period over a bar draws a two-bar cycle (`Meter.GetCycles`) a bar plays the first half of, and
+  that is common, not a slow part's alone (`TwoBarCyclesTest.ReportSlowPatterns`, 64 songs: the counter-melody's bar
+  patterns 70%, the bass's 33%, the chords', the riff's and the rhythm's 27-30%, the melody's 17%, the drums' 2%), a
+  bar of a sparser rhythm. Played whole over a pair of bars, the second bar its second half (tried 9 October 2026), it
+  changed 230 of 256 songs and mostly left the second bar empty, its half a rank weaker all through: the bars the bass
+  plays in fell 10% in a pair's second, the chords' 6%, the counter-melody's 17%, the riff's 13%
+  (`TwoBarCyclesTest.ReportBarsByPlace`), silence rather than a long note, a note held a bar at most and the chords' and
+  the bass's to the chord's change. Taken up only with notes held across the bar line, a suspension's or a tie's, which
+  is what a cycle longer than a bar is for; patterns longer than two bars and the pattern as the unit of a hyper-bar
+  meter stay an engine's change, the bar being the unit of the scheme's letters, the state's layers, the melody's
+  question and answer, the drums' presence, the fills' lines and the feels.
 - **Phrases of other than four bars** (P3, postponed October 2026: a section is whole 4-bar patterns, and 89 places in
   26 files count its bars by them, the fills, the phrase ends, stop time, the energy, the polymeters; an extension's bars
   would count as its pattern's first, not its last): a phrase extended before its cadence (4 + 2, the cadence's bars
