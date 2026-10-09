@@ -573,8 +573,14 @@ Each item with its plan, and what it waits for.
   changed 230 of 256 songs and mostly left the second bar empty, its half a rank weaker all through: the bars the bass
   plays in fell 10% in a pair's second, the chords' 6%, the counter-melody's 17%, the riff's 13%
   (`TwoBarCyclesTest.ReportBarsByPlace`), silence rather than a long note, a note held a bar at most and the chords' and
-  the bass's to the chord's change. Taken up only with notes held across the bar line, a suspension's or a tie's, which
-  is what a cycle longer than a bar is for; patterns longer than two bars and the pattern as the unit of a hyper-bar
+  the bass's to the chord's change. Tried again the same day with its notes held as far as the cycle (a note's
+  `CycleBars`, the realizer's hold and its restrike at a change reaching as far): the lines' holes closed (the melody
+  sounding in 94% of a pair's second bars as before, the riff 93% against 95%), the bass's nearly (93% against 95%),
+  but the chords' and the rhythm part's stayed (88% against 93%, 91% against 97%), as a chord is struck again at a
+  change only on to a note of the same chord, and the counter-melody's (84% against 92%); and drawn over two bars a
+  cycle's notes spread over both, so that every slow part grew sparser, its first bars too (the counter-melody's struck
+  91% to 86%), the parts' densities having been tuned against a bar of the cycle. Taken up only as a retuning of the
+  rhythm's density with it, not as a mechanism alone; patterns longer than two bars and the pattern as the unit of a hyper-bar
   meter stay an engine's change, the bar being the unit of the scheme's letters, the state's layers, the melody's
   question and answer, the drums' presence, the fills' lines and the feels.
 - **Phrases of other than four bars** (P3, postponed October 2026: a section is whole 4-bar patterns, and 89 places in
