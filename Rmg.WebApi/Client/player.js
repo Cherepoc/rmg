@@ -1,5 +1,8 @@
 import { Sequencer, WorkletSynthesizer } from "spessasynth_lib";
 
+// how long a song is waited for, in milliseconds, before it is taken as loaded all the same
+const SONG_WAIT = 5000;
+
 // resolved through the import map, so the processor is always the one of the library the page loads
 export const WORKLET_URL = new URL("spessasynth_processor.min.js", import.meta.resolve("spessasynth_lib")).href;
 const SOUND_BANK_ID = "main";
@@ -42,7 +45,8 @@ class Player {
 
     /** Resolves once the sequencer has taken the next song, when its length is known. */
     nextSong() {
-        return new Promise((resolve) => this.#songWaiters.push(resolve));
+        // a song the sequencer never reports, a file it could not read, given up on after a while, as it was then
+        return Promise.race([new Promise((resolve) => this.#songWaiters.push(resolve)), new Promise((resolve) => setTimeout(resolve, SONG_WAIT))]);
     }
 
     async loadSoundFont(buffer) {

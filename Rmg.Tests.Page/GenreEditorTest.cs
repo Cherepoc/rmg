@@ -388,6 +388,43 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A genre file opened while one's own is edited is a genre of its own, which a save keeps beside it.</summary>
+    [Test]
+    public async Task AGenreImported_WhileOnesOwnIsEdited_IsSavedBesideIt()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var name = dialog.Locator("input[aria-label='Genre name']");
+        var save = dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true });
+        var yours = page.Page.Locator("select[aria-label='Genre'] optgroup[label='Yours'] option");
+        await name.FillAsync("First");
+        await save.ClickAsync();
+        await page.Until(async () => await yours.CountAsync() == 1, "the first saved");
+
+        await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload
+        {
+            Name = "imported.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Imported", "choices": {} }""")
+        });
+        await page.Until(async () => await name.InputValueAsync() == "Imported", "the file opened");
+        await save.ClickAsync();
+        await page.Until(async () => (await yours.AllTextContentsAsync()).Order().SequenceEqual(["First", "Imported"]), "both kept");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    /// <summary>A handle clicked without a move changes nothing, and overrides nothing.</summary>
+    [Test]
+    public async Task AHandleClicked_WithoutAMove_OverridesNothing()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var time = await Section(dialog, "Time and feel");
+        var tune = await Change(time, "meter");
+
+        await tune.Locator("[data-option][data-end]").First.ClickAsync();
+        await Assert.That(await tune.Locator(".tune-override input").IsCheckedAsync()).IsFalse();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task OnesOwnGenre_IsRenamedInItsPlace_ADeletionAsked_AndNamesOneWhateverTheirCase()
     {

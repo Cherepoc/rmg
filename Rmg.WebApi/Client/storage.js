@@ -100,7 +100,9 @@ export function recallGenre() {
 export function recallGenreCopies() {
     try {
         const kept = JSON.parse(localStorage.getItem(GENRE_COPIES) ?? "{}");
-        return kept !== null && typeof kept === "object" && !Array.isArray(kept) ? kept : {};
+        if (kept === null || typeof kept !== "object" || Array.isArray(kept)) return {};
+        // every copy a genre, as the others are read, one of another shape left out
+        return Object.fromEntries(Object.entries(kept).filter(([, x]) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null));
     } catch {
         return {};
     }

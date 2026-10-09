@@ -74,20 +74,28 @@ function showPanels(isShown) {
     elements.controls.hidden = !isShown;
 }
 
+// how many times the summary was asked for, the latest answer the one shown
+let loads = 0;
+
 /**
  *     Reads the summary from the admin area, whose credentials the browser asked for when the page was opened and sends
  *     on with every request under it.
  */
 async function load() {
     setStatus("Reading…");
+    // the latest asked for alone shown, a slower earlier answer let go of
+    const asked = ++loads;
 
     let response;
+    let read;
     try {
         response = await fetch(new URL(`api/summary?days=${encodeURIComponent(elements.range.value)}`, location.href));
+        read = response.ok ? await response.json() : null;
     } catch (error) {
-        setStatus(`Could not reach the server: ${error.message}`, true);
+        if (asked === loads) setStatus(`Could not read the summary: ${error.message}`, true);
         return;
     }
+    if (asked !== loads) return;
 
     if (response.status === 404) {
         showPanels(false);
@@ -100,7 +108,7 @@ async function load() {
         return;
     }
 
-    summary = await response.json();
+    summary = read;
     showPanels(true);
     draw();
     setStatus("");
@@ -119,14 +127,16 @@ function duration(ms) {
     if (ms < 1000) return `${Math.round(ms)} ms`;
     if (ms < 60_000) return `${(ms / 1000).toFixed(ms < 10_000 ? 1 : 0)} s`;
 
-    return `${Math.floor(ms / 60_000)}m ${Math.round((ms % 60_000) / 1000)}s`;
+    const whole = Math.round(ms / 1000);
+    return `${Math.floor(whole / 60)}m ${whole % 60}s`;
 }
 
 function seconds(value) {
     if (value === null || value === undefined) return "—";
     if (value < 60) return `${value.toFixed(0)} s`;
 
-    return `${Math.floor(value / 60)}m ${Math.round(value % 60)}s`;
+    const whole = Math.round(value);
+    return `${Math.floor(whole / 60)}m ${whole % 60}s`;
 }
 
 function percent(part, whole) {
@@ -261,7 +271,8 @@ function drawDaily() {
         return;
     }
 
-    elements.dailyFigure.hidden = false;
+    // the chart where the table is not the one shown
+    elements.dailyFigure.hidden = !elements.dailyTable.hidden;
     elements.dailyPanel.querySelector(".empty")?.remove();
 
     const highest = Math.max(1, ...days.flatMap((day) => SERIES.map((series) => day[series.key])));

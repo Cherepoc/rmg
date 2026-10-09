@@ -155,10 +155,14 @@ let startedListening = null;
 // the songs' version the song on the page was made by, which every event about the song carries: the same seed
 // is another song in another version, and a page open across a deploy still plays the song it got
 let songVersion = null;
+// the songs' version the server makes now, as it says it
+let serverVersion = null;
 // where the next song made starts playing, in seconds, a listening song's; none for its start
 let startAt = null;
 // the stages the song asked for next leaves out, as the listening mode hears one without a device; none otherwise
 let skipped = [];
+// and the stages the song on the page left out, which its remakes, its download and its MP3 leave out too
+let songSkipped = [];
 // the song's sections as its report gives them, where each starts in seconds, its role and its soloists, and its length
 let songSections = [];
 let songSeconds = 0;
@@ -315,8 +319,9 @@ function advance() {
  *     with the settings given, which become the page's, and the latest ask is the one that plays.
  */
 async function playNew(seed, origin, asked = settings, { keepsPlace = false } = {}) {
-    // a new song of Any genre in a preset drawn for it
-    if (seed === null && asked === settings && isAnyGenre) drawAnyGenre();
+    // a new song of Any genre in a preset drawn for it, the page's settings taking it only once the song is on its way,
+    // so that a Stop puts back the genre of the song on the page
+    if (seed === null && asked === settings && isAnyGenre) asked = { ...settings, genre: drawAnyGenre() };
     // the same song asked for again is the one already on its way: asking anew would only cancel it for nothing
     if (arrival !== null && arrival.wanted === wantedOf(seed, asked)) return;
 
@@ -336,6 +341,11 @@ async function playNew(seed, origin, asked = settings, { keepsPlace = false } = 
  */
 function cancelPendingPlay() {
     playRequest++;
+}
+
+/** A request leaving out the stages given, as the listening mode's song without its device asks; as it is for none. */
+function withSkip(request, skip) {
+    return skip.length > 0 ? { ...request, skip } : request;
 }
 
 /** What a new song is asked for with, as the request says it, which tells one ask for the same song from another. */
@@ -410,6 +420,8 @@ function useSoundFont(name, read, origin, isStored = false) {
  */
 async function loadSoundFont(name, read, origin, isStored = false) {
     showSoundFontWork(name, null);
+    // how long it takes to arrive, from its own start, whenever it is chosen
+    const started = performance.now();
 
     let blob;
     let soundFont;
@@ -448,7 +460,7 @@ async function loadSoundFont(name, read, origin, isStored = false) {
 
     // the size and where it came from, never its name: a file of your own is yours, and its name can say
     // more about you than this has any business knowing
-    track("soundfont_ready", { ms: since(), bytes: soundFont.byteLength, detail: origin });
+    track("soundfont_ready", { ms: Math.round(performance.now() - started), bytes: soundFont.byteLength, detail: origin });
 
     deliver();
 }
@@ -513,6 +525,9 @@ async function deliverPending() {
             const loaded = player.nextSong();
             player.loadSong(song);
             applyMuting(player);
+            // and the mix as the page has it now, a change made while the song was on its way, which its file was asked
+            // for without, heard once the song is the player's
+            loaded.then(() => applyMix(player));
             if (swap !== null) {
                 await loaded;
                 player.currentTime = swap.share * player.duration;
@@ -537,8 +552,13 @@ async function deliverPending() {
         return;
     }
 
-    track("audio_ready", { ms: since() });
+    // how long the page waited for its first sound, once a page
+    if (!isAudioReadyTold) track("audio_ready", { ms: since() });
+    isAudioReadyTold = true;
 }
+
+// whether the page has told how long its first sound took
+let isAudioReadyTold = false;
 
 /** How many times a soundfont is asked for before giving up on it. */
 const DOWNLOAD_ATTEMPTS = 4;
@@ -852,9 +872,9 @@ function currentSong() {
     return songSeed === null ? null : songName(songSeed, settings, songGenreKey);
 }
 
-/** The name the song on the page is downloaded under. */
+/** The name the song on the page is downloaded under: its name, as a link names it, its genre's key among it. */
 function fileName() {
-    return `song-${songSeed}${identityOf(settings)}`;
+    return `song-${currentSong()}`;
 }
 
 const BUSY = "The server is busy. Trying again…";
@@ -923,7 +943,9 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
     songsComing++;
     showWork(elements.nowPlaying, "Making the song");
     try {
-        const response = await requestSong({ ...requestFor(seed, settings), ...(skipped.length > 0 ? { skip: skipped } : {}) }, signal);
+        // a new song's stages as asked, a remake's as its song's
+        const skip = isRemade ? songSkipped : skipped;
+        const response = await requestSong(withSkip(requestFor(seed, settings), skip), signal);
         if (!response.ok) {
             if (signal?.aborted) return false;
             setStatus(`Could not generate a song: ${await describeFailure(response)}`, true);
@@ -950,6 +972,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         drumGroupsPresent = made.drumGroups;
         drumPiecesPlayed = made.drumPieces;
         songSeed = response.headers.get("X-Song-Seed") ?? seed;
+        songSkipped = skip;
         // a preset by its id, which a link reads as it is, another genre by the key the server keeps it by
         songGenreKey = presetOf(settings.genre)?.id ?? response.headers.get("X-Genre-Key");
         songVersion = response.headers.get("X-Song-Version");
@@ -1425,7 +1448,7 @@ async function exportMp3() {
     showWork(elements.exportMp3, `Exporting ${name}`);
 
     try {
-        const response = await requestSong(requestFor(songSeed, settings));
+        const response = await requestSong(withSkip(requestFor(songSeed, settings), songSkipped));
         if (!response.ok) throw new Error(await describeFailure(response));
 
         const song = await response.arrayBuffer();
@@ -1685,7 +1708,7 @@ const genreManager = createGenreManager({
     // the editor in place of the window, which closing it leaves for the page
     onNew: () => {
         genreManager.close();
-        genreEditor.open(noGenre(), genreChoices);
+        genreEditor.open(noGenre(), genreChoices, false);
     },
     // a copy in the editor, kept only once it is saved; a preset's without its sentence, which says what the preset sets
     // and would no longer once the copy changes it
@@ -1693,11 +1716,12 @@ const genreManager = createGenreManager({
         const isPreset = PRESETS.includes(genre);
         const copy = { name: freeName(genre.name), ...(genre.description && !isPreset ? { description: genre.description } : {}), choices: structuredClone(genre.choices) };
         genreManager.close();
-        genreEditor.open(copy, genreChoices);
+        genreEditor.open(copy, genreChoices, false);
     },
     onEdit: (genre) => {
         genreManager.close();
-        genreEditor.open(genre, genreChoices);
+        // one's own only where it is, the song's of the same name otherwise
+        genreEditor.open(genre, genreChoices, recallGenres().some((x) => isSameGenre(x, genre)));
     },
     onRemove: (name) => {
         keepGenres(recallGenres().filter((x) => !sameName(x.name, name)));
@@ -1908,9 +1932,7 @@ function useGenre(genre) {
 /** A preset drawn for the next song, of Any genre, other than the song's where there is another. */
 function drawAnyGenre() {
     const others = PRESETS.filter((x) => !isSameGenre(asGenre(x), settings.genre));
-    settings.genre = asGenre(others[Math.floor(Math.random() * others.length)]);
-    keepCurrentSettings();
-    showGenre();
+    return asGenre(others[Math.floor(Math.random() * others.length)]);
 }
 
 /** Every genre the list offers, by its value in it: the presets, then the genres made here, each by name; one's own by its place as kept. */
@@ -1953,8 +1975,7 @@ function chooseGenre(value) {
     if (value === "song") return;
     isAnyGenre = value === "any";
     keepAnyGenre(isAnyGenre);
-    if (isAnyGenre) drawAnyGenre();
-    else settings.genre = value === "none" ? noGenre() : asGenre(listedGenres().find((x) => x.value === value).genre);
+    settings.genre = isAnyGenre ? drawAnyGenre() : value === "none" ? noGenre() : asGenre(listedGenres().find((x) => x.value === value).genre);
     track("genre_chosen", { detail: value.startsWith("preset:") ? value.slice("preset:".length) : value.startsWith("own:") ? "own" : value });
     showGenre();
     settingsChanged(true);
@@ -1969,8 +1990,9 @@ async function listChoices() {
         const options = await response.json();
         tempos = options.tempos;
         lengths = options.lengths;
+        // a piece of a group the page shows no row for left off its chips, the lists after it filled all the same
         for (const piece of options.drumPieces) {
-            groupRows.get(piece.group.toLowerCase()).chips.append(createDrumPieceChip(piece));
+            groupRows.get(piece.group.toLowerCase())?.chips.append(createDrumPieceChip(piece));
             for (const note of piece.notes) drumGroupOfNote.set(note, piece.group.toLowerCase());
         }
         evenDrumGroupRows();
@@ -2101,7 +2123,7 @@ function createPartRow(part) {
     instrument.setAttribute("aria-label", `Instrument of the ${name.toLowerCase()}`);
     if (part === "drum") instrument.append(...DRUM_KITS.map((kit) => createOption(String(kit.instrument), kit.name)));
     else fillInstruments(instrument);
-    instrument.addEventListener("change", () => setPartInstrument(part, { isGiven: true, value: Number(instrument.value) }));
+    instrument.addEventListener("change", () => setPartInstrument(part, { isGiven: true, value: Number(instrument.value) }, true));
 
     const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => setPartVolume(part, step));
     const pan = createFader(`Pan of the ${name.toLowerCase()}, from left to right`, (step) => setPartPan(part, { isGiven: true, value: step }), true);
@@ -2139,9 +2161,10 @@ function setPartGiven(part, isGiven) {
     mix.plays = !isGiven ? "random" : partsInSong[part] === false ? "off" : "on";
     // the song's own volume, the fullest, once it is let go of
     if (!isGiven) setPartVolume(part, LAST_STEP);
-    setPartInstrument(part, { isGiven, value: isGiven ? mix.instrument.value : drawn.instrument });
+    setPartInstrument(part, { isGiven, value: isGiven ? mix.instrument.value : drawn.instrument }, false);
     if (part === "drum") {
-        settings.drumPieces = { isGiven, value: [...drumPiecesPlayed] };
+        // the pieces the song played, none given before a song has played any
+        settings.drumPieces = { isGiven: isGiven && drumPiecesPlayed.length > 0, value: [...drumPiecesPlayed] };
         if (!isGiven) for (const group of DRUM_GROUPS) settings.drumGroups[group].volume = LAST_STEP;
     } else setPartPan(part, { isGiven, value: isGiven ? mix.pan.value : drawn.pan });
     showSettings();
@@ -2408,15 +2431,22 @@ function showSettings() {
  */
 function settingsChanged(isRemade) {
     keepCurrentSettings();
-    rememberSong();
+    // the address once a slider rests, as a browser takes only so many rewrites of it in a while
+    clearTimeout(rememberTimer);
+    rememberTimer = setTimeout(() => rememberSong(), REMEMBER_WAIT);
     if (isRemade) scheduleRegeneration();
     else scheduleDownloadRefresh();
 }
 
-function setPartInstrument(part, instrument) {
+// how long the settings rest, in milliseconds, before the address takes them, and the wait under way
+const REMEMBER_WAIT = 250;
+let rememberTimer = 0;
+
+/** A part's instrument set, a change of it told where somebody made one, not where giving the part set it. */
+function setPartInstrument(part, instrument, isChange) {
     settings.parts[part].instrument = instrument;
     rows.get(part).instrument.value = String(instrument.value);
-    track("mix_changed", { detail: "instrument" });
+    if (isChange) track("mix_changed", { detail: "instrument" });
     settingsChanged(false);
 
     // the page and the download are right whatever the audio does, so the player is told separately
@@ -2539,7 +2569,7 @@ async function refreshDownload() {
     const refresh = new AbortController();
     downloadRefresh = refresh;
     try {
-        const response = await requestSong(requestFor(songSeed, settings), refresh.signal);
+        const response = await requestSong(withSkip(requestFor(songSeed, settings), songSkipped), refresh.signal);
         if (!response.ok) throw new Error(await describeFailure(response));
 
         offerDownload(await response.arrayBuffer());
@@ -2716,7 +2746,8 @@ function startListening() {
             // and played at once, from where to listen, the button pressed the gesture the player waits for
             arrived.then((isThere) => isThere && playOrPause(true));
         },
-        verdict: (seed, choice) => tell("verdict", { seed, version: songVersion, detail: `${question.id}:${choice}` }),
+        // the version of the song heard, or, of one not heard yet, the server's, which makes it
+        verdict: (seed, choice) => tell("verdict", { seed, version: songSeed === seed && songVersion !== null ? songVersion : serverVersion, detail: `${question.id}:${choice}` }),
     });
     document.querySelector("main").prepend(strip);
     return true;
@@ -2826,6 +2857,7 @@ async function showVersion() {
         if (!response.ok) return;
 
         const { version, commit } = await response.json();
+        serverVersion = version;
         elements.version.textContent = commit ? `RMG ${version} (${commit.slice(0, 7)})` : `RMG ${version}`;
         elements.version.hidden = false;
     } catch {

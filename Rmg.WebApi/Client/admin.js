@@ -38,6 +38,9 @@ async function describe() {
     if (settings) query.set("settings", settings);
     if (genre) query.set("genre", genre);
     elements.describe.disabled = true;
+    // the song described before taken away, so that it is never copied for this one
+    elements.description.hidden = true;
+    elements.copy.disabled = true;
     setStatus("Making the song…");
     try {
         const response = await fetch(new URL(`api/songs/describe?${query}`, location.href));
@@ -60,8 +63,9 @@ async function describe() {
 }
 
 elements.describe.addEventListener("click", describe);
+// Enter as the button, and as it, not while a song is being described
 elements.link.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") describe();
+    if (event.key === "Enter" && !elements.describe.disabled) describe();
 });
 
 elements.copy.addEventListener("click", async () => {

@@ -49,6 +49,8 @@ export function createGenreTune() {
     let start = null;
     // a handle being dragged, and its end
     let dragging = null;
+    // how many times the chart was asked for, the latest answer the one drawn
+    let previewsAsked = 0;
     // the choice as the window opened on it, which closing it without Done loses nothing of
     let opened = "";
 
@@ -95,17 +97,19 @@ export function createGenreTune() {
     const main = html("div", { class: "tune-main" }, heading, grid, empty);
     const body = html("div", { class: "tune-body" }, list, main);
 
-    const reset = html("button", { type: "button", text: "Restore defaults", title: "The options and their amounts by default, as with no genre" });
+    const reset = html("button", { type: "button", text: "Restore defaults", title: "The options and their amounts by default, as with no genre, the choice no longer overridden" });
     const finish = html("button", { type: "button", class: "primary", text: "Done" });
     const footer = html("footer", {}, reset, html("span", { class: "tune-gap" }), finish);
     dialog.append(header, body, footer);
 
     override.addEventListener("change", () => (overridden = override.checked));
+    // the songs' own, the choice no longer overridden
     reset.addEventListener("click", () => {
         amounts = start(choice);
         selected = kept()[0]?.name ?? null;
         renderList();
-        edited();
+        overridden = override.checked = false;
+        changed();
     });
     finish.addEventListener("click", () => {
         done?.(overridden ? structuredClone(amounts) : null);
@@ -213,7 +217,8 @@ export function createGenreTune() {
     }
 
     async function askPreview() {
-        const asked = choice;
+        // the latest asked for alone drawn, a slower earlier answer let go of
+        const asked = ++previewsAsked;
         // a pool keeping none is no genre's, and draws nothing
         if (kept().length === 0) return;
         try {
@@ -222,8 +227,10 @@ export function createGenreTune() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ choice: choice.name, options: amounts }),
             });
-            if (!response.ok || asked !== choice) return;
-            preview = await response.json();
+            if (!response.ok || asked !== previewsAsked) return;
+            const answered = await response.json();
+            if (asked !== previewsAsked) return;
+            preview = answered;
             // the charts alone, so that what is pressed or focused meanwhile stays where it is
             renderCharts();
         } catch {
@@ -514,9 +521,12 @@ export function createGenreTune() {
             setEnd(end, endsOf(amounts[name])[end] + by);
             chart.querySelector(`[data-option="${CSS.escape(name)}"][data-end="${end}"]`)?.focus();
         });
+        // a drag's amount before it, so that a click that moves nothing overrides nothing
+        let before = null;
         element.addEventListener("pointerdown", (event) => {
             choose();
             dragging = end;
+            before = JSON.stringify(amounts[name]);
             element.setPointerCapture(event.pointerId);
         });
         element.addEventListener("pointermove", (event) => {
@@ -525,8 +535,11 @@ export function createGenreTune() {
         });
         element.addEventListener("pointerup", () => {
             dragging = null;
-            edited();
+            if (JSON.stringify(amounts[name]) !== before) edited();
         });
+        // a drag the browser broke off, as a touch turned scroll, let go of
+        for (const type of ["pointercancel", "lostpointercapture"])
+            element.addEventListener(type, () => (dragging = null));
         return element;
     }
 
@@ -553,7 +566,7 @@ export function createGenreTune() {
             html("h4", { text: ENDS[end] }),
             html("ul", {}, ...items.map((x) => html("li", { title: optionOf(x.name).label }, html("span", { text: optionOf(x.name).short }), ` ${x.amount}%`))))));
         const said = (end) => told[end].map((x) => `${optionOf(x.name).label} ${x.amount}%`).join(", ");
-        shares.setAttribute("aria-label", `The chance a song draws each: in a middling song ${said(1)}; in the experimental ${said(2)}`);
+        shares.setAttribute("aria-label", `The chance a song draws each: in the plainest song ${said(0)}; in a middling one ${said(1)}; in the experimental ${said(2)}`);
     }
 
     return {

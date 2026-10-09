@@ -64,7 +64,14 @@ fixed; the review and the plan are kept outside the repository):
    compared by hash; a link's genre, a preset's or a kept one's, described with the song; a listening server refusing
    to run without analytics; a question's id kept short enough for its verdicts. Left: analytics written off the
    request (*Open work*).
-9. The page: the genre editor never losing a genre, a mix change during a request, Any genre after a Stop.
+9. Done: the page. The genre editor never losing a genre: one opened is one's own only where it is, a file imported
+   saved beside it, Save as refusing a name it cannot take, the latest graphs drawn; the fine-tune window overriding
+   nothing a click does not change, restoring the songs' own, a drag let go of when the browser breaks it off; Any
+   genre's draw put back by a Stop; a mix changed while a song is on its way heard on it; the listening mode's song
+   without its device leaving its stages out in its remakes, its download and its MP3, a verdict filed under the
+   version heard; a download named as its link; the address rewritten once a slider rests; the dashboard showing the
+   latest range asked for, its minutes rounded whole; the admin page clearing an old description; CSS on touch screens
+   and the narrow layout.
 10. Tests that cannot fail made to fail when their rule breaks.
 11. Duplication removed, the fingerprint kept.
 12. Performance, behind a profile, the fingerprint kept.

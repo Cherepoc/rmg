@@ -45,6 +45,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     // the name of one's own genre the draft is, which Save keeps it in place of and Delete lets go of; none for a draft of
     // none, a preset or a song's
     let origin = null;
+    // how many times the graphs were asked for, the latest answer the one drawn
+    let previewsAsked = 0;
 
     const dialog = document.createElement("dialog");
     dialog.className = "genre-dialog";
@@ -454,7 +456,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         if (read?.genres) {
             told.textContent = `${onKeepAll(read.genres)} kept among yours.`;
             told.hidden = false;
-        } else if (read?.genre) load(read.genre);
+        } else if (read?.genre) {
+            // a genre of its own, which a save keeps beside the one the editor was opened on
+            origin = null;
+            load(read.genre);
+        }
         else showProblem(NOT_A_GENRE);
     });
     const imported = button("Import JSON", "Open a genre saved as a JSON file, or keep every one of a list of them", () => file.click());
@@ -493,7 +499,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         draft.name = asked;
         name.value = asked;
         showProblem();
-        if (isPresetName(asked) || (isOwn(asked) && !confirm(`Replace your genre ${asked}?`))) return;
+        // a name the draft cannot take, too long say, saves nothing
+        if (problemOf(draft) !== null || isPresetName(asked) || (isOwn(asked) && !confirm(`Replace your genre ${asked}?`))) return;
         keep((genre) => onSave(genre, null));
         origin = asked;
         showProblem();
@@ -531,15 +538,18 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     /** What the songs draw of every choice of the draft, the graphs drawn again as it comes; none for a draft that is no genre. */
     async function askPreviews() {
         if (problemOf(draft) !== null) return;
-        const asked = draft;
+        // the latest asked for alone drawn, a slower earlier answer let go of
+        const asked = ++previewsAsked;
         try {
             const response = await fetch(new URL("api/genres/previews", location.href), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(draft.choices),
             });
-            if (!response.ok || asked !== draft) return;
-            previews = await response.json();
+            if (!response.ok || asked !== previewsAsked) return;
+            const answered = await response.json();
+            if (asked !== previewsAsked) return;
+            previews = answered;
         } catch {
             // the graphs as they were
             return;
@@ -584,10 +594,13 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
 
     return {
         element: dialog,
-        /** Opens the editor on a genre, a copy of it the draft, by the choices the server lists; its sections open where it names a choice. */
-        open(genre, choiceList) {
+        /**
+         * Opens the editor on a genre, a copy of it the draft, by the choices the server lists; its sections open where it
+         * names a choice. One of one's own is saved in its place, any other, whatever its name, as a genre of its own.
+         */
+        open(genre, choiceList, isOwnGenre) {
             choices = new Map(choiceList.map((x) => [x.name, x]));
-            origin = isOwn(genre.name) ? genre.name.trim() : null;
+            origin = isOwnGenre ? genre.name.trim() : null;
             told.hidden = true;
             load(genre);
             kept = asKept();
