@@ -867,6 +867,10 @@ internal sealed record GeneratedSection(
                 .Intersect(before);
         // a breakdown's lines and pad out every time
         var resting = drawn.Union(held).Union(Breakdown ? Breakdowns.Resting : []).Except(entering);
+        // a section keeps its harmony, as its rests alone do (Arrangement.DrawRests): the chords playing where the bass is
+        // held back and the rests would leave both out
+        if (resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords) && !Absent.Contains(TrackRole.Chords))
+            resting = resting.Remove(TrackRole.Chords);
         // never silent: the parts held back playing where nothing else would, and every part the song has where its rests
         // alone leave none
         bool Silent() => !Roles.Values.Distinct().Any(x => !resting.Contains(x) && HasNotes(x));

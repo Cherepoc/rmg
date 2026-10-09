@@ -33,7 +33,7 @@ public sealed class InsertionTest
     public async Task AFunkSongsWah_IsOnAGuitarOrAClavinetComping_EveryChannelOfItsPartAssigned()
     {
         var played = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))))
         {
             var messages = GsMessages(song.Rendered);
             if (song.Song.Draws!.Insertion is not { } insertion)
@@ -51,7 +51,9 @@ public sealed class InsertionTest
             await Assert.That(assigned).IsEqualTo(song.Rendered.Tracks.Count(x => x.Role == insertion.Part));
         }
 
-        await Assert.That(played).IsGreaterThan(8);
+        // a quarter of Funk's songs at least, 32 of 128, against the mechanism breaking (measured: 51 at offset 0, 55 at a million)
+        Console.WriteLine($"Funk's wah in {played} of 128 songs");
+        await Assert.That(played).IsGreaterThan(32);
         // and a drawn song in the middle plays none, its type unset and no part assigned
         foreach (var seed in Enumerable.Range(0, 8))
             await Assert.That(GsMessages(TestCorpus.Get(seed).Rendered).Where(x => x is [0x40, 0x03, 0x00, ..] or [0x40, _, 0x22, ..])).IsEmpty();
