@@ -84,7 +84,11 @@ fixed; the review and the plan are kept outside the repository):
     realizing 17%, no single hot spot. A chord's movement measured in loops, a meter's cycle templates and pulses
     kept, a position's section found by halving: 7.4 s to 6.4 s for the 32, the fingerprint kept. Left: the state
     maps every note's state is read from (*Open work*).
-13. Test speed. 14. Page test reliability. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
+13. Done: test speed, 183 s to 165 s for the suite: the intro's genre songs made once for both its rules, a class's
+    genre songs once, the corpus's renderings and trace read once, the songs a test makes twice made side by side, a
+    duplicate test gone, four tests made to check what they say, a free form's kept parts tested. A cache of the
+    songs with values supplied left out, as their thousands would not fit the tests' memory.
+14. Page test reliability. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
 
 **Done before it** (the plan of 8 October 2026 from the review of P3 and P4, each step through the implementation loop,
 each device a genre's data on a mechanism there already where it can be, strong in its genres rather than a few
