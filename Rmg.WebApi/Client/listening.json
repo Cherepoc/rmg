@@ -15,22 +15,29 @@
     "seeds": [
       {
         "seed": "D",
-        "at": 99.8,
+        "at": 97.1,
         "listen": [
           "Riff (Acoustic Guitar (steel))",
           "Riff's twin (Acoustic Guitar (steel))"
         ]
       },
       {
+        "seed": "H",
+        "at": 84.1,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
         "seed": "S",
-        "at": 101.3,
+        "at": 110.6,
         "listen": [
           "Riff (Acoustic Guitar (steel))"
         ]
       },
       {
         "seed": "b",
-        "at": 221.1,
+        "at": 233.2,
         "listen": [
           "Riff (Acoustic Guitar (steel))"
         ]
@@ -47,13 +54,6 @@
         "at": 16.1,
         "listen": [
           "Chords (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "12",
-        "at": 104.4,
-        "listen": [
-          "Riff (Acoustic Guitar (steel))"
         ]
       }
     ]

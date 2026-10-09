@@ -49,7 +49,14 @@ fixed; the review and the plan are kept outside the repository):
    form reusing its sections by the form facet; an odd play of a pattern placing its line; a genre's alone parts kept
    to; a percussion section counting the percussion it draws from; a doubling drum never silent; a solo's register a
    step inside its range; a third-less seventh named 7(no3); a filter's resonance and a sweep's pan restored after.
-7. Stream robustness, with a fingerprint over genre songs.
+7. Done: stream robustness. A chance drawing at an end too; every line's fill, a section's every decision and every
+   pitched track, a pinch and a dive by their note, key changes, octaves and dips by their place, and every appearance
+   by its section and how often it played, each from a stream of its own; a soloist's draws whatever its instrument; a
+   key named apart from a seed (`Seeds.Key`). The fingerprint over songs with values supplied, the deploy's over the
+   page's genres, and a report over every preset's songs (`CorpusFingerprintTest.ReportGenres`). The new songs showed,
+   and the step fixed: a soloing bass's run octaved, the kick's doubles left behind by its push and its polymeter, a
+   ghost counted a downbeat, a line cliché through a chord a later note voices otherwise, marking drums soloing into
+   silence, and a strum's turn rounded the wrong way.
 8. The server's robustness: failing songs logged, malformed requests answered 400, ratings outside the telemetry's cap.
 9. The page: the genre editor never losing a genre, a mix change during a request, Any genre after a Stop.
 10. Tests that cannot fail made to fail when their rule breaks.
