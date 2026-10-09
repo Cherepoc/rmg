@@ -153,80 +153,43 @@ internal sealed class SongTracks
             .Select(x => KeyValuePair.Create(x.Item1, Math.Sign(pans[x.Item1]) is 0 ? 1.0 : Math.Sign(pans[x.Item1]))));
         StateTrace.RecordSong(TracePoints.Panning, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
-        // the riff's state, which its twin shares, so that the two play its notes alike
-        var riffLayer = LayerStates.CreateTrackLayer(
-            riffContext,
+        // a part's own state, how loud it plays and in what rhythm, with whatever more it has
+        StateMap PartLayer(IGenerationContext partContext, TrackRole role, Func<StateMapBuilder, StateMapBuilder>? more = null) => LayerStates.CreateTrackLayer(
+            partContext,
             Layers.Track,
-            new StateMapBuilder("Track role", perTrack: true)
-                .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Riff))
-                .Add(CompositionStateKinds.LineStepwiseness, RiffLayers.Stepwiseness)
-                .Add(CompositionStateKinds.Rhythm.Fullness, RiffLayers.Fullness)
-                .ToStateMap(riffContext),
-            _ => Level(TrackRole.Riff),
-            RhythmLayerOf(TrackRole.Riff)
+            (more ?? (x => x))(new StateMapBuilder("Track role", perTrack: true).Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(role))).ToStateMap(partContext),
+            _ => Level(role),
+            RhythmLayerOf(role)
         );
+
+        // the riff's state, which its twin shares, so that the two play its notes alike
+        var riffLayer = PartLayer(riffContext, TrackRole.Riff, x => x
+            .Add(CompositionStateKinds.LineStepwiseness, RiffLayers.Stepwiseness)
+            .Add(CompositionStateKinds.Rhythm.Fullness, RiffLayers.Fullness));
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
             // the solo part, near the middle as the melody is, on its other side, drawing no pan of its own, so that a song
             // pans as it would; its notes are a solo's alone (Solos)
-            [SoloTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(
-                    soloContext,
-                    Layers.Track,
-                    new StateMapBuilder("Track role", perTrack: true)
-                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Solo))
-                        .ToStateMap(soloContext),
-                    _ => Level(TrackRole.Solo),
-                    RhythmLayerOf(TrackRole.Solo)
-                ),
-                soloInstrument.Program,
-                -1,
-                1,
-                TrackRole.Solo,
-                -pans[MelodyTrack]
-            ),
+            [SoloTrack] = new PitchInstrumentTrack(PartLayer(soloContext, TrackRole.Solo), soloInstrument.Program, -1, 1, TrackRole.Solo, -pans[MelodyTrack]),
             // the twin plays the riff's instrument in the riff's state, its notes the riff's, moved (LineDoubling)
             [RiffTwinTrack] = new PitchInstrumentTrack(riffLayer, riffInstrument.Program, -1, 0, TrackRole.RiffTwin, pans[RiffTwinTrack]),
             [RhythmTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(
-                    rhythmContext,
-                    Layers.Track,
-                    new StateMapBuilder("Track role", perTrack: true)
-                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Rhythm))
-                        // as the chords', its instrument sets how smoothly its chords move, and the song moves it a little
-                        .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => rhythmInstrument.Leading + x))
-                        .Add(CompositionStateKinds.Rhythm.Fullness, RhythmPartFullness)
-                        .ToStateMap(rhythmContext),
-                    _ => Level(TrackRole.Rhythm),
-                    RhythmLayerOf(TrackRole.Rhythm)
-                ),
+                PartLayer(rhythmContext, TrackRole.Rhythm, x => x
+                    // as the chords', its instrument sets how smoothly its chords move, and the song moves it a little
+                    .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(v => rhythmInstrument.Leading + v))
+                    .Add(CompositionStateKinds.Rhythm.Fullness, RhythmPartFullness)),
                 rhythmInstrument.Program,
                 Generators.Int(-1, 1).WithContext(rhythmContext)(),
                 Generators.Int(1, 3).WithContext(rhythmContext)(),
                 TrackRole.Rhythm,
                 pans[RhythmTrack]
             ),
-            [RiffTrack] = new PitchInstrumentTrack(
-                riffLayer,
-                riffInstrument.Program,
-                -1,
-                0,
-                TrackRole.Riff,
-                pans[RiffTrack]
-            ),
+            [RiffTrack] = new PitchInstrumentTrack(riffLayer, riffInstrument.Program, -1, 0, TrackRole.Riff, pans[RiffTrack]),
             [CounterMelodyTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(
-                    counterContext,
-                    Layers.Track,
-                    new StateMapBuilder("Track role", perTrack: true)
-                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.CounterMelody))
-                        .Add(CompositionStateKinds.LineStepwiseness, CounterLayers.Stepwiseness)
-                        .Add(CompositionStateKinds.Rhythm.Period.Power, CounterLayers.SlowerBy)
-                        .Add(CompositionStateKinds.Rhythm.Fullness, CounterLayers.Fullness)
-                        .ToStateMap(counterContext),
-                    _ => Level(TrackRole.CounterMelody),
-                    RhythmLayerOf(TrackRole.CounterMelody)
-                ),
+                PartLayer(counterContext, TrackRole.CounterMelody, x => x
+                    .Add(CompositionStateKinds.LineStepwiseness, CounterLayers.Stepwiseness)
+                    .Add(CompositionStateKinds.Rhythm.Period.Power, CounterLayers.SlowerBy)
+                    .Add(CompositionStateKinds.Rhythm.Fullness, CounterLayers.Fullness)),
                 counterInstrument.Program,
                 -1,
                 0,
@@ -234,16 +197,7 @@ internal sealed class SongTracks
                 pans[CounterMelodyTrack]
             ),
             [PadTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(
-                    padContext,
-                    Layers.Track,
-                    new StateMapBuilder("Track role", perTrack: true)
-                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Pad))
-                        .Add(StateKinds.VoiceLeading, padInstrument.Leading)
-                        .ToStateMap(padContext),
-                    _ => Level(TrackRole.Pad),
-                    RhythmLayerOf(TrackRole.Pad)
-                ),
+                PartLayer(padContext, TrackRole.Pad, x => x.Add(StateKinds.VoiceLeading, padInstrument.Leading)),
                 padInstrument.Program,
                 -1,
                 1,
@@ -251,17 +205,8 @@ internal sealed class SongTracks
                 pans[PadTrack]
             ),
             [ChordsTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(
-                    context,
-                    Layers.Track,
-                    new StateMapBuilder("Track role", perTrack: true)
-                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Chords))
-                        // the chord instrument sets how smoothly the chords move, and the song moves it a little
-                        .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => chordsInstrument.Leading + x))
-                        .ToStateMap(context),
-                    _ => Level(TrackRole.Chords),
-                    RhythmLayerOf(TrackRole.Chords)
-                ),
+                // the chord instrument sets how smoothly the chords move, and the song moves it a little
+                PartLayer(context, TrackRole.Chords, x => x.Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(v => chordsInstrument.Leading + v))),
                 chordsInstrument.Program,
                 minOctaveOffsetGenerator(),
                 maxOctaveOffsetGenerator(),
@@ -269,19 +214,11 @@ internal sealed class SongTracks
                 pans[ChordsTrack]
             ),
             [MelodyTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(
-                    context,
-                    Layers.Track,
-                    new StateMapBuilder("Track role", perTrack: true)
-                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Melody))
-                        // the melody instrument sets how stepwise the melody is, and the song moves it a little
-                        .Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(x => melodyInstrument.Leading + x))
-                        // a melody repeats its cycles more than the other tracks, as riffs
-                        .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)
-                        .ToStateMap(context),
-                    _ => Level(TrackRole.Melody),
-                    RhythmLayerOf(TrackRole.Melody)
-                ),
+                PartLayer(context, TrackRole.Melody, x => x
+                    // the melody instrument sets how stepwise the melody is, and the song moves it a little
+                    .Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(v => melodyInstrument.Leading + v))
+                    // a melody repeats its cycles more than the other tracks, as riffs
+                    .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)),
                 melodyInstrument.Program,
                 minOctaveOffsetGenerator(),
                 maxOctaveOffsetGenerator(),
@@ -289,16 +226,7 @@ internal sealed class SongTracks
                 pans[MelodyTrack]
             ),
             [BassTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(
-                    context,
-                    Layers.Track,
-                    new StateMapBuilder("Track role", perTrack: true)
-                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Bass))
-                        .Add(CompositionStateKinds.LineStepwiseness, BassLeadingLayers.Stepwiseness)
-                        .ToStateMap(context),
-                    _ => Level(TrackRole.Bass),
-                    RhythmLayerOf(TrackRole.Bass)
-                ),
+                PartLayer(context, TrackRole.Bass, x => x.Add(CompositionStateKinds.LineStepwiseness, BassLeadingLayers.Stepwiseness)),
                 bassInstrument.Program,
                 -3,
                 -2,
