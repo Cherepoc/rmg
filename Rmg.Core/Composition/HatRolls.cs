@@ -37,7 +37,7 @@ internal static class HatRolls
         var rolls = new List<(double From, double To, int Rate)>();
         foreach (var (span, index) in song.Form.Map.Sections.Select((x, i) => (x, i)))
         {
-            var context = song.Stream(SongStream.HatRolls, index);
+            var context = song.AppearanceStream(SongStream.HatRolls, index);
             var chance = Chance.At(song.SectionOf(span.SectionId).Facets[Facet.Groove], song.Genre.Chance(GenreChoices.HatRolls, "bars"));
             var bar = span.Meter.BarDuration;
             for (var end = span.Start + bar; end <= span.End + 1e-9; end += bar)

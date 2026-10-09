@@ -83,7 +83,7 @@ internal static class SongStages
         var (form, structure, ids) = (song.Form, song.Structure, song.SectionIds);
         var keyChanges = KeyChange.Generate(
             song.Stream(SongStream.KeyChange),
-            place => song.Stream(SongStream.KeyChange, place),
+            (index, pattern) => song.AppearanceStream(SongStream.KeyChange, index, pattern),
             id => song.Stream(SongStream.SectionKey, id),
             song.Facets[Facet.Scale],
             form.Map,
@@ -93,7 +93,7 @@ internal static class SongStages
             ids.Count - 1 + (song.Repeats ? 1 : 0) - (structure.Roles[ids[^1]] == SectionRole.Outro ? 1 : 0),
             song.Genre
         );
-        var sectionTempos = SectionTempo.Generate(place => song.Stream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre);
+        var sectionTempos = SectionTempo.Generate(place => song.AppearanceStream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre);
         StateTrace.RecordSong(TracePoints.SectionTempo, string.Join(", ", sectionTempos.Select(x => $"{x:F2}")), sectionTempos);
         StateTrace.RecordSong(TracePoints.KeyChange, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
         var (preparedKeys, preparedRoots, chains) = KeyChange.Prepare(
@@ -107,7 +107,7 @@ internal static class SongStages
         var timeline = draft.Timeline.MergeStateTimelineMap(form.SongState)
             .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(preparedKeys, form.Map.Duration))
             .MergeStateTimelineMap(preparedRoots)
-            .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration, place => song.Stream(SongStream.TempoRamps, place)))
+            .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration, place => song.AppearanceStream(SongStream.TempoRamps, place)))
             .MergeStateMap(song.CommonStateMap)
             .MergeStateMap(Groove.ToStateMap(song.Swing, song.GrooveContext));
         return draft with { Timeline = timeline, Chains = chains };
@@ -177,13 +177,13 @@ internal static class SongStages
                 song.Form.Map,
                 song.Solos,
                 song.Soloists.GetValueOrDefault(TrackRole.Drum),
-                index => song.Stream(SongStream.DrumSolo, index),
-                index => song.Stream(SongStream.DrumSoloStacks, index),
-                index => song.Stream(SongStream.DrumSoloFeet, index),
-                index => song.Stream(SongStream.DrumSoloPlayers, index),
-                index => song.Stream(SongStream.DrumSoloOstinato, index),
-                index => song.Stream(SongStream.DrumSoloStickings, index),
-                index => song.Stream(SongStream.DrumSoloMotifs, index),
+                index => song.AppearanceStream(SongStream.DrumSolo, index),
+                index => song.AppearanceStream(SongStream.DrumSoloStacks, index),
+                index => song.AppearanceStream(SongStream.DrumSoloFeet, index),
+                index => song.AppearanceStream(SongStream.DrumSoloPlayers, index),
+                index => song.AppearanceStream(SongStream.DrumSoloOstinato, index),
+                index => song.AppearanceStream(SongStream.DrumSoloStickings, index),
+                index => song.AppearanceStream(SongStream.DrumSoloMotifs, index),
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
                 song.Genre,
                 song.Meter,
@@ -240,8 +240,8 @@ internal static class SongStages
     internal static SongDraft LineChordsStage(SongDecisions song, SongDraft draft)
     {
         var (riff, melody) = (song.Track(TrackRole.Riff), song.Track(TrackRole.Melody));
-        var timeline = LineChords.Apply(draft.Timeline, riff.Key, (PitchInstrumentTrack)riff.Value, song.Form.Map, index => song.Stream(SongStream.LineChords, index), LineChords.Riff);
-        timeline = LineChords.Apply(timeline, melody.Key, (PitchInstrumentTrack)melody.Value, song.Form.Map, index => song.Stream(SongStream.MelodyChords, index), LineChords.Melody);
+        var timeline = LineChords.Apply(draft.Timeline, riff.Key, (PitchInstrumentTrack)riff.Value, song.Form.Map, index => song.AppearanceStream(SongStream.LineChords, index), LineChords.Riff);
+        timeline = LineChords.Apply(timeline, melody.Key, (PitchInstrumentTrack)melody.Value, song.Form.Map, index => song.AppearanceStream(SongStream.MelodyChords, index), LineChords.Melody);
         return draft with { Timeline = timeline };
     }
 
@@ -256,9 +256,9 @@ internal static class SongStages
                 song.Form.Map,
                 song.Soloists,
                 song.Solos,
-                index => song.Stream(SongStream.SoloLines, index),
-                index => song.Stream(SongStream.SoloChords, index),
-                index => song.Stream(SongStream.SoloMotifs, index)
+                index => song.AppearanceStream(SongStream.SoloLines, index),
+                index => song.AppearanceStream(SongStream.SoloChords, index),
+                index => song.AppearanceStream(SongStream.SoloMotifs, index)
             )
         };
 
@@ -282,7 +282,7 @@ internal static class SongStages
                 song.Soloists.GetValueOrDefault(TrackRole.Solo)
                 ?? Soloist.Generate(song.Stream(SongStream.Soloist, (int)TrackRole.Solo), song.Facets[Facet.Melody], song.Facets[Facet.Sound], solo.InstrumentCode),
                 index => song.Sections[index].Facets[Facet.Melody],
-                index => song.Stream(SongStream.SoloAnswers, index),
+                index => song.AppearanceStream(SongStream.SoloAnswers, index),
                 song.Genre
             )
         };

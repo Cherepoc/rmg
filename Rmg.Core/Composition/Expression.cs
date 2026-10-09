@@ -193,6 +193,9 @@ internal static class Expression
     /// </summary>
     public const double PinchChance = 0.18;
 
+    /// <summary>How finely a note's place keys its pinch's and its dive's draws: a 96th of a beat.</summary>
+    private const int NotePlacesPerBeat = 96;
+
     /// <summary>The shortest note a pinch takes, in seconds, long enough to be heard, and the most notes a beat around it.</summary>
     public const double PinchShortest = 0.6, PinchBusiest = 2.5;
 
@@ -668,8 +671,11 @@ internal static class Expression
             // and its detune, either way, every part drawing whatever it plays; a drum's kit and a part holding chords left in tune
             var detuned = tapeStream.TestProbability(DetuneChance) && tape && role is not (TrackRole.Drum or TrackRole.Pad) && !role.PlaysChords();
             var detune = (tapeStream.TestProbability(0.5) ? 1 : -1) * tapeStream.GenerateInt(2, DetuneMost + 1);
-            // and its pinches, from a sequence of its own, one a phrase at most
-            var pinching = pinchStreams(track);
+            // and its pinches and its dive, from a sequence of its own, each note's by its place, so that a note let pass
+            // leaves the others' draws as they were, one a phrase at most
+            var pinchSeed = pinchStreams(track).GenerateSeed();
+            IGenerationContext Pinching(double position, int decision) =>
+                new GenerationContext(Seeds.Derive(Seeds.Derive(pinchSeed, (long)Math.Round(position * NotePlacesPerBeat)), decision));
             var pinchedPhrases = new HashSet<(int, int)>();
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
@@ -787,6 +793,7 @@ internal static class Expression
                         var pinchLean = role is TrackRole.Riff or TrackRole.RiffTwin
                             ? Math.Log(afterChug ? PinchAfterChugOdds : 1) + Math.Log(phraseEnd ? PinchPhraseEndOdds : 1)
                             : isSolo ? intensity.LogOdds : 0;
+                        var pinching = Pinching(note.Position, 0);
                         var pinched = pinching.TestProbability(new Tilt(pinchLean).Chance(PinchChance, 1));
                         var bent = pinching.TestProbability(PinchBendChance);
                         var interval = PinchIntervals[pinching.GenerateInt(0, PinchIntervals.Length)];
@@ -811,7 +818,7 @@ internal static class Expression
                         && note.Position >= span.End - span.Meter.BarDuration - 1e-9 && LongestOfBar(timeline, i, span)
                         && index + 1 < energies.Count && energies[index + 1] > energies[index]
                         && note.Value.Duration >= 1 && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
-                        && state.GetStateValue(CompositionStateKinds.Pinch) == 0 && pinching.TestProbability(DiveChance))
+                        && state.GetStateValue(CompositionStateKinds.Pinch) == 0 && Pinching(note.Position, 1).TestProbability(DiveChance))
                     {
                         state = state.With(CompositionStateKinds.Bend, (int)BendKind.Dive).With(CompositionStateKinds.BendDepth, -DiveDepth)
                             .With(CompositionStateKinds.Vibrato, 0).With(CompositionStateKinds.WideVibrato, 0);

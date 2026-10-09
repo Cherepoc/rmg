@@ -138,11 +138,19 @@ public sealed class ScalesTest
             .Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (From: x.Chords[0], To: x.Change)).ToArray();
 
         var tracks = Render.RenderSong(song).Tracks.Where(x => !x.IsPercussionInstrument).ToArray();
+        // a pinch harmonic, which sounds its string's overtone, the note's octave and fifth, wherever the scale is, as played
+        var swing = Render.GetSwing(song);
+        var pinched = song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Pinch) > 0).Select(x => swing.Apply(x.Position)).ToArray();
 
         await Assert.That(tracks.Sum(x => x.NoteTimeline.Count)).IsGreaterThan(0);
+        // a note struck again while it sounds, judged where it started
+        var realized = song.Notes!.Where(x => song.TrackDefinitions[x.Key] is PitchInstrumentTrack).ToDictionary(x => song.TrackDefinitions[x.Key].Role, x => x.Value);
         foreach (var track in tracks)
-        foreach (var note in track.NoteTimeline)
+        foreach (var rendered in track.NoteTimeline)
         {
+            var note = realized.GetValueOrDefault(track.Role)?.Where(x => x.Value.Pitches.Contains(rendered.Value.Offset)
+                           && swing.Apply(x.Position) < rendered.Position - 1e-3 && swing.Apply(x.Position + x.Value.Duration) > rendered.Position + 1e-3)
+                       .Select(x => (TimelineItem<RenderedNote>?)rendered.Value.ToTimelineItem(swing.Apply(x.Position))).LastOrDefault() ?? rendered;
             // a bass note leading into the next chord by a semitone leaves the scale on purpose: the last before the change,
             // wherever it falls
             var approach = (ChordApproach)approaches.GetEffectiveValueAt(note.Position);
@@ -151,7 +159,7 @@ public sealed class ScalesTest
                 && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9)
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
             var isPedal = track.PitchInstrumentCode == bassProgram && pedals.Any(x => note.Position >= x.From - 0.2 && note.Position < x.To);
-            if (isChromaticApproach || isPedal || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End))
+            if (isChromaticApproach || isPedal || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End) || pinched.Any(x => Math.Abs(x - note.Position) < 1e-3))
                 continue;
 
             var scale = Rmg.Core.Composition.Realizer.AlterScaleSteps(offsets.GetEffectiveValueAt(note.Position), AlteredAt(note.Position));

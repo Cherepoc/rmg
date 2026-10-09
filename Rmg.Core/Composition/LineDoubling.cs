@@ -21,6 +21,9 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal static class LineDoubling
 {
+    /// <summary>Where the octaves' sequences are keyed, by their part, past any pair's.</summary>
+    private const int OctavePlaces = 1000;
+
     /// <summary>
     ///     The steps a twin plays apart from the riff: a third above and a sixth below, the plainest, and a fourth above, a
     ///     fifth below, a second above and a seventh below, the wilder.
@@ -189,8 +192,9 @@ internal static class LineDoubling
                     });
             }
 
-        // and a line in octaves by its own part, each part and section from a sequence of its own, after the pairs'
-        foreach (var (role, place) in OctaveRoles.Select((x, i) => (x, Pairs.Length + i)))
+        // and a line in octaves by its own part, each part and section from a sequence of its own, by the part, apart from
+        // the pairs'
+        foreach (var (role, place) in OctaveRoles.Select(x => (x, OctavePlaces + (int)x)))
         {
             // a riff harmonised by its twin is doubled already, everywhere
             if (!trackOf.TryGetValue(role, out var track) || role == TrackRole.Riff && trackOf.ContainsKey(TrackRole.RiffTwin))

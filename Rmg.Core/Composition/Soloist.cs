@@ -212,7 +212,8 @@ internal sealed record Soloist(
     /// <param name="program">The instrument the soloing part plays, which leans whether it bends.</param>
     public static Soloist Generate(IGenerationContext context, double melody, double sound, int program)
     {
-        var speeds = SpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat).Order();
+        // every draw made in this order, whatever the instrument
+        var speeds = SpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat).ToArray();
         var sizes = Favourites(context, CellSizeOptions, melody);
         var groups = context.TestProbability(GroupingChance.At(melody));
         var shapes = Favourites(context, ShapeOptions, melody);
@@ -223,11 +224,11 @@ internal sealed record Soloist(
         var slideLean = ExpressionLean + ExpressionSpread.At(sound) * Generators.SplineValue()(context);
         var bends = context.TestProbability(Tilt.Of(BendSuitOdds, BendSuit(program)).Chance(BendChance.At(sound), 1));
         var vibrates = context.TestProbability(VibratoChance.At(sound));
-        var fastest = FastestSpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat);
+        var fastest = FastestSpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat).ToArray();
         var stamina = Math.Pow(2, StaminaPowers.At(melody) + StaminaSpread.At(melody) * Generators.SplineValue()(context));
         var phraseBars = Favourites(context, PhraseBarOptions, melody);
-        // drawn last, so that the rest stays as it was
-        var chordRate = InstrumentRoles.PlaysChords(program) ? ChordRates.At(melody) * (0.5 + context.GenerateDouble()) : 0;
+        var chordDraw = context.GenerateDouble();
+        var chordRate = InstrumentRoles.PlaysChords(program) ? ChordRates.At(melody) * (0.5 + chordDraw) : 0;
         var voices = context.Pick(ByConvention.Weigh(VoiceOptions, melody));
         var planes = context.TestProbability(PlaneChance.At(melody));
         var octaves = context.TestProbability(OctaveChance.At(melody));

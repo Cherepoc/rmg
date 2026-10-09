@@ -85,7 +85,7 @@ internal static class Mutations
                                    && !(figures.ContainsKey(FigurePlayer.Backbeat) && snares.Contains(x)) && !(figures.ContainsKey(FigurePlayer.Claves) && x == claves))
             ];
             var groove = section.Facets[Facet.Groove];
-            var context = song.Stream(SongStream.Mutations, index);
+            var context = song.AppearanceStream(SongStream.Mutations, index);
             var chance = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling).Chance(Chance.At(groove, song.Genre.Chance(GenreChoices.Mutation, "bars")), 1);
             var anchored = context.TestProbability(KeepsAnchors.At(groove));
             var barLength = span.Meter.BarDuration;

@@ -64,6 +64,18 @@ internal sealed record SongDecisions(
     /// <summary>A stage's own stream for each pair of places, such as a section and a track.</summary>
     public IGenerationContext Stream(SongStream stream, int place, int other) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(Seed, (int)stream), place), other));
 
+    /// <summary>
+    ///     A stage's own stream for each appearance, by its place among those played (<see cref="Played" />), keyed by its
+    ///     section and how many times the section played before it, so that an appearance added before it leaves it as it was.
+    /// </summary>
+    public IGenerationContext AppearanceStream(SongStream stream, int index) => Stream(stream, AppearanceKey(Played, index));
+
+    /// <summary>A stage's own stream for each appearance (<see cref="AppearanceStream(SongStream, int)" />) and another place in it.</summary>
+    public IGenerationContext AppearanceStream(SongStream stream, int index, int other) => Stream(stream, AppearanceKey(Played, index), other);
+
+    /// <summary>An appearance's key, by its section and how many times the section played before it.</summary>
+    internal static int AppearanceKey(IReadOnlyList<int> played, int index) => Seeds.Key(played[index], played.Take(index).Count(x => x == played[index]));
+
     /// <summary>A facet's value as the rhythm's unconventionality, for a choice that leans by it.</summary>
     public RhythmicUnconventionality Of(Facet facet) => new(Facets[facet]);
 
@@ -308,17 +320,21 @@ internal sealed record SongDecisions(
         // one the soloist's where the song has it
         var drawnSolos = Composition.Solos.WithSoloist(
             Stream(SongStream.SoloistSolo),
-            [..played.Select((id, index) => Composition.Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, structure.Roles[id], generateSection(id).Facets, partsAt[index], genre))],
+            [..played.Select((id, index) => Composition.Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), AppearanceKey(played, index))), index, structure.Roles[id], generateSection(id).Facets, partsAt[index], genre))],
             [..played.Select(id => structure.Roles[id])],
             [..played.Select(id => generateSection(id).Facets[Facet.Melody])],
             [..SongParts.All.Except(absent)]
         );
         // a pitched solo trading with the drums now and then, each from a sequence of its own
-        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTrade(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloTrades), index)), x,
+        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTrade(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloTrades), AppearanceKey(played, index))), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
         // and played by two parts together a third apart now and then, each from a sequence of its own
-        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTwin(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloTwins), index)), x,
+        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTwin(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloTwins), AppearanceKey(played, index))), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
+        // drums that only mark the form neither solo nor trade, as they play no groove to solo from, the appearance played as
+        // it is, or by its pitched soloists alone
+        if (drumJob != DrumJob.Groove)
+            drawnSolos = [..drawnSolos.Select(x => x is { IsDrumSolo: true } ? null : x is { TradesWithDrums: true } ? x with { Soloists = [..x.Soloists.Where(s => s != TrackRole.Drum)] } : x)];
         for (var index = 0; index < played.Length; index++)
         {
             cancellation.ThrowIfCancellationRequested();

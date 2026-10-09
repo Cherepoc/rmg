@@ -41,7 +41,7 @@ public sealed class StrumTest
                 down += strum > 0 ? 1 : 0;
                 // down and up in turn on the strumming grid: a chord a step after another the other way
                 if (previous is { } last && Math.Abs(note.Position - last.Position - grid) < 1e-6)
-                    await Assert.That(strum > 0).IsNotEqualTo(last.Strum > 0);
+                    await Assert.That(strum > 0).IsNotEqualTo(last.Strum > 0).Because($"seed {song.Seed}, {part.Role} at {note.Position} after {last.Position}, grid {grid}");
                 previous = (note.Position, strum);
                 // its strings in order from the stroke's first, the last a whole stroke after it
                 var strings = rendered.Where(x => Math.Abs(x.Position - Swing(song.Song).Apply(note.Position)) < 1e-6 && note.Value.Pitches.Contains(x.Value.Offset))

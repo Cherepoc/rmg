@@ -17,6 +17,9 @@ namespace Rmg.Core.Composition;
 /// <param name="Semitones">The new key, as its step from the song's own, from -5 to 6.</param>
 public sealed record KeyChange(double Position, int Semitones)
 {
+    /// <summary>How finely a key change's place keys its draws: a 96th of a beat.</summary>
+    private const int PlacesPerBeat = 96;
+
     /// <summary>How a key change is led into, where it is: a chain of chords, or a pivot chord both keys share.</summary>
     public enum Device
     {
@@ -84,7 +87,7 @@ public sealed record KeyChange(double Position, int Semitones)
     ];
 
     /// <param name="context">The last section's draws.</param>
-    /// <param name="places">Every other pattern's draws, by its place in the song, each of its own.</param>
+    /// <param name="places">Every other pattern's draws, by its appearance's place among the song's and the pattern's in it, each of its own.</param>
     /// <param name="sections">Every section's draws of its own key, by its id, each of its own.</param>
     /// <param name="unconventionality">The scale facet of the song's unconventionality.</param>
     /// <param name="sectionIds">The song's sections in its order, before any it plays again to fade out.</param>
@@ -93,7 +96,7 @@ public sealed record KeyChange(double Position, int Semitones)
     /// <param name="genre">The genre whose lifts and sections' own keys the song takes, where it names them (<see cref="GenreChoices.KeyChanges" />).</param>
     internal static ImmutableArray<KeyChange> Generate(
         IGenerationContext context,
-        Func<int, IGenerationContext> places,
+        Func<int, int, IGenerationContext> places,
         Func<int, IGenerationContext> sections,
         double unconventionality,
         SongMap map,
@@ -127,7 +130,7 @@ public sealed record KeyChange(double Position, int Semitones)
             if (place == 0) continue;
 
             var isLastSection = index == liftAt && start == section.Start;
-            var drawing = isLastSection ? context : places(place);
+            var drawing = isLastSection ? context : places(index, (int)Math.Round((start - section.Start) / section.Meter.PatternDuration));
             var chance = isLastSection && cameBack ? LastSectionChance.At(unconventionality, lastSection) : ElsewhereChance.At(unconventionality, elsewhere);
             var isChanging = drawing.TestProbability(chance);
             var step = drawing.Pick(ByConvention.Weigh(Steps, unconventionality));
@@ -178,7 +181,7 @@ public sealed record KeyChange(double Position, int Semitones)
     ///     the scale making their quality, a cadence's raised step a minor scale's dominant major.
     /// </summary>
     /// <param name="common">The song's common state, its chords and scales, before any key change.</param>
-    /// <param name="streams">A key change's draws, by its place among the song's.</param>
+    /// <param name="streams">A key change's draws, by where it is, in 96ths of a beat (<see cref="PlacesPerBeat" />).</param>
     /// <returns>The key changes, the chains' among them; the roots' moves, a layer of the common state; and every chain, for the trace.</returns>
     internal static (ImmutableArray<KeyChange> Keys, StateTimelineMap Roots, ImmutableArray<(double Change, ImmutableArray<double> Chords, Device Device)> Chains) Prepare(
         ImmutableArray<KeyChange> changes,
@@ -213,7 +216,8 @@ public sealed record KeyChange(double Position, int Semitones)
         HashSet<int> Scale(double position, int key) => [..Enumerable.Range(0, Scales.StepCount).Select(x => RootPitch(Moved(position), key, x))];
         for (var i = 0; i < changes.Length; i++)
         {
-            var context = streams(i);
+            // each change's from a sequence of its own, by its place, so that a change before it leaves it as it was
+            var context = streams((int)Math.Round(changes[i].Position * PlacesPerBeat));
             var prepares = context.TestProbability(PrepareChance);
             var length = context.Pick(ByConvention.Weigh(ChainLengths, unconventionality));
             var (keyFromNext, rootStep) = context.Pick(ByConvention.Weigh(Links, unconventionality));

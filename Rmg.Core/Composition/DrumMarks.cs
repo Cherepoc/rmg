@@ -105,7 +105,7 @@ internal static class DrumMarks
                 places.TryAdd(map.Ending.Start, 0);
 
             // a section's start and the ending swelling, from a sequence of the section's own, so that the strikes' draws stay
-            var swelling = song.Stream(SongStream.DrumMarks, index);
+            var swelling = song.AppearanceStream(SongStream.DrumMarks, index);
             foreach (var (at, strength) in places)
             {
                 // drawn for every place, so that the draws are as many
