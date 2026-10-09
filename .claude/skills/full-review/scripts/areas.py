@@ -2,8 +2,12 @@
 import os
 
 
-def area(path):
+def area(path, category=None):
     b = os.path.basename(path)
+    if category == 'run':
+        return 'run'
+    if category == 'genre-fit':
+        return 'genre-fit'
     if path.startswith('Rmg.Tests.Page'):
         return 'page-tests'
     if path.startswith('Rmg.Tests'):
@@ -34,6 +38,8 @@ def area(path):
 
 
 TITLES = {
+    'run': 'Test runs on other corpora',
+    'genre-fit': 'Genre fit: devices missing, inherited or mis-set',
     'core-pipeline': 'Core: pipeline, form, sections, stages',
     'core-harmony': 'Core: harmony and realizing',
     'core-lines': 'Core: lines, melody, riff',

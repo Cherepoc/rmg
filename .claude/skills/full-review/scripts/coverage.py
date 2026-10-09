@@ -3,7 +3,7 @@
     python3 coverage.py <review folder>
 
 Prints the slices and angles done and missing, the findings by severity, every file not accounted for or not read in
-full, and invalid JSON. Exits 1 while any slice is missing or any file is not read in full.
+full, every device a device family's reviewer did not account for, and invalid JSON. Exits 1 while any slice is missing or any file is not read in full.
 """
 import collections, json, os, sys
 
@@ -40,6 +40,24 @@ for a in angles:
         severities.update(x.get('severity', '?') for x in d.get('findings', []))
     except Exception as e:
         bad.append((a, str(e)))
+
+# a device family's reviewer accounts for every device of its family, by name, in its coverage
+devices_path = os.path.join(R, 'devices.json')
+if os.path.exists(devices_path):
+    families = json.load(open(devices_path))['families']
+    for family, d in families.items():
+        angle = f'angle-device-{family}'
+        if angle not in angles:
+            missing.append(angle)
+            continue
+        try:
+            covered = json.dumps(json.load(open(os.path.join(findings, angle + '.json'))).get('coverage', [])).lower()
+        except Exception:
+            continue
+        for device in d['choices'] + d['stages']:
+            name = device.split(' (')[0]
+            if name.lower() not in covered:
+                gaps.append((angle, name, 'device not accounted for'))
 
 print(f"slices: {len(done)} of {len(manifest)} done; angles: {len(angles)} done ({', '.join(a[6:] for a in angles)})")
 print(f"findings by severity: {dict(severities)}")

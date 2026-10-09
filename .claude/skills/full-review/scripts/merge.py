@@ -73,6 +73,16 @@ w(f"{files} files ({lines} lines) in {len(manifest)} slices, each read in full b
 w(f"**Totals after merging the duplicates:** {severity.get('high', 0)} high, {severity.get('medium', 0)} medium, "
   f"{severity.get('low', 0)} low ({len(deduped)} in all; {sum(dropped.values())} dropped as rejected or duplicate).\n")
 w('## The summary\n\n_To write: what is in good shape, the high findings and what to fix first, the themes across the areas._\n')
+# a matter of taste is heard, not fixed: each a listening question to ask before any change
+taste = [f for f in deduped if f.get('kind') == 'taste']
+if taste:
+    w(f'## Proposed listening questions ({len(taste)})\n')
+    w('Musical findings of taste, which reading cannot settle: each to be asked on the test instance (`?listen=`) before its change.\n')
+    w('| Where | Question | Without | Finding | Id |')
+    w('|---|---|---|---|---|')
+    for f in taste:
+        listen = f.get('listen') or {}
+        w(f"| `{os.path.basename(f['file'])}:{f.get('line')}` | {cell(listen.get('question'), 200)} | {cell(listen.get('without'), 120)} | {cell(f.get('summary'), 160)} | {f['id']} |")
 w('## The high findings\n')
 for f in (f for f in deduped if f['severity'] == 'high'):
     w(f"### {f['file']}:{f.get('line')} ({f['category']}, {f['verdict']})\n")
@@ -80,7 +90,7 @@ for f in (f for f in deduped if f['severity'] == 'high'):
       f"- **Evidence:** `{cell(f.get('evidence'), 400)}`\n" + (f"- **Verifier:** {cell(f.get('reason'), 600)}\n" if f.get('reason') else ''))
 by_area = collections.defaultdict(list)
 for f in deduped:
-    by_area[area(f['file'])].append(f)
+    by_area[area(f['file'], f.get('category'))].append(f)
 for key in TITLES:
     items = sorted(by_area.get(key, []), key=lambda f: (rank.get(f['severity'], 2), f['file'], f.get('line') or 0))
     if not items:

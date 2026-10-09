@@ -79,14 +79,63 @@ You review one concern across the whole codebase rather than one slice.
    - tests that hold only for the corpus's own songs: a part, a device, an intro or a section kind assumed present, a seed's song named for what it happens to do (`RMG_CORPUS_OFFSET` moves the corpus);
    - calibrations over fewer than 64 songs, or comparing one genre's songs with another's rather than the same songs with a mechanism on and off.
 
-10. **musicality.** The generator as a musician would hear it, genre by genre.
-    - Read `genres.json`'s presets with their descriptions and the devices they switch on.
-    - Read the devices' code enough to know what they do.
-    - Report idiom mistakes (a device a genre would never use, or plays wrongly) and idiom gaps (what a player of the genre would always do and the generator never does). Cover every preset briefly and the defining ones in depth: rock, metal, jazz, funk, electronic and techno, trance, hip hop, reggae, latin and bossa, blues, ambient, orchestral, black metal, djent, IDM, drum and bass.
-    - Each finding is `musicality`, with a concrete suggestion. `file` and `line` point at the preset or the code.
-    - You may not run anything. If a measurement would settle a question, say what report and what number would settle it.
+10. **musicality** is followed by genre, by the genre-fit reviewers below, and by device, by the device families'.
 
 11. **bars.** Every place that turns a position into a bar, a beat, a group, a phrase or a pattern, or takes the bar before a line: `BarDuration`, `PhraseDuration`, `PatternDuration`, `PhraseBars`, `NearestGroupStart`, `BeatInBar`, `PatternBarAt`, `MeterAt`, `Math.Floor(position / ...)`.
     - Is the position counted from its section's start (or its pattern's), not the song's, in the section's own meter? A section starts wherever the sections before it end, a whole number of its bars from nowhere in particular.
     - Does it hold for a phrase of three or of six bars, a pattern of several phrases, a meter of odd groups, and a short last bar (`SectionSpan.Cut`), whose bar before the next section is shorter than the section's bar?
     - Does a loop over a section's bars reach its last, partial one, and keep its edits inside it?
+
+## The device families
+
+A reviewer per family of musical devices, from `devices/<family>.txt` (written by `scripts/devices.py`): every genre
+choice and every stage of the family. The id is `device-<family>`. For every device of the list:
+
+- **End to end.** Its decision (where it is drawn, from which stream, leaned by which facet and genre choice), the stage
+  or generator code that plays it, what the render does with it, its genre data (the presets that name it, the songs'
+  own amounts), its tests (a rule that it plays where it should and never at the plain end where it must not, a report
+  of how often it plays), and its roadmap and listening entry. A device whose decision, stage or tests are missing, or
+  that plays where its own doc says it does not, is a finding.
+- **Against the others.** The family's devices in pairs, and each against the devices of other families that edit the
+  same notes or the same bars (stop time, drops, solos, textures, polymeters, figures, short bars, doubling, late
+  entries): does each keep out of the other where it should, and is what they make together intended? Most of the
+  bugs a second corpus found were two devices meeting: a push moving a polymeter's cycle, a doubling silencing its
+  part where a texture rested the doubled one, a drop landing on a section that builds.
+- **As it sounds.** What the device does to the music, whether a player would do it so, and where its amounts would
+  sound wrong. A finding of taste is `kind: "taste"` with a proposed listening question (see the primer's output).
+- **Coverage.** List every device of the family in `coverage`, `file` the device's main file and `note` its name and
+  what was checked; the coverage check fails a device not named there.
+
+## The genre-fit families
+
+A reviewer per family of genres, the id `genre-<family>`, its genres given in the task:
+
+| Family | Genres |
+|---|---|
+| heavy | rock, punk, metal, nuMetal, djent, blackMetal |
+| groove | jazz, blues, funk, soul, fusion, disco |
+| dance | electronic, techno, trance, dnb, trap, idm |
+| beat | hipHop, synthwave, chiptune, pop, reggae, ska |
+| folk | latin, bossa, country, folk, medieval |
+| score | orchestral, ambient, dungeon |
+
+Read `run/every-chance.txt` (every chances option's three ends by preset, `*` marking the songs' own amounts a preset
+inherits), `run/genre-devices.txt` (how often each preset plays each device, measured) and `Client/genres.json`'s
+presets with their descriptions. For every genre of the family:
+
+- **Inherited where it does not belong.** A device the genre plays by the songs' own amounts (`*`) that its style
+  would not play: a short bar in a genre built on square sections, a solo in a genre without soloists. The fix is the
+  option named at 0, the choice's other options named at the songs' own amounts so that they keep playing.
+- **Missing.** A device the engine has that the genre's players use, which the preset leaves at the songs' own amounts
+  or at 0: ghost notes for a genre whose drummers play them, a riff intro for one that opens on its riff. Only devices
+  the engine has; a device it does not have is an idiom gap for the roadmap, said as such.
+- **Mis-set.** Amounts against the genre: a plain end playing what a plain song of the genre never does, a wild end
+  losing the genre (`EveryPreset_ChoicesByEnd`, `GenreDevicesReportTest`), an amount the measured share shows far from
+  the style, a pool whose weights contradict the description.
+- **Against the description.** What the preset's description says against what its choices do.
+- Each finding is `category: "genre-fit"`, `file` `Rmg.WebApi/Client/genres.json` and `line` the preset's line, with the
+  change to the JSON as the suggestion. A change of amounts is a matter of taste unless the description or the
+  style's plain convention settles it: `kind: "taste"` with a listening question, or `"mistake"`.
+- No more than the strongest five findings a genre, so that the list stays one a person acts on. Name no artists or
+  bands; describe the sound.
+- List every genre of the family in `coverage` with what was checked.

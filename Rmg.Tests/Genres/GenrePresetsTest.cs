@@ -300,6 +300,28 @@ public sealed class GenrePresetsReportTest
     }
 
     /// <summary>
+    ///     Every chances choice's every option, by preset: its chance at the plain end, the middle and the wild end, the
+    ///     preset's where it names the choice (0 for an option it leaves out of a choice it names), and the songs' own,
+    ///     marked *, where it does not; so that a device a genre plays by the songs' own, or misses, shows.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_EveryChance()
+    {
+        static string Ends(Rmg.Core.Probabilities.ByConvention x) => $"{x.Plain:0.##}/{x.Tuned:0.##}/{x.Wild:0.##}";
+        foreach (var choice in GenreChoices.All.Where(x => x.Kind == GenreChoiceKind.Chances))
+        foreach (var option in choice.Options)
+        {
+            var row = GenrePresets.All.Select(preset => GenrePresets.Genre(preset).Chance(choice, option.Name) is { } named
+                ? $"{preset.Id} {Ends(named)}"
+                : $"{preset.Id} *{Ends(option.Own)}");
+            Console.WriteLine($"{choice.Name}.{option.Name} (songs' {Ends(option.Own)}): {string.Join("; ", row)}");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
     ///     Every preset's songs at the plainest, a middling and the wildest base: how many parts they have, how many in
     ///     4/4, swung, and in the commonest scale, against none, so that a genre's wild end is seen to stray from it.
     /// </summary>

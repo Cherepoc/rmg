@@ -11,6 +11,10 @@ Read `primer.md` and `decided.md` (same folder) and `/home/glyge/Projects/sw/rmg
 For each finding in your input file:
 
 1. Open the cited file and line, and the surrounding code and callers needed to judge it. Check whether the evidence is quoted correctly and whether the failure scenario can actually happen. Trace the callers and the data: is the "empty list" ever empty, is the "wrong order" ever reached?
+   - A `run` finding is a test failing on other songs: trace its cause by reading, a generator bug, a test assuming what
+     those songs break, or a calibration over too few songs, and say which in the reason; you cannot run it.
+   - A `taste` finding cannot be confirmed by reading: `plausible` where the musical claim is grounded in the code and
+     the style, `rejected` where it is not; check its `listen` could be asked.
 2. Give a verdict:
    - `confirmed`: you traced it and it is real, with the scenario reachable.
    - `plausible`: likely real, but you could not prove reachability without running code.

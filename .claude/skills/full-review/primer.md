@@ -60,6 +60,7 @@ Doc comments are dense English prose describing the music. The style is delibera
 5. **Musicality:** a rule that would make something sound wrong, or what a real player or producer would do differently. Be concrete.
 6. **Dead code and stale docs:** unused members, parameters always passed the same value, comments that no longer describe the code.
 7. **Tests** (when your slice is tests):
+   - A test that holds only for the corpus's own songs (see *Tests* above).
    - Rules asserted as rules, calibrations bounded widely.
    - A test that can pass vacuously, for example a loop over zero items followed by no count assert.
    - Assertions on description strings.
@@ -102,12 +103,20 @@ Write one JSON file, the path given in your task, with this shape:
       "evidence": "<the code quoted, a few lines>",
       "scenario": "<concrete inputs or state, and the wrong outcome>",
       "suggestion": "<the fix, briefly>",
-      "confidence": "certain|likely|possible"
+      "confidence": "certain|likely|possible",
+      "kind": "mistake|taste",
+      "listen": {"question": "<what a listener is asked>", "genre": "<a preset id, or none>", "without": "<the patch or stage left out that makes the song without>"}
     }
   ],
   "elsewhere": [{"file": "...", "line": 0, "summary": "..."}],
   "slice_notes": "<two or three sentences on the slice as a whole: its design, what is good, what is weak>"
 }
 ```
+
+`kind` and `listen` go on `musicality` and `genre-fit` findings alone. A **mistake** is wrong by a rule the code or the
+music states: notes against the chord, a device playing where its doc says it does not, a plain end playing a wild
+thing. A **taste** is a judgement of how it sounds, which no reviewer can hear: it is fixed only after a listener
+hears it, so give it a `listen` the page's listening mode could ask (a genre where the device plays, the question, and
+what the song without it leaves out).
 
 Validate that the file is valid JSON. Your final message is one line: the path written, and the counts of findings by severity.
