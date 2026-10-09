@@ -66,7 +66,7 @@ internal static class SoloAnswers
             var band = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
             if (solos.ContainsKey(index) || !counterRests || melody.Length == 0)
                 continue;
-            StateTrace.Record(TracePoints.SoloAnswers, soloTrack, span.SectionId, 0, StateMap.Default, 0, $"{answering}", (index, answering));
+            StateTrace.RecordSection(TracePoints.SoloAnswers, soloTrack, span.SectionId, $"{answering}", (index, answering));
             if (!answering)
                 continue;
 

@@ -73,8 +73,8 @@ internal sealed class SectionDrumGenerator
         // the drums: the kit's or, now and then, the percussion's alone, by the roles they play, as the song drew them
         // (DrawDrums)
         var (isPercussionOnly, kit, _) = planned;
-        StateTrace.Record(TracePoints.PercussionOnly, SectionGenerator.SectionTrace, sectionId, 0, StateMap.Default, 0, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
-        StateTrace.Record(TracePoints.Kit, SectionGenerator.SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Drums.Select(x => x.Name)), kit);
+        StateTrace.RecordSection(TracePoints.PercussionOnly, SectionGenerator.SectionTrace, sectionId, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
+        StateTrace.RecordSection(TracePoints.Kit, SectionGenerator.SectionTrace, sectionId, string.Join(", ", kit.Drums.Select(x => x.Name)), kit);
         // a drum that doubles a lead plays its lead's beats up to the rank its role doubles, all of them, a share, or a
         // figure of its own on the lead's feel, as it is bound to it, drawn from a sequence of its own, leaning to its own
         // figure the less conventional the section
@@ -87,7 +87,7 @@ internal sealed class SectionDrumGenerator
                 bindingContext.Pick(ByConvention.Weigh(x.Key.Bindings.Select(b => (b.Value, RhythmicUnconventionality.WeightEnds(b.Weight, b.Value == DrumBinding.Figure ? 1 : 0))), rhythm.Value))
             )
         );
-        StateTrace.Record(TracePoints.Doubles, SectionGenerator.SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Doubles.Select(x => $"{x.Key.Name} on {x.Value.Name}")), doubles);
+        StateTrace.RecordSection(TracePoints.Doubles, SectionGenerator.SectionTrace, sectionId, string.Join(", ", kit.Doubles.Select(x => $"{x.Key.Name} on {x.Value.Name}")), doubles);
         // a drum that does not lead plays on its lead's feel: one bound to it always, one that colours the section on the
         // lead of its main role's by a chance, drawn from a sequence of its own, crossing it the less conventional the section
         var feelContext = _stream(sectionId, SectionStream.DrumFeels);
@@ -101,7 +101,7 @@ internal sealed class SectionDrumGenerator
                 feelLeads[track] = DrumGroups.GetTrackNumber(lead);
         }
 
-        StateTrace.Record(TracePoints.FeelLeads, SectionGenerator.SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", feelLeads.Select(x => $"{DrumGroups.GetDrum(x.Key).Name} on {DrumGroups.GetDrum(x.Value).Name}")), feelLeads.ToImmutable());
+        StateTrace.RecordSection(TracePoints.FeelLeads, SectionGenerator.SectionTrace, sectionId, string.Join(", ", feelLeads.Select(x => $"{DrumGroups.GetDrum(x.Key).Name} on {DrumGroups.GetDrum(x.Value).Name}")), feelLeads.ToImmutable());
         return (sectionRoles, kit, isPercussionOnly, doubles, feelLeads.ToImmutable());
     }
 
@@ -115,7 +115,7 @@ internal sealed class SectionDrumGenerator
         foreach (var track in activeDrumTrackNumbers.Order().Where(x => DrumGroups.GetDrum(x).HasStrokes))
             if (DrumStrokes.DrawChange(strokeContext, DrumGroups.GetDrum(track), SongStroke(track), DrumStrokes.SectionChangeChance, rhythm.Value, tilt, DrumSounds.OddsOf(_genre)) is { } change)
                 sectionStrokes[track] = change;
-        StateTrace.Record(TracePoints.DrumStrokes, SectionGenerator.SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", sectionStrokes), sectionStrokes.ToImmutable());
+        StateTrace.RecordSection(TracePoints.DrumStrokes, SectionGenerator.SectionTrace, sectionId, string.Join(", ", sectionStrokes), sectionStrokes.ToImmutable());
         var barDrums = DrumPresence.Draw(
             _stream(sectionId, SectionStream.DrumPresence),
             activeDrumTrackNumbers,
@@ -126,7 +126,7 @@ internal sealed class SectionDrumGenerator
             tilt,
             DrumSounds.OddsOf(_genre)
         );
-        StateTrace.Record(TracePoints.DrumPresence, SectionGenerator.SectionTrace, sectionId, 0, StateMap.Default, 0, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
+        StateTrace.RecordSection(TracePoints.DrumPresence, SectionGenerator.SectionTrace, sectionId, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
         return (sectionStrokes.ToImmutable(), barDrums);
     }
 

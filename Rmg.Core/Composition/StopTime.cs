@@ -62,7 +62,7 @@ internal static class StopTime
         foreach (var id in song.SectionIds.Distinct())
         {
             var stops = song.Form.Map.Sections.Any(x => x.SectionId == id && phrases.Any(p => Math.Abs(p.Start - x.Start) < 1e-9));
-            StateTrace.Record(TracePoints.StopTime, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{stops}", stops);
+            StateTrace.RecordSection(TracePoints.StopTime, SectionGenerator.SectionTrace, id, $"{stops}", stops);
         }
 
         if (phrases.Length == 0)

@@ -134,6 +134,10 @@ public sealed class StateTrace : IDisposable
     /// <summary>Records a decision of the whole song, such as its form or its effects, on <see cref="SongTrack" />.</summary>
     internal static void RecordSong(string point, string description, object? value) => Record(point, SongTrack, 0, 0, StateMap.Default, 0, description, value);
 
+    /// <summary>Records a section's decision, or one at a part's place in it, on a track, at no bar or state of its own.</summary>
+    internal static void RecordSection(string point, int track, int section, string description, object? value) =>
+        Record(point, track, section, 0, StateMap.Default, 0, description, value);
+
     internal static void Record(
         string point,
         int track,

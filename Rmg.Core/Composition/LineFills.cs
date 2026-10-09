@@ -70,7 +70,7 @@ internal static class LineFills
             var walk = Walk(scale, start, target, positions.Length);
             var walked = positions.Zip(walk, (position, pitch) => Place(events[before].Value, position, pitch)).ToArray();
             walkedInto.Add(run.Line);
-            StateTrace.Record(TracePoints.LineFill, lineTrack, 0, 0, StateMap.Default, 0, $"{positions.Length} notes into {run.Line}", (run.Line, positions));
+            StateTrace.RecordSection(TracePoints.LineFill, lineTrack, 0, $"{positions.Length} notes into {run.Line}", (run.Line, positions));
             // a note held into the rest let go where the walk starts, a line singing one note at a time
             var held = events[before].Value.GetStateValue(StateKinds.HeldDuration);
             if (held > from - events[before].Position)

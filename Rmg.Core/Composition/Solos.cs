@@ -255,7 +255,7 @@ internal static class Solos
             var context = streams(index);
             bool IsIn(TimelineItem<StateMap> note) => note.Position >= span.Start - 1e-9 && note.Position < span.End - 1e-9;
             var melody = song.TrackTimelineMap[trackOf[TrackRole.Melody]].EventTimeline.Where(IsIn).ToArray();
-            StateTrace.Record(TracePoints.SoloLine, trackOf[TrackRole.Melody], span.SectionId, 0, StateMap.Default, 0, $"{melody.Length} notes", (index, melody.Length));
+            StateTrace.RecordSection(TracePoints.SoloLine, trackOf[TrackRole.Melody], span.SectionId, $"{melody.Length} notes", (index, melody.Length));
             // a melody with no notes there leaves nothing to solo on, and the parts play as they would
             if (melody.Length == 0)
                 continue;
@@ -269,7 +269,7 @@ internal static class Solos
             var first = trackOf[solo.Soloists[0]];
             var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
             var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, soloists[solo.Soloists[0]], solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
-            StateTrace.Record(TracePoints.SoloGestures, first, span.SectionId, 0, StateMap.Default, 0, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
+            StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
 
             // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart
             var band = song.TrackTimelineMap

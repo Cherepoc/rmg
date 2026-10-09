@@ -265,7 +265,7 @@ internal static class DrumSolos
             // a trade whose drums' turns fall in the bar the fill plays alone leaves them none
             if (played.Length == 0)
                 continue;
-            StateTrace.Record(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId, 0, StateMap.Default, 0,
+            StateTrace.RecordSection(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId,
                 $"{played.Length} segments, {soloists.Count} soloists {mode}{(feetTracks.Count > 0 ? ", the feet keeping time" : "")}",
                 new DrumSolo(index, played, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered));
 

@@ -129,7 +129,7 @@ internal static class Figures
         foreach (var (id, figures) in drawn)
         {
             var played = figures.Where(x => x.Value is not null).ToImmutableDictionary(x => x.Key, x => x.Value!.Name);
-            StateTrace.Record(TracePoints.Figures, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
+            StateTrace.RecordSection(TracePoints.Figures, SectionGenerator.SectionTrace, id, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
         }
 
         draft = draft with { Figures = drawn.ToImmutableDictionary(x => x.Key, x => x.Value.Where(f => f.Value is not null).ToImmutableDictionary(f => f.Key, f => f.Value!.Name)) };

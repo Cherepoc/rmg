@@ -271,7 +271,7 @@ internal sealed class SongFormGenerator
             }
         }
 
-        StateTrace.Record(TracePoints.SongIntro, FillGenerator.DrumsTrace, sectionIds[0], 0, StateMap.Default, 0, introDescription);
+        StateTrace.RecordSection(TracePoints.SongIntro, FillGenerator.DrumsTrace, sectionIds[0], introDescription, null);
 
         var description = $"{plan.Ending} ending";
         if (FormLayers.HasFinalChord(plan.Ending))
@@ -313,7 +313,7 @@ internal sealed class SongFormGenerator
             description += $", fading from beat {fadeStart} to {end}";
         }
 
-        StateTrace.Record(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
+        StateTrace.RecordSection(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], description, null);
         // a lift the drums announce built to and dropped at, now and then, a genre's: the band out for the bar before it, the
         // lines that walk into the section with it, but for the drums' fill into it, and the drums landing on it
         var drop = FormLayers.Drop.At(_songRhythm.Value, _genre.Chance(GenreChoices.Drop, "lifts"));
@@ -366,7 +366,7 @@ internal sealed class SongFormGenerator
             drops.Add(line.Position);
             if (kind == DropKind.Filtered)
                 filtered.Add(line.Position);
-            StateTrace.Record(kind == DropKind.Silent ? TracePoints.Drop : TracePoints.FilteredDrop, FillGenerator.DrumsTrace, line.Next.SectionId, 0, StateMap.Default, 0,
+            StateTrace.RecordSection(kind == DropKind.Silent ? TracePoints.Drop : TracePoints.FilteredDrop, FillGenerator.DrumsTrace, line.Next.SectionId,
                 $"into {line.Position}", line.Position);
         }
 

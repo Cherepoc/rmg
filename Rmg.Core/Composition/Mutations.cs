@@ -110,7 +110,7 @@ internal static class Mutations
                 }
             }
 
-            StateTrace.Record(TracePoints.Mutations, FillGenerator.DrumsTrace, span.SectionId, 0, StateMap.Default, 0, $"{made} edits", (index, made));
+            StateTrace.RecordSection(TracePoints.Mutations, FillGenerator.DrumsTrace, span.SectionId, $"{made} edits", (index, made));
         }
 
         if (!any)

@@ -140,7 +140,7 @@ internal static class LineDoubling
                 if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && riffPowerChords(index))
                     continue;
 
-                StateTrace.Record(TracePoints.LineDoubling, targetTrack, span.SectionId, 0, StateMap.Default, 0, $"{source} {step}", (index, source, target, step));
+                StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));
                 doubling.Add((sourceTrack, index));
                 doubling.Add((targetTrack, index));
                 // where the doubling part plays in the section, from its first note to its last, so that it joins no earlier
@@ -181,7 +181,7 @@ internal static class LineDoubling
                     if (In(bassTrack, start, end).Length > 0 || In(riffTrack, start, end) is not { Length: > 0 } riff)
                         continue;
 
-                    StateTrace.Record(TracePoints.RiffBass, bassTrack, span.SectionId, 0, StateMap.Default, 0, $"{start}", (index, start));
+                    StateTrace.RecordSection(TracePoints.RiffBass, bassTrack, span.SectionId, $"{start}", (index, start));
                     filled.AddRange(riff.Select(x => x.Value.With(StateKinds.Alteration, 0).With(CompositionStateKinds.SoundsAs, 0).ToTimelineItem(x.Position)));
                 }
 
@@ -208,7 +208,7 @@ internal static class LineDoubling
                 if (doubling.Contains((track, index)) || !Plays())
                     continue;
 
-                StateTrace.Record(TracePoints.Octave, track, span.SectionId, 0, StateMap.Default, 0, $"{role} {inOctaves} {energies[index]:F2}", (index, role, energies[index], inOctaves));
+                StateTrace.RecordSection(TracePoints.Octave, track, span.SectionId, $"{role} {inOctaves} {energies[index]:F2}", (index, role, energies[index], inOctaves));
                 if (!inOctaves)
                     continue;
 

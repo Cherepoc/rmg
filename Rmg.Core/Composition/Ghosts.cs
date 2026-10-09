@@ -41,7 +41,7 @@ internal static class Ghosts
             var context = song.Stream(SongStream.Ghosts, id);
             var ghosts = context.TestProbability(Chance.At(section.Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Ghosts, "sections")));
             var draws = Enumerable.Range(0, (int)Math.Round(song.SectionMeters[id].BarDuration / Length)).Select(_ => context.GenerateDouble()).ToArray();
-            StateTrace.Record(TracePoints.Ghosts, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{ghosts}", ghosts);
+            StateTrace.RecordSection(TracePoints.Ghosts, SectionGenerator.SectionTrace, id, $"{ghosts}", ghosts);
             return ghosts ? draws : null;
         });
         if (snares.Length == 0 || ghosting.Values.All(x => x is null))

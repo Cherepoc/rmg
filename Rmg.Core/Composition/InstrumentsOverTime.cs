@@ -172,7 +172,7 @@ internal static class InstrumentsOverTime
                 var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => x.Note.Position >= span.Start - 1e-9 && x.Note.Position < span.End - 1e-9).ToArray();
                 var accent = inSpan.Length == 0 ? double.MaxValue : inSpan.Select(x => x.Note.Value.Velocity).OrderDescending().ElementAt((int)(inSpan.Length * AccentShare));
                 if (switches || mode != ArticulationMode.None && !variants.IsEmpty)
-                    StateTrace.Record(TracePoints.InstrumentOverTime, track, span.SectionId, 0, StateMap.Default, 0, $"{program} {mode} {variant}", (index, pitched.Role, program, variants.IsEmpty ? ArticulationMode.None : mode, variant));
+                    StateTrace.RecordSection(TracePoints.InstrumentOverTime, track, span.SectionId, $"{program} {mode} {variant}", (index, pitched.Role, program, variants.IsEmpty ? ArticulationMode.None : mode, variant));
                 foreach (var (note, i) in inSpan)
                 {
                     var bar = Math.Min(bars.Length - 1, (int)Math.Floor((note.Position - span.Start) / span.Meter.BarDuration + 1e-9));

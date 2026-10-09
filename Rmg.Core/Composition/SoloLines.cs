@@ -313,7 +313,7 @@ internal static class SoloLines
 
                     // a run, too fast to play in octaves, alone
                     line.AddRange(positions.Select((position, i) => Place(position, pitches[i], level, accented: accents[i], stacked: stacks && accents[i], octave: gesture == SoloGesture.Lick)));
-                    StateTrace.Record(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, 0, StateMap.Default, 0, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
+                    StateTrace.RecordSection(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
                     if (pitches.Length > 0)
                         current = pitches[^1];
                     break;

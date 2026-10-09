@@ -137,9 +137,9 @@ internal sealed class SectionGenerator
         var meter = plan.Meter;
         // how far the section strays from convention, facet by facet, each from a sequence of its own
         var facets = Facets(sectionId);
-        StateTrace.Record(TracePoints.SectionUnconventionality, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", facets.Facets.OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Value:F2}")), facets);
+        StateTrace.RecordSection(TracePoints.SectionUnconventionality, SectionTrace, sectionId, string.Join(" ", facets.Facets.OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Value:F2}")), facets);
         var unconventionality = new HarmonicUnconventionality(facets[Facet.Chords], _genre);
-        StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2}", unconventionality);
+        StateTrace.RecordSection(TracePoints.SectionHarmony, SectionTrace, sectionId, $"{unconventionality.Chords:F2}", unconventionality);
         // the section's rhythm strays as its groove does
         var rhythm = new RhythmicUnconventionality(facets[Facet.Groove]) { GrooveHold = RhythmicUnconventionality.HoldOf(_genre) };
         var chords = LayerStates.CreateChordPool(unconventionality)(Stream(sectionId, SectionStream.ChordPool));
@@ -152,7 +152,7 @@ internal sealed class SectionGenerator
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
         var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel], _genre);
         if (feelChange is { } feelOfSection)
-            StateTrace.Record(TracePoints.Feel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{feelOfSection}", feelOfSection);
+            StateTrace.RecordSection(TracePoints.Feel, SectionTrace, sectionId, $"{feelOfSection}", feelOfSection);
         var sectionStateMap = CreateSectionStateMap(
             songStateMap,
             new StateMapBuilder(Layers.Section)
@@ -183,11 +183,11 @@ internal sealed class SectionGenerator
         );
         var barStateTimelineMap = _generators(meter).Bars.Generate(Stream(sectionId, SectionStream.BarStates), scale, progression, harmonicRhythm, home, chordScales, shifts, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
-        StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
+        StateTrace.RecordSection(TracePoints.MelodyContour, SectionTrace, sectionId, string.Join(", ", contour), contour);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
         var scheme = PhraseSchemes.Pick(Stream(sectionId, SectionStream.PhraseScheme), facets[Facet.Form], _genre);
-        StateTrace.Record(TracePoints.PhraseScheme, SectionTrace, sectionId, 0, StateMap.Default, 0, scheme.ToString(), scheme);
+        StateTrace.RecordSection(TracePoints.PhraseScheme, SectionTrace, sectionId, scheme.ToString(), scheme);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(Stream(sectionId, SectionStream.MelodyBusyness), tilt), tilt, facets);
 
         var (sectionStrokes, barDrums) = _drums.DrawDrumBars(sectionId, activeDrumTrackNumbers, kit, scheme, rhythm, tilt);
@@ -195,13 +195,13 @@ internal sealed class SectionGenerator
         // a heavy band's breakdown now and then, a genre's, from a sequence of its own
         var breakdown = Breakdowns.MayBreakDown(plan.Role, plan.KeepsSongScale)
                         && Stream(sectionId, SectionStream.Breakdown).TestProbability(Breakdowns.Chance.At(facets[Facet.Form], _genre.Chance(GenreChoices.Breakdown, "sections")));
-        StateTrace.Record(TracePoints.Breakdown, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{breakdown}", breakdown);
+        StateTrace.RecordSection(TracePoints.Breakdown, SectionTrace, sectionId, $"{breakdown}", breakdown);
         // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its
         // own, drawn in a breakdown too, which plays in half time
         var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt, sectionRhythm.Facets[Facet.Groove], _genre);
         if (breakdown)
             timeFeel = 1;
-        StateTrace.Record(TracePoints.TimeFeel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{timeFeel}", timeFeel);
+        StateTrace.RecordSection(TracePoints.TimeFeel, SectionTrace, sectionId, $"{timeFeel}", timeFeel);
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
         var drums = _drums.GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads, sectionRoles, sectionStrokes, barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
         var (powerChords, chugs, octaveBass, hooks) = DrawDevices(sectionId, plan.Role, facets);
@@ -210,16 +210,16 @@ internal sealed class SectionGenerator
         // its bass alternating the root and the fifth, a genre's, from a sequence of its own
         var alternatingBass = Stream(sectionId, SectionStream.AlternatingBass)
             .TestProbability(AlternatingBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.AlternatingBass, "sections")));
-        StateTrace.Record(TracePoints.AlternatingBass, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{alternatingBass}", alternatingBass);
+        StateTrace.RecordSection(TracePoints.AlternatingBass, SectionTrace, sectionId, $"{alternatingBass}", alternatingBass);
         // its riff's weak notes on an open string's drone now and then, as a chugging riff's are, without its chugs, a
         // genre's, from a sequence of its own
         var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone")));
-        StateTrace.Record(TracePoints.Drone, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{drone}", drone);
+        StateTrace.RecordSection(TracePoints.Drone, SectionTrace, sectionId, $"{drone}", drone);
         var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs || drone).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
-        StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
+        StateTrace.RecordSection(TracePoints.SectionLength, SectionTrace, sectionId, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap, meter).Repeat(plays);
         // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
         // it has; a later appearance draws them again (Appear)
@@ -281,7 +281,7 @@ internal sealed class SectionGenerator
         var turnaround = Stream(sectionId, SectionStream.Turnaround).TestProbability(Progressions.Turnaround.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Turnaround, "sections")));
         if (turnaround)
             progression = Progressions.TurnAround(progression, harmonicRhythm.Changes.Count(x => x >= meter.PatternDuration - meter.BarDuration - 1e-9));
-        StateTrace.Record(TracePoints.Turnaround, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{turnaround}", turnaround);
+        StateTrace.RecordSection(TracePoints.Turnaround, SectionTrace, sectionId, $"{turnaround}", turnaround);
         // the cadence raising the seventh for a major chord on the fifth, where the scale allows it, by the progression
         // facet, from a sequence of its own
         var raisable = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
@@ -322,7 +322,7 @@ internal sealed class SectionGenerator
         var planed = Planing.Draw(planingContext, progression.Length, plan.HasTonicHome);
         if (planes)
             (progression, chordScales, shifts) = ([..progression.Select(_ => 0)], [..chordScales.Select(_ => ChordScale.Section)], planed);
-        StateTrace.Record(TracePoints.Planing, SectionTrace, sectionId, 0, StateMap.Default, 0, planes ? string.Join(" ", planed) : "none", planes ? planed : null);
+        StateTrace.RecordSection(TracePoints.Planing, SectionTrace, sectionId, planes ? string.Join(" ", planed) : "none", planes ? planed : null);
         // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
         // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
         var loops = Stream(sectionId, SectionStream.Loop).TestProbability(Loop.At(facets[Facet.Form], _genre.Chance(GenreChoices.Loop, "sections")));
@@ -332,11 +332,11 @@ internal sealed class SectionGenerator
         else if (loops && (_firstHarmony ?? throw new InvalidOperationException("A section loops before the song's first is made.")).Meter.Equals(meter))
             harmony = _firstHarmony.Value.Harmony;
         (scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep) = harmony;
-        StateTrace.Record(TracePoints.SectionScale, SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name, scale);
-        StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
-        StateTrace.Record(TracePoints.Progression, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", progression), progression);
-        StateTrace.Record(TracePoints.CadenceRaise, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
-        StateTrace.Record(TracePoints.ChordScales, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", chordScales.Select(x => x.Kind)), chordScales);
+        StateTrace.RecordSection(TracePoints.SectionScale, SectionTrace, sectionId, scale.Name, scale);
+        StateTrace.RecordSection(TracePoints.HarmonicRhythm, SectionTrace, sectionId, $"{harmonicRhythm.Span}", harmonicRhythm);
+        StateTrace.RecordSection(TracePoints.Progression, SectionTrace, sectionId, string.Join(" ", progression), progression);
+        StateTrace.RecordSection(TracePoints.CadenceRaise, SectionTrace, sectionId, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
+        StateTrace.RecordSection(TracePoints.ChordScales, SectionTrace, sectionId, string.Join(" ", chordScales.Select(x => x.Kind)), chordScales);
         return harmony;
     }
 
@@ -348,17 +348,17 @@ internal sealed class SectionGenerator
     {
         // its riff in power chords, a genre's, which the songs never play, from a sequence of its own
         var powerChords = Stream(sectionId, SectionStream.PowerChords).TestProbability(PowerChordChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "powerChords")));
-        StateTrace.Record(TracePoints.RiffPowerChords, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{powerChords}", powerChords);
+        StateTrace.RecordSection(TracePoints.RiffPowerChords, SectionTrace, sectionId, $"{powerChords}", powerChords);
         // its guitars' and its picked bass's repeats palm-muted, a genre's, which the songs never play, from a sequence of its own
         var chugs = Stream(sectionId, SectionStream.Chugs).TestProbability(ChugChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "chugs")));
-        StateTrace.Record(TracePoints.Chugs, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{chugs}", chugs);
+        StateTrace.RecordSection(TracePoints.Chugs, SectionTrace, sectionId, $"{chugs}", chugs);
         // the bass in octaves now and then, a genre's the more, from a sequence of its own
         var octaveBass = Stream(sectionId, SectionStream.OctaveBass).TestProbability(OctaveBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.OctaveBass, "sections")));
-        StateTrace.Record(TracePoints.OctaveBass, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{octaveBass}", octaveBass);
+        StateTrace.RecordSection(TracePoints.OctaveBass, SectionTrace, sectionId, $"{octaveBass}", octaveBass);
         // its melody on a hook now and then, a chorus by its role or any section by a genre's, from a sequence of its own
         var hooks = Stream(sectionId, SectionStream.Hook).TestProbability(MelodyLayers.HookChanceOf(role)
             .At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, role == Composition.SectionRole.Chorus ? "choruses" : "sections")));
-        StateTrace.Record(TracePoints.MelodyHook, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{hooks}", hooks);
+        StateTrace.RecordSection(TracePoints.MelodyHook, SectionTrace, sectionId, $"{hooks}", hooks);
         return (powerChords, chugs, octaveBass, hooks);
     }
 
@@ -576,7 +576,7 @@ internal sealed class SectionGenerator
             // leading into the chord changes within a phrase as often as the section has it
             var leadingContext = Stream(sectionId, SectionStream.MelodyLeading);
             var leading = Math.Clamp(MelodyLayers.Leading + Generators.SplineValue()(leadingContext) * MelodyLayers.LeadingSpread, 0, 1);
-            StateTrace.Record(TracePoints.MelodyLeading, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{leading:F2}", leading);
+            StateTrace.RecordSection(TracePoints.MelodyLeading, SectionTrace, sectionId, $"{leading:F2}", leading);
             // how freely the melody changes register where a phrase starts: the line's, as the song and the section move it
             var freedomContext = Stream(sectionId, SectionStream.RegisterFreedom);
             var freedom = Math.Clamp(
@@ -584,7 +584,7 @@ internal sealed class SectionGenerator
                 0,
                 1
             );
-            StateTrace.Record(TracePoints.LineRegisterFreedom, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{freedom:F2}", freedom);
+            StateTrace.RecordSection(TracePoints.LineRegisterFreedom, SectionTrace, sectionId, $"{freedom:F2}", freedom);
             // a later appearance builds its bars afresh where its rhythm is improvised, as recorded the first time
             var melody = new SectionLine(
                 trackNumber,
@@ -603,7 +603,7 @@ internal sealed class SectionGenerator
                 StreamSeed(sectionId, SectionStream.MelodyImprovisation),
                 hooks
             );
-            StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
+            StateTrace.RecordSection(TracePoints.MelodyAnswer, SectionTrace, sectionId, $"{amount:F2}", amount);
             yield return (trackNumber, bars with { Timeline = melody.Appear(0, 0).Trim(meter.PatternDuration) }, melody);
         }
     }
@@ -631,7 +631,7 @@ internal sealed class SectionGenerator
         {
             var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Melody ? SectionStream.LineScale : SectionStream.RiffLineScale;
             var lineScale = LineScales.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Scale], _genre, _tracks.Definitions[trackNumber].Role == TrackRole.Riff);
-            StateTrace.Record(TracePoints.LineScale, trackNumber, sectionId, 0, StateMap.Default, 0, $"{lineScale}", lineScale);
+            StateTrace.RecordSection(TracePoints.LineScale, trackNumber, sectionId, $"{lineScale}", lineScale);
             sectionTrackLayer.Add(CompositionStateKinds.LineScale, (int)lineScale);
             // a riff that chugs or drones on a pedal, a chugging one's power chords by its notes (Chugs); one that does not in
             // power chords throughout
@@ -660,7 +660,7 @@ internal sealed class SectionGenerator
         {
             var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Chords ? SectionStream.Arpeggio : SectionStream.RhythmArpeggio;
             var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre);
-            StateTrace.Record(TracePoints.Arpeggio, trackNumber, sectionId, 0, StateMap.Default, 0, $"{arpeggio}", arpeggio);
+            StateTrace.RecordSection(TracePoints.Arpeggio, trackNumber, sectionId, $"{arpeggio}", arpeggio);
             sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
             // and the colour it lays on its broken chord, from a sequence of its own
             var colour = Arpeggios.DrawColour(new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Colour), trackNumber)), sectionRhythm.Facets[Facet.Chords], _genre);

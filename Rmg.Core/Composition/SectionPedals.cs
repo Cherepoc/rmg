@@ -24,7 +24,7 @@ internal static class SectionPedals
             var context = song.Stream(SongStream.SectionPedal, id);
             var pedals = context.TestProbability(Chance.At(song.SectionOf(id).Facets[Facet.Progression], song.Genre.Chance(GenreChoices.HarmonyDevices, "pedal")));
             var root = context.Pick(Roots);
-            StateTrace.Record(TracePoints.SectionPedal, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, pedals ? $"{root}" : "none", pedals ? root : null);
+            StateTrace.RecordSection(TracePoints.SectionPedal, SectionGenerator.SectionTrace, id, pedals ? $"{root}" : "none", pedals ? root : null);
             return pedals ? root : (int?)null;
         });
         var sections = song.Form.Map.Sections.Where(x => pedalling[x.SectionId] is not null)

@@ -28,7 +28,7 @@ internal static class LiftCues
     {
         foreach (var line in lines.Where(x => x.Ending != x.Next && (x.Next.Energy - x.Ending.Energy) * x.Ending.Rhythm.Coupling > Threshold))
         {
-            StateTrace.Record(TracePoints.LiftCue, FillGenerator.DrumsTrace, line.Next.SectionId, 0, StateMap.Default, 0, $"into {line.Position}", line.Position);
+            StateTrace.RecordSection(TracePoints.LiftCue, FillGenerator.DrumsTrace, line.Next.SectionId, $"into {line.Position}", line.Position);
             song = song.MapTrackEvents(Cues.Select(x => (Track: DrumGroups.GetTrackNumber(x.Drum), x.Drum, x.Sound, x.Beats)).Where(x => song.TrackTimelineMap.ContainsKey(x.Track)).ToDictionary(
                 x => x.Track,
                 x => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>

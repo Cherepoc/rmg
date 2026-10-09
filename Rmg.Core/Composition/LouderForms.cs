@@ -67,7 +67,7 @@ internal static class LouderForms
             {
                 if (program is not { } played || spans.Length == 0)
                     continue;
-                StateTrace.Record(trace, track, 0, 0, StateMap.Default, 0, $"{played}", played);
+                StateTrace.RecordSection(trace, track, 0, $"{played}", played);
                 result[track] = EventTimeline.Create(result[track].Duration, result[track].Select(x =>
                     x.Value.State.GetStateValue(CompositionStateKinds.Program) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0
                     && spans.Any(s => x.Position >= s.Start - 1e-9 && x.Position < s.End - 1e-9)

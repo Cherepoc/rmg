@@ -287,7 +287,7 @@ internal sealed record SongDecisions(
         generateSection(sectionIds[0]);
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), songUnconventionality[Facet.Melody]);
-        StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);
+        StateTrace.RecordSection(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, $"{improvisation:F2}", improvisation);
         // a song that fades out plays its last section once more, over which it fades, twice where it plays its pattern
         // only once, so that the fade takes eight bars at least
         var fading = Fading(plan.Ending, generateSection(sectionIds[^1]).Plays);
@@ -360,11 +360,11 @@ internal sealed record SongDecisions(
             if (solo is not null)
             {
                 solos[index] = solo;
-                StateTrace.Record(TracePoints.Solo, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{string.Join(", ", solo.Soloists)} {solo.Mode}", (index, solo));
+                StateTrace.RecordSection(TracePoints.Solo, SectionGenerator.SectionTrace, id, $"{string.Join(", ", solo.Soloists)} {solo.Mode}", (index, solo));
             }
             restedBefore[id] = section.Resting;
-            StateTrace.Record(TracePoints.Arrangement, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", section.Resting.Order()), section.Resting);
-            StateTrace.Record(TracePoints.Texture, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{section.TextureKind}", (index, section.TextureKind, section.PhraseSilent));
+            StateTrace.RecordSection(TracePoints.Arrangement, SectionGenerator.SectionTrace, id, string.Join(", ", section.Resting.Order()), section.Resting);
+            StateTrace.RecordSection(TracePoints.Texture, SectionGenerator.SectionTrace, id, $"{section.TextureKind}", (index, section.TextureKind, section.PhraseSilent));
             sections.Add(section);
         }
 

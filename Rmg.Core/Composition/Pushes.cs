@@ -27,7 +27,7 @@ internal static class Pushes
         {
             var section = song.SectionOf(id);
             var pushes = song.Stream(SongStream.Pushes, id).TestProbability(Chance.At(section.Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Push, "sections")));
-            StateTrace.Record(TracePoints.Push, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{pushes}", pushes);
+            StateTrace.RecordSection(TracePoints.Push, SectionGenerator.SectionTrace, id, $"{pushes}", pushes);
             return pushes;
         });
         // but in a solo, and in stop time and out of it, whose hits stay on the bar
