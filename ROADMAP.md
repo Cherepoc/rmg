@@ -167,7 +167,7 @@ several pitches and an ornament already, as the render plays both for any track;
 within a bar; and swing already pairs by each section's meter. In order of what each gives for its cost:
 
 1. Done: a riser's own channel, the render's, its part's track carrying it and its mix over it, the page's too; a
-   riser into every drop, a filtered one's as well, its part playing on under it (`?listen=riser`).
+   riser into every drop, a filtered one's as well, its part playing on under it (`riser` heard and kept, 10 October 2026).
 2. Put off after its review in the loop: the bar patterns' finest note by the tempo. A shortest note in seconds that
    keeps 16ths at the fastest tempos lets 32nds through at the slow ones, and every pattern whose rank bounces off the
    limit now (`ResolvedRhythm.Of`) would change, so it cannot be one rule with the fills' without a genre's lever; the
@@ -176,7 +176,7 @@ within a bar; and swing already pairs by each section's meter. In order of what 
    its hat rolls and ratchets in 32nds already. Taken up with *Rolls splintering into 32nds* (*Black metal and IDM*).
 3. Done: flams and drags, the snare's ornaments, its grace strokes before its note on its sound (`DrumOrnaments`), a
    flam on a fill's 8ths and a drag into a backbeat, the song's by its fills and groove facets and a genre's
-   (`rudiments`), none in the machines' genres (`?listen=rudiments`). Two toms at once put off: a drum note plays one
+   (`rudiments`), none in the machines' genres (`rudiments` heard and kept, 10 October 2026). Two toms at once put off: a drum note plays one
    sound by its articulation (`StateKinds.ArticulationIndex`), so two would want a list of them, an engine's change
    for an accent no listening asks for; with the drum solos' idioms, should their tom cascades want it.
 4. Done: a phrase's length the meter's (`Meter.PhraseBars`), every phrase line through the meter, the fingerprint kept.
@@ -184,14 +184,14 @@ within a bar; and swing already pairs by each section's meter. In order of what 
    pattern of one phrase: a scheme of four fitted to them, three leaving out its second bar and four and two playing its
    last two again, its cadence's chords with them, which go back to their preparation before they arrive; a span that
    fits no phrase not drawn, a chord a bar where none of a genre's does; the loops' genres in fours, Orchestral's four
-   and two 14% of its sections (`?listen=phrase-length`). Left: the genres' section lengths named in bars of four
+   and two 14% of its sections (`phrase-length` heard and kept, 10 October 2026). Left: the genres' section lengths named in bars of four
    (`bars16`) play their patterns as often whatever their phrase, so a section of "16 bars" in threes has 12; and an
    intro's window of four bars, which a first section in threes does not end a phrase with.
 6. Done: a short bar before a section (`ShortBars`), a section's last bar cut to its first half of groups wherever it
    plays but at the song's end and under an intro's entries, by the form facet and a genre's `sectionChanges`
    "shortBar", Djent's the most, 6% of the drawn songs' sections at the middle and 19% at the wild end; the map's meter
    at a position the short bar's (`SongMap.MeterAt`), so that a fill, a drop's silence, a riser and a tempo's easing
-   take the bar before a section as it is, a held note cut to it, the file signing it (`?listen=short-bar`). With it, a
+   take the bar before a section as it is, a held note cut to it, the file signing it (`short-bar` heard and kept, 10 October 2026, off in the loops' genres). With it, a
    trading turn half a pattern in whole bars, a pattern of three trading bar by bar, and a solo's phrase kept within its
    turn.
 7. **Feels mixed within a bar,** let go of after review: a bar's change of feel taking effect from one of its groups
@@ -236,9 +236,10 @@ device where it is heard the most, by how much its song with the device and with
 its song without lays its patch over the genre's options, the others kept (`withoutDevice`). Asked again since:
 `tape`, whose song without had lost every other effect of its genre's, and `stop-time`; asked anew, `inversion`, the
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
-`lift-cues`, under 0.1. Asked anew: `riser`, Techno's reverse cymbal into every drop, the filtered ones too, on a
-channel of its own, under 0.01 as a short device is; `rudiments`, Jazz's flams and drags, 0.02; `phrase-length`,
-Orchestral's phrases of four and two and of three, 1.41; `short-bar`, Djent's sections ending on a bar cut short, 1.22.
+`lift-cues`, under 0.1. Answered on 10 October 2026, and kept: `riser`, Techno's reverse cymbal into every drop, the filtered ones too, on a
+channel of its own; `rudiments`, Jazz's flams and drags; `phrase-length`, Orchestral's phrases of four and two and of
+three; and `short-bar`, Djent's sections ending on a bar cut short, which the loops' genres play none of now (Trance,
+Drum and bass, Trap, Disco, Funk, Ambient and Chiptune beside the five that named none), their sections square.
 
 Answered on 9 October 2026, late, and kept: `own-modes`, Fusion's planed chords in modes of their own; and `mediant`,
 Orchestral's iii or vi turned major.

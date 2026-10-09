@@ -61,20 +61,7 @@ public sealed class ListeningQuestionsTest
         new("quieter-form", "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
             "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?
-                .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min()),
-        new("riser", "Techno's reverse cymbal swelling into a drop, the band muffled under it or silent: a build, or noise over the band?",
-            "The riser's loudness against the band, and whether it rises over a filtered drop.", "techno", ["Risers"], null,
-            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.FilteredDrop).Select(t => (double?)t.Value).Min(), 2)),
-        new("rudiments", "Jazz's snare dragging into its backbeat and flamming in its fills, soft strokes just before a note: a drummer's touch, or a stumble?",
-            "The flams' and drags' chances by genre, and their strokes' loudness.", "jazz", ["Drum ornaments"], null,
-            x => x.Song.Notes!.Where(n => x.IsDrum(n.Key)).SelectMany(n => n.Value).Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Ornament) is { IsDefaultOrEmpty: false })
-                .Select(n => (double?)n.Position).Min() is { } at ? Before(x, at, 2) : null),
-        new("phrase-length", "Orchestral's phrases of four bars and two, the cadence's bars played again before it arrives, and now and then of three: a phrase drawn out, or a bar too many?",
-            "The phrase lengths' weights by genre, and whether three bars are kept.", "orchestral", [], new() { ["phraseBars"] = new() { ["threeBars"] = 0, ["sixBars"] = 0 } },
-            x => Before(x, x.Map.Sections.Where(s => s.Meter.PhraseBars != Meter.DefaultPhraseBars).Select(s => (double?)s.Start).Min(), 1)),
-        new("short-bar", "Djent's section ending on a bar cut short, its first half, before the next comes in early: a jolt, or a stumble?",
-            "The short bar's chance by genre.", "djent", [], new() { ["sectionChanges"] = new() { ["shortBar"] = 0 } },
-            x => Before(x, x.Map.Sections.Where(s => s.Cut > 0).Select(s => (double?)s.LastBar).Min(), 2))
+                .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min())
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
