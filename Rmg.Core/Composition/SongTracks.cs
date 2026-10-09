@@ -27,7 +27,7 @@ internal sealed class SongTracks
     private SongTracks(
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
         ImmutableArray<PercussionInstrumentDefinition> songDrums,
-        ImmutableArray<TrackGroup> groups,
+        StateMap drumStateMap,
         double bassLeading,
         DrumSetup drumSetup
     )
@@ -35,9 +35,8 @@ internal sealed class SongTracks
         Definitions = definitions;
         SongDrums = songDrums;
         DrumSetup = drumSetup;
-        Groups = groups;
+        DrumStateMap = drumStateMap;
         BassLeading = bassLeading;
-        NonGroupedTrackNumbers = [..definitions.Keys.Except(groups.SelectMany(x => x.TrackNumbers))];
     }
 
     public ImmutableSortedDictionary<int, IInstrumentTrack> Definitions { get; }
@@ -48,11 +47,8 @@ internal sealed class SongTracks
     /// <summary>The drums the song has; a section plays some of them.</summary>
     public ImmutableArray<PercussionInstrumentDefinition> SongDrums { get; }
 
-    /// <summary>The tracks that share their rhythm, which are the drums.</summary>
-    public ImmutableArray<TrackGroup> Groups { get; }
-
-    /// <summary>The pitched tracks, which make their patterns each on its own.</summary>
-    public ImmutableSortedSet<int> NonGroupedTrackNumbers { get; }
+    /// <summary>The state the song's drums share, their rhythm's and their level's.</summary>
+    public StateMap DrumStateMap { get; }
 
     /// <summary>How much the bass leads into the chords in the song, before a section moves it.</summary>
     public double BassLeading { get; }
@@ -293,21 +289,9 @@ internal sealed class SongTracks
         (definitions[MelodyTrack], definitions[ChordsTrack]) = Registers.Apart((PitchInstrumentTrack)definitions[MelodyTrack], (PitchInstrumentTrack)definitions[ChordsTrack]);
 
         // the drums share the rhythm-related state
-        ImmutableArray<TrackGroup> groups =
-        [
-            new(
-                [..songDrums.Select(DrumGroups.GetTrackNumber)],
-                LayerStates.CreateTrackLayer(
-                    context,
-                    Layers.DrumGroup,
-                    StateMap.Default,
-                    _ => Level(TrackRole.Drum),
-                    rhythmicUnconventionality.Lean(RhythmLayers.DrumGroup)
-                )
-            )
-        ];
+        var drumsShared = LayerStates.CreateTrackLayer(context, Layers.DrumGroup, StateMap.Default, _ => Level(TrackRole.Drum), rhythmicUnconventionality.Lean(RhythmLayers.DrumGroup));
 
-        return new SongTracks(definitions.ToImmutableSortedDictionary(), songDrums, groups, bassLeading, drumSetup);
+        return new SongTracks(definitions.ToImmutableSortedDictionary(), songDrums, drumsShared, bassLeading, drumSetup);
     }
 
     /// <summary>

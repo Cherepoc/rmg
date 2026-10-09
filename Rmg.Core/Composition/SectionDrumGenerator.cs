@@ -194,51 +194,49 @@ internal sealed class SectionDrumGenerator
         Meter meter
     )
     {
-        foreach (var group in _tracks.Groups)
-        {
-            // the section's time, as a step of every drum's period: half time twice as long, double time half
-            var groupStateMap = new StateMapBuilder(Layers.SectionDrumGroup, perTrack: true)
-                .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
-                .AddNoteWalkLayer()
-                .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
-                .AddNoteDurationLayer()
-                .ToStateMap(context)
-                .MergeWith(new StateMapBuilder("Section time").Add(CompositionStateKinds.Rhythm.Period.Power, timeFeel).ToStateMap(context))
-                .MergeWith(group.StateMap)
-                .MergeWith(sectionStateMap);
-            var trackStateMaps = new Dictionary<int, StateMap>();
-            foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
-                trackStateMaps[trackNumber] = _trackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy, SectionRole(sectionRoles, trackNumber))
-                    .MergeWith(groupStateMap)
-                    .MergeWith(sectionRoles[trackNumber])
-                    .MergeWith(sectionStrokes.TryGetValue(trackNumber, out var stroke) ? DrumStrokes.At(StateDepths.Section, stroke) : StateMap.Default);
+        // the section's time, as a step of every drum's period: half time twice as long, double time half
+        var groupStateMap = new StateMapBuilder(Layers.SectionDrumGroup, perTrack: true)
+            .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
+            .AddNoteWalkLayer()
+            .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
+            .AddNoteDurationLayer()
+            .ToStateMap(context)
+            .MergeWith(new StateMapBuilder("Section time").Add(CompositionStateKinds.Rhythm.Period.Power, timeFeel).ToStateMap(context))
+            .MergeWith(_tracks.DrumStateMap)
+            .MergeWith(sectionStateMap);
+        var songDrums = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order().ToArray();
+        var trackStateMaps = new Dictionary<int, StateMap>();
+        foreach (var trackNumber in songDrums.Where(activeDrumTrackNumbers.Contains))
+            trackStateMaps[trackNumber] = _trackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy, SectionRole(sectionRoles, trackNumber))
+                .MergeWith(groupStateMap)
+                .MergeWith(sectionRoles[trackNumber])
+                .MergeWith(sectionStrokes.TryGetValue(trackNumber, out var stroke) ? DrumStrokes.At(StateDepths.Section, stroke) : StateMap.Default);
 
-            // a drum out of the groove still has the state the drums share, with no notes, so that a note added
-            // later, such as in a fill, plays as loud as the section, and its own rhythm's state, which a fill plays it by
-            var idleStateMap = groupStateMap.OfScope(StateScope.Render);
-            var idleTrackNumbers = group.TrackNumbers.Where(x => !trackStateMaps.ContainsKey(x)).ToArray();
-            yield return new GeneratedBars(TrackEventStateTimelineMap.Create(
-                meter.PatternDuration,
-                idleTrackNumbers.Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
-                        x,
-                        EventTimeline.Create<StateMap>(meter.PatternDuration).ToEventStateTimelineMap(idleStateMap)
-                    )
-                ),
-                StateTimelineMap.Create(meter.PatternDuration)
-            ), [
-                ..idleTrackNumbers.Select(x => new BarFeel(
-                        x,
-                        meter.PatternBarCount - 1,
-                        SongTracks.GetGenerationStateMap(_tracks.Definitions[x]).MergeWith(groupStateMap).MergeWith(sectionRoles[x]),
-                        0
-                    )
+        // a drum out of the groove still has the state the drums share, with no notes, so that a note added later, such as
+        // in a fill, plays as loud as the section, and its own rhythm's state, which a fill plays it by
+        var idleStateMap = groupStateMap.OfScope(StateScope.Render);
+        var idleTrackNumbers = songDrums.Where(x => !trackStateMaps.ContainsKey(x)).ToArray();
+        yield return new GeneratedBars(TrackEventStateTimelineMap.Create(
+            meter.PatternDuration,
+            idleTrackNumbers.Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
+                    x,
+                    EventTimeline.Create<StateMap>(meter.PatternDuration).ToEventStateTimelineMap(idleStateMap)
                 )
-            ]);
+            ),
+            StateTimelineMap.Create(meter.PatternDuration)
+        ), [
+            ..idleTrackNumbers.Select(x => new BarFeel(
+                    x,
+                    meter.PatternBarCount - 1,
+                    SongTracks.GetGenerationStateMap(_tracks.Definitions[x]).MergeWith(groupStateMap).MergeWith(sectionRoles[x]),
+                    0
+                )
+            )
+        ]);
 
-            if (trackStateMaps.Count == 0)
-                continue;
+        if (trackStateMaps.Count == 0)
+            yield break;
 
-            yield return _patterns(meter).GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, null);
-        }
+        yield return _patterns(meter).GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, null);
     }
 }

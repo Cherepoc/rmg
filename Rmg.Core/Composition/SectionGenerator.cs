@@ -486,7 +486,7 @@ internal sealed class SectionGenerator
         bool pedal
     )
     {
-        foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
+        foreach (var trackNumber in _tracks.Definitions.Where(x => x.Value is PitchInstrumentTrack).Select(x => x.Key))
         {
             // a riff's twin has no notes of its own, but the riff's, moved, once the song is put together (LineDoubling), and
             // the solo part none but a solo's (Solos), and they draw nothing
