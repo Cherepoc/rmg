@@ -278,7 +278,13 @@ public sealed class GenrePresetsReportTest
         void Print(string name, Genre genre)
         {
             Console.WriteLine($"== {name}");
-            var ends = new[] { 0.0, 0.5, 1.0 }.Select(@base => TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Base: @base, Genre: genre)))).ToArray();
+            // a song that fails to be made reported, its seed and base named, the others measured
+            CorpusSong[] Made(double @base) => [..TestCorpus.InParallel(Enumerable.Range(0, Count), seed =>
+            {
+                try { return TestCorpus.Get(seed, new SongOverrides(Base: @base, Genre: genre)); }
+                catch (Exception e) { Console.WriteLine($"  fails at base {@base}, seed {seed}: {e.GetBaseException().Message}"); return null; }
+            }).OfType<CorpusSong>()];
+            var ends = new[] { 0.0, 0.5, 1.0 }.Select(Made).ToArray();
             void Row(string choice, Func<CorpusSong, IEnumerable<string>> of) =>
                 Console.WriteLine($"  {choice,-10} " + string.Join(" | ", ends.Select(x => Top(x.SelectMany(of)))));
             Row("meter", x => [Meter.NameOf(x.Map.Meter)]);
