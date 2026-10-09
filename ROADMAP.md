@@ -87,8 +87,11 @@ fixed; the review and the plan are kept outside the repository):
     parameters, with the song's decisions passed whole.
 12. Done: performance, behind a profile (dotTrace, 32 songs): the decisions 45% of a song's time, the stages 50%,
     realizing 17%, no single hot spot. A chord's movement measured in loops, a meter's cycle templates and pulses
-    kept, a position's section found by halving: 7.4 s to 6.4 s for the 32, the fingerprint kept. Left: the state
-    maps every note's state is read from (*Open work*).
+    kept, a position's section found by halving: 7.4 s to 6.4 s for the 32, the fingerprint kept. After it (9 October
+    2026), allocations: a song 64 to 47 MB allocated and 127 to 94 ms, the suite 204 to 150 s, a timeline's states
+    made once, a note's state read at its place, a track's state merged once over `RealizeStruck`'s passes. Its few
+    passes and the notes' kept states leave realizing no more to win; what a song allocates is spread over its
+    decisions (21 MB), realizing (9 MB), the lines (5 MB) and the rest, no call above a tenth (`AllocationReportTest`).
 13. Done: test speed, 183 s to 165 s for the suite: the intro's genre songs made once for both its rules, a class's
     genre songs once, the corpus's renderings and trace read once, the songs a test makes twice made side by side, a
     duplicate test gone, four tests made to check what they say, a free form's kept parts tested. A cache of the
@@ -563,12 +566,6 @@ Each item with its plan, and what it waits for.
   JavaScript.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
-- **The note states read once** (P4, from the review of 9 October 2026): `Realizer.GetNoteStates` merges a track's
-  state with the whole song's, again for every pass of `RealizeStruck`, for every solo's loudness and every answered
-  gap, and the lines' placing reads it too. A song allocates 47 MB as it is made, 9.5 of them realizing, 5.3 placing
-  the lines and 21 its decisions and sections, no call above a tenth (`AllocationReportTest`, the dotTrace timeline of
-  9 October 2026, after the state maps were read at their notes' places alone and a timeline's states made once);
-  reading a track's states once, merging only what changed between `RealizeStruck`'s passes, is what is left.
 - **Analytics written off the request** (P4, from the review of 9 October 2026): every tally and song measurement opens
   SQLite and writes under one lock on a pool thread, so a burst of tallies holds threads that songs wait for; a queue
   one writer drains, in batches, would answer at once. And the admin password tried without a limit: a pause after a

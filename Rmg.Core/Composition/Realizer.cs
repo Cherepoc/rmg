@@ -63,11 +63,16 @@ internal static class Realizer
         StateTimelineMap commonStateTimelineMap
     )
     {
-        return track
-            .MergeStateMap(definition.StateMap.OfScope(StateScope.Render))
-            .MergeStateTimelineMap(commonStateTimelineMap)
-            .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
+        return NoteStates(Merged(track, definition, commonStateTimelineMap));
     }
+
+    /// <summary>A track's notes over its own state, its definition's and the common state, merged.</summary>
+    private static EventStateTimelineMap<StateMap> Merged(EventStateTimelineMap<StateMap> track, IInstrumentTrack definition, StateTimelineMap commonStateTimelineMap) =>
+        track.MergeStateMap(definition.StateMap.OfScope(StateScope.Render)).MergeStateTimelineMap(commonStateTimelineMap);
+
+    /// <summary>Every note's state in a merged track, its own over what the track's merged state is where it plays.</summary>
+    private static EventTimeline<StateMap> NoteStates(EventStateTimelineMap<StateMap> merged) =>
+        merged.ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
 
     /// <summary>The lowest and the highest note of a pitched track's range.</summary>
     internal static (int Low, int High) GetRange(PitchInstrumentTrack track)
@@ -117,9 +122,11 @@ internal static class Realizer
         Func<double, Meter> meterAt
     )
     {
+        // the track's state over the song's merged once, as a pass strikes notes again but changes no state
+        var merged = Merged(raw, track, commonStateTimelineMap);
         while (true)
         {
-            var realized = RealizePitchTrack(track, GetNoteStates(raw, track, commonStateTimelineMap), changes, meterAt, out var crossings);
+            var realized = RealizePitchTrack(track, NoteStates(merged.WithEvents(raw.EventTimeline)), changes, meterAt, out var crossings);
             if (crossings.Count == 0 || !(track.Role.PlaysChords() || track.Role == TrackRole.Bass))
                 return realized;
 
