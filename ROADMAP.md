@@ -617,8 +617,12 @@ left:
 - **A heavy band's time and backbeat heard together** (P2, heard 9 October 2026 in Black metal, `ADFFnPdywKu` among
   other songs): a section's leads are the drums that play their roles in it, every section keeps time, and a drum
   keeping a role plays in a cycle of a bar at most, so a kit's bars with drums sound both 98.5% of the corpus's, Black
-  metal's 98.8% (`KitRolesTest`). Left: a blast's cymbal, and the drums' loudness against the guitars (the steps of 9
-  October 2026).
+  metal's 98.8% (`KitRolesTest`); a blast's cymbal rides it on every 8th. Left: the snare heard against the guitars.
+  Measured (fluidsynth rendering each part and drum group alone in both soundfonts served, 8 songs each): on its hits
+  the snare is 8 to 11 dB under the band in the 1 to 4 kHz its crack lives in, Black metal's and Metal's alike (Metal's
+  drums at 65 rather than 60), while the hi-hat or ride stands 7 to 16 dB over the band above 5 kHz and the kick 10 to
+  13 dB over it in the lows: the snare masked by the driven guitars stacked and doubled, not the time. To decide: the
+  snare raised over a wall of driven guitars, or the guitars lowered under it, before any level is moved.
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:
