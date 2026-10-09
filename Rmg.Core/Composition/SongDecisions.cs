@@ -383,7 +383,10 @@ internal sealed record SongDecisions(
 
         // the song put together as planned, and the lines the drums mark, then every stage after it in its order
         cancellation.ThrowIfCancellationRequested();
-        var form = formGenerator.Assemble(plan, played, sections);
+        // a section's last bar cut short before the next now and then, each from a stream of its own
+        var shortBars = ShortBars.Draw(id => SongGenerator.CreateStream(seed, SongStream.ShortBars, id), sectionIds.Distinct(), songUnconventionality[Facet.Form], genre);
+        StateTrace.RecordSong(TracePoints.ShortBars, string.Join(", ", shortBars.Order()), shortBars);
+        var form = formGenerator.Assemble(plan, played, sections, shortBars);
         return new SongDecisions(
             seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections, energies,
             solos, soloists, pinned, form, repeats, commonStateMap, swing, grooveContext, scale, drumJob,

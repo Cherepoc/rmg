@@ -223,11 +223,12 @@ public static class Render
                 Controllers = [..x.Track.Controllers.Where(c => c.Controller != 10 || x.Mix?.Pan is null)],
                 Expression = x.Track.Expression
             });
-        // the meter the song starts in, and every section's that is another than the one before
+        // the meter the song starts in, and every section's that is another than the one before, a short last bar's its own
         var meters = new List<(double Position, Meter Meter)> { (0, song.Meter) };
         foreach (var section in song.Map?.Sections ?? [])
-            if (!section.Meter.HasSameBar(meters[^1].Meter))
-                meters.Add((section.Start, section.Meter));
+        foreach (var (position, meter) in section.Cut > 0 ? [(section.Start, section.Meter), (section.LastBar, ShortBars.Of(section.Meter))] : new[] { (section.Start, section.Meter) })
+            if (!meter.HasSameBar(meters[^1].Meter))
+                meters.Add((position, meter));
         return new RenderedSong(song.Duration, [..meters], common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed])
         {
             Room = song.Draws?.Room,

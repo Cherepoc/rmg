@@ -80,7 +80,10 @@ public sealed class ListeningQuestionsTest
                 .Select(n => (double?)n.Position).Min() is { } at ? Before(x, at, 2) : null),
         new("phrase-length", "Orchestral's phrases of four bars and two, the cadence's bars played again before it arrives, and now and then of three: a phrase drawn out, or a bar too many?",
             "The phrase lengths' weights by genre, and whether three bars are kept.", "orchestral", [], new() { ["phraseBars"] = new() { ["threeBars"] = 0, ["sixBars"] = 0 } },
-            x => Before(x, x.Map.Sections.Where(s => s.Meter.PhraseBars != Meter.DefaultPhraseBars).Select(s => (double?)s.Start).Min(), 1))
+            x => Before(x, x.Map.Sections.Where(s => s.Meter.PhraseBars != Meter.DefaultPhraseBars).Select(s => (double?)s.Start).Min(), 1)),
+        new("short-bar", "Djent's section ending on a bar cut short, its first half, before the next comes in early: a jolt, or a stumble?",
+            "The short bar's chance by genre.", "djent", [], new() { ["sectionChanges"] = new() { ["shortBar"] = 0 } },
+            x => Before(x, x.Map.Sections.Where(s => s.Cut > 0).Select(s => (double?)s.LastBar).Min(), 2))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

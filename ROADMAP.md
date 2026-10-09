@@ -142,7 +142,7 @@ percent everywhere, and a listening question once deployed):
     put off with the riser as a lift cue, both wanting a channel of their own.
 11. Let go of after its plan's review: a phrase extended before its cadence, 4 + 2, as an edit after assembly, would
     move every later place of the song's map, its lines, fills and stop time, its bars counting as its pattern's first:
-    the 4-bar grid rewritten in all but name (*Phrases of other than four bars*).
+    the 4-bar grid rewritten in all but name (built since, *Planned: the engine*, steps 4 and 5).
 
 Done in the plan of 7 October 2026: pinch harmonics; an ending in the song's own harmony; any General MIDI instrument
 in any role; a sparse song's silent start; a groove that mutates; drum solos' feet and stickings; a filtered drop and a
@@ -187,14 +187,13 @@ within a bar; and swing already pairs by each section's meter. In order of what 
    and two 14% of its sections (`?listen=phrase-length`). Left: the genres' section lengths named in bars of four
    (`bars16`) play their patterns as often whatever their phrase, so a section of "16 bars" in threes has 12; and an
    intro's window of four bars, which a first section in threes does not end a phrase with.
-6. **A short bar before a section.** A section's last bar cut to half its length, its first groups, before the next
-   section (a 2/4 bar before a chorus), a section's draw by the form facet and a genre's chance: the span shorter by
-   it (`SectionSpan`), its notes trimmed, the MIDI's time signature written for it, every bar counted from its
-   section's start as now; the fill into the next section falls in the short bar, two beats of it as a drummer
-   plays. Measured: the sections with one, a rule that no note crosses a section's end and every time signature
-   matches its bars. Review: the bars of a section stay alike but the last, which nothing past it counts from; the
-   melody's held phrase end is cut, which is the idiom; a stage that counts bars to a section's end by its duration
-   divided (mutations, stop time) to be checked in the step.
+6. Done: a short bar before a section (`ShortBars`), a section's last bar cut to its first half of groups wherever it
+   plays but at the song's end and under an intro's entries, by the form facet and a genre's `sectionChanges`
+   "shortBar", Djent's the most, 6% of the drawn songs' sections at the middle and 19% at the wild end; the map's meter
+   at a position the short bar's (`SongMap.MeterAt`), so that a fill, a drop's silence, a riser and a tempo's easing
+   take the bar before a section as it is, a held note cut to it, the file signing it (`?listen=short-bar`). With it, a
+   trading turn half a pattern in whole bars, a pattern of three trading bar by bar, and a solo's phrase kept within its
+   turn.
 7. **Feels mixed within a bar,** let go of after review: a bar's change of feel taking effect from one of its groups
    rather than its start, generated as two spans spliced. A fill does it already where a drummer does, and a soloist's
    tuplets give a run its fives and sevens; a groove changing feel mid-bar outside a fill is the wild end's alone and
@@ -486,7 +485,6 @@ Each item with its plan, and what it waits for.
 - **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
   the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
-- **A bar of two beats before a section:** planned (*Planned: the engine*, step 6), its last bar cut short.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a
   section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`), the chorus 2.6 semitones over
   the verse, higher in 61% of the songs.

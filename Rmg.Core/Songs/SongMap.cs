@@ -44,23 +44,28 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
         return SectionAt(position) ?? (position < Origin ? Sections[0] : Sections[^1]);
     }
 
-    /// <summary>The meter a position's bar is in: its section's, the first's before it and the last's after it.</summary>
+    /// <summary>
+    ///     The meter a position's bar is in: its section's, the first's before it and the last's after it, and a short last
+    ///     bar's own (<see cref="ShortBars" />), so that the bar before a section's start is the bar there is.
+    /// </summary>
     public Meter MeterAt(double position)
     {
-        return BarsAt(position)?.Meter ?? Meter;
+        return BarsAt(position) is not { } span ? Meter
+            : span.Cut > 0 && position >= span.LastBar - 1e-9 && position < span.End - 1e-9 ? ShortBars.Of(span.Meter)
+            : span.Meter;
     }
 
-    /// <summary>The bar of a section's 4-bar pattern a position is in, counted from its section's start, before the first too.</summary>
+    /// <summary>The bar of a section's pattern a position is in, counted from its section's start, before the first too, a short last bar the pattern's own.</summary>
     public int PatternBarAt(double position)
     {
-        var meter = MeterAt(position);
+        var meter = BarsAt(position)?.Meter ?? Meter;
         return ((int)Math.Floor((position - (BarsAt(position)?.Start ?? Origin)) / meter.BarDuration)).Mod(meter.PatternBarCount);
     }
 
     /// <summary>How far into its bar a position is, in beats, the bars counted from its section's start.</summary>
     public double BeatInBar(double position)
     {
-        var meter = MeterAt(position);
+        var meter = BarsAt(position)?.Meter ?? Meter;
         var fromStart = position - (BarsAt(position)?.Start ?? Origin);
         return fromStart - Math.Floor(fromStart / meter.BarDuration) * meter.BarDuration;
     }
@@ -76,10 +81,13 @@ public sealed record IntroSpan(IntroKind Kind, double Duration, IntroWindow Wind
 /// <param name="Entry">When it comes in, in beats from the start of the intro's window.</param>
 public sealed record IntroEntry(IntroPart Part, ImmutableArray<int> Tracks, double Entry);
 
-/// <summary>A section where the song plays it, and the meter its bars are in.</summary>
-public sealed record SectionSpan(int SectionId, double Start, double Duration, Meter Meter)
+/// <summary>A section where the song plays it, the meter its bars are in, and how much its last bar is cut short, in beats (<see cref="ShortBars" />).</summary>
+public sealed record SectionSpan(int SectionId, double Start, double Duration, Meter Meter, double Cut)
 {
     public double End => Start + Duration;
+
+    /// <summary>Where its last bar starts, a short one's.</summary>
+    public double LastBar => End - Meter.BarDuration + Cut;
 }
 
 /// <summary>How a song ends: the ending's kind, where it starts, how long it is, and its final chord's length.</summary>

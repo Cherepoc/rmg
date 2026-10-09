@@ -30,10 +30,13 @@ public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode,
     public bool TradesWithDrums => Soloists.Length > 1 && Soloists.Contains(TrackRole.Drum);
 
     /// <summary>
-    ///     How long a soloist's turn is in a section that trades: its pattern, or half of it where the section plays it once,
-    ///     and whose turn it is at a position, by its place among the soloists.
+    ///     How long a soloist's turn is in a section that trades: its pattern, or half of it in whole bars, a pattern of
+    ///     three trading bar by bar, where the section plays it once, a short last bar's cut counted in; and whose turn it is
+    ///     at a position, by its place among the soloists.
     /// </summary>
-    public static double TurnOf(SectionSpan span) => Math.Max(1, (int)Math.Round(span.Duration / span.Meter.PatternDuration)) > 1 ? span.Meter.PatternDuration : span.Meter.PatternDuration / 2;
+    public static double TurnOf(SectionSpan span) => (int)Math.Round((span.Duration + span.Cut) / span.Meter.PatternDuration) > 1
+        ? span.Meter.PatternDuration
+        : Math.Max(1, span.Meter.PatternBarCount / 2) * span.Meter.BarDuration;
 
     public int TurnAt(SectionSpan span, double position) => (int)Math.Floor((position - span.Start) / TurnOf(span) + 1e-9) % Soloists.Length;
 }

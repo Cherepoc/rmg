@@ -189,8 +189,8 @@ internal sealed class FillGenerator
     )
     {
         var ending = line.Ending;
-        // the fill is in the bars of the section it ends
-        var meter = ending.Meter;
+        // the fill is in the bars of the section it ends, the bar before the line a short one's where the section cuts it
+        var meter = map?.MeterAt(line.Position - 1e-6) ?? ending.Meter;
         var chances = GetChances(drummer);
         var fills = ending.Fills.Value;
         // how much the line weighs: its own weight, and the energy it leads into, as far as the section's rhythm follows it

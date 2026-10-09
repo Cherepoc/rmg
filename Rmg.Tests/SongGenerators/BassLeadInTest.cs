@@ -100,7 +100,7 @@ public sealed class BassLeadInTest
         );
 
         // one section of a pattern of one phrase, which restates nothing
-        var map = new SongMap(Meter.FourFour, new IntroSpan(IntroKind.Cold, 0), [new SectionSpan(0, 0, 8, Meter.FourFour)], new EndingSpan(EndingKind.Open, 8, 0, 0));
+        var map = new SongMap(Meter.FourFour, new IntroSpan(IntroKind.Cold, 0), [new SectionSpan(0, 0, 8, Meter.FourFour, 0)], new EndingSpan(EndingKind.Open, 8, 0, 0));
         var placed = LinePattern.Place(song, 0, bass, BassLeadingLayers.Line, map);
 
         await Assert.That(placed.TrackTimelineMap[0].EventTimeline.Count).IsEqualTo(expectedNotes);

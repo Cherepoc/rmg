@@ -378,11 +378,13 @@ internal static class SoloLines
         var played = new Dictionary<int, double>();
         for (var (from, phrase) = (span.Start, 0); from < span.End - 1e-9; phrase++)
         {
-            // the phrase, to its turn's end at the latest, and to the solo's end rather than leave a scrap of less than a bar
+            // the phrase, to its turn's end at the latest, and to the turn's or the solo's end rather than leave a scrap of
+            // less than a bar
             var bars = context.Pick(soloist.PhraseBars.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
-            var to = Math.Min(Math.Min(span.End, from + bars * bar), span.Start + (Math.Floor((from - span.Start) / turn + 1e-9) + 1) * turn);
-            if (span.End - to < bar - 1e-9)
-                to = span.End;
+            var turnEnd = Math.Min(span.End, span.Start + (Math.Floor((from - span.Start) / turn + 1e-9) + 1) * turn);
+            var to = Math.Min(turnEnd, from + bars * bar);
+            if (turnEnd - to < bar - 1e-9)
+                to = turnEnd;
 
             // its peak, on the way to the solo's climax or easing after it, and the shape of its intensity
             var place = ((from + to) / 2 - span.Start) / span.Duration;

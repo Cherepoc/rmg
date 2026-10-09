@@ -167,13 +167,21 @@ internal sealed class SongFormGenerator
         return song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [track] = _ => quoted });
     }
 
+    /// <summary>A section's timeline cut short, its notes after the cut left out and a note held past it held to it.</summary>
+    private static TrackEventStateTimelineMap<StateMap> CutShort(TrackEventStateTimelineMap<StateMap> timeline, double duration) =>
+        timeline.Trim(duration).MapTrackEvents(timeline.TrackTimelineMap.Keys.ToDictionary(x => x, _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
+            EventTimeline.Create(notes.Duration, notes.Select(x => x.Value.GetStateValue(StateKinds.HeldDuration) is var held && x.Position + held > duration + 1e-9
+                ? x.Value.With(StateKinds.HeldDuration, duration - x.Position).ToTimelineItem(x.Position)
+                : x)))));
+
     /// <summary>
     ///     The song put together as planned: the intro's bars, the sections and the ending's bars one after another,
     ///     where each is, what the form changes once they are, the tempo, and the lines the fills mark.
     /// </summary>
     /// <param name="sectionIds">The sections in the song's order.</param>
     /// <param name="sections">Every section in the song's order, as generated.</param>
-    public SongAssembly Assemble(FormPlan plan, IReadOnlyList<int> sectionIds, IReadOnlyList<GeneratedSection> sections)
+    /// <param name="shortBars">The sections whose last bar is cut short wherever they play but at the song's end (<see cref="ShortBars" />).</param>
+    public SongAssembly Assemble(FormPlan plan, IReadOnlyList<int> sectionIds, IReadOnlyList<GeneratedSection> sections, IReadOnlySet<int> shortBars)
     {
         // the meter the song starts in, its first section's, which its intro plays in, and the one it ends in
         var meter = sections[0].Meter;
@@ -197,11 +205,19 @@ internal sealed class SongFormGenerator
         // the first section starts after the intro's bars, and the ending after the last
         var origin = introBlock?.Duration ?? 0;
         var spans = ImmutableArray.CreateBuilder<SectionSpan>();
+        var timelines = new List<TrackEventStateTimelineMap<StateMap>>();
         var start = origin;
-        foreach (var (id, section) in sectionIds.Zip(sections))
+        for (var index = 0; index < sections.Count; index++)
         {
-            spans.Add(new SectionSpan(id, start, section.Timeline.Duration, section.Meter));
-            start += section.Timeline.Duration;
+            var (id, section) = (sectionIds[index], sections[index]);
+            // its last bar cut short before the next section, its notes there with it, a note held past it to its end; but
+            // the song's last, and its first where an intro's entries come in over its bars
+            var countsBars = index == 0 && plan.Intro == IntroKind.Entries && !plan.Window.IsBefore;
+            var cut = shortBars.Contains(id) && index < sections.Count - 1 && !countsBars ? ShortBars.Cut(section.Meter) : 0;
+            var timeline = cut > 0 ? CutShort(section.Timeline, section.Timeline.Duration - cut) : section.Timeline;
+            spans.Add(new SectionSpan(id, start, timeline.Duration, section.Meter, cut));
+            timelines.Add(timeline);
+            start += timeline.Duration;
         }
 
         var end = start;
@@ -221,7 +237,7 @@ internal sealed class SongFormGenerator
         var blocks = ImmutableArray.CreateBuilder<TrackEventStateTimelineMap<StateMap>>();
         if (introBlock is not null)
             blocks.Add(introBlock);
-        blocks.AddRange(sections.Select(x => x.Timeline));
+        blocks.AddRange(timelines);
 
         ImmutableArray<FillSection> fillSections =
         [

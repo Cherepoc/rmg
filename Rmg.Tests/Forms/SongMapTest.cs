@@ -9,7 +9,7 @@ public sealed class SongMapTest
     private static readonly SongMap Map = new(
         Meter.FourFour,
         new IntroSpan(IntroKind.Entries, 8, new IntroWindow(2, true)),
-        [new SectionSpan(0, 8, 32, Meter.FourFour), new SectionSpan(1, 40, 32, Meter.FourFour)],
+        [new SectionSpan(0, 8, 32, Meter.FourFour, 0), new SectionSpan(1, 40, 32, Meter.FourFour, 0)],
         new EndingSpan(EndingKind.Button, 72, 4, 1)
     );
 
@@ -36,7 +36,7 @@ public sealed class SongMapTest
         var map = new SongMap(
             Meter.FourFour,
             new IntroSpan(IntroKind.Cold, 0),
-            [new SectionSpan(0, 0, 16, Meter.FourFour), new SectionSpan(1, 16, 12, threeFour)],
+            [new SectionSpan(0, 0, 16, Meter.FourFour, 0), new SectionSpan(1, 16, 12, threeFour, 0)],
             new EndingSpan(EndingKind.Button, 28, 4, 1)
         );
 

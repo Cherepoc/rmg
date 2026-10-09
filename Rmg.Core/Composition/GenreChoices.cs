@@ -414,11 +414,11 @@ public static class GenreChoices
     public static GenreChoice PinchSound { get; } = Pool("pinchSound", "A pinch harmonic's sound",
         Expression.PinchSounds.Select(x => (Name(x.Sound.ToString()), x.Sound == Composition.PinchSound.Harmonics ? "General MIDI's guitar harmonics" : "The guitar's squeal, at the harmonic", x.Weight)));
 
-    /// <summary>A section's own tempo, one by a metric ratio and its own meter, beside the song's (<see cref="Composition.SectionTempo" />, <see cref="Composition.SectionMeter" />).</summary>
+    /// <summary>A section's own tempo, one by a metric ratio, its own meter beside the song's and its last bar cut short (<see cref="Composition.SectionTempo" />, <see cref="Composition.SectionMeter" />, <see cref="Composition.ShortBars" />).</summary>
     public static GenreChoice SectionChanges { get; } = Chances("sectionChanges", "A section's own time",
         [
             ("tempo", "A section at a tempo of its own", Composition.SectionTempo.Chance), ("modulation", "A tempo by a metric ratio", Composition.SectionTempo.ModulationChance),
-            ("meter", "A section in a meter of its own", Composition.SectionMeter.Chance)
+            ("meter", "A section in a meter of its own", Composition.SectionMeter.Chance), ("shortBar", "A section's last bar cut short", Composition.ShortBars.Chance)
         ]);
 
     /// <summary>A section's drums and bass in a cycle across the bar (<see cref="Composition.Polymeter" />).</summary>
