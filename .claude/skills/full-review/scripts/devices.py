@@ -1,6 +1,7 @@
-"""The musical devices, by family, for the device and genre-fit reviewers: every genre choice (`GenreChoices`) and every
-stage (`SongStages`), each in the family it belongs to. Writes <out>/devices.json and <out>/devices/<family>.txt, and
-prints the families and every device it could not place, which is to be placed by hand before the reviewers start.
+"""The musical devices, by family, for the device reviewers: every genre choice (`GenreChoices`) and every stage
+(`SongStages`), each in the family it belongs to; and every genre preset, for the genre-fit reviewers. Writes
+<out>/devices.json, <out>/devices/<family>.txt and <out>/genres.txt, and prints the families, every device it could not
+place, which is to be placed by hand before the reviewers start, and the presets.
 
     python3 devices.py <repo> <out>
 """
@@ -54,6 +55,10 @@ for stage in stages:
     (placed[family]['stages'].append(stage) if family else unplaced.append(f'stage {stage}'))
 
 os.makedirs(os.path.join(out, 'devices'), exist_ok=True)
+# every genre preset, for a genre-fit reviewer each
+presets = re.findall(r'^    "id": "(\w+)"', open(os.path.join(root, 'Rmg.WebApi/Client/genres.json')).read(), re.M)
+with open(os.path.join(out, 'genres.txt'), 'w') as f:
+    f.write('\n'.join(presets) + '\n')
 json.dump({'families': placed, 'unplaced': unplaced}, open(os.path.join(out, 'devices.json'), 'w'), indent=1)
 for family, d in placed.items():
     with open(os.path.join(out, 'devices', family + '.txt'), 'w') as f:
@@ -61,3 +66,4 @@ for family, d in placed.items():
                 '\nStages (SongStages.cs):\n' + '\n'.join(f'  {x}' for x in d['stages']) + '\n')
     print(f"{family:8} {len(d['choices']):3} choices, {len(d['stages']):2} stages")
 print(f"{len(choices)} choices and {len(stages)} stages; unplaced: {', '.join(unplaced) or 'none'}")
+print(f"{len(presets)} genre presets: {' '.join(presets)}")

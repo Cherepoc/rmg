@@ -9,10 +9,10 @@ A review that reads every line rather than a sample, and runs the code before it
 and skims what does not fit, so coverage is made a contract: every file is given to exactly one reviewer, in slices
 small enough to read whole, each reviewer accounts for every file it was given, and the accounts are checked against
 the file list. Cross-cutting reviewers follow one concern each across the code, device reviewers one family of musical
-devices end to end and against each other, genre reviewers one family of presets; verifiers check every finding, and
+devices end to end and against each other, genre reviewers one preset each; verifiers check every finding, and
 the result is a report, not commits.
 
-A run costs about sixty reviewers and twenty-five verifiers, with three runs of the suite. Confirm with the user
+A run costs about ninety reviewers and thirty verifiers, with three runs of the suite. Confirm with the user
 before starting where they did not ask for the full review by name, and ask whether to include the tests (about half
 the slices) and which model the agents use (the current one by default: the user chose it over a faster one).
 
@@ -21,7 +21,7 @@ the slices) and which model the agents use (the current one by default: the user
 - **The review's folder**, outside the repository and kept between sessions: `R=~/Projects/sw/rmg-reviews/<date>`.
   The latest earlier folder there is the last review, `L`. Nothing is written in the repository.
 - **The briefs**, this skill's own (`S=<repo>/.claude/skills/full-review`): `primer.md` (the project, the checklist,
-  the output), `angles.md` (the cross-cutting concerns, the device families, the genre families), `verify.md` (the
+  the output), `angles.md` (the cross-cutting concerns, the device families, the genre-fit reviewers), `verify.md` (the
   verifiers' brief) and `decided.md` (findings decided against or kept on purpose, which no reviewer raises again).
 - **The scripts**, in `$S/scripts`: `manifest.py`, `devices.py`, `run_findings.py`, `coverage.py`,
   `verify_batches.py`, `merge.py`, `compare.py`.
@@ -31,7 +31,7 @@ the slices) and which model the agents use (the current one by default: the user
 ```
 python3 $S/scripts/manifest.py <repo> $R            # --no-tests to leave the tests out
 python3 $S/scripts/compare.py $L $R --files          # the files added, removed and grown since the last review
-python3 $S/scripts/devices.py <repo> $R              # every genre choice and stage, by family
+python3 $S/scripts/devices.py <repo> $R              # every genre choice and stage, by family, and every preset
 git -C <repo> log --since=<L's date> --oneline
 ```
 
@@ -52,6 +52,7 @@ RMG_CORPUS_OFFSET=1000000 dotnet run --project Rmg.Tests -c Release --no-build >
 RMG_CORPUS_OFFSET=2000000 dotnet run --project Rmg.Tests -c Release --no-build > $R/run/offset-2000000.txt
 dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_EveryChance" --output detailed > $R/run/every-chance.txt
 dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/GenreDevicesReportTest/*" --output detailed > $R/run/genre-devices.txt
+dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_ChoicesByEnd" --output detailed > $R/run/every-preset.txt
 python3 $S/scripts/run_findings.py <repo> $R <offset> $R/run/offset-<offset>.txt     # for every run with a failure
 ```
 
@@ -73,7 +74,7 @@ About twelve at a time, in the background, every one read only (never building, 
 >
 > Write your JSON to `$R/findings/<id>.json`. Read only: never edit repository files, never build or run dotnet.
 
-**A cross-cutting reviewer per concern**, the numbered angles of `angles.md` but musicality, which the families below
+**A cross-cutting reviewer per concern**, the numbered angles of `angles.md` but musicality, which the device and genre reviewers below
 take:
 
 > You are a cross-cutting reviewer in a full-codebase review of `<repo>`. First read `$S/primer.md`, then
@@ -86,9 +87,16 @@ take:
 **A device reviewer per family** (form, harmony, lines, drums, solos, sound), as `angles.md`'s *device families*
 describe, its devices in `$R/devices/<family>.txt`, its output `$R/findings/angle-device-<family>.json`.
 
-**A genre-fit reviewer per family of genres** (heavy, groove, dance, beat, folk, score), as `angles.md`'s *genre-fit
-families* describe, reading `$R/run/every-chance.txt` and `$R/run/genre-devices.txt`, its output
-`$R/findings/angle-genre-<family>.json`.
+**A genre-fit reviewer per genre preset** (`$R/genres.txt`), as `angles.md`'s *genre-fit reviewers* describe, reading
+the three preset reports in `$R/run/`, its output `$R/findings/angle-genre-<preset id>.json`:
+
+> You are a genre reviewer in a full-codebase review of `<repo>`. First read `$S/primer.md`, then `$S/angles.md` (its
+> *genre-fit reviewers*), then `$S/decided.md`, then `<repo>/CLAUDE.md`.
+>
+> Your genre is the preset "`<preset id>`". The reports are in `$R/run/`.
+>
+> Write your JSON to `$R/findings/angle-genre-<preset id>.json`. Read only: never edit repository files, never build or
+> run dotnet.
 
 ## The coverage check
 
@@ -97,7 +105,8 @@ python3 $S/scripts/coverage.py $R
 ```
 
 It reports the slices and angles done, the findings by severity, invalid JSON, every file a slice did not read in full
-or did not account for, and every device a device family did not account for. Give each gap to a fresh agent until
+or did not account for, every device a device family did not account for, and every preset without its genre
+reviewer. Give each gap to a fresh agent until
 none is left: a reviewer's message that it finished is not coverage, the lists are.
 
 ## Phase 3: verification

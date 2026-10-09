@@ -79,7 +79,7 @@ You review one concern across the whole codebase rather than one slice.
    - tests that hold only for the corpus's own songs: a part, a device, an intro or a section kind assumed present, a seed's song named for what it happens to do (`RMG_CORPUS_OFFSET` moves the corpus);
    - calibrations over fewer than 64 songs, or comparing one genre's songs with another's rather than the same songs with a mechanism on and off.
 
-10. **musicality** is followed by genre, by the genre-fit reviewers below, and by device, by the device families'.
+10. **musicality** is followed by genre, a reviewer per preset, and by device, a reviewer per family, below.
 
 11. **bars.** Every place that turns a position into a bar, a beat, a group, a phrase or a pattern, or takes the bar before a line: `BarDuration`, `PhraseDuration`, `PatternDuration`, `PhraseBars`, `NearestGroupStart`, `BeatInBar`, `PatternBarAt`, `MeterAt`, `Math.Floor(position / ...)`.
     - Is the position counted from its section's start (or its pattern's), not the song's, in the section's own meter? A section starts wherever the sections before it end, a whole number of its bars from nowhere in particular.
@@ -106,36 +106,33 @@ choice and every stage of the family. The id is `device-<family>`. For every dev
 - **Coverage.** List every device of the family in `coverage`, `file` the device's main file and `note` its name and
   what was checked; the coverage check fails a device not named there.
 
-## The genre-fit families
+## The genre-fit reviewers
 
-A reviewer per family of genres, the id `genre-<family>`, its genres given in the task:
+A reviewer per genre preset, the id `genre-<preset id>`, every preset of `Client/genres.json` (listed in `genres.txt`,
+written by `scripts/devices.py`). Read `run/every-chance.txt` (every chances option's three ends by preset, `*` marking
+the songs' own amounts a preset inherits), `run/genre-devices.txt` (how often each preset plays each device, measured),
+`run/every-preset.txt` (what each preset's songs draw at the plain end, the middle and the wild end), and the preset in
+`Client/genres.json` with its description, every choice it names read against `GenreChoices` and the code of the
+devices it switches on or leaves. Read the presets nearest it in style too, for contrast: what sets this genre apart is
+part of what it must play. Then, for the genre:
 
-| Family | Genres |
-|---|---|
-| heavy | rock, punk, metal, nuMetal, djent, blackMetal |
-| groove | jazz, blues, funk, soul, fusion, disco |
-| dance | electronic, techno, trance, dnb, trap, idm |
-| beat | hipHop, synthwave, chiptune, pop, reggae, ska |
-| folk | latin, bossa, country, folk, medieval |
-| score | orchestral, ambient, dungeon |
-
-Read `run/every-chance.txt` (every chances option's three ends by preset, `*` marking the songs' own amounts a preset
-inherits), `run/genre-devices.txt` (how often each preset plays each device, measured) and `Client/genres.json`'s
-presets with their descriptions. For every genre of the family:
-
-- **Inherited where it does not belong.** A device the genre plays by the songs' own amounts (`*`) that its style
-  would not play: a short bar in a genre built on square sections, a solo in a genre without soloists. The fix is the
-  option named at 0, the choice's other options named at the songs' own amounts so that they keep playing.
+- **Inherited where it does not belong.** A device the genre plays by the songs' own amounts (`*`) that its style would
+  not play: a short bar in a genre built on square sections, a solo in a genre without soloists. The fix is the option
+  named at 0, the choice's other options named at the songs' own amounts so that they keep playing.
 - **Missing.** A device the engine has that the genre's players use, which the preset leaves at the songs' own amounts
   or at 0: ghost notes for a genre whose drummers play them, a riff intro for one that opens on its riff. Only devices
   the engine has; a device it does not have is an idiom gap for the roadmap, said as such.
 - **Mis-set.** Amounts against the genre: a plain end playing what a plain song of the genre never does, a wild end
-  losing the genre (`EveryPreset_ChoicesByEnd`, `GenreDevicesReportTest`), an amount the measured share shows far from
-  the style, a pool whose weights contradict the description.
+  losing the genre, an amount the measured share shows far from the style, a pool whose weights contradict the
+  description, an instrument, a kit, a tempo, a meter or a form the style would not take.
 - **Against the description.** What the preset's description says against what its choices do.
+- **Its conventionality.** The plain end the genre's most typical song, the middle a good one of it, the wild end still
+  the genre: a device that should be the genre's plainest habit left to its wild end, or a wild device leaking into
+  its plain end.
 - Each finding is `category: "genre-fit"`, `file` `Rmg.WebApi/Client/genres.json` and `line` the preset's line, with the
-  change to the JSON as the suggestion. A change of amounts is a matter of taste unless the description or the
-  style's plain convention settles it: `kind: "taste"` with a listening question, or `"mistake"`.
-- No more than the strongest five findings a genre, so that the list stays one a person acts on. Name no artists or
-  bands; describe the sound.
-- List every genre of the family in `coverage` with what was checked.
+  change to the JSON as the suggestion. A change of amounts is a matter of taste unless the description or the style's
+  plain convention settles it: `kind: "taste"` with a listening question, or `"mistake"`.
+- The strongest eight findings at most, so that the list stays one a person acts on. Name no artists or bands;
+  describe the sound.
+- In `coverage`, every choice the preset names and every device the inherited table shows it playing, each with what
+  was checked.

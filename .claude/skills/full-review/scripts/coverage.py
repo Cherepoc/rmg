@@ -59,6 +59,13 @@ if os.path.exists(devices_path):
             if name.lower() not in covered:
                 gaps.append((angle, name, 'device not accounted for'))
 
+# a genre-fit reviewer for every preset
+genres_path = os.path.join(R, 'genres.txt')
+if os.path.exists(genres_path):
+    for preset in open(genres_path).read().split():
+        if f'angle-genre-{preset}' not in angles:
+            missing.append(f'angle-genre-{preset}')
+
 print(f"slices: {len(done)} of {len(manifest)} done; angles: {len(angles)} done ({', '.join(a[6:] for a in angles)})")
 print(f"findings by severity: {dict(severities)}")
 if missing:
