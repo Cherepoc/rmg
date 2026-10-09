@@ -19,7 +19,9 @@ public sealed class DropTest
             // but the riser into it (Risers.Apply)
             var pitched = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value)
                 .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) != Risers.Program + 1).ToArray();
-            await Assert.That(pitched.Where(x => x.Position < at - 1e-9 && x.Position + (x.Value.Duration > 0.25 ? x.Value.Duration : 0) > from + 1e-9)).IsEmpty();
+            // nothing struck in the silent bar, its first beat too, nor a long note ringing into it
+            await Assert.That(pitched.Where(x => x.Position >= from - 1e-9 && x.Position < at - 1e-9
+                                                 || x.Position < from - 1e-9 && x.Value.Duration > 0.25 && x.Position + x.Value.Duration > from + 1e-9)).IsEmpty();
             // back in the drop's first bar, a part whose pattern rests on the downbeat on its next beat, the drums on it
             await Assert.That(pitched.Any(x => x.Position >= at - 1e-9 && x.Position < at + song.Song.Map!.MeterAt(at).BarDuration - 1e-9)).IsTrue().Because($"seed {song.Seed} at {at}");
         }

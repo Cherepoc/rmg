@@ -62,7 +62,8 @@ public sealed class FillGrooveTest
 
                 var grooveGrid = Grid(groove.Select(x => x.Position));
                 // every drum's own grid, from its first note, which a fill's note is on if it falls on a halving of it,
-                // down to an eighth, and off if it falls on none of them, as 16ths over triplets
+                // down to an eighth, and off if it falls on none of them; straight 16ths over a triplet groove's grid fall on
+                // its finer halvings, so that this tells a straight groove's fills alone
                 var drumGrids = groove.GroupBy(x => x.Track)
                     .Select(x => (Start: x.Min(y => y.Position), Grid: Grid(x.Select(y => y.Position))))
                     .Where(x => !double.IsNaN(x.Grid))

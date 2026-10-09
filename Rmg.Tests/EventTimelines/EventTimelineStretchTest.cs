@@ -8,11 +8,11 @@ public sealed class EventTimelineStretchTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task ZeroDurationTimeline_Stretches_ToZeroDuration(double offset)
+    public async Task ZeroDurationTimeline_Stretches_ToZeroDuration(double factor)
     {
         var input = EventTimeline.Create<int>(0);
         
-        var result = input.Stretch(offset);
+        var result = input.Stretch(factor);
 
         await Check.That(result)
             .IsNotNull()
@@ -24,7 +24,8 @@ public sealed class EventTimelineStretchTest
     [Test]
     public async Task ZeroFactorStretch_ToZeroDuration()
     {
-        const double duration = 1;
+        // both items within the timeline, so that the stretch has them to drop
+        const double duration = 2;
         var items = new TimelineItem<int>[]
         {
             new(0, 1),

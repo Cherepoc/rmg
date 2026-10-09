@@ -23,8 +23,9 @@ public sealed class TurnaroundTest
     {
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz"))));
         // but a section that planes, its chords the home's shape moved rather than its progression's
+        // each section's turnaround with its own progression, joined by the section
         var sections = songs.SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.Turnaround)
-            .Zip(song.Trace.Where(x => x.Point == TracePoints.Progression), (turn, progression) => (Turns: (bool)turn.Value!, Progression: (ImmutableArray<int>)progression.Value!, turn.Section))
+            .Select(turn => (Turns: (bool)turn.Value!, Progression: (ImmutableArray<int>)song.Trace.Last(p => p.Point == TracePoints.Progression && p.Section == turn.Section).Value!, turn.Section))
             .Where(x => song.Trace.Where(p => p.Point == TracePoints.Planing && p.Section == x.Section).All(p => p.Value is null))
             .Select(x => (x.Turns, x.Progression))).ToArray();
 

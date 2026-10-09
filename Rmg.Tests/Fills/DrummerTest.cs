@@ -45,6 +45,8 @@ public sealed class DrummerTest
         await Assert.That(WeightOfPath(middle, FillPath.Loop) / WeightOfPath(middle, FillPath.OneWay))
             .IsEqualTo(WeightOfPath(FillLayers.Paths, FillPath.Loop) * Drummer.FavouriteWeight / WeightOfPath(FillLayers.Paths, FillPath.OneWay)).Within(1e-9);
         await Assert.That(WeightOfPath(drummer.WeighPaths(FillLayers.Paths, 0), FillPath.Random)).IsEqualTo(0);
+        // every walk at the wild end, as likely each
+        await Assert.That(drummer.WeighPaths(FillLayers.Paths, 1).Length).IsEqualTo(FillLayers.Paths.Length);
         await Assert.That(drummer.WeighPaths(FillLayers.Paths, 1).Select(x => x.Weight).Distinct().Count()).IsEqualTo(1);
     }
 
@@ -110,7 +112,10 @@ public sealed class DrummerTest
         var busyness = drummers.Select(x => x.Busyness).Order().ToArray();
 
         await Assert.That(busyness[busyness.Length / 2]).IsEqualTo(0.5).Within(0.03);
-        await Assert.That(busyness.All(x => x is >= 0 and <= 1)).IsTrue();
+        // spread about it, the middle half wider than a tenth
+        var spread = busyness[busyness.Length * 3 / 4] - busyness[busyness.Length / 4];
+        Console.WriteLine($"the middle half of the drummers' busyness {spread:F2} wide");
+        await Assert.That(spread).IsGreaterThan(0.1);
         await Assert.That(drummers.Select(x => x.Favourite).Distinct().Count()).IsEqualTo(FillLayers.Paths.Length);
     }
 }

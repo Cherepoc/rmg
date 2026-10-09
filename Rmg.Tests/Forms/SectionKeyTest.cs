@@ -8,6 +8,8 @@ public sealed class SectionKeyTest
     [Test]
     public async Task ASectionInAKeyOfItsOwn_PlaysItEveryTime_AndTheFirstInTheSongs()
     {
+        // the plainer half's songs, as the wilder change key at any pattern too (KeyChangeTest), which would move a
+        // section's own key at its start
         var songs = TestCorpus.Range(128)
             .Where(x => ((Unconventionality)x.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Scale] <= 0.5)
             .ToArray();

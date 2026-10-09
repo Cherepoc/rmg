@@ -12,7 +12,12 @@ public sealed class SectionLengthReportTest
         {
             var plays = song.Trace.Where(x => x.Point == TracePoints.SectionLength).ToDictionary(x => x.Section, x => (int)x.Value!);
             foreach (var span in song.Map.Sections)
+            {
                 await Assert.That(span.Duration).IsEqualTo(plays[span.SectionId] * span.Meter.PatternDuration).Within(1e-9);
+                // a pattern of a phrase played as often as one of the options says, a longer one as near as it can
+                if (span.Meter.Phrases == 1)
+                    await Assert.That(SectionLength.Options.Select(x => x.Plays)).Contains(plays[span.SectionId]);
+            }
         }
     }
 

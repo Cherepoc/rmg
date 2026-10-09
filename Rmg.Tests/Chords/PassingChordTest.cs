@@ -12,9 +12,12 @@ namespace Rmg.Tests.Chords;
 public sealed class PassingChordTest
 {
     /// <summary>Every section's chords as it records them: where they start, their roots, and which of them pass.</summary>
-    private static IEnumerable<(HarmonicRhythm Rhythm, ImmutableArray<int> Progression)> Sections(CorpusSong song) =>
-        song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).Select(x => (HarmonicRhythm)x.Value!)
-            .Zip(song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => (ImmutableArray<int>)x.Value!));
+    private static IEnumerable<(HarmonicRhythm Rhythm, ImmutableArray<int> Progression)> Sections(CorpusSong song)
+    {
+        // joined by their section, as each records its own
+        var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => (ImmutableArray<int>)x.Last().Value!);
+        return song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).GroupBy(x => x.Section).Select(x => ((HarmonicRhythm)x.Last().Value!, progressions[x.Key]));
+    }
 
     [Test]
     public async Task APassingChord_IsTheNextsDominant_OrTheNextASemitoneAbove_HalfwayThroughAChordABarLong()

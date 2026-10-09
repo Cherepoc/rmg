@@ -166,7 +166,8 @@ public sealed class DrumSoloTest
                 await Assert.That(soloTracks.Contains(track) || keptTracks.Contains(track)).IsTrue().Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {note.Position}");
                 if (keptTracks.Contains(track))
                     keeping.Add(note.Value.Velocity);
-                else if (!solo.Tracks[0].Contains(track) || !solo.Feet)
+                // the hands', but the kick where the feet keep time on it
+                else if (!(solo.Feet && DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Contains(track)))
                     soloing.Add(note.Value.Velocity);
             }
         }

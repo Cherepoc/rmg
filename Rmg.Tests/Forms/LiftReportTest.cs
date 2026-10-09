@@ -8,7 +8,7 @@ public sealed class LiftReportTest
     [Test]
     public async Task IntoABiggerSection_TheHiHatOpensOnTheLastBeat_AndTheSnareStrikesItsHead()
     {
-        var cues = 0;
+        var (cues, opened) = (0, 0);
         var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
         int[] snares = [DrumGroups.GetTrackNumber(DrumDefinitions.AcousticSnare), DrumGroups.GetTrackNumber(DrumDefinitions.ElectricSnare)];
         foreach (var song in TestCorpus.Range(128))
@@ -18,15 +18,20 @@ public sealed class LiftReportTest
             {
                 var bar = song.Map.MeterAt(line - 1e-6).BarDuration;
                 // the open hi-hat, 46, on the last beat, and the snare's head, 38 or 40, over the last bar
-                foreach (var note in song.Song.Notes!.GetValueOrDefault(hiHat, Rmg.Core.Events.EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0)).Where(x => x.Position >= line - 1 - 1e-9 && x.Position < line - 1e-9))
+                var open = song.Song.Notes!.GetValueOrDefault(hiHat, Rmg.Core.Events.EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0)).Where(x => x.Position >= line - 1 - 1e-9 && x.Position < line - 1e-9).ToArray();
+                foreach (var note in open)
                     await Assert.That(note.Value.Pitches[0]).IsEqualTo(46).Because($"seed {song.Seed} at {note.Position}");
+                opened += open.Length > 0 ? 1 : 0;
                 foreach (var note in snares.SelectMany(t => song.Song.Notes!.GetValueOrDefault(t, Rmg.Core.Events.EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0))).Where(x => x.Position >= line - bar - 1e-9 && x.Position < line - 1e-9))
                     await Assert.That(note.Value.Pitches[0]).IsNotEqualTo(37).Because($"seed {song.Seed} at {note.Position}");
                 cues++;
             }
         }
 
+        // the hi-hat opening where it plays the last beat, which a third of the cues have, the rest keeping time on another
+        Console.WriteLine($"{opened} of {cues} cues opening the hi-hat");
         await Assert.That(cues).IsGreaterThan(20);
+        await Assert.That(opened).IsGreaterThan(cues / 5);
     }
 
     [Test]

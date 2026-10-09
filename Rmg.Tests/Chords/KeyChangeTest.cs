@@ -53,10 +53,11 @@ public sealed class KeyChangeTest
         {
             var song = TestCorpus.Get(seed, new SongOverrides(Base: 1));
             var changes = Changes(song);
+            var starts = PatternStarts(song);
 
             // nearly every one, a step and a section's own key now and then coming back to the key it left
-            await Assert.That(changes.All(x => PatternStarts(song).Contains(x.Position))).IsTrue();
-            await Assert.That(changes.Length).IsGreaterThanOrEqualTo(PatternStarts(song).Length * 3 / 4);
+            await Assert.That(changes.All(x => starts.Any(start => Math.Abs(start - x.Position) < 1e-9))).IsTrue();
+            await Assert.That(changes.Length).IsGreaterThanOrEqualTo(starts.Length * 3 / 4);
             await Assert.That(changes.All(x => x.Semitones is >= -5 and <= 6)).IsTrue();
             // every change moves the key
             await Assert.That(changes.Zip(changes.Skip(1)).All(x => x.First.Semitones != x.Second.Semitones)).IsTrue();

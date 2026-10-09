@@ -98,14 +98,16 @@ public sealed class RiffTest
 
                 doubled++;
                 var twinned = notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.SoundsAs) > 0).ToArray();
-                if (twinned.Length == 0)
+                // a melody to sound as
+                if (twinned.Length == 0 || melody.Count == 0)
                     continue;
 
                 inTimbre++;
                 // in the program the melody plays there
                 foreach (var note in twinned)
                 {
-                    var near = melody.LastOrDefault(x => x.Position <= note.Position + 1e-9, melody[0]);
+                    // the melody's note sounding there, or the nearest
+                    var near = melody.MinBy(x => x.Position <= note.Position + 1e-9 && x.Position + x.Value.Duration > note.Position ? -1 : Math.Abs(x.Position - note.Position));
                     await Assert.That(program(SongTracks.CounterMelodyTrack, note)).IsEqualTo(program(SongTracks.MelodyTrack, near)).Because($"seed {song.Seed} at {note.Position}");
                 }
             }
