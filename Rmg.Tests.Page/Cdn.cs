@@ -8,7 +8,7 @@ namespace Rmg.Tests.Page;
 /// <summary>
 ///     The page's modules from the CDN (cdn.jsdelivr.net), served to every page from a cache rather than fetched by each:
 ///     a module holds back the page's load, so that one slow fetch would fail a test, and their URLs name their versions,
-///     so that a copy kept on disk stays right. Fetched once a run where the disk has none.
+///     so that a copy kept on disk stays right. Fetched once a run where the disk has none, and again where that failed.
 /// </summary>
 internal static class Cdn
 {
@@ -22,7 +22,20 @@ internal static class Cdn
 
     public static async Task Serve(IRoute route)
     {
-        var (body, type) = await Files.GetOrAdd(route.Request.Url, url => new Lazy<Task<(byte[], string)>>(() => Load(url))).Value;
+        var file = Files.GetOrAdd(route.Request.Url, url => new Lazy<Task<(byte[] Body, string Type)>>(() => Load(url)));
+        (byte[] Body, string Type) loaded;
+        try
+        {
+            loaded = await file.Value;
+        }
+        catch
+        {
+            // a failed fetch not kept, so that the next page fetches it again
+            Files.TryRemove(new KeyValuePair<string, Lazy<Task<(byte[] Body, string Type)>>>(route.Request.Url, file));
+            throw;
+        }
+
+        var (body, type) = loaded;
         try
         {
             await route.FulfillAsync(new RouteFulfillOptions

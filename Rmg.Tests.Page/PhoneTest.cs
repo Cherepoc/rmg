@@ -49,6 +49,8 @@ public sealed class PhoneTest(Site site)
             foreach (var middle in tops[i]) await Assert.That(Math.Abs(middle - tops[i][0])).IsLessThan(8);
             if (i > 0) await Assert.That(tops[i].Min()).IsGreaterThan(tops[i - 1].Max() + 8);
         }
+
+        await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]

@@ -100,6 +100,8 @@ public sealed class DoubleClickTest(Site site)
 
         await Assert.That(await Setting(page, "form").InputValueAsync()).IsEqualTo(drawn);
         await Assert.That(await Setting(page, "form").IsDisabledAsync()).IsTrue();
+        // past the page's wait before it remakes a song, which would come after it
+        await Task.Delay(SongPage.PastRemake);
         await Assert.That(page.Requests.Count).IsEqualTo(asked);
     }
 

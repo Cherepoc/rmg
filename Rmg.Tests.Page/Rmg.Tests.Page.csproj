@@ -21,6 +21,14 @@
       <ProjectReference Include="..\Rmg.WebApi\Rmg.WebApi.csproj" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
+    <!--
+        the listening mode's questions as the tests ask them, served in place of the page's own, which lose questions as
+        they are answered: one patching a genre, copies of it for the tests that give verdicts, and one leaving out a stage
+    -->
+    <ItemGroup>
+      <None Include="listening.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
     <!-- a collection compared in its order, or as a set where it says so -->
     <ItemGroup>
       <Using Include="TUnit.Assertions.Enums" />

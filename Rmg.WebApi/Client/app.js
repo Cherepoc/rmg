@@ -52,7 +52,7 @@ import { asGenre, byName, hasAGenre, isSameGenre, nestedChoices, presetById, pre
 import { createGenreEditor } from "./genre-editor.js";
 import { createGenreManager } from "./genre-manager.js";
 import { since, tell, track } from "./tally.js";
-import { createListeningIndex, createListeningStrip, listeningQuestion, withoutDevice } from "./listening.js";
+import { createListeningIndex, createListeningStrip, listeningQuestion, loadQuestions, withoutDevice } from "./listening.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
 const PAUSE_ICON = "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z";
@@ -2720,15 +2720,22 @@ start();
 /**
  *     The listening mode where the address asks a question (listening.js): each of its songs in its genre, made with its
  *     device or without, the stages and the genre's choices the one without leaves out, and a verdict on it told; the
- *     index of the questions where it asks none, or one not asked. Whether the address asks for the listening mode.
+ *     index of the questions where it asks none, or one not asked. Whether the address asks for the listening mode,
+ *     whose questions then come as they are fetched.
  */
 function startListening() {
     const asked = new URL(location.href).searchParams.get("listen");
     if (asked === null) return false;
-    const question = listeningQuestion(asked);
+    loadQuestions().then((questions) => askQuestion(questions, asked));
+    return true;
+}
+
+/** The question asked of the questions, or their index where it is none of them. */
+function askQuestion(questions, asked) {
+    const question = listeningQuestion(questions, asked);
     if (question === null) {
-        showListeningIndex();
-        return true;
+        showListeningIndex(questions);
+        return;
     }
 
     asksQuestion = true;
@@ -2750,11 +2757,10 @@ function startListening() {
         verdict: (seed, choice) => tell("verdict", { seed, version: songSeed === seed && songVersion !== null ? songVersion : serverVersion, detail: `${question.id}:${choice}` }),
     });
     document.querySelector("main").prepend(strip);
-    return true;
 }
 
 /** The index of the questions, with their verdicts as the server that listens counts them, none where it does not. */
-async function showListeningIndex() {
+async function showListeningIndex(questions) {
     let verdicts = null;
     try {
         const response = await fetch(new URL("api/listening/verdicts", location.href));
@@ -2762,7 +2768,7 @@ async function showListeningIndex() {
     } catch {
         // the index as a server that does not listen shows it
     }
-    document.querySelector("main").prepend(createListeningIndex(verdicts, (id) => presetById(id)?.name ?? id));
+    document.querySelector("main").prepend(createListeningIndex(questions, verdicts, (id) => presetById(id)?.name ?? id));
 }
 
 /**

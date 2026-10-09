@@ -1,0 +1,236 @@
+[
+  {
+    "id": "quieter-form",
+    "question": "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
+    "decides": "The quieter form's chances by genre.",
+    "genre": "blackMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "quieter": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "D",
+        "at": 97.1,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))",
+          "Riff's twin (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 84.1,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 110.6,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 233.2,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 38.7,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 16.1,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "verdict-replaced",
+    "question": "A copy of the quieter form's question, whose verdicts a test gives again.",
+    "decides": "The quieter form's chances by genre.",
+    "genre": "blackMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "quieter": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "D",
+        "at": 97.1,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))",
+          "Riff's twin (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 84.1,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 110.6,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 233.2,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 38.7,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 16.1,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mutes-kept",
+    "question": "A copy of the quieter form's question, on whose songs a test mutes and solos parts.",
+    "decides": "The quieter form's chances by genre.",
+    "genre": "blackMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "quieter": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "D",
+        "at": 97.1,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))",
+          "Riff's twin (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 84.1,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 110.6,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 233.2,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 38.7,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 16.1,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ghosts-left-out",
+    "question": "Funk's ghost notes left out: does the groove miss them?",
+    "decides": "The quieter form's chances by genre.",
+    "genre": "funk",
+    "without": {
+      "skip": [
+        "Ghosts"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      {
+        "seed": "D",
+        "at": 97.1,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))",
+          "Riff's twin (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 84.1,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 110.6,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 233.2,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 38.7,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 16.1,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  }
+]

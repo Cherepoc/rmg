@@ -26,11 +26,11 @@ public sealed class SongRequest(JsonElement body)
     /// <summary>The status it was answered with, "aborted" for one let go of, null while on its way.</summary>
     public string? Ended { get; private set; }
 
-    public void End(string ended)
+    public void End(string ended, long at)
     {
         if (Ended is not null) return;
         Ended = ended;
-        EndedAt = Stopwatch.GetTimestamp();
+        EndedAt = at;
     }
 
     public override string ToString() => $"{Seed ?? "random"}: {Ended ?? "on its way"}";
@@ -54,6 +54,12 @@ public sealed class SongPage : IAsyncDisposable
     }
 
     public IPage Page { get; }
+
+    /// <summary>
+    ///     Longer than the page waits after a change before it remakes the song (200 ms), so that a test showing no song
+    ///     was asked for waits past it.
+    /// </summary>
+    public static readonly TimeSpan PastRemake = TimeSpan.FromMilliseconds(500);
 
     /// <summary>How long every song asked for is held back before it goes to the server.</summary>
     public TimeSpan Slow { get; set; } = TimeSpan.Zero;
@@ -97,6 +103,8 @@ public sealed class SongPage : IAsyncDisposable
         }
 
         var context = await site.Browser.NewContextAsync(options);
+        // the tests' own listening questions, whatever the page's are now
+        await context.RouteAsync("**/listening.json", route => route.FulfillAsync(new RouteFulfillOptions { Path = Path.Combine(AppContext.BaseDirectory, "listening.json") }));
         var page = await context.NewPageAsync();
         var songPage = new SongPage(context, page);
 
@@ -109,15 +117,17 @@ public sealed class SongPage : IAsyncDisposable
         {
             lock (songPage._errors) songPage._errors.Add(error);
         };
-        page.RequestFailed += (_, request) => songPage.End(request, "aborted");
+        page.RequestFailed += (_, request) => songPage.End(request, "aborted", Stopwatch.GetTimestamp());
         page.RequestFinished += async (_, request) =>
         {
+            // when it finished, before the round trip that reads its status, which a request sent after it could pass
+            var at = Stopwatch.GetTimestamp();
             // a request that finishes as its test closes the page has no one left to read it, and an event handler's
             // exception would end every test's run rather than this one
             try
             {
                 var response = await request.ResponseAsync();
-                songPage.End(request, response is null ? "aborted" : response.Status.ToString());
+                songPage.End(request, response is null ? "aborted" : response.Status.ToString(), at);
             }
             catch (PlaywrightException) when (page.IsClosed)
             {
@@ -164,11 +174,11 @@ public sealed class SongPage : IAsyncDisposable
         }
     }
 
-    private void End(IRequest request, string ended)
+    private void End(IRequest request, string ended, long at)
     {
         lock (_requests)
             if (_byRequest.TryGetValue(request, out var asked))
-                asked.End(ended);
+                asked.End(ended, at);
     }
 
     /// <summary>Waits until the condition holds, and fails saying what was asked for if it does not in time.</summary>

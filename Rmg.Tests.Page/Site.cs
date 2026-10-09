@@ -138,7 +138,8 @@ public sealed class Site : IAsyncInitializer, IAsyncDisposable
         return ((IPEndPoint)listener.LocalEndpoint).Port;
     }
 
-    private static DirectoryInfo Root()
+    /// <summary>The repository the tests are built in.</summary>
+    public static DirectoryInfo Root()
     {
         for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
             if (File.Exists(Path.Combine(directory.FullName, "Rmg.slnx")))

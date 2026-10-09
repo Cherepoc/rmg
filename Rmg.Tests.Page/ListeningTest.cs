@@ -4,7 +4,11 @@ using Microsoft.Playwright;
 
 namespace Rmg.Tests.Page;
 
-/// <summary>The listening mode (<c>?listen=</c> a question): a song heard with a device and without, and a verdict on it kept.</summary>
+/// <summary>
+///     The listening mode (<c>?listen=</c> a question): a song heard with a device and without, and a verdict on it kept.
+///     The questions are the tests' own (<c>listening.json</c> here), each test that gives verdicts its own question, so
+///     that the verdicts kept are its.
+/// </summary>
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class ListeningTest(Site site)
 {
@@ -38,6 +42,8 @@ public sealed class ListeningTest(Site site)
         var seconds = listenAt[0] * 60 + listenAt[1];
         await page.Until(async () => (await page.Page.Locator("#elapsed").TextContentAsync())!.Split(":").Select(int.Parse).ToArray() is var shown
                                      && shown[0] * 60 + shown[1] >= Math.Max(0, seconds - 3), "the song started where to listen");
+        // and not past it, as it would be had it started anywhere else
+        await Assert.That((await page.Page.Locator("#elapsed").TextContentAsync())!.Split(":").Select(int.Parse).ToArray() is var at ? at[0] * 60 + at[1] : 0).IsLessThanOrEqualTo(seconds + 2);
 
         count = page.Requests.Count;
         await strip.GetByRole(AriaRole.Button, new() { Name = "Play B" }).ClickAsync();
@@ -81,7 +87,7 @@ public sealed class ListeningTest(Site site)
     [Test]
     public async Task Back_GoesToTheSongBefore_AndAVerdictGivenAgainReplacesTheFirst()
     {
-        await using var page = await SongPage.Open(site, "?listen=quieter-form");
+        await using var page = await SongPage.Open(site, "?listen=verdict-replaced");
         var strip = page.Page.Locator("section.listening");
         await page.Until(() => strip.IsVisibleAsync(), "the question asked");
         var back = strip.GetByRole(AriaRole.Button, new() { Name = "Back" });
@@ -111,7 +117,7 @@ public sealed class ListeningTest(Site site)
         await page.Until(async () =>
         {
             var verdicts = await client.GetFromJsonAsync<JsonElement>("api/listening/verdicts");
-            asked = verdicts.GetProperty("verdicts").EnumerateArray().FirstOrDefault(x => x.GetProperty("question").GetString() == "quieter-form");
+            asked = verdicts.GetProperty("verdicts").EnumerateArray().FirstOrDefault(x => x.GetProperty("question").GetString() == "verdict-replaced");
             return asked.ValueKind == JsonValueKind.Object && asked.GetProperty("unsure").GetInt32() >= 1;
         }, "the verdict given again kept");
         await Assert.That(asked.GetProperty("same").GetInt32()).IsEqualTo(0);
@@ -141,7 +147,7 @@ public sealed class ListeningTest(Site site)
     [Test]
     public async Task AQuestionsSongs_KeepTheMutesAndSolos()
     {
-        await using var page = await SongPage.Open(site, "?listen=quieter-form");
+        await using var page = await SongPage.Open(site, "?listen=mutes-kept");
         var strip = page.Page.Locator("section.listening");
         await page.Until(() => strip.IsVisibleAsync(), "the question asked");
         var mute = page.Page.Locator("#mixer button.listen[aria-label='Mute the bass']");
@@ -169,6 +175,29 @@ public sealed class ListeningTest(Site site)
         await Play("A");
         await Assert.That(await mute.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
         await Assert.That(await solo.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    /// <summary>A question's song without its device leaves out the stages it names, and its song with plays them all.</summary>
+    [Test]
+    public async Task AQuestionsSongWithout_LeavesOutItsStages()
+    {
+        await using var page = await SongPage.Open(site, "?listen=ghosts-left-out");
+        var strip = page.Page.Locator("section.listening");
+        await page.Until(() => strip.IsVisibleAsync(), "the question asked");
+        foreach (var (letter, skips) in new[] { ("A", false), ("B", true) })
+        {
+            var count = page.Requests.Count;
+            await strip.GetByRole(AriaRole.Button, new() { Name = $"Play {letter}" }).ClickAsync();
+            await page.Until(() => page.Requests.Count > count, $"{letter} asked for");
+            var body = page.Requests[^1].Body;
+            await Assert.That(body.GetProperty("genreName").GetString()).IsEqualTo("Funk");
+            await Assert.That(body.TryGetProperty("skip", out var skip) ? skip.EnumerateArray().Select(x => x.GetString()).ToArray() : [])
+                .IsEquivalentTo(skips ? ["Ghosts"] : Array.Empty<string?>(), CollectionOrdering.Matching);
+            await page.Settled();
+        }
+
+        await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
 

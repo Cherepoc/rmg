@@ -135,11 +135,17 @@ public sealed class AskingTest(Site site)
         await page.FirstSong();
         var asked = page.Requests.Count;
 
-        foreach (var value in new[] { 10, 20, 30 })
-        {
-            await page.SetSetting("feel", value);
-            await Task.Delay(100);
-        }
+        // one after another within the page's wait before it remakes, however slow the test's round trips
+        await page.Page.EvaluateAsync("""
+            () => {
+                const range = document.querySelector("input[data-setting='feel']");
+                for (const value of [10, 20, 30]) {
+                    range.value = String(value);
+                    range.dispatchEvent(new Event("input"));
+                    range.dispatchEvent(new Event("change"));
+                }
+            }
+            """);
 
         await page.Until(() => page.Requests.Count > asked, "the song asked for again");
         await page.Settled();

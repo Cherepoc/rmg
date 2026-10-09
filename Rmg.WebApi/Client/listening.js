@@ -1,12 +1,17 @@
-import QUESTIONS from "./listening.json";
-
 /**
  *     The page's listening mode, `?listen=` a question's id, on a server that listens (a test instance): a device heard
  *     with and without over a few songs, A and B swapped from song to song so that neither is always the one with, and a
  *     verdict on each. The questions are written by the tests (`ListeningQuestionsTest`), each its songs and where in each
  *     the device first plays, the genre they are made in, and what the song without leaves out: stages of it and choices
- *     of its genre.
+ *     of its genre. They are served beside the page, `listening.json`, and fetched only where the page listens.
  */
+
+/** The questions, as the server serves them beside the page. */
+export async function loadQuestions() {
+    const response = await fetch(new URL("listening.json", location.href));
+    if (!response.ok) throw new Error(`The listening questions could not be fetched: ${response.status}`);
+    return response.json();
+}
 
 /**
  *     A genre's choices with a question's patch laid over them for its song without the device: every option the patch
@@ -20,8 +25,8 @@ export function withoutDevice(choices, patch) {
 }
 
 /** The question of the id, none for none or one not asked. */
-export function listeningQuestion(id) {
-    return id === null ? null : QUESTIONS.find((x) => x.id === id) ?? null;
+export function listeningQuestion(questions, id) {
+    return id === null ? null : questions.find((x) => x.id === id) ?? null;
 }
 
 /**
@@ -29,7 +34,7 @@ export function listeningQuestion(id) {
  *     asking it, and its verdicts so far, as the server that listens counts them (`/api/listening/verdicts`), the latest
  *     version's; `verdicts` none where it does not listen, which the index says.
  */
-export function createListeningIndex(verdicts, genreName) {
+export function createListeningIndex(questions, verdicts, genreName) {
     const index = document.createElement("section");
     index.className = "panel listening listening-index";
     index.setAttribute("aria-label", "Listening");
@@ -43,7 +48,7 @@ export function createListeningIndex(verdicts, genreName) {
     const list = document.createElement("ul");
     list.className = "listening-questions";
     const counted = new Map((verdicts?.verdicts ?? []).map((x) => [x.question, x]));
-    list.append(...QUESTIONS.map((question) => {
+    list.append(...questions.map((question) => {
         const item = document.createElement("li");
         item.dataset.question = question.id;
         const link = document.createElement("a");

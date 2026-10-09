@@ -18,7 +18,9 @@ public sealed class GenreTest(Site site)
         await Assert.That(await page.Page.Locator("select[aria-label='Genre']").InputValueAsync()).IsEqualTo("preset:reggae");
         // letters alone, and shorter than a key's 11, so that no key is ever an id
         var ids = await page.Page.EvaluateAsync<string[]>("() => [...document.querySelectorAll(\"select[aria-label='Genre'] option[value^='preset:']\")].map(x => x.value.slice(7))");
-        await Assert.That(ids.Length).IsEqualTo(32);
+        // every preset of the page's genres
+        var presets = System.Text.Json.JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(Site.Root().FullName, "Rmg.WebApi", "Client", "genres.json"))).RootElement;
+        await Assert.That(ids).IsEquivalentTo(presets.EnumerateArray().Select(x => x.GetProperty("id").GetString()!).ToArray(), CollectionOrdering.Any);
         await Assert.That(ids.All(x => x.All(char.IsAsciiLetter) && x.Length < 11)).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }

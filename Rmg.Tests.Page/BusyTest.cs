@@ -43,7 +43,8 @@ public sealed class BusyTest(Site site)
         page.Busy = 10;
         await page.Page.Locator("#generate").ClickAsync();
         await page.Until(async () => (await page.Status()).Contains("Could not generate"), "the page giving up", 15);
-        await Task.Delay(500);
+        // as long as a fifth ask would come after the fourth at the latest, the Retry-After and half as long again
+        await Task.Delay(1750);
 
         await Assert.That(page.Since(asked).Select(x => x.Ended)).IsEquivalentTo(new[] { "503", "503", "503", "503" }, CollectionOrdering.Matching);
         await Assert.That(await page.Status()).Contains("busy");

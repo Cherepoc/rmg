@@ -33,7 +33,7 @@
             read, and added by the render itself once it exists. Listed early, a folder this build replaces
             would still be expected, and the build would fail looking for it.
         -->
-        <Content Remove="wwwroot/assets/**;wwwroot/*.html;wwwroot/admin/*.html;wwwroot/favicon.svg" />
+        <Content Remove="wwwroot/assets/**;wwwroot/*.html;wwwroot/admin/*.html;wwwroot/favicon.svg;wwwroot/listening.json" />
 
         <ClientSource Include="$(ClientDirectory)**/*" />
 
@@ -93,7 +93,7 @@
         <RenderClientPages Bundle="$(ClientBundle)"
                            Root="$(ClientDirectory)"
                            Pages="$(ClientDirectory)index.html;$(ClientDirectory)admin/index.html;$(ClientDirectory)admin/dashboard.html"
-                           Copied="$(ClientDirectory)favicon.svg"
+                           Copied="$(ClientDirectory)favicon.svg;$(ClientDirectory)listening.json"
                            WebRoot="$(ClientWebRoot)"
                            Version="$(_ClientVersion)">
             <Output TaskParameter="AssetsFolder" PropertyName="ClientAssetsFolder" />
@@ -106,7 +106,7 @@
             written is added by hand, or a publish from a clean checkout would leave it behind.
         -->
         <ItemGroup>
-            <Content Include="$(ClientWebRoot)assets/**;$(ClientWebRoot)*.html;$(ClientWebRoot)admin/*.html;$(ClientWebRoot)favicon.svg"
+            <Content Include="$(ClientWebRoot)assets/**;$(ClientWebRoot)*.html;$(ClientWebRoot)admin/*.html;$(ClientWebRoot)favicon.svg;$(ClientWebRoot)listening.json"
                      Exclude="@(Content)"
                      CopyToPublishDirectory="PreserveNewest" />
         </ItemGroup>
