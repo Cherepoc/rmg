@@ -11,11 +11,6 @@ public sealed class FakeGenerationContext : IGenerationContext
         return NextDouble;
     }
 
-    public int GenerateInt()
-    {
-        throw new NotImplementedException();
-    }
-
     public int GenerateInt(int min, int max)
     {
         throw new NotImplementedException();

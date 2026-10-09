@@ -44,7 +44,7 @@ internal sealed class Line
 
     // every note that may be echoed, as the scale step it had from its chord's root, by its key, with where its phrase
     // aimed then
-    private readonly Dictionary<int, (int Step, int Root, double Aim)> _heard = [];
+    private readonly Dictionary<long, (int Step, int Root, double Aim)> _heard = [];
 
     // the run of echoes playing: the root of its chord, the octave it plays in, in scale steps from where it was heard, and
     // where it plays its figure inverted, the step it mirrors the figure's about, its first's
@@ -104,7 +104,7 @@ internal sealed class Line
         int step,
         double turn,
         double register,
-        int echo = 0,
+        long echo = 0,
         ChordArrival landing = ChordArrival.Free,
         PhraseStart phraseStart = PhraseStart.None,
         LineScale lineScale = LineScale.Section,

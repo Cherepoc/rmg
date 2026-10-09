@@ -19,7 +19,6 @@ internal sealed class FillGenerator
     /// <summary>The track of a trace entry that records a decision for all the drums, such as a line's fill.</summary>
     public const int DrumsTrace = -1;
 
-    private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
     /// <summary>How finely a line's place keys its stream: a 96th of a beat.</summary>
     private const int LinePlacesPerBeat = 96;
@@ -293,7 +292,7 @@ internal sealed class FillGenerator
         var density = layer.CreateDensityGenerator();
         var spread = layer.CreateFullnessGenerator();
         // the fill's change of feel from a sequence of its own, a single draw of the fill's
-        var feelChange = Feels.DrawChange(new GenerationContext((uint)SeedGenerator(_line)), feel, Feels.FillChange, feelUnconventionality, _genre);
+        var feelChange = Feels.DrawChange(new GenerationContext(_line.GenerateSeed()), feel, Feels.FillChange, feelUnconventionality, _genre);
         return new StateMapBuilder("Fill", perTrack: true)
             .Add(CompositionStateKinds.Rhythm.MaxRank, context => FillLayers.FinerRanks + density(context))
             .Add(CompositionStateKinds.Rhythm.RankOffset, density)
@@ -464,7 +463,7 @@ internal sealed class FillGenerator
             ? (FillLayers.RunEndVelocity, FillLayers.RunStartVelocity)
             : (FillLayers.RunStartVelocity, FillLayers.RunEndVelocity);
 
-        var seed = SeedGenerator(_line);
+        var seed = _line.GenerateSeed();
         var notes = new List<(double Position, int Rank, int MaxRank)>();
         if (run.Speed != FillSpeed.Steady)
         {
@@ -475,7 +474,7 @@ internal sealed class FillGenerator
             var note = rhythm.Period / Math.Pow(2, Math.Min(first, second));
             var middle = from + Math.Round((line - from) / 2 / note) * note;
             notes.AddRange(rhythm.Play(_line, seed, line, from, middle, first));
-            notes.AddRange(rhythm.Play(_line, seed + 1, line, middle, line, second));
+            notes.AddRange(rhythm.Play(_line, Seeds.Derive(seed, 1), line, middle, line, second));
         }
         else
             notes.AddRange(rhythm.Play(_line, seed, line, from, line, rhythm.MaxRank));

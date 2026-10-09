@@ -531,7 +531,7 @@ internal sealed class SectionGenerator
                 : isMelody && hooks ? sectionRhythm with { Scheme = sectionRhythm.Scheme.Unvaried() }
                 : sectionRhythm;
             var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, trackRhythm.Scheme);
-            GeneratedBars BuildBars(ImmutableArray<int> rhythmKeys) => _generators(meter).Patterns.BuildBars(
+            GeneratedBars BuildBars(ImmutableArray<long> rhythmKeys) => _generators(meter).Patterns.BuildBars(
                 seeds,
                 sectionId,
                 trackStateMaps.ToImmutableDictionary(),
@@ -544,7 +544,7 @@ internal sealed class SectionGenerator
                 rhythmKeys
             );
             var bars = BuildBars([]);
-            TrackEventStateTimelineMap<StateMap> Rebuilt(ImmutableArray<int> rhythmKeys)
+            TrackEventStateTimelineMap<StateMap> Rebuilt(ImmutableArray<long> rhythmKeys)
             {
                 using var pause = StateTrace.Pause();
                 return BuildBars(rhythmKeys).Timeline.Repeat(2);

@@ -17,7 +17,7 @@ internal sealed class LinePattern
     private readonly LineProfile _profile;
 
     // the bar pattern's seed, which names its notes for the echoes
-    private readonly int _motif;
+    private readonly ulong _motif;
 
     /// <summary>The stream a chugging note's draw of its pedal derives from its key (<see cref="Line.PedalShare" />).</summary>
     private const int PedalStream = 7;
@@ -407,7 +407,7 @@ internal sealed class LinePattern
                     return note;
 
                 var (step, turn) = profile.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.LineStepwiseness));
-                var key = Seeds.Key(noteKey, unchecked((int)seed));
+                var key = Seeds.Key(noteKey, unchecked((long)seed));
                 return note.Value
                     .With(CompositionStateKinds.LineStep, step)
                     .With(CompositionStateKinds.LineTurn, turn)
@@ -438,9 +438,9 @@ internal sealed class LinePattern
     ///     The key of a beat's note in its figure: its bar pattern's, its cycle's draw and its place in the cycle, so
     ///     that a bar pattern that comes back, and a cycle that repeats the one before, play their beats' notes again.
     /// </summary>
-    internal static int GetNoteKey(int barPattern, KeptBeat beat)
+    internal static long GetNoteKey(ulong barPattern, KeptBeat beat)
     {
-        var key = Seeds.Key(Seeds.Key(barPattern, beat.Source), beat.Slot);
+        var key = Seeds.Key(Seeds.Key(unchecked((long)barPattern), beat.Source), beat.Slot);
         return key == 0 ? 1 : key;
     }
 
@@ -488,7 +488,7 @@ internal sealed record SectionLine(
     int Track,
     LineProfile Profile,
     TrackEventStateTimelineMap<StateMap> Bars,
-    Func<ImmutableArray<int>, TrackEventStateTimelineMap<StateMap>> BuildBars,
+    Func<ImmutableArray<long>, TrackEventStateTimelineMap<StateMap>> BuildBars,
     ImmutableArray<int> Letters,
     HarmonicRhythm HarmonicRhythm,
     ImmutableArray<ChordApproach> Approaches,
@@ -521,7 +521,7 @@ internal sealed record SectionLine(
             var context = new GenerationContext(Seeds.Derive(seed, RhythmStream));
             // a draw per letter, which its bars redraw their rhythm below, the likelier where a phrase varies
             var draws = Enumerable.Range(0, Letters.Max() + 1).Select(_ => context.GenerateDouble()).ToArray();
-            ImmutableArray<int> rhythmKeys =
+            ImmutableArray<long> rhythmKeys =
             [
                 ..Enumerable.Range(0, 2 * Letters.Length).Select(bar =>
                     {

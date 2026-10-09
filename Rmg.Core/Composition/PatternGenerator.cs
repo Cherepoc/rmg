@@ -16,8 +16,6 @@ internal sealed class PatternGenerator
     // the key an answer's bar derives its fresh rhythm's seed from its bar pattern's by
     private const int AnswerRhythmKey = 1;
 
-    private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
-
     private static readonly Func<IGenerationContext, double> ArticulationOffset = Generators.SplineValue();
 
     private readonly IGenerationContext _context;
@@ -73,10 +71,10 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>The seeds of the tracks' bar patterns, a set for every letter of the scheme, one seed per track.</summary>
-    public static ImmutableArray<ImmutableDictionary<int, int>> DrawSeeds(IGenerationContext context, IEnumerable<int> trackNumbers, PhraseScheme scheme)
+    public static ImmutableArray<ImmutableDictionary<int, ulong>> DrawSeeds(IGenerationContext context, IEnumerable<int> trackNumbers, PhraseScheme scheme)
     {
         var tracks = trackNumbers.ToArray();
-        var trackSeedMapGenerator = (IGenerationContext innerContext) => tracks.ToImmutableDictionary(x => x, _ => SeedGenerator(innerContext));
+        var trackSeedMapGenerator = (IGenerationContext innerContext) => tracks.ToImmutableDictionary(x => x, _ => innerContext.GenerateSeed());
         return Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(context);
     }
 
@@ -87,7 +85,7 @@ internal sealed class PatternGenerator
     /// <param name="rhythmKeys">Every bar's key to draw its rhythm afresh by, 0 for none; none for no bar.</param>
     /// <param name="feelLeads">The tracks that play on another's feel, its tuplet, and the tracks whose feel they play on.</param>
     public GeneratedBars BuildBars(
-        ImmutableArray<ImmutableDictionary<int, int>> trackSeedMaps,
+        ImmutableArray<ImmutableDictionary<int, ulong>> trackSeedMaps,
         int sectionId,
         ImmutableDictionary<int, StateMap> trackStateMaps,
         BarDrums barDrums,
@@ -96,7 +94,7 @@ internal sealed class PatternGenerator
         StateTimelineMap barStateTimelineMap,
         SectionRhythm sectionRhythm,
         MelodyAnswer? answer,
-        ImmutableArray<int> rhythmKeys
+        ImmutableArray<long> rhythmKeys
     )
     {
         // a bar pattern's own layer, drawn for every track and bar; no chord root offset here: every track plays the
@@ -169,11 +167,8 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>Whether a drum that accents its lead plays the lead's beat at the place given, as the bar pattern's seed has it.</summary>
-    private static bool IsAccented(int seed, int trackNumber, double position, double share)
-    {
-        var key = Seeds.Key(Seeds.Key(seed, trackNumber), (int)Math.Round(position * AccentPlacesPerBeat));
-        return new GenerationContext((uint)key).TestProbability(share);
-    }
+    private static bool IsAccented(ulong seed, int trackNumber, double position, double share) =>
+        new GenerationContext(Seeds.Derive(Seeds.Derive(seed, trackNumber), (long)Math.Round(position * AccentPlacesPerBeat))).TestProbability(share);
 
     // the state that makes a track's feel, the tuplet its cycles play in, which its grouping follows
     private static readonly IStateKind FeelKind = CompositionStateKinds.Rhythm.Feel;
@@ -186,16 +181,16 @@ internal sealed class PatternGenerator
     private const int AccentPlacesPerBeat = 48;
 
     /// <summary>The seed of a bar's rhythm: its bar pattern's, drawn afresh for an answer, and again by its own key.</summary>
-    private static int GetRhythmSeed(int seed, bool redrawsRhythm, int rhythmKey)
+    private static ulong GetRhythmSeed(ulong seed, bool redrawsRhythm, long rhythmKey)
     {
-        var answered = redrawsRhythm ? Seeds.Key(seed, AnswerRhythmKey) : seed;
-        return rhythmKey == 0 ? answered : Seeds.Key(answered, rhythmKey);
+        var answered = redrawsRhythm ? Seeds.Derive(seed, AnswerRhythmKey) : seed;
+        return rhythmKey == 0 ? answered : Seeds.Derive(answered, rhythmKey);
     }
 
     /// <summary>A track's bar: its bar pattern's state over the track's, and the notes of its rhythm.</summary>
     private EventStateTimelineMap<StateMap> GenerateBar(
         int trackNumber,
-        int seed,
+        ulong seed,
         StateMap trackStateMap,
         StateTimelineMap barStateTimelineMap,
         int sectionId,
@@ -203,7 +198,7 @@ internal sealed class PatternGenerator
         Func<IGenerationContext, StateMap> barPatternLayerGenerator,
         bool isVaried,
         bool redrawsRhythm,
-        int rhythmKey,
+        long rhythmKey,
         int? phraseEnd,
         bool isResting,
         int? stroke,
@@ -216,7 +211,7 @@ internal sealed class PatternGenerator
     )
     {
         var patternSeeds = CreatePatternSeeds(seed);
-        var trackGenerationContext = _context.CreateContext((uint)patternSeeds.TrackState);
+        var trackGenerationContext = _context.CreateContext(patternSeeds.TrackState);
         // an answer's bar that draws its rhythm afresh plays its bar pattern's settings on another rhythm
         var builder = new StateMapBuilder(Layers.BarPattern, perTrack: true)
             .Add(barPatternLayerGenerator)
@@ -233,7 +228,7 @@ internal sealed class PatternGenerator
             .MergeWith(trackStateMap);
         // the bar's change of the feel it comes to, now and then, a passage in another feel, from a sequence of its own
         // by the bar pattern's seed, so that a drum playing its lead's bar patterns changes as its lead does
-        if (Feels.DrawChange(new GenerationContext((uint)Seeds.Key(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality, _genre) is { } barFeel)
+        if (Feels.DrawChange(new GenerationContext(Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality, _genre) is { } barFeel)
             stateMap = stateMap.MergeWith(Feels.At(StateDepths.BarPattern, barFeel));
         // a pinned drum plays its rhythm as its song gives it, every layer's moves of it let go of
         if (trackStateMap.GetStateValue(CompositionStateKinds.Pinned) > 0)
@@ -287,7 +282,7 @@ internal sealed class PatternGenerator
         var rhythmPattern = _rhythmPatternGenerator(stateMap);
 
         var patternSeeds = CreatePatternSeeds(stateMap.GetStateValue(CompositionStateKinds.ValueSeed));
-        var changingContext = _context.CreateContext((uint)patternSeeds.StateChanges);
+        var changingContext = _context.CreateContext(patternSeeds.StateChanges);
         var changingStateTimelineMap = Generators.SequentialTimeline(CreateBeatLayerGenerator(stateMap), 1, 4)(changingContext)
             .ToStateTimelineMap();
 
@@ -494,13 +489,13 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>The seeds of the random sequences that make up one pattern of a track.</summary>
-    internal static PatternSeeds CreatePatternSeeds(int seed)
+    internal static PatternSeeds CreatePatternSeeds(ulong seed)
     {
         return new PatternSeeds(
-            Seeds.Key(seed, 0),
-            Seeds.Key(seed, 1),
-            Seeds.Key(seed, 2),
-            Seeds.Key(seed, 3)
+            Seeds.Derive(seed, 0),
+            Seeds.Derive(seed, 1),
+            Seeds.Derive(seed, 2),
+            Seeds.Derive(seed, 3)
         );
     }
 }
@@ -637,7 +632,7 @@ internal readonly record struct ResolvedRhythm(
 /// <param name="Rhythm">Which beats of the rhythm play.</param>
 /// <param name="StateChanges">How the note offsets change along the pattern.</param>
 /// <param name="NoteValues">The values of the notes that play.</param>
-internal readonly record struct PatternSeeds(int TrackState, int Rhythm, int StateChanges, int NoteValues);
+internal readonly record struct PatternSeeds(ulong TrackState, ulong Rhythm, ulong StateChanges, ulong NoteValues);
 
 internal static class IncrementalGenerators
 {

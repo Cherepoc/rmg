@@ -10,16 +10,15 @@ namespace Rmg.Tests.SongGenerators;
 public sealed class SongGeneratorPatternSeedsTest
 {
     [Test]
-    [Arguments(0)]
-    [Arguments(1)]
-    [Arguments(-7)]
-    [Arguments(int.MaxValue)]
-    [Arguments(int.MinValue)]
-    public async Task CreatePatternSeeds_GivesEachSequenceItsOwnSeed(int seed)
+    [Arguments(0UL)]
+    [Arguments(1UL)]
+    [Arguments(ulong.MaxValue)]
+    [Arguments(1UL << 63)]
+    public async Task CreatePatternSeeds_GivesEachSequenceItsOwnSeed(ulong seed)
     {
         var result = PatternGenerator.CreatePatternSeeds(seed);
 
-        int[] seeds = [result.TrackState, result.Rhythm, result.StateChanges, result.NoteValues];
+        ulong[] seeds = [result.TrackState, result.Rhythm, result.StateChanges, result.NoteValues];
         await Assert.That(seeds.Distinct().Count()).IsEqualTo(4);
     }
 

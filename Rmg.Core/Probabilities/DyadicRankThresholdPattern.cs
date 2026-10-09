@@ -27,7 +27,7 @@ public sealed class DyadicRankThresholdPattern
     /// </param>
     public static DyadicRankThresholdPattern Create(
         IGenerationContext generationContext,
-        int generationSeed,
+        ulong generationSeed,
         Func<int, double> rankWeightFunc,
         DyadicTimelineDescriptor descriptor,
         double variation = 1
@@ -36,7 +36,7 @@ public sealed class DyadicRankThresholdPattern
         ArgumentOutOfRangeException.ThrowIfNegative(variation);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(variation, 1);
 
-        var seededGenerationContext = generationContext.CreateContext((uint)generationSeed);
+        var seededGenerationContext = generationContext.CreateContext(generationSeed);
         // every slot's last draw, and the cycle it was drawn in, by its rank too, so that a cycle of another shape, an
         // uneven meter's longer group, repeats no draw made for another place
         var decisions = new Dictionary<(int Slot, int Rank), (bool IsKept, int Cycle)>();

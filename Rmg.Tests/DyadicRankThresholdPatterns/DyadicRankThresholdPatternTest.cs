@@ -30,7 +30,7 @@ public sealed class DyadicRankThresholdPatternTest
     [Test]
     public async Task NoVariation_RepeatsTheFirstCycle_AsARiff()
     {
-        for (var seed = 0; seed < 50; seed++)
+        for (var seed = 0UL; seed < 50; seed++)
         {
             var pattern = DyadicRankThresholdPattern.Create(
                 new GenerationContext(0),
@@ -57,7 +57,7 @@ public sealed class DyadicRankThresholdPatternTest
             .Select(seed => Positions(
                 DyadicRankThresholdPattern.Create(
                     new GenerationContext(0),
-                    seed,
+                    (ulong)seed,
                     Weights(0, 0.5),
                     new DyadicTimelineDescriptor(BarDuration, 0.5, 0, 0, BarDuration, 2),
                     variation: 0
@@ -72,7 +72,7 @@ public sealed class DyadicRankThresholdPatternTest
     public async Task FullVariation_IsTheSameAsEveryPositionDrawnOnItsOwn()
     {
         // what the pattern did before cycles could repeat: every position kept or not by its own draw, in order
-        for (var seed = 0; seed < 30; seed++)
+        for (var seed = 0UL; seed < 30; seed++)
         {
             var descriptor = new DyadicTimelineDescriptor(BarDuration, 4 / 3.0, 0.25, 2, BarDuration, 2);
             var weights = Weights(1, 0.5);
@@ -92,7 +92,7 @@ public sealed class DyadicRankThresholdPatternTest
     public async Task SomeVariation_RedrawsSomeCycles()
     {
         var redrawn = 0;
-        for (var seed = 0; seed < 200; seed++)
+        for (var seed = 0UL; seed < 200; seed++)
         {
             var pattern = DyadicRankThresholdPattern.Create(
                 new GenerationContext(0),

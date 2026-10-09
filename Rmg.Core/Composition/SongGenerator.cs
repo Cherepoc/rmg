@@ -98,7 +98,7 @@ public static class SongGenerator
     }
 
     /// <summary>A stream's own sequence for a place in it, such as a facet of the song's unconventionality, a part or an appearance.</summary>
-    internal static IGenerationContext CreateStream(ulong seed, SongStream stream, int place)
+    internal static IGenerationContext CreateStream(ulong seed, SongStream stream, long place)
     {
         return new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)stream), place));
     }

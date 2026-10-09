@@ -80,7 +80,7 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Me
     /// <param name="maxRank">The rank of the finest notes.</param>
     public ImmutableArray<(double Position, int Rank, int MaxRank)> Play(
         IGenerationContext context,
-        int seed,
+        ulong seed,
         double line,
         double from,
         double to,

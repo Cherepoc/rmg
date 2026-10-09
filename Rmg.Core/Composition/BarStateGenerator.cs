@@ -12,10 +12,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal sealed class BarStateGenerator
 {
-
-
-    private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
-
     // how many values each state that changes by bar picks from along the pattern, so that bars repeat theirs
     private const int PoolSize = 4;
 
@@ -96,7 +92,7 @@ internal sealed class BarStateGenerator
     )
     {
         // each state draws from its own random sequence, so tuning one does not change the others
-        var seed = SeedGenerator(context);
+        var seed = context.GenerateSeed();
         var changes = harmonicRhythm.Changes;
         var cadencePosition = changes[^1];
         var progressionTimeline = StateTimeline.Create(
@@ -142,7 +138,7 @@ internal sealed class BarStateGenerator
             _meter.PatternDuration,
             [
                 .._timelineGenerators.Select((generator, index) =>
-                    generator.Generate(context.CreateContext((uint)Seeds.Key(seed, index)), _meter.PatternDuration)
+                    generator.Generate(context.CreateContext(Seeds.Derive(seed, index)), _meter.PatternDuration)
                 ),
                 StateTimeline.Create(_meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer(Layers.Section),
                 progressionTimeline,
@@ -151,8 +147,8 @@ internal sealed class BarStateGenerator
                 ..shiftTimeline,
                 roleChordTimeline,
                 GenerateResets(context, facets[Facet.Chords]),
-                ..GenerateBassLeading(context.CreateContext((uint)Seeds.Key(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),
-                GenerateMelodyContour(context, context.CreateContext((uint)Seeds.Key(seed, ContourPeriodStream)), facets[Facet.Melody]),
+                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),
+                GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), facets[Facet.Melody]),
                 GenerateMelodyPhraseEnd(context)
             ]
         );

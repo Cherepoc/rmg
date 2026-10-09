@@ -107,7 +107,7 @@ public sealed class PhraseSchemesTest
     public async Task VariedRepeat_StartsAsItsFirstPlayDid()
     {
         // the same bar pattern, drawn afresh more often: its first cycle is the same
-        for (var seed = 0; seed < 30; seed++)
+        for (var seed = 0UL; seed < 30; seed++)
         {
             var weights = WeightUtil.CreateGeometricRankWeightFunc(1, 0, 1.0, 0.5);
             var descriptor = new DyadicTimelineDescriptor(4, 1, 0, 2, 4, 2);

@@ -13,13 +13,12 @@ public static class Seeds
     }
 
     /// <summary>
-    ///     Derives a key, such as a note's in its figure (<c>NoteKey</c>), from another and a place, the same on every run
-    ///     and platform: a name within a song, rather than a seed of its randomness, and so named apart from
-    ///     <see cref="Derive" />, which a seed's int would otherwise fall to without a word.
+    ///     Derives a key, such as a note's in its figure (<c>NoteKey</c>), from another and a place: a name within a song,
+    ///     which a stream's place may be, rather than a seed of its randomness, as wide as a seed.
     /// </summary>
-    public static int Key(int key, int place)
+    public static long Key(long key, long place)
     {
-        return unchecked((int)Mix(((ulong)(uint)place << 32) | (uint)key));
+        return unchecked((long)Derive((ulong)key, place));
     }
 
     /// <summary>A seed of all 64 bits drawn afresh, for a song nobody asked for by its seed.</summary>

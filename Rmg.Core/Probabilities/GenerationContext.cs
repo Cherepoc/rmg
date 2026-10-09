@@ -14,12 +14,6 @@ public sealed class GenerationContext : IGenerationContext
         return _random.NextDouble();
     }
 
-    /// <summary>A number from 0 to <see cref="int.MaxValue" />, as <see cref="System.Random.Next()" /> draws one.</summary>
-    public int GenerateInt()
-    {
-        return (int)(_random.Next() >> 33);
-    }
-
     /// <summary>A number from min up to max, max not among them; min where they are the same, a draw spent all the same, so that the draws are as many.</summary>
     public int GenerateInt(int min, int max)
     {
@@ -55,8 +49,6 @@ public sealed class GenerationContext : IGenerationContext
 public interface IGenerationContext
 {
     double GenerateDouble();
-
-    int GenerateInt();
 
     int GenerateInt(int min, int max);
 

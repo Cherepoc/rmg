@@ -24,11 +24,11 @@ public sealed class DyadicRankItemPattern<T>
         IGenerationContext context,
         DyadicRankThresholdPattern rhythmPattern,
         Func<IGenerationContext, Func<double, KeptBeat, T>> drawFunc,
-        int generationSeed,
+        ulong generationSeed,
         Func<double, KeptBeat, T, T>? complete = null
     )
     {
-        var seededContext = context.CreateContext((uint)generationSeed);
+        var seededContext = context.CreateContext(generationSeed);
         var draw = drawFunc(seededContext);
         complete ??= (_, _, values) => values;
         // every beat's values by its cycle and its place in it

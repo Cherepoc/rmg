@@ -65,7 +65,7 @@ public sealed class DrumCoverageTest
         var covered = DrumCoverage.Cover(context, Song, sections, Once(0, 1), _ => throw new InvalidOperationException());
 
         await Assert.That(covered).IsEquivalentTo(sections, CollectionOrdering.Matching);
-        await Assert.That(context.GenerateInt()).IsEqualTo(new GenerationContext(1).GenerateInt());
+        await Assert.That(context.GenerateSeed()).IsEqualTo(new GenerationContext(1).GenerateSeed());
     }
 
     [Test]

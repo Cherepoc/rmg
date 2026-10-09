@@ -11,7 +11,7 @@ internal static class CompositionStateKinds
 
     public static FillStateKinds Fill { get; } = new(Prefix);
 
-    public static StateKind<int> ValueSeed { get; } = StateKinds.CreateAdditive<int>(Prefix + "ValueSeedValue");
+    public static StateKind<ulong> ValueSeed { get; } = StateKinds.CreateAdditive<ulong>(Prefix + "ValueSeedValue");
 
     public static IncrementalStateKinds IncrementalArticulationOffset { get; } =
         new(Prefix + StateKinds.ArticulationOffset.Name);
@@ -33,7 +33,7 @@ internal static class CompositionStateKinds
     // which note of a figure a line's note is: the key of its beat in its bar pattern's rhythm, the same for a beat of a
     // bar that comes back and for a beat of a cycle that repeats the one before, so that the note plays again, and is
     // mutated alike, wherever the figure does; 0 for none
-    public static StateKind<int> NoteKey { get; } = StateKinds.CreateAdditive<int>(Prefix + "NoteKey", StateScope.Render);
+    public static StateKind<long> NoteKey { get; } = StateKinds.CreateAdditive<long>(Prefix + "NoteKey", StateScope.Render);
 
     // how far above or below the middle of its range a line aims in a bar, in semitones, for the phrase's shape
     public static StateKind<double> LineRegister { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineRegister", StateScope.Render);
@@ -285,7 +285,7 @@ internal static class CompositionStateKinds
             Period = new PeriodStateKinds(prefix + "Period");
             Phase = new DyadicRhythmStateKinds(prefix + "Phase");
             MaxRank = StateKinds.CreateAdditive<int>(prefix + "MaxRank");
-            Seed = StateKinds.CreateAdditive<int>(prefix + "SeedValue");
+            Seed = StateKinds.CreateAdditive<ulong>(prefix + "SeedValue");
             RankOffset = StateKinds.CreateAdditive<int>(prefix + "RankOffset");
             Fullness = StateKinds.CreateAdditive<double>(prefix + "Fullness");
             Variation = StateKinds.CreateAdditive<double>(prefix + "Variation");
@@ -312,7 +312,7 @@ internal static class CompositionStateKinds
 
         public StateKind<int> MaxRank { get; }
 
-        public StateKind<int> Seed { get; }
+        public StateKind<ulong> Seed { get; }
 
         public StateKind<int> RankOffset { get; }
 

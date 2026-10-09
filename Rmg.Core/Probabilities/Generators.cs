@@ -182,11 +182,6 @@ public static class Generators
         return context => context.GenerateInt(min, max);
     }
 
-    public static Func<IGenerationContext, int> Int()
-    {
-        return context => context.GenerateInt();
-    }
-
     /// <summary>A layer's shift of an amount, up to the given size either way (<see cref="SplineValue" />).</summary>
     public static Func<IGenerationContext, double> Spread(double size) => SplineValue().Then(x => x * size);
 

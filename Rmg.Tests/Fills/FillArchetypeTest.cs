@@ -208,7 +208,7 @@ public sealed class FillArchetypeTest
     {
         // a half-bar cycle, its strongest note on the downbeat, and little kept of the weaker ones
         var sparse = FillRhythm.Of(Groove(-1, 0, 2, fullness: 0.05), StateMap.Default, 0.2, Meter.FourFour);
-        var empty = Enumerable.Range(0, 200).Count(x => sparse.Play(new GenerationContext((ulong)x), x, Line, Line - 1, Line, sparse.MaxRank).IsEmpty);
+        var empty = Enumerable.Range(0, 200).Count(x => sparse.Play(new GenerationContext((ulong)x), (ulong)x, Line, Line - 1, Line, sparse.MaxRank).IsEmpty);
 
         await Assert.That(empty).IsGreaterThan(100);
     }

@@ -59,10 +59,10 @@ internal sealed record SongDecisions(
     public IGenerationContext Stream(SongStream stream) => SongGenerator.CreateStream(Seed, stream);
 
     /// <summary>A stage's own stream for each place, such as an appearance or a section.</summary>
-    public IGenerationContext Stream(SongStream stream, int place) => SongGenerator.CreateStream(Seed, stream, place);
+    public IGenerationContext Stream(SongStream stream, long place) => SongGenerator.CreateStream(Seed, stream, place);
 
     /// <summary>A stage's own stream for each pair of places, such as a section and a track.</summary>
-    public IGenerationContext Stream(SongStream stream, int place, int other) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(Seed, (int)stream), place), other));
+    public IGenerationContext Stream(SongStream stream, long place, long other) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(Seed, (int)stream), place), other));
 
     /// <summary>
     ///     A stage's own stream for each appearance, by its place among those played (<see cref="Played" />), keyed by its
@@ -74,7 +74,7 @@ internal sealed record SongDecisions(
     public IGenerationContext AppearanceStream(SongStream stream, int index, int other) => Stream(stream, AppearanceKey(Played, index), other);
 
     /// <summary>An appearance's key, by its section and how many times the section played before it.</summary>
-    internal static int AppearanceKey(IReadOnlyList<int> played, int index) => Seeds.Key(played[index], played.Take(index).Count(x => x == played[index]));
+    internal static long AppearanceKey(IReadOnlyList<int> played, int index) => Seeds.Key(played[index], played.Take(index).Count(x => x == played[index]));
 
     /// <summary>A facet's value as the rhythm's unconventionality, for a choice that leans by it.</summary>
     public RhythmicUnconventionality Of(Facet facet) => new(Facets[facet]);
