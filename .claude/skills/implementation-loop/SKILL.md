@@ -46,6 +46,8 @@ every step with its commit, its measurements, and whatever was postponed or left
 
 - `dotnet` is `~/.dotnet/dotnet`: `export PATH=$HOME/.dotnet:$PATH`.
 - Build: `dotnet build Rmg.slnx -c Release --nologo -v quiet`.
+- Songs changed: `dotnet Rmg/bin/Release/net10.0/Rmg.dll --fingerprint-songs > before.txt` before the change and
+  again after it, the lines that differ the songs it changed, of 256.
 - Page tests: `dotnet run --project Rmg.Tests.Page -c Release --no-build`, about 15 s, after a build of the solution.
 - Tests: `dotnet run --project Rmg.Tests -c Release --no-build`; one class, explicit report tests included:
   `-- --treenode-filter "/*/*/ClassName/*" --output detailed`.

@@ -87,6 +87,7 @@ public sealed class CliOptionsParserTest
     [Test]
     [Arguments("--version", CliCommand.Version)]
     [Arguments("--fingerprint", CliCommand.Fingerprint)]
+    [Arguments("--fingerprint-songs", CliCommand.FingerprintSongs)]
     public async Task CommandOption_ResultsIn_ItsCommand(string option, CliCommand expected)
     {
         var result = Parse("-n", "3", option);

@@ -22,6 +22,13 @@ if (parseResult.Command == CliCommand.Fingerprint)
     return 0;
 }
 
+if (parseResult.Command == CliCommand.FingerprintSongs)
+{
+    foreach (var line in SongFingerprint.ComputeBySong(SongFingerprint.CorpusSize))
+        Console.Out.WriteLine(line);
+    return 0;
+}
+
 if (parseResult.Options is null)
 {
     Console.Error.WriteLine(parseResult.Error);

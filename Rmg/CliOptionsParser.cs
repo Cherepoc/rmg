@@ -14,7 +14,10 @@ public enum CliCommand
     Version,
 
     /// <summary>The songs' fingerprint, which the deploy compares with the file VERSION.</summary>
-    Fingerprint
+    Fingerprint,
+
+    /// <summary>Each corpus song's hash by its seed, so that two builds' lists compared count the songs a change changed.</summary>
+    FingerprintSongs
 }
 
 public sealed record CliParseResult(CliOptions? Options, string? Error, CliCommand Command)
@@ -51,6 +54,8 @@ public static class CliOptionsParser
           --version            Print RMG's songs' version and commit
           --fingerprint        Print the fingerprint of the songs of the corpus's seeds, which changes
                                when the songs do
+          --fingerprint-songs  Print each corpus song's hash by its seed, two builds' lists compared
+                               counting the songs a change changed
           -h, --help           Show this help
         """;
 
@@ -71,6 +76,8 @@ public static class CliOptionsParser
                 return new CliParseResult(null, null, CliCommand.Version);
             if (arg == "--fingerprint")
                 return new CliParseResult(null, null, CliCommand.Fingerprint);
+            if (arg == "--fingerprint-songs")
+                return new CliParseResult(null, null, CliCommand.FingerprintSongs);
 
             var name = arg;
             string? inlineValue = null;

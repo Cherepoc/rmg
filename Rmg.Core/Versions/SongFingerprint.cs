@@ -50,8 +50,12 @@ public static class SongFingerprint
         return Convert.ToHexString(hash.GetHashAndReset())[..16];
     }
 
+    /// <summary>Each song's hash of seeds 0 to <paramref name="count" /> - 1, a line a seed, "seed hash", so that two builds' lists compared count the songs a change changed.</summary>
+    public static IEnumerable<string> ComputeBySong(int count) =>
+        Enumerable.Range(0, count).AsParallel().AsOrdered().Select(seed => $"{seed} {Convert.ToHexString(SHA256.HashData(Write(seed, SongOverrides.None)))[..16]}");
+
     /// <summary>A song's MIDI file as the fingerprint hashes it, without the build's label.</summary>
-    internal static byte[] Write(int seed, SongOverrides overrides)
+    private static byte[] Write(int seed, SongOverrides overrides)
     {
         using var stream = new MemoryStream();
         Render.RenderSong(SongGenerator.GenerateSong((ulong)seed, overrides)).Write(stream, null);
