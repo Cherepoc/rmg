@@ -29,35 +29,24 @@ public sealed class SongIntroTest
     private static double WindowStart(CorpusSong song) => song.Map.Intro.Window.IsBefore ? 0 : song.Origin;
 
     /// <summary>
-    ///     A song sounds from its first bar, its intro too, where its drums only mark the form and play in its sections
-    ///     alone (<see cref="DrumMarks" />): a Medieval song once came in on its drums alone, which the marks then cleared,
-    ///     and sat silent for four bars; a sparse song's parts resting through their first bar, its earliest coming in on
-    ///     its first beat (<see cref="SilentStart" />).
-    /// </summary>
-    /// <summary>
-    ///     No section's appearance silent, in every genre: an IDM song's second section once rested every part it had,
-    ///     its rests drawn alone covering them all (<see cref="GeneratedSection" />).
+    ///     In every genre, a song sounds from its first bar, its intro too, where its drums only mark the form and play in
+    ///     its sections alone (<see cref="DrumMarks" />): a Medieval song once came in on its drums alone, which the marks
+    ///     then cleared, and sat silent for four bars; a sparse song's parts resting through their first bar, its earliest
+    ///     coming in on its first beat (<see cref="SilentStart" />). And no section's appearance is silent: an IDM song's
+    ///     second section once rested every part it had, its rests drawn alone covering them all
+    ///     (<see cref="GeneratedSection" />). One pass over the genres' songs for both, as they are made once.
     /// </summary>
     [Test]
-    public async Task NoSection_IsSilent_InEveryGenre()
+    public async Task ASong_SoundsFromItsFirstBar_AndInEverySection_InEveryGenre()
     {
         foreach (var genre in GenrePresets.All.Select(x => x.Id).Prepend(null))
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
         {
             var notes = song.Song.Notes!.Values.SelectMany(x => x).Select(x => x.Position).Order().ToArray();
+            await Assert.That(notes.Length).IsGreaterThan(0).Because($"{genre ?? "the songs"} seed {song.Seed}");
+            await Assert.That(notes[0]).IsLessThan(song.Song.Meter.BarDuration).Because($"{genre ?? "the songs"} seed {song.Seed}");
             foreach (var span in song.Map.Sections)
                 await Assert.That(notes.Any(x => x >= span.Start - 1e-9 && x < span.End - 1e-9)).IsTrue().Because($"{genre ?? "the songs"} seed {song.Seed} at {span.Start}");
-        }
-    }
-
-    [Test]
-    public async Task ASong_SoundsFromItsFirstBar_InEveryGenre()
-    {
-        foreach (var genre in GenrePresets.All.Select(x => x.Id).Prepend(null))
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
-        {
-            var first = song.Song.Notes!.Values.SelectMany(x => x).Select(x => x.Position).DefaultIfEmpty(double.MaxValue).Min();
-            await Assert.That(first).IsLessThan(song.Song.Meter.BarDuration).Because($"{genre ?? "the songs"} seed {song.Seed}");
         }
     }
 

@@ -110,7 +110,8 @@ public sealed class SongEndingTest
         foreach (var song in slowing)
         {
             var tempo = song.Rendered.TempoTimeline;
-            var before = tempo.GetEffectiveValueAt(Ending(song).Start - 5);
+            // the tempo before the slowing bar, the last section's, whatever its meter
+            var before = tempo.GetEffectiveValueAt(Ending(song).Start - song.Map.Sections[^1].Meter.BarDuration - 1e-6);
 
             await Assert.That(tempo.GetEffectiveValueAt(Ending(song).Start - 1)).IsLessThan(before);
             await Assert.That(tempo.GetEffectiveValueAt(Ending(song).Start)).IsEqualTo(before * FormLayers.Ritardando[^1]).Within(1e-9);

@@ -7,11 +7,14 @@ namespace Rmg.Tests.Forms;
 /// <summary>A build and its drop: the band out for the bar before a lift, but for the drums' fill, and back on it.</summary>
 public sealed class DropTest
 {
+    // the electronic songs, made once for the tests of this class
+    private static readonly Lazy<CorpusSong[]> Electronic = new(() => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic")))));
+
     [Test]
     public async Task ADrop_SilencesTheBand_ForTheBarBeforeIt_AndTheBandComesBackInItsFirstBar()
     {
         var drops = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic")))))
+        foreach (var song in Electronic.Value)
         foreach (var at in song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!))
         {
             drops++;
@@ -33,7 +36,7 @@ public sealed class DropTest
     public async Task ABuild_RollsTheSnare_TwiceAsFastEachBar_From8thsTo32nds_BeforeTheSilence()
     {
         int builds = 0, rolled = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic")))))
+        foreach (var song in Electronic.Value)
         {
             var snare = FormLayers.BuildRollDrums.Select(DrumGroups.GetTrackNumber).FirstOrDefault(song.Song.Notes!.ContainsKey, -1);
             if (snare < 0)
@@ -58,7 +61,8 @@ public sealed class DropTest
     public async Task AFilteredDrop_KeepsTheBandPlaying_TheMixClosingOverTheBarBefore_AndOpeningOnIt()
     {
         var drops = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno")))))
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno"))));
+        foreach (var song in songs)
         foreach (var at in song.Trace.Where(x => x.Point == TracePoints.FilteredDrop).Select(x => (double)x.Value!))
         {
             drops++;
@@ -71,8 +75,7 @@ public sealed class DropTest
             await Assert.That(mix.GetEffectiveValueAt(at)).IsLessThan(0.05).Because($"seed {song.Seed} at {at}");
         }
 
-        var silent = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno"))))
-            .Sum(x => x.Trace.Count(t => t.Point == TracePoints.Drop));
+        var silent = songs.Sum(x => x.Trace.Count(t => t.Point == TracePoints.Drop));
         Console.WriteLine($"of 32 Techno songs' drops, {drops} filtered and {silent} silent");
         await Assert.That(drops).IsGreaterThan(5);
     }

@@ -34,6 +34,9 @@ public sealed class MeterReportTest
             var (start, end) = (map.Sections[0].Start, map.Sections[^1].End);
             bars += (int)Math.Round((end - start) / meter.BarDuration);
             drums += song.Drums.Count(x => x.Position >= start && x.Position < end);
+            // each section's changes to the drums' roles
+            var changes = song.Trace.Where(e => e.Point == TracePoints.DrumRoles).GroupBy(e => e.Section)
+                .ToDictionary(x => x.Key, x => (System.Collections.Immutable.ImmutableDictionary<int, DrumRole>)x.First().Value!);
             foreach (var track in DrumGroups.AllDrums.Select(DrumGroups.GetTrackNumber).Distinct())
             {
                 if (!song.Song.Notes!.TryGetValue(track, out var notes))
@@ -41,8 +44,7 @@ public sealed class MeterReportTest
                 foreach (var note in notes.Where(x => x.Position >= start && x.Position < end && x.Value.State.GetStateValue(StateKinds.ArticulationIndex) == 0))
                 {
                     // the section's role for the drum, or the song's where it keeps it
-                    var span = map.Sections.Last(x => x.Start <= note.Position + 1e-9);
-                    var changed = (System.Collections.Immutable.ImmutableDictionary<int, DrumRole>)song.Trace.First(e => e.Point == TracePoints.DrumRoles && e.Section == span.SectionId).Value!;
+                    var changed = changes[map.SectionAt(note.Position)!.SectionId];
                     var role = changed.TryGetValue(track, out var r) ? r : (DrumRole)song.Song.TrackDefinitions[track].StateMap.GetStateValue(CompositionStateKinds.DrumRole).Value;
                     var place = Math.Round(map.BeatInBar(note.Position) * 4) / 4;
                     roles[role][place] = roles[role].GetValueOrDefault(place) + 1;

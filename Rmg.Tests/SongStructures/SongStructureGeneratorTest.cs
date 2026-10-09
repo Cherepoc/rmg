@@ -76,4 +76,27 @@ public sealed class SongStructureGeneratorTest
         await Assert.That(first.SelectMany(x => x.SectionIds).ToArray())
             .IsEquivalentTo(second.SelectMany(x => x.SectionIds).ToArray(), CollectionOrdering.Matching);
     }
+
+    /// <summary>
+    ///     A free form of a length given keeps of its parts, drawn to the most there may be, the first as many as come
+    ///     nearest the length, by their sections' plays.
+    /// </summary>
+    [Test]
+    public async Task ALengthGiven_KeepsTheFirstParts_ThatComeNearestIt()
+    {
+        // an appearance of ten seconds, whatever its role
+        static SongLength Length(double target) => new(target, (_, _) => 10);
+
+        for (var seed = 0; seed < 50; seed++)
+        {
+            var all = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), Length(1e9), 0.5);
+            var kept = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), Length(300), 0.5);
+            double Distance(int count) => Math.Abs(Math.Log(all.Take(count).Sum(x => x.SectionIds.Length) * 10 / 300.0));
+
+            await Assert.That(all.Length).IsEqualTo(SongStructureGenerator.MaxPartCountForLength);
+            await Assert.That(kept.SelectMany(x => x.SectionIds).ToArray())
+                .IsEquivalentTo(all.Take(kept.Length).SelectMany(x => x.SectionIds).ToArray(), CollectionOrdering.Matching);
+            await Assert.That(Enumerable.Range(1, all.Length).All(n => Distance(n) >= Distance(kept.Length) - 1e-12)).IsTrue().Because($"seed {seed}");
+        }
+    }
 }

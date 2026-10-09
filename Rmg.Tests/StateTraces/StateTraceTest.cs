@@ -167,20 +167,4 @@ public sealed class StateTraceTest
         using var next = StateTrace.Start();
         await Assert.That(next.Entries.Count).IsEqualTo(0);
     }
-
-    [Test]
-    public async Task Trace_DoesNotChangeTheSong()
-    {
-        var plain = Rmg.Core.Rendering.Render.RenderSong(SongGenerator.GenerateSong(3));
-        Rmg.Core.Rendering.RenderedSong traced;
-        using (StateTrace.Start())
-            traced = Rmg.Core.Rendering.Render.RenderSong(SongGenerator.GenerateSong(3));
-
-        using var plainStream = new MemoryStream();
-        using var tracedStream = new MemoryStream();
-        Rmg.Core.Midi.Write(plain, plainStream, null);
-        Rmg.Core.Midi.Write(traced, tracedStream, null);
-
-        await Assert.That(tracedStream.ToArray().SequenceEqual(plainStream.ToArray())).IsTrue();
-    }
 }

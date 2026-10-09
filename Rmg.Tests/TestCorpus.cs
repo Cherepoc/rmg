@@ -122,26 +122,32 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     public double[] ChordChanges => [..Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)];
 
     /// <summary>The parts a section leaves out where the song plays it, by its span's place among the song's (<see cref="Arrangement" />).</summary>
-    public ImmutableHashSet<TrackRole> Resting(SectionSpan span) =>
-        (ImmutableHashSet<TrackRole>)Trace.Where(x => x.Point == TracePoints.Arrangement).ElementAt(Array.IndexOf(Map.Sections.ToArray(), span)).Value!;
+    public ImmutableHashSet<TrackRole> Resting(SectionSpan span) => Arrangements[Array.IndexOf(Spans, span)];
+
+    // the song's sections, and what the trace says of each, read once
+    private SectionSpan[] Spans => field ??= [..Map.Sections];
+
+    private ImmutableHashSet<TrackRole>[] Arrangements => field ??= [..Trace.Where(x => x.Point == TracePoints.Arrangement).Select(x => (ImmutableHashSet<TrackRole>)x.Value!)];
+
+    private (int Index, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent)[] Textures => field ??=
+        [..Trace.Where(x => x.Point == TracePoints.Texture).Select(x => ((int, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>>))x.Value!)];
 
     /// <summary>How a section brings its parts in where the song plays it (<see cref="Rmg.Core.Composition.Texture" />).</summary>
-    public (int Index, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Texture(SectionSpan span) =>
-        ((int, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>>))Trace.Where(x => x.Point == TracePoints.Texture).ElementAt(Array.IndexOf(Map.Sections.ToArray(), span)).Value!;
+    public (int Index, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Texture(SectionSpan span) => Textures[Array.IndexOf(Spans, span)];
 
     /// <summary>The sections the song plays as solos, by their places among its sections.</summary>
-    public ImmutableDictionary<int, SoloPlan> Solos =>
+    public ImmutableDictionary<int, SoloPlan> Solos => field ??=
         Trace.Where(x => x.Point == TracePoints.Solo).Select(x => ((int Index, SoloPlan Plan))x.Value!).ToImmutableDictionary(x => x.Index, x => x.Plan);
 
     /// <summary>Whether the song plays a section as a solo where it plays it.</summary>
-    public bool IsSolo(SectionSpan span) => Solos.ContainsKey(Array.IndexOf(Map.Sections.ToArray(), span));
+    public bool IsSolo(SectionSpan span) => Solos.ContainsKey(Array.IndexOf(Spans, span));
 
     /// <summary>Whether a section's drums play where the song plays it, rather than rest for a breakdown.</summary>
     public bool HasDrums(SectionSpan span) => !Resting(span).Contains(TrackRole.Drum);
 
     /// <summary>The phrase an appearance's drums come in at, a build bringing them in late, as its texture has it; 0 where they play from its start.</summary>
-    public int DrumsFrom(int index) => Trace.Where(x => x.Point == TracePoints.Texture).Select(x => ((int Index, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>> Silent))x.Value!)
-        .Where(x => x.Index == index).Select(x => x.Silent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max()).DefaultIfEmpty(0).First();
+    public int DrumsFrom(int index) => Textures
+        .Where(x => x.Index == index).Select(x => x.PhraseSilent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max()).DefaultIfEmpty(0).First();
 
     /// <summary>
     ///     Where the drums mark a line, as the song puts them: at every pattern from the first section on, the first after
@@ -164,7 +170,7 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
         // a line at a phrase a build's drums have come in by, with the fill they come in on
         bool IsAfterDrumsComeIn(double line)
         {
-            var index = Array.FindLastIndex(Map.Sections.ToArray(), s => s.Start <= line + 1e-9);
+            var index = Array.FindLastIndex(Spans, s => s.Start <= line + 1e-9);
             var span = Map.Sections[index];
             return (int)Math.Floor((line - span.Start) / span.Meter.PatternDuration + 1e-9) >= DrumsFrom(index);
         }

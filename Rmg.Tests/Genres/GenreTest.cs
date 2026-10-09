@@ -310,8 +310,9 @@ public sealed class GenreTest
             ImmutableDictionary<string, ByConvention>.Empty.Add("from", Alike(TempoAmount(80))).Add("to", Alike(TempoAmount(160))).Add("lean", Alike(lean))));
         double Average(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Bpm(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).Average();
 
-        await Assert.That(Average(Leaning(1))).IsGreaterThan(Average(Leaning(0.5)) + 10);
-        await Assert.That(Average(Leaning(0))).IsLessThan(Average(Leaning(0.5)) - 10);
+        var middle = Average(Leaning(0.5));
+        await Assert.That(Average(Leaning(1))).IsGreaterThan(middle + 10);
+        await Assert.That(Average(Leaning(0))).IsLessThan(middle - 10);
     }
 
     [Test]

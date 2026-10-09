@@ -158,8 +158,8 @@ public sealed class FillTest
             if (!corpusSong.PlaysDrums)
                 continue;
 
-            var (song, origin) = corpusSong;
-            var drums = Render.RenderSong(song).Tracks.Single(x => x.IsPercussionInstrument).NoteTimeline;
+            var song = corpusSong.Song;
+            var drums = corpusSong.Drums;
             // the sections of percussion only land on the percussion
             var percussionOnly = corpusSong.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
             // the bars of the sections in their meters, after the first, up to the ending's, which lands every time, but the

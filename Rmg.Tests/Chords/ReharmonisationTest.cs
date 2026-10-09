@@ -20,13 +20,17 @@ public sealed class ReharmonisationTest
     public async Task ASubstitute_IsAThirdFromTheChordItReplaces_InTheLaterAppearanceAlone()
     {
         var reharmonised = 0;
-        foreach (var seed in Enumerable.Range(0, 32))
+        // each song, side by side, and where it reharmonises, again without
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed =>
         {
             var (with, substitutes) = Generate(seed);
-            if (substitutes is not { } found)
+            return (Seed: seed, With: with, Substitutes: substitutes, Without: substitutes is null ? null : Generate(seed, "Reharmonisation").Song);
+        });
+        foreach (var (seed, with, substitutes, without) in songs)
+        {
+            if (substitutes is not { } found || without is null)
                 continue;
             reharmonised++;
-            var (without, _) = Generate(seed, "Reharmonisation");
             int Root(Song song, double position) => song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
             var changes = with.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
             foreach (var change in changes)

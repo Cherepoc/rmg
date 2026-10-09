@@ -137,7 +137,7 @@ public sealed class ScalesTest
         var pedals = ((ImmutableArray<(double Change, ImmutableArray<double> Chords, KeyChange.Device Device)>)TestCorpus.Get(seed).Trace.Single(x => x.Point == TracePoints.KeyPreparation).Value!)
             .Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (From: x.Chords[0], To: x.Change)).ToArray();
 
-        var tracks = Render.RenderSong(song).Tracks.Where(x => !x.IsPercussionInstrument).ToArray();
+        var tracks = TestCorpus.Get(seed).Rendered.Tracks.Where(x => !x.IsPercussionInstrument).ToArray();
         // a pinch harmonic, which sounds its string's overtone, the note's octave and fifth, wherever the scale is, as played
         var swing = Render.GetSwing(song);
         var pinched = song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Pinch) > 0).Select(x => swing.Apply(x.Position)).ToArray();

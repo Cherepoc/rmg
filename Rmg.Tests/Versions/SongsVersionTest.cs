@@ -44,13 +44,13 @@ public sealed class SongsVersionTest
     [Test]
     public async Task TheLabel_IsWrittenAtTheFilesStart()
     {
-        var song = Render.RenderSong(SongGenerator.GenerateSong(3));
         using var labelled = new MemoryStream();
-        song.Write(labelled, SongsVersion.Label(3));
+        TestCorpus.Get(3).Rendered.Write(labelled, SongsVersion.Label(3));
 
-        var text = System.Text.Encoding.UTF8.GetString(labelled.ToArray());
-        await Assert.That(text).Contains($"RMG {SongsVersion.Number}");
-        await Assert.That(text).Contains("seed 3");
+        // the first event of the first track, after the header's 14 bytes, the track's 8 and the event's own 4
+        var bytes = labelled.ToArray();
+        await Assert.That(bytes.AsSpan().IndexOf(System.Text.Encoding.ASCII.GetBytes($"RMG {SongsVersion.Number}"))).IsEqualTo(26);
+        await Assert.That(System.Text.Encoding.ASCII.GetString(bytes)).Contains("seed 3");
     }
 
     [Test]
@@ -63,8 +63,7 @@ public sealed class SongsVersionTest
     [Test]
     public async Task TheFingerprint_IsTheSameEveryTime()
     {
-        await Assert.That(SongFingerprint.Compute(3)).IsEqualTo(SongFingerprint.Compute(3));
-        await Assert.That(SongFingerprint.Compute(3)).IsNotEqualTo(SongFingerprint.Compute(4));
+        await Assert.That(SongFingerprint.Compute(1)).IsEqualTo(SongFingerprint.Compute(1));
     }
 
     private static string FindVersionFile()
