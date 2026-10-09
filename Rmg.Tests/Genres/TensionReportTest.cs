@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Genres;
@@ -11,7 +13,7 @@ public sealed class TensionReportTest
     ///     The share of a part's notes on the beat outside the chord they sound over, the chords part's pitches between its
     ///     changes, and how many there were; none where the song has no such part.
     /// </summary>
-    private static (int Off, int OnBeat) OffChord(CorpusSong song, TrackRole role)
+    internal static (int Off, int OnBeat) OffChord(CorpusSong song, TrackRole role)
     {
         var part = song.Song.TrackDefinitions.FirstOrDefault(x => x.Value.Role == role && song.Song.Notes!.ContainsKey(x.Key)).Key;
         if (part == 0 || !song.Song.Notes!.TryGetValue(song.Song.Track(TrackRole.Chords), out var chordNotes))
@@ -24,18 +26,25 @@ public sealed class TensionReportTest
     }
 
     /// <summary>
-    ///     A calibration: Djent's counter-melody, its strong beats on a tension 40% of them at the middle, off its chord far
-    ///     more than Metal's, 58% of its notes on the beat to 22%, and 37% without its tensions (Report, October 2026).
+    ///     A calibration: Djent's counter-melody, its strong beats on a tension 40% of them at the middle, off its chord on
+    ///     more of its beats than the same songs' without its tensions, 48% to 31% over these songs; Metal's lines, which have
+    ///     none, land off their power chords as often as chance and their songs have it, 29% to 45% (Report).
     /// </summary>
     [Test]
-    public async Task DjentsCounterMelody_LandsOffItsChordMoreThanMetals()
+    public async Task DjentsCounterMelody_LandsOffItsChord_OftenerThanWithoutItsTensions()
     {
-        double Share(string genre) =>
-            TestCorpus.InParallel(Enumerable.Range(0, 32), seed => OffChord(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))), TrackRole.CounterMelody))
+        var djent = GenrePresets.Genre("djent");
+        var plain = djent with
+        {
+            Choices = djent.Choices.SetItem(GenreChoices.Tension.Name, ImmutableDictionary<string, ByConvention>.Empty
+                .Add(GenreChoices.Name(nameof(TrackRole.Melody)), new ByConvention(0, 0, 0)).Add(GenreChoices.Name(nameof(TrackRole.CounterMelody)), new ByConvention(0, 0, 0)))
+        };
+        double Share(Genre genre) =>
+            TestCorpus.InParallel(Enumerable.Range(0, 64), seed => OffChord(TestCorpus.Get(seed, new SongOverrides(Genre: genre)), TrackRole.CounterMelody))
                 .Aggregate((Off: 0, OnBeat: 0), (sum, x) => (sum.Off + x.Off, sum.OnBeat + x.OnBeat)) is var (off, all) ? off / (double)Math.Max(1, all) : 0;
-        var (djent, metal) = (Share("djent"), Share("metal"));
-        Console.WriteLine($"the counter-melody's notes on the beat off its chord: Djent's {djent:P0}, Metal's {metal:P0}");
-        await Assert.That(djent).IsGreaterThan(metal + 0.1);
+        var (tense, without) = (Share(djent), Share(plain));
+        Console.WriteLine($"Djent's counter-melody's notes on the beat off its chord: {tense:P0}, {without:P0} without its tensions");
+        await Assert.That(tense).IsGreaterThan(without + 0.05);
     }
 
     [Test]

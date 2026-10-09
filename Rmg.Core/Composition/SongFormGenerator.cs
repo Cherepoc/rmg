@@ -280,10 +280,10 @@ internal sealed class SongFormGenerator
 
             if (plan.Ending == EndingKind.Stop)
             {
-                // the band stops before the line, and the drums land on it with the rest
+                // the band stops before the line, every part of it, a soloist too, and the drums land on it with the rest
                 var stop = end - plan.Stop;
                 description += $", stopping {plan.Stop} beats before it";
-                foreach (var track in sections[^1].Timeline.TrackTimelineMap.Keys)
+                foreach (var track in _roles.Keys)
                 {
                     edits.Cut(track, stop);
                     edits.Clear(track, stop, end);

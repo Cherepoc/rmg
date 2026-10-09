@@ -18,8 +18,9 @@ public sealed class OctaveBassTest
     [Test]
     public async Task AFunkBass_JumpsAnOctave_OftenerThanTheSongs()
     {
-        var funk = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))).ToArray();
-        var songs = TestCorpus.Range(16).ToArray();
+        var funk = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))).ToArray();
+        var songs = TestCorpus.Range(64).ToArray();
+        Console.WriteLine($"the bass an octave from the note before: funk's {Octaves(funk):P1}, the songs' {Octaves(songs):P1}");
 
         await Assert.That(Octaves(funk)).IsGreaterThan(Octaves(songs) * 2);
     }

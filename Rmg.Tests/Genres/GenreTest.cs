@@ -235,8 +235,8 @@ public sealed class GenreTest
             (GenreChoices.Rhythms[RhythmPart.Chords], [("speed", 1), ("offbeat", 0.75), ("fineness", 0)]),
             (GenreChoices.Rhythms[RhythmPart.Ground], [("speed", 1), ("fineness", 0), ("fullness", 1), ("repetition", 1)])
         );
-        var none = TestCorpus.Measure(32, GenreRhythmReportTest.Falls);
-        var moved = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => GenreRhythmReportTest.Falls(TestCorpus.Get(seed, new SongOverrides(Genre: genre))));
+        var none = TestCorpus.Measure(64, GenreRhythmReportTest.Falls);
+        var moved = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => GenreRhythmReportTest.Falls(TestCorpus.Get(seed, new SongOverrides(Genre: genre))));
         double Average(IEnumerable<Dictionary<RhythmPart, GenreRhythmReportTest.Fall>> songs, RhythmPart part, Func<GenreRhythmReportTest.Fall, double> of) =>
             songs.Where(x => x.ContainsKey(part)).Average(x => of(x[part]));
 

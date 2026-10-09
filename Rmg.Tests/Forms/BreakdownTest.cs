@@ -46,7 +46,9 @@ public sealed class BreakdownTest
                 if (song.Solos.ContainsKey(index))
                     continue;
                 var lines = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Pad)
-                    .SelectMany(x => x.Value).Count(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
+                    // a riser into a drop after it rides a resting part's channel, no line of it
+                    .SelectMany(x => x.Value).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) != Risers.Program + 1)
+                    .Count(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
                 await Assert.That(lines).IsEqualTo(0).Because(because);
             }
         }

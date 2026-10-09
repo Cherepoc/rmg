@@ -42,8 +42,14 @@ internal static class InnerLines
             && notes.All(note => note.GetStateValue(StateKinds.ChordNotePitchOffsets) is { IsEmpty: false } heights
                                  && heights.Any(IsRoot) && heights.All(x => IsRoot(x) || x * Realizer.OctaveNoteCount < Highest));
         static bool IsRoot(double height) => Math.Abs(height - Math.Round(height)) < 1e-9;
-        // every chord held long enough in a section that takes the line, but in a solo: where it starts and ends
-        var held = song.Form.Map.Sections.Where((x, i) => lining[x.SectionId] && !song.Solos.ContainsKey(i))
+        // every chord held long enough in a section that takes the line, but in a solo, and in a hook intro, the chorus's
+        // first phrase, as the chorus takes it: where it starts and ends
+        var map = song.Form.Map;
+        List<(double Start, double End, Meter Meter)> spans = [..map.Sections.Where((x, i) => lining[x.SectionId] && !song.Solos.ContainsKey(i)).Select(x => (x.Start, x.End, x.Meter))];
+        if (map.Intro.Kind == IntroKind.Hook && map.Sections.Select((x, i) => (Span: x, Index: i)).First(x => song.Structure.Roles[x.Span.SectionId] == SectionRole.Chorus) is var (chorus, chorusIndex)
+            && lining[chorus.SectionId] && !song.Solos.ContainsKey(chorusIndex))
+            spans.Insert(0, (0, map.Origin, chorus.Meter));
+        var held = spans
             .SelectMany(span => changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9)
                 .Select(x => (Start: x, End: Math.Min(changes.FirstOrDefault(c => c > x + 1e-9, span.End), span.End), span.Meter))
                 .Where(x => x.End - x.Start >= Bars * x.Meter.BarDuration - 1e-9))
