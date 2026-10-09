@@ -28,7 +28,7 @@ public sealed class GhostsTest
                 var bar = with.Map.SectionAt(note.Position)!;
                 var start = bar.Start + Math.Floor((note.Position - bar.Start + 1e-6) / bar.Meter.BarDuration) * bar.Meter.BarDuration;
                 added.Add((note.Position - start, note.Value.Velocity,
-                    notes.Where(x => x.Position >= start - 1e-9 && x.Position < start + bar.Meter.BarDuration - 1e-9 && before.Contains(Math.Round(x.Position, 6))).Max(x => x.Value.Velocity)));
+                    notes.Where(x => x.Position >= start - 1e-9 && x.Position < start + bar.Meter.BarDuration - 1e-9 && before.Contains(Math.Round(x.Position, 6))).Select(x => x.Value.Velocity).DefaultIfEmpty(double.NaN).Max()));
             }
         }
 

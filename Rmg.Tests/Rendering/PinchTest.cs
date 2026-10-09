@@ -43,8 +43,9 @@ public sealed class PinchTest
     }
 
     /// <summary>
-    ///     A riff's dive (<see cref="BendKind.Dive" />): its last held note before a louder section alone, in the section's last bar, falling an octave,
-    ///     held into the section, but where the band stops before it.
+    ///     A riff's dive (<see cref="BendKind.Dive" />): its last held note before another section alone, in the section's last bar, falling an octave,
+    ///     held into the section, but where the band stops before it; the next appearance's being the louder, by the energies
+    ///     the song steps its appearances by, which the trace does not keep, not asserted.
     /// </summary>
     [Test]
     public async Task ADive_IsTheRiffsLastHeldNoteBeforeALouderSection()
@@ -52,7 +53,6 @@ public sealed class PinchTest
         var (dives, songs, beats, reaching) = (0, 0, 0.0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("nuMetal")))))
         {
-            var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => ((SectionEnergyTrace)x.First().Value!).Energy);
             var any = false;
             foreach (var (track, notes) in song.Song.Notes!)
             foreach (var (note, i) in notes.Select((x, i) => (x, i)).Where(x => x.x.Value.State.GetStateValue(CompositionStateKinds.Bend) == (int)BendKind.Dive))

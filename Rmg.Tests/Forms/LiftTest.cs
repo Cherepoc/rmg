@@ -11,7 +11,7 @@ public sealed class LiftTest
     {
         var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
             .Add("dynamics", ImmutableDictionary<string, ByConvention>.Empty.Add("lift", new(1, 1, 1))));
-        var earlier = 0;
+        var (earlier, louder) = (0, 0);
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var (own, longer) = (TestCorpus.Get(seed), TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
@@ -25,11 +25,18 @@ public sealed class LiftTest
                     await Assert.That(b.Position).IsEqualTo(a.Position);
                     if (Math.Abs(a.Value.Velocity - b.Value.Velocity) > 1e-9
                         && starts.Any(x => a.Position < x.Start - x.BarDuration - 1e-9 && a.Position >= x.Start - 4 * x.BarDuration - 1e-9))
+                    {
                         earlier++;
+                        louder += b.Value.Velocity > a.Value.Velocity ? 1 : 0;
+                    }
                 }
             }
         }
 
+        // swelling: the notes it reaches before the last bar louder, all but the few a stage after it plays as loud as
+        // another note there
+        Console.WriteLine($"{louder} of {earlier} notes before the last bar louder");
         await Assert.That(earlier).IsGreaterThan(0);
+        await Assert.That((double)louder).IsGreaterThan(earlier * 0.95);
     }
 }

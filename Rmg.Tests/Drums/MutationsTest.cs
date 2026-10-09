@@ -7,7 +7,7 @@ namespace Rmg.Tests.Drums;
 /// <summary>A groove that mutates (<see cref="Mutations" />): its edits kept, the groove straying as a section goes on.</summary>
 public sealed class MutationsTest
 {
-    /// <summary>Every drum hit of a section's bar, by its track and its place in the bar, in 16ths.</summary>
+    /// <summary>Every drum hit of a section's bar, by its track and its place in the bar, in 32nds.</summary>
     private static HashSet<(int, int)> Bar(CorpusSong song, SectionSpan span, int bar) =>
     [
         ..song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum).SelectMany(x => x.Value
@@ -18,13 +18,16 @@ public sealed class MutationsTest
     [Test]
     public async Task AMiddlingSong_NeverMutates()
     {
-        foreach (var song in TestCorpus.Range(32))
-        foreach (var made in song.Trace.Where(x => x.Point == TracePoints.Mutations).Select(x => (((int, int))x.Value!).Item2))
-            await Assert.That(made == 0 || song.Trace.Any(x => x.Point == TracePoints.Mutations)).IsTrue();
+        var checkedSections = 0;
         // a groove supplied at the middle, as it is, which a base there would let its sections stray from
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: System.Collections.Immutable.ImmutableDictionary<Facet, double>.Empty.Add(Facet.Groove, 0.5)))))
         foreach (var made in song.Trace.Where(x => x.Point == TracePoints.Mutations).Select(x => (((int, int))x.Value!).Item2))
+        {
             await Assert.That(made).IsEqualTo(0).Because($"seed {song.Seed}");
+            checkedSections++;
+        }
+
+        await Assert.That(checkedSections).IsGreaterThan(10);
     }
 
     [Test]

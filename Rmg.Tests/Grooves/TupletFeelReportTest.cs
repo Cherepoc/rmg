@@ -27,7 +27,7 @@ public sealed class TupletFeelReportTest
                               $"{with.Length} songs with any, of them in a tuplet in under a tenth of their bars {Count(x => x.TupletBars < x.Bars / 10.0)}, " +
                               $"a tenth to a half {Count(x => x.TupletBars >= x.Bars / 10.0 && x.TupletBars < x.Bars / 2.0)}, over half {Count(x => x.TupletBars >= x.Bars / 2.0)}; " +
                               $"their main tuplet {with.Sum(x => x.MainTupletBars) / (double)Math.Max(1, with.Sum(x => x.TupletBars)):P0} of their tuplet bars, " +
-                              $"{with.Average(x => x.Tuplets):F1} tuplets a song, a drum changing between straight and tuplet {with.Average(x => x.Changes):F1} times a song");
+                              $"{with.Select(x => (double)x.Tuplets).DefaultIfEmpty(double.NaN).Average():F1} tuplets a song, a drum changing between straight and tuplet {with.Select(x => (double)x.Changes).DefaultIfEmpty(double.NaN).Average():F1} times a song");
             // the tuplets played, by the step of the period they are: -1 a dotted 8th's 3+3+2, 1 triplets, -2 quintuplets
             var tupletBars = all.SelectMany(x => x.Primes).Where(x => x != 0).ToArray();
             Console.WriteLine($"  tuplet bars by step: {string.Join(", ", tupletBars.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key}: {x.Count() / (double)tupletBars.Length:P0} ({RhythmPeriodOf(x.Key)})"))}");

@@ -53,11 +53,15 @@ public sealed class AlternatingBassTest
     [Test]
     public async Task AnAlternatingBass_SoundsTheFifth_OnItsStrongNotesAfterTheRoot()
     {
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("country", 1))));
-        var (fifths, strong) = songs.Select(x => Measure(x, true)).Aggregate((0, 0), (a, b) => (a.Item1 + b.Fifths, a.Item2 + b.Strong));
-        Console.WriteLine($"the fifth on {fifths} of {strong} strong notes after a chord's first");
+        (int Fifths, int Strong) Sum(double chance, bool alternating) => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("country", chance))))
+            .Select(x => Measure(x, alternating)).Aggregate((0, 0), (a, b) => (a.Item1 + b.Fifths, a.Item2 + b.Strong));
+        var (fifths, strong) = Sum(1, true);
+        var (plainFifths, plainStrong) = Sum(0, false);
+        Console.WriteLine($"the fifth on {fifths} of {strong} strong notes after a chord's first, against {plainFifths} of {plainStrong} where none alternates");
         await Assert.That(strong).IsGreaterThan(50);
+        await Assert.That(plainStrong).IsGreaterThan(50);
         await Assert.That(fifths).IsGreaterThan(strong / 3);
+        await Assert.That(fifths / (double)strong).IsGreaterThan(2 * plainFifths / (double)plainStrong);
     }
 
     /// <summary>How often the presets' bass sounds the fifth on a strong note after a chord's first, with the alternating bass and without.</summary>

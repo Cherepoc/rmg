@@ -55,6 +55,7 @@ public sealed class StateKindDefaultTimelineTest
         var result = StateTimelineMap.Create(0).GetStateTimeline(StateKinds.ScaleOffsets).GetEffectiveValueAt(0);
 
         await Assert.That(result.IsDefault).IsFalse();
+        await Assert.That(result.Length).IsEqualTo(0);
     }
 
 }

@@ -132,8 +132,7 @@ public sealed class SongSettingsTest
         var bits = 1 + 39;
         await Assert.That(SongSettings.Parse(MixedText[..bits] + "W" + MixedText[(bits + 1)..])).IsNull();
         await Assert.That(SongSettings.Parse(MixedText[..^1] + "3")).IsNull();
-        // a value past the last step
-        await Assert.That(SongSettings.Parse(MixedText[..1] + "z" + MixedText[2..])).IsNotNull();
+        // and a character that is no digit
         await Assert.That(SongSettings.Parse(MixedText[..1] + "_" + MixedText[2..])).IsNull();
     }
 

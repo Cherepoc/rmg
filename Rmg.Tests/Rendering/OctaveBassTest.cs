@@ -1,3 +1,4 @@
+using Rmg.Core.Events;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 using Rmg.Tests.Genres;
@@ -7,10 +8,10 @@ namespace Rmg.Tests.Rendering;
 /// <summary>An octave bass: a section's bass off the beat the note before an octave away, a genre's the more.</summary>
 public sealed class OctaveBassTest
 {
-    /// <summary>The share of a bass's notes an octave from the note before, in the songs given.</summary>
+    /// <summary>The share of a bass's notes an octave from the note before, in the songs given that have a bass.</summary>
     private static double Octaves(IEnumerable<CorpusSong> songs)
     {
-        var notes = songs.Select(x => x.Song.Notes![SongTracks.BassTrack].ToArray()).ToArray();
+        var notes = songs.Select(x => x.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack)?.ToArray()).OfType<TimelineItem<RealizedNote>[]>().ToArray();
         return notes.Sum(bass => bass.Skip(1).Where((x, i) => Math.Abs(x.Value.Pitches[0] - bass[i].Value.Pitches[0]) == 12).Count()) / (double)notes.Sum(x => x.Length);
     }
 

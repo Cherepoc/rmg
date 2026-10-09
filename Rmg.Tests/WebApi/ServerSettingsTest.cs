@@ -102,6 +102,9 @@ public sealed class ServerSettingsTest
         await Assert.That(settings.SoundFontDirectory).IsNull();
         await Assert.That(settings.DefaultSoundFont).IsNull();
         await Assert.That(settings.IsCounting).IsTrue();
+        await Assert.That(settings.Address).IsNull();
+        await Assert.That(settings.KnownProxies.IsEmpty).IsTrue();
+        await Assert.That(settings.EventsPerVisitorPerDay).IsEqualTo(ServerSettings.DefaultEventsPerVisitorPerDay);
     }
 
     [Test]

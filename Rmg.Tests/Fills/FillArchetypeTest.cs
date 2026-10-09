@@ -380,6 +380,8 @@ public sealed class FillArchetypeTest
             }
         ).ToArray();
 
+        // rolls of a few notes, a swell to measure in each
+        await Assert.That(rolls.All(x => x.Length > 1)).IsTrue();
         await Assert.That(rolls.Average(Swell)).IsLessThan(-0.2);
     }
 

@@ -26,7 +26,7 @@ public sealed class MetalArpeggiosReportTest
             var colours = arpeggios.Select(x => (ChordColour)x.Notes[0].Value.State.GetStateValue(CompositionStateKinds.Colour)).ToArray();
             var patterns = arpeggios.Select(x => (ArpeggioPattern)x.Notes[0].Value.State.GetStateValue(CompositionStateKinds.Arpeggio)).ToArray();
             Console.WriteLine($"{name}: of the chord parts' sections {arpeggios.Length / (double)broken.Length:P0} broken, {clean / (double)Math.Max(1, arpeggios.Length):P0} of them clean, " +
-                              $"{arpeggios.Average(x => x.Notes.Length / x.Duration):F1} notes a beat, the rhythm part's {arpeggios.Where(x => x.Part.Role == TrackRole.Rhythm).DefaultIfEmpty().Average(x => x.Notes is null ? 0 : x.Notes.Length / x.Duration):F1}; " +
+                              $"{arpeggios.Select(x => x.Notes.Length / x.Duration).DefaultIfEmpty(double.NaN).Average():F1} notes a beat, the rhythm part's {arpeggios.Where(x => x.Part.Role == TrackRole.Rhythm).DefaultIfEmpty().Average(x => x.Notes is null ? 0 : x.Notes.Length / x.Duration):F1}; " +
                               $"patterns {string.Join(", ", patterns.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)patterns.Length:P0}"))}; " +
                               $"colours {string.Join(", ", colours.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)colours.Length:P0}"))}");
         }
