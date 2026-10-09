@@ -71,7 +71,7 @@ internal static class LineDoubling
     ///     (<see cref="GenreChoices.HarmonyInterval" />): thirds and sixths, fourths and fifths, and seconds and sevenths, each
     ///     with its inversion.
     /// </summary>
-    public static string IntervalOf(int step) => step.Mod(7) switch
+    public static string IntervalOf(int step) => step.Mod(Scales.StepCount) switch
     {
         2 or 5 => "thirds",
         3 or 4 => "fourths",

@@ -33,9 +33,9 @@ internal static class ChordShapes
 
     // heights that leave the quality to the scale: steps of the octave divided evenly into seven, which fall between
     // the two qualities a 7-note scale can give, such as a minor and a major third
-    private const double Third = 12.0 * 2 / 7;
-    private const double Sixth = 12.0 * 5 / 7;
-    private const double Seventh = 12.0 * 6 / 7;
+    private const double Third = 12.0 * 2 / Scales.StepCount;
+    private const double Sixth = 12.0 * 5 / Scales.StepCount;
+    private const double Seventh = 12.0 * 6 / Scales.StepCount;
     private const double Thirteenth = 12 + Sixth;
 
     public static ImmutableArray<ChordShape> All { get; } =

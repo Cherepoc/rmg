@@ -25,8 +25,6 @@ internal sealed class Line
 
     private const int OctaveNoteCount = 12;
 
-    private const int ScaleStepCount = 7;
-
     // the range the line sings in, moved up or down its instrument's by its section's lift, and its middle; and where it
     // sits unmoved, and the instrument's, which bounds the move
     private int _low;
@@ -140,7 +138,7 @@ internal sealed class Line
             // moved by as many scale steps as the phrase now aims away from where it aimed when the note was heard, so that
             // a figure repeated where its phrase rises or falls rises or falls with it, as a sequence, and one repeated
             // where the phrase aims as it did plays as heard, as a section that comes back does
-            var moved = (int)Math.Round((aim - heard.Aim) * ScaleStepCount / OctaveNoteCount);
+            var moved = (int)Math.Round((aim - heard.Aim) * Scales.StepCount / OctaveNoteCount);
             // over the root it was heard over, as it was, but in a phrase that goes on, where that would leap from the
             // note before; over another root, nearest the note before, as a sequence: the octave the figure as heard
             // plays in, which the move by the aim then takes up or down, rather than one nearest the note before again,
@@ -177,7 +175,7 @@ internal sealed class Line
     private int GetNearestOctave(ChordContext chord, int step)
     {
         var target = _previous ?? _middle;
-        var steps = Enumerable.Range(-3, 7).Select(x => step + x * ScaleStepCount).ToArray();
+        var steps = Enumerable.Range(-3, 7).Select(x => step + x * Scales.StepCount).ToArray();
         var inRange = steps.Where(x => chord.GetPitch(x) >= _low && chord.GetPitch(x) <= _high).ToArray();
         return (inRange.Length > 0 ? inRange : steps).MinBy(x => Math.Abs(chord.GetPitch(x) - target));
     }

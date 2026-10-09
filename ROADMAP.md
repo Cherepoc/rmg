@@ -182,8 +182,6 @@ where they stand were mostly built since; what is left of them is small and a ge
 2. A melody in block harmony, a third voice beside the counter-melody's (*A melody in block harmony*).
 3. Roots off the scale: a planed section's chords each in a mode of its own (*Roots off the scale*).
 4. Long cycles for the generated patterns: a slow part's two-bar cycle played whole over a pair of bars (*Long cycles*).
-5. The seven steps one rule: one constant read everywhere and a scale made of seven notes or refused (*The seven steps
-   one rule*).
 Patterns longer than two bars stay parked (*Long cycles*); scales of other sizes are decided against (*Decided, and
 kept*).
 
@@ -572,12 +570,6 @@ Each item with its plan, and what it waits for.
   whose quality differs from the chord's before, and the melody's notes in their chord's scale (a rule, as now);
   songs changed counted from the planed sections first (`TracePoints.Planing`). `?listen=own-modes` in Fusion. Left
   out: symmetric cycles (major or minor thirds), Planing's moves holding minor thirds already.
-- **The seven steps one rule** (P2, the parked reviewed, step 5): a harmony scale is seven notes by decision (*Decided,
-  and kept*), but the rule is copied rather than kept: `Progressions.StepCount` and `Line.ScaleStepCount` restate
-  `Scales.StepCount`, `LineDoubling.IntervalOf` counts by a bare 7, and only the progressions check a scale's size
-  (`Progressions`, where a scale's offsets are weighed), long after the scale is made. One constant, `Scales.StepCount`,
-  read everywhere, and `Scale` refusing offsets of any other count where it is made, the progressions' check gone with
-  it. No song changes (`CorpusFingerprintTest`).
 - **Long cycles** (reviewed 9 October 2026; P2 for two bars, P4 beyond): a figure of two bars is built, its onsets over 32 16ths from a
   section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's after *More figures*), and chords of two bars
   are a harmonic rhythm; a section's bars repeating, AABA to ABCD, give every part figures of two and four bars, a

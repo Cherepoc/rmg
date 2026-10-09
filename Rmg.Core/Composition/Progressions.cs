@@ -13,9 +13,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal static class Progressions
 {
-    // the chord roots and the rules below are in steps of a 7-note scale, which every scale of Scales is
-    private const int StepCount = 7;
-
     /// <summary>
     ///     The chance a progression of four chords or more holds its home over its first two, a slower start, I for two bars
     ///     before the rest move, as often in a plain song as a wild one, a little more in the wilder.
@@ -186,7 +183,7 @@ internal static class Progressions
             throw new ArgumentOutOfRangeException(nameof(phrases), phrases, $"{count} chords do not share alike among {phrases} phrases of two or more.");
         var perPhrase = count / phrases;
 
-        var cadenceWeights = GetCadenceWeights(scale.Offsets, home);
+        var cadenceWeights = GetCadenceWeights(scale, home);
         var tilt = Tilt.Of(MotionOdds, 1);
         var roots = new int[count];
         for (var chord = 1; chord < count; chord++)
@@ -194,8 +191,8 @@ internal static class Progressions
             var previous = roots[chord - 1];
             var isCadence = chord == count - 1;
             var isPreparation = chord == count - 2;
-            var weights = new Weighted<int>[StepCount];
-            for (var step = 0; step < StepCount; step++)
+            var weights = new Weighted<int>[Scales.StepCount];
+            for (var step = 0; step < Scales.StepCount; step++)
             {
                 // a longer progression's phrases, past the first, start by their place, and all but the last end home
                 var phrase = chord / perPhrase;
@@ -230,14 +227,12 @@ internal static class Progressions
     ///     half step below it a little; IV, more when it is major over a minor home (dorian); and VI now and then, which
     ///     does not resolve.
     /// </summary>
-    public static ImmutableArray<double> GetCadenceWeights(ImmutableArray<int> scaleOffsets, int home)
+    public static ImmutableArray<double> GetCadenceWeights(Scale scale, int home)
     {
-        if (scaleOffsets.Length != StepCount)
-            throw new ArgumentException($"The scale must have {StepCount} notes.", nameof(scaleOffsets));
-
-        var weights = new double[StepCount];
+        var scaleOffsets = scale.Offsets;
+        var weights = new double[Scales.StepCount];
         var homeQuality = GetQuality(scaleOffsets, home);
-        for (var step = 1; step < StepCount; step++)
+        for (var step = 1; step < Scales.StepCount; step++)
         {
             var quality = GetQuality(scaleOffsets, home + step);
             var interval = GetInterval(scaleOffsets, home, home + step);
@@ -333,7 +328,7 @@ internal static class Progressions
 
     private static int Mod(int step)
     {
-        return step.Mod(StepCount);
+        return step.Mod(Scales.StepCount);
     }
 
     /// <summary>The step, moved by octaves to within 3 steps of 0.</summary>

@@ -24,6 +24,13 @@ public sealed class ScalesTest
     }
 
     [Test]
+    public async Task AScaleOfOtherThanSevenNotes_IsRefused()
+    {
+        await Assert.That(() => new Scale("Major pentatonic", [0, 2, 4, 7, 9], new ByConvention(1, 1, 1)) { Description = "" }).Throws<ArgumentException>();
+        await Assert.That(() => new Scale("Octatonic", [0, 1, 3, 4, 6, 7, 9, 10], new ByConvention(1, 1, 1)) { Description = "" }).Throws<ArgumentException>();
+    }
+
+    [Test]
     public async Task Scales_AreDistinct_AndWeighted()
     {
         await Assert.That(AllScales.Select(x => x.Name).Distinct().Count()).IsEqualTo(AllScales.Count());

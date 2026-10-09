@@ -115,7 +115,7 @@ public sealed class ProgressionsTest
     {
         var scale = Rmg.Core.Composition.Scales.All.Single(x => x.Name == expected.Scale);
 
-        var weights = Rmg.Core.Composition.Progressions.GetCadenceWeights(scale.Offsets, 0);
+        var weights = Rmg.Core.Composition.Progressions.GetCadenceWeights(scale, 0);
         var strong = Enumerable.Range(0, 7).Where(x => weights[x] >= 0.8).ToArray();
 
         await Assert.That(strong).IsEquivalentTo(expected.Cadences, CollectionOrdering.Matching);
@@ -126,8 +126,8 @@ public sealed class ProgressionsTest
     public async Task Cadences_OfARelativeHome_AreThoseOfItsMode()
     {
         // natural minor seen from its third step is major, so a section at home there cadences like major
-        var fromRelativeMajor = Rmg.Core.Composition.Progressions.GetCadenceWeights(Rmg.Core.Composition.Scales.NaturalMinor.Offsets, 2);
-        var major = Rmg.Core.Composition.Progressions.GetCadenceWeights(Rmg.Core.Composition.Scales.Major.Offsets, 0);
+        var fromRelativeMajor = Rmg.Core.Composition.Progressions.GetCadenceWeights(Rmg.Core.Composition.Scales.NaturalMinor, 2);
+        var major = Rmg.Core.Composition.Progressions.GetCadenceWeights(Rmg.Core.Composition.Scales.Major, 0);
 
         await Assert.That(fromRelativeMajor).IsEquivalentTo(major, CollectionOrdering.Matching);
     }
@@ -149,7 +149,7 @@ public sealed class ProgressionsTest
     public async Task StrictPhrases_PrepareInBarThree_AndCadenceInBarFour()
     {
         var scale = Rmg.Core.Composition.Scales.Major;
-        var cadences = Rmg.Core.Composition.Progressions.GetCadenceWeights(scale.Offsets, 0);
+        var cadences = Rmg.Core.Composition.Progressions.GetCadenceWeights(scale, 0);
         var phrases = GeneratePhrases(scale, 0, 1);
 
         var preparing = phrases.Count(x => Mod7(x[2]) is 1 or 3) / (double)PhraseCount;
@@ -180,7 +180,7 @@ public sealed class ProgressionsTest
     public async Task LooserPhrases_KeepLessToTheRules()
     {
         var scale = Rmg.Core.Composition.Scales.Major;
-        var cadences = Rmg.Core.Composition.Progressions.GetCadenceWeights(scale.Offsets, 0);
+        var cadences = Rmg.Core.Composition.Progressions.GetCadenceWeights(scale, 0);
         double CadenceShare(double strictness) =>
             GeneratePhrases(scale, 0, strictness).Count(x => cadences[Mod7(x[3])] > 0) / (double)PhraseCount;
 

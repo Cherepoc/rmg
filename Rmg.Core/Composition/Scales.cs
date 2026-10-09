@@ -5,10 +5,15 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>A scale, as the semitones of its notes above its first note, which the song's key moves.</summary>
+/// <param name="Offsets">Its seven notes (<see cref="Scales.StepCount" />), any other count refused.</param>
 /// <param name="Weight">How likely a song is to be in the scale, by the scale facet of its unconventionality.</param>
 [DebuggerDisplay("Scale {Name}")]
 public sealed record Scale(string Name, ImmutableArray<int> Offsets, ByConvention Weight)
 {
+    public ImmutableArray<int> Offsets { get; } = Offsets.Length == Scales.StepCount
+        ? Offsets
+        : throw new ArgumentException($"A scale has {Scales.StepCount} notes, not {Offsets.Length}.", nameof(Offsets));
+
     /// <summary>How it sounds, in a sentence, which the page shows over its name.</summary>
     public required string Description { get; init; }
 
@@ -23,8 +28,9 @@ public sealed record Scale(string Name, ImmutableArray<int> Offsets, ByConventio
 }
 
 /// <summary>
-///     The scales a song can be in. They all have seven notes, since the chord root moves by scale steps and chord
-///     heights are placed between the qualities a 7-note scale gives; scales of other sizes need more than that.
+///     The scales a song can be in. They all have seven notes, by decision rather than for want of more: the progressions'
+///     motions, degrees and cadences, a chord's heights between the qualities a 7-note scale gives and the doublings'
+///     thirds and sixths are a seven-note scale's, and a line takes a scale of any size over it (<see cref="LineScales" />).
 /// </summary>
 public static class Scales
 {
