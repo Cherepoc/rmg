@@ -91,7 +91,13 @@ fixed; the review and the plan are kept outside the repository):
 14. Done: page tests reliable, five runs in a row passing: the listening questions fetched beside the page, the
     tests serving their own (one patching a genre, one leaving out a stage, a question of its own for each test that
     gives verdicts), a song's end stamped as it ends, negative checks waiting past the remake, a failed CDN fetch tried
-    again, the generator's tuned numbers read by their form. Left: the media session and the pulse have no page test. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
+    again, the generator's tuned numbers read by their form.
+15. Done: test structure: the tests ask a track's role, never its number, through one helper; their copies of
+    production replaced by the production they copied (a note's program, a state's chord, a note's merged state), the
+    layers' names as constants; tests checking what they say, loops counted, calibrations widened and printed; the
+    listening measure, the media session and the pulse tested. Kept apart on purpose: the fill lines the tests state
+    in their own words, as calling the fill generator would make its tests agree with it by construction.
+16. Dead code and stale docs.
 
 **Done before it** (the plan of 8 October 2026 from the review of P3 and P4, each step through the implementation loop,
 each device a genre's data on a mechanism there already where it can be, strong in its genres rather than a few
