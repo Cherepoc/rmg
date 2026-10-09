@@ -130,10 +130,10 @@ internal sealed class SectionGenerator
     /// <param name="plan">The section's place in the song's form, which some of its draws keep to.</param>
     public GeneratedSection Generate(SectionPlan plan)
     {
-        // every section draws from its own sequence, so a change to one leaves the others as they are
+        // every section draws from its own sequences, each decision from one of its own, so a change to one leaves the
+        // others as they are
         var sectionId = plan.Id;
         var meter = plan.Meter;
-        var context = _context.CreateContext(Seeds.Derive(_seed, sectionId));
         // how far the section strays from convention, facet by facet, each from a sequence of its own
         var facets = Facets(sectionId);
         StateTrace.Record(TracePoints.SectionUnconventionality, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", facets.Facets.OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Value:F2}")), facets);
@@ -141,12 +141,12 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2}", unconventionality);
         // the section's rhythm strays as its groove does
         var rhythm = new RhythmicUnconventionality(facets[Facet.Groove]) { GrooveHold = RhythmicUnconventionality.HoldOf(_genre) };
-        var chords = LayerStates.CreateChordPool(unconventionality)(context);
+        var chords = LayerStates.CreateChordPool(unconventionality)(Stream(sectionId, SectionStream.ChordPool));
 
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);
         var tilt = SectionEnergy.Tilt(energy, rhythm.Coupling);
 
-        var (scale, home, harmonicRhythm, progression, chordScales, shifts, _, _) = DrawHarmony(plan, context, facets, energy, tilt);
+        var (scale, home, harmonicRhythm, progression, chordScales, shifts, _, _) = DrawHarmony(plan, facets, energy, tilt);
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
         var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel], _genre);
@@ -161,14 +161,14 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section, tilt))
                 .Add(CompositionStateKinds.NoteDynamics, Math.Pow(rhythm.ChanceScale, VelocityLayers.DynamicsLean))
                 .AddNoteDurationLayer()
-                .ToStateMap(context)
+                .ToStateMap(Stream(sectionId, SectionStream.SectionState))
                 .MergeWith(feelChange is { } changed ? Feels.At(StateDepths.Section, changed) : StateMap.Default),
             new StateMapBuilder("Section")
                 .Add(CompositionStateKinds.ChordPool.Collection, chords)
                 .Add(StateKinds.ChordRoot, home)
                 // the melody higher the more energy the section has than the song, a chorus over its verse
                 .Add(CompositionStateKinds.LineLift, MelodyLayers.EnergyRegister * _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy))
-                .ToStateMap(context)
+                .ToStateMap(Stream(sectionId, SectionStream.SectionState))
         );
         var (sectionRoles, kit, isPercussionOnly, doubles, feelLeads) = _drums.DrawDrumParts(sectionId, plan.Drums, rhythm);
         var activeDrumTrackNumbers = kit.Drums.Select(DrumGroups.GetTrackNumber).ToImmutableHashSet();
@@ -176,18 +176,18 @@ internal sealed class SectionGenerator
         // the section state reaches the notes through the track state maps, so the bar state holds only the state
         // that changes by bar
         var bassLeading = Math.Clamp(
-            _tracks.BassLeading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Section)(context),
+            _tracks.BassLeading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Section)(Stream(sectionId, SectionStream.BassLeading)),
             0,
             1
         );
-        var barStateTimelineMap = _generators(meter).Bars.Generate(context, scale, progression, harmonicRhythm, home, chordScales, shifts, unconventionality, bassLeading, facets);
+        var barStateTimelineMap = _generators(meter).Bars.Generate(Stream(sectionId, SectionStream.BarStates), scale, progression, harmonicRhythm, home, chordScales, shifts, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
-        var scheme = PhraseSchemes.Pick(context, facets[Facet.Form], _genre);
+        var scheme = PhraseSchemes.Pick(Stream(sectionId, SectionStream.PhraseScheme), facets[Facet.Form], _genre);
         StateTrace.Record(TracePoints.PhraseScheme, SectionTrace, sectionId, 0, StateMap.Default, 0, scheme.ToString(), scheme);
-        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context, tilt), tilt, facets);
+        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(Stream(sectionId, SectionStream.MelodyBusyness), tilt), tilt, facets);
 
         var (sectionStrokes, barDrums) = _drums.DrawDrumBars(sectionId, activeDrumTrackNumbers, kit, scheme, rhythm, tilt);
 
@@ -214,7 +214,7 @@ internal sealed class SectionGenerator
         // genre's, from a sequence of its own
         var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone")));
         StateTrace.Record(TracePoints.Drone, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{drone}", drone);
-        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs || drone).ToArray();
+        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs || drone).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
@@ -260,19 +260,19 @@ internal sealed class SectionGenerator
     ///     section's where it loops; each decision from a sequence of its own but the home's and the progression's, the
     ///     section's own.
     /// </summary>
-    private SectionHarmony DrawHarmony(SectionPlan plan, IGenerationContext context, Unconventionality facets, double energy, Tilt tilt)
+    private SectionHarmony DrawHarmony(SectionPlan plan, Unconventionality facets, double energy, Tilt tilt)
     {
         var sectionId = plan.Id;
         var meter = plan.Meter;
         var scale = plan.KeepsSongScale ? _songScale : PickScale(sectionId, facets[Facet.Scale], energy, plan.Role);
         // the section's chords move around its home, which every track's root starts from; the song's last section
         // leads home to its tonic, where the song ends
-        var home = Progressions.GenerateHome(context, scale, plan.Role, _genre, facets[Facet.Progression]);
+        var home = Progressions.GenerateHome(Stream(sectionId, SectionStream.Home), scale, plan.Role, _genre, facets[Facet.Progression]);
         if (plan.HasTonicHome)
             home = 0;
         // how often its chords change, from a sequence of its own, faster the more energy it has
         var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter, facets[Facet.Progression], _genre);
-        var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count, meter.Phrases,
+        var progression = Progressions.Generate(Stream(sectionId, SectionStream.Progression), scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count, meter.Phrases,
             motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name), step => _genre.Shift(GenreChoices.RootDegrees, Progressions.Degrees[step].Name),
             step => _genre.Shift(GenreChoices.CadenceDegrees, Progressions.Degrees[step].Name));
         // a turnaround now and then, the pattern's last bar leading back to its start, by the progression facet and a genre's,
@@ -468,7 +468,6 @@ internal sealed class SectionGenerator
 
     /// <summary>The pitched tracks, each making its patterns on its own, over the section's state.</summary>
     private IEnumerable<(int Track, GeneratedBars Bars, SectionLine? Line)> GeneratePitchedTracks(
-        IGenerationContext context,
         int sectionId,
         StateMap sectionStateMap,
         StateTimelineMap barStateTimelineMap,
@@ -495,6 +494,8 @@ internal sealed class SectionGenerator
                 continue;
             }
 
+            // each track from a sequence of its own
+            var context = new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.PitchedTracks), trackNumber));
             var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal);
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
             {
@@ -978,5 +979,14 @@ internal enum SectionStream
     HeldHome = 44,
     Breakdown = 45,
     AlternatingBass = 46,
-    Drone = 47
+    Drone = 47,
+    ChordPool = 48,
+    Home = 49,
+    Progression = 50,
+    SectionState = 51,
+    BassLeading = 52,
+    BarStates = 53,
+    PhraseScheme = 54,
+    MelodyBusyness = 55,
+    PitchedTracks = 56
 }

@@ -61,12 +61,16 @@ public sealed class DoublingTest
         foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
         {
             var notes = song.Song.Notes!;
+            // the bars the drum sits out, by their letter in the section's scheme (DrumPresence)
+            var resting = song.Trace.Where(x => x.Point == TracePoints.DrumPresence && x.Section == entry.Section).Select(x => ((BarDrums)x.Value!).Resting).FirstOrDefault() ?? [];
+            var letters = ((PhraseScheme)song.Trace.First(x => x.Point == TracePoints.PhraseScheme && x.Section == entry.Section).Value!).Letters;
             // the lead's strong beats in its groove, not in a pattern's last bar, where a fill plays, nor at its first beat,
-            // where a landing does
+            // where a landing does, nor in a bar the drum sits out
             bool InGroove(double position)
             {
                 var inPattern = (position - span.Start) % span.Meter.PatternDuration;
-                return inPattern < span.Meter.PatternDuration - FillBars(span.Meter) && inPattern >= 0.5;
+                var letter = letters[(int)Math.Floor(inPattern / span.Meter.BarDuration + 1e-9) % letters.Length];
+                return inPattern < span.Meter.PatternDuration - FillBars(span.Meter) && inPattern >= 0.5 && !resting.Contains((track, letter));
             }
             var strong = notes.GetValueOrDefault(doubling.Lead, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0))
                 .Any(x => x.Position >= span.Start && x.Position < span.End && InGroove(x.Position) && x.Value.State.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank);

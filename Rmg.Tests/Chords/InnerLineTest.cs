@@ -22,7 +22,8 @@ public sealed class InnerLineTest
             // the chord's notes the fallen one, 1 to 3 semitones under its root, where the root was, and the root no more
             var classes = Realizer.GetChordNotes(note.Value.State).Classes;
             await Assert.That(falls is >= 1 and <= 3).IsTrue();
-            await Assert.That(classes.Contains((root - falls).Mod(12)) && !classes.Contains(root)).IsTrue();
+            await Assert.That(classes.Contains((root - falls).Mod(12)) && !classes.Contains(root)).IsTrue()
+                .Because($"seed {song.Seed} at {note.Position}: root {root}, falls {falls}, classes {string.Join(",", classes)}");
             await Assert.That(note.Value.Pitches.All(x => classes.Contains(x.Mod(12)))).IsTrue();
         }
 

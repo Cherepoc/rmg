@@ -19,7 +19,7 @@ public sealed class GlideTest
     [Test]
     public async Task AHipHopBass_SlidesIntoItsChanges_FarOftenerThanTheSongs()
     {
-        var hipHop = Slid(TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("hipHop")))));
+        var hipHop = Slid(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("hipHop")))));
         var songs = Slid(TestCorpus.Range(16));
         Console.WriteLine($"changes slid into: Hip-hop {hipHop:P1}, the songs {songs:P1}");
 

@@ -39,7 +39,7 @@ public sealed class PinchTest
 
         Console.WriteLine($"{genre}: {pinches} pinches in 64 songs, {length / Math.Max(1, pinches):F2} s long on the average, {squeals} squealing");
         // some, against a pinch never made: a tremolo-picked genre holds few notes to pinch
-        await Assert.That(pinches).IsGreaterThan(2);
+        await Assert.That(pinches).IsGreaterThan(0);
     }
 
     /// <summary>

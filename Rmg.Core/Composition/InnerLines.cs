@@ -35,12 +35,12 @@ internal static class InnerLines
         var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         var kept = draft.Chains.SelectMany(x => x.Chords.Append(x.Change)).ToHashSet();
         // a chord the chords play as a triad or a power chord, its root among its notes and none from its sixth up but the
-        // root again, which the line passes through: the shape the chords' first note in it has, as every part has it then
+        // root again, which the line passes through: the shape every note of the chords in it has, as every part has it then
         var chords = draft.Timeline.TrackTimelineMap.GetValueOrDefault(song.Track(TrackRole.Chords).Key)?.EventTimeline;
         bool Lines((double Start, double End) chord) =>
-            chords?.Where(x => x.Position >= chord.Start - 1e-9 && x.Position < chord.End - 1e-9).Select(x => x.Value).FirstOrDefault() is { } first
-            && first.GetStateValue(StateKinds.ChordNotePitchOffsets) is { IsEmpty: false } heights
-            && heights.Any(IsRoot) && heights.All(x => IsRoot(x) || x * Realizer.OctaveNoteCount < Highest);
+            chords?.Where(x => x.Position >= chord.Start - 1e-9 && x.Position < chord.End - 1e-9).Select(x => x.Value).ToArray() is { Length: > 0 } notes
+            && notes.All(note => note.GetStateValue(StateKinds.ChordNotePitchOffsets) is { IsEmpty: false } heights
+                                 && heights.Any(IsRoot) && heights.All(x => IsRoot(x) || x * Realizer.OctaveNoteCount < Highest));
         static bool IsRoot(double height) => Math.Abs(height - Math.Round(height)) < 1e-9;
         // every chord held long enough in a section that takes the line, but in a solo: where it starts and ends
         var held = song.Form.Map.Sections.Where((x, i) => lining[x.SectionId] && !song.Solos.ContainsKey(i))
@@ -75,6 +75,12 @@ internal static class InnerLines
                         : (StepAlterations?)null;
                 var unaltered = state.GetStateValue(StateKinds.ScaleOffsets) is { IsEmpty: false } scale ? scale : offsets;
                 if (moved is not { } line || Realizer.TryAlterScaleSteps(unaltered, line) is null)
+                    break;
+                // and where the chords' note there sounds it, the fallen note in place of the root
+                if (chords?.LastOrDefault(x => x.Position <= at + 1e-9) is { Value: { } played }
+                    && Realizer.GetChordNotes(StateMap.Aggregate([played, state]).With(CompositionStateKinds.InnerLine, quarter)
+                        .With(StateKinds.ScaleAlterations, new LayerValue<StepAlterations>(StateDepths.Note, line))) is var (sounding, _, classes)
+                    && (!classes.Contains((sounding.Root - quarter).Mod(Realizer.OctaveNoteCount)) || classes.Contains(sounding.Root.Mod(Realizer.OctaveNoteCount))))
                     break;
                 falls.Add(quarter.ToTimelineItem(at));
                 marks.Add((Change * quarter).ToTimelineItem(at));
