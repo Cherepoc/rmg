@@ -201,6 +201,10 @@ within a bar; and swing already pairs by each section's meter. In order of what 
 The tag stays put off: the extension (step 5) covers a phrase's last bars played again within its section, and a tag
 at a section's end alone would make its last pattern unlike the others, which nothing in steps 4 to 6 needs.
 
+**Next plan** (10 October 2026): the suite on a second corpus (*Open work*), then call and response (*Form and
+sections*), then acoustic sections fitted, quiet drums in calm genres, a breakdown's snare with a double kick's backbeat,
+and the tag.
+
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
 ratings by conventionality once enough are in, continuously and never as a gate.
@@ -505,9 +509,21 @@ Each item with its plan, and what it waits for.
   the verse, higher in 61% of the songs.
 - **The band's devices, the rest** (P3, each an edit after assembly among the stages, as stop time and pushes are):
   stop time's hits added where a part rests on the downbeat; a backing figure that recurs through the song. Call and response between
-  parts (postponed October 2026): an edit after the notes keeping the counter-melody to the melody's rests kept 12% to
-  15% of its notes, the melody leaving no room; the counter-melody's rhythm placed against the melody's gaps when it is
-  drawn, as the solo part's answers are (`SoloAnswers`), is the way, should listening ask.
+  parts, planned (*Next plan*).
+- **Call and response** (P2, reviewed 10 October 2026, *Next plan*): the band answering the melody phrase after phrase,
+  as blues, soul, funk, country and Latin bands do; the solo part's answers in the melody's gaps (`SoloAnswers`),
+  soloists trading and the melody's own question and answer are built, a band's answer is not. The call is the device:
+  an edit after the notes keeping the counter-melody to the melody's rests kept 12% to 15% of its notes, and drawing it
+  against the melody's gaps would find as few, the melody filling its phrases. So a section's melody sings the first
+  half of every phrase of four or of four and two, its phrase's end moved to the half, a held note rather than a cut,
+  and rests in the second (a phrase of three, which has no half, kept whole); and the riff answers it in the second
+  half, or the solo part's answers where the song has no riff, or the counter-melody, the weakest, slow and sparse; the
+  answer recurring as its bar patterns do by the scheme's letters, the recurring backing figure with it. Rests by a
+  bar's place in its phrase, for any part, are new: a bar rests now only where a drum rests by its letter
+  (`PatternGenerator`, `BarDrums.Resting`), which they may take in. A section's decision, a verse's rather than a
+  bridge's, by a genre's chance, Blues', Soul's, Funk's, Country's and Latin's, the songs' own low and alike at every
+  end, as it is a convention, not a wild thing. Measured by the melody's and the answer's bars by their half of the
+  phrase, and a listening question in Blues.
 - **Harmony's devices, the rest** (P3): a ii–V into a chord but the home, which a chord's own scale makes part of; the
   line cliché rising (the fifth, its sharp, the sixth) beside its falling one (`InnerLines`), should
   listening ask.
