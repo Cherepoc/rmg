@@ -224,10 +224,9 @@ internal static class Realizer
             var articulationIndex = fixedIndex > 0 ? Math.Min(fixedIndex, track.Sounds.Length) - 1
                 : stroke.IsSet ? stroke.Value
                 : articulationOffset.ToIndex(track.Sounds.Length);
-            // and plays as loud as its sound is over the drum
+            // struck as hard as the note is, whatever its sound, which the sound set makes as loud as it is
             var sound = track.Sounds[articulationIndex];
-            var velocity = noteVelocity + VelocityLayers.SoundLevel * sound.Loudness;
-            return new RealizedNote([sound.Code], velocity, PercussionNoteDuration, stateMap).ToTimelineItem(timelineItem.Position);
+            return new RealizedNote([sound.Code], noteVelocity, PercussionNoteDuration, stateMap).ToTimelineItem(timelineItem.Position);
         }
     }
 

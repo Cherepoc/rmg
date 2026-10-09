@@ -223,7 +223,7 @@ internal sealed class SongTracks
                 if (pins)
                     drumStateMap = drumStateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.Pinned.CreateState(1)]));
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
-                    LayerStates.CreateTrackLayer(context, Layers.Track, drumStateMap, _ => VelocityLayers.GetLevel(drum),
+                    LayerStates.CreateTrackLayer(context, Layers.Track, drumStateMap, _ => 0,
                         pins ? RhythmLayers.Still : DrumRoles.Hold(trackRhythmLayer, DrumRoles.Of(drumStateMap))),
                     drum.Sounds
                 );

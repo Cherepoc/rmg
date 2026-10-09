@@ -34,15 +34,6 @@ internal static class VelocityLayers
     /// </summary>
     public const double GenreLevel = 0.4;
 
-    /// <summary>How much louder a drum plays for how loud it leans, such as the crash louder and the cross-stick quieter.</summary>
-    public const double DrumLevel = 0.15;
-
-    /// <summary>How much louder or quieter a drum's sound plays for how loud it is, such as the open hi-hat louder.</summary>
-    public const double SoundLevel = 0.3;
-
-    /// <summary>A drum's level: the drums', and its own by how loud it leans.</summary>
-    public static double GetLevel(PercussionInstrumentDefinition drum) => DrumLevel * drum.Loudness;
-
     /// <summary>
     ///     The loudness of a section, shared by all its tracks, drawn either way and leaned by its energy: narrow, so that
     ///     a quiet section, whether its energy or its draw makes it so, is still heard, and its energy sounds in how few

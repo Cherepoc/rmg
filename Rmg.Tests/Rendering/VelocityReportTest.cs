@@ -1,13 +1,16 @@
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
+using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Rendering;
 
 /// <summary>
 ///     How loud the tracks play, as MIDI velocities from 0 to 127: every role's level, its accent (a note on the bar's
 ///     downbeat over one an 8th off the beat), how much a note at the same place varies from bar to bar within a
-///     section, and how loud a chord of several notes sounds against a single note.
+///     section, and how loud a chord of several notes sounds against a single note; and by genre, how hard every part and
+///     every piece of the drums plays, and how many notes reach the loudest a player strikes again and again, 111, or
+///     above it, as an accent does.
 /// </summary>
 public sealed class VelocityReportTest
 {
@@ -116,5 +119,43 @@ public sealed class VelocityReportTest
         var sums = songs.SelectMany(x => x.Song.Notes!.Values.SelectMany(n => n.Select(v => v.Value.Velocity))).Order().ToArray();
         Console.WriteLine($"Velocity sums: 5% {sums[sums.Length / 20]:F2}, median {sums[sums.Length / 2]:F2}, 95% {sums[sums.Length * 19 / 20]:F2}");
         await Task.CompletedTask;
+    }
+
+    /// <summary>The loudest velocity a player strikes again and again; above it, an accent.</summary>
+    private const int Repeated = 111;
+
+    private static readonly (string Name, int[] Notes)[] Pieces =
+        [("kick", [35, 36]), ("snare", [38, 40]), ("hi-hat", [42, 44, 46]), ("ride", [51, 53, 59]), ("crash", [49, 52, 55, 57])];
+
+    [Test]
+    [Explicit]
+    public async Task GenreReport()
+    {
+        foreach (var genre in new string?[] { null, "metal", "blackMetal", "djent", "pop", "techno", "trance", "rock", "jazz", "folk", "orchestral" })
+        {
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => genre is null ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))));
+            Console.WriteLine($"{genre ?? "the corpus"}:");
+            var drums = songs.SelectMany(s => s.Rendered.Tracks.Where(t => t.IsPercussionInstrument).SelectMany(t => t.NoteTimeline.Select(n => n.Value))).ToArray();
+            Print("drums", [..drums.Select(x => Midi(x.Velocity))]);
+            foreach (var (name, notes) in Pieces)
+                Print(name, [..drums.Where(x => notes.Contains(x.Offset)).Select(x => Midi(x.Velocity))]);
+            foreach (var role in new[] { TrackRole.Riff, TrackRole.Chords, TrackRole.Bass, TrackRole.Melody })
+                Print(role.ToString().ToLowerInvariant(), [..songs.SelectMany(s => s.Rendered.Tracks.Where(t => !t.IsPercussionInstrument && t.Role == role).SelectMany(t => t.NoteTimeline.Select(n => Midi(n.Value.Velocity))))]);
+        }
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>A velocity as MIDI writes it (<see cref="Rmg.Core.Midi" />).</summary>
+    private static int Midi(double velocity) => (int)Math.Min(127, Math.Floor(velocity * 127) + 1);
+
+    private static void Print(string name, int[] velocities)
+    {
+        if (velocities.Length == 0)
+            return;
+        var sorted = velocities.Order().ToArray();
+        int At(double share) => sorted[Math.Min(sorted.Length - 1, (int)(share * sorted.Length))];
+        Console.WriteLine($"  {name,-7} {sorted.Length,6} notes: p10 {At(0.1),3} p50 {At(0.5),3} p90 {At(0.9),3} p99 {At(0.99),3} max {sorted[^1],3}, IQR {At(0.75) - At(0.25),2}; " +
+                          $"over {Repeated} {sorted.Count(x => x > Repeated) / (double)sorted.Length,6:P1}, 127 {sorted.Count(x => x == 127) / (double)sorted.Length:P2}");
     }
 }

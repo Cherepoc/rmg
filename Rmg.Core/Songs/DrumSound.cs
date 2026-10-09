@@ -7,7 +7,7 @@ namespace Rmg.Core.Songs;
 ///     cross-stick.
 /// </summary>
 /// <param name="Weight">How likely the sound is among its drum's, in runs and landings.</param>
-/// <param name="Loudness">How much louder or quieter it plays than its drum, from -1 to 1, which leans its stroke by energy too.</param>
+/// <param name="Loudness">How much louder or quieter it sounds than its drum, from -1 to 1, which leans its stroke and its accents by energy; it is struck as hard as the drum.</param>
 /// <param name="Stroke">How likely the sound is as the stroke of a drum that strikes rather than walks its sounds; 0 for never.</param>
 /// <param name="Accent">
 ///     The chance a note of a drum that strikes plays the sound in place of its stroke, such as the open hi-hat, with no
