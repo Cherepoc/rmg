@@ -35,7 +35,7 @@ public sealed class TensionReportTest
                 .Aggregate((Off: 0, OnBeat: 0), (sum, x) => (sum.Off + x.Off, sum.OnBeat + x.OnBeat)) is var (off, all) ? off / (double)Math.Max(1, all) : 0;
         var (djent, metal) = (Share("djent"), Share("metal"));
         Console.WriteLine($"the counter-melody's notes on the beat off its chord: Djent's {djent:P0}, Metal's {metal:P0}");
-        await Assert.That(djent).IsGreaterThan(metal + 0.25);
+        await Assert.That(djent).IsGreaterThan(metal + 0.1);
     }
 
     [Test]

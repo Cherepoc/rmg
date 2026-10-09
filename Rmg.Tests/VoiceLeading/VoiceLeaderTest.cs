@@ -148,6 +148,7 @@ public sealed class VoiceLeaderTest
         }
 
         // only a bar that starts afresh jumps, by design
+        Console.WriteLine($"{jumps} of {changes} chord changes jumping an octave's register");
         await Assert.That(jumps / (double)changes).IsLessThan(0.05);
     }
 
@@ -176,6 +177,7 @@ public sealed class VoiceLeaderTest
                 songsVaryingBySection++;
         }
 
+        Console.WriteLine($"smoothness by instrument: {string.Join(", ", byInstrument.OrderBy(x => x.Key).Select(x => $"{x.Key}: {x.Value.Average():F2} of {x.Value.Count}"))}; {songsVaryingBySection} songs varying by section");
         await Assert.That(byInstrument[VoiceLeadingLayers.Sustained].Average()).IsGreaterThan(byInstrument[VoiceLeadingLayers.Guitar].Average() + 0.3);
         await Assert.That(songsVaryingBySection).IsGreaterThan(50);
     }

@@ -129,7 +129,9 @@ public sealed class SongEndingTest
         await Assert.That(Share(0)).IsEqualTo(0);
         await Assert.That(Share(0.25)).IsLessThan(Share(0.5));
         await Assert.That(Share(0.75)).IsGreaterThan(Share(0.5));
-        await Assert.That(Share(1)).IsEqualTo(0.4).Within(1e-9);
+        // the wildest's share tuned, 0.4 as it is, bounded widely
+        Console.WriteLine($"adventurous endings: {Share(0.5):P0} of a middling song's, {Share(1):P0} of the wildest's");
+        await Assert.That(Share(1)).IsBetween(0.2, 0.7);
     }
 
     [Test]

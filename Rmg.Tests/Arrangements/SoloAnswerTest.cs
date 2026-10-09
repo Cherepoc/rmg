@@ -50,7 +50,8 @@ public sealed class SoloAnswerTest
             }
         }
 
-        // a calibration, its bound wide: 96 answers in October 2026, hooked choruses leaving fewer gaps
+        // a calibration, its bound wide, hooked choruses leaving fewer gaps
+        Console.WriteLine($"{answers} answers; louder than the melody in {louder} of {sections} sections");
         await Assert.That(answers).IsGreaterThan(50);
         await Assert.That(louder / (double)sections).IsLessThan(0.1);
     }

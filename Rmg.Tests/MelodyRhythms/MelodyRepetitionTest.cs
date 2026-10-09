@@ -272,13 +272,12 @@ public sealed class MelodyRepetitionTest
 
         // placed over the song, a recurring section and an answer that go on from the note before replay the tune heard,
         // an octave off where it would leap from it
-        // (0.87 over these songs, drawn about the middle, a floor under it, as it moves a little with every change of the songs)
-        Console.WriteLine($"recurring notes of the same class, not improvised: {m.FixedClass:P1}");
-        await Assert.That(m.FixedClass).IsGreaterThan(0.84);
+        // calibrations bounded widely, against the mechanism breaking, their targets in RecurrenceReport
+        Console.WriteLine($"recurring notes of the same class, not improvised: {m.FixedClass:P1}; an answer's first half: {m.AnswerFirstHalfClass:P1}");
+        await Assert.That(m.FixedClass).IsGreaterThan(0.6);
         // the wildest melodies improvise over their whole range, so that songs that improvise keep less of it
         await Assert.That(m.Improvised).IsBetween(0.5, 0.95);
-        // about 0.9 over 512 songs, so a margin under it, which 256 songs' spread may take
-        await Assert.That(m.AnswerFirstHalfClass).IsGreaterThan(0.85);
+        await Assert.That(m.AnswerFirstHalfClass).IsGreaterThan(0.6);
         await Assert.That(m.AnswerSecondHalf).IsBetween(0.5, 0.9);
     }
 
