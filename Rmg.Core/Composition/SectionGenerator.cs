@@ -640,21 +640,21 @@ internal sealed class SectionGenerator
             else if (powerChords && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
                 sectionTrackLayer.Add(CompositionStateKinds.PowerChord, 1);
         }
-        // a line's strong beats on a tension now and then, as the genre has its part, by the section's melody facet
-        if (LinePattern.Tensions.Where(x => x.Role == _tracks.Definitions[trackNumber].Role).Select(x => (ByConvention?)x.Chance).FirstOrDefault() is { } tension)
+        // a line's device's chance, as the part and the genre have it, by the section's melody facet
+        void AddLine(StateKind<double> kind, ImmutableArray<(TrackRole Role, ByConvention Chance)> chances, GenreChoice? choice)
         {
-            var chance = tension.At(sectionRhythm.Facets[Facet.Melody], _genre.Chance(GenreChoices.Tension, GenreChoices.Name(_tracks.Definitions[trackNumber].Role.ToString())));
-            if (chance > 0)
-                sectionTrackLayer.Add(CompositionStateKinds.LineTension, chance);
+            var role = _tracks.Definitions[trackNumber].Role;
+            if (chances.Where(x => x.Role == role).Select(x => (ByConvention?)x.Chance).FirstOrDefault() is { } chance
+                && chance.At(sectionRhythm.Facets[Facet.Melody], choice is null ? null : _genre.Chance(choice, GenreChoices.Name(role.ToString()))) is var value and > 0)
+                sectionTrackLayer.Add(kind, value);
         }
-        // a line's figures played inverted where they come back now and then, as the part and the genre have it, by the section's melody facet
-        if (LinePattern.Inversions.Where(x => x.Role == _tracks.Definitions[trackNumber].Role).Select(x => (ByConvention?)x.Chance).FirstOrDefault() is { } inversions
-            && inversions.At(sectionRhythm.Facets[Facet.Melody], _genre.Chance(GenreChoices.Inversion, GenreChoices.Name(_tracks.Definitions[trackNumber].Role.ToString()))) is var inversion and > 0)
-            sectionTrackLayer.Add(CompositionStateKinds.LineInversion, inversion);
-        // a line's phrases ending on a goal, as the part has it, by the section's melody facet
-        if (LinePattern.Goals.Where(x => x.Role == _tracks.Definitions[trackNumber].Role).Select(x => (ByConvention?)x.Chance).FirstOrDefault() is { } goals
-            && goals.At(sectionRhythm.Facets[Facet.Melody]) is var goal and > 0)
-            sectionTrackLayer.Add(CompositionStateKinds.LineGoal, goal);
+
+        // a line's strong beats on a tension now and then
+        AddLine(CompositionStateKinds.LineTension, LinePattern.Tensions, GenreChoices.Tension);
+        // its figures played inverted where they come back now and then
+        AddLine(CompositionStateKinds.LineInversion, LinePattern.Inversions, GenreChoices.Inversion);
+        // its phrases ending on a goal, the genres' as the songs'
+        AddLine(CompositionStateKinds.LineGoal, LinePattern.Goals, null);
         // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
         if (_tracks.Definitions[trackNumber].Role.PlaysChords())
         {

@@ -259,25 +259,30 @@ internal sealed class LinePattern
     /// </summary>
     private static ChordArrival? GoalOf(LineNote note)
     {
-        if (note.State.GetStateValue(CompositionStateKinds.LineGoal) is not (var chance and > 0) || note.State.GetStateValue(StateKinds.HeldDuration) <= 0)
+        if (note.State.GetStateValue(StateKinds.HeldDuration) <= 0 || Drawn(note, CompositionStateKinds.LineGoal, GoalStream) is not { } context)
             return null;
-        var context = new GenerationContext(Seeds.Derive((ulong)note.State.GetStateValue(CompositionStateKinds.NoteKey), GoalStream));
-        var (goal, root) = (context.GenerateDouble(), context.GenerateDouble());
         // its third where its chord has one, a suspended chord's root
-        return goal < chance ? root < GoalRootShare || !note.Classes.Contains(note.Chord.GetPitch(2).Mod(12)) ? ChordArrival.Root : ChordArrival.Third : null;
+        return context.GenerateDouble() < GoalRootShare || !note.Classes.Contains(note.Chord.GetPitch(2).Mod(12)) ? ChordArrival.Root : ChordArrival.Third;
     }
 
-    /// <summary>Whether a run of echoes starting on a note plays its figure inverted, by the note's own draw, from its key, which draws nothing else.</summary>
-    private static bool Inverts(LineNote note) =>
-        note.State.GetStateValue(CompositionStateKinds.LineInversion) is var chance and > 0
-        && new GenerationContext(Seeds.Derive((ulong)note.State.GetStateValue(CompositionStateKinds.NoteKey), InversionStream)).GenerateDouble() < chance;
+    /// <summary>Whether a run of echoes starting on a note plays its figure inverted, by the note's own draw.</summary>
+    private static bool Inverts(LineNote note) => Drawn(note, CompositionStateKinds.LineInversion, InversionStream) is not null;
 
-    /// <summary>Whether a note on a strong beat lands on a tension, by its own draw, from its key, which draws nothing else.</summary>
+    /// <summary>Whether a note on a strong beat lands on a tension, by its own draw.</summary>
     private static bool IsTense(LineNote note, int rank, LineProfile profile) =>
-        note.State.GetStateValue(CompositionStateKinds.LineTension) is var chance and > 0
-        && rank <= profile.StrongestWeakRank
-        && TensionsOf(note).Count > 0
-        && new GenerationContext(Seeds.Derive((ulong)note.State.GetStateValue(CompositionStateKinds.NoteKey), TensionStream)).GenerateDouble() < chance;
+        rank <= profile.StrongestWeakRank && TensionsOf(note).Count > 0 && Drawn(note, CompositionStateKinds.LineTension, TensionStream) is not null;
+
+    /// <summary>
+    ///     A note's own sequence for a line's device, from its key, which draws nothing else, where the note has the device's
+    ///     chance and its first draw falls under it; none where not.
+    /// </summary>
+    private static GenerationContext? Drawn(LineNote note, StateKind<double> kind, int stream)
+    {
+        if (note.State.GetStateValue(kind) is not (var chance and > 0))
+            return null;
+        var context = new GenerationContext(Seeds.Derive((ulong)note.State.GetStateValue(CompositionStateKinds.NoteKey), stream));
+        return context.GenerateDouble() < chance ? context : null;
+    }
 
     /// <summary>A note's tensions: its scale's notes outside its chord, as pitch classes.</summary>
     private static IReadOnlySet<int> TensionsOf(LineNote note) =>
