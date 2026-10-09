@@ -165,6 +165,17 @@ public sealed class GenerateSongRequestTest
         };
 
         await Assert.That(request.TryRead(out _, out _, out _, out var error)).IsFalse();
-        await Assert.That(error).IsNotNull();
+        // refused for what it is, not for another reason
+        await Assert.That(error).Contains(Reasons[what]);
     }
+
+    /// <summary>What each refusal names, a fragment of its error.</summary>
+    private static readonly Dictionary<string, string> Reasons = new()
+    {
+        ["unconventionality"] = "Unconventionality 62", ["facet"] = "Facet feel -1", ["unknownFacet"] = "tempo is not a facet", ["part"] = "kazoo is not a part",
+        ["instrument"] = "instrument 128", ["group"] = "gong is not a drum group", ["seed"] = "is not a seed", ["tempo"] = "Tempo 62", ["key"] = "Key 12",
+        ["meter"] = "Meter -1", ["mode"] = "Mode 13", ["swing"] = "Swing 62", ["genreChoice"] = "kazoo is not a choice", ["genreOption"] = "1/1 is not an option",
+        ["genreStep"] = "meter 3/4 is not a whole number", ["genreEnds"] = "meter 3/4 is not a whole number", ["genreEmptyPool"] = "keeps none of its options",
+        ["noPieces"] = "No drum pieces", ["piece"] = "gong is not a drum piece"
+    };
 }

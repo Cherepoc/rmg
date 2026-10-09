@@ -30,7 +30,8 @@ public sealed class MelodyFillTest
                 var target = melody.FirstOrDefault(x => x.Position >= line - 1e-9);
                 await Assert.That(walked.Select(x => Math.Round(x.Position, 6))).IsEquivalentTo(positions.Select(x => Math.Round(x, 6)), CollectionOrdering.Matching);
                 await Assert.That(positions.Length).IsLessThanOrEqualTo(3);
-                if (target.Value is not null && walked.Length > 0 && Math.Abs(target.Value.Pitches[0] - walked[^1].Value.Pitches[0]) <= 4)
+                // a step, two semitones at most, three for an augmented second
+                if (target.Value is not null && walked.Length > 0 && Math.Abs(target.Value.Pitches[0] - walked[^1].Value.Pitches[0]) <= 3)
                     stepping++;
                 walks++;
             }

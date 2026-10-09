@@ -149,6 +149,9 @@ public sealed class LineTest
         var notes = Enumerable.Range(0, 200).Select(i => Place(line, C, CTones, i % 2 == 0 ? Strong : Weak, 2, 0)).ToArray();
 
         await Assert.That(notes.Max() - notes.Min()).IsLessThanOrEqualTo(MelodyLayers.Line.RangeWidth);
+        // in the singable middle, A3 to D5
+        var (low, high) = Line.GetSingableRange(MinNote, MaxNote, MelodyLayers.Line.RangeWidth);
+        await Assert.That(notes.All(x => x >= low && x <= high)).IsTrue();
     }
 
     [Test]

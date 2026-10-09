@@ -56,6 +56,15 @@ public sealed class GhostsTest
         await Assert.That(count).IsGreaterThan(100);
     }
 
+    /// <summary>The songs never ghost, a genre's device alone.</summary>
+    [Test]
+    public async Task TheSongs_NeverGhost()
+    {
+        var ghosting = TestCorpus.Range(32).SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Ghosts)).ToArray();
+        await Assert.That(ghosting.Length).IsGreaterThan(0);
+        await Assert.That(ghosting.All(x => !(bool)x.Value!)).IsTrue();
+    }
+
     /// <summary>How many ghost notes a bar the funky presets play, of their bars with a backbeat.</summary>
     [Test]
     [Explicit]

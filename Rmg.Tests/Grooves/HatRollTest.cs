@@ -8,7 +8,7 @@ namespace Rmg.Tests.Grooves;
 public sealed class HatRollTest
 {
     [Test]
-    public async Task AHipHopHat_RollsSomeBarsLastBeat_InEvenFastNotes_GrowingLouder_TheSongsNever()
+    public async Task AHipHopHat_RollsInEvenFastNotes_GrowingLouder_FarOftenerThanTheSongs()
     {
         static (int Rolls, int Louder) Rolls(CorpusSong song)
         {

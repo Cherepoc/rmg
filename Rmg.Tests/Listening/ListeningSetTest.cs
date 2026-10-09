@@ -44,7 +44,11 @@ public sealed class ListeningSetTest
     [Explicit]
     public async Task Report()
     {
-        var directory = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "songs", "listening");
+        // under the repository, wherever the tests run from
+        var root = new DirectoryInfo(AppContext.BaseDirectory);
+        while (root is not null && !File.Exists(Path.Combine(root.FullName, "Rmg.slnx")))
+            root = root.Parent;
+        var directory = Path.Combine(root?.FullName ?? throw new InvalidOperationException("No repository above the tests."), "songs", "listening");
         Directory.CreateDirectory(directory);
         var checklist = new StringBuilder("# Listening set\n\n");
 
@@ -78,7 +82,7 @@ public sealed class ListeningSetTest
         var fast = spans.Where(x => x.Spans.Values.Any(r => r.Bars == 0.5)).OrderByDescending(x => Bpm(x.Song)).Take(2);
         foreach (var (kind, (song, rhythms)) in slow.Select(x => ("slow", x)).Concat(fast.Select(x => ("fast", x))))
         {
-            var seed = songs.ToList().IndexOf(song);
+            var seed = song.Seed;
             var sections = string.Join(", ", song.Map.Sections.Select(x => $"{Time(song, x.Start)} {rhythms[x.SectionId].Span * 60 / Bpm(song):F1} s"));
             await Write(directory, $"chords-{kind}-{seed}", song);
             checklist.AppendLine($"- `chords-{kind}-{seed}.mid`: {Describe(song)}; each section's start and chord length: {sections}");

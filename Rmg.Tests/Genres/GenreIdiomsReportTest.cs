@@ -124,7 +124,7 @@ public sealed class GenreIdiomsReportTest
                 : double.NaN,
             ["tom hits a minute"] = Tracks(DrumGroups.Toms).Sum(t => notes[t].Count) / minutes,
             ["time as the bar before"] = timeBars.Length > 0 ? timeBars.Count(x => TimeOf(x) == TimeOf(x - 4)) / (double)timeBars.Length : double.NaN,
-            ["hi-hat foot on 2 and 4"] = bars.Length > 0 ? bars.Count(x => new[] { 1, 3 }.All(b => notes.Values.Any(n => n.Any(y => Math.Abs(y.Position - (x + b)) < 0.05 && y.Value.Pitches.Contains(44))))) / (double)bars.Length : double.NaN,
+            ["hi-hat foot on 2 and 4"] = bars.Length > 0 ? bars.Count(x => new[] { 1, 3 }.All(b => drums.Any(t => notes[t].Any(y => Math.Abs(y.Position - (x + b)) < 0.05 && y.Value.Pitches.Contains(44))))) / (double)bars.Length : double.NaN,
             ["snares cross-stick"] = snares.SelectMany(t => notes[t]).ToArray() is { Length: > 0 } struck ? struck.Count(x => x.Value.Pitches.Contains(37)) / (double)struck.Length : double.NaN,
             ["snare on 2 and 4"] = bars.Length > 0 ? bars.Count(x => HitsAt(snares, x + 1) && HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
             ["chorus melody bars repeated"] = RepeatedIn(SectionRole.Chorus),
@@ -146,7 +146,7 @@ public sealed class GenreIdiomsReportTest
                     return offsets.Any(o => (x.Value.Pitches.Min() - key - o).Mod(12) == 0) ? 0.0 : 1;
                 })
                 : double.NaN,
-            ["riff sections in power chords"] = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords).Select(x => (bool)x.Value!).DefaultIfEmpty().Average(x => x ? 1.0 : 0),
+            ["riff sections in power chords"] = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["guitars' notes palm-muted"] = notes.Where(x => x.Key is SongTracks.RiffTrack or SongTracks.RhythmTrack).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["solo appearances"] = song.Solos.Count / (double)map.Sections.Length,
             ["sections in stop time"] = song.Trace.Where(x => x.Point == TracePoints.StopTime).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),

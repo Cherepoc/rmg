@@ -43,4 +43,15 @@ public sealed class MidiIntToBytesVariableTest
 
         await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
+
+    /// <summary>A quantity of three bytes and of four, the longest a MIDI file takes, as long rests and tick deltas need.</summary>
+    [Test]
+    [Arguments(0x80u, new byte[] { 0x81, 0x00 })]
+    [Arguments(0x3FFFu, new byte[] { 0xFF, 0x7F })]
+    [Arguments(0x4000u, new byte[] { 0x81, 0x80, 0x00 })]
+    [Arguments(0x0FFFFFFFu, new byte[] { 0xFF, 0xFF, 0xFF, 0x7F })]
+    public async Task LongerValues_TakeTheirBytes_EachButTheLastFlagged(uint value, byte[] expected)
+    {
+        await Assert.That(Midi.IntToBytesVariable(value)).IsEquivalentTo(expected, CollectionOrdering.Matching);
+    }
 }

@@ -177,7 +177,8 @@ public sealed class ListeningQuestionsTest
                 question = question.Text,
                 decides = question.Decides,
                 genre = question.Genre,
-                without = new { skip = question.Skip, genre = question.GenrePatch ?? [] },
+                // an object of choices always, as the page reads it, empty where the song without the device patches none
+                without = new { skip = question.Skip, genre = question.GenrePatch ?? new Dictionary<string, Dictionary<string, int>>() },
                 seeds = asked.Select(x => new { seed = Base62.FromSeed((ulong)x.Seed), at = Math.Round(x.At, 1), listen = x.Listen }).ToArray()
             });
         }

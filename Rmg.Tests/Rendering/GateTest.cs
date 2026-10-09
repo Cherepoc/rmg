@@ -117,6 +117,7 @@ public sealed class GateTest
 
         Console.WriteLine($"{restruck} chords struck again on a bar line, {held} sustained chords held across one");
         await Assert.That(restruck).IsGreaterThan(0);
+        await Assert.That(held).IsGreaterThan(0);
     }
 
     [Test]

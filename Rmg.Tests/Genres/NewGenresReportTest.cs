@@ -19,7 +19,7 @@ public sealed class NewGenresReportTest
             var songs = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Base: given, Genre: GenrePresets.Genre(name))));
             var figures = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Figures).Select(t => (ImmutableDictionary<FigurePlayer, string>)t.Value!)).ToArray();
             string Figure(FigurePlayer player, string figure) => $"{figure} {figures.Count(x => x.GetValueOrDefault(player) == figure) / (double)figures.Length:P0}";
-            var tempos = songs.Select(x => x.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(x.Map.Sections[0].Start).GetStateValue(Rmg.Core.Events.StateKinds.Tempo)).ToArray();
+            var tempos = songs.Select(x => x.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(x.Map.Sections[0].Start).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo).ToArray();
             var meters = songs.Select(x => (Meter)x.Trace.Single(t => t.Point == TracePoints.Meter).Value!).ToArray();
             var chords = songs.SelectMany(x => x.Song.Notes!.GetValueOrDefault(SongTracks.ChordsTrack)?.Where(n => n.Value.Pitches.Length >= 3) ?? []).ToArray();
             var effects = songs.Select(x => ((SongEffects)x.Trace.Single(t => t.Point == TracePoints.SongEffects).Value!).Strong).ToArray();

@@ -29,6 +29,7 @@ public sealed class ExpressionTest
         var strong = Effects.Select((e, i) => (e, i)).Where(x => x.e.IsStrong).Select(x => x.i).ToArray();
         var gentle = Effects.Select((e, i) => (e, i)).Where(x => !x.e.IsStrong).Select(x => x.i).ToArray();
 
+        // most wildest songs playing a strong effect, every one drawing one but where no part of it may carry it
         await Assert.That(wild.Count(song => strong.Any(i => song.Any(p => p[i])))).IsGreaterThan(wild.Length * 3 / 4);
         await Assert.That(wild.Any(song => strong.Count(i => song.Any(p => p[i])) >= 2)).IsTrue();
         await Assert.That(wild.SelectMany(x => x).Any(p => gentle.Count(i => p[i]) >= 2)).IsTrue();

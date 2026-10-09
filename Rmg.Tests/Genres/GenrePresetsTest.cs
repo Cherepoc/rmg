@@ -274,7 +274,8 @@ public sealed class GenrePresetsReportTest
             void Row(string choice, Func<CorpusSong, IEnumerable<string>> of) =>
                 Console.WriteLine($"  {choice,-10} " + string.Join(" | ", ends.Select(x => Top(x.SelectMany(of)))));
             Row("meter", x => [Meter.NameOf(x.Map.Meter)]);
-            Row("feel", x => [Feels.NameOf(Feels.Of(x.Song.Notes![SongTracks.ChordsTrack].First().Value.State))]);
+            // by the melody's first note, which every song has, the chords not
+            Row("feel", x => [Feels.NameOf(Feels.Of(x.Song.Notes![SongTracks.MelodyTrack].First().Value.State))]);
             Row("scale", x => [x.Song.Draws!.Scale.Name]);
             Row("shapes", x => GenreReportTest.Shapes(x).Select(y => y.Name));
             Row("setup", x => [$"{x.Song.Draws!.DrumSetup}"]);
