@@ -564,9 +564,11 @@ Each item with its plan, and what it waits for.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
 - **The note states read once** (P4, from the review of 9 October 2026): `Realizer.GetNoteStates` merges a track's
-  state with the whole song's and builds a state map at every position, again for every pass of `RealizeStruck`, for
-  every solo's loudness and every answered gap; reading it once a track, and a note's tempo without the whole map,
-  would take a share of the 17% realizing costs and the stages' few percent each. Measure with the profile first.
+  state with the whole song's, again for every pass of `RealizeStruck`, for every solo's loudness and every answered
+  gap, and the lines' placing reads it too. A song allocates 47 MB as it is made, 9.5 of them realizing, 5.3 placing
+  the lines and 21 its decisions and sections, no call above a tenth (`AllocationReportTest`, the dotTrace timeline of
+  9 October 2026, after the state maps were read at their notes' places alone and a timeline's states made once);
+  reading a track's states once, merging only what changed between `RealizeStruck`'s passes, is what is left.
 - **Analytics written off the request** (P4, from the review of 9 October 2026): every tally and song measurement opens
   SQLite and writes under one lock on a pool thread, so a burst of tallies holds threads that songs wait for; a queue
   one writer drains, in batches, would answer at once. And the admin password tried without a limit: a pause after a
@@ -584,7 +586,8 @@ Each item with its plan, and what it waits for.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
-  cache them; a corpus song holds about 5 MB.
+  cache them; a corpus song keeps about 3 MB, every note's state the most of it, and its making allocates 47 MB
+  more for a moment.
 
 ## Genres
 
