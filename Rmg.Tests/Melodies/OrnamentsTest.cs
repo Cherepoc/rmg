@@ -30,7 +30,8 @@ public sealed class OrnamentsTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ornamenting))))
         {
             await Assert.That(Played(song).Length).IsEqualTo(Ornaments.All.Length);
-            foreach (var (track, notes) in song.Song.Notes!)
+            // a pitched part's, a drum's flams and drags its own (DrumOrnamentsTest)
+            foreach (var (track, notes) in song.Song.Notes!.Where(x => !song.IsDrum(x.Key)))
             foreach (var note in notes.Where(x => OrnamentOf(x.Value).Length > 0))
             {
                 var ornament = OrnamentOf(note.Value);

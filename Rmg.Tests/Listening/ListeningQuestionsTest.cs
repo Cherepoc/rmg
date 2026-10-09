@@ -73,7 +73,11 @@ public sealed class ListeningQuestionsTest
                 .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 2)),
         new("riser", "Techno's reverse cymbal swelling into a drop, the band muffled under it or silent: a build, or noise over the band?",
             "The riser's loudness against the band, and whether it rises over a filtered drop.", "techno", ["Risers"], null,
-            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.FilteredDrop).Select(t => (double?)t.Value).Min(), 2))
+            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.FilteredDrop).Select(t => (double?)t.Value).Min(), 2)),
+        new("rudiments", "Jazz's snare dragging into its backbeat and flamming in its fills, soft strokes just before a note: a drummer's touch, or a stumble?",
+            "The flams' and drags' chances by genre, and their strokes' loudness.", "jazz", ["Drum ornaments"], null,
+            x => x.Song.Notes!.Where(n => x.IsDrum(n.Key)).SelectMany(n => n.Value).Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Ornament) is { IsDefaultOrEmpty: false })
+                .Select(n => (double?)n.Position).Min() is { } at ? Before(x, at, 2) : null)
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

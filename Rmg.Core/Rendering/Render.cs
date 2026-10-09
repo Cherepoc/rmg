@@ -26,6 +26,9 @@ public static class Render
     /// <summary>How loud an ornament's quick note plays against its note.</summary>
     internal const double OrnamentVelocity = 0.8;
 
+    /// <summary>How loud a drum's grace stroke plays against its note, a flam's: well under it.</summary>
+    internal const double GraceStrokeVelocity = 0.6;
+
     /// <summary>How loud an up stroke plays against a down stroke.</summary>
     internal const double UpStrokeVelocity = 0.9;
 
@@ -71,6 +74,7 @@ public static class Render
             // a riser on a channel of its own, its part's mix over it, so that it swells where the part plays on
             var risers = allNotes.Where(x => Risers.IsRiser(x.Value.State)).ToArray();
             var trackNotes = risers.Length == 0 ? allNotes : EventTimeline.Create(allNotes.Duration, allNotes.Where(x => !Risers.IsRiser(x.Value.State)));
+            var isPercussion = song.TrackDefinitions[trackNumber] is PercussionInstrumentTrack;
             // a drum plays as its group is asked to
             var group = song.TrackDefinitions[trackNumber] is PercussionInstrumentTrack && !mix.DrumGroups.IsEmpty
                 ? mix.DrumGroups.GetValueOrDefault(DrumGroups.GroupOf(DrumGroups.GetDrum(trackNumber)).Name)
@@ -96,8 +100,17 @@ public static class Render
                     var shift = note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset);
                     var strum = note.Value.State.GetStateValue(CompositionStateKinds.Strum);
                     var order = note.Value.Pitches.Order().Skip(strum < 0 && note.Value.Pitches.Length >= UpStrokeFullest ? 1 : 0).ToArray();
-                    // an ornament's quick notes, lighter, from the note's start, and the note after them
+                    // an ornament's quick notes, lighter, from the note's start, and the note after them; a drum's grace
+                    // strokes, softer, before its note, on its sound, as a flam's are
                     var ornament = note.Value.State.GetStateValue(CompositionStateKinds.Ornament);
+                    if (!ornament.IsDefaultOrEmpty && isPercussion)
+                    {
+                        var stroke = note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep);
+                        return ornament.Select((x, i) => new RenderedNote(note.Value.Pitches[0] + x, velocity * GraceStrokeVelocity, stroke, shift)
+                                .ToTimelineItem(swing.Apply(note.Position - (ornament.Length - i) * stroke)))
+                            .Append(new RenderedNote(note.Value.Pitches[0], velocity, duration, shift).ToTimelineItem(position));
+                    }
+
                     if (!ornament.IsDefaultOrEmpty)
                     {
                         var step = note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep);

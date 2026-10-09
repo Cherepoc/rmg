@@ -336,6 +336,9 @@ internal static class TracePoints
     /// <summary>Whether a section's snare plays ghost notes (a <c>bool</c>; <see cref="Composition.Ghosts" />).</summary>
     public const string Ghosts = "Ghosts";
 
+    /// <summary>Whether the song's snare flams in its fills and drags into its backbeats (a <c>(bool Flams, bool Drags)</c>; <see cref="Composition.DrumOrnaments" />).</summary>
+    public const string DrumOrnaments = "Drum ornaments";
+
     /// <summary>How the song ends, in words.</summary>
     public const string SongEnding = "Song ending";
 }

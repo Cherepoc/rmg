@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "rudiments": { "flams": [0, 35, 70], "drags": [0, 5, 30] },
       "drumStrokes": { "openHiHat": 85 },
       "cadenceRaise": { "sections": [0, 10, 10] },
       "ghosts": { "sections": [10, 20, 30] },
@@ -68,6 +69,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "rudiments": { "flams": [0, 25, 60], "drags": [0, 40, 80] },
       "dynamics": { "evenness": 40 },
       "sticking": { "singles": 100, "doubles": 60, "paradiddle": 60, "sixStroke": [10, 30, 40] },
       "drumSoloFeet": { "hatFoot": 100, "groove": 40 },
@@ -139,6 +141,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 120 to 128, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
       "cadenceRaise": { "sections": 0 },
       "dropKind": { "silent": 100, "filtered": 50 },
@@ -217,6 +220,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 130 to 145, the pads and bass pumping.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
       "dropKind": { "silent": 100, "filtered": 100 },
       "mutation": { "bars": [0, 5, 15] },
@@ -297,6 +301,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "chordScales": { "applied": [0, 35, 35], "borrowed": [0, 12, 12], "own": [0, 0, 30], "mediant": [10, 25, 30] },
       "dynamics": { "evenness": 85 },
       "cadenceRaise": { "sections": 0 },
@@ -366,6 +371,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 75 },
       "cadenceRaise": { "sections": 0 },
       "ghosts": { "sections": [20, 30, 40] },
@@ -555,6 +561,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "rudiments": { "flams": [0, 20, 50], "drags": [0, 30, 70] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60 },
       "drumSetup": { "kit": 100, "kitAndPercussion": [20, 30, 40] },
       "ghosts": { "sections": [50, 70, 80] },
@@ -719,6 +726,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "louderForms": { "guitars": 0, "quieter": 0 },
       "mixFilter": { "closing": [10, 20, 40], "opening": 0, "dips": 0 },
       "alone": { "pad": 100, "melody": 40, "chords": 30, "counterMelody": 20 },
@@ -827,6 +835,7 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "rudiments": { "flams": [0, 35, 70], "drags": [0, 0, 20] },
       "pocket": { "laidBack": 10 },
       "riffIntro": { "songs": [30, 40, 50] },
       "breakdown": { "sections": [20, 30, 40] },
@@ -900,6 +909,7 @@
     "name": "Medieval",
     "description": "Calm and modal: recorders, flutes and a fiddle over a lute and a harp, a choir and a drone, open fifths, a second voice in fourths and fifths, 3/4 and 6/8, slow, a tambourine, a triangle and a frame drum marking the form.",
     "choices": {
+      "rudiments": { "flams": [0, 40, 80], "drags": [0, 20, 60] },
       "octaveBass": { "sections": 0 },
       "stopTime": { "sections": 0 },
       "push": { "sections": 0 },
@@ -959,6 +969,7 @@
     "name": "Dungeon synth",
     "description": "Dark and slow: a harpsichord's ostinato under a celesta or a horn, synth strings, choirs and brass, minor and harmonic minor triads, drones and a deep reverb, a timpani and a snare's roll marking the form.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "octaveBass": { "sections": 0 },
       "stopTime": { "sections": 0 },
       "push": { "sections": 0 },
@@ -1230,6 +1241,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
       "mutation": { "bars": [0, 5, 10] },
       "cadenceRaise": { "sections": [10, 20, 20] },
@@ -1292,6 +1304,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
       "dropKind": { "silent": 100, "filtered": 60 },
       "rootDegree": { "sixth": 80, "third": 85, "seventh": 75 },
@@ -1353,6 +1366,7 @@
     "name": "Drum and bass",
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
       "figure": { "ground": { "own": 100, "breakbeat": [30, 40, 50] } },
       "dropKind": { "silent": 100, "filtered": 40 },
@@ -1468,6 +1482,7 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major and Mixolydian, a count-in and a stop.",
     "choices": {
+      "rudiments": { "flams": [0, 30, 60], "drags": [0, 0, 20] },
       "drumStrokes": { "openHiHat": 85 },
       "stopTime": { "sections": [10, 15, 20] },
       "room": { "room": 100 },
@@ -1524,6 +1539,7 @@
     "name": "Fusion",
     "description": "Electric piano and a soprano sax over a fretless bass singing high, Lydian, Dorian and melodic minor, ninths to thirteenths and quartal chords, chords in scales of their own and planed, odd meters, long solos.",
     "choices": {
+      "rudiments": { "flams": [0, 30, 70], "drags": [0, 30, 70] },
       "ownMode": { "lydian": 100, "dorian": 100, "melodicMinor": 80, "mixolydian": 50, "phrygian": [0, 10, 20] },
       "ghosts": { "sections": [30, 50, 60] },
       "polymeter": { "sections": [0, 10, 30] },
@@ -1575,6 +1591,7 @@
     "name": "Soul",
     "description": "An organ, a piano and horns, sevenths and ninths passing through applied dominants, a laid-back backbeat, 4/4 or a swaying 6/8, a last chorus lifted, sax solos answering the tune.",
     "choices": {
+      "rudiments": { "flams": [0, 20, 50], "drags": [0, 25, 60] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60 },
       "louderForms": { "guitars": 0, "quieter": 0 },
       "ghosts": { "sections": [40, 55, 70] },
@@ -1745,6 +1762,7 @@
     "name": "Orchestral",
     "description": "Strings, horns and woodwinds over a contrabass, a harp's arpeggios, timpani and a cymbal marking the form, minor, major and harmonic minor, long crescendos into louder sections, parts entering one by one.",
     "choices": {
+      "rudiments": { "flams": [0, 50, 90], "drags": [0, 20, 60] },
       "octaveBass": { "sections": 0 },
       "stopTime": { "sections": 0 },
       "push": { "sections": 0 },
@@ -1910,6 +1928,7 @@
     "name": "Chiptune",
     "description": "Square and saw waves on every part, as an old games console's sound chip plays them: chords broken into fast arpeggios, a pulse bass, a catchy hook repeated, a small electronic kit, straight, 120 to 160, major or minor.",
     "choices": {
+      "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
       "space": { "melody": 25, "chords": 25, "bass": 15, "drum": 25, "counterMelody": 25, "riff": 25 },
       "feelChances": { "swing": 0, "halfTime": 8, "doubleTime": 4 },

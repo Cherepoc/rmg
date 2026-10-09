@@ -239,5 +239,6 @@ internal enum SongStream
     SoloTwins = 102,
     QuieterForms = 103,
     PartTracks = 104,
-    BlockHarmony = 105
+    BlockHarmony = 105,
+    DrumOrnaments = 106
 }

@@ -243,5 +243,61 @@
         ]
       }
     ]
+  },
+  {
+    "id": "rudiments",
+    "question": "Jazz's snare dragging into its backbeat and flamming in its fills, soft strokes just before a note: a drummer's touch, or a stumble?",
+    "decides": "The flams' and drags' chances by genre, and their strokes' loudness.",
+    "genre": "jazz",
+    "without": {
+      "skip": [
+        "Drum ornaments"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      {
+        "seed": "H",
+        "at": 109,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "P",
+        "at": 73.3,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 86,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 88.5,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 92.6,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "h",
+        "at": 27.5,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      }
+    ]
   }
 ]

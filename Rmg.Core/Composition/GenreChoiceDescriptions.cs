@@ -55,6 +55,7 @@ public static class GenreChoiceDescriptions
         ["grooveHold"] = "How steady the groove stays from section to section: above the middle the backbeat holds to 2 and 4 and the patterns barely move.",
         ["pins"] = "How often each part keeps one figure every bar, unchanging, as a four-on-the-floor kick or a reggae skank does.",
         ["ghosts"] = "How often a section's snare plays ghost notes, soft 16ths off the beat between its backbeats, the likelier next to one, as a funk or soul drummer does; the same 16ths in every bar of the section.",
+        ["rudiments"] = "How often a song's snare flams, a soft stroke just before a note, on its beats in a fill, as a rock or a marching drummer accents one; and drags, two, into its backbeat, as a jazz or a funk drummer does.",
         ["hatRolls"] = "How often a bar ends with the hi-hat rolling in 32nds or triplets, as trap does.",
         ["pocket"] = "How the parts sit around the beat: above the middle laid back, the backbeat and the lead behind it, below tight on the grid.",
         ["fills"] = "How much the drums fill into a new section: above the middle oftener and longer, below seldom and short.",

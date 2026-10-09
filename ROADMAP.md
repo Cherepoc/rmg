@@ -168,21 +168,17 @@ within a bar; and swing already pairs by each section's meter. In order of what 
 
 1. Done: a riser's own channel, the render's, its part's track carrying it and its mix over it, the page's too; a
    riser into every drop, a filtered one's as well, its part playing on under it (`?listen=riser`).
-2. **The bar patterns' finest note by the tempo.** A bar pattern stops at 16ths by a constant
-   (`ResolvedRhythm.MaxRankLimit`), a fill at its shortest note in seconds (`FillLayers`), hat rolls and ratchets in
-   32nds already. One rule for both: a bar pattern's finest rank by a shortest note in seconds of its own, 16ths at
-   every tempo the songs play, 32nds reached only where a genre's fineness (`GenreRhythm`, "fineness", now capped at
-   0) leans above it and the tempo allows, IDM's wildest first. Measured: the songs unchanged without a genre
-   (fingerprint over the drawn songs), IDM's notes a beat by rank and its shortest note in seconds. Review,
-   overengineering: figures in 32nds are left out, as none asks for one; musicality: 32nd hats in a groove are trap's
-   and IDM's, a blur past about 12 notes a second, which the seconds cap.
-3. **Two drum sounds at once, flams and drags.** No engine change: a fill's or a solo's accent landing on two toms
-   at once puts two sounds in one note (`FillSounds`), and a flam or a drag on a snare's accent is an ornament on a drum
-   note, its grace strokes the same sound a 32nd or less before (the render's ornament plays on the beat now; a drum's
-   before it). Taken up with the drum solos' genre idioms (*Drum solos rethought*, step 6), metal's tom cascades and a
-   march's flams, rather than alone. Measured: the notes of two sounds and the flams per fill by genre; the rules that
-   read one sound a drum note made to read every one. Review: a run's two toms together sound heavy, an accent's
-   device, not a run's, so on accents and landings only.
+2. Put off after its review in the loop: the bar patterns' finest note by the tempo. A shortest note in seconds that
+   keeps 16ths at the fastest tempos lets 32nds through at the slow ones, and every pattern whose rank bounces off the
+   limit now (`ResolvedRhythm.Of`) would change, so it cannot be one rule with the fills' without a genre's lever; the
+   one genre leaning fineness up, Metal's kick at 100, means its finest, 16ths, which a lifted cap would make 32nds; and
+   IDM's alone would want a state of its own and the tempo in the bar's rhythm for a sound no listening has asked for,
+   its hat rolls and ratchets in 32nds already. Taken up with *Rolls splintering into 32nds* (*Black metal and IDM*).
+3. Done: flams and drags, the snare's ornaments, its grace strokes before its note on its sound (`DrumOrnaments`), a
+   flam on a fill's 8ths and a drag into a backbeat, the song's by its fills and groove facets and a genre's
+   (`rudiments`), none in the machines' genres (`?listen=rudiments`). Two toms at once put off: a drum note plays one
+   sound by its articulation (`StateKinds.ArticulationIndex`), so two would want a list of them, an engine's change
+   for an accent no listening asks for; with the drum solos' idioms, should their tom cascades want it.
 4. **A phrase's length a meter's** (a refactor). `Meter.PhraseBarCount`, the constant 4, made the meter's own
    (`PhraseBars`, 4 by default, beside `Phrases`), every use through the meter, and the tables of four bars read by a
    bar's place in its phrase: the answer's second half (`MelodyLayers.AnswerBars`), the register's peak and period, a
@@ -735,7 +731,6 @@ left:
   - The pump on the kick wherever it falls, should a pumping genre's kick leave the beat; it ducks on the beat now.
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a
     role free.
-  - A snare's drag, two quick strokes before a backbeat, should the ghost notes want it.
   - The piano's montuno, a broken chord off the beat, an arpeggio's pattern of its own (`Arpeggios`) rather than a
     figure, the figures striking a player's chord or note; a second time keeper playing straight under the tresillo.
   - More figures (P3, by listening): a figure for the hi-hat or the snare, a figure of more than
