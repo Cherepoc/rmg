@@ -18,7 +18,7 @@ public sealed class UnconventionalityReportTest
         var songs = TestCorpus.InParallel(Enumerable.Range(0, SongCount), seed => Unconventionality.Generate(
             Unconventionality.DrawBase(SongGenerator.CreateStream((ulong)seed, SongStream.Rhythm)),
             // the songs' own facets, as the generator draws them
-            facet => SongGenerator.CreateStream((ulong)seed, SongStream.Unconventionality, facet)
+            facet => SongGenerator.CreateStream((ulong)seed, SongStream.Unconventionality, (int)facet)
         ));
 
         string Spread(double[] values) => $"10% {Percentile(values, 0.1):F2}, median {Percentile(values, 0.5):F2}, 90% {Percentile(values, 0.9):F2}";

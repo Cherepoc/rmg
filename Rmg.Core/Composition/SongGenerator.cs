@@ -97,10 +97,10 @@ public static class SongGenerator
         return new GenerationContext(Seeds.Derive(seed, (int)stream));
     }
 
-    /// <summary>A stream's own sequence for a facet of the song's unconventionality.</summary>
-    internal static IGenerationContext CreateStream(ulong seed, SongStream stream, Facet facet)
+    /// <summary>A stream's own sequence for a place in it, such as a facet of the song's unconventionality, a part or an appearance.</summary>
+    internal static IGenerationContext CreateStream(ulong seed, SongStream stream, int place)
     {
-        return new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)stream), (int)facet));
+        return new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)stream), place));
     }
 
     /// <summary>The tempos a song may play at, as multiples of <see cref="Meter.BaseTempo" />, slowest first: every one the draw can land on.</summary>

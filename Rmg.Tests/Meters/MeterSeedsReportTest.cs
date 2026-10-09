@@ -14,7 +14,7 @@ public sealed class MeterSeedsReportTest
             SongGenerator.CreateStream((ulong)seed, SongStream.Meter),
             Unconventionality.Generate(
                 Unconventionality.DrawBase(SongGenerator.CreateStream((ulong)seed, SongStream.Rhythm)),
-                facet => SongGenerator.CreateStream((ulong)seed, SongStream.Unconventionality, facet)
+                facet => SongGenerator.CreateStream((ulong)seed, SongStream.Unconventionality, (int)facet)
             )[Facet.Feel],
             null,
             Genre.None

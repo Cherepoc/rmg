@@ -59,7 +59,7 @@ internal sealed record SongDecisions(
     public IGenerationContext Stream(SongStream stream) => SongGenerator.CreateStream(Seed, stream);
 
     /// <summary>A stage's own stream for each place, such as an appearance or a section.</summary>
-    public IGenerationContext Stream(SongStream stream, int place) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seed, (int)stream), place));
+    public IGenerationContext Stream(SongStream stream, int place) => SongGenerator.CreateStream(Seed, stream, place);
 
     /// <summary>A stage's own stream for each pair of places, such as a section and a track.</summary>
     public IGenerationContext Stream(SongStream stream, int place, int other) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(Seed, (int)stream), place), other));
@@ -106,7 +106,7 @@ internal sealed record SongDecisions(
         // how far the song strays from convention, and every facet of it, drawn around the song's; the rhythm strays as
         // the groove does, which every rhythm layer from the tracks' own on is scaled by
         var unconventionalityBase = overrides.Base ?? Unconventionality.DrawBase(Stream(SongStream.Rhythm));
-        var songUnconventionality = Unconventionality.Generate(unconventionalityBase, facet => SongGenerator.CreateStream(seed, SongStream.Unconventionality, facet));
+        var songUnconventionality = Unconventionality.Generate(unconventionalityBase, facet => SongGenerator.CreateStream(seed, SongStream.Unconventionality, (int)facet));
         if (overrides.Facets is { } facets)
             songUnconventionality = songUnconventionality with { Facets = songUnconventionality.Facets.SetItems(facets) };
         // its values read at its facets, a value's plain and wild ends leaning a plain and a wild song
@@ -118,10 +118,10 @@ internal sealed record SongDecisions(
         StateTrace.RecordSong(TracePoints.SongRhythm, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
         // the parts the song leaves out, the pad, the counter-melody and the drums now and then, each from a sequence
         // of its own, and any given in or out
-        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts, songUnconventionality, genre);
+        var absent = SongParts.DrawAbsent(part => SongGenerator.CreateStream(seed, SongStream.Parts, (int)part), overrides.Parts, songUnconventionality, genre);
         StateTrace.RecordSong(TracePoints.SongParts, string.Join(", ", absent.Order()), absent);
         // the parts the song pins to their figures, a genre's, each from a sequence of its own
-        var pinned = DrumRoles.DrawPinned(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Pins), (int)part)), songUnconventionality[Facet.Groove], genre);
+        var pinned = DrumRoles.DrawPinned(part => SongGenerator.CreateStream(seed, SongStream.Pins, (int)part), songUnconventionality[Facet.Groove], genre);
         StateTrace.RecordSong(TracePoints.PinnedDrums, string.Join(", ", pinned.Order()), pinned);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
@@ -139,7 +139,7 @@ internal sealed record SongDecisions(
             overrides.DrumPieces is { } pieces ? DrumPieces.SetupOf(pieces) : overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value, genre),
             overrides.DrumPieces is { } given ? DrumPieces.Of(given) : null,
             genre,
-            part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartFeel), (int)part)),
+            part => SongGenerator.CreateStream(seed, SongStream.PartFeel, (int)part),
             songUnconventionality[Facet.Feel],
             songUnconventionality[Facet.Sound],
             pinned
@@ -230,7 +230,7 @@ internal sealed record SongDecisions(
         var plan = formGenerator.Plan(sectionIds);
         // a section in a meter of its own now and then, a chorus the likelier, each drawing from a stream of its own
         var sectionMeters = SectionMeter.Generate(
-            id => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionMeter), id)),
+            id => SongGenerator.CreateStream(seed, SongStream.SectionMeter, id),
             meter,
             songUnconventionality[Facet.Feel],
             sectionIds,
@@ -241,7 +241,7 @@ internal sealed record SongDecisions(
         if (genre.Pool<int>(GenreChoices.Phrases, GenreChoices.PhrasesName) is { } phrasePool)
             sectionMeters = sectionMeters.ToImmutableDictionary(x => x.Key, x => x.Value with
             {
-                Phrases = new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionPhrases), x.Key))
+                Phrases = SongGenerator.CreateStream(seed, SongStream.SectionPhrases, x.Key)
                     .Pick(ByConvention.Weigh(GenreChoices.PhraseCounts.Select(p => (p, p == 1 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Form], phrasePool))
             });
         StateTrace.RecordSong(TracePoints.SectionMeter, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
@@ -321,16 +321,16 @@ internal sealed record SongDecisions(
         // one the soloist's where the song has it
         var drawnSolos = Composition.Solos.WithSoloist(
             Stream(SongStream.SoloistSolo),
-            [..played.Select((id, index) => Composition.Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), AppearanceKey(played, index))), index, structure.Roles[id], generateSection(id).Facets, partsAt[index], genre))],
+            [..played.Select((id, index) => Composition.Solos.Draw(SongGenerator.CreateStream(seed, SongStream.Solos, AppearanceKey(played, index)), index, structure.Roles[id], generateSection(id).Facets, partsAt[index], genre))],
             [..played.Select(id => structure.Roles[id])],
             [..played.Select(id => generateSection(id).Facets[Facet.Melody])],
             [..SongParts.All.Except(absent)]
         );
         // a pitched solo trading with the drums now and then, each from a sequence of its own
-        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTrade(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloTrades), AppearanceKey(played, index))), x,
+        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTrade(SongGenerator.CreateStream(seed, SongStream.SoloTrades, AppearanceKey(played, index)), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
         // and played by two parts together a third apart now and then, each from a sequence of its own
-        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTwin(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloTwins), AppearanceKey(played, index))), x,
+        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTwin(SongGenerator.CreateStream(seed, SongStream.SoloTwins, AppearanceKey(played, index)), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
         // drums that only mark the form neither solo nor trade, as they play no groove to solo from, the appearance played as
         // it is, or by its pitched soloists alone
@@ -373,7 +373,7 @@ internal sealed record SongDecisions(
         var soloists = solos.Values.SelectMany(x => x.Soloists).Distinct().ToDictionary(
             role => role,
             role => Soloist.Generate(
-                new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Soloist), (int)role)),
+                SongGenerator.CreateStream(seed, SongStream.Soloist, (int)role),
                 songUnconventionality[role == TrackRole.Drum ? Facet.Fills : Facet.Melody],
                 songUnconventionality[Facet.Sound],
                 tracks.Definitions.Values.OfType<PitchInstrumentTrack>().FirstOrDefault(x => x.Role == role)?.InstrumentCode ?? -1));
@@ -389,7 +389,7 @@ internal sealed record SongDecisions(
             // the song's effects, decided before its notes, the part playing its strong one among those it plays
             Expression.DrawSound(Stream(SongStream.Effects), songUnconventionality[Facet.Sound], genre, tracks.Definitions,
                 tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).Select(x => x.Key).ToHashSet(),
-                effect => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.StrongEffects), (int)effect))));
+                effect => SongGenerator.CreateStream(seed, SongStream.StrongEffects, (int)effect)));
     }
 
     /// <summary>
