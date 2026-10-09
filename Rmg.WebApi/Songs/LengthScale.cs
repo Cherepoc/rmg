@@ -16,6 +16,5 @@ public static class LengthScale
     public static double Seconds(int step) => Shortest * Math.Pow(Longest / Shortest, step / (double)StepScale.Last);
 
     /// <summary>The step nearest a length in seconds, by its ratio to it; the ends for one beyond them.</summary>
-    public static int StepOf(double seconds) =>
-        Enumerable.Range(0, Steps).MinBy(step => Math.Abs(Math.Log(Seconds(step) / seconds)));
+    public static int StepOf(double seconds) => StepScale.Nearest(Seconds, seconds);
 }

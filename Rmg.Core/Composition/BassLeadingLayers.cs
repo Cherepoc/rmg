@@ -94,12 +94,6 @@ internal static class BassLeadingLayers
 
     /// <summary>How much the bass moves by step rather than by leap, from 0 to 1 (<see cref="CompositionStateKinds.LineStepwiseness" />).</summary>
     public const double Stepwiseness = 0.8;
-
-    /// <summary>A layer's shift of the amount, up to the given size either way.</summary>
-    public static Func<IGenerationContext, double> CreateGenerator(double size)
-    {
-        return Generators.SplineValue().Then(x => x * size);
-    }
 }
 
 /// <summary>How the bass's last note before a chord change leads into the next chord's root.</summary>

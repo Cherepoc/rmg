@@ -187,6 +187,9 @@ public static class Generators
         return context => context.GenerateInt();
     }
 
+    /// <summary>A layer's shift of an amount, up to the given size either way (<see cref="SplineValue" />).</summary>
+    public static Func<IGenerationContext, double> Spread(double size) => SplineValue().Then(x => x * size);
+
     /// <summary>
     ///     Creates a generator of values around 0, symmetric unless skewed. <paramref name="c" /> sets the spread: 1 is a
     ///     quarter circle on either side, more gathers the values closer to 0 and less spreads them further out, beyond

@@ -187,10 +187,4 @@ internal static class MelodyLayers
     ///     end; another section's never, but by a genre's (<see cref="GenreChoices.Hook" />).
     /// </summary>
     public static ByConvention HookChanceOf(SectionRole role) => role == SectionRole.Chorus ? new ByConvention(0.6, 0.6, 0.3) : new ByConvention(0, 0, 0);
-
-    /// <summary>A layer's shift of the stepwiseness, up to the given size either way.</summary>
-    public static Func<IGenerationContext, double> CreateGenerator(double size)
-    {
-        return Generators.SplineValue().Then(x => x * size);
-    }
 }

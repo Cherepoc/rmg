@@ -184,7 +184,7 @@ internal sealed class SectionGenerator
         // the section state reaches the notes through the track state maps, so the bar state holds only the state
         // that changes by bar
         var bassLeading = Math.Clamp(
-            _tracks.BassLeading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Section)(Stream(sectionId, SectionStream.BassLeading)),
+            _tracks.BassLeading + Generators.Spread(BassLeadingLayers.Section)(Stream(sectionId, SectionStream.BassLeading)),
             0,
             1
         );
@@ -624,11 +624,11 @@ internal sealed class SectionGenerator
         // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
         // and is as busy as the section has it
         var sectionTrackLayer = new StateMapBuilder(Layers.SectionTrack, perTrack: true)
-            .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
+            .Add(StateKinds.VoiceLeading, Generators.Spread(VoiceLeadingLayers.Section));
         if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
         {
             sectionRhythm.MelodyBusyness.AddTo(
-                sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section)),
+                sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, Generators.Spread(MelodyLayers.Section)),
                 sectionRhythm.Energy
             );
         }

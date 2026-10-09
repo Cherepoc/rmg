@@ -17,6 +17,9 @@ public static class StepScale
     public static double ToAmount(int step) =>
         step <= Middle ? step / (2.0 * Middle) : 0.5 + (step - Middle) / (2.0 * (Last - Middle));
 
+    /// <summary>The step whose value is nearest one given, by its ratio to it; the ends for one beyond them.</summary>
+    public static int Nearest(Func<int, double> valueOf, double value) => Enumerable.Range(0, Steps).MinBy(step => Math.Abs(Math.Log(valueOf(step) / value)));
+
     /// <summary>An amount from 0 to 1 as its nearest step.</summary>
     public static int ToStep(double amount) =>
         (int)Math.Round(amount <= 0.5 ? amount * 2 * Middle : Middle + (amount - 0.5) * 2 * (Last - Middle));

@@ -17,6 +17,5 @@ public static class TempoScale
     public static double Multiplier(int step) => Math.Pow(2, 2 * StepScale.ToAmount(step) - 1);
 
     /// <summary>The step nearest a tempo, as a multiple of <see cref="Meter.BaseTempo" />, by its ratio to it.</summary>
-    public static int StepOf(double multiplier) =>
-        Enumerable.Range(0, Steps).MinBy(step => Math.Abs(Math.Log(Multiplier(step) / multiplier)));
+    public static int StepOf(double multiplier) => StepScale.Nearest(Multiplier, multiplier);
 }

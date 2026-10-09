@@ -73,7 +73,7 @@ public sealed record RhythmLayer(
 
     public Func<IGenerationContext, double> CreateVariationGenerator()
     {
-        return Generators.SplineValue().Then(x => x * Variation);
+        return Generators.Spread(Variation);
     }
 
     public const double SpeedShare = 3.25;

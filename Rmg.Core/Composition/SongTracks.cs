@@ -111,7 +111,7 @@ internal sealed class SongTracks
         var bassInstrument = InstrumentRoles.Bass.Pick(context, sound, Pool(TrackRole.Bass));
 
         // how much the bass leads into the chords: its instrument sets where the song starts, a section moves it
-        var bassLeading = bassInstrument.Leading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Song)(context);
+        var bassLeading = bassInstrument.Leading + Generators.Spread(BassLeadingLayers.Song)(context);
         var minOctaveOffsetGenerator = Generators.Int(-2, 1).WithContext(context);
         var maxOctaveOffsetGenerator = Generators.Int(0, 3).WithContext(context);
 
@@ -172,7 +172,7 @@ internal sealed class SongTracks
             [RhythmTrack] = new PitchInstrumentTrack(
                 PartLayer(rhythmContext, TrackRole.Rhythm, x => x
                     // as the chords', its instrument sets how smoothly its chords move, and the song moves it a little
-                    .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(v => rhythmInstrument.Leading + v))
+                    .Add(StateKinds.VoiceLeading, Generators.Spread(VoiceLeadingLayers.Song).Then(v => rhythmInstrument.Leading + v))
                     .Add(CompositionStateKinds.Rhythm.Fullness, RhythmPartFullness)),
                 rhythmInstrument.Program,
                 Generators.Int(-1, 1).WithContext(rhythmContext)(),
@@ -202,7 +202,7 @@ internal sealed class SongTracks
             ),
             [ChordsTrack] = new PitchInstrumentTrack(
                 // the chord instrument sets how smoothly the chords move, and the song moves it a little
-                PartLayer(context, TrackRole.Chords, x => x.Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(v => chordsInstrument.Leading + v))),
+                PartLayer(context, TrackRole.Chords, x => x.Add(StateKinds.VoiceLeading, Generators.Spread(VoiceLeadingLayers.Song).Then(v => chordsInstrument.Leading + v))),
                 chordsInstrument.Program,
                 minOctaveOffsetGenerator(),
                 maxOctaveOffsetGenerator(),
@@ -212,7 +212,7 @@ internal sealed class SongTracks
             [MelodyTrack] = new PitchInstrumentTrack(
                 PartLayer(context, TrackRole.Melody, x => x
                     // the melody instrument sets how stepwise the melody is, and the song moves it a little
-                    .Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(v => melodyInstrument.Leading + v))
+                    .Add(CompositionStateKinds.LineStepwiseness, Generators.Spread(MelodyLayers.Song).Then(v => melodyInstrument.Leading + v))
                     // a melody repeats its cycles more than the other tracks, as riffs
                     .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)),
                 melodyInstrument.Program,
