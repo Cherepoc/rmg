@@ -380,6 +380,10 @@ public static class GenreChoices
     public static GenreChoice LineScale { get; } = Pool("lineScale", "Lines' scale",
         Composition.LineScales.Weights.Select(x => (Name(x.Scale.ToString()), Composition.LineScales.LabelOf(x.Scale), x.Weight)));
 
+    /// <summary>The mode a chord takes on its own root, a colour of its own or a planed chord's quality (<see cref="Composition.ChordScales.OwnModes" />).</summary>
+    public static GenreChoice OwnMode { get; } = Pool("ownMode", "A chord's own mode",
+        Composition.ChordScales.OwnModes.Select(x => (Name(x.Mode.Name), x.Mode.Name, x.Weight)));
+
     /// <summary>The scale a riff's passing notes take where a genre gives it one of its own, the lines' otherwise (<see cref="LineScale" />).</summary>
     public static GenreChoice RiffScale { get; } = Pool("riffScale", "Riff's scale",
         Composition.LineScales.Weights.Select(x => (Name(x.Scale.ToString()), Composition.LineScales.LabelOf(x.Scale), x.Weight)));
@@ -630,7 +634,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Inversion, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Inversion, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

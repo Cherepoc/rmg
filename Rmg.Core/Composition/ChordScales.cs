@@ -65,8 +65,36 @@ public static class ChordScales
     /// <summary>The chance a chord but the home sounds in a mode of its own on its root, by the progression facet: a wild song's alone.</summary>
     public static ByConvention Own { get; } = new(0, 0, 0.3);
 
-    /// <summary>The modes a chord may take on its own root, each kept to the chords whose triad it keeps.</summary>
-    public static ImmutableArray<Scale> OwnModes { get; } = [Scales.Lydian, Scales.Mixolydian, Scales.Dorian, Scales.MelodicMinor, Scales.Phrygian];
+    /// <summary>
+    ///     The modes a chord may take on its own root, and how likely each is by the progression facet: Lydian, Mixolydian
+    ///     and Dorian, a note from a major or a minor chord's plainest scale, at either end, and melodic minor's and
+    ///     Phrygian's stranger colours toward the wild end alone, where the five are alike.
+    /// </summary>
+    public static ImmutableArray<(Scale Mode, ByConvention Weight)> OwnModes { get; } =
+    [
+        (Scales.Lydian, new ByConvention(1, 0.3, 0.2)),
+        (Scales.Mixolydian, new ByConvention(1, 0.3, 0.2)),
+        (Scales.Dorian, new ByConvention(1, 0.3, 0.2)),
+        (Scales.MelodicMinor, new ByConvention(0, 0.07, 0.2)),
+        (Scales.Phrygian, new ByConvention(0, 0.03, 0.2))
+    ];
+
+    /// <summary>
+    ///     A mode among those given, by the facet and a genre's pool (<see cref="GenreChoices.OwnMode" />), from one draw
+    ///     whichever it is, so that the draws are as many; none where none is given or the pool keeps none of them.
+    /// </summary>
+    private static Scale? PickMode(IGenerationContext context, IReadOnlySet<Scale> modes, double unconventionality, Genre genre)
+    {
+        var pool = genre.Pool<Scale>(GenreChoices.OwnMode, x => GenreChoices.Name(x.Name));
+        (Scale, ByConvention)[] options = [..OwnModes.Where(x => modes.Contains(x.Mode) && (pool is null || pool(x.Mode) is not null))];
+        if (options.Length == 0)
+        {
+            context.GenerateDouble();
+            return null;
+        }
+
+        return context.Pick(pool is null ? ByConvention.WeighFilled(options, unconventionality) : ByConvention.Weigh(options, unconventionality, pool));
+    }
 
     /// <summary>How many of its notes the most a mode borrowed differs from the section's scale on its home.</summary>
     public const int BorrowedDistance = 3;
@@ -99,10 +127,10 @@ public static class ChordScales
         // a mode on the chord's root that changes something but keeps its triad, the lines over it taking its colour
         ChordScale? OwnScale(int root)
         {
-            var modes = OwnModes.Select(x => Toward(scale.Offsets, home + root, x.Offsets, ChordScaleKind.Own)).OfType<ChordScale>()
-                .Where(x => !new[] { 0, 2, 4 }.Any(step => x.Steps.Moves(Mod(home + root + step)))).ToArray();
-            var pick = ownContext.GenerateDouble();
-            return modes.Length == 0 ? null : modes[(int)(pick * modes.Length)];
+            var modes = OwnModes.Select(x => (x.Mode, Scale: Toward(scale.Offsets, home + root, x.Mode.Offsets, ChordScaleKind.Own)))
+                .Where(x => x.Scale is not null && !new[] { 0, 2, 4 }.Any(step => x.Scale.Steps.Moves(Mod(home + root + step))))
+                .ToDictionary(x => x.Mode, x => x.Scale!);
+            return PickMode(ownContext, modes.Keys.ToHashSet(), unconventionality, genre) is { } mode ? modes[mode] : null;
         }
 
         return
@@ -131,20 +159,26 @@ public static class ChordScales
     }
 
     /// <summary>
-    ///     Every planed chord's mode on the home, which its move by semitones carries to its root, drawn evenly among the own
-    ///     modes the section's scale reaches a semitone a step at most, so that its quality is the mode's, major in Lydian or
-    ///     Mixolydian, minor in Dorian, melodic minor or Phrygian; the section's where the mode is or is out of reach, and the
-    ///     first chord's, the home, and the last's where the section leads home.
+    ///     Every planed chord's mode on the home, which its move by semitones carries to its root, drawn among the own modes
+    ///     the section's scale is or reaches a semitone a step at most (<see cref="OwnModes" />), so that its quality is the
+    ///     mode's, major in Lydian or Mixolydian, minor in Dorian, melodic minor or Phrygian; the first chord's the section's,
+    ///     the home, and the last's where the section leads home.
     /// </summary>
-    internal static ImmutableArray<ChordScale> Planed(IGenerationContext context, Scale scale, int home, int count, bool endsHome) =>
-    [
-        ..Enumerable.Range(0, count).Select(chord =>
-        {
-            // drawn for every chord, so that its draws are as many
-            var mode = OwnModes[(int)(context.GenerateDouble() * OwnModes.Length)];
-            return chord == 0 || endsHome && chord == count - 1 ? ChordScale.Section : Toward(scale.Offsets, home, mode.Offsets, ChordScaleKind.Own) ?? ChordScale.Section;
-        })
-    ];
+    internal static ImmutableArray<ChordScale> Planed(IGenerationContext context, Scale scale, int home, int count, bool endsHome, double unconventionality, Genre genre)
+    {
+        var onHome = Rotate(scale.Offsets, home);
+        var modes = OwnModes.Select(x => (x.Mode, Scale: x.Mode.Offsets.SequenceEqual(onHome) ? ChordScale.Section : Toward(scale.Offsets, home, x.Mode.Offsets, ChordScaleKind.Own)))
+            .Where(x => x.Scale is not null).ToDictionary(x => x.Mode, x => x.Scale!);
+        return
+        [
+            ..Enumerable.Range(0, count).Select(chord =>
+            {
+                // drawn for every chord, so that its draws are as many
+                var mode = PickMode(context, modes.Keys.ToHashSet(), unconventionality, genre);
+                return chord == 0 || endsHome && chord == count - 1 || mode is null ? ChordScale.Section : modes[mode];
+            })
+        ];
+    }
 
     /// <summary>
     ///     The steps of the scale to raise and lower for the mode given to sound on one of its steps, none where that

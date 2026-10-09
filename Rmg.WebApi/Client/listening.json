@@ -193,10 +193,10 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 87.9,
+        "at": 296.6,
         "listen": [
-          "Chords (Electric Guitar (clean))",
-          "Riff (Lead 1 (square))"
+          "Riff (Lead 1 (square))",
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
@@ -207,28 +207,27 @@
         ]
       },
       {
+        "seed": "F",
+        "at": 56.9,
+        "listen": [
+          "Chords (Electric Piano 2)"
+        ]
+      },
+      {
         "seed": "J",
-        "at": 186.1,
+        "at": 188.2,
         "listen": [
           "Bass (Fretless Bass)",
           "Chords (Electric Piano 1)"
         ]
       },
       {
-        "seed": "L",
-        "at": 155.7,
+        "seed": "S",
+        "at": 223.7,
         "listen": [
-          "Chords (Electric Piano 1)",
-          "Bass (Fretless Bass)"
-        ]
-      },
-      {
-        "seed": "T",
-        "at": 200.5,
-        "listen": [
-          "Rhythm part (Clavinet)",
-          "Melody (Electric Guitar (clean))",
-          "Bass (Fretless Bass)"
+          "Chords (Pad 3 (polysynth))",
+          "Solo (Overdriven Guitar)",
+          "Rhythm part (Electric Guitar (clean))"
         ]
       },
       {

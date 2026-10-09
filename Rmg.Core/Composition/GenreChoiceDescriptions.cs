@@ -33,6 +33,7 @@ public static class GenreChoiceDescriptions
         ["planing"] = "How often a section slides its home chord's shape up and down by semitones, a modern, filmic colour.",
         ["harmonyDevices"] = "Reharmonising a section when it comes back, a chromatic line moving inside a held chord, and a bass note held under a section's changing chords.",
         ["loop"] = "How often a section plays the song's first section's chords again, as a beat loops one progression for the whole track.",
+        ["ownMode"] = "The mode a chord takes on its own root, where it takes one: Lydian, Mixolydian and Dorian, a note from the plain scales, melodic minor and Phrygian stranger; a planed chord's quality is its mode's.",
         ["lineScale"] = "The scale the melody's and the riff's passing notes take: the key's, the pentatonic and blues scales for rock and blues, the jazz and symmetric ones for an outside sound.",
         ["riffScale"] = "The scale the riff's passing notes and accents take where it differs from the melody's: chromatic and octatonic for a dissonant metal riff under a melodic lead.",
         ["ornaments"] = "How often a song's melody and counter-melody ornament their notes: a quick grace note before a note, a turn around a held one, a trill on a long one, as a flute or a fiddle does.",

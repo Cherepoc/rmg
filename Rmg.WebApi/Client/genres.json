@@ -1522,6 +1522,7 @@
     "name": "Fusion",
     "description": "Electric piano and a soprano sax over a fretless bass singing high, Lydian, Dorian and melodic minor, ninths to thirteenths and quartal chords, chords in scales of their own and planed, odd meters, long solos.",
     "choices": {
+      "ownMode": { "lydian": 100, "dorian": 100, "melodicMinor": 80, "mixolydian": 50, "phrygian": [0, 10, 20] },
       "ghosts": { "sections": [30, 50, 60] },
       "polymeter": { "sections": [0, 10, 30] },
       "tempo": { "from": [90, 90, 80], "to": [140, 140, 180] },

@@ -333,7 +333,7 @@ internal sealed class SectionGenerator
         // a genre's, from a sequence of its own
         var modesContext = Stream(sectionId, SectionStream.PlaningModes);
         var inModes = modesContext.TestProbability(Planing.ModesChance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "modes")));
-        var modes = ChordScales.Planed(modesContext, scale, home, progression.Length, plan.HasTonicHome);
+        var modes = ChordScales.Planed(modesContext, scale, home, progression.Length, plan.HasTonicHome, facets[Facet.Progression], _genre);
         if (planes)
             (progression, chordScales, shifts) = ([..progression.Select(_ => 0)], inModes ? modes : [..chordScales.Select(_ => ChordScale.Section)], planed);
         StateTrace.RecordSection(TracePoints.Planing, SectionTrace, sectionId, planes ? string.Join(" ", planed) : "none", planes ? planed : null);

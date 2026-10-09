@@ -546,8 +546,9 @@ Each item with its plan, and what it waits for.
   should the two-voice passing notes sound thin; Jazz's soli, four voices close, which no part is free to play; the pad
   as a voice, which plays chords, not lines, and sat over the melody 81% of the time when tried.
 - **Roots off the scale, the rest** (P3, by listening to `?listen=own-modes`): a planed section's chords each in a mode
-  of its own, major or minor as it makes them (`Planing.ModesChance`, `ChordScales.Planed`), Fusion's 73% of its planed
-  sections, a chord's mode changing on 80% of the moves. Should it sound aimless, a chord keeping the mode of the one
+  of its own, major or minor as it makes them (`Planing.ModesChance`, `ChordScales.Planed`), the modes weighed by the
+  progression facet and a genre's pool (`ChordScales.OwnModes`, `ownMode`: Fusion's Lydian, Dorian and melodic minor 82%,
+  Phrygian 3%), Fusion's 72% of its planed sections, a chord's mode changing on 78% of the moves. Should it sound aimless, a chord keeping the mode of the one
   before now and then, a chance on the same draw; symmetric cycles (major or minor thirds) left out, Planing's moves
   holding minor thirds already.
 - **Long cycles** (P4, reviewed 9 October 2026, the generated patterns tried and put off the same day): a figure of two
