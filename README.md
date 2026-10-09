@@ -195,7 +195,7 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
 - **Stages and streams.** `SongGenerator` runs the stages in turn: the tracks, the structure, every section
   (`SectionGenerator`, `PatternGenerator`), the form (`SongFormGenerator`), and then edits of the song put together,
   such as the fills, the lines placed over the whole song, the key changes, the polymeters, the solos and the
-  expression. Every stage, section and decision draws from a random sequence of its own (`SongStream`), so that a
+  expression. Every stage, section, part and decision draws from a random sequence of its own (`SongStream`), so that a
   change to one leaves what the others draw as it was; `CorpusFingerprintTest` shows when the songs change.
 - **Conventionality.** A choice's options carry their weights at the plain end, the middle and the wild end
   (`ByConvention`), and lean by energy or anything else through their odds (`Tilt`); a lean is data on the option.
