@@ -44,7 +44,7 @@ internal static class StopTime
         return
         [
             ..song.Form.Map.Sections.Where((x, i) => stops[x.SectionId] && x != built && !song.Solos.ContainsKey(i))
-                .Select(x => (x.Start, Math.Min(x.End, x.Start + Meter.PhraseBarCount * x.Meter.BarDuration), x.Meter.BarDuration))
+                .Select(x => (x.Start, Math.Min(x.End, x.Start + x.Meter.PhraseDuration), x.Meter.BarDuration))
         ];
     }
 
@@ -109,7 +109,7 @@ internal static class StopTime
 
         // the drums' fills out of it, from a run's first note to its line, which go on as a drummer fills into the next
         // section, a drum never heard otherwise landing there, and the bass walking with them in a phrase's last half bar
-        var fills = draft.Runs.Where(x => !x.Positions.IsEmpty).Select(x => (From: x.Positions.Min(), To: x.Line))
+        var fills = draft.FillSpans
             // and the last half bar of every phrase, the drums leading the band back in, with the fill its line draws there
             .Concat(phrases.Select(x => (From: x.End - x.BarDuration / 2, To: x.End))).ToArray();
         bool InAFill(double position) => fills.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9);

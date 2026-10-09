@@ -14,7 +14,7 @@ public sealed class ProgressionsTest
     private static ImmutableArray<int>[] GeneratePhrases(Scale scale, int home, double strictness, Func<int, double> motionLean)
     {
         var context = new GenerationContext(1);
-        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4, 1, motionLean, _ => 0))];
+        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4, 1, motionLean, _ => 0, _ => 0))];
     }
 
     // how often the roots move by a motion, by its place in the motions, of every move between chords
@@ -28,7 +28,7 @@ public sealed class ProgressionsTest
         double Share(Func<int, double> degreeLean, int degree)
         {
             var context = new GenerationContext(1);
-            var phrases = Enumerable.Range(0, 4000).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, minor, 0, 0.85, 4, 1, _ => 0, degreeLean)).ToArray();
+            var phrases = Enumerable.Range(0, 4000).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, minor, 0, 0.85, 4, 1, _ => 0, degreeLean, _ => 0)).ToArray();
             // the chords drawn, the first, home, not among them
             return (double)phrases.Sum(x => x.Skip(1).Count(r => Mod7(r) == degree)) / phrases.Sum(x => x.Length - 1);
         }
@@ -50,7 +50,7 @@ public sealed class ProgressionsTest
         foreach (var strictness in new[] { 0.95, 0.9, 0.85 })
         {
             var some = Enumerable.Range(0, 2000).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, strictness, 12, 3,
-                x => x == motions.IndexOf("fourthDown") ? 0.6 : x == motions.IndexOf("stepUp") ? 0.4 : 0, _ => 0)).ToArray();
+                x => x == motions.IndexOf("fourthDown") ? 0.6 : x == motions.IndexOf("stepUp") ? 0.4 : 0, _ => 0, _ => 0)).ToArray();
             double At(int chord, int root) => (double)some.Count(x => Mod7(x[chord]) == root) / some.Length;
             Console.WriteLine($"at {strictness}: bar 5 IV {At(4, 3):P0}, bar 9 V {At(8, 4):P0}, bar 4 I {At(3, 0):P0}, bar 8 I {At(7, 0):P0}, bar 10 IV {At(9, 3):P0}, bar 11 I {At(10, 0):P0}, bar 12 V {At(11, 4):P0}");
         }
@@ -66,7 +66,7 @@ public sealed class ProgressionsTest
         var motions = Rmg.Core.Composition.Progressions.Motions.Select(x => x.Name).ToList();
         var context = new GenerationContext(1);
         var phrases = Enumerable.Range(0, 2000)
-            .Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, 1, 12, 3, x => x == motions.IndexOf("fourthDown") ? 0.8 : x == motions.IndexOf("stepUp") ? 0.7 : 0, _ => 0))
+            .Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, 1, 12, 3, x => x == motions.IndexOf("fourthDown") ? 0.8 : x == motions.IndexOf("stepUp") ? 0.7 : 0, _ => 0, _ => 0))
             .ToArray();
         double Share(int chord, int root) => (double)phrases.Count(x => Mod7(x[chord]) == root) / phrases.Length;
 

@@ -73,7 +73,7 @@ internal static class Articulations
                 var repeats = i > 0 && timeline[i - 1].Value.Pitches.SequenceEqual(note.Value.Pitches);
                 var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
                 // by the instrument playing the note, a switched one's
-                var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
+                var program = InstrumentsOverTime.ProgramOf(state, part.InstrumentCode);
                 // a riff chugging on its pedal muting every note off its accents, another part its repeats
                 var onPedal = state.GetStateValue(CompositionStateKinds.LinePedal) > 0;
                 if (Chugs(part.Role, program) && section >= 0 && song.Sections[section].Chugs && (repeats || onPedal) && weak)

@@ -12,7 +12,7 @@ namespace Rmg.Core.Composition;
 /// <param name="meter">The meter the song's bars are in, where no map says otherwise.</param>
 /// <param name="map">Where the song's parts are and the meter of each, from which the trace counts the bars of the
 ///     sections' patterns; none for a song that starts with its first section, in the meter given.</param>
-internal sealed class TimelineEdits(IGenerationContext context, Meter meter, SongMap? map = null)
+internal sealed class TimelineEdits(IGenerationContext context, Meter meter, SongMap? map)
 {
     private const double Epsilon = 1e-6;
 

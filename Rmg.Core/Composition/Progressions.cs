@@ -172,9 +172,6 @@ internal static class Progressions
     ///     How a genre leans each root, by its steps above home, its place in <see cref="Degrees" />, as the motions are
     ///     leaned.
     /// </param>
-    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, int phrases, Func<int, double> motionLean,
-        Func<int, double> degreeLean) => Generate(context, scale, home, strictness, count, phrases, motionLean, degreeLean, _ => 0);
-
     /// <param name="cadenceLean">
     ///     How a genre leans the chord that leads home, by its steps above home, its place in <see cref="Degrees" />: a black
     ///     metal band's ♭II or ♭VI rather than V, as the degrees are leaned.
@@ -340,7 +337,7 @@ internal static class Progressions
     }
 
     /// <summary>The step, moved by octaves to within 3 steps of 0.</summary>
-    private static int Normalize(int step)
+    internal static int Normalize(int step)
     {
         return Mod(step + 3) - 3;
     }

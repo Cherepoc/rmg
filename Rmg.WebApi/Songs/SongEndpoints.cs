@@ -33,8 +33,6 @@ public static class SongEndpoints
         routes.MapGet("/api/version", () => Results.Ok(new VersionResponse(SongsVersion.Number, SongsVersion.Commit)));
     }
 
-    private static readonly JsonSerializerOptions HeaderJson = new(JsonSerializerDefaults.Web);
-
     /// <summary>
     ///     Writes a song as a MIDI file. What it is made of is reported in the headers, since the body is the file
     ///     itself. A song waits its turn (<see cref="SongQueue" />), and one turned away is told to ask again in a moment.
@@ -142,7 +140,7 @@ public static class SongEndpoints
 
         // and everything the song drew or was given, and which channel plays which part, for the page to show and
         // set before a note of it is heard
-        context.Response.Headers["X-Song-Settings"] = JsonSerializer.Serialize(report, HeaderJson);
+        context.Response.Headers["X-Song-Settings"] = JsonSerializer.Serialize(report, AppJsonContext.Default.SongReport);
 
         return Results.File(stream, "audio/midi", SongFile.GetName(songSeed));
     }

@@ -45,7 +45,7 @@ internal static class MixFilter
             var first = map.Sections[0];
             // over the intro, or the first phrase where there is none or only a count-in's clicks
             var overIntro = map.Intro.Duration > 0 && map.Intro.Kind != IntroKind.CountIn;
-            var end = overIntro ? map.Origin : first.Start + Math.Min(first.Duration, Meter.PhraseBarCount * first.Meter.BarDuration);
+            var end = overIntro ? map.Origin : first.Start + Math.Min(first.Duration, first.Meter.PhraseDuration);
             ramps.Add((overIntro ? 0 : first.Start, end, openingDepth, 0));
         }
 
@@ -74,7 +74,7 @@ internal static class MixFilter
         if (closes)
         {
             var last = map.Sections[^1];
-            ramps.Add((last.End - Math.Min(last.Duration, Meter.PhraseBarCount * last.Meter.BarDuration), last.End, 0, closingDepth));
+            ramps.Add((last.End - Math.Min(last.Duration, last.Meter.PhraseDuration), last.End, 0, closingDepth));
             // and closed through the ending
             ramps.Add((last.End, map.Duration, closingDepth, closingDepth));
         }

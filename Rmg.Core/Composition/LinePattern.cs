@@ -208,7 +208,7 @@ internal sealed class LinePattern
 
         foreach (var span in map.Sections.Where(x => x.Meter.Phrases > 2))
         {
-            var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+            var phrase = span.Meter.PhraseDuration;
             for (var start = span.Start; start < span.End - 1e-9; start += span.Meter.PatternDuration)
             for (var restating = 1; restating < span.Meter.Phrases - 1; restating++)
                 for (var i = 0; i < notes.Length; i++)

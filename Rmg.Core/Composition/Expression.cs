@@ -85,7 +85,7 @@ public enum PinchSound
 internal static class Expression
 {
     /// <summary>The program a note plays on: its own where a section switched the part's instrument, the part's otherwise.</summary>
-    private static int ProgramOf(RealizedNote note, int program) => note.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : program;
+    private static int ProgramOf(RealizedNote note, int program) => InstrumentsOverTime.ProgramOf(note.State, program);
 
     /// <summary>Whether an instrument bends and sings a vibrato: guitars, strings, voices, brass, reeds, pipes, synth leads, a fretless or synth bass.</summary>
     public static bool Bends(int program) => InstrumentTraits.Has(program, InstrumentTrait.Bends);
@@ -242,7 +242,7 @@ internal static class Expression
     }
 
     /// <summary>Whether a program is a driven guitar, which pinches.</summary>
-    private static bool Pinches(int program) => program is 29 or 30;
+    private static bool Pinches(int program) => InstrumentTraits.Has(program, InstrumentTrait.Driven);
 
     /// <summary>How far a part's tone closes at its deepest, in its quietest section, in the brightness controller's steps, short of a filter's reach.</summary>
     internal const int ToneReach = 24;
@@ -779,7 +779,7 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Filter, (int)filter).With(CompositionStateKinds.FilterDepth, filterDepth)
                             .With(CompositionStateKinds.FilterCycle, filter == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle);
                     // a pinch, a held note's harmonic, where the song pinches
-                    var phrase = (index, (int)Math.Floor((note.Position - span.Start) / (Meter.PhraseBarCount * span.Meter.BarDuration) + 1e-9));
+                    var phrase = (index, (int)Math.Floor((note.Position - span.Start) / (span.Meter.PhraseDuration) + 1e-9));
                     if (songPinches && Pinches(noteProgram) && note.Value.Pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.Octave) == 0
                         && role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo
                         && state.GetStateValue(CompositionStateKinds.PalmMute) == 0 && !pinchedPhrases.Contains(phrase) && !isRelease

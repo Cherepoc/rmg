@@ -189,7 +189,7 @@ internal sealed class SongFormGenerator
         {
             IntroKind.Entries when plan.Window.IsBefore => first.Timeline.Trim(windowDuration),
             IntroKind.CountIn => CreateCountIn(first, plan.HalfCountIn, _roles),
-            IntroKind.Hook => hook.Section.Timeline.Trim(Meter.PhraseBarCount * hook.Section.Meter.BarDuration),
+            IntroKind.Hook => hook.Section.Timeline.Trim(hook.Section.Meter.PhraseDuration),
             _ => null
         };
         ImmutableArray<IntroEntry> entries = plan.Intro == IntroKind.Entries ? DrawEntries(first, plan.Window, plan.RiffFirst) : [];

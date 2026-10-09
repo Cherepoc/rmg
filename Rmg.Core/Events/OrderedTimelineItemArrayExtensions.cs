@@ -69,13 +69,8 @@ internal static class OrderedTimelineItemArrayExtensions
         if (oldDuration > newDuration)
             return Trim(items, newDuration);
 
-        var index = items.GetIndexAtCeiling(newDuration);
-        if (index == 0)
-            return [];
-
-        if (index == -1)
-            index = items.Length;
-
+        // lengthened: every item kept, as every one is before the old end, and the last state closed there
+        var index = items.Length;
         var addClosingStateItem = !stateKind.CheckValueIsDefault(items[index - 1].Value);
         var newItems = new TimelineItem<T>[index + (addClosingStateItem ? 1 : 0)];
         items.CopyTo(newItems);
@@ -136,10 +131,6 @@ internal static class OrderedTimelineItemArrayExtensions
         var newItems = new TimelineItem<T>[items.Length - breakIndex];
         for (var i = 0; i < newItems.Length; i++)
             newItems[i] = items[i + breakIndex].ShiftMinZero(offset);
-
-        var firstItem = newItems[0];
-        if (firstItem.Position < 0)
-            newItems[0] = new TimelineItem<T>(0, firstItem.Value);
 
         return [..newItems];
     }

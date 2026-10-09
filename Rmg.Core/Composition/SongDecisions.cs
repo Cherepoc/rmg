@@ -304,12 +304,13 @@ internal sealed record SongDecisions(
         var solos = new Dictionary<int, SoloPlan>();
         var sections = new List<GeneratedSection>();
         // how loud and busy each appearance is meant to be: its section's energy, stepped by its place in the song
-        var energies = new List<double>();
+        var energySteps = played.Select((id, index) => SectionEnergy.AppearanceStep(Place(index), averagePlaces[id], SectionEnergy.ContrastOf(genre))).ToArray();
+        List<double> energies = [..played.Select((id, index) => generateSection(id).Energy + energySteps[index])];
         // the parts held back at the song's start, each entering at a later section, from a stream of their own
         var lateEntries = LateEntries.Generate(
             Stream(SongStream.LateEntries),
             played,
-            [..played.Select((id, index) => generateSection(id).Energy + SectionEnergy.AppearanceStep(Place(index), averagePlaces[id], SectionEnergy.ContrastOf(genre)))],
+            [..energies],
             songUnconventionality[Facet.Form],
             absent
         );
@@ -340,8 +341,7 @@ internal sealed record SongDecisions(
             cancellation.ThrowIfCancellationRequested();
             var id = played[index];
             var solo = drawnSolos[index];
-            var energyStep = SectionEnergy.AppearanceStep(Place(index), averagePlaces[id], SectionEnergy.ContrastOf(genre));
-            energies.Add(generateSection(id).Energy + energyStep);
+            var energyStep = energySteps[index];
             var section = generateSection(id).Appear(
                 played.Take(index).Count(x => x == id),
                 Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),

@@ -31,8 +31,8 @@ public sealed record RhythmLayer(
     double Variation = 0
 )
 {
-    /// <summary>The chance to move a track's speed, <see cref="SpeedShare" /> times the groove's.</summary>
-    public double Speed { get; init; } = Math.Min(1, Groove * SpeedShare);
+    /// <summary>The chance to move a track's speed, <see cref="SpeedShare" /> times the groove's, a groove's chance of a third at most.</summary>
+    public double Speed { get; init; } = Groove * SpeedShare;
 
     /// <summary>
     ///     The layer by the groove facet of an unconventionality: its moves, of the groove, the speed and the density, as

@@ -11,9 +11,9 @@ public sealed class Song
         Meter meter,
         ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions,
         TrackEventStateTimelineMap<StateMap> trackEventStateTimelineMap,
-        SongMap? map = null,
-        ImmutableSortedDictionary<int, EventTimeline<RealizedNote>>? notes = null,
-        SongDraws? draws = null
+        SongMap? map,
+        ImmutableSortedDictionary<int, EventTimeline<RealizedNote>>? notes,
+        SongDraws? draws
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(duration);

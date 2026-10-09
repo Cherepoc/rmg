@@ -306,7 +306,7 @@ public static class SongDescriptions
 
     private static MelodyDescription? MelodyOf(Song song, IReadOnlyList<StateTraceEntry> trace)
     {
-        var track = song.TrackDefinitions.FirstOrDefault(x => x.Value.Role == TrackRole.Melody).Key;
+        var track = song.TrackDefinitions.Single(x => x.Value.Role == TrackRole.Melody).Key;
         if (!song.Notes!.TryGetValue(track, out var notes) || notes.Count == 0)
             return null;
 

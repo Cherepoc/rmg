@@ -216,7 +216,7 @@ public static class Render
         var playing = own;
         foreach (var note in notes)
         {
-            var program = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : own;
+            var program = InstrumentsOverTime.ProgramOf(note.Value.State, own);
             if (program == playing)
                 continue;
 

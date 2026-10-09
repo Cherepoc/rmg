@@ -23,7 +23,11 @@ internal sealed record SongDraft(
     ImmutableArray<(double Change, ImmutableArray<double> Chords, KeyChange.Device Device)> Chains,
     ImmutableDictionary<int, ImmutableDictionary<FigurePlayer, string>> Figures,
     ImmutableHashSet<int> Polymeters
-);
+)
+{
+    /// <summary>Where the drums fill, from a run's first note to its line, which the stages that play around a fill keep out of.</summary>
+    public (double From, double To)[] FillSpans => [..Runs.Where(x => !x.Positions.IsEmpty).Select(x => (x.Positions.Min(), x.Line))];
+}
 
 /// <summary>A stage of the song after it is put together: its name, what it does, and whether a test may leave it out.</summary>
 /// <param name="CanSkip">Whether it only edits the song, nothing after it reading what it hands on, so that a test may leave it out.</param>
@@ -345,10 +349,7 @@ internal static class SongStages
     /// <param name="observe">What is done with the song after each stage, by its name, such as a test's checks of it.</param>
     internal static SongDraft Run(SongDecisions song, SongDraft draft, IReadOnlySet<string> skipped, Action<string, SongDraft> observe, CancellationToken cancellation)
     {
-        foreach (var name in skipped)
-            if (All.SingleOrDefault(x => x.Name == name) is not { CanSkip: true })
-                throw new ArgumentException($"No stage {name} that may be left out.", nameof(skipped));
-
+        // the stages left out checked as the song is asked for (SongGenerator.GenerateSong)
         foreach (var stage in All.Where(x => !skipped.Contains(x.Name)))
         {
             cancellation.ThrowIfCancellationRequested();

@@ -55,7 +55,7 @@ public sealed class FillTest
             [new KeyValuePair<int, EventStateTimelineMap<StateMap>>(1, Hits(0, 2, 3, 4).ToEventStateTimelineMap(StateMap.Default))],
             StateTimelineMap.Create(8)
         );
-        var edits = new TimelineEdits(new GenerationContext(1), Meter.FourFour);
+        var edits = new TimelineEdits(new GenerationContext(1), Meter.FourFour, null);
 
         edits.Clear(1, 2, 3.5);
         edits.Hit(1, 4, 0.8, 2, 0, "Test");

@@ -52,9 +52,12 @@ internal sealed class FillSounds
             if (!weightedSounds.TryGetValue(role, out var weighted))
                 weightedSounds[role] = weighted = [];
             var soundWeight = drum.Sounds.Sum(x => x.Weight);
-            weighted.AddRange(drumSounds.Zip(drum.Sounds, (x, sound) => (x, drum.Weight * sound.Weight / soundWeight * odds(sound.Code) is var weight
-                ? new ByConvention(sound.Wildness > 0 && odds(sound.Code) <= 1 ? 0 : weight, weight, weight * (1 + sound.Wildness))
-                : default)));
+            weighted.AddRange(drumSounds.Zip(drum.Sounds, (x, sound) =>
+            {
+                var soundOdds = odds(sound.Code);
+                var weight = drum.Weight * sound.Weight / soundWeight * soundOdds;
+                return (x, new ByConvention(sound.Wildness > 0 && soundOdds <= 1 ? 0 : weight, weight, weight * (1 + sound.Wildness)));
+            }));
         }
 
         _sounds = sounds.ToImmutableSortedDictionary(x => x.Key, x => x.Value.ToImmutableArray());

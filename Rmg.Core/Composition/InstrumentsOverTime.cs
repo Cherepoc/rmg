@@ -27,6 +27,9 @@ public enum ArticulationMode
 /// </summary>
 internal static class InstrumentsOverTime
 {
+    /// <summary>The program a note plays: one it switches to, kept as its General MIDI number + 1, or the part's own where none.</summary>
+    public static int ProgramOf(StateMap state, int own) => state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : own;
+
     /// <summary>The chance a section switches a part to another instrument of its role.</summary>
     public static ByConvention SwitchChance { get; } = new(0, 0.015, 1);
 

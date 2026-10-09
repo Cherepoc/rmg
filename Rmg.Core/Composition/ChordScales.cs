@@ -170,5 +170,5 @@ public static class ChordScales
     private static ImmutableArray<int> Rotate(ImmutableArray<int> offsets, int step) =>
         [..Enumerable.Range(0, offsets.Length).Select(i => Mod(offsets[Mod(step + i, offsets.Length)] - offsets[Mod(step, offsets.Length)], Realizer.OctaveNoteCount))];
 
-    private static int Mod(int value, int by = Scales.StepCount) => (value % by + by) % by;
+    private static int Mod(int value, int by = Scales.StepCount) => value.Mod(by);
 }

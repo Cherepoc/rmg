@@ -24,7 +24,7 @@ internal static class SectionPedals
             return pedals ? root : (int?)null;
         });
         var sections = song.Form.Map.Sections.Where(x => pedalling[x.SectionId] is not null)
-            .Select(x => (Phrase: Meter.PhraseBarCount * x.Meter.BarDuration, Root: pedalling[x.SectionId]!.Value, Span: x))
+            .Select(x => (Phrase: x.Meter.PhraseDuration, Root: pedalling[x.SectionId]!.Value, Span: x))
             .Select(x => (x.Root == 0 ? x.Span.Start : Math.Max(x.Span.Start, x.Span.End - x.Phrase), x.Root == 0 ? Math.Min(x.Span.End, x.Span.Start + x.Phrase) : x.Span.End,
                 x.Span.Start, common.GetEffectiveStateMapAt(x.Span.Start).GetStateValue(StateKinds.ChordRoot) + x.Root));
         var changes = draft.Chains.Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Chords[0], x.Change, x.Change, 4));

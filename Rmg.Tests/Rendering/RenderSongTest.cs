@@ -18,7 +18,8 @@ public sealed class RenderSongTest
             StateTimelineMap.Create(0)
         );
         var tracks = ImmutableSortedDictionary<int, IInstrumentTrack>.Empty.Add(0, track);
-        return new Song(duration, Meter.FourFour, tracks, trackEventStateTimelineMap);
+        // no map, its notes realized as it renders, no draws
+        return new Song(duration, Meter.FourFour, tracks, trackEventStateTimelineMap, null, null, null);
     }
 
     private static PitchInstrumentTrack PitchTrack(int minOctaveOffset = 0, int maxOctaveOffset = 4) =>

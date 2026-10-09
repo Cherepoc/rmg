@@ -12,12 +12,10 @@ public sealed class PercussionInstrumentTrack : IInstrumentTrack
     {
         StateMap = stateMap;
         Sounds = sounds;
-        ArticulationCodes = [..sounds.Select(x => x.Code)];
     }
 
     public ImmutableArray<DrumSound> Sounds { get; }
 
-    public ImmutableArray<int> ArticulationCodes { get; }
     public StateMap StateMap { get; }
 
     public TrackRole Role => TrackRole.Drum;

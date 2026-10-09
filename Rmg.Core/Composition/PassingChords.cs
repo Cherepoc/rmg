@@ -127,5 +127,5 @@ internal static class PassingChords
     /// <summary>A chord's root in semitones above the scale's first note, as its own scale has it.</summary>
     private static int RootOf(Scale scale, int home, int root, ChordScale chordScale) => scale.Offsets[Mod(home + root)] + chordScale.Steps.By(Mod(home + root));
 
-    private static int Normalize(int step) => Mod(step + 3) - 3;
+    private static int Normalize(int step) => Progressions.Normalize(step);
 }

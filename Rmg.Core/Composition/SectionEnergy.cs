@@ -47,8 +47,7 @@ internal static class SectionEnergy
     public static StateMap GenerateSong(IGenerationContext context, Genre genre)
     {
         var shift = genre.Shift(GenreChoices.Dynamics, "energy");
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
-        var draw = shift == 0 ? Generators.SplineValue() : Probabilities.Tilt.Of(GenreEnergyOdds, shift).SplineValue();
+        var draw = Probabilities.Tilt.Of(GenreEnergyOdds, shift).SplineValue();
         return new StateMapBuilder("Song")
             .Add(CompositionStateKinds.Energy, draw.Then(x => x * Song))
             .ToStateMap(context);

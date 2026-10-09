@@ -116,6 +116,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
     /// <summary>How long a section's pattern is, in beats.</summary>
     public double PatternDuration => PatternBarCount * BarDuration;
 
+    /// <summary>How long a phrase of the meter's bars lasts, in beats: <see cref="PhraseBarCount" /> bars.</summary>
+    public double PhraseDuration => PhraseBarCount * BarDuration;
+
     /// <summary>
     ///     The time signature a score writes the bar in: in quarters where every group is whole beats, as 4/4 and 3/4, in
     ///     8ths where every group is whole 8ths, as 6/8 and 7/8, and in 16ths otherwise, as 15/16 of a group of three.

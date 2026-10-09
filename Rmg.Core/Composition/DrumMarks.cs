@@ -95,7 +95,7 @@ internal static class DrumMarks
             var energy = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling);
             var plays = Plays(span);
             // the section's places, each at its strongest: its start, its phrases' and its chords' changes
-            var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+            var phrase = span.Meter.PhraseDuration;
             var places = new SortedDictionary<double, int> { [span.Start] = 0 };
             for (var at = span.Start + phrase; at < span.End - 1e-9; at += phrase)
                 places.TryAdd(at, 1);

@@ -312,7 +312,7 @@ internal sealed class FillGenerator
         double minNote
     )
     {
-        var edits = new TimelineEdits(_line, _meter);
+        var edits = new TimelineEdits(_line, _meter, null);
         Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0, _meter);
         return edits.ApplyTo(song);
     }
@@ -487,7 +487,8 @@ internal sealed class FillGenerator
         {
             var (position, rank, maxRank) = notes[k];
             var loudness = startVelocity + (endVelocity - startVelocity) * (position - from) / span
-                           + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank)(_line);
+                           // a run's accents its own, as a drummer's hands make them, whatever the groove's dynamics
+                           + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank, 1)(_line);
             foreach (var sound in FillSounds.GetNoteSounds(run, places[k], x => drums[x].Has(position, line)))
             {
                 edits.Hit(sound.Track, position, loudness, sound.Articulation, sectionId, "Fill");

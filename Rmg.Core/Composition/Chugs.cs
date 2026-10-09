@@ -18,7 +18,7 @@ internal static class Chugs
 
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
-        var riff = song.Tracks.Definitions.FirstOrDefault(x => x.Value.Role == TrackRole.Riff).Key;
+        var riff = song.Track(TrackRole.Riff).Key;
         if (!draft.Timeline.TrackTimelineMap.TryGetValue(riff, out var track) || !song.Sections.Any(x => x.Chugs))
             return draft;
 

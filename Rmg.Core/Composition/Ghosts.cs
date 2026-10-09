@@ -48,7 +48,7 @@ internal static class Ghosts
             return draft;
 
         // but where a fill plays, from its first note to its line, and in stop time
-        var fills = draft.Runs.Where(x => !x.Positions.IsEmpty).Select(x => (From: x.Positions.Min(), To: x.Line)).ToArray();
+        var fills = draft.FillSpans;
         var stops = song.StopTime;
         bool Busy(double from, double to) => fills.Any(x => x.From < to - 1e-9 && x.To > from + 1e-9) || stops.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9);
 

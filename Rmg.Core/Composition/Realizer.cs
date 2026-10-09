@@ -205,7 +205,7 @@ internal static class Realizer
     /// <summary>A drum's hits, each of the sound its note names or its articulation's walk picks.</summary>
     private static EventTimeline<RealizedNote> RealizePercussionTrack(PercussionInstrumentTrack track, EventTimeline<StateMap> noteTimeline)
     {
-        if (track.ArticulationCodes.IsEmpty)
+        if (track.Sounds.IsEmpty)
             throw new ArgumentException("Articulation codes cannot be empty", nameof(track));
 
         return EventTimeline.Create(noteTimeline.Duration, noteTimeline.Select(RealizeHit));
@@ -220,9 +220,9 @@ internal static class Realizer
             // a note may name its sound, as a fill does; a drum that strikes plays its stroke; otherwise the walk of the
             // articulation picks it
             var stroke = stateMap.GetStateValue(StateKinds.DrumStroke);
-            var articulationIndex = fixedIndex > 0 ? Math.Min(fixedIndex, track.ArticulationCodes.Length) - 1
+            var articulationIndex = fixedIndex > 0 ? Math.Min(fixedIndex, track.Sounds.Length) - 1
                 : stroke.IsSet ? stroke.Value
-                : articulationOffset.ToIndex(track.ArticulationCodes.Length);
+                : articulationOffset.ToIndex(track.Sounds.Length);
             // and plays as loud as its sound is over the drum
             var sound = track.Sounds[articulationIndex];
             var velocity = noteVelocity + VelocityLayers.SoundLevel * sound.Loudness;
