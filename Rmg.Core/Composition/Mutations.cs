@@ -96,7 +96,7 @@ internal static class Mutations
             var made = 0;
             for (var bar = 1; bar < bars; bar++)
             {
-                if (bar % Meter.PhraseBarCount == 0 && context.TestProbability(SnapBack.At(groove)))
+                if (bar % span.Meter.PhraseBars == 0 && context.TestProbability(SnapBack.At(groove)))
                     edits.Clear();
                 var start = span.Start + bar * barLength;
                 var count = context.TestProbability(chance) ? context.TestProbability(SecondEdit) ? 2 : 1 : 0;

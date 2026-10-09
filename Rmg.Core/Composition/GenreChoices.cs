@@ -239,7 +239,7 @@ public static class GenreChoices
 
     /// <summary>How long a section plays, its pattern played over and over: four bars to thirty-two, a dance track's the longest, which the songs never play (<see cref="Composition.SectionLength" />).</summary>
     public static GenreChoice SectionLength { get; } = Pool("sectionLength", "Section's length",
-        Composition.SectionLength.Options.Select(x => (Composition.SectionLength.NameOf(x.Plays), $"{x.Plays * Composition.Meter.PhraseBarCount} bars", x.Weight)));
+        Composition.SectionLength.Options.Select(x => (Composition.SectionLength.NameOf(x.Plays), $"{x.Plays * Composition.Meter.DefaultPhraseBars} bars", x.Weight)));
 
     /// <summary>How an appearance brings its parts in over its phrases: steady, building, thinning or one part alone (<see cref="Composition.Texture" />).</summary>
     public static GenreChoice Texture { get; } = Pool("texture", "Texture", Composition.Texture.Kinds.Select(x => (Name(x.Kind.ToString()), Composition.Texture.LabelOf(x.Kind), x.Weight)));
@@ -485,7 +485,7 @@ public static class GenreChoices
     ///     eight, twelve, as the blues has, or sixteen (<see cref="Composition.Meter.Phrases" />).
     /// </summary>
     public static GenreChoice Phrases { get; } = Pool("phrases", "Section's pattern",
-        PhraseCounts.Select(x => (PhrasesName(x), $"{x * Composition.Meter.PhraseBarCount} bars", x == 1 ? new ByConvention(1, 1, 1) : default)));
+        PhraseCounts.Select(x => (PhrasesName(x), $"{x * Composition.Meter.DefaultPhraseBars} bars", x == 1 ? new ByConvention(1, 1, 1) : default)));
 
     /// <summary>Whether a song takes one of the forms songs are written in, or one of its own (<see cref="SongForms" />).</summary>
     public static GenreChoice FormChances { get; } = Chances("formChances", "Form or its own", [("forms", "One of the forms", SongForms.OwnFormChance)]);

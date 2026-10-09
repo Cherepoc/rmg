@@ -528,7 +528,7 @@ internal sealed class SectionGenerator
             var answerContext = Stream(sectionId, SectionStream.MelodyAnswer);
             var answerSeed = answerContext.GenerateSeed();
             var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(meter.PatternDuration - meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
-            var answer = isMelody ? LinePattern.DrawAnswer(answerContext, amount, questionEnd) : null;
+            var answer = isMelody ? LinePattern.DrawAnswer(answerContext, amount, questionEnd, meter.PhraseBars) : null;
             // a riff's bars follow a riff's scheme, from a sequence of its own, rather than the section's phrase
             var isRiff = _tracks.Definitions[trackNumber].Role == TrackRole.Riff;
             // and a hook's repeats are its first bar's, none varied

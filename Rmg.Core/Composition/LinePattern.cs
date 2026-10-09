@@ -348,7 +348,7 @@ internal sealed class LinePattern
     /// <summary>
     ///     A section's melody as a question and its answer: its 4 bars, and the answer's, of the same bar patterns, whose
     ///     later bars' rhythm is varied (<see cref="PatternGenerator.GenerateBars" />) and whose notes there are mutated
-    ///     (<see cref="Mutate" />, <see cref="MelodyLayers.AnswerBars" />), so that they are placed by the rules where
+    ///     (<see cref="Mutate" />, <see cref="MelodyLayers.AnswerShare" />), so that they are placed by the rules where
     ///     they echoed the question.
     /// </summary>
     /// <param name="bars">The section's bars, its 4-bar pattern's question and answer.</param>
@@ -363,7 +363,7 @@ internal sealed class LinePattern
             profile,
             seed,
             meter.BarDuration,
-            bar => Answers(bar, meter) ? amount * MelodyLayers.AnswerBars[bar % Meter.PhraseBarCount] : 0
+            bar => Answers(bar, meter) ? amount * MelodyLayers.AnswerShare(bar, meter.PhraseBars) : 0
         );
     }
 
@@ -373,7 +373,7 @@ internal sealed class LinePattern
     /// </summary>
     public static bool Answers(int bar, Meter meter)
     {
-        return bar >= meter.PatternBarCount || meter.Phrases > 1 && bar >= meter.PatternBarCount - Meter.PhraseBarCount;
+        return bar >= meter.PatternBarCount || meter.Phrases > 1 && bar >= meter.PatternBarCount - meter.PhraseBars;
     }
 
     /// <summary>
@@ -425,9 +425,10 @@ internal sealed class LinePattern
     ///     where the question's does. Drawn from the answer's own sequence, by the section's amount: the rhythm now and then
     ///     in its later bars, and the end afresh, other than the question's.
     /// </summary>
-    public static MelodyAnswer DrawAnswer(IGenerationContext context, double amount, int questionEnd)
+    /// <param name="phraseBars">How many bars the answer's phrase has.</param>
+    public static MelodyAnswer DrawAnswer(IGenerationContext context, double amount, int questionEnd, int phraseBars)
     {
-        ImmutableArray<bool> rhythm = [..MelodyLayers.AnswerBars.Select(x => context.TestProbability(x * amount * MelodyLayers.AnswerRhythm))];
+        ImmutableArray<bool> rhythm = [..Enumerable.Range(0, phraseBars).Select(bar => context.TestProbability(MelodyLayers.AnswerShare(bar, phraseBars) * amount * MelodyLayers.AnswerRhythm))];
         var endsAfresh = context.TestProbability(amount);
         ImmutableArray<Weighted<int>> ends = [..MelodyLayers.PhraseEnds.Where(x => x.Value != questionEnd)];
         var end = context.Pick(ends);
@@ -506,7 +507,7 @@ internal sealed record SectionLine(
     ///     The line's bars as the section plays them the given time, from 0, unplaced: the first time as they were made,
     ///     and every later time improvised by the amount given (<see cref="MelodyLayers.Improvisation" />), each appearance
     ///     from the first, not from the one before, so that the section keeps its tune: the bars of a letter draw their
-    ///     rhythm afresh, alike, where a phrase varies (<see cref="MelodyLayers.AnswerBars" />), by the amount times
+    ///     rhythm afresh, alike, where a phrase varies (<see cref="MelodyLayers.AnswerShare" />), by the amount times
     ///     <see cref="MelodyLayers.ImprovisedRhythm" />, and its notes are mutated by the amount. Every note carries how its
     ///     chord leads out and lands, and a phrase's first note whether it starts afresh, drawn for every appearance.
     /// </summary>
@@ -525,7 +526,7 @@ internal sealed record SectionLine(
             [
                 ..Enumerable.Range(0, 2 * Letters.Length).Select(bar =>
                     {
-                        var chance = amount * MelodyLayers.ImprovisedRhythm * MelodyLayers.AnswerBars[bar % Meter.PhraseBarCount];
+                        var chance = amount * MelodyLayers.ImprovisedRhythm * MelodyLayers.AnswerShare(bar, HarmonicRhythm.Meter.PhraseBars);
                         return draws[Letters[bar % Letters.Length]] < chance ? appearance : 0;
                     }
                 )

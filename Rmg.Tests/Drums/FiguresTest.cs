@@ -22,9 +22,9 @@ public sealed class FiguresTest
     private static IEnumerable<(SectionSpan Span, double Bar, double Position)> Hits(CorpusSong song, IReadOnlySet<int> tracks, IReadOnlySet<int> sections) =>
         song.Map.Sections.Where(x => sections.Contains(x.SectionId)).SelectMany(span => song.Song.Notes!.Where(x => tracks.Contains(x.Key)).SelectMany(x => x.Value)
             .Where(x => x.Position > span.Start + 1e-9 && x.Position < span.End - 1e-9
-                        && Math.Abs(Math.IEEERemainder(x.Position - span.Start, Meter.PhraseBarCount * span.Meter.BarDuration)) > 1e-6)
+                        && Math.Abs(Math.IEEERemainder(x.Position - span.Start, span.Meter.PhraseDuration)) > 1e-6)
             .Select(x => (span, Bar: span.Start + Math.Floor((x.Position - span.Start) / span.Meter.BarDuration + 1e-9) * span.Meter.BarDuration, x.Position))
-            .Where(x => Math.Abs(Math.IEEERemainder(x.Bar + span.Meter.BarDuration - span.Start, Meter.PhraseBarCount * span.Meter.BarDuration)) > 1e-6));
+            .Where(x => Math.Abs(Math.IEEERemainder(x.Bar + span.Meter.BarDuration - span.Start, span.Meter.PhraseDuration)) > 1e-6));
 
     /// <summary>
     ///     A calibration: the kick follows the riff's pattern before the lines are placed, which leave a few of the riff's

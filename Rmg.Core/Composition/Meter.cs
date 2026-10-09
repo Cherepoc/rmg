@@ -6,7 +6,7 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     The meter a song is in: a bar as its groups of 16ths, from which its hierarchy follows, the bar splitting into
 ///     its groups and every group into its beats and on down to the 16ths; 4/4 as two halves of two beats. A section is
-///     made of 4-bar patterns in every meter, one bar for every chord of a progression of a chord a bar.
+///     made of patterns of its phrases (<see cref="PhraseBars" />, <see cref="Phrases" />) in every meter.
 /// </summary>
 /// <param name="Groups">The bar's groups, each in 16ths, in order.</param>
 public sealed record Meter(ImmutableArray<int> Groups)
@@ -84,10 +84,16 @@ public sealed record Meter(ImmutableArray<int> Groups)
     }
 
     /// <summary>
-    ///     How many bars a phrase has: a melody's arc and its question or answer, an intro's window; a section's pattern,
-    ///     its harmony's cycle, is one or more of them (<see cref="Phrases" />).
+    ///     How many bars a phrase has where nothing makes it another length: four, as the genres' section lengths and an
+    ///     intro's window count them.
     /// </summary>
-    public const int PhraseBarCount = 4;
+    public const int DefaultPhraseBars = 4;
+
+    /// <summary>
+    ///     How many bars a section's phrase has: a melody's arc and its question or answer, a fill's and a mark's line; a
+    ///     section's pattern, its harmony's cycle, is one or more of them (<see cref="Phrases" />).
+    /// </summary>
+    public int PhraseBars { get; init; } = DefaultPhraseBars;
 
     /// <summary>
     ///     How many phrases a section's pattern has, the cycle its chords go round: one, a four-bar pattern, as every song's
@@ -96,7 +102,7 @@ public sealed record Meter(ImmutableArray<int> Groups)
     public int Phrases { get; init; } = 1;
 
     /// <summary>How many bars a section's pattern has.</summary>
-    public int PatternBarCount => PhraseBarCount * Phrases;
+    public int PatternBarCount => PhraseBars * Phrases;
 
     /// <summary>The tempo, in beats a minute, that a song's tempo state is a multiple of; a beat is a quarter note.</summary>
     public const double BaseTempo = 120;
@@ -122,8 +128,8 @@ public sealed record Meter(ImmutableArray<int> Groups)
     /// <summary>How long a section's pattern is, in beats.</summary>
     public double PatternDuration => PatternBarCount * BarDuration;
 
-    /// <summary>How long a phrase of the meter's bars lasts, in beats: <see cref="PhraseBarCount" /> bars.</summary>
-    public double PhraseDuration => PhraseBarCount * BarDuration;
+    /// <summary>How long a phrase of the meter's bars lasts, in beats: <see cref="PhraseBars" /> bars.</summary>
+    public double PhraseDuration => PhraseBars * BarDuration;
 
     /// <summary>
     ///     The time signature a score writes the bar in: in quarters where every group is whole beats, as 4/4 and 3/4, in
@@ -344,11 +350,11 @@ public sealed record Meter(ImmutableArray<int> Groups)
         return isPowerOfTwo ? int.MaxValue : ResolvedRhythm.GridRankLimit(sixteenths / 4.0);
     }
 
-    public bool Equals(Meter? other) => other is not null && HasSameBar(other) && Phrases == other.Phrases;
+    public bool Equals(Meter? other) => other is not null && HasSameBar(other) && Phrases == other.Phrases && PhraseBars == other.PhraseBars;
 
-    public override int GetHashCode() => Groups.Aggregate(17 * 31 + Phrases, (hash, group) => hash * 31 + group);
+    public override int GetHashCode() => Groups.Aggregate((17 * 31 + Phrases) * 31 + PhraseBars, (hash, group) => hash * 31 + group);
 
-    /// <summary>Whether another's bar is this one's, its groups the same, which a time signature writes, however many phrases its pattern has.</summary>
+    /// <summary>Whether another's bar is this one's, its groups the same, which a time signature writes, however many phrases its pattern has, and of how many bars.</summary>
     public bool HasSameBar(Meter other) => Groups.SequenceEqual(other.Groups);
 
     public override string ToString() => $"{Sixteenths}/16 ({string.Join("+", Groups)})";

@@ -122,7 +122,7 @@ internal sealed class PatternGenerator
                 {
                     var patternBar = barIndex % scheme.Letters.Length;
                     var inAnswer = answer is not null && LinePattern.Answers(barIndex, _meter);
-                    var redrawsRhythm = inAnswer && answer!.RedrawsRhythm[barIndex % Meter.PhraseBarCount];
+                    var redrawsRhythm = inAnswer && answer!.RedrawsRhythm[barIndex % _meter.PhraseBars];
                     var rhythmKey = rhythmKeys.IsDefaultOrEmpty ? 0 : rhythmKeys[barIndex];
                     var phraseEnd = inAnswer ? answer!.PhraseEnd : null;
                     // a drum that doubles or accents a lead plays its lead's bar patterns, and one that plays a figure of its

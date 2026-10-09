@@ -24,7 +24,7 @@ public sealed class PushTest
             var kick = song.Song.Notes!.Where(x => kicks.Contains(x.Key)).SelectMany(x => x.Value).Select(x => x.Position).ToArray();
             // but in and at the end of a phrase in stop time, which a push leaves be, its fill landing there
             var stopped = song.Trace.Where(x => x.Point == TracePoints.StopTime && (bool)x.Value!).Select(x => x.Section).ToHashSet();
-            bool InStopTime(double at) => song.Song.Map!.Sections.Any(s => stopped.Contains(s.SectionId) && at >= s.Start - 1e-9 && at <= s.Start + Meter.PhraseBarCount * s.Meter.BarDuration + 1e-9);
+            bool InStopTime(double at) => song.Song.Map!.Sections.Any(s => stopped.Contains(s.SectionId) && at >= s.Start - 1e-9 && at <= s.Start + s.Meter.PhraseDuration + 1e-9);
             foreach (var (span, index) in song.Song.Map!.Sections.Select((x, i) => (x, i)).Where(x => pushing.Contains(x.x.SectionId) && !song.Solos.ContainsKey(x.i)))
             foreach (var change in changes.Where(x => x > span.Start + 1e-9 && x < span.End - 1e-9 && Math.Abs(Math.IEEERemainder(x - span.Start, span.Meter.BarDuration)) < 1e-6 && !InStopTime(x)))
             {

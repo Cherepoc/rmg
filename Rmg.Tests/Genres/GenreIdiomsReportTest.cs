@@ -30,7 +30,7 @@ public sealed class GenreIdiomsReportTest
         var drums = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack && notes.ContainsKey(x.Key)).Select(x => x.Key).ToArray();
         bool DrumsPlay(double start) => drums.Any(t => notes[t].Any(x => x.Position >= start - 1e-9 && x.Position < start + 4 - 1e-9));
         var bars = common.SelectMany(x => Enumerable.Range(0, (int)Math.Round(x.Duration / x.Meter.BarDuration))
-                .Where(b => b % Meter.PhraseBarCount != Meter.PhraseBarCount - 1)
+                .Where(b => b % Meter.DefaultPhraseBars != Meter.DefaultPhraseBars - 1)
                 .Select(b => x.Start + b * x.Meter.BarDuration))
             .Where(DrumsPlay)
             .ToArray();
@@ -49,7 +49,7 @@ public sealed class GenreIdiomsReportTest
             .SelectMany(x => x.Zip(x.Skip(1), (a, b) => ((b - a) % 7 + 7) % 7)).ToArray();
         double Motion(int steps) => motions.Length > 0 ? motions.Count(x => x == steps) / (double)motions.Length : double.NaN;
         var changes = map.Sections.Sum(x => song.ChordChanges.Count(c => c >= x.Start - 1e-9 && c < x.End - 1e-9));
-        var phrases = map.Sections.Sum(x => x.Duration / (Meter.PhraseBarCount * x.Meter.BarDuration));
+        var phrases = map.Sections.Sum(x => x.Duration / x.Meter.PhraseDuration);
 
         var melody = notes.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
         var drumVelocities = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack && notes.ContainsKey(x.Key)).SelectMany(x => notes[x.Key]).Select(x => 127 * Render.GetMidiVelocity(x.Value)).ToArray();

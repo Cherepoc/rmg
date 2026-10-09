@@ -147,7 +147,7 @@ public sealed class MelodyRepetitionTest
             int? Step(int i) => i + 1 < notes.Length ? notes[i + 1].Value.Offset - notes[i].Value.Offset : null;
             foreach (var span in song.Map.Sections.Where(x => x.Meter.Phrases == 3).DistinctBy(x => x.SectionId))
             {
-                var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+                var phrase = span.Meter.PhraseDuration;
                 foreach (var (onset, i) in at.Where(x => x.Key >= span.Start && x.Key < span.Start + phrase))
                 {
                     onsets++;
@@ -191,7 +191,7 @@ public sealed class MelodyRepetitionTest
                 if (!at.TryGetValue(Math.Round(change, 6), out var note) || song.Map.SectionAt(change) is not { } span)
                     continue;
                 var isRoot = note.Pitches.Min().Mod(12) == Realizer.GetChord(common.GetEffectiveStateMapAt(change)).Chord.GetPitch(0).Mod(12);
-                var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+                var phrase = span.Meter.PhraseDuration;
                 var inPattern = (change - span.Start) % span.Meter.PatternDuration;
                 var isMiddle = span.Meter.Phrases == 3 && inPattern >= phrase - 1e-9 && inPattern < 2 * phrase - 1e-9;
                 (changes, roots) = isMiddle ? (changes, roots) : (changes + 1, roots + (isRoot ? 1 : 0));

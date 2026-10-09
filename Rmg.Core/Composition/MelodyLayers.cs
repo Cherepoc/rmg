@@ -59,15 +59,18 @@ internal static class MelodyLayers
     ];
 
     /// <summary>
-    ///     How much of the answer's every bar, the section's second 4 bars, is mutated from the question's, by the answer
-    ///     amount: its first half as the question, the classic answer's start, and its second half changed; where a
+    ///     How much of an answer's bar, by its place in its phrase, is mutated from the question's, by the answer amount:
+    ///     the phrase's first half as the question, the classic answer's start, and its second half changed; where a
     ///     phrase varies, as an improvised appearance's rhythm does too.
     /// </summary>
-    public static ImmutableArray<double> AnswerBars { get; } = [0, 0, 0.8, 0.8];
+    public static double AnswerShare(int bar, int phraseBars) => 2 * (bar % phraseBars) >= phraseBars ? ChangedShare : 0;
+
+    // how much of a bar in the answer's second half is changed
+    private const double ChangedShare = 0.8;
 
     /// <summary>
     ///     How likely an answer's changing bar is to draw its rhythm afresh, over the bar's share of the answer
-    ///     (<see cref="AnswerBars" />) and the answer's amount: half the time at the amount with no lean.
+    ///     (<see cref="AnswerShare" />) and the answer's amount: half the time at the amount with no lean.
     /// </summary>
     public const double AnswerRhythm = 1.25;
 
@@ -105,7 +108,7 @@ internal static class MelodyLayers
 
     /// <summary>
     ///     How likely a bar of a section's later appearance is to draw its melody's rhythm afresh, over the song's
-    ///     improvisation and where a phrase varies (<see cref="AnswerBars" />).
+    ///     improvisation and where a phrase varies (<see cref="AnswerShare" />).
     /// </summary>
     public const double ImprovisedRhythm = 2;
 
@@ -156,29 +159,31 @@ internal static class MelodyLayers
     public const double SlopeSpread = 1;
 
     /// <summary>
-    ///     How many bars a phrase's shape takes before it starts again, and how likely each is: mostly the whole phrase,
+    ///     How much of a phrase its shape takes before it starts again, and how likely each is: mostly the whole phrase,
     ///     and now and then half of it, a wave that rises and falls twice; the shorter leans unconventional.
     /// </summary>
-    public static ImmutableArray<Weighted<int>> Periods { get; } = [new(0.8, Meter.PhraseBarCount), new(0.2, Meter.PhraseBarCount / 2)];
+    public static ImmutableArray<Weighted<double>> Periods { get; } = [new(0.8, 1), new(0.2, 0.5)];
 
     private static readonly Func<IGenerationContext, int> PeakBarGenerator = Generators.WeightedIndex(PeakBars);
 
     private static readonly Func<IGenerationContext, double> SlopeGenerator = Generators.SplineValue().Then(x => Slope + x * SlopeSpread);
 
     /// <summary>
-    ///     The shape a phrase takes, as the register it aims at in each of its four bars: its peak in the bar drawn, and
-    ///     lower by the slope drawn for every bar away from it, so that it rises to its peak and falls from it; the shape
-    ///     starts again every period, drawn from its own sequence, so that a period of half the phrase makes a wave.
+    ///     The shape a phrase takes, as the register it aims at in each of its bars: its peak in the bar drawn, as far into
+    ///     the phrase as into a phrase of four (<see cref="PeakBars" />), and lower by the slope drawn for every bar away from
+    ///     it, so that it rises to its peak and falls from it; the shape starts again every period, drawn from its own
+    ///     sequence, so that a period of half the phrase makes a wave.
     /// </summary>
+    /// <param name="phraseBars">How many bars the phrase has.</param>
     /// <param name="periodContext">The sequence the period is drawn from.</param>
     /// <param name="unconventionality">The melody facet of the section's unconventionality, whose ends the contour's periods lean by.</param>
-    public static ImmutableArray<double> GenerateContour(IGenerationContext context, IGenerationContext periodContext, double unconventionality)
+    public static ImmutableArray<double> GenerateContour(IGenerationContext context, IGenerationContext periodContext, double unconventionality, int phraseBars)
     {
-        var peak = PeakBars[PeakBarGenerator(context)].Value;
+        var peak = (int)Math.Round(PeakBars[PeakBarGenerator(context)].Value * (phraseBars - 1) / (double)(Meter.DefaultPhraseBars - 1));
         var slope = SlopeGenerator(context);
-        var periods = ByConvention.Weigh(Periods.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value < Meter.PhraseBarCount ? 1 : 0))), unconventionality);
-        var period = periodContext.Pick(periods);
-        return [..Enumerable.Range(0, Meter.PhraseBarCount).Select(bar => PeakRegister - slope * Math.Abs(bar % period - peak % period))];
+        var periods = ByConvention.Weigh(Periods.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value < 1 ? 1 : 0))), unconventionality);
+        var period = Math.Max(1, (int)Math.Round(periodContext.Pick(periods) * phraseBars));
+        return [..Enumerable.Range(0, phraseBars).Select(bar => PeakRegister - slope * Math.Abs(bar % period - peak % period))];
     }
 
     /// <summary>

@@ -25,7 +25,7 @@ internal static class SectionLength
     ];
 
     /// <summary>A length's name, as a genre names it: "bars16", the bars it plays.</summary>
-    public static string NameOf(int plays) => $"bars{plays * Meter.PhraseBarCount}";
+    public static string NameOf(int plays) => $"bars{plays * Meter.DefaultPhraseBars}";
 
     /// <summary>How far a role leans its section to the length it plays, as the odds of that length over the others.</summary>
     public const double RoleOdds = 8;

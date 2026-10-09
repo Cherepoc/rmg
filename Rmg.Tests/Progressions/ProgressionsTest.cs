@@ -140,7 +140,7 @@ public sealed class ProgressionsTest
     {
         var phrases = GeneratePhrases(Rmg.Core.Composition.Scales.Major, 0, strictness);
 
-        await Assert.That(phrases.All(x => x.Length == Meter.PhraseBarCount)).IsTrue();
+        await Assert.That(phrases.All(x => x.Length == Meter.DefaultPhraseBars)).IsTrue();
         await Assert.That(phrases.All(x => x[0] == 0)).IsTrue();
         await Assert.That(phrases.All(x => x.All(root => root is >= -3 and <= 3))).IsTrue();
     }

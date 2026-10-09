@@ -19,7 +19,7 @@ public sealed class SectionPedalTest
             var bass = song.Song.Notes![song.Song.Track(TrackRole.Bass)];
             foreach (var span in song.Song.Map!.Sections.Where(x => pedalling.ContainsKey(x.SectionId)))
             {
-                var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+                var phrase = span.Meter.PhraseDuration;
                 var (start, end) = pedalling[span.SectionId] == 0 ? (span.Start, Math.Min(span.End, span.Start + phrase)) : (Math.Max(span.Start, span.End - phrase), span.End);
                 var classes = bass.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).Select(x => x.Value.Pitches[0].Mod(12)).ToArray();
                 if (classes.Length == 0)

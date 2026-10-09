@@ -89,7 +89,7 @@ public sealed class StopTimeTest
         var intro = song.Map.Intro;
         var built = intro.Kind == IntroKind.Entries && !intro.Window.IsBefore ? song.Map.Sections[0] : null;
         return song.Song.Map!.Sections.Where((x, i) => stopping.Contains(x.SectionId) && x != built && !song.Solos.ContainsKey(i))
-            .Select(x => (x.Start, Math.Min(x.End, x.Start + Meter.PhraseBarCount * x.Meter.BarDuration), x.Meter.BarDuration));
+            .Select(x => (x.Start, Math.Min(x.End, x.Start + x.Meter.PhraseDuration), x.Meter.BarDuration));
     }
 
     /// <summary>How long a set of spans covers, their overlaps once.</summary>

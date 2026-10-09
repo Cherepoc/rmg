@@ -131,7 +131,7 @@ internal static class FormLayers
         new(0.12, new IntroWindow(1, true)),
         new(0.2, new IntroWindow(2, true)),
         new(0.1, new IntroWindow(4, true)),
-        new(0.58, new IntroWindow(Meter.PhraseBarCount, false))
+        new(0.58, new IntroWindow(Meter.DefaultPhraseBars, false))
     ];
 
     /// <summary>

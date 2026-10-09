@@ -169,7 +169,7 @@ public sealed class MelodyRhythmTest
         var waves = 0;
         for (var i = 0; i < 2_000; i++)
         {
-            var contour = MelodyLayers.GenerateContour(context, context, 0.5);
+            var contour = MelodyLayers.GenerateContour(context, context, 0.5, Meter.DefaultPhraseBars);
             await Assert.That(contour.Max()).IsEqualTo(MelodyLayers.PeakRegister);
 
             // a wave: the shape of half the phrase, twice, its peak and its low bar taking turns
@@ -197,7 +197,7 @@ public sealed class MelodyRhythmTest
         var context = new Rmg.Core.Probabilities.GenerationContext(1);
 
         double WaveShare(double unconventionality) => Enumerable.Range(0, 2_000)
-            .Select(_ => MelodyLayers.GenerateContour(context, context, unconventionality))
+            .Select(_ => MelodyLayers.GenerateContour(context, context, unconventionality, Meter.DefaultPhraseBars))
             .Count(x => x[0].IsEqualToByEpsilon(x[2]) && x[1].IsEqualToByEpsilon(x[3])) / 2_000.0;
 
         await Assert.That(WaveShare(0)).IsLessThan(0.1);

@@ -789,7 +789,7 @@ internal static class Expression
                     {
                         var bar = Math.Floor((note.Position - span.Start) / span.Meter.BarDuration + 1e-9);
                         var afterChug = i > 0 && timeline[i - 1].Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0;
-                        var phraseEnd = (bar + 1) % Meter.PhraseBarCount == 0;
+                        var phraseEnd = (bar + 1) % span.Meter.PhraseBars == 0;
                         var pinchLean = role is TrackRole.Riff or TrackRole.RiffTwin
                             ? Math.Log(afterChug ? PinchAfterChugOdds : 1) + Math.Log(phraseEnd ? PinchPhraseEndOdds : 1)
                             : isSolo ? intensity.LogOdds : 0;

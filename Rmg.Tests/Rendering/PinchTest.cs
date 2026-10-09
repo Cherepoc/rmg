@@ -32,7 +32,7 @@ public sealed class PinchTest
                 await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Vibrato)).IsGreaterThan(0).Because(because);
                 await Assert.That(song.Song.TrackDefinitions[track].Role).IsNotEqualTo(TrackRole.Chords).Because(because);
                 var span = song.Map.Sections.Last(x => x.Start <= note.Position + 1e-9);
-                await Assert.That(phrases.Add((song.Map.Sections.IndexOf(span), (int)Math.Floor((note.Position - span.Start) / (Meter.PhraseBarCount * span.Meter.BarDuration) + 1e-9))))
+                await Assert.That(phrases.Add((song.Map.Sections.IndexOf(span), (int)Math.Floor((note.Position - span.Start) / span.Meter.PhraseDuration + 1e-9))))
                     .IsTrue().Because($"{because}: one a phrase");
             }
         }

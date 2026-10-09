@@ -37,7 +37,7 @@ public sealed class HookIntroTest
         {
             var chorus = Chorus(song);
             // its length the chorus's first phrase
-            await Assert.That(song.Origin).IsEqualTo(Meter.PhraseBarCount * chorus.Meter.BarDuration).Because($"seed {song.Seed}");
+            await Assert.That(song.Origin).IsEqualTo(chorus.Meter.PhraseDuration).Because($"seed {song.Seed}");
             // every line's notes as the chorus plays them, but in the last bar, which leads into the first section
             var quoted = song.Origin - chorus.Meter.BarDuration;
             // in its key, and where the chorus doubles a line an octave apart, the intro's notes among its own

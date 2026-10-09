@@ -24,7 +24,7 @@ public sealed class DoublingTest
             // 8th early now and then
             bool InFillBar(double position)
             {
-                var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+                var phrase = span.Meter.PhraseDuration;
                 var inPhrase = (position - span.Start) % phrase;
                 return inPhrase >= phrase - FillBars(span.Meter) || inPhrase < 0.5;
             }
@@ -106,7 +106,7 @@ public sealed class DoublingTest
                 following += colouring.Count(x => feelLeads.ContainsKey(DrumGroups.GetTrackNumber(x)));
 
                 foreach (var (track, lead) in feelLeads)
-                for (var bar = 0; bar < Meter.PhraseBarCount; bar++)
+                for (var bar = 0; bar < Meter.DefaultPhraseBars; bar++)
                 {
                     bars++;
                     await Assert.That(patterns[(entry.Section, track, bar)].Feel).IsEqualTo(patterns[(entry.Section, lead, bar)].Feel);

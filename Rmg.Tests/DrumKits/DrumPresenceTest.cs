@@ -88,7 +88,7 @@ public sealed class DrumPresenceTest
                     continue;
 
                 // the bars of its letter, but the last of a pattern, where a fill may play it
-                var bars = schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter && x.bar < Meter.PhraseBarCount - 1).Select(x => x.bar);
+                var bars = schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter && x.bar < Meter.DefaultPhraseBars - 1).Select(x => x.bar);
                 foreach (var bar in bars)
                 {
                     var start = span.Start + bar * span.Meter.BarDuration;

@@ -91,7 +91,7 @@ public sealed class HarmonyReportTest
             {
                 var rhythm = rhythms[section.Key];
                 var played = section
-                    .GroupBy(x => rhythm.IndexAt(x.Bar % Meter.PhraseBarCount * rhythm.Meter.BarDuration + x.Position))
+                    .GroupBy(x => rhythm.IndexAt(x.Bar % rhythm.Meter.PhraseDuration + x.Position))
                     .Select(x =>
                     {
                         var entry = x.First();

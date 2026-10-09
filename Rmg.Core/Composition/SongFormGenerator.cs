@@ -143,7 +143,7 @@ internal sealed class SongFormGenerator
     {
         IntroKind.Entries when plan.Window.IsBefore => plan.Window.Bars * first.BarDuration,
         IntroKind.CountIn => first.BarDuration,
-        IntroKind.Hook => Meter.PhraseBarCount * (hook ?? throw new ArgumentNullException(nameof(hook))).BarDuration,
+        IntroKind.Hook => (hook ?? throw new ArgumentNullException(nameof(hook))).PhraseDuration,
         _ => 0
     };
 

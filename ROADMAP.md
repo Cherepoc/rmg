@@ -179,14 +179,11 @@ within a bar; and swing already pairs by each section's meter. In order of what 
    (`rudiments`), none in the machines' genres (`?listen=rudiments`). Two toms at once put off: a drum note plays one
    sound by its articulation (`StateKinds.ArticulationIndex`), so two would want a list of them, an engine's change
    for an accent no listening asks for; with the drum solos' idioms, should their tom cascades want it.
-4. **A phrase's length a meter's** (a refactor). `Meter.PhraseBarCount`, the constant 4, made the meter's own
-   (`PhraseBars`, 4 by default, beside `Phrases`), every use through the meter, and the tables of four bars read by a
-   bar's place in its phrase: the answer's second half (`MelodyLayers.AnswerBars`), the register's peak and period, a
-   melody answer's bars (`MelodyAnswer.RedrawsRhythm`), the fills' and marks' phrase lines, a phrase end's pinch, the
-   mutation's snap back, the intro's window, the hook intro, the section lengths' names (kept as names, their labels
-   in patterns). Measured: the fingerprint kept, every test as it was. Review, overengineering: the place-by-fraction
-   tables must read exactly as now at four, or the step redraws songs; a table that cannot is left at four with a
-   phrase of other lengths falling back to its nearest, not generalised for its own sake.
+4. Done: a phrase's length the meter's (`Meter.PhraseBars`, four by default, `DefaultPhraseBars` where the genres'
+   lengths and an intro's window count four), the answer's half, the contour's peak and period by a bar's place in its
+   phrase, the fills', the mutations' and the pinches' phrase lines through the meter; the fingerprint kept. Left to
+   step 5, which counts in other lengths: the phrase schemes' and the riff's four letters, the tests that read a trace's
+   bars by four, and the comments on "4-bar patterns".
 5. **Phrases of three and six bars, and four and two.** A section's phrase length drawn from a stream of its own by
    the form facet (four only at the plain end, the others rare at the middle) and a genre's pool (`phraseBars`), beside
    its pattern's phrases; a phrase scheme of its length (three: AAB, ABA, ABB, ABC; six as four and two); a progression

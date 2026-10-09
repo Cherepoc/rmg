@@ -35,7 +35,7 @@ public sealed class DrumMarksTest
             var changes = song.ChordChanges;
             bool Marks(double at) =>
                 map.Sections.Any(span => Math.Abs(at - span.Start) < DrumMarks.SwellBeats + 1e-6
-                                         || at > span.Start && at < span.End && Math.Abs(Math.IEEERemainder(at - span.Start, Meter.PhraseBarCount * span.Meter.BarDuration)) < 1e-6)
+                                         || at > span.Start && at < span.End && Math.Abs(Math.IEEERemainder(at - span.Start, span.Meter.PhraseDuration)) < 1e-6)
                 || changes.Any(x => Math.Abs(x - at) < 1e-6)
                 || Math.Abs(at - map.Ending.Start) < DrumMarks.SwellBeats + 1e-6;
             foreach (var (_, notes) in drums)
@@ -83,7 +83,7 @@ public sealed class DrumMarksTest
                 var notes = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PercussionInstrumentTrack).SelectMany(x => x.Value).ToArray();
                 hits += notes.Length;
                 starts += notes.Count(n => map.Sections.Any(s => Math.Abs(n.Position - s.Start) < 1e-6) || Math.Abs(n.Position - map.Ending.Start) < 1e-6);
-                phrases += notes.Count(n => map.Sections.Any(s => n.Position > s.Start + 1e-6 && n.Position < s.End && Math.Abs(Math.IEEERemainder(n.Position - s.Start, Meter.PhraseBarCount * s.Meter.BarDuration)) < 1e-6));
+                phrases += notes.Count(n => map.Sections.Any(s => n.Position > s.Start + 1e-6 && n.Position < s.End && Math.Abs(Math.IEEERemainder(n.Position - s.Start, s.Meter.PhraseDuration)) < 1e-6));
                 rolls += notes.Count(n => map.Sections.Any(s => n.Position > s.Start - 1 - 1e-6 && n.Position < s.Start - 1e-6));
                 // a swell's fading notes after a section's start
                 sections += map.Sections.Length;
