@@ -9,8 +9,8 @@ public sealed class PocketTest
     /// <summary>A part's offset off the beat in seconds, its first note's, at the tempo where it plays.</summary>
     private static double? Seconds(CorpusSong song, int track) =>
         song.Song.Notes!.GetValueOrDefault(track)?.FirstOrDefault(x => x.Value.State.GetStateValue(CompositionStateKinds.TimingOffset) != 0) is { Value: not null } note
-            ? note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset) * 60
-              / (song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo)
+            ? note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset)
+              * Meter.SecondsPerBeat(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo))
             : null;
 
     [Test]

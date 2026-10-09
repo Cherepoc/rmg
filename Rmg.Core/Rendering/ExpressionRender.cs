@@ -127,7 +127,7 @@ internal static class ExpressionRender
             var shaped = bend != BendKind.None || vibrato > 0 || wide > 0;
             if (shaped || wow > 0)
             {
-                var cyclesPerBeat = VibratoRate * 60 / (tempo.GetEffectiveValueAt(note.Position) * Meter.BaseTempo);
+                var cyclesPerBeat = VibratoRate * Meter.SecondsPerBeat(tempo.GetEffectiveValueAt(note.Position));
                 for (var t = 0.0; t < duration - 1e-9; t += shaped ? Step / 4 : Step)
                 {
                     var share = t / duration;

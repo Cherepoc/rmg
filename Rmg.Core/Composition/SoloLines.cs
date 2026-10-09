@@ -251,7 +251,7 @@ internal static class SoloLines
             soloist,
             // a quote wants the melody's notes there
             (start, end) => !melody.Any(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9) ? 0 : isOwn ? OwnQuoteWeight : MelodyQuoteWeight,
-            position => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60,
+            position => Meter.BeatsPerSecond(common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo)),
             turn
         );
         var line = new List<TimelineItem<StateMap>>();

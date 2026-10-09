@@ -23,7 +23,7 @@ public sealed class PinchTest
             {
                 pinches++;
                 var because = $"seed {song.Seed}, track {track} at {note.Position}";
-                var seconds = 60 / (song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo);
+                var seconds = Meter.SecondsPerBeat(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo));
                 await Assert.That(note.Value.Pitches.Length).IsEqualTo(1).Because(because);
                 await Assert.That(note.Value.Duration * seconds).IsGreaterThanOrEqualTo(Expression.PinchShortest - 1e-9).Because(because);
                 length += note.Value.Duration * seconds;

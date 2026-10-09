@@ -93,7 +93,7 @@ internal static class Groove
         if (given is { } amountGiven)
             (swings, amount) = (amountGiven > 0, amountGiven);
 
-        var sixteenth = 60 / (Meter.BaseTempo * tempo) / 4;
+        var sixteenth = Meter.SecondsPerBeat(tempo) / 4;
         var period = sixteenth >= ShortestSwungNote * Math.Pow(GenreSwungNoteReach, -genre.Shift(GenreChoices.FeelValues, "sixteenths")) ? 0.5 : 1;
         // a triplet's swing plays the pair's second note a third of the pair late of its middle, at two thirds
         return swings && meter.Pairs(period) ? new Swing(amount * period / 6, period) : Swing.None;

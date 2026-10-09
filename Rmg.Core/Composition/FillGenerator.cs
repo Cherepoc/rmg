@@ -94,7 +94,7 @@ internal sealed class FillGenerator
         // starts at, before any slowing into the ending
         var tempo = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         double MinNote(double line) =>
-            FillLayers.MinNoteSeconds * Meter.BaseTempo * tempo.GetEffectiveValueAt(map?.SectionAt(line - 1e-9)?.Start ?? 0) / 60;
+            FillLayers.MinNoteSeconds * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(map?.SectionAt(line - 1e-9)?.Start ?? 0));
 
         var drummer = Drummer.Generate(_context, _songRhythm.Value);
         var edits = new TimelineEdits(_context, _meter, map);

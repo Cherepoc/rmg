@@ -133,7 +133,7 @@ public static class Render
                 {
                     var tempo = common.GetStateTimeline(StateKinds.Tempo);
                     TimelineItem<RenderedNote> Late(TimelineItem<RenderedNote> note) =>
-                        (note.Value with { Shift = note.Value.Shift + DoubleTracking.Delay * tempo.GetEffectiveValueAt(note.Position) * Meter.BaseTempo / 60 }).ToTimelineItem(note.Position);
+                        (note.Value with { Shift = note.Value.Shift + DoubleTracking.Delay * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position)) }).ToTimelineItem(note.Position);
                     renderedTracks.Add(
                         new RenderedTrack(false, pitchInstrumentTrack.Role, DoubleTracking.SecondTake(pitchInstrumentTrack.InstrumentCode), EventTimeline.Create(played.Duration, played.Select(Late)),
                             -pitchInstrumentTrack.Pan, DoubleTracking.Level)

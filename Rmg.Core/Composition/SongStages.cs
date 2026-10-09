@@ -332,7 +332,7 @@ internal static class SongStages
                 song.Stream(SongStream.Tape),
                 song.Stream(SongStream.Pinch),
                 track => song.Stream(SongStream.Pinch, track),
-                position => 60 / (draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(position) * Meter.BaseTempo),
+                position => Meter.SecondsPerBeat(draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(position)),
                 song.Genre,
                 [..draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)],
                 song.Form.Edits.CutsOf,

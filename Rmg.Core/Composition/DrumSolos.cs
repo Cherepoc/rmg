@@ -251,7 +251,7 @@ internal static class DrumSolos
                 drummer,
                 // the groove is there to quote throughout
                 (_, _) => 1,
-                position => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60,
+                position => Meter.BeatsPerSecond(common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo)),
                 solo.TradesWithDrums ? SoloPlan.TurnOf(whole) : span.Duration
             );
             var turn = SoloPlan.TurnOf(whole);

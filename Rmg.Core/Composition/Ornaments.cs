@@ -75,7 +75,7 @@ internal static class Ornaments
                     return note;
                 var draw = song.Stream(SongStream.Ornaments, key).GenerateDouble();
                 // a quick note's length in beats at the tempo there
-                var step = tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60 / Rate;
+                var step = Meter.BeatsPerSecond(tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo)) / Rate;
                 var seconds = note.Value.Duration / (step * Rate);
                 var onBeat = note.Value.State.GetStateValue(CompositionStateKinds.BeatRank) == 0;
                 // the longest ornament the note may take, of those the song plays and the note drew

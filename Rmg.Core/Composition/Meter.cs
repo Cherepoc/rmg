@@ -101,6 +101,12 @@ public sealed record Meter(ImmutableArray<int> Groups)
     /// <summary>The tempo, in beats a minute, that a song's tempo state is a multiple of; a beat is a quarter note.</summary>
     public const double BaseTempo = 120;
 
+    /// <summary>How many beats a second a song's tempo state plays.</summary>
+    public static double BeatsPerSecond(double tempo) => tempo * BaseTempo / 60;
+
+    /// <summary>How many seconds a beat lasts at a song's tempo state.</summary>
+    public static double SecondsPerBeat(double tempo) => 60 / (tempo * BaseTempo);
+
     /// <summary>
     ///     The bar a rhythm's period and phase are counted in, in beats: 4/4's, whatever the song's meter, so that a
     ///     setting means a length, which the song's meter plays at the level of its own nearest it.

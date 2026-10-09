@@ -43,7 +43,7 @@ public sealed class DoubleTrackingTest
                 await Assert.That((first.Volume, second.Volume)).IsEqualTo((DoubleTracking.Level, DoubleTracking.Level));
                 await Assert.That(second.NoteTimeline.Select(x => (x.Position, x.Value.Offset))).IsEquivalentTo(first.NoteTimeline.Select(x => (x.Position, x.Value.Offset)), CollectionOrdering.Matching);
                 foreach (var (a, b) in first.NoteTimeline.Zip(second.NoteTimeline))
-                    await Assert.That(b.Value.Shift - a.Value.Shift).IsEqualTo(DoubleTracking.Delay * tempo.GetEffectiveValueAt(a.Position) * Meter.BaseTempo / 60).Within(1e-9);
+                    await Assert.That(b.Value.Shift - a.Value.Shift).IsEqualTo(DoubleTracking.Delay * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(a.Position))).Within(1e-9);
             }
 
             // every part on a channel of its own, the drums' kept

@@ -55,7 +55,7 @@ public sealed class RenderedSong
     public double SecondsAt(double position)
     {
         var changes = TempoTimeline.Select(x => x.Position).Where(x => x > 0 && x < position).Prepend(0).Append(position).Distinct().Order().ToArray();
-        return changes.Zip(changes.Skip(1)).Sum(x => (x.Second - x.First) * 60 / (TempoTimeline.GetEffectiveValueAt(x.First) * Meter.BaseTempo));
+        return changes.Zip(changes.Skip(1)).Sum(x => (x.Second - x.First) * Meter.SecondsPerBeat(TempoTimeline.GetEffectiveValueAt(x.First)));
     }
 
     /// <summary>How far the whole band is faded in, as the song fades out; no steps for a song that does not.</summary>

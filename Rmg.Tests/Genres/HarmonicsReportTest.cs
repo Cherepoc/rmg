@@ -28,7 +28,7 @@ public sealed class HarmonicsReportTest
 
             // seconds a beat at the note, and the part's notes a beat over the beat on either side of it
             double Seconds((CorpusSong Song, TrackRole Role, EventTimeline<RealizedNote> Notes, int Index, TimelineItem<RealizedNote> Note) x) =>
-                60 / (x.Song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(x.Note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo);
+                Meter.SecondsPerBeat(x.Song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(x.Note.Position).GetStateValue(StateKinds.Tempo));
             double Around((CorpusSong Song, TrackRole Role, EventTimeline<RealizedNote> Notes, int Index, TimelineItem<RealizedNote> Note) x) =>
                 x.Notes.Count(n => Math.Abs(n.Position - x.Note.Position) < 1) / 2.0;
             var seconds = harmonics.Select(x => x.Note.Value.Duration * Seconds(x)).ToArray();

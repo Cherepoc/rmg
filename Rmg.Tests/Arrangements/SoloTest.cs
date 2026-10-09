@@ -223,7 +223,7 @@ public sealed class SoloTest
         foreach (var (song, songRuns) in wild)
         foreach (var run in songRuns.Where(x => x.Notes.Length > 1))
         {
-            var beatsASecond = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(run.Start).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
+            var beatsASecond = Meter.BeatsPerSecond(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(run.Start).GetStateValue(StateKinds.Tempo));
             var shortest = run.Notes.Zip(run.Notes.Skip(1), (a, b) => b.Position - a.Position).Min();
             await Assert.That(beatsASecond / shortest).IsLessThanOrEqualTo(Math.Max(run.Soloist.MaxNotesASecond, run.Soloist.Speeds[0] * beatsASecond) + 1e-6);
         }
@@ -433,7 +433,7 @@ public sealed class SoloTest
 
                     checkedRuns++;
                     played[segment.Speed] = played.GetValueOrDefault(segment.Speed) + segment.End - segment.Start;
-                    var beatsASecond = common.GetEffectiveStateMapAt(segment.Start).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo / 60;
+                    var beatsASecond = Meter.BeatsPerSecond(common.GetEffectiveStateMapAt(segment.Start).GetStateValue(Rmg.Core.Events.StateKinds.Tempo));
                     // where a soloist has nothing slower to play at, its slowest
                     if (segment.Speed == soloist.Speeds[0])
                         continue;

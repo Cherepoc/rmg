@@ -136,7 +136,7 @@ public static class SongDescriptions
         }).ToImmutableArray();
 
         return new SongDescription(
-            Math.Round(Seconds(tempo, rendered.Duration), 1),
+            Math.Round(rendered.Seconds, 1),
             sections.Sum(x => x.Bars),
             songBpm,
             TimeSignature(map.Meter),
@@ -238,14 +238,6 @@ public static class SongDescriptions
     }
 
     private static string Ordinal(int n) => n % 10 == 2 && n % 100 != 12 ? $"{n}nd" : $"{n}th";
-
-    /// <summary>How long the song plays, its tempo as it changes over it, from its start, where none has changed it yet.</summary>
-    private static double Seconds(StateTimeline<double> tempo, double duration)
-    {
-        double[] starts = [0, ..tempo.Select(x => x.Position).Where(x => x > 0 && x < duration)];
-        return starts.Select((start, i) => (start, end: i + 1 < starts.Length ? starts[i + 1] : duration))
-            .Sum(x => (x.end - x.start) * 60 / (tempo.GetEffectiveValueAt(x.start) * Meter.BaseTempo));
-    }
 
     private static string Word(double value) => value < 1 / 3.0 ? "plain" : value > 2 / 3.0 ? "experimental" : "middling";
 

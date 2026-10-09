@@ -170,7 +170,7 @@ internal sealed record SongDecisions(
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), songUnconventionality[Facet.Feel], overrides, genre);
         // a length given leans the form to it, by how long an appearance of each role plays on the average at the tempo
         var tempo = commonStateMap.GetStateValue(StateKinds.Tempo);
-        double SecondsOf(double beats) => beats * 60 / (Meter.BaseTempo * tempo);
+        double SecondsOf(double beats) => beats * Meter.SecondsPerBeat(tempo);
         // a length given, or one in a genre's range at the song's form, drawn from a stream of its own
         var target = overrides.Length
                      ?? (genre.Range(GenreChoices.Length, songUnconventionality[Facet.Form]) is { } lengths ? SongGenerator.LengthIn(Stream(SongStream.GenreLength), lengths) : null);

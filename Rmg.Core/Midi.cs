@@ -141,7 +141,7 @@ public static class Midi
     private static byte[] Tempo(double tempo)
     {
         // microseconds a beat
-        var tempoValue = (uint)(60 / Meter.BaseTempo * 1_000_000.0 / tempo);
+        var tempoValue = (uint)Math.Round(Meter.SecondsPerBeat(tempo) * 1_000_000);
         return
         [
             0xff,
@@ -336,7 +336,7 @@ public static class Midi
         if (echo is { } beats)
         {
             var tempos = tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0 ? tempoTimeline.Select(x => (x.Position, x.Value)).Prepend((0, 1)) : tempoTimeline.Select(x => (x.Position, x.Value));
-            events = tempos.Select(x => new MidiEvent(AbsoluteDelta(x.Position), GsMessage([0x40, 0x01, 0x52], [DelayTime(beats * 60_000 / (x.Value * Meter.BaseTempo))])))
+            events = tempos.Select(x => new MidiEvent(AbsoluteDelta(x.Position), GsMessage([0x40, 0x01, 0x52], [DelayTime(beats * 1000 * Meter.SecondsPerBeat(x.Value))])))
                 .Concat(events)
                 .Prepend(new MidiEvent(0, GsMessage([0x40, 0x01, 0x51], [DelayDarkness])))
                 .Prepend(new MidiEvent(0, GsMessage([0x40, 0x01, 0x55], [127, 0, 0, 127, DelayFeedback])));
