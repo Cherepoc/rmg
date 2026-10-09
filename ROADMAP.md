@@ -72,7 +72,10 @@ fixed; the review and the plan are kept outside the repository):
    version heard; a download named as its link; the address rewritten once a slider rests; the dashboard showing the
    latest range asked for, its minutes rounded whole; the admin page clearing an old description; CSS on touch screens
    and the narrow layout.
-10. Tests that cannot fail made to fail when their rule breaks.
+10. Done: tests that cannot fail made to fail. Every collection compared in its order, the five sets among them said
+    to be; every rule's loop counted; tests crashing on nothing guarded; each section's bars in its own meter;
+    calibrations printed and bounded widely, their targets in the reports; rules checking what their names say. Left:
+    a few tests that check less than their names (*Open work*).
 11. Duplication removed, the fingerprint kept.
 12. Performance, behind a profile, the fingerprint kept.
 13. Test speed. 14. Page test reliability. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
@@ -537,6 +540,11 @@ Each item with its plan, and what it waits for.
   SQLite and writes under one lock on a pool thread, so a burst of tallies holds threads that songs wait for; a queue
   one writer drains, in batches, would answer at once. And the admin password tried without a limit: a pause after a
   few wrong ones, should the area ever face the open internet without the proxy's.
+- **Tests that check less than their names** (P4, from the review of 9 October 2026): the louder and quieter forms
+  per appearance, both ways; a breakdown's riff chugging and its kick on its onsets; a solo's approach off the beat
+  into its change; each passing kind's shape (the tritone substitute's dominant, the half-diminished's whole step);
+  the melody's joins at every pattern; the busyness reports' facets read from the trace; the MIDI file parsed for its
+  program changes; the stages' hand-offs, each read after it is made.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
