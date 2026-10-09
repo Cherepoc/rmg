@@ -201,9 +201,13 @@ within a bar; and swing already pairs by each section's meter. In order of what 
 The tag stays put off: the extension (step 5) covers a phrase's last bars played again within its section, and a tag
 at a section's end alone would make its last pattern unlike the others, which nothing in steps 4 to 6 needs.
 
-**Next plan** (10 October 2026): the suite on a second corpus (*Open work*), then call and response (*Form and
-sections*), then acoustic sections fitted, quiet drums in calm genres, a breakdown's snare with a double kick's backbeat,
-and the tag.
+**Next plan** (10 October 2026): call and response (*Form and sections*), then acoustic sections fitted, quiet drums
+in calm genres, a breakdown's snare with a double kick's backbeat, and the tag. Done first: the suite on a second corpus
+(`RMG_CORPUS_OFFSET`), its 28 failures at an offset of a million fixed, 13 of them bugs (an intro's entries over a
+first phrase of three, a mutation past a short bar, a section without its harmony, a line cliché off its section's
+groups and out of its chord's scale, a polymeter's copies in the wrong chord shape and pushed, a doubled line silenced
+where a texture rests its source, a drop the band does not come back on, a stop's silence struck again, a quieter form
+recorded unplayed), the rest tests assuming what new songs break and calibrations given 128 songs.
 
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
@@ -665,11 +669,6 @@ Each item with its plan, and what it waits for.
   into its change; each passing kind's shape (the tritone substitute's dominant, the half-diminished's whole step);
   the melody's joins at every pattern; the busyness reports' facets read from the trace; the MIDI file parsed for its
   program changes; the stages' hand-offs, each read after it is made.
-- **The suite on a second corpus** (P3, from the seeds made 64-bit, 9 October 2026): redrawing every song with no other
-  change failed about 30 tests, rules meeting songs they never had (a stop leaving a soloist ringing, a hook intro
-  without its chorus's inner line) and calibrations over too few songs. A setting that shifts `TestCorpus`'s seeds
-  (`RMG_CORPUS_OFFSET`) would let the suite run now and then on other songs, so that such bugs show before a change
-  that redraws the songs trips over them; each failure then fixed as a bug or its calibration given a wider sample.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
