@@ -176,8 +176,19 @@ genre first (see *Genres*).
 *Architecture*: plainer prose); and the music's: the
 songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listening data*).
 
-**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: scales of other
-sizes and a melody in block harmony.
+**The parked reviewed** (P2, 9 October 2026, each step through the implementation loop): two of the three items parked
+where they stand were mostly built since; what is left of them is small and a genre's data.
+1. Bossa nova's clave, a two-bar figure on the cross-stick (*More figures*, under *Genres*).
+2. A melody in block harmony, a third voice beside the counter-melody's (*A melody in block harmony*).
+3. Roots off the scale: a planed section's chords each in a mode of its own (*Roots off the scale*).
+4. Long cycles for the generated patterns: a slow part's two-bar cycle played whole over a pair of bars (*Long cycles*).
+5. The seven steps one rule: one constant read everywhere and a scale made of seven notes or refused (*The seven steps
+   one rule*).
+Patterns longer than two bars stay parked (*Long cycles*); scales of other sizes are decided against (*Decided, and
+kept*).
+
+**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where it stands: patterns longer
+than two bars.
 
 ## Listening
 
@@ -531,25 +542,59 @@ Each item with its plan, and what it waits for.
   chord but the home, two chords passing where one does now; a chord solo's approaches on the strong beats at the wild
   end, and the dominant as its approach; the tritone substitute for a progression's own V7 in a reharmonised
   appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
-- **A melody in block harmony** (P4, parked): the counter-melody or the pad voicing its long notes, approaches on its
-  passing ones, as a horn section's soli.
-- **Scales of other sizes** (P4, parked again after a trial, 8 October 2026): a minor pentatonic forced on 64 songs
-  fails at once (`Progressions.GetCadenceWeights`); seven steps are assumed in 13 files, 28 places, and the
-  progressions' motions, degrees and cadences, which genres name, are tables of seven steps. The blues' harmony it was
-  reopened for is there already: Blues plays every chord its dominant (`chordScales`), in sevenths and ninths, under
-  blues and pentatonic lines. What it would add is harmony inside a pentatonic or a whole-tone scale, quartal chords at
-  the wild end, for a redesign of the progressions in semitones. The plan when taken up: the steps counted by the
-  scale's length, a fifth the step nearest seven semitones, the motions and degrees by their semitones.
-- **Long cycles** (P4 since October 2026: a section's bars repeating, AABA to ABCD, already give every part, the drums
-  too, figures of two and four bars, a varied repeat (A′) starting as its bar did and then changing, near an answer;
-  the clave and the montuno are figures, *Figures as a genre's data*; built only should listening find the second bar
-  no answer, or a figure want a note across the bar line): a bar
-  pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its first half and starts
-  again at every bar line. Patterns as long as their cycle would let slow
-  figures run whole, a crash every two bars, a kick figure answered in the second bar, a chord of two bars, a clave's
-  3-2. Put off as an engine's change: the bar is the unit of the scheme's letters, the state's layers, the melody's
-  question and answer, the drums' presence, the fills' lines and the feels. A crash every two bars, should it be
-  missed, an edit after assembly as the lift's cues are.
+- **A melody in block harmony** (P2, reviewed 9 October 2026): two voices are built, the counter-melody harmonising the
+  melody a third or a sixth apart in 25% of sections, in the melody's sound half the time, twin leads
+  (`LineDoubling.Pairs`, `TwinTimbreChance`); a horn section's soli wants a third. Plan: where the counter-melody
+  harmonises the melody, a section draws a block from a stream of its own (`SongStream`), a genre's chance
+  (`GenreChoices.Doubling` "block", the songs' 0 at every end, so that no drawn song changes), and the pad plays the
+  melody's notes the counter-melody's interval mirrored, `-(c mod 7)` steps where the counter-melody plays `c`: thirds
+  give parallel triads in first inversion (melody C, E above, A below), fourths a quartal stack, seconds a cluster, so
+  any interval a genre names makes three distinct notes and the pad draws no interval of its own. The pad's own notes
+  give way from its first to its last as the pair's do; the melody's sound decided once a section for both voices, its
+  stream drawn as now (`SongStream.TwinTimbres`), so that the block is a section in one sound. Genres: Soul, Funk, Ska
+  and Latin, whose counter-melodies are horns; Jazz after listening, its soli four voices close rather than three in
+  parallel. Measured, in sections playing it: the pad's notes outside its chord's scale (a rule, none), the pad above
+  the counter-melody (crossings, the realizer's register), a second between the pad and the melody (none), and the
+  bass's octave reached by the pad under a low melody. `?listen=block`. Left out: chord tones under long notes with
+  diminished approaches on the passing ones, a voicing mechanism of its own, should the parallel triads sound naive;
+  a fourth voice, which no part is free to play.
+- **Roots off the scale** (P2, the parked reviewed, step 3): chord roots moving outside a seven-note scale with chords
+  of their own qualities, Fusion's (*More genres*), the one thing scales of other sizes were wanted for that is not
+  built (*Decided, and kept*). Planing moves roots off the scale already, by semitones, but always in the home chord's shape, a
+  planed section's chords all in the section's scale (`SectionGenerator`), so Fusion's own modes (40-60% of its chords)
+  never reach its planed sections (20-40% of them). Plan (P2, the parked reviewed, step 3): a planed section draws, from
+  a stream of its own, whether its chords keep the home's structure or each take a mode of its own on its moved root
+  (`ChordScales.OwnModes`: Lydian, Mixolydian, Dorian, melodic minor, Phrygian, each from a stream of its own by the
+  chord), the moved root being the home's so that a mode is drawn as on the home and the shift carries it; a section
+  leading home, as the song's last, ends in the section's scale on its tonic. How planing is played, not whether: the
+  songs' share 0.5 at the middle and the wild end alike, a genre's `planing` "ownModes", Fusion's high, Black metal's,
+  Djent's and Techno's 0, their planing a constant structure. Measured, over the planed sections: the share of chords
+  whose quality differs from the chord's before, and the melody's notes in their chord's scale (a rule, as now);
+  songs changed counted from the planed sections first (`TracePoints.Planing`). `?listen=own-modes` in Fusion. Left
+  out: symmetric cycles (major or minor thirds), Planing's moves holding minor thirds already.
+- **The seven steps one rule** (P2, the parked reviewed, step 5): a harmony scale is seven notes by decision (*Decided,
+  and kept*), but the rule is copied rather than kept: `Progressions.StepCount` and `Line.ScaleStepCount` restate
+  `Scales.StepCount`, `LineDoubling.IntervalOf` counts by a bare 7, and only the progressions check a scale's size
+  (`Progressions`, where a scale's offsets are weighed), long after the scale is made. One constant, `Scales.StepCount`,
+  read everywhere, and `Scale` refusing offsets of any other count where it is made, the progressions' check gone with
+  it. No song changes (`CorpusFingerprintTest`).
+- **Long cycles** (reviewed 9 October 2026; P2 for two bars, P4 beyond): a figure of two bars is built, its onsets over 32 16ths from a
+  section's first bar (`Figures`, Latin's 3-2 and 2-3 clave, Bossa nova's after *More figures*), and chords of two bars
+  are a harmonic rhythm; a section's bars repeating, AABA to ABCD, give every part figures of two and four bars, a
+  varied repeat (A′) near an answer. So a kick answered in its second bar or a crash every two bars, should listening
+  miss one, is a figure's data or an edit after assembly as the lift's cues are. The generated patterns: a part's
+  period over a bar draws a cycle of two bars already (`Meter.GetCycles`) but cuts it at the bar line, so that a slow
+  part plays its first half in every bar and never its second. Plan (P2, the parked reviewed, step 4): such a bar
+  pattern draws its rhythm over two bars (`PatternGenerator.GenerateRhythmPattern`, its descriptor two bars long) and a
+  pair of bars plays it whole, the first bar its first half and the second its second, both of the pair's first
+  bar's letter, so that a cycle is never stitched from two seeds; a 4-bar pattern holds two pairs, the phrase's halves.
+  Measured first: the bar patterns whose period is over a bar, by role, from the trace (`TracePoints.BarPattern`); if
+  few, the period's range is a decision of its own. Then: the notes of a slow part's second bars that differ from its
+  first's, and a note held over a chord change into a clash. Songs changed: every song with a slow part, counted in
+  the commit. To check in its plan: an answer that redraws its rhythm in a pair's second bar, a lead-in, the feels'
+  count by bar, a polymeter's cells, a short bar ending a phrase. Left parked: patterns longer than two bars, and the
+  pattern as the unit of a hyper-bar meter, an engine's change, the bar being the unit of the scheme's letters, the
+  state's layers, the melody's question and answer, the drums' presence, the fills' lines and the feels.
 - **Phrases of other than four bars** (P3, postponed October 2026: a section is whole 4-bar patterns, and 89 places in
   26 files count its bars by them, the fills, the phrase ends, stop time, the energy, the polymeters; an extension's bars
   would count as its pattern's first, not its last): a phrase extended before its cadence (4 + 2, the cadence's bars
@@ -633,9 +678,8 @@ left:
     figures' grid in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
 - **More genres** (P3). What the genres made in October 2026 still want: Fusion's
-  roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
-  coming only of planing and a chord's own scale) and a lead's wide-interval legato lines (*A melody's leaping by
-  genre*); and Bossa nova's two-bar clave (below and *Long cycles*).
+  roots off the scale (*Roots off the scale*, a planed section's own modes) and a lead's wide-interval legato lines (*A melody's leaping by
+  genre*); and Bossa nova's two-bar clave (*More figures*, below).
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
 - **Harmony for Jazz and Soul** (P3): a ii–V elsewhere (*Approach chords*, *Harmony's devices*); call and response
@@ -654,7 +698,12 @@ left:
   - A snare's drag, two quick strokes before a backbeat, should the ghost notes want it.
   - The piano's montuno, a broken chord off the beat, an arpeggio's pattern of its own (`Arpeggios`) rather than a
     figure, the figures striking a player's chord or note; a second time keeper playing straight under the tresillo.
-  - More figures (P3, by listening): Bossa nova's clave, a figure for the hi-hat or the snare, a figure of more than
+  - Bossa nova's clave (P2, the parked reviewed, 9 October 2026): a figure of two bars, `bossa32`, onsets 0, 6, 12, 20
+    and 26, the son clave's with its last stroke an 8th later, played by the backbeat, so that Bossa nova's stroke, the
+    cross-stick, plays it on the rim as its drummer does, in Bossa nova's pool beside its own rhythm. No drawn song
+    changes, Bossa nova's songs do. Measured by Bossa nova's bars whose backbeat strikes the clave's onsets;
+    `?listen=bossa-clave`.
+  - More figures (P3, by listening): a figure for the hi-hat or the snare, a figure of more than
     two bars; the double kick following the riff's accents alone, should every 16th sound a machine.
   - A hook of one or two bars sung through a whole section, its phrase ends let go of; a hooked melody's bars repeat
     about half at most now, a phrase's last bar ending on its held note.
@@ -705,6 +754,25 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   should the ratings fall at the wild end (the ratings by conventionality).
 
 ## Decided, and kept
+
+- **Harmony in seven steps, lines in any scale** (decided 9 October 2026, after a trial on 8 October and two reviews):
+  scales of other sizes as the harmony's, a section's chords built and moved in a pentatonic, whole-tone or octatonic
+  scale, will not be built. The genres play as the code does: harmony from a seven-note scale, melodies gapping it,
+  rock's, blues', soul's and metal's pentatonic and blues lines over it, jazz's melodic minor, whole-tone and
+  diminished lines over chords moving by its degrees; the lines take any scale already (`LineScales`, the pentatonic
+  68% of the plain end's lines). Harmony from another scale is another language, not this one with fewer notes: a
+  pentatonic's chords are sus and quartal with no dominant, which the shapes play (Quartal triad, Quartal stack,
+  So What, Sus2, Sus4); a whole-tone scale's are all augmented, every move alike, a passage's colour rather than a
+  section's harmony; an octatonic's are diminished and 7♭9 moving in minor thirds, shapes and planing's moves both.
+  And the seven steps are not arithmetic to generalise but the devices themselves: the root motions (down a fifth,
+  ii–V), the degrees genres lean to (♭VII, ♭VI), the cadence's raised seventh, applied dominants, borrowed chords and
+  the doublings' thirds and sixths mean something only in a scale with a fifth, a seventh and a parallel mode, so that
+  counting them in semitones would leave most without a meaning in a pentatonic (from E in C's, a fifth up is not in
+  it) and the code with a branch for every scale that is not seven, for harmony no preset plays; the trial failed at
+  once at the cadence (`Progressions.GetCadenceWeights`). What it was wanted for is built or planned: the line scales,
+  the shapes, planing, a chord's own scale, and roots off the scale (*Roots off the scale*). Taken up only for a genre
+  whose harmony itself is gapped, an East Asian pop or a modal pentatonic folk, as that genre's own progressions beside
+  these rather than these resized.
 
 - **Black metal ends both ways** (heard 8 October 2026, 2 better, 3 worse, 1 not told apart): a raw band's modal ending,
   ♭II, ♭VI or ♭VII into i, the most often, and a symphonic band's classical V–i now and then, its last chord V 22%, its
