@@ -40,7 +40,7 @@ internal static class Pocket
         if (amount == 0)
             return draft;
         var notes = SongStages.NotesOf(draft);
-        var tempo = draft.Timeline.CommonStateTimelineMap;
+        var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
@@ -48,7 +48,7 @@ internal static class Pocket
             var definition = song.Tracks.Definitions[track];
             var offset = amount * OffsetOf(definition.Role, definition.Role == TrackRole.Drum ? DrumRoles.Of(definition.StateMap) : null);
             // in beats at the tempo where the note plays
-            double Beats(double position) => offset * Meter.BeatsPerSecond(tempo.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo));
+            double Beats(double position) => offset * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position));
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select(note => offset == 0
                 ? note
                 : (note.Value with { State = note.Value.State.With(CompositionStateKinds.TimingOffset, Beats(note.Position)) }).ToTimelineItem(note.Position)));

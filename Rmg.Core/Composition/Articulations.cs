@@ -35,7 +35,7 @@ internal static class Articulations
         var notes = SongStages.NotesOf(draft);
         var sections = song.Form.Map.Sections;
         var stroke = StrokeFrom + (StrokeTo - StrokeFrom) * song.Stream(SongStream.Strum).GenerateDouble();
-        var tempo = draft.Timeline.CommonStateTimelineMap;
+        var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
@@ -102,7 +102,7 @@ internal static class Articulations
                     pitches = [under >= bottom ? under : under + 12 <= top ? under + 12 : pitches[0]];
                 }
                 // the stroke in beats at the tempo there
-                double Beats(double seconds) => seconds * Meter.BeatsPerSecond(tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo));
+                double Beats(double seconds) => seconds * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position));
                 if (note.Value.Pitches.Length > 1 && InstrumentTraits.Has(program, InstrumentTrait.Strums))
                     // down on the grid's even steps and up on its odd, as the hand swings
                     state = state.With(CompositionStateKinds.Strum, (long)Math.Floor(note.Position / grid + 1e-9) % 2 == 0 ? Beats(stroke) : -Beats(stroke));

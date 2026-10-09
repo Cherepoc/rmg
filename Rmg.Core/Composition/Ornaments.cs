@@ -61,7 +61,7 @@ internal static class Ornaments
             return draft;
 
         var notes = SongStages.NotesOf(draft);
-        var tempo = draft.Timeline.CommonStateTimelineMap;
+        var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
@@ -75,7 +75,7 @@ internal static class Ornaments
                     return note;
                 var draw = song.Stream(SongStream.Ornaments, key).GenerateDouble();
                 // a quick note's length in beats at the tempo there
-                var step = Meter.BeatsPerSecond(tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo)) / Rate;
+                var step = Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position)) / Rate;
                 var seconds = note.Value.Duration / (step * Rate);
                 var onBeat = note.Value.State.GetStateValue(CompositionStateKinds.BeatRank) == 0;
                 // the longest ornament the note may take, of those the song plays and the note drew
