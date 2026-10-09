@@ -176,9 +176,8 @@ within a bar; and swing already pairs by each section's meter. In order of what 
    its hat rolls and ratchets in 32nds already. Taken up with *Rolls splintering into 32nds* (*Black metal and IDM*).
 3. Done: flams and drags, the snare's ornaments, its grace strokes before its note on its sound (`DrumOrnaments`), a
    flam on a fill's 8ths and a drag into a backbeat, the song's by its fills and groove facets and a genre's
-   (`rudiments`), none in the machines' genres (`rudiments` heard and kept, 10 October 2026). Two toms at once put off: a drum note plays one
-   sound by its articulation (`StateKinds.ArticulationIndex`), so two would want a list of them, an engine's change
-   for an accent no listening asks for; with the drum solos' idioms, should their tom cascades want it.
+   (`rudiments`), none in the machines' genres (`rudiments` heard and kept, 10 October 2026). Two toms at once put off (*Fills and
+   lines*, *Two toms at once*).
 4. Done: a phrase's length the meter's (`Meter.PhraseBars`), every phrase line through the meter, the fingerprint kept.
 5. Done: phrases of three bars and of four and two (`PhraseLengths`), by the form facet and a genre's `phraseBars`, for a
    pattern of one phrase: a scheme of four fitted to them, three leaving out its second bar and four and two playing its
@@ -518,6 +517,18 @@ Each item with its plan, and what it waits for.
 - **The songs' own appoggiaturas** (P2): a line's note on a strong beat a tension
   that resolves by step to the chord, the songs' chance 0 at the plain end and low in the middle (`LinePattern.Tensions`
   is a genre's alone now, 0 for the songs); a genre's tension (`GenreChoices.Tension`) stays as it is.
+- **Two toms at once** (P3, reviewed 10 October 2026, put off: a rare accent, and the pair it would play the muddy one):
+  a drum note's sound a list of articulations (`StateKinds.ArticulationIndex` now one, `TimelineEdits.Hit` taking
+  one, `Realizer.RealizePercussionTrack` playing one), as an ornament and the articulation offset are lists, rather
+  than a second sound, which would cap it at a player's two hands; and a fill's window playing every sound of a drum
+  it holds, the gate in `FillSounds.GetNoteSounds` lifted, so that two toms strike together where a window is wide,
+  by its width's lean (`FillLayers.Widths`, one at the plain end, wider at the wild), with no chance, genre option or
+  rule for accents of its own; landings as they are, a sound a role. The render plays a note's pitches already, each
+  softer by the chord's rule. A window takes neighbouring sounds of the walk's order, the toms a whole step apart,
+  whose General MIDI samples beat into a cluster, where a drummer doubles a rack and a floor tom; and snare, kick or
+  cymbal with a tom strike together already, being drums apart. Taken up with the drum solos' tom cascades, which
+  want the far pair chosen, a rule that would earn its place there. Measured by the fill notes with two tom sounds,
+  by fifths of the fills facet; the stages reading one pitch a drum note checked.
 - **Filling the melody's gaps before a chord change within a phrase,** should they sound empty now that the solo part
   answers.
 - **The lift beyond the cues:** the chords' rhythm doubling, a part of the next section coming in early, should the
