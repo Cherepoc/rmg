@@ -71,6 +71,7 @@ internal static class Mutations
             return draft;
         var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var timekeepers = DrumGroups.Timekeepers.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var played = drums.ToDictionary(x => x, x => timelines[x].EventTimeline.ToList());
         var any = false;
         var claves = DrumGroups.GetTrackNumber(DrumDefinitions.Claves);
@@ -82,7 +83,8 @@ internal static class Mutations
             int[] own = draft.Polymeters.Contains(span.SectionId) ? [] :
             [
                 ..drums.Where(x => !section.Bindings.ContainsKey(x) && !section.Bindings.ContainsValue(x) && !(figures.ContainsKey(FigurePlayer.Ground) && kicks.Contains(x))
-                                   && !(figures.ContainsKey(FigurePlayer.Backbeat) && snares.Contains(x)) && !(figures.ContainsKey(FigurePlayer.Claves) && x == claves))
+                                   && !(figures.ContainsKey(FigurePlayer.Backbeat) && snares.Contains(x)) && !(figures.ContainsKey(FigurePlayer.Time) && timekeepers.Contains(x))
+                                   && !(figures.ContainsKey(FigurePlayer.Claves) && x == claves))
             ];
             var groove = section.Facets[Facet.Groove];
             var context = song.AppearanceStream(SongStream.Mutations, index);

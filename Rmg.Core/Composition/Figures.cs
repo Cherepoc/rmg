@@ -5,7 +5,7 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
-/// <summary>Who plays a figure: the kick, the snare, the riff, the chords, the claves or the bass, in the order a section draws them.</summary>
+/// <summary>Who plays a figure: the kick, the snare, the riff, the chords, the claves, the bass or the drum keeping time, in the order a section draws them.</summary>
 public enum FigurePlayer
 {
     Ground,
@@ -13,7 +13,8 @@ public enum FigurePlayer
     Riff,
     Claves,
     Chords,
-    Bass
+    Bass,
+    Time
 }
 
 /// <summary>
@@ -33,7 +34,7 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 
 /// <summary>
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
-///     double kick; a black metal band's blast beat and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
+///     double kick; a black metal band's blast beat, its cymbal riding it, and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
 ///     band's galloping riff, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a clave's three and two; a trance's chords in 16ths, its arpeggio's steady run, and its bass
 ///     rolling in the 16ths after the kick or on the offbeats. A section draws each player's, its own rhythm or one of its
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
@@ -45,7 +46,7 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 internal static class Figures
 {
     /// <summary>The players in the turns they play their figures in, each turn after what it follows.</summary>
-    private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Claves, FigurePlayer.Chords], [FigurePlayer.Ground], [FigurePlayer.Bass]];
+    private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves, FigurePlayer.Chords], [FigurePlayer.Ground], [FigurePlayer.Bass]];
 
     /// <summary>A player's own rhythm, as its pool names it.</summary>
     public const string Own = "own";
@@ -57,6 +58,7 @@ internal static class Figures
         new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, false, 1, false),
         new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1, false),
         new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1, false),
+        new("blast", "A blast beat, a cymbal riding it on every 8th", FigurePlayer.Time, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1, false),
         new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, false, 0, false),
         new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, false, 0, false),
         new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, false, 0, false),
@@ -83,6 +85,7 @@ internal static class Figures
         FigurePlayer.Riff => "Riff's figure",
         FigurePlayer.Chords => "Chords' figure",
         FigurePlayer.Bass => "Bass's figure",
+        FigurePlayer.Time => "Hi-hat's figure",
         _ => "Claves' figure"
     };
 
@@ -143,6 +146,7 @@ internal static class Figures
         {
             [FigurePlayer.Ground] = [..DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(all.ContainsKey)],
             [FigurePlayer.Backbeat] = [..DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).Where(all.ContainsKey)],
+            [FigurePlayer.Time] = [..DrumGroups.Timekeepers.Drums.Select(DrumGroups.GetTrackNumber).Where(all.ContainsKey)],
             [FigurePlayer.Riff] = TrackOf(TrackRole.Riff) is { } own ? [own] : [],
             [FigurePlayer.Claves] = [..new[] { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }.Where(all.ContainsKey)],
             [FigurePlayer.Chords] = TrackOf(TrackRole.Chords) is { } chords ? [chords] : [],

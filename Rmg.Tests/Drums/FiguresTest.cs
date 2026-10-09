@@ -75,6 +75,24 @@ public sealed class FiguresTest
     }
 
     [Test]
+    public async Task ACymbalRidingABlast_StrikesOnTheEighths()
+    {
+        var keepers = DrumGroups.Timekeepers.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var (hits, on) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
+        foreach (var (_, bar, position) in Hits(song, keepers, Playing(song, FigurePlayer.Time, "blast")))
+        {
+            hits++;
+            var eighth = (position - bar) / 0.5;
+            on += Math.Abs(eighth - Math.Round(eighth)) < 0.1 ? 1 : 0;
+        }
+
+        Console.WriteLine($"of {hits} hits of a cymbal riding a blast, {on / (double)hits:P1} on the 8ths");
+        await Assert.That(hits).IsGreaterThan(50);
+        await Assert.That(on).IsEqualTo(hits);
+    }
+
+    [Test]
     public async Task AClave_StrikesOnlyOnItsThreeAndTwo()
     {
         var claves = new HashSet<int> { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) };
@@ -122,7 +140,7 @@ public sealed class FiguresTest
     }
 
     [Test]
-    public async Task AFigureTwoPlayersPlay_IsPlayedByBoth_ABlastsKickWithItsSnare()
+    public async Task AFigureSeveralPlayersPlay_IsPlayedByAll_ABlastsKickWithItsSnareAndItsCymbal()
     {
         var blasts = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
@@ -131,6 +149,7 @@ public sealed class FiguresTest
             {
                 blasts++;
                 await Assert.That(figures.GetValueOrDefault(FigurePlayer.Backbeat)).IsEqualTo("blast").Because($"seed {song.Seed}");
+                await Assert.That(figures.GetValueOrDefault(FigurePlayer.Time)).IsEqualTo("blast").Because($"seed {song.Seed}");
             }
 
         await Assert.That(blasts).IsGreaterThan(5);
