@@ -45,6 +45,8 @@ public static class TrackRoles
     {
         TrackRole.CounterMelody => "Counter-melody",
         TrackRole.Drum => "Drums",
+        TrackRole.RiffTwin => "Riff's twin",
+        TrackRole.Solo => "Soloist",
         _ => role.ToString()
     };
 }

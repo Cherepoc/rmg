@@ -138,9 +138,7 @@ internal static class Solos
     public static string LabelOf(TrackRole part) => part switch
     {
         TrackRole.Solo => "The solo part",
-        TrackRole.CounterMelody => "Counter-melody",
-        TrackRole.Drum => "Drums",
-        _ => part.ToString()
+        _ => TrackRoles.LabelOf(part)
     };
 
     public static ImmutableArray<(SoloMode Mode, ByConvention Weight)> Modes { get; } =

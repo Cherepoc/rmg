@@ -222,11 +222,11 @@ public static class GenreChoices
 
     /// <summary>The chance a line's note on a strong beat lands on a tension, the melody's and the counter-melody's (<see cref="LinePattern.Tensions" />).</summary>
     public static GenreChoice Tension { get; } = Chances("tension", "Strong beats on a tension",
-        [..LinePattern.Tensions.Select(x => (Name(x.Role.ToString()), x.Role == TrackRole.Melody ? "The melody's" : "The counter-melody's", x.Chance))]);
+        [..LinePattern.Tensions.Select(x => (Name(x.Role.ToString()), $"The {TrackRoles.LabelOf(x.Role).ToLowerInvariant()}'s", x.Chance))]);
 
     /// <summary>The chance a line's run of echoes plays its figure inverted, the melody's (<see cref="LinePattern.Inversions" />).</summary>
     public static GenreChoice Inversion { get; } = Chances("inversion", "Figures inverted",
-        [..LinePattern.Inversions.Select(x => (Name(x.Role.ToString()), "The melody's", x.Chance))]);
+        [..LinePattern.Inversions.Select(x => (Name(x.Role.ToString()), $"The {TrackRoles.LabelOf(x.Role).ToLowerInvariant()}'s", x.Chance))]);
 
     /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, and the chords are struck short (<see cref="Articulations.Apply" />).</summary>
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
@@ -244,11 +244,8 @@ public static class GenreChoices
 
     /// <summary>Which part plays a section alone, where its texture leaves one, each as likely in the songs (<see cref="Composition.Texture" />).</summary>
     public static GenreChoice Alone { get; } = Pool("alone", "The part alone",
-        new (TrackRole Role, string Label)[]
-        {
-            (TrackRole.Melody, "Melody"), (TrackRole.Chords, "Chords"), (TrackRole.Bass, "Bass"), (TrackRole.Pad, "Pad"),
-            (TrackRole.CounterMelody, "Counter-melody"), (TrackRole.Drum, "Drums"), (TrackRole.Riff, "Riff"), (TrackRole.Rhythm, "Rhythm")
-        }.Select(x => (Name(x.Role.ToString()), x.Label, Even(1))));
+        PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Drum, TrackRole.Riff, TrackRole.Rhythm)
+            .Select(x => (x.Name, x.Label, Even(1))));
 
     /// <summary>How the chords and the rhythm part break their chords, or play them whole (<see cref="Arpeggios" />): an arpeggiator's up and down a synth genre's.</summary>
     public static GenreChoice Arpeggio { get; } = Pool("arpeggio", "Arpeggios", Arpeggios.Patterns.Select(x => (Name(x.Pattern.ToString()), Arpeggios.LabelOf(x.Pattern), x.Weight)));
@@ -267,7 +264,7 @@ public static class GenreChoices
     ///     to 100, an octave higher, a quarter's way from either end moving it (<see cref="Registers" />).
     /// </summary>
     public static GenreChoice Register { get; } = Values("register", "Register",
-        [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm"), ("solo", "Soloist")], Facet.Sound);
+        PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo), Facet.Sound);
 
     /// <summary>
     ///     How often each of a drum's own sounds plays, from 0, an eighth as often, through 50, as the songs have it, to 100,
@@ -339,16 +336,14 @@ public static class GenreChoices
     ///     (<see cref="VelocityLayers.GenreLevel" />): a beat's drums leading it, a dub's bass; the mix's volumes over them.
     /// </summary>
     public static GenreChoice Levels { get; } = Values("levels", "Levels",
-        [..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum }
-            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)))], Facet.Sound);
+        PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum), Facet.Sound);
 
     /// <summary>
     ///     How much reverb each part plays with, from 0, dry, through 50, as the songs have it, to 100, as wet as can be
     ///     (<see cref="Expression.Reverb(TrackRole, Genre)" />): an ambient wash, a funk band's dry room.
     /// </summary>
     public static GenreChoice Space { get; } = Values("space", "Space",
-        [..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum }
-            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)))], Facet.Sound);
+        PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum), Facet.Sound);
 
     /// <summary>How much the bass leads into a new chord, from 0, never, through 50, as its instrument has it, to 100, walking (<see cref="BassLeadingLayers.GenreLeadOdds" />).</summary>
     public static GenreChoice Bass { get; } = Values("bass", "Bass", [("leading", "Leading into a chord")], Facet.Melody);
@@ -443,7 +438,7 @@ public static class GenreChoices
     ///     as it is where a genre does not say.
     /// </summary>
     public static GenreChoice Pan { get; } = Values("pan", "Pan",
-        [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm")], Facet.Sound);
+        PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm), Facet.Sound);
 
     /// <summary>
     ///     How loud and busy a song is, its energy leaning high or low, how much its sections differ from it
@@ -516,25 +511,25 @@ public static class GenreChoices
     ///     left out.
     /// </summary>
     public static GenreChoice Rests { get; } = Values("rests", "Parts resting",
-        [..Arrangement.Rests.Select(x => (Name(x.Part.ToString()), TrackRoles.LabelOf(x.Part)))], Facet.Form);
+        PartsOf([..Arrangement.Rests.Select(x => x.Part)]), Facet.Form);
 
     // the pitched parts' pools, in the order the page shows them
-    private static readonly (TrackRole Role, string Label, InstrumentRole Pool)[] InstrumentPools =
+    private static readonly (TrackRole Role, InstrumentRole Pool)[] InstrumentPools =
     [
-        (TrackRole.Melody, "Melody", InstrumentRoles.Melody),
-        (TrackRole.Chords, "Chords", InstrumentRoles.Chords),
-        (TrackRole.Bass, "Bass", InstrumentRoles.Bass),
-        (TrackRole.Pad, "Pad", InstrumentRoles.Pad),
-        (TrackRole.CounterMelody, "Counter-melody", InstrumentRoles.CounterMelody),
-        (TrackRole.Riff, "Riff", InstrumentRoles.Riff),
-        (TrackRole.Rhythm, "Rhythm", InstrumentRoles.Rhythm),
-        (TrackRole.Solo, "Soloist", InstrumentRoles.Solo)
+        (TrackRole.Melody, InstrumentRoles.Melody),
+        (TrackRole.Chords, InstrumentRoles.Chords),
+        (TrackRole.Bass, InstrumentRoles.Bass),
+        (TrackRole.Pad, InstrumentRoles.Pad),
+        (TrackRole.CounterMelody, InstrumentRoles.CounterMelody),
+        (TrackRole.Riff, InstrumentRoles.Riff),
+        (TrackRole.Rhythm, InstrumentRoles.Rhythm),
+        (TrackRole.Solo, InstrumentRoles.Solo)
     ];
 
     /// <summary>Every pitched part's instruments, by its role, its pool's (<see cref="InstrumentRoles" />).</summary>
     public static ImmutableDictionary<TrackRole, GenreChoice> Instruments { get; } = InstrumentPools.ToImmutableDictionary(
         x => x.Role,
-        x => Pool($"instrument.{Name(x.Role.ToString())}", x.Label, x.Pool.Everything.Select(i => (Name(i.Name), i.Name, i.Weight)))
+        x => Pool($"instrument.{Name(x.Role.ToString())}", TrackRoles.LabelOf(x.Role), x.Pool.Everything.Select(i => (Name(i.Name), i.Name, i.Weight)))
     );
 
     /// <summary>The drum kits' sounds, by their General MIDI programs, the standard one every song's with no genre.</summary>
@@ -592,12 +587,8 @@ public static class GenreChoices
     /// <summary>The chances of the parts, every one a song may have or leave out, each as a middling song has it.</summary>
     public static GenreChoice Parts { get; } = WithTwinsRiff(Chances("parts", "Lineup",
     [
-        ..new (TrackRole Role, string Label)[]
-        {
-            (TrackRole.Melody, "Melody"), (TrackRole.Chords, "Chords"), (TrackRole.Bass, "Bass"), (TrackRole.Pad, "Pad"),
-            (TrackRole.CounterMelody, "Counter-melody"), (TrackRole.Drum, "Drums"), (TrackRole.Riff, "Riff"), (TrackRole.RiffTwin, "Riff's twin"),
-            (TrackRole.Rhythm, "Rhythm"), (TrackRole.Solo, "Soloist")
-        }.Select(x => (Name(x.Role.ToString()), x.Label, SongParts.ChanceOf(x.Role)))
+        ..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Drum, TrackRole.Riff, TrackRole.RiffTwin, TrackRole.Rhythm, TrackRole.Solo }
+            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x), SongParts.ChanceOf(x)))
     ]));
 
     // the riff's twin tagged as playing only with the riff
@@ -686,6 +677,9 @@ public static class GenreChoices
 
     /// <summary>A choice of values, every one's own as it is.</summary>
     /// <summary>A choice of values, each a lean from the songs' own, read at the song's facet it follows (<see cref="Genre.AtSong" />).</summary>
+    /// <summary>Parts as options of a choice, by their names and their labels.</summary>
+    private static IEnumerable<(string Name, string Label)> PartsOf(params TrackRole[] roles) => roles.Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)));
+
     private static GenreChoice Values(string name, string label, IEnumerable<(string Name, string Label)> options, Facet follows) =>
         new(name, label, GenreChoiceKind.Values, [..options.Select(x => new GenreOption(x.Name, x.Label, Even(0.5)))]) { Follows = follows };
 
