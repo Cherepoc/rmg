@@ -468,6 +468,10 @@ Each item with its plan, and what it waits for.
 
 ### Instruments and expression
 
+- **A song's drum stroke by its energy** (P3, by listening, October 2026): a genre leaning the open hi-hat as a stroke
+  washes its loud sections more than its quiet ones only where a section draws the stroke anew; the song's own stroke is
+  drawn with no energy lean, so Rock's quiet sections ride the open hi-hat in 11% of them against 17% of its loud ones
+  (Punk's 5% against 25%). Should a quiet verse's wash be heard, the song's stroke leaned as a section's is.
 - **A held riff restruck outside a gate** (P3, by listening): a decaying chord is struck again on its bar lines only
   where the gate holds it (`GatedChords.Hold`); a rock band's riff held over a bar restruck the same way, should a held
   guitar chord dying out be heard elsewhere.
