@@ -614,6 +614,12 @@ left:
   - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
+- **A heavy band's time and backbeat heard together** (P2, heard 9 October 2026 in Black metal, `ADFFnPdywKu` among
+  other songs): sections whose snare plays with no hi-hat or ride to be heard, or whose kick and hi-hat or ride play
+  with no snare to be heard. To measure first: per bar, which drum roles sound (`DrumRoles`, the section's redrawn roles
+  and the drums at rest, `BarDrums`), and how loud against the band; then whether the cause is a role left without a
+  drum, a drum resting, or one masked in the mix. A rule then that a kit section keeps its backbeat and its time
+  together unless a breakdown, a drop or stop time takes one out.
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:
