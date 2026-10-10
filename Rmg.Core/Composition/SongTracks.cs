@@ -103,9 +103,10 @@ internal sealed class SongTracks
         var (padContext, counterContext, riffContext) = (partStreams(TrackRole.Pad), partStreams(TrackRole.CounterMelody), partStreams(TrackRole.Riff));
         var (rhythmContext, soloContext) = (partStreams(TrackRole.Rhythm), partStreams(TrackRole.Solo));
 
-        // the melody plays something other than the chords, so the two can be told apart
-        var chordsInstrument = InstrumentRoles.Chords.Pick(chordsContext, sound, Pool(TrackRole.Chords));
-        var melodyInstrument = InstrumentRoles.Melody.Pick(melodyContext, sound, Pool(TrackRole.Melody), chordsInstrument.Program);
+        // the melody first, as it carries the song, its pool's weights as they are, and the chords something other than it, so
+        // that the two can be told apart
+        var melodyInstrument = InstrumentRoles.Melody.Pick(melodyContext, sound, Pool(TrackRole.Melody));
+        var chordsInstrument = InstrumentRoles.Chords.Pick(chordsContext, sound, Pool(TrackRole.Chords), melodyInstrument.Program);
         var bassInstrument = InstrumentRoles.Bass.Pick(bassContext, sound, Pool(TrackRole.Bass));
 
         // how much the bass leads into the chords: its instrument sets where the song starts, a section moves it

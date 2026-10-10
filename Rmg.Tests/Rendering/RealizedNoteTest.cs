@@ -72,8 +72,8 @@ public sealed class RealizedNoteTest
         );
         var edited = new Song(song.Duration, song.Meter, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map, song.Notes.SetItem(song.Track(TrackRole.Melody), changed), song.Draws);
 
-        var program = ((PitchInstrumentTrack)song.TrackDefinitions[song.Track(TrackRole.Melody)]).InstrumentCode;
-        var rendered = Render.RenderSong(edited).Tracks.Single(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program);
+        // the melody's track by its role, as another part may play its instrument
+        var rendered = Render.RenderSong(edited).Tracks.Single(x => !x.IsPercussionInstrument && x.Role == TrackRole.Melody && !x.IsDouble && !x.IsRiser);
 
         await Assert.That(rendered.NoteTimeline.OrderBy(x => x.Position).Last().Value.Offset).IsEqualTo(last.Value.Pitches[0] + 12);
     }
