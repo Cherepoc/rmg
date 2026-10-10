@@ -170,6 +170,17 @@ let songSections = [];
 let songSeconds = 0;
 // the song's chords where they change, and their keys, as its file marks them (harmony.js)
 let songHarmony = [];
+// the song's length as the player has it, once it does, which the bar's places are shares of; none before
+let playedSeconds = 0;
+// where the bar was let go of before the player had the song, which it starts at once it does; none for none
+let pendingPlace = null;
+// until when the bar, the time and the harmony show where the bar was let go of, rather than the player's position, which
+// reads the old one for a moment after a seek
+let settlesAt = 0;
+const SETTLE_MS = 250;
+
+/** A share of the bar as a time in the song: of its length as the player has it, or as the server said until then. */
+const timeAt = (share) => share * (playedSeconds > 0 ? playedSeconds : songSeconds);
 
 /** The key, its mode and the chord playing at a time, shown beside the times. */
 function showHarmony(seconds) {
@@ -286,8 +297,12 @@ async function withPlayer(action, failureMessage) {
 function listen(player) {
     // the length is only known once the sequencer has taken the song, and a new song starts from the top
     player.onSongChange(() => {
-        render(player, 0);
-        if (!player.paused) showMedia(player, 0);
+        // or from where the bar was let go of while it was on its way
+        const from = pendingPlace === null ? 0 : Math.min(pendingPlace, player.duration);
+        pendingPlace = null;
+        if (from > 0) player.currentTime = from;
+        render(player, from);
+        if (!player.paused) showMedia(player, from);
     });
     player.onSongEnded(() => {
         setPlayIcon(false);
@@ -992,6 +1007,8 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         drumPiecesPlayed = made.drumPieces;
         songSeed = response.headers.get("X-Song-Seed") ?? seed;
         songHarmony = readHarmony(song);
+        playedSeconds = 0;
+        pendingPlace = null;
         showHarmony(0);
         songSkipped = skip;
         // a preset by its id, which a link reads as it is, another genre by the key the server keeps it by
@@ -1651,18 +1668,21 @@ elements.seek.addEventListener("pointercancel", () => {
 // a seek replays the song up to the new place, so dragging only shows where it would go, and the
 // sequencer is moved once, when the bar is let go of
 elements.seek.addEventListener("input", async () => {
-    // the key and chord where it would go, by the song's own length, whether or not the player has the song yet
-    showHarmony(Number(elements.seek.value) * songSeconds);
-    await withPlayer((player) => {
-        // the song's own length until the player has it, as the total shows it
-        elements.elapsed.textContent = formatTime(Number(elements.seek.value) * (player.duration > 0 ? player.duration : songSeconds));
-    }, "Seeking failed");
+    // where it would go, whether or not the player has the song yet
+    elements.elapsed.textContent = formatTime(timeAt(Number(elements.seek.value)));
+    showHarmony(timeAt(Number(elements.seek.value)));
 });
 
 elements.seek.addEventListener("change", async () => {
+    // shown at once, the ticks leaving it until the player is there
+    settlesAt = performance.now() + SETTLE_MS;
+    elements.elapsed.textContent = formatTime(timeAt(Number(elements.seek.value)));
+    showHarmony(timeAt(Number(elements.seek.value)));
     await withPlayer((player) => {
-        const time = Number(elements.seek.value) * player.duration;
-        player.currentTime = time;
+        // where the bar was let go of, or where the song starts once the player has it, whenever that is
+        const time = timeAt(Number(elements.seek.value));
+        if (player.duration > 0) player.currentTime = time;
+        else pendingPlace = time;
         render(player, time);
         showMedia(player, time);
     }, "Seeking failed");
@@ -2692,12 +2712,15 @@ elements.seek.addEventListener("pointermove", (event) => {
  *     The sequencer applies a new position in the worklet, so reading it straight back after a
  *     stop or a seek still gives the old one: callers that just moved it pass the position instead.
  */
-function render(player, time = player.currentTime) {
+function render(player, given = null) {
     const duration = player.duration;
+    if (duration > 0) playedSeconds = duration;
     elements.total.textContent = formatTime(duration > 0 ? duration : songSeconds);
+    const time = given ?? player.currentTime;
 
-    // the bar and the time under it are the seek's own while it lasts
-    if (!isSeeking) {
+    // the bar and the time under it are the seek's own while it lasts, and a moment after, while the player gets there,
+    // but a position given, which is the player's now
+    if (!isSeeking && (given !== null || performance.now() >= settlesAt)) {
         if (duration > 0) elements.seek.value = String(time / duration);
         elements.elapsed.textContent = formatTime(time);
         showHarmony(time);

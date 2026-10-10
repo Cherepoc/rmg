@@ -13,9 +13,6 @@ public sealed class HarmonyTest(Site site)
         await page.FirstSong();
         var harmony = page.Page.Locator("#harmony");
 
-        // where the song starts, as its file marks it
-        await page.Until(async () => System.Text.RegularExpressions.Regex.IsMatch(await harmony.TextContentAsync() ?? "", Shown), "the key and chord shown");
-
         // and where a seek puts it: the readout of every place the bar is dragged to, as the file marks them, changing
         // along the song
         var seen = new HashSet<string>();
@@ -68,7 +65,7 @@ public sealed class HarmonyTest(Site site)
         await using var page = await SongPage.Open(site);
         await page.FirstSong();
         var harmony = page.Page.Locator("#harmony");
-        await page.Until(async () => System.Text.RegularExpressions.Regex.IsMatch(await harmony.TextContentAsync() ?? "", Shown), "the key and chord shown");
+        // a song that opens on its drums alone shows none where it starts, so that none is waited for here
         if (playing)
         {
             await page.Page.Locator("#play").ClickAsync();
@@ -88,12 +85,14 @@ public sealed class HarmonyTest(Site site)
         }
 
         await page.Page.Mouse.UpAsync();
-        await Task.Delay(SongPage.PastRemake);
         var after = (await harmony.TextContentAsync())!;
-        Console.WriteLine($"seen while dragging: {string.Join(" | ", seen)}; after: {after}");
-        // it changed as the bar moved, and after the bar is let go of it shows the last place's
+        Console.WriteLine($"seen while dragging: {string.Join(" | ", seen)}; let go of: {after}");
+        // it changed as the bar moved, and shows the place it is let go of
         await Assert.That(seen.Distinct().Count()).IsGreaterThan(1);
         await Assert.That(after).IsEqualTo(seen[^1]);
+        // and the song goes on from there, not from its start, whether or not the player had it yet
+        await Task.Delay(SongPage.PastRemake);
+        await Assert.That(double.Parse(await page.Page.Locator("#seek").InputValueAsync(), System.Globalization.CultureInfo.InvariantCulture)).IsGreaterThan(0.8);
         await Assert.That(page.Errors).IsEmpty();
     }
 }
