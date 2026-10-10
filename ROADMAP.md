@@ -209,8 +209,8 @@ groups and out of its chord's scale, a polymeter's copies in the wrong chord sha
 where a texture rests its source, a drop the band does not come back on, a stop's silence struck again, a quieter form
 recorded unplayed), the rest tests assuming what new songs break and calibrations given 128 songs.
 
-**Planned next** (11 October 2026): held tones, let ring, calm sections in place of the quieter form, a riff's drone with leaps, key
-steps by genre, and Classical and Power ballad presets (*Open work*, *Planned: held tones, let ring, and two genres*).
+**Planned next** (11 October 2026): held tones, let ring, a section's form in place of the louder and quieter forms' swap, a riff's
+drone with leaps, 12/8, and Power ballad and Classical presets (*Open work*, *Planned: held tones, let ring, a section's form, and two genres*).
 
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
@@ -455,65 +455,60 @@ What it left, all in `reviews/2026-10-10.md`'s *Open*:
   the fine-tune grid's layout and the editor's drum setups; and 23 left open by their packages.
 - A test that lists the calibrations measuring fewer than 64 songs, which both reviews found.
 
-### Planned: held tones, let ring, and two genres
+### Planned: held tones, let ring, a section's form, and two genres
 
-Planned 11 October 2026, reviewed the same day; each step through the implementation loop, with a listening question
-and a deploy to test. In order:
+Planned 11 October 2026 and revised the same day after two reviews; each step through the implementation loop, with a
+listening question and a deploy to test. In order:
 
-1. **Held tones** (P1): sweet chords made bittersweet by notes held over every chord, as a clean guitar's open strings
-   ring through a progression: a seventh chord a semitone from one of them, an add9 rubbing its third. A part's colour
-   (`GenreChoices.Colour`) "held": the key's second and third steps (a tone apart in a major key, a semitone in a
-   minor one, which is the rub asked for) kept in every chord's voicing whatever its root, so that over one chord they are its tensions and over the
-   next its own notes; at the wild end wider pairs, the 4th or the 7th among them. Which two steps is the option's
-   data, so that a dark genre holds menacing ones, sweet or dark by where its semitone falls: the 2nd and 3rd rub
-   between the chord's colours, sweet; the 5th and the 6th of a minor key, or the 1st and 2nd of a Phrygian one, rub
-   against the tonic and its fifth, menacing (`held` and `heldDark`, each a pair of the key's steps). A held step the chord's scale alters
-   is left out of that chord rather than bent. A new `ChordColour` beside the ninth and the others, but of the key's
-   steps rather than the chord's intervals; the chord's name on the page stays its state's (`SongHarmony`). Clean and decaying instruments only (a clean guitar, a piano, a harp),
-   where a held second is heard as a colour, not as mud. One rule for every genre that names the option, not a list of
-   chords; measured by the semitones held tones make against a chord's notes, on and off over the same songs.
-2. **Let ring** (P1): a broken chord's notes sustaining to the chord's change rather than each stopping where the next
-   starts, so that its seconds sound together; the arpeggio's notes stay single strokes, their length the chord's, a
-   note cut where its own pitch is struck again. Note lengths in the state, not a sustain pedal, which synthesizers
-   honour unevenly.
-   Only for figures of 8ths or slower, and decaying instruments, where a held note fades on its own; a choice of a
-   part's (`Arpeggios`), by a genre's chance. With the held tones it is the sound asked for: an arpeggio, its notes
-   let ring.
-3. **Calm sections** (P1, replacing the quieter form, which only changes the guitars' instrument, so that an acoustic
-   guitar goes on tremolo-picking): a quieter appearance of a heavy song turned calm as a whole, decided with the
-   sections, before the parts play (a section's state), not swapped after. In it the driven guitars turn acoustic or
-   clean together; one breaks the section's chords, 8ths or slower, let ring (step 2), with the genre's held tones
-   (step 1, Black metal's dark ones), the others rest; no figure plays there, neither a riff's tremolo nor the drums'
-   blast or double kick; the drums in half time or resting, the bass held on the roots. Black metal's chance as its
-   quieter form's, Metal's and Rock's by listening. Measured over the same songs, on and off: a calm section's guitar
-   notes shorter than an 8th none, its guitars all one form, the drums' notes a bar halved or fewer. Asked again as
-   `?listen=quieter-form` once built; the question asked now, of the swap alone, retired.
-4. **A riff's drone, with leaps** (P2): *A riff's drone, reworked* (*Form and sections*), and with it a riff of an open
-   string and wide leaps, a fretted note an octave or more above it played against it in turn, its melody on the strong
-   notes and the open string between; no chugs. Djent's chugs drawn down to 40–60% of its riffs and the drone given
-   20–40%; asked as `?listen=djent-open`.
-5. **Key steps by genre** (P2, only if Classical needs it): where a key change goes, a genre's pool (`keySteps`), as
-   Classical's to its dominant. A power ballad's last chorus up a step is the plain end's already (`KeyChange`); and
-   the relative is a change of mode, not of key, which a key change keeps, so it is a section's mode or left out.
-6. **Classical** (P2): chamber music: a melody on violin, flute or clarinet, the piano's broken chords (an Alberti
-   figure) under it, the cello's bass, no drums; raised cadences, ornaments, phrases of four and four, the forms AABA,
-   ABA and a rondo; terraced dynamics, a section louder or quieter as a whole; 80–140 BPM in 4/4, 3/4 and 6/8; key
-   changes to the dominant (step 5). Unlike Orchestral, which has its ornaments, meters and hall already: a few
-   players, the piano's broken chords, no timpani, a lighter, galant sound. Risks: the rule that no two parts share an
-   instrument rules out music for the piano alone, left for later; and a bass on its chords' roots sounds like pop on
-   strings, so the bass's inversions and walks are leaned up.
-7. **Power ballad** (P2): a clean guitar's broken chords let ring with held tones (steps 1 and 2), an overdriven lead
-   for the melody, a fingered bass and string pads; 60–85 BPM in 4/4 and 12/8 (a
-   meter to add, `Meter`, four groups of three 8ths, or 4/4 with a triplet feel), natural minor and major, sus2, add9 and
-   major seventh chords; the texture building section by section, the chorus heavy where the verse is clean (the
-   quieter form, the other way round), a guitar solo, the last chorus lifted (`KeyChange`), ending by a fade or a ring-out.
+1. **Held tones** (P1): two of the key's steps held over every chord of a broken chord's part, so that over one chord
+   they are its tensions and over the next its own notes, as a guitar's open strings ring through a progression. A new
+   `ChordColour`, of the key's steps rather than the chord's intervals, each option a pair of steps as its data:
+   `held`, the 2nd and the 3rd, sweet, their rub between the chord's colours (a tone apart in a major key, a semitone
+   in a minor one); `heldDark`, the 5th and the 6th, or the 1st and the 2nd where the scale is Phrygian, menacing, their
+   rub against the tonic and its fifth. A step the chord's own scale alters left out of that chord rather than bent;
+   clean and decaying instruments only (a clean or acoustic guitar, a piano, a harp); the chord's name on the page
+   its state's (`SongHarmony`). Measured over the same songs, on and off: the semitones the held tones make against a
+   chord's notes, sweet against dark. Asked as `?listen=held`.
+2. **Let ring** (P1): a broken chord's notes sounding on to the chord's change, a note cut where its own pitch is struck
+   again; note lengths in the state, not a sustain pedal, which synthesizers honour unevenly. Figures of 8ths or slower
+   on decaying instruments alone, by a genre's chance (`Arpeggios`). Asked with step 1 as one question, both against
+   neither, as together they are the sound asked for.
+3. **A section's form** (P1, in place of the louder and quieter forms' instrument swap after assembly, which leaves an
+   acoustic guitar tremolo-picking): a louder or quieter appearance turned heavy or calm as a whole, decided with the
+   sections, before the parts play, a section's state. One mechanism both ways, the guitars always together:
+   - *Calm*: the driven guitars acoustic or clean; one breaks the chords, 8ths or slower, let ring, with the genre's
+     held tones, the others rest; no figure there, neither a riff's tremolo nor the drums' blast or double kick; the
+     drums in half time or resting, the bass held on its roots.
+   - *Heavy*: the clean guitars driven; broken chords given up for struck ones, power chords where the genre has them.
+   Black metal's calm as its quieter form's chance, Rock's heavy as its louder form's; Metal's calm by listening.
+   Measured over the same songs, on and off: no guitar note shorter than an 8th in a calm section, its guitars one
+   form, its drums' notes a bar halved or fewer; no broken chord in a heavy one. `?listen=quieter-form` retired now,
+   asked again of the calm sections once built.
+4. **A riff's drone, with leaps** (P2): *A riff's drone, reworked* (*Form and sections*), a riff alternating an open
+   string, the key's own, with fretted notes an octave or more above it, its melody on the strong notes; no chugs.
+   Djent's chugs drawn down to 40–60% of its riffs and the drone given 20–40%; asked as `?listen=djent-open`.
+5. **12/8** (P2): a meter of four groups of three 8ths (`Meter`), its broken chords in triplets, which swing cannot
+   give, as it only lengthens a pair's first note. For the power ballad, and Blues and Soul by listening.
+6. **Power ballad** (P2, data over steps 1, 2, 3 and 5): a clean guitar's broken chords let ring with sweet held
+   tones, an overdriven lead for the melody, a fingered bass, string pads; 60–85 BPM in 4/4 and 12/8; natural minor and
+   major, sus2, add9 and major seventh chords; the texture building section by section, the chorus heavy (step 3), a
+   guitar solo, the last chorus up a step (`KeyChange`, the plain end's already), ending by a fade or a ring-out.
+7. **Classical** (P2): chamber music, a few players unlike Orchestral's orchestra: a melody on violin, flute or
+   clarinet, the piano's Alberti figure under it, the cello's bass, no drums; raised cadences, ornaments, phrases of
+   four and four, AABA, ABA and a rondo; terraced dynamics; 80–140 BPM in 4/4, 3/4 and 6/8; the bass's inversions and
+   walks leaned up, as a bass on the roots alone sounds like pop on strings. Its key change to the dominant a genre's
+   pool of key steps (`keySteps`), the one piece of code it needs, built only if the songs' own steps do not serve; the
+   relative left out, a change of mode a key change keeps. Music for the piano alone left out, as no two parts share an
+   instrument.
 
-Review: **overengineering** cut: held tones are a colour, not a new harmony system, and let ring a note's length, not a
-new figure; the two presets are data over them, no code of their own but the key steps. **Musicality**: held seconds
-are sweet only on clean, decaying sounds and only as a few notes, so they are the clean instruments' and stop where the
-chord's scale would make them a wrong note; let ring on fast figures or sustained sounds would blur, so it is 8ths or
-slower on decaying ones. Classical without drums leans on the cadences and the dynamics, which are what it will be
-judged by.
+Review: **overengineering**: held tones a colour and let ring a note's length, not new systems; a section's form one
+mechanism for both directions rather than a calm texture beside the louder form; the presets data, with 12/8 and
+perhaps the key steps their only code; a tempo of a calm section's own left out, half time giving the calm. **Musicality**:
+held tones sweet or menacing only on clean, decaying sounds and a few notes, and dark ones dark over the tonic alone,
+lush over the 6th, so heard before kept; let ring blurring on fast figures, so 8ths or slower; drums blasting under a
+calm guitar the absurdity listening split on, so the drums are measured; the jump into a calm section left as it is, as
+black metal cuts, a fill or a fade there only if listening asks; Classical judged by its cadences, its bass and its
+dynamics, as it has no drums.
 
 ### Conventionality
 
@@ -574,9 +569,9 @@ judged by.
   it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
   melody with an open string, the string the key's own (its tonic or fifth, not every chord's root), in a pattern of
-  the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it. Planned with wide leaps (*Planned: held tones, let ring, and two genres*, step 4).
+  the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it. Planned with wide leaps (*Planned: held tones, let ring, a section's form, and two genres*, step 4).
 - **Acoustic sections, fitted** (P1, heard 8 and 9 October 2026, and 11 October: the instrument alone changes, an
-  acoustic guitar still tremolo-picking): planned as *Calm sections* (*Planned: held tones, let ring, and two genres*,
+  acoustic guitar still tremolo-picking): planned as *A section's form* (*Planned: held tones, let ring, a section's form, and two genres*,
   step 3).
 - **A breakdown's snare** (P2, suggested 8 October 2026 after listening): Djent's breakdown plays its backbeat on the
   cross-stick, where a breakdown wants the snare itself, struck on the riff's accents with the kick or on the song's
