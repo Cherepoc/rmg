@@ -641,69 +641,6 @@
     ]
   },
   {
-    "id": "ambient-swing",
-    "question": "An ambient piece swung long-short: right, or should it float evenly?",
-    "decides": "Ambient's swing, now the songs' own.",
-    "genre": "ambient",
-    "without": {
-      "skip": [],
-      "genre": {
-        "feelChances": {
-          "swing": 0,
-          "halfTime": 8,
-          "doubleTime": 4
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "3",
-        "at": 1080.7,
-        "listen": [
-          "Melody (Celesta)"
-        ]
-      },
-      {
-        "seed": "P",
-        "at": 130.4,
-        "listen": [
-          "Melody (Celesta)"
-        ]
-      },
-      {
-        "seed": "S",
-        "at": 752.1,
-        "listen": [
-          "Counter-melody (Flute)"
-        ]
-      },
-      {
-        "seed": "c",
-        "at": 524.2,
-        "listen": [
-          "Bass (Contrabass)",
-          "Chords (Pad 7 (halo))"
-        ]
-      },
-      {
-        "seed": "1M",
-        "at": 666.9,
-        "listen": [
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "1o",
-        "at": 742.5,
-        "listen": [
-          "Chords (Pad 2 (warm))",
-          "Riff (Electric Guitar (clean))",
-          "Acoustic Snare"
-        ]
-      }
-    ]
-  },
-  {
     "id": "trap-reharm",
     "question": "The last hook's loop changing its chords: this trap song, or its beat lost?",
     "decides": "Trap's reharmonisation, now the songs' own.",

@@ -777,6 +777,7 @@
         "solo": { "flute": 100, "violin": 60, "electricGuitarClean": 50, "sopranoSax": 50, "lead2Sawtooth": [0, 20, 50] }
       },
       "kit": { "room": 69, "brush": 100, "orchestra": 100 },
+      "feelChances": { "swing": 0, "halfTime": 8, "doubleTime": 4 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": 60, "drum": [25, 30, 50], "riff": [6, 6, 47], "riffTwin": [0, 15, 15], "rhythm": [5, 5, 38], "solo": [0, 0, 10] },
       "drumSetup": { "kit": 100 },
       "levels": { "pad": 65, "drum": 30 },

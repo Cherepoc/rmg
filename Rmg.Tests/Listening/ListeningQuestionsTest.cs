@@ -77,9 +77,6 @@ public sealed class ListeningQuestionsTest
         new("medieval-raise", "The raised, major chord before home at a phrase's end: medieval, or a later classical cadence?",
             "Medieval's cadence raise, now the songs' own.", "medieval", [], new() { ["cadenceRaise"] = new() { ["sections"] = 0 } },
             x => FirstSection(x, TracePoints.CadenceRaise, v => (((int?, bool))v!).Item2)),
-        new("ambient-swing", "An ambient piece swung long-short: right, or should it float evenly?",
-            "Ambient's swing, now the songs' own.", "ambient", [], new() { ["feelChances"] = new() { ["swing"] = 0 } },
-            x => ((Swing)x.Trace.Single(t => t.Point == TracePoints.Swing).Value!).Delay > 0 ? 0 : null),
         new("trap-reharm", "The last hook's loop changing its chords: this trap song, or its beat lost?",
             "Trap's reharmonisation, now the songs' own.", "trap", [], new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.Reharmonisation && t.Value is not null)
