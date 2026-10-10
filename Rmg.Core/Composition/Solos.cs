@@ -205,6 +205,8 @@ internal static class Solos
         var count = context.Pick(ByConvention.Weigh(Counts, melody));
         var mode = context.Pick(ByConvention.Weigh(Modes, melody));
         var step = Steps[context.GenerateInt(0, Steps.Length)];
+        // whether the solo is the soloist's own line, drawn before the soloists, whose draws a part held back changes
+        var isOwn = context.TestProbability(OwnChance.At(melody));
         var candidates = Soloists.Where(x => parts.Contains(x.Part)).ToList();
         var soloists = new List<TrackRole>();
         // a part a genre's pool leaves out never solos, and a song with none of its soloists has no solo
@@ -215,8 +217,6 @@ internal static class Solos
             soloists.Add(soloist);
             candidates.RemoveAll(x => x.Part == soloist);
         }
-
-        var isOwn = context.TestProbability(OwnChance.At(melody));
 
         if (!isSolo || index == 0 || soloists.Count == 0 || !parts.Contains(TrackRole.Melody) && !soloists.Contains(TrackRole.Drum))
             return null;
@@ -277,8 +277,11 @@ internal static class Solos
                 .Where(x => definitions[x.Key] is PitchInstrumentTrack && x.Key != trackOf[TrackRole.Melody] && !solo.Soloists.Any(s => trackOf[s] == x.Key))
                 .Select(x => Loudness(Realizer.GetNoteStates(x.Value, definitions[x.Key], song.CommonStateTimelineMap).Where(IsIn), 0))
                 .Where(x => !double.IsNaN(x))
-                .DefaultIfEmpty(0)
+                .DefaultIfEmpty(double.NaN)
                 .Max();
+            // where no part plays under it, as loud as the melody it takes the place of, and as it is where that rests too
+            if (double.IsNaN(band))
+                band = Loudness(Realizer.GetNoteStates(song.TrackTimelineMap[trackOf[TrackRole.Melody]], definitions[trackOf[TrackRole.Melody]], song.CommonStateTimelineMap).Where(IsIn), 0) - Margin;
             var moves = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
             // the drums' turns the drums' own (DrumSolos)
             foreach (var (soloist, place) in solo.Soloists.Select((x, i) => (x, i)).Where(x => x.x != TrackRole.Drum))
@@ -297,7 +300,7 @@ internal static class Solos
                     definitions[trackOf[soloist]],
                     song.CommonStateTimelineMap
                 ).ToArray();
-                var lift = Lift(heard, band + Margin);
+                var lift = double.IsNaN(band) ? 0 : Lift(heard, band + Margin);
                 TimelineItem<StateMap>[] played =
                 [
                     // a soloist that plays no chords playing the line's stacked notes alone
@@ -306,8 +309,9 @@ internal static class Solos
                         .With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + lift)
                         .ToTimelineItem(x.Position))
                 ];
-                // an accompanist that trades going back to its own part between its turns, a lead resting
-                var comps = solo.Mode == SoloMode.Trading && soloist is not (TrackRole.Melody or TrackRole.Solo);
+                // an accompanist that trades going back to its own part between its turns, a lead resting, and the counter-melody
+                // too, which a solo otherwise rests to make room
+                var comps = solo.Mode == SoloMode.Trading && soloist is not (TrackRole.Melody or TrackRole.Solo or TrackRole.CounterMelody);
                 moves[trackOf[soloist]] = own => EventTimeline.Create(own.Duration,
                     own.Where(x => !IsIn(x) || comps && solo.TurnAt(span, x.Position) != place).Concat(played).OrderBy(x => x.Position));
             }

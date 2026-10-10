@@ -51,7 +51,7 @@ public sealed class SoloTest
 
             var span = song.Map.Sections[index];
             int Notes(TrackRole role) => song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role)
-                .Sum(x => x.Value.Count(n => n.Position >= span.Start + 1e-9 && n.Position < span.LastBar));
+                .Sum(x => x.Value.Count(n => n.Position >= span.Start - 1e-9 && n.Position < span.LastBar));
             if (solo.IsDrumSolo)
             {
                 foreach (var part in Enum.GetValues<TrackRole>().Where(x => x != TrackRole.Drum))
@@ -113,6 +113,7 @@ public sealed class SoloTest
 
         await Assert.That(plain.Length).IsGreaterThan(0);
         await Assert.That(plain.All(x => !x.IsOwn)).IsTrue();
+        await Assert.That(wild.Length).IsGreaterThan(0);
         await Assert.That(wild.All(x => x.IsOwn)).IsTrue();
     }
 
@@ -361,7 +362,7 @@ public sealed class SoloTest
             var span = song.Map.Sections[index];
             foreach (var role in new[] { TrackRole.CounterMelody, TrackRole.Pad }.Where(x => !solo.Soloists.Contains(x)))
                 await Assert.That(song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role)
-                    .Sum(x => x.Value.Count(n => n.Position >= span.Start + 1e-9 && n.Position < span.End - 1e-9))).IsEqualTo(0).Because($"seed {song.Seed}, {role} in a solo");
+                    .Sum(x => x.Value.Count(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9))).IsEqualTo(0).Because($"seed {song.Seed}, {role} in a solo");
             checkedSolos++;
         }
 

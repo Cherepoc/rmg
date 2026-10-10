@@ -33,6 +33,10 @@ public sealed class SoloAnswerTest
                 var next = onsets.FirstOrDefault(x => x > note.Position + 1e-9, double.MaxValue);
                 await Assert.That(note.Position - before).IsGreaterThanOrEqualTo(1 - 1e-9).Because($"seed {song.Seed} at {note.Position}");
                 await Assert.That(note.Position + note.Value.Duration).IsLessThanOrEqualTo(next + 1e-6).Because($"seed {song.Seed} at {note.Position}");
+                // a short line, starting a beat after the note before at the soonest and played over two bars at most
+                var bar = song.Map.MeterAt(note.Position).BarDuration;
+                await Assert.That(note.Position - before).IsLessThanOrEqualTo(Rmg.Core.Composition.SoloAnswers.After + Rmg.Core.Composition.SoloAnswers.LongestBars * bar + 1)
+                    .Because($"seed {song.Seed} at {note.Position}");
                 answers++;
             }
 

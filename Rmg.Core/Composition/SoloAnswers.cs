@@ -30,6 +30,9 @@ internal static class SoloAnswers
     /// <summary>How much quieter an answer plays than the melody of its section, on the average of their velocities as rendered.</summary>
     public const double Quieter = 0.06;
 
+    /// <summary>How many bars an answer plays at most, a short line in a gap, never a solo.</summary>
+    public const int LongestBars = 2;
+
     /// <summary>The song with the solo part's answers played, each section drawing from a sequence of its own.</summary>
     /// <param name="answerer">The solo part's vocabulary, its soloist's.</param>
     /// <param name="melodyFacet">Every section's melody facet, by its place among the song's sections.</param>
@@ -64,7 +67,8 @@ internal static class SoloAnswers
             var counterRests = !trackOf.TryGetValue(TrackRole.CounterMelody, out var counter) || !song.TrackTimelineMap.TryGetValue(counter, out var counterTrack) || !counterTrack.EventTimeline.Any(IsIn);
             var melody = melodyTrack.EventTimeline.Where(IsIn).ToArray();
             var band = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
-            if (solos.ContainsKey(index) || !counterRests || melody.Length == 0)
+            // an answer over the band, none where the melody plays alone
+            if (solos.ContainsKey(index) || !counterRests || melody.Length == 0 || band.Length == 0)
                 continue;
             StateTrace.RecordSection(TracePoints.SoloAnswers, soloTrack, span.SectionId, $"{answering}", (index, answering));
             if (!answering)
@@ -78,7 +82,8 @@ internal static class SoloAnswers
             {
                 var answered = context.TestProbability(GapChance);
                 var start = Math.Ceiling(2 * (onsets[i] + After) - 1e-9) / 2;
-                var end = onsets[i + 1] - Before;
+                // a short line, a bar or two at most, however long the gap
+                var end = Math.Min(onsets[i + 1] - Before, start + LongestBars * span.Meter.BarDuration);
                 if (!answered || end - start < 1 - 1e-9)
                     continue;
 

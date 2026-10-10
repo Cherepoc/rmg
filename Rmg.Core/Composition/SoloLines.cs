@@ -207,9 +207,8 @@ internal static class SoloLines
         int[] ChordNotes(double position) => Notes(position, Enumerable.Range(-4, 12).SelectMany(octave => ChordSteps.Select(x => x + octave * Scales.StepCount)));
         int Nearest(int[] notes, int pitch) => notes.Length == 0 ? Math.Clamp(pitch, bottom, top) : notes.MinBy(x => Math.Abs(x - pitch));
 
-        // a solo as loud as the melody there, on average, rather than as a note of it it plays over, a soft pickup say, and
-        // the louder the more intense
-        var loudness = melody.Average(x => x.Value.GetStateValue(StateKinds.Velocity));
+        // the louder the more intense, around none, as the caller sets how loud the line plays as heard (Solos.Lift)
+        const double loudness = 0;
 
         // every note's phrase and pitch, in the line's order, which its loudness arcs over
         var marks = new List<(int Phrase, int Pitch)>();
@@ -429,7 +428,7 @@ internal static class SoloLines
                 var weights = Gestures.Select(x => new Weighted<SoloGesture>(
                     x.Gesture switch
                     {
-                        SoloGesture.Quote => quoteWeight(at, end),
+                        SoloGesture.Quote => quoteWeight(at, end) * soloist.GestureWeights[x.Gesture],
                         // a pause is a breath between gestures: never a phrase's first, nor one after another
                         SoloGesture.Pause => previous is null or { Gesture: SoloGesture.Pause } ? 0 : soloist.GestureWeights[x.Gesture] * soloist.PauseRate / Soloist.PauseRates.Tuned,
                         _ => soloist.GestureWeights[x.Gesture]
@@ -505,6 +504,11 @@ internal static class SoloLines
                 cells.Add(size);
                 if (Enumerable.Range(0, size).Any(i => Reach(i) < 0 || Reach(i) >= scale.Count))
                     cursor.Direction = -cursor.Direction;
+                // and a cell played in place, an arpeggio's or a lick's, that leaves it either way moves its root in where the
+                // range has room for it, rather than repeat the edge's note; a run steps on from where it was
+                var steps = Enumerable.Range(0, size).Select(i => cursor.Direction * figure[i % figure.Length]).ToArray();
+                if (!continues && steps.Max() - steps.Min() < scale.Count)
+                    root = Math.Clamp(root, -steps.Min(), scale.Count - 1 - steps.Max());
             }
 
             for (; cursor.Note < size && pitches.Count < count; cursor.Note++)

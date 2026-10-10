@@ -89,7 +89,8 @@ public sealed class DrumSoloTest
 
         await Assert.That(climax).IsGreaterThan(10);
         await Assert.That(crashed / (double)climax).IsGreaterThan(0.8);
-        await Assert.That(calmCrashed / (double)Math.Max(1, calm)).IsLessThan(0.2);
+        await Assert.That(calm).IsGreaterThan(0);
+        await Assert.That(calmCrashed / (double)calm).IsLessThan(0.2);
     }
 
     [Test]
