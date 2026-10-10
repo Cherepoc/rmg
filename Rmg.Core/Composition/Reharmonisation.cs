@@ -8,8 +8,8 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     A later appearance reharmonised: the song's last appearance of a section heard before, a last chorus most often, now
 ///     and then playing some of its chords as substitutes a third away, which share two of their three notes with the
-///     chords they replace, in the section's own scale; decided before the lines are placed, so that the melody placed over
-///     them fits them as it fits any chord.
+///     chords they replace, in the section's own scale, but a section on one chord, a vamp; decided before the lines are
+///     placed, so that the melody placed over them fits them as it fits any chord.
 /// </summary>
 internal static class Reharmonisation
 {
@@ -39,10 +39,15 @@ internal static class Reharmonisation
         var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         // and a chord moved by semitones, and the chord it slides into, kept, and a chord in a scale of its own, an applied
         // dominant's, a borrowed chord's or the cadence's raised fifth, whose colour a substitute would lose
-        var kept = moved.Concat(changes.Where((x, i) => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordShift) != 0
+        var leading = moved.ToHashSet();
+        var kept = leading.Concat(changes.Where((x, i) => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordShift) != 0
                                                        || i > 0 && common.GetEffectiveStateMapAt(changes[i - 1]).GetStateValue(StateKinds.ChordShift) != 0
                                                        || common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } own && own.Value != StepAlterations.None)).ToHashSet();
         var (roots, scales) = (new List<TimelineItem<int>>(), new List<TimelineItem<LayerValue<StepAlterations>>>());
+        // a section on one chord, a vamp, which a substitute would undo, left as it is, but the chords leading into a key change
+        bool OneChord(SectionSpan first) => changes.Where(x => first.IsWithin(x) && !leading.Contains(x)).Select(x => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordRoot)).Distinct().Count() <= 1;
+        if (later >= 0 && OneChord(sections.First(x => x.SectionId == sections[later].SectionId)))
+            kept.UnionWith(changes);
         if (later >= 0)
         {
             var span = sections[later];

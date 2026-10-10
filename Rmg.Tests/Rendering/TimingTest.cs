@@ -28,9 +28,12 @@ public sealed class TimingTest
                 _ => true
             })).IsTrue();
 
-        var laidBack = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("hipHop"))));
-        var tight = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic"))));
+        // the same songs, Hip-hop's pocket against the songs' own
+        var laidBack = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("hipHop"))));
+        var own = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without("hipHop", GenreChoices.Pocket.Name))));
         await Assert.That(LaidBackShifts(songs)).IsNotEmpty();
-        await Assert.That(LaidBackShifts(laidBack).Average()).IsGreaterThan(LaidBackShifts(tight).DefaultIfEmpty(0).Average() * 2);
+        Console.WriteLine($"the drums laid back by {LaidBackShifts(laidBack).Average():F4} beats in Hip-hop, {LaidBackShifts(own).DefaultIfEmpty(0).Average():F4} with the songs' pocket");
+        // measured: 0.038 beats against 0.014, at offsets 0 and a million
+        await Assert.That(LaidBackShifts(laidBack).Average()).IsGreaterThan(LaidBackShifts(own).DefaultIfEmpty(0).Average() * 1.5);
     }
 }

@@ -12,7 +12,7 @@ public sealed class LiftTest
         var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
             .Add("dynamics", ImmutableDictionary<string, ByConvention>.Empty.Add("lift", new(1, 1, 1))));
         var (earlier, louder) = (0, 0);
-        foreach (var seed in Enumerable.Range(0, 16))
+        foreach (var seed in Enumerable.Range(0, 64))
         {
             var (own, longer) = (TestCorpus.Get(seed), TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
             // each change of section, the bar before it, a short last bar's, and the full bars of the section it ends

@@ -119,7 +119,15 @@ public sealed record SectionSpan(int SectionId, double Start, double Duration, M
     public int BarCount => (int)Math.Ceiling(Duration / Meter.BarDuration - 1e-9);
 
     /// <summary>The bar a position is in, counted from its start, a hair early counting as the bar it is at.</summary>
-    public int BarOf(double position) => (int)Math.Floor((position - Start) / Meter.BarDuration + 1e-9);
+    public int BarOf(double position) => Count(position, Meter.BarDuration);
+
+    /// <summary>The phrase a position is in, counted from its start, a hair early counting as the phrase it is at.</summary>
+    public int PhraseOf(double position) => Count(position, Meter.PhraseDuration);
+
+    /// <summary>The play of its pattern a position is in, counted from its start, a hair early counting as the play it is at.</summary>
+    public int PatternOf(double position) => Count(position, Meter.PatternDuration);
+
+    private int Count(double position, double length) => (int)Math.Floor((position - Start) / length + 1e-9);
 
     /// <summary>Where a bar of it starts and ends, a short last one ending at the section's end.</summary>
     public (double Start, double End) Bar(int index) => (Start + index * Meter.BarDuration, Math.Min(Start + (index + 1) * Meter.BarDuration, End));

@@ -29,8 +29,8 @@ public sealed class BreakdownTest
     [Test]
     public async Task ABreakdown_IsABridgeInHalfTime_TheKickWithTheRiff_TheLinesAndThePadOut()
     {
-        var found = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always("djent")))))
+        var (found, kicked, withRiff) = (0, 0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always("djent")))))
         {
             var structure = (SongStructure)song.Trace.Single(t => t.Point == TracePoints.SongForm).Value!;
             var breakdowns = Breakdowns(song);
@@ -45,6 +45,20 @@ public sealed class BreakdownTest
                 await Assert.That(figures.GetValueOrDefault(FigurePlayer.Ground)).IsEqualTo("withRiff").Because(because);
                 if (song.Solos.ContainsKey(index))
                     continue;
+                // its riff chugging, and its kick on the riff's notes in the bars the riff plays, but a phrase's last, where a fill
+                // plays, and the landing on a phrase's first beat
+                await Assert.That(song.Trace.Single(t => t.Point == TracePoints.Chugs && t.Section == span.SectionId).Value).IsEqualTo(true).Because(because);
+                if (song.Song.Notes!.TryGetValue(song.Track(TrackRole.Riff), out var riff))
+                    foreach (var (bar, barIndex) in Enumerable.Range(0, span.BarCount).Select(x => (span.Bar(x), x)).Where(x => (x.x + 1) % span.Meter.PhraseBars != 0))
+                    {
+                        var onsets = riff.Where(x => x.IsWithin(bar.Start, bar.End)).Select(x => Math.Round(x.Position, 6)).ToHashSet();
+                        var kicks = DrumGroups.Kick.Tracks.Where(song.Song.Notes.ContainsKey).SelectMany(x => song.Song.Notes[x])
+                            .Where(x => x.IsWithin(bar.Start, bar.End) && !(barIndex % span.Meter.PhraseBars == 0 && Math.Abs(x.Position - bar.Start) < 1e-6)).ToArray();
+                        if (onsets.Count == 0)
+                            continue;
+                        kicked += kicks.Length;
+                        withRiff += kicks.Count(x => onsets.Contains(Math.Round(x.Position, 6)));
+                    }
                 var lines = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Pad)
                     // a riser into a drop after it rides a resting part's channel, no line of it
                     .SelectMany(x => x.Value).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) != Risers.Program + 1)
@@ -54,6 +68,9 @@ public sealed class BreakdownTest
         }
 
         await Assert.That(found).IsGreaterThan(4);
+        // a push's kick an eighth early and a lift's cue among the rest, against the mechanism breaking (measured: 99.7% to 99.9% at offsets 0, a million and three million)
+        Console.WriteLine($"{withRiff} of {kicked} kicks on the riff's notes");
+        await Assert.That(withRiff / (double)kicked).IsGreaterThan(0.8);
     }
 
     /// <summary>How many songs and sections break down in the heavy presets as they are, and how many could, every bridge broken down.</summary>

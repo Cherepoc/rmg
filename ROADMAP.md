@@ -471,9 +471,9 @@ Each item with its plan, and what it waits for.
 
 What it left, all in `reviews/2026-10-10.md`'s *Open*:
 
-- **44 findings moved between packages and never worked**: tests of the drums, the sound and the form, stale docs,
-  the fine-tune grid's layout and the editor's drum setups; and 23 left open by their packages.
-- A test that lists the calibrations measuring fewer than 64 songs, which both reviews found.
+- **The findings left open** (A3 of the plan of 11 October 2026): the docs and the tests worked, 47 of 67; left, the
+  code's (13, 17, 49, 54, 66, 86, 88, 100, 110, 195, 411, 12, 14, 30, 52, 57, 102, 108, 113, 143) and the page's (368, 382,
+  384, 467, 477), each in `reviews/2026-10-10.md`'s *Open*.
 
 ### Planned: held tones, let ring, a section's form, and two genres
 
@@ -749,11 +749,12 @@ dynamics, as it has no drums.
 - **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
-- **Tests that check less than their names** (P4, from the review of 9 October 2026): the louder and quieter forms
-  per appearance, both ways; a breakdown's riff chugging and its kick on its onsets; a solo's approach off the beat
-  into its change; each passing kind's shape (the tritone substitute's dominant, the half-diminished's whole step);
-  the melody's joins at every pattern; the busyness reports' facets read from the trace; the MIDI file parsed for its
-  program changes; the stages' hand-offs, each read after it is made.
+- **Tests that check less than their names** (P4, from the review of 9 October 2026; a breakdown's riff chugging and its
+  kick on the riff's notes done 11 October 2026, and the solo's approach off the beat let go of, its player not told by its
+  notes): the louder and quieter forms per appearance, both ways (with *A section's form*); each passing kind's shape
+  (the tritone substitute's dominant, the half-diminished's whole step); the melody's joins at every pattern; the
+  busyness reports' facets read from the trace; the MIDI file parsed for its program changes; the stages' hand-offs,
+  each read after it is made.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than

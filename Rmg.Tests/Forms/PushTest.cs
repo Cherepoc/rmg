@@ -16,7 +16,7 @@ public sealed class PushTest
     {
         int pushed = 0, early = 0, kicked = 0;
         var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))))
         {
             var pushing = song.Trace.Where(x => x.Point == TracePoints.Push && (bool)x.Value!).Select(x => x.Section).ToHashSet();
             var changes = song.ChordChanges;
@@ -25,7 +25,9 @@ public sealed class PushTest
             // but in and at the end of a phrase in stop time, which a push leaves be, its fill landing there
             var stopped = song.Trace.Where(x => x.Point == TracePoints.StopTime && (bool)x.Value!).Select(x => x.Section).ToHashSet();
             bool InStopTime(double at) => song.Song.Map!.Sections.Any(s => stopped.Contains(s.SectionId) && at >= s.Start - 1e-9 && at <= s.Start + s.Meter.PhraseDuration + 1e-9);
-            foreach (var (span, index) in song.Song.Map!.Sections.Select((x, i) => (x, i)).Where(x => pushing.Contains(x.x.SectionId) && !song.Solos.ContainsKey(x.i)))
+            // but in a polymeter, whose cycle runs across the changes (Pushes)
+            var polymetric = song.PolymeterPlans.Keys.ToHashSet();
+            foreach (var (span, index) in song.Song.Map!.Sections.Select((x, i) => (x, i)).Where(x => pushing.Contains(x.x.SectionId) && !song.Solos.ContainsKey(x.i) && !polymetric.Contains(x.x.SectionId)))
             foreach (var change in changes.Where(x => x > span.Start + 1e-9 && x < span.End - 1e-9 && Math.Abs(Math.IEEERemainder(x - span.Start, span.Meter.BarDuration)) < 1e-6 && !InStopTime(x)))
             {
                 pushed++;
@@ -38,7 +40,9 @@ public sealed class PushTest
             }
         }
 
-        await Assert.That(pushed).IsGreaterThan(20);
+        await Assert.That(pushed).IsGreaterThan(80);
+        Console.WriteLine($"{pushed} changes pushed: the chords early on {early / (double)pushed:P0}, the kick on {kicked / (double)pushed:P0}");
+        // measured: the chords 86%, the kick 73%, at offset 0
         // the chords play most pushed changes early, but where they came in, a stop time, or rested the bar before
         await Assert.That(early / (double)pushed).IsGreaterThan(0.5);
         await Assert.That(kicked / (double)pushed).IsGreaterThan(0.3);

@@ -12,12 +12,7 @@ public sealed class GenreKeyChangeTest
             Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Scale, scale), Genre: genre)))
         .Average(x => ((ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).IsEmpty ? 0.0 : 1);
 
-    /// <summary>A preset without one of its choices, which its songs then take at the songs' own amounts.</summary>
-    private static Genre Without(string id, string choice)
-    {
-        var preset = GenrePresets.All.Single(x => x.Id == id);
-        return GenrePresets.Genre(preset with { Choices = preset.Choices.Where(x => x.Key != choice).ToDictionary() });
-    }
+    private static Genre Without(string id, string choice) => GenrePresets.Without(id, choice);
 
     [Test]
     public async Task ABlues_StaysInItsKey_HoweverWild_AndAJazzTune_ChangesKeyOftener()

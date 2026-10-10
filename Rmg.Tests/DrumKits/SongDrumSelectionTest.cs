@@ -32,6 +32,8 @@ public sealed class SongDrumSelectionTest
     public async Task TheCalls_AreInAFewSongs_AndNeverLeadARole()
     {
         var withCalls = Seeds.Count(seed => DrumGroups.Calls.Drums.Any(SongDrums(seed).Contains)) / (double)Seeds.Count();
+        Console.WriteLine($"songs with a call {withCalls:P1}");
+        // measured: 18% of 1000 songs, October 2026
         await Assert.That(withCalls).IsBetween(0.1, 0.3);
 
         foreach (var seed in Seeds)
@@ -49,6 +51,8 @@ public sealed class SongDrumSelectionTest
         foreach (var seed in Seeds)
             await Assert.That(MainSnares.Count(SongDrums(seed).Contains)).IsEqualTo(1);
         var withClap = Seeds.Count(seed => SongDrums(seed).Contains(DrumDefinitions.Clap)) / (double)Seeds.Count();
+        Console.WriteLine($"songs with a clap {withClap:P1}");
+        // measured: 29% of 1000 songs, October 2026
         await Assert.That(withClap).IsBetween(0.2, 0.4);
     }
 
@@ -84,7 +88,10 @@ public sealed class SongDrumSelectionTest
             await Assert.That(songDrums.Count(new[] { DrumDefinitions.Tambourine, DrumDefinitions.Cabasa, DrumDefinitions.Maracas }.Contains)).IsLessThanOrEqualTo(2);
         }
 
-        await Assert.That(songs.Count(x => x.Contains(DrumDefinitions.Ride)) / (double)songs.Length).IsBetween(0.65, 0.85);
+        var ride = songs.Count(x => x.Contains(DrumDefinitions.Ride)) / (double)songs.Length;
+        Console.WriteLine($"songs with a ride {ride:P1}");
+        // measured: 76% of 1000 songs, October 2026
+        await Assert.That(ride).IsBetween(0.65, 0.85);
     }
 
     [Test]
@@ -118,6 +125,8 @@ public sealed class SongDrumSelectionTest
         double Share(DrumSetup setup, double unconventionality) => Seeds.Count(seed =>
             DrumSetups.Pick(new GenerationContext((ulong)seed), unconventionality, Genre.None) == setup) / (double)Seeds.Count();
 
+        Console.WriteLine($"at the middle the kit alone {Share(DrumSetup.Kit, 0.5):P1}, percussion alone {Share(DrumSetup.Percussion, 0.5):P1}; percussion alone {Share(DrumSetup.Percussion, 0):P1} plainest, {Share(DrumSetup.Percussion, 1):P1} wildest");
+        // measured: the kit alone 61%, percussion alone 7% at the middle, 0% and 33% at the ends, October 2026
         await Assert.That(Share(DrumSetup.Kit, 0.5)).IsBetween(0.55, 0.7);
         await Assert.That(Share(DrumSetup.Percussion, 0.5)).IsBetween(0.02, 0.09);
         await Assert.That(Share(DrumSetup.Percussion, 1)).IsGreaterThan(Share(DrumSetup.Percussion, 0) * 3);
@@ -139,23 +148,6 @@ public sealed class SongDrumSelectionTest
 
         foreach (var drum in MainSnares.Append(DrumDefinitions.Clap).Concat(DrumGroups.Percussion.Drums))
             await Assert.That(seen.Contains(drum)).IsTrue();
-    }
-
-    [Test]
-    public async Task SectionDrums_AreSubsetOfSongDrums()
-    {
-        foreach (var seed in Seeds)
-        {
-            var context = new GenerationContext((ulong)seed);
-            var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion, null);
-
-            for (var i = 0; i < 5; i++)
-            {
-                var sectionDrums = DrumKitGenerator.SelectKit(context, songDrums, default, false, songDrums.ToDictionary(x => x, x => x.MainRole)).Drums;
-
-                await Assert.That(sectionDrums.All(songDrums.Contains)).IsTrue();
-            }
-        }
     }
 
     [Test]

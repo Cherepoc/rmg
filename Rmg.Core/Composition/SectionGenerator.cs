@@ -121,10 +121,10 @@ internal sealed class SectionGenerator
         return _context.CreateContext(StreamSeed(sectionId, stream));
     }
 
-    /// <summary>The seed of <see cref="Stream" />, for a decision that derives its own sequences from it.</summary>
     /// <summary>A track's own sequence of a section's decision, so that a change to one track leaves the others as they are.</summary>
     private IGenerationContext TrackStream(int sectionId, SectionStream stream, int track) => new GenerationContext(Seeds.Derive(StreamSeed(sectionId, stream), track));
 
+    /// <summary>The seed of <see cref="Stream" />, for a decision that derives its own sequences from it.</summary>
     private ulong StreamSeed(int sectionId, SectionStream stream)
     {
         return Seeds.Derive(Seeds.Derive(_seed, sectionId), (int)stream);
@@ -217,6 +217,7 @@ internal sealed class SectionGenerator
         var (powerChords, chugs, octaveBass, hooks) = DrawDevices(sectionId, plan.Role, facets);
         // a breakdown's riff chugging on its pedal
         chugs |= breakdown;
+        StateTrace.RecordSection(TracePoints.Chugs, SectionTrace, sectionId, $"{chugs}", chugs);
         // its bass alternating the root and the fifth, a genre's, from a sequence of its own
         var alternatingBass = Stream(sectionId, SectionStream.AlternatingBass)
             .TestProbability(AlternatingBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.AlternatingBass, "sections")));
@@ -281,6 +282,7 @@ internal sealed class SectionGenerator
         var home = Progressions.GenerateHome(Stream(sectionId, SectionStream.Home), scale, plan.Role, _genre, facets[Facet.Progression]);
         if (plan.HasTonicHome)
             home = 0;
+        StateTrace.RecordSection(TracePoints.SectionHome, SectionTrace, sectionId, $"{home}", home);
         // how often its chords change, from a sequence of its own, faster the more energy it has
         var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter, facets[Facet.Progression], _genre);
         // a phrase of four and two its first four bars' chords and its last two's again
@@ -326,6 +328,7 @@ internal sealed class SectionGenerator
         // a section vamping on its home, a genre's, from a sequence of its own, as planing does without its moves, the
         // cadence's raise with it, the progression's other draws made all the same
         var vamps = Stream(sectionId, SectionStream.Vamp).TestProbability(Vamp.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Vamp, "sections")));
+        StateTrace.RecordSection(TracePoints.Vamp, SectionTrace, sectionId, $"{vamps}", vamps);
         if (vamps)
             // the changes as drawn, without the passing chords', which a vamp on one chord has none of
             (harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep) = (drawnRhythm, [..Enumerable.Repeat(0, drawnRhythm.Count)],
@@ -374,7 +377,6 @@ internal sealed class SectionGenerator
         StateTrace.RecordSection(TracePoints.RiffPowerChords, SectionTrace, sectionId, $"{powerChords}", powerChords);
         // its guitars' and its picked bass's repeats palm-muted, a genre's, which the songs never play, from a sequence of its own
         var chugs = Stream(sectionId, SectionStream.Chugs).TestProbability(ChugChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "chugs")));
-        StateTrace.RecordSection(TracePoints.Chugs, SectionTrace, sectionId, $"{chugs}", chugs);
         // the bass in octaves now and then, a genre's the more, from a sequence of its own
         var octaveBass = Stream(sectionId, SectionStream.OctaveBass).TestProbability(OctaveBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.OctaveBass, "sections")));
         StateTrace.RecordSection(TracePoints.OctaveBass, SectionTrace, sectionId, $"{octaveBass}", octaveBass);
@@ -790,7 +792,7 @@ internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool 
 /// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
 /// <param name="DrumRoles">The role every one of the song's drums plays in the section.</param>
 /// <param name="Lines">The section's lines, such as its melody, before they are placed, placed afresh every time it plays.</param>
-/// <param name="Plays">How many times the section plays its pattern, of a phrase of 4 bars or more: once, twice, four or eight times (<see cref="SectionLength" />).</param>
+/// <param name="Plays">How many times the section plays its pattern: once, twice, four or eight times a pattern of one phrase, and as near in phrases a longer one, three times a pattern of three phrases among them (<see cref="DrawPlays" />).</param>
 /// <param name="Bindings">The drums bound to a lead, by their tracks, and their leads' tracks (<see cref="Doubling" />).</param>
 /// <param name="Resting">The parts the section leaves out as it plays (<see cref="Arrangement" />).</param>
 /// <param name="Absent">The parts the song leaves out, which every section rests (<see cref="SongParts" />).</param>

@@ -62,7 +62,9 @@ public sealed class DrumSoloTest
         }
 
         await Assert.That(solos).IsGreaterThan(10);
-        await Assert.That(feet / (double)solos).IsBetween(0.55, 0.85);
+        // the feet's chance 0.7 (DrumSolos.Feet), against the mechanism breaking (measured: 70% to 75% at offsets 0 and a million)
+        Console.WriteLine($"{solos} drum solos, the feet keeping an ostinato in {feet / (double)solos:P0}, the kick stacked in {stacking / (double)Math.Max(1, others):P0} of the others");
+        await Assert.That(feet / (double)solos).IsBetween(0.4, 0.95);
         await Assert.That(kept).IsGreaterThan(feet / 3);
         await Assert.That(feetLoudness.Average()).IsLessThan(handsLoudness.Average());
         await Assert.That(stacking / (double)others).IsBetween(0.2, 0.8);

@@ -228,7 +228,7 @@ internal static class Polymeter
                 }
             }
 
-            int Bar(double position) => (int)Math.Floor((position - span.Start) / span.Meter.BarDuration + 1e-9);
+            int Bar(double position) => span.BarOf(position);
             // the notes before and after the section as they are, and the section's as played
             EventTimeline<StateMap> Within(EventTimeline<StateMap> notes, IEnumerable<TimelineItem<StateMap>> played) =>
                 EventTimeline.Create(notes.Duration, notes.Where(x => !x.IsWithin(span.Start, span.End)).Concat(played).OrderBy(x => x.Position));

@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 using Rmg.Tests.Genres;
@@ -28,6 +29,50 @@ public sealed class MutationsTest
         }
 
         await Assert.That(checkedSections).IsGreaterThan(10);
+    }
+
+    /// <summary>
+    ///     IDM's songs mutating against the same songs without: a polymeter's drums left as they are, and where the anchors
+    ///     are kept, every bar's downbeat kick the song without struck.
+    /// </summary>
+    [Test]
+    public async Task AMutatingGroove_LeavesAPolymeter_AndKeepsItsAnchorsBelowTheWildEnd()
+    {
+        var (mutated, kept) = (0, 0);
+        var kicks = DrumGroups.Kick.Tracks.ToHashSet();
+        foreach (var seed in Enumerable.Range(0, 32))
+        {
+            var genre = GenrePresets.Genre("idm");
+            var with = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
+            var without = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), new SongOverrides(Genre: genre), System.Collections.Immutable.ImmutableHashSet.Create("Mutations"), (_, _) => { }, CancellationToken.None);
+            var edits = with.Trace.Where(x => x.Point == TracePoints.Mutations).Select(x => (((int Index, int Made))x.Value!)).ToDictionary(x => x.Index, x => x.Made);
+            var figured = with.Trace.Where(x => x.Point == TracePoints.Figures && ((System.Collections.ICollection)x.Value!).Count > 0).Select(x => x.Section).ToHashSet();
+            var polymetric = ((System.Collections.IDictionary)with.Trace.Single(x => x.Point == TracePoints.Polymeter).Value!).Keys.Cast<int>().ToHashSet();
+            foreach (var (span, index) in with.Map.Sections.Select((x, i) => (x, i)).Where(x => edits.GetValueOrDefault(x.i) > 0))
+            {
+                mutated++;
+                // the drums' notes in the section's bars after its first, as the stage edits them, with and without it
+                (int, double)[] Drums(Song song, Func<int, bool> which) => [..song.Notes!.Where(x => song.TrackDefinitions[x.Key].Role == TrackRole.Drum && which(x.Key))
+                    .SelectMany(x => x.Value.Where(n => n.Position >= span.Start + span.Meter.BarDuration - 1e-9 && n.Position < span.End - 1e-9).Select(n => (x.Key, Math.Round(n.Position, 6))))
+                    .Order()];
+                if (polymetric.Contains(span.SectionId))
+                    await Assert.That(Drums(with.Song, _ => true)).IsEquivalentTo(Drums(without, _ => true), CollectionOrdering.Matching).Because($"seed {seed} at {span.Start}");
+                // a downbeat kick of the song without kept, where the section keeps its anchors every time, its groove at the
+                // middle or plainer (Mutations.KeepsAnchors)
+                var groove = ((Unconventionality)with.Trace.First(x => x.Point == TracePoints.SectionUnconventionality && x.Section == span.SectionId).Value!).Facets[Facet.Groove];
+                if (!figured.Contains(span.SectionId) && groove <= 0.5)
+                {
+                    var bars = Enumerable.Range(1, span.BarCount - 1).Select(bar => Math.Round(span.Start + bar * span.Meter.BarDuration, 6)).ToHashSet();
+                    var downbeats = Drums(without, kicks.Contains).Where(x => bars.Contains(x.Item2)).Select(x => x.Item2).ToHashSet();
+                    var still = Drums(with.Song, kicks.Contains).Select(x => x.Item2).ToHashSet();
+                    kept += downbeats.Count;
+                    await Assert.That(downbeats.All(still.Contains)).IsTrue().Because($"seed {seed} at {span.Start}");
+                }
+            }
+        }
+
+        await Assert.That(mutated).IsGreaterThan(10);
+        await Assert.That(kept).IsGreaterThan(0);
     }
 
     [Test]

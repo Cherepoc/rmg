@@ -10,7 +10,7 @@ public sealed class PumpTest
     [Test]
     public async Task APumpingSongsPads_DuckOnTheBeat_AndSwellBackOverIt()
     {
-        var pumping = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic"))))
+        var pumping = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic"))))
             .Where(x => ((SongEffects)x.Trace.Single(t => t.Point == TracePoints.SongEffects).Value!).Strong == StrongEffect.Pump)
             .ToArray();
         await Assert.That(pumping.Length).IsGreaterThan(3);
@@ -26,6 +26,8 @@ public sealed class PumpTest
         }
 
         await Assert.That(onBeat).IsGreaterThan(100);
+        Console.WriteLine($"{pumping.Length} songs pumping: ducked on the beat {ducked / (double)onBeat:P0}, full before the next {full / (double)offBeat:P0}");
+        // measured: ducked 89% to 90%, full 100%, at offsets 0 and a million
         await Assert.That(ducked / (double)onBeat).IsGreaterThan(0.8);
         await Assert.That(full / (double)offBeat).IsGreaterThan(0.8);
     }

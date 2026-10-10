@@ -359,19 +359,29 @@ public sealed class FillArchetypeTest
     }
 
     [Test]
-    public async Task SlowingDown_PlaysTheFinerNotesFirst()
+    [Arguments(FillSpeed.SlowsDown)]
+    [Arguments(FillSpeed.SpeedsUp)]
+    public async Task ChangingSpeed_PlaysTheFinerNotesInItsFasterHalf(FillSpeed speed)
     {
+        var finer = 0;
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var roll = Events(ApplyRun(setup, SnareRun(setup, FillSpeed.SlowsDown)), setup.Snare, 4, Line)
+            var roll = Events(ApplyRun(setup, SnareRun(setup, speed)), setup.Snare, 4, Line)
                 .Where(x => x.Value.GetStateValue(StateKinds.Velocity) != 0)
                 .ToArray();
             var middle = (roll[0].Position + Line) / 2;
+            static bool OnAnEighth(double position) => Math.Abs(position * 2 - Math.Round(position * 2)) < 1e-6;
+            var (slow, fast) = speed == FillSpeed.SlowsDown
+                ? (roll.Where(x => x.Position >= middle), roll.Where(x => x.Position < middle))
+                : (roll.Where(x => x.Position < middle), roll.Where(x => x.Position >= middle));
 
-            // the second half keeps to 8ths
-            await Assert.That(roll.Where(x => x.Position >= middle).All(x => Math.Abs(x.Position * 2 - Math.Round(x.Position * 2)) < 1e-6)).IsTrue();
+            // the slower half keeps to 8ths, and the faster plays between them
+            await Assert.That(slow.All(x => OnAnEighth(x.Position))).IsTrue().Because($"seed {seed}");
+            finer += fast.Any(x => !OnAnEighth(x.Position)) ? 1 : 0;
         }
+
+        await Assert.That(finer).IsGreaterThan(Seeds.Count() / 2);
     }
 
     [Test]

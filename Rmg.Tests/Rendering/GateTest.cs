@@ -18,7 +18,8 @@ public sealed class GateTest
         var gated = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
         {
-            var chopped = song.Rendered.Tracks.Where(x => x.Expression.Any(e => e.Value == 0)).ToArray();
+            // a part's own track, not its double's, which a driven guitar's second take copies the gate to
+            var chopped = song.Rendered.Tracks.Where(x => !x.IsDouble && x.Expression.Any(e => e.Value == 0)).ToArray();
             await Assert.That(chopped.Length).IsLessThanOrEqualTo(1);
             if (chopped.Length == 0)
                 continue;

@@ -15,7 +15,7 @@ public sealed class GenreDevicesReportTest
     private const int Count = 32;
 
     /// <summary>A song's share of each device, by its name.</summary>
-    private static Dictionary<string, double> Measure(CorpusSong song)
+    internal static Dictionary<string, double> Measure(CorpusSong song)
     {
         double Sections(string point, Func<object?, bool> plays) =>
             song.Trace.Where(x => x.Point == point).Select(x => plays(x.Value) ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average();
@@ -64,6 +64,12 @@ public sealed class GenreDevicesReportTest
                 ? verses.Average(x => song.Resting(x.span).Contains(TrackRole.Melody) ? 1.0 : 0)
                 : double.NaN,
             ["songs with a solo"] = song.Solos.Count > 0 ? 1 : 0,
+            ["sections ghosting"] = Sections(TracePoints.Ghosts, x => (bool)x!),
+            ["sections whose groove mutates"] = Sections(TracePoints.Mutations, x => (((int, int Made))x!).Made > 0),
+            ["sections with a figure"] = Sections(TracePoints.Figures, x => ((System.Collections.ICollection)x!).Count > 0),
+            ["sections in half or double time"] = Sections(TracePoints.TimeFeel, x => (int)x! != 0),
+            ["songs flamming or dragging"] = song.Trace.Single(x => x.Point == TracePoints.DrumOrnaments).Value is (int flams, int drags) && flams + drags > 0 ? 1 : 0,
+            ["songs whose drums mark the form"] = ((System.Collections.ICollection)song.Trace.Single(x => x.Point == TracePoints.DrumMarks).Value!).Count > 0 ? 1 : 0,
             ["songs swung"] = song.Swing.Delay > 0 ? 1 : 0,
             ["songs swung in 16ths"] = song.Swing.Delay > 0 && song.Swing.Period < 1 ? 1 : 0,
             ["songs with a guitar driven when loud"] = song.Trace.Any(x => x.Point == TracePoints.LouderForm) ? 1 : 0,

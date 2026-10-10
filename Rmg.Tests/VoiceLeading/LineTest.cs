@@ -225,38 +225,13 @@ public sealed class LineTest
     [Test]
     public async Task Songs_MelodiesMoveByLittle_AndTakeChordNotesOnTheBeat()
     {
-        var moves = new List<int>();
-        int onBeat = 0, onBeatChordNotes = 0;
-        for (var seed = 0; seed < 64; seed++)
-        {
-            var song = TestCorpus.Get(seed).Song;
-            var rendered = Render.RenderSong(TestCorpus.Unornamented(song));
-            RenderedTrack TrackOf(TrackRole role) => rendered.Tracks.First(x => x.Role == role && !x.IsDouble);
-            // a note in octaves once, by its own pitch, which comes first, and none of a solo, whose line is its own; the
-            // rendered notes in the order of the song's, which say which is a solo's
-            var solo = song.Notes![song.Track(TrackRole.Melody)].Select(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1).ToArray();
-            var heard = TrackOf(TrackRole.Melody).NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray();
-            await Assert.That(heard.Length).IsEqualTo(solo.Length);
-            var melody = heard.Where((_, i) => !solo[i]).ToArray();
-            moves.AddRange(melody.Zip(melody.Skip(1)).Select(x => Math.Abs(x.Second.Value.Offset - x.First.Value.Offset)));
-            // a note on the beat against its own chord, as its state has it, not the chords' part's strokes, which an
-            // arpeggio or a rest leaves out
-            foreach (var note in song.Notes![song.Track(TrackRole.Melody)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0
-                                                                                        && Math.Abs(x.Position - Math.Round(x.Position)) < 1e-9))
-            {
-                onBeat++;
-                if (Realizer.GetChordNotes(note.Value.State).Classes.Contains(note.Value.Pitches[0].Mod(12)))
-                    onBeatChordNotes++;
-            }
-        }
-
-        // calibrations, their bounds against the line falling apart, the line's moves and chord notes reported in
-        // MelodyRepetitionTest.Report: a move of 2.7 semitones, a leap past a fifth 4.9% of the moves, 70% of the beats
-        // on a chord's notes (October 2026)
-        Console.WriteLine($"mean move {moves.Average():F2}, leaps past a fifth {moves.Count(x => x > 7) / (double)moves.Count:P1}, chord notes on the beat {onBeatChordNotes / (double)onBeat:P0}");
-        await Assert.That(moves.Average()).IsLessThan(4.5);
-        await Assert.That(moves.Count(x => x > 7) / (double)moves.Count).IsLessThan(0.1);
-        await Assert.That(onBeatChordNotes / (double)onBeat).IsGreaterThan(0.55);
+        // calibrations of the measure the report prints (MelodyRepetitionTest.Report), their bounds against the line
+        // falling apart (measured: a move of 2.64 to 2.76, leaps 9.6% to 10.5%, chord notes on the beat 66% to 71%, at offsets 0 and a million)
+        var m = Rmg.Tests.MelodyRhythms.MelodyRepetitionTest.Measure(TestCorpus.Range(64));
+        Console.WriteLine($"mean move {m.MeanMove:F2}, leaps {m.LeapShare:P1}, chord notes on the beat {m.OnBeatChordNotes:P0}");
+        await Assert.That(m.MeanMove).IsLessThan(4.5);
+        await Assert.That(m.LeapShare).IsLessThan(0.2);
+        await Assert.That(m.OnBeatChordNotes).IsGreaterThan(0.55);
     }
 
     [Test]

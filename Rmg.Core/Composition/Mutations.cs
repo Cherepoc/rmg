@@ -114,7 +114,7 @@ internal static class Mutations
                 if (edits.Count > 0)
                 {
                     foreach (var mutation in edits)
-                        Lay(mutation, played, own, start, length, kicks, snares);
+                        Lay(mutation, played, own, start, length, span.Meter, kicks, snares, anchored);
                     any = true;
                 }
             }
@@ -154,9 +154,7 @@ internal static class Mutations
         if (track < 0)
             return null;
         var hits = HitsIn(played[track], start, length).Where(x => !anchored || !IsAnchor(track, x, meter, kicks, snares)).Distinct().ToArray();
-        // a stretch of the bar holding an anchor, which a swap or a trade moves whole
-        bool Holds(double from, double width) => anchored && drums.Any(drum =>
-            HitsIn(played[drum], start, length).Any(x => x >= from - 1e-9 && x < from + width - 1e-9 && IsAnchor(drum, x, meter, kicks, snares)));
+        bool Holds(double from, double width) => anchored && HoldsAnchor(played, drums, start, length, from, width, meter, kicks, snares);
         var beat = Math.Floor(pick * Math.Floor(length + 1e-9));
         return kind switch
         {
@@ -172,10 +170,22 @@ internal static class Mutations
         };
     }
 
-    /// <summary>An edit laid on a bar, as far as the bar has what it edits.</summary>
-    private static void Lay(Mutation mutation, Dictionary<int, List<TimelineItem<StateMap>>> played, int[] drums, double start, double length,
-        IReadOnlySet<int> kicks, IReadOnlySet<int> snares)
+    /// <summary>Whether a stretch of the bar holds an anchor, which a swap or a trade moves whole.</summary>
+    private static bool HoldsAnchor(Dictionary<int, List<TimelineItem<StateMap>>> played, int[] drums, double start, double length, double from, double width, Meter meter,
+        IReadOnlySet<int> kicks, IReadOnlySet<int> snares) =>
+        drums.Any(drum => HitsIn(played[drum], start, length).Any(x => x >= from - 1e-9 && x < from + width - 1e-9 && IsAnchor(drum, x, meter, kicks, snares)));
+
+    /// <summary>
+    ///     An edit laid on a bar, as far as the bar has what it edits; a swap or a trade kept from a bar before left out where
+    ///     this bar holds an anchor in what it moves, as it was drawn where the bar it was drawn in held none.
+    /// </summary>
+    private static void Lay(Mutation mutation, Dictionary<int, List<TimelineItem<StateMap>>> played, int[] drums, double start, double length, Meter meter,
+        IReadOnlySet<int> kicks, IReadOnlySet<int> snares, bool anchored)
     {
+        if (anchored && (mutation.Kind == MutationKind.Swap && (HoldsAnchor(played, drums, start, length, mutation.At, 2 * Sixteenth, meter, kicks, snares)
+                                                                || HoldsAnchor(played, drums, start, length, mutation.By, 2 * Sixteenth, meter, kicks, snares))
+                         || mutation.Kind == MutationKind.Trade && HoldsAnchor(played, drums, start, length, mutation.At, 1, meter, kicks, snares)))
+            return;
         // an edit drawn on a full bar that reaches past a short one's end, which the next section plays, is left
         if (mutation.At >= length - 1e-9 || mutation.Kind == MutationKind.Swap && Math.Max(mutation.At, mutation.By) + 2 * Sixteenth > length + 1e-9
             || mutation.Kind == MutationKind.Trade && mutation.At + 1 > length + 1e-9)

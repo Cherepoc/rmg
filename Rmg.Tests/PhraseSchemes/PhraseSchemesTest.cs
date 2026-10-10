@@ -83,16 +83,17 @@ public sealed class PhraseSchemesTest
         foreach (var (song, riff) in withRiffs.SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track == song.Track(TrackRole.Riff)).GroupBy(x => x.Section).Select(x => (song, x))))
         {
             // fitted to its section's phrase
-            await Assert.That(RiffLayers.Schemes.Select(x => x.Value.Fitted(song.MeterOf(riff.Key).PhraseBars).ToString())).Contains(riff.Select(x => x.Phrase).Distinct().Single()!);
+            var played = riff.Select(x => (PhraseScheme)x.Value!).DistinctBy(x => string.Join(",", x.Letters)).Single();
+            await Assert.That(RiffLayers.Schemes.Any(x => x.Value.Fitted(song.MeterOf(riff.Key).PhraseBars).Letters.SequenceEqual(played.Letters))).IsTrue();
             riffs++;
         }
 
         await Assert.That(riffs).IsGreaterThan(0);
         foreach (var section in TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track != TestCorpus.Get(1).Track(TrackRole.Riff)).GroupBy(x => x.Section))
         {
-            var phrases = section.Select(x => x.Phrase).Distinct().ToArray();
+            var phrases = section.Select(x => (PhraseScheme)x.Value!).DistinctBy(x => string.Join(",", x.Letters)).ToArray();
             await Assert.That(phrases.Length).IsEqualTo(1).Because("every track follows the section's scheme");
-            var letters = phrases[0]!.Replace("′", "");
+            var letters = phrases[0].Letters;
 
             foreach (var track in section.GroupBy(x => x.Track))
             {
@@ -100,7 +101,7 @@ public sealed class PhraseSchemesTest
                 var seeds = track.GroupBy(x => x.Bar).OrderBy(x => x.Key).Select(x => x.First().StateMap.GetStateValue(CompositionStateKinds.ValueSeed)).ToArray();
                 for (var a = 0; a < letters.Length; a++)
                 for (var b = 0; b < letters.Length; b++)
-                    await Assert.That(seeds[a] == seeds[b]).IsEqualTo(letters[a] == letters[b]).Because($"{letters}, bars {a} and {b}");
+                    await Assert.That(seeds[a] == seeds[b]).IsEqualTo(letters[a] == letters[b]).Because($"{string.Join(",", letters)}, bars {a} and {b}");
             }
         }
     }

@@ -188,9 +188,10 @@ internal static class Figures
                                     ? [..Enumerable.Range(0, span.Meter.Sixteenths).Where(x => x % figure.Step == 0).Select(x => bar + x * 0.25)]
                                     : [..figure.Onsets.Select(x => x - index % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
                             // in a bar both play, each struck as the player's own note at or before it was; one around the kick
-                            // where the kick plays, the player's own rhythm where it rests; and none in half or double time,
-                            // whose figure is the player's own rhythm stretched or pressed
-                            if (own.Length == 0 || onsets.Length == 0 || song.SectionOf(span.SectionId).TimeFeel != 0 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
+                            // where the kick plays, the player's own rhythm where it rests; and none of fixed onsets in half or
+                            // double time, whose figure is the player's own rhythm stretched or pressed, but one with the riff,
+                            // whose notes are as the riff plays them there, a breakdown's kick on its chugs
+                            if (own.Length == 0 || onsets.Length == 0 || song.SectionOf(span.SectionId).TimeFeel != 0 && !figure.FollowsRiff || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
                                 continue;
                             played.RemoveAll(x => In(x.Position));
                             played.AddRange(onsets.Where(In).Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));

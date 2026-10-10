@@ -27,15 +27,15 @@ public sealed class SongStagesTest
     [Test]
     public async Task AStageLeftOut_LeavesWhatTheOthersMakeAsItWas()
     {
-        // the cues before a bigger section are the drums' alone: the melody is as it was without them
+        // the cues before a bigger section are the drums' alone: every other part's notes are as they were without them
         foreach (var seed in Enumerable.Range(0, 8))
         {
             var (with, _) = Generate(seed);
             var (without, stages) = Generate(seed, "Lift cues");
             await Assert.That(stages.Select(x => x.Name)).DoesNotContain("Lift cues");
-            var (melodyWith, melodyWithout) = (with.Notes![with.Track(TrackRole.Melody)], without.Notes![without.Track(TrackRole.Melody)]);
-            await Assert.That(melodyWithout.Select(x => (x.Position, x.Value.Pitches[0])))
-                .IsEquivalentTo(melodyWith.Select(x => (x.Position, x.Value.Pitches[0])), CollectionOrdering.Matching);
+            foreach (var (track, notes) in with.Notes!.Where(x => with.TrackDefinitions[x.Key].Role != TrackRole.Drum))
+                await Assert.That(without.Notes![track].Select(x => (x.Position, x.Value.Duration, string.Join(",", x.Value.Pitches))))
+                    .IsEquivalentTo(notes.Select(x => (x.Position, x.Value.Duration, string.Join(",", x.Value.Pitches))), CollectionOrdering.Matching).Because($"seed {seed}, track {track}");
         }
     }
 

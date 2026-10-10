@@ -150,7 +150,7 @@ internal sealed class PatternGenerator
                                 phraseEnd,
                                 barDrums.Resting.Contains((x.Key, letter)),
                                 barDrums.Strokes.TryGetValue((x.Key, letter), out var stroke) ? stroke : null,
-                                sectionRhythm.Scheme.ToString(),
+                                sectionRhythm.Scheme,
                                 sectionRhythm.Energy,
                                 doubles.GetValueOrDefault(x.Key),
                                 feelLeads.TryGetValue(x.Key, out var feelLead) ? barFeels.Single(feel => feel.Track == feelLead).Rhythm : null,
@@ -204,7 +204,7 @@ internal sealed class PatternGenerator
         int? phraseEnd,
         bool isResting,
         int? stroke,
-        string scheme,
+        PhraseScheme scheme,
         Tilt energy,
         Doubling? doubling,
         StateMap? leadFeel,
@@ -239,7 +239,7 @@ internal sealed class PatternGenerator
         if (leadFeel is not null)
             stateMap = stateMap.Except([FeelKind]).MergeWith(leadFeel.Subset([FeelKind]));
         // an answer's bar is recorded at its place in the pattern, as its question's is
-        StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex % _meter.PatternBarCount, stateMap, phrase: scheme);
+        StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex % _meter.PatternBarCount, stateMap, phrase: scheme.ToString(), value: scheme);
 
         // the bar's place in the pattern, whose state an answer's bar plays over as its question's does
         var patternBar = barIndex % _meter.PatternBarCount;

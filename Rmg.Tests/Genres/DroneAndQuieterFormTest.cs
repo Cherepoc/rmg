@@ -39,7 +39,7 @@ public sealed class DroneAndQuieterFormTest
     [Test]
     public async Task ADroningRiff_PlaysItsWeakNotesOnItsPedal()
     {
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("blackMetal", GenreChoices.Riff, "drone"))));
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("blackMetal", GenreChoices.Riff, "drone"))));
         var drones = songs.Select(x => Pedal(x, x.Trace.Where(t => t.Point == TracePoints.Drone && (bool)t.Value!).Select(t => t.Section).ToHashSet())).ToArray();
         var (onPedal, weak) = (drones.Sum(x => x.OnPedal), drones.Sum(x => x.Weak));
         Console.WriteLine($"droning: {onPedal} of {weak} weak notes on the pedal");

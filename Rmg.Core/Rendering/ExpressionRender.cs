@@ -235,7 +235,7 @@ internal static class ExpressionRender
             swept = sweep > 0;
 
             // the part's brightness, one curve: its tone, below the sound's own, a filter closing further from it and opening
-            // back, ringing as it does: a wobble in time, a squelch on every note, an opening over a section's first phrase;
+            // back, ringing as it does: a wobble in time, a squelch on every note, an opening over a section's first pattern;
             // and the whole mix's closing; never below the filter's reach
             var tone = state.GetStateValue(CompositionStateKinds.Tone);
             var filter = (StrongEffect)state.GetStateValue(CompositionStateKinds.Filter);

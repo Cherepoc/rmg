@@ -16,8 +16,17 @@ public sealed class GenreIdiomsReportTest
 {
     private const int Count = 32;
 
-    /// <summary>A song's measures, each by its name.</summary>
+    /// <summary>A song's measures, each by its name, the devices' as the devices' report measures them (<see cref="GenreDevicesReportTest.Measure" />).</summary>
     internal static Dictionary<string, double> Measure(CorpusSong song)
+    {
+        var measures = Idioms(song);
+        foreach (var (name, value) in GenreDevicesReportTest.Measure(song))
+            measures.Add(name, value);
+        return measures;
+    }
+
+    /// <summary>A song's idioms, each by its name.</summary>
+    private static Dictionary<string, double> Idioms(CorpusSong song)
     {
         var map = song.Map;
         var notes = song.Song.Notes!;
@@ -108,7 +117,6 @@ public sealed class GenreIdiomsReportTest
             ["roots down a step (bVII-bVI)"] = Motion(6),
             ["sections on one chord"] = song.Trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section)
                 .Select(x => ((System.Collections.Immutable.ImmutableArray<int>)x.First().Value!).Distinct().Count() == 1 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
-            ["sections with a passing chord"] = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).Select(x => ((HarmonicRhythm)x.Value!).Passing.Length > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["sections sharing a progression"] = progressions.Length > 1 ? progressions.Skip(1).Count(x => x == progressions[0]) / (double)(progressions.Length - 1) : double.NaN,
             ["fills a minute"] = song.Trace.Count(x => x.Point == TracePoints.FillDecision && ((FillDecision)x.Value!).Span > 0) / minutes,
             ["drums over the melody"] = drumVelocities.Length > 0 && melodyVelocities.Length > 0 ? drumVelocities.Average() - melodyVelocities.Average() : double.NaN,
@@ -150,13 +158,9 @@ public sealed class GenreIdiomsReportTest
             ["riff sections in power chords"] = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["guitars' notes palm-muted"] = notes.Where(x => x.Key == song.Track(TrackRole.Riff) || x.Key == song.Track(TrackRole.Rhythm)).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["solo appearances"] = song.Solos.Count / (double)map.Sections.Length,
-            ["sections in stop time"] = song.Trace.Where(x => x.Point == TracePoints.StopTime).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["sections the drums rest"] = Rests(TrackRole.Drum),
             ["sections the pad rests"] = Rests(TrackRole.Pad),
-            ["changing key"] = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).IsEmpty ? 0 : 1,
             ["bass notes an octave from the one before"] = bass.Length > 1 ? bass.Skip(1).Select((x, i) => Math.Abs(x.Value.Pitches.Min() - bass[i].Value.Pitches.Min()) == 12 ? 1.0 : 0).Average() : double.NaN,
-            ["sections pushing"] = song.Trace.Where(x => x.Point == TracePoints.Push).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
-            ["lifts dropped"] = song.Trace.Count(x => x.Point == TracePoints.LiftCue) is var lifts and > 0 ? song.Trace.Count(x => x.Point == TracePoints.Drop) / (double)lifts : double.NaN,
             ["ending a fade"] = map.Ending.Kind == EndingKind.Fade ? 1 : 0,
             ["ending a button or a stop"] = map.Ending.Kind is EndingKind.Button or EndingKind.Stop ? 1 : 0,
             ["intro part by part"] = map.Intro.Kind == IntroKind.Entries ? 1 : 0,
@@ -187,7 +191,7 @@ public sealed class GenreIdiomsReportTest
         ["blues"] = [("melody pentatonic or blues", 0.6, 1), ("snare on 2 and 4", 0.8, 1)],
         ["jazz"] = [("chords in 4 bars", 4, 8), ("melody leaps past a fifth", 0.06, 0.2), ("time as the bar before", 0.8, 1)],
         ["folk"] = [("melody mean move", 0, 2.5), ("fills a minute", 0, 4)],
-        ["pop"] = [("snare on 2 and 4", 0.75, 1), ("chords in 4 bars", 2, 5), ("changing key", 0.2, 0.6), ("tempo", 95, 125)],
+        ["pop"] = [("snare on 2 and 4", 0.75, 1), ("chords in 4 bars", 2, 5), ("songs changing key", 0.2, 0.6), ("tempo", 95, 125)],
         ["metal"] = [("kick hits a bar", 4, 16), ("riff sections in power chords", 0.7, 1), ("guitars' notes palm-muted", 0.15, 1), ("tempo", 120, 180)],
         ["funk"] = [("sections sharing a progression", 0.4, 1), ("melody bars repeated", 0.1, 1), ("chords stabbed (a 16th or shorter)", 0.15, 1), ("lifts dropped", 0, 0)]
     };

@@ -45,7 +45,10 @@ internal sealed record SongDecisions(
     SongSound Sound
 )
 {
-    /// <summary>Where the song plays in stop time, its phrases' start, end and bar, decided once for the stages that keep to it (<see cref="Composition.StopTime" />).</summary>
+    /// <summary>
+    ///     Where the song plays in stop time, its phrases' start, end and bar, as drawn, decided once for the stages before
+    ///     stop time that keep to it (<see cref="Composition.StopTime" />); those after keep to what it played (<see cref="SongDraft.Stopped" />).
+    /// </summary>
     public ImmutableArray<(double Start, double End, double BarDuration)> StopTime => _stopTime ??= StopTimeSkipped ? [] : [..Composition.StopTime.Phrases(this)];
 
     /// <summary>Whether the song is made without its stop time, as a listening test compares it, which every stage keeping to it then keeps to.</summary>

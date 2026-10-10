@@ -10,10 +10,10 @@ namespace Rmg.Core.Composition;
 ///     hands on to another.
 /// </summary>
 /// <param name="Notes">The notes, once realized (<see cref="SongStages.RealizeNotes" />); none before.</param>
-/// <param name="Runs">The drums' runs, which the fills play and the lines walk with (<see cref="SongStages.Fills" />).</param>
+/// <param name="Runs">The drums' runs, which the fills play, the lines walk with and the stages that play around a fill keep out of (<see cref="FillSpans" />).</param>
 /// <param name="Chains">How each key change is led into, which the bass's pedal holds under (<see cref="SongStages.KeyChanges" />).</param>
 /// <param name="Figures">Every section's figures, by its id and the player, which a mutating groove leaves as they are (<see cref="Composition.Figures" />).</param>
-/// <param name="Polymeters">The sections a figure runs across the bar lines in, which a mutating groove leaves as they are (<see cref="SongStages.Polymeter" />).</param>
+/// <param name="Polymeters">The sections a figure runs across the bar lines in, which the figures, the pushes and a mutating groove keep to (<see cref="SongStages.Polymeter" />).</param>
 internal sealed record SongDraft(
     TrackEventStateTimelineMap<StateMap> Timeline,
     ImmutableSortedDictionary<int, EventTimeline<RealizedNote>>? Notes,
@@ -23,13 +23,19 @@ internal sealed record SongDraft(
     ImmutableHashSet<int> Polymeters
 )
 {
+    /// <summary>
+    ///     Where the song plays in stop time as stop time played it, its phrases that a part carries, none before it or where
+    ///     it is left out: the stages after it keep to these, the stages before it to the phrases drawn (<see cref="SongDecisions.StopTime" />).
+    /// </summary>
+    public ImmutableArray<(double Start, double End, double BarDuration)> Stopped { get; init; } = [];
+
     /// <summary>Where the drums fill, from a run's first note to its line, which the stages that play around a fill keep out of.</summary>
     public (double From, double To)[] FillSpans => [..Runs.Where(x => !x.Positions.IsEmpty).Select(x => (x.Positions.Min(), x.Line))];
 
-    /// <summary>Whether a span meets a fill, from its first note to its line, the song's stop time or a drum solo: where the drums' own touches keep out.</summary>
+    /// <summary>Whether a span meets a fill, from its first note to its line, the song's stop time as played or a drum solo: where the drums' own touches keep out.</summary>
     public Func<double, double, bool> Busy(SongDecisions song)
     {
-        var (fills, stops) = (FillSpans, song.StopTime);
+        var (fills, stops) = (FillSpans, Stopped);
         var solos = DrumSoloSpans(song);
         return (from, to) => fills.Any(x => x.From < to - 1e-9 && x.To > from + 1e-9) || stops.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9)
                              || solos.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9);
@@ -394,7 +400,7 @@ internal static class SongStages
                 song.Genre,
                 [..draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)],
                 song.Form.Edits.CutsOf,
-                [..song.StopTime.Select(x => (x.Start, x.End))],
+                [..draft.Stopped.Select(x => (x.Start, x.End))],
                 song.IntroSource
             )
         };

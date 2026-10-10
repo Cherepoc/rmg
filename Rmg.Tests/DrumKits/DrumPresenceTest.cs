@@ -44,7 +44,7 @@ public sealed class DrumPresenceTest
         var checkedNotes = 0;
         foreach (var song in TestCorpus.Range(32).Where(x => x.PlaysDrums))
         {
-            var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
+            var schemes = song.Trace.Where(x => x.Point == TracePoints.PhraseScheme).ToDictionary(x => x.Section, x => ((PhraseScheme)x.Value!).Letters);
             // a drum solo plays its own segments in place of the groove (DrumSolos)
             var solos = song.Trace.Where(x => x.Point == TracePoints.DrumSolo).Select(x => x.Section).ToHashSet();
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence && !solos.Contains(x.Section)))
@@ -52,7 +52,9 @@ public sealed class DrumPresenceTest
             foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
             {
                 var code = DrumGroups.GetDrum(track).Sounds[stroke].Code;
-                foreach (var bar in schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter).Select(x => x.bar))
+                // every phrase's bars of its letter, as every phrase plays its scheme
+                var letters = schemes[entry.Section];
+                foreach (var bar in Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.BarDuration)).Where(x => letters[x % letters.Length] == letter))
                 {
                     var start = span.Start + bar * span.Meter.BarDuration;
                     // but a fill's notes, which name their sounds, and an accent's, a note's own stroke
@@ -76,7 +78,7 @@ public sealed class DrumPresenceTest
         var checkedBars = 0;
         foreach (var song in TestCorpus.Range(32).Where(x => x.PlaysDrums))
         {
-            var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
+            var schemes = song.Trace.Where(x => x.Point == TracePoints.PhraseScheme).ToDictionary(x => x.Section, x => ((PhraseScheme)x.Value!).Letters);
             // a drum solo plays its own segments in place of the groove (DrumSolos)
             var solos = song.Trace.Where(x => x.Point == TracePoints.DrumSolo).Select(x => x.Section).ToHashSet();
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence && !solos.Contains(x.Section)))
@@ -87,8 +89,9 @@ public sealed class DrumPresenceTest
                 if (!song.Song.Notes!.TryGetValue(track, out var notes))
                     continue;
 
-                // the bars of its letter, but the last of a pattern, where a fill may play it
-                var bars = schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter && x.bar < span.Meter.PhraseBars - 1).Select(x => x.bar);
+                // every phrase's bars of its letter, but each phrase's last, where a fill may play it
+                var letters = schemes[entry.Section];
+                var bars = Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.BarDuration)).Where(x => letters[x % letters.Length] == letter && x % letters.Length < letters.Length - 1);
                 foreach (var bar in bars)
                 {
                     var start = span.Start + bar * span.Meter.BarDuration;

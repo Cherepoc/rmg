@@ -17,4 +17,11 @@ internal static class GenrePresets
         Rmg.WebApi.Genres.GenrePresetFile.Genre(new Rmg.WebApi.Genres.GenrePreset(preset.Id, preset.Name, preset.Description, preset.Choices));
 
     public static Genre Genre(string id) => Genre(All.Single(x => x.Id == id));
+
+    /// <summary>A preset without one of its choices, which its songs then take at the songs' own amounts: the same songs with its device as the songs have it.</summary>
+    public static Genre Without(string id, string choice)
+    {
+        var preset = All.Single(x => x.Id == id);
+        return Genre(preset with { Choices = preset.Choices.Where(x => x.Key != choice).ToDictionary() });
+    }
 }

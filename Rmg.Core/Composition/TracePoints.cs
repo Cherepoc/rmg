@@ -69,6 +69,12 @@ internal static class TracePoints
     /// <summary>The ornaments the song's lines play (an <c>ImmutableArray</c> of <see cref="Composition.Ornament" />).</summary>
     public const string Ornaments = "Ornaments";
 
+    /// <summary>A section's home, its step above the song's tonic (an <c>int</c>, <see cref="Progressions.GenerateHome" />).</summary>
+    public const string SectionHome = "Section home";
+
+    /// <summary>Whether a section vamps on its home (a <c>bool</c>, <see cref="SectionGenerator.Vamp" />).</summary>
+    public const string Vamp = "Vamp";
+
     /// <summary>Whether a section turns its pattern around, its last bar a V or a ii–V into its start (a <c>bool</c>).</summary>
     public const string Turnaround = "Turnaround";
 

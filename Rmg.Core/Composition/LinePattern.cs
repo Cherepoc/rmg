@@ -242,7 +242,7 @@ internal sealed class LinePattern
             if (letter == 0 || map.SectionAt(notes[i].Note.Position) is not { } span)
                 continue;
             var position = notes[i].Note.Position;
-            var pattern = span.Start + Math.Floor((position - span.Start) / span.Meter.PatternDuration + 1e-9) * span.Meter.PatternDuration;
+            var pattern = span.Start + span.PatternOf(position) * span.Meter.PatternDuration;
             var bar = (int)Math.Floor((position - pattern) / span.Meter.BarDuration + 1e-9);
             if (!firsts.TryGetValue((pattern, letter), out var first))
             {

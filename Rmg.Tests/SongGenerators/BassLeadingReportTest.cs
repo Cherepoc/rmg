@@ -55,7 +55,8 @@ public sealed class BassLeadingReportTest
                 var isLastBeat = last.Position >= change - 1;
                 var isStep = Math.Abs(lastPitch - nextPitch) is 1 or 2;
                 var isOnChord = nextClasses.Contains(nextPitch.Mod(12));
-                var barFirst = bass.First(x => x.Position >= change - song.Map.Meter.BarDuration - 1e-9);
+                // the bar before the change in the meter it plays in, a section's own or a short bar's
+                var barFirst = bass.First(x => x.Position >= change - song.Map.BarBefore(change) - 1e-9);
                 m = new Measures(
                     m.Changes + 1,
                     m.Asked + (isAsked ? 1 : 0),

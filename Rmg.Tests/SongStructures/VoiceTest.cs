@@ -11,7 +11,7 @@ public sealed class VoiceTest
     public async Task AHipHopVerse_LeavesItsMelodyOut_Often_ItsChorusKeepsIt()
     {
         var (verses, versesOut, choruses, chorusesOut) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("hipHop")))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("hipHop")))))
         {
             var structure = song.Trace.Where(x => x.Point == TracePoints.SongForm).Select(x => (SongStructure)x.Value!).Single();
             foreach (var span in song.Song.Map!.Sections)

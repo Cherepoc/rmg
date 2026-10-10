@@ -32,13 +32,20 @@ public sealed class SoloTwinTest
             await Assert.That(solo.Mode).IsEqualTo(SoloMode.Together).Because(because);
             await Assert.That(Math.Abs(solo.Step)).IsEqualTo(2).Because(because);
             var span = song.Map.Sections[index];
-            double[] Onsets(TrackRole role) => [..song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role)
-                .SelectMany(x => x.Value).Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).Select(x => x.Position).Distinct().Order()];
-            var first = Onsets(solo.Soloists[0]);
-            foreach (var at in Onsets(solo.Soloists[1]))
+            // a part's notes in the solo, by their onsets
+            Dictionary<double, Rmg.Core.Events.StateMap> Notes(TrackRole role) => song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role)
+                .SelectMany(x => x.Value).Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9)
+                .GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.First().Value.State);
+            var first = Notes(solo.Soloists[0]);
+            var onsets = first.Keys.Order().ToArray();
+            foreach (var other in solo.Soloists.Skip(1))
+            foreach (var (at, state) in Notes(other))
             {
-                var next = first.FirstOrDefault(x => x > at + 1e-9, double.PositiveInfinity);
+                var next = onsets.FirstOrDefault(x => x > at + 1e-6, double.PositiveInfinity);
                 await Assert.That(next - at).IsGreaterThanOrEqualTo(Rmg.Core.Composition.Solos.TogetherShortest - 1e-6).Because($"{because} at {at}");
+                // the first's note a third away, where it plays one
+                if (first.TryGetValue(at, out var played))
+                    await Assert.That(state.GetStateValue(Rmg.Core.Events.StateKinds.ScaleStep) - played.GetStateValue(Rmg.Core.Events.StateKinds.ScaleStep)).IsEqualTo(solo.Step).Because($"{because} at {at}");
             }
         }
 

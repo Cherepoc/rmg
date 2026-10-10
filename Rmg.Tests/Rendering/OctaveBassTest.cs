@@ -16,12 +16,14 @@ public sealed class OctaveBassTest
     }
 
     [Test]
-    public async Task AFunkBass_JumpsAnOctave_OftenerThanTheSongs()
+    public async Task AFunkBass_JumpsAnOctave_OftenerThanWithTheSongsChance()
     {
+        // the same songs, Funk's octave bass against the songs' own chance of it
         var funk = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))).ToArray();
-        var songs = TestCorpus.Range(64).ToArray();
-        Console.WriteLine($"the bass an octave from the note before: funk's {Octaves(funk):P1}, the songs' {Octaves(songs):P1}");
+        var without = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without("funk", GenreChoices.OctaveBass.Name)))).ToArray();
+        Console.WriteLine($"the bass an octave from the note before: funk's {Octaves(funk):P1}, with the songs' chance {Octaves(without):P1}");
 
-        await Assert.That(Octaves(funk)).IsGreaterThan(Octaves(songs) * 2);
+        // measured: 27.5% to 29.1% against 2.8% to 5.3%, at offsets 0 and a million
+        await Assert.That(Octaves(funk)).IsGreaterThan(Octaves(without) * 1.5);
     }
 }

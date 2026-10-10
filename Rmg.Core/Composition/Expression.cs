@@ -52,7 +52,7 @@ public enum StrongEffect
     /// <summary>A synth's filter opening on every note, ringing, and closing over it, as an acid line's squelches.</summary>
     Squelch,
 
-    /// <summary>A synth's filter opening over the first phrase of every section the part plays, as a track builds in.</summary>
+    /// <summary>A synth's filter opening over the first pattern of every section the part plays, as a track builds in.</summary>
     Opening,
 
     /// <summary>A held chord chopped in 16ths, sounding in some and silent between, as a trance gate chops a pad.</summary>
@@ -247,7 +247,7 @@ internal static class Expression
     public const int DiveDepth = 12;
 
     /// <summary>General MIDI's guitar harmonics, which a pinch sounds on where it rings as a bell.</summary>
-    private const int GuitarHarmonics = 31;
+    internal const int GuitarHarmonics = 31;
 
     /// <summary>Whether a note is the longest of its bar, a held one among the part's, which a pinch takes.</summary>
     private static bool LongestOfBar(EventTimeline<RealizedNote> notes, int index, SectionSpan span)
@@ -448,7 +448,7 @@ internal static class Expression
     /// <summary>The delays an echo repeats after, in beats: a dotted 8th, a quarter, an 8th.</summary>
     public static ImmutableArray<double> EchoDelays { get; } = [0.75, 1, 0.5];
 
-    /// <summary>A part's reverb, from 0 to 127, as a mix sets it by role, and how far a section strays from it, by the sound facet.</summary>
+    /// <summary>A part's reverb, from 0 to 127, as a mix sets it by role, which a part strays from once for the song, by the sound facet (<see cref="ReverbSpread" />).</summary>
     public static int Reverb(TrackRole role) => role switch
     {
         TrackRole.Drum => 40,
@@ -799,7 +799,7 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Filter, (int)filter).With(CompositionStateKinds.FilterDepth, filterDepth)
                             .With(CompositionStateKinds.FilterCycle, filter == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle);
                     // a pinch, a held note's harmonic, where the song pinches
-                    var phrase = (index, (int)Math.Floor((note.Position - span.Start) / (span.Meter.PhraseDuration) + 1e-9));
+                    var phrase = (index, span.PhraseOf(note.Position));
                     if (songPinches && Pinches(noteProgram) && note.Value.Pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.Octave) == 0
                         && role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo
                         && state.GetStateValue(CompositionStateKinds.PalmMute) == 0 && !pinchedPhrases.Contains(phrase) && !isRelease
@@ -807,7 +807,7 @@ internal static class Expression
                         && timeline.Count(x => Math.Abs(x.Position - note.Position) < 1 - 1e-9) / 2.0 <= PinchBusiest
                         && LongestOfBar(timeline, i, span))
                     {
-                        var bar = Math.Floor((note.Position - span.Start) / span.Meter.BarDuration + 1e-9);
+                        var bar = span.BarOf(note.Position);
                         var afterChug = i > 0 && timeline[i - 1].Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0;
                         var phraseEnd = (bar + 1) % span.Meter.PhraseBars == 0;
                         var pinchLean = role is TrackRole.Riff or TrackRole.RiffTwin

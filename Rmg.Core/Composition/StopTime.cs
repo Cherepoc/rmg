@@ -138,7 +138,7 @@ internal static class StopTime
                     : note));
         }
 
-        return draft with { Notes = result.ToImmutable() };
+        return draft with { Notes = result.ToImmutable(), Stopped = [..phrases.Where(p => carriers[Math.Round(p.Start, 6)] != Carrier.None)] };
     }
 
     /// <summary>What goes on through a stopped bar.</summary>

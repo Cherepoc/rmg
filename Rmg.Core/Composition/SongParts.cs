@@ -6,10 +6,11 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     Which of the band's parts a song has, for its sections to play or rest as they draw (<see cref="Arrangement" />):
-///     the melody, the chords and the bass always, and the pad, the counter-melody and the drums by a chance of their
-///     own, whatever the song's unconventionality, since a song without one is neither plainer nor stranger for it; but
-///     the riff's twin, which harmonises it, by the song's melody facet, as a harmony is a thing a plain song does not
-///     play, and a wild one now and then, no oftener than a middling one. A part given in or out is so, each drawn all the same from a sequence of its own, so that giving one leaves the
+///     the melody, the chords and the bass always, and the pad, the counter-melody, the drums, the riff and the rhythm part
+///     by a chance of their own, whatever the song's unconventionality, since a song without one is neither plainer nor
+///     stranger for it; but the riff's twin, which harmonises it, by the song's melody facet, as a harmony is a thing a
+///     plain song does not play, and a wild one now and then, no oftener than a middling one; and the soloist by the form
+///     facet, as often as songs solo. A part given in or out is so, each drawn all the same from a sequence of its own, so that giving one leaves the
 ///     rest of the song as its seed made it.
 /// </summary>
 public static class SongParts

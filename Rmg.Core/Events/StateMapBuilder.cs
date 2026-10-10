@@ -5,7 +5,7 @@ namespace Rmg.Core.Events;
 
 public sealed class StateMapBuilder
 {
-    private readonly string? _layer;
+    private readonly string _layer;
     private readonly bool _isPerTrack;
     private readonly List<Func<IGenerationContext, IState>> _stateGenerators = [];
     private readonly List<Func<IGenerationContext, StateMap>> _stateMapGenerators = [];
@@ -73,7 +73,7 @@ public sealed class StateMapBuilder
 
     private static StateMap GenerateStateMap(
         IGenerationContext context,
-        string? layer,
+        string layer,
         bool isPerTrack,
         IEnumerable<Func<IGenerationContext, IState>> stateGenerators,
         IEnumerable<Func<IGenerationContext, StateMap>> stateMapGenerators
@@ -81,13 +81,13 @@ public sealed class StateMapBuilder
     {
         // the states made here are this layer's; those of the maps added keep the layers they were made in
         var states = stateGenerators.Select(generator => generator(context));
-        if (layer is not null && StateTrace.IsExplaining)
+        if (StateTrace.IsExplaining)
             states = states.Select(x => x.Contributions.IsEmpty ? x.WithLayer(layer) : x);
 
         var stateMapStates = stateMapGenerators.SelectMany(x => x(context).States);
         var stateMap = states
             .Concat(stateMapStates)
             .ToStateMap();
-        return isPerTrack ? stateMap.ThrowIfShared(layer!) : stateMap;
+        return isPerTrack ? stateMap.ThrowIfShared(layer) : stateMap;
     }
 }

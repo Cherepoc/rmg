@@ -79,8 +79,9 @@ public sealed class VelocityReportTest
         // a note plays where the song's swing moves it
         var swing = Rmg.Core.Rendering.Render.GetSwing(song.Song);
         var rendered = song.Rendered.Tracks
+            // the part's own track by its role, not another part's on its program nor its own double's
             .Where(x => song.Song.TrackDefinitions[track] is PitchInstrumentTrack pitched
-                ? !x.IsPercussionInstrument && x.PitchInstrumentCode == pitched.InstrumentCode
+                ? !x.IsPercussionInstrument && !x.IsDouble && x.Role == pitched.Role
                 : x.IsPercussionInstrument)
             .SelectMany(x => x.NoteTimeline)
             .GroupBy(x => (Math.Round(x.Position, 6), x.Value.Offset))
@@ -94,7 +95,7 @@ public sealed class VelocityReportTest
     }
 
     [Test]
-    public async Task TheBassAndTheChordsPlayEvenly_AChordAsLoudAsANote_AndTheMelodyAndTheBassOnTop()
+    public async Task TheBassAndTheChordsPlayEvenly_AndTheMelodyAndTheBassOnTop()
     {
         var m = Measure(TestCorpus.Range(128));
         var (bass, chords, melody, drums) = (m["Bass"], m["Chords"], m["Melody"], m["Drum"]);
@@ -103,7 +104,7 @@ public sealed class VelocityReportTest
         await Assert.That(bass.Accent).IsLessThan(melody.Accent * 0.75);
         await Assert.That(chords.Accent).IsLessThan(melody.Accent * 0.75);
         // the melody and the bass lead the mix, about as loud, the bass a little quieter for its even beats, and the
-        // chords, a chord of several notes about as loud as a single note, and the drums under them
+        // chords and the drums under them
         // within a few decibels against the mechanism breaking, the target of one in the Report
         Console.WriteLine($"melody {melody.Loudness:F1} dB, bass {bass.Loudness:F1}, chords {chords.Loudness:F1}, drums {drums.Loudness:F1}");
         await Assert.That(Math.Abs(melody.Loudness - bass.Loudness)).IsLessThan(4);

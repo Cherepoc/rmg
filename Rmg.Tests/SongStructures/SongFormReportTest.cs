@@ -50,7 +50,7 @@ public sealed class SongFormReportTest
             outros += roles.Contains(SectionRole.Outro) ? 1 : 0;
         }
 
-        // bounded widely, the targets in the Report: about 0.3 and 0.15
+        // bounded widely against the mechanism breaking, the targets about 0.3 and 0.15 (measured: intros 29% to 32%, outros 14% to 16%, at offsets 0 and a million)
         Console.WriteLine($"intros {intros / 256.0:P0}, outros {outros / 256.0:P0}");
         await Assert.That(intros / 256.0).IsBetween(0.1, 0.5);
         await Assert.That(outros / 256.0).IsBetween(0.02, 0.35);

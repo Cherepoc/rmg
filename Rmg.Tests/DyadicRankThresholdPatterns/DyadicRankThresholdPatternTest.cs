@@ -52,20 +52,22 @@ public sealed class DyadicRankThresholdPatternTest
     [Test]
     public async Task OneRankCycle_WithNoVariation_IsAPulse()
     {
-        // a half-beat cycle of one rank: a note on every 8th, every time
+        // a half-beat cycle of one rank, kept half the time: with no variation every cycle as the first, a note on every
+        // 8th or none
         var pulses = Enumerable.Range(0, 50)
             .Select(seed => Positions(
                 DyadicRankThresholdPattern.Create(
                     new GenerationContext(0),
                     (ulong)seed,
-                    Weights(0, 0.5),
+                    Weights(1, 0.5),
                     new DyadicTimelineDescriptor(BarDuration, 0.5, 0, 0, BarDuration, 2),
                     variation: 0
                 )
             ))
             .ToArray();
 
-        await Assert.That(pulses.All(x => x.Length == 8)).IsTrue();
+        await Assert.That(pulses.All(x => x.Length is 8 or 0)).IsTrue();
+        await Assert.That(pulses.Any(x => x.Length == 8) && pulses.Any(x => x.Length == 0)).IsTrue();
     }
 
     [Test]

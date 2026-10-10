@@ -753,6 +753,7 @@ public sealed class SoloTest
         await Assert.That(plain.All(x => !x.Soloist.Approaches && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) == 0)).IsTrue();
         var approaches = notes.Where(x => !x.Soloist.Planes && IsStacked(x.Note) && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) > 0).ToArray();
         await Assert.That(approaches.Length).IsGreaterThan(10);
+
     }
 
     /// <summary>How a solo stacks its notes, by its facets: the soloists that can and that plane, and the share of their notes stacked by gesture and by voices.</summary>
