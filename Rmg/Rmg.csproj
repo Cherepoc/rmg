@@ -6,6 +6,8 @@
         <LangVersion>14</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <!-- the fingerprint's and a batch's songs are made in parallel, and allocate a lot: server GC keeps the cores busy, 384 songs in 12 s rather than 20 -->
+        <ServerGarbageCollection>true</ServerGarbageCollection>
     </PropertyGroup>
 
     <ItemGroup>
