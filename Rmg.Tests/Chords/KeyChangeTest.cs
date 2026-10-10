@@ -58,7 +58,8 @@ public sealed class KeyChangeTest
             // nearly every one, a step and a section's own key now and then coming back to the key it left
             await Assert.That(changes.All(x => starts.Any(start => Math.Abs(start - x.Position) < 1e-9))).IsTrue();
             await Assert.That(changes.Length).IsGreaterThanOrEqualTo(starts.Length * 3 / 4);
-            await Assert.That(changes.All(x => x.Semitones is >= -5 and <= 6)).IsTrue();
+            // within a fifth of the song's key either way, each the nearest to the key before
+            await Assert.That(changes.All(x => x.Semitones is >= -7 and <= 7)).IsTrue();
             // every change moves the key
             await Assert.That(changes.Zip(changes.Skip(1)).All(x => x.First.Semitones != x.Second.Semitones)).IsTrue();
             steps.AddRange(changes.Zip(changes.Skip(1), (first, second) => (second.Semitones - first.Semitones).Mod(12)));

@@ -91,7 +91,8 @@ public sealed class HarmonyReportTest
             {
                 var rhythm = rhythms[section.Key];
                 var played = section
-                    .GroupBy(x => rhythm.IndexAt(x.Bar % rhythm.Meter.PhraseDuration + x.Position))
+                    // a chord's place in its pattern: its bar's start in beats and its place in the bar
+                    .GroupBy(x => rhythm.IndexAt(x.Bar % rhythm.Meter.PatternBarCount * rhythm.Meter.BarDuration + x.Position))
                     .Select(x =>
                     {
                         var entry = x.First();

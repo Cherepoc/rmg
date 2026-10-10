@@ -114,7 +114,7 @@ internal static class Arpeggios
             return voiced;
         var lowest = voiced.Min();
         var tone = lowest + ((root + SemitonesOf(colour) - lowest) % 12 + 12) % 12;
-        return voiced.Contains(tone) ? voiced : [..voiced, tone == lowest ? tone + 12 : tone];
+        return voiced.Contains(tone) ? voiced : [..voiced, tone];
     }
 
     /// <summary>An arpeggio as a genre's page shows it.</summary>
@@ -136,12 +136,19 @@ internal static class Arpeggios
     }
 
     /// <summary>The note of a voiced chord, low to high, that its note of the given place since the chord came in plays.</summary>
-    public static int Pick(ArpeggioPattern pattern, ImmutableArray<int> voiced, int place, double position)
+    /// <param name="root">The chord's root, any octave of it, which the root and fifth and the pedal play on, as the voicing may put another note lowest.</param>
+    public static int Pick(ArpeggioPattern pattern, ImmutableArray<int> voiced, int place, double position, int root)
     {
         var notes = voiced.Order().ToArray();
         var count = notes.Length;
         if (count == 1 || pattern == ArpeggioPattern.None)
             return notes[0];
+
+        // the root's lowest note in the voicing, the lowest note where it has none, and the fifth above it, the middle note
+        // where it has none
+        var low = Array.FindIndex(notes, x => (x - root).Mod(12) == 0) is var r and >= 0 ? r : 0;
+        var fifth = Array.FindIndex(notes, x => x > notes[low] && (x - notes[low]).Mod(12) == 7) is var f and >= 0 ? f : count / 2;
+        int[] others = [..Enumerable.Range(0, count).Where(x => x != low)];
 
         var cycle = Math.Max(1, 2 * count - 2);
         return pattern switch
@@ -152,11 +159,11 @@ internal static class Arpeggios
             ArpeggioPattern.DownUp => notes[count - 1 - (place % cycle < count ? place % cycle : cycle - place % cycle)],
             ArpeggioPattern.Alberti => notes[(place % 4) switch { 0 => 0, 2 => count / 2, _ => count - 1 }],
             ArpeggioPattern.Pairs => notes[place % 2 == 0 ? 0 : count - 1],
-            ArpeggioPattern.RootFifth => notes[place % 2 == 0 ? 0 : count / 2],
+            ArpeggioPattern.RootFifth => notes[place % 2 == 0 ? low : fifth],
             // an order of no pattern, the same for the same place, as a hash of it
             ArpeggioPattern.Random => notes[(int)(Probabilities.Seeds.Mix((ulong)(position * 1000) + (ulong)place) % (ulong)count)],
             ArpeggioPattern.UpTwoOctaves => notes[place % count] + 12 * (place / count % 2),
-            ArpeggioPattern.Pedal => notes[place % 2 == 0 ? 0 : 1 + place / 2 % (count - 1)],
+            ArpeggioPattern.Pedal => notes[place % 2 == 0 ? low : others[place / 2 % others.Length]],
             _ => throw new ArgumentOutOfRangeException(nameof(pattern), pattern, null)
         };
     }

@@ -14,7 +14,7 @@ namespace Rmg.Core.Composition;
 ///     key.
 /// </summary>
 /// <param name="Position">Where the new key starts, a pattern's start.</param>
-/// <param name="Semitones">The new key, as its step from the song's own, from -5 to 6.</param>
+/// <param name="Semitones">The new key, as its step from the song's own, from -7 to 7, the step nearest the key before.</param>
 public sealed record KeyChange(double Position, int Semitones)
 {
     /// <summary>How finely a key change's place keys its draws: a 96th of a beat.</summary>
@@ -137,8 +137,10 @@ public sealed record KeyChange(double Position, int Semitones)
             if (isChanging)
                 lift += step;
 
-            // a key as a step from the song's own, so that the band's register stays where the song put it
-            var next = (lift + ownKeys[section.SectionId] + 5).Mod(12) - 5;
+            // a key as a step from the song's own, the one nearest the key before, so that a lift is heard as a lift, and within
+            // a fifth of the song's either way, so that the band's register stays near where the song put it
+            var next = key + ((lift + ownKeys[section.SectionId] - key + 6).Mod(12) - 6);
+            next = next > 7 ? next - 12 : next < -7 ? next + 12 : next;
             if (next == key) continue;
 
             key = next;
@@ -182,13 +184,15 @@ public sealed record KeyChange(double Position, int Semitones)
     /// </summary>
     /// <param name="common">The song's common state, its chords and scales, before any key change.</param>
     /// <param name="streams">A key change's draws, by where it is, in 96ths of a beat (<see cref="PlacesPerBeat" />).</param>
+    /// <param name="home">A section's home where a position is, in scale steps, which a chord's root plays over the progression's.</param>
     /// <returns>The key changes, the chains' among them; the roots' moves, a layer of the common state; and every chain, for the trace.</returns>
     internal static (ImmutableArray<KeyChange> Keys, StateTimelineMap Roots, ImmutableArray<(double Change, ImmutableArray<double> Chords, Device Device)> Chains) Prepare(
         ImmutableArray<KeyChange> changes,
         StateTimelineMap common,
         SongMap map,
         double unconventionality,
-        Func<int, IGenerationContext> streams
+        Func<int, IGenerationContext> streams,
+        Func<double, int> home
     )
     {
         var chordStarts = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
@@ -206,8 +210,19 @@ public sealed record KeyChange(double Position, int Semitones)
             shifts.Add((-common.GetEffectiveStateMapAt(from).GetStateValue(StateKinds.ChordShift)).ToTimelineItem(from));
             shifts.Add(0.ToTimelineItem(to));
         }
+        // a chromatic passing chord sliding into a chord the change moves, unshifted, as it would slide towards a chord no
+        // longer there
+        void Unslide(double chord)
+        {
+            var before = chordStarts.LastOrDefault(x => x < chord - 1e-9, double.NaN);
+            if (double.IsNaN(before) || common.GetEffectiveStateMapAt(before).GetStateValue(StateKinds.ChordShift) == 0 || shifts.Any(x => Math.Abs(x.Position - before) < 1e-9))
+                return;
+            shifts.Add((-common.GetEffectiveStateMapAt(before).GetStateValue(StateKinds.ChordShift)).ToTimelineItem(before));
+            shifts.Add(0.ToTimelineItem(chord));
+        }
         var chains = ImmutableArray.CreateBuilder<(double, ImmutableArray<double>, Device)>();
-        int Root(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
+        // a chord's root as it plays: the progression's, which the common state holds, over its section's home
+        int Root(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot) + home(position);
         // the state where a chord the change moves plays, in the section's scale, as it will (Plain)
         StateMap Moved(double position) => common.GetEffectiveStateMapAt(position).With(StateKinds.ScaleAlterations, KeysOwnScale).With(StateKinds.ChordShift, 0);
         int RootPitch(StateMap state, int key, int step) => (key + Realizer.GetChord(state.With(StateKinds.ChordRoot, step)).Chord.GetPitch(0)).Mod(12);
@@ -276,6 +291,7 @@ public sealed record KeyChange(double Position, int Semitones)
                 roots.Add((pivot - Root(chords[^1])).ToTimelineItem(chords[^1]));
                 roots.Add(0.ToTimelineItem(change));
                 Plain(chords[^1], change);
+                Unslide(chords[^1]);
                 chains.Add((change, [chords[^1]], Device.Pivot));
                 continue;
             }
@@ -293,6 +309,7 @@ public sealed record KeyChange(double Position, int Semitones)
                 next = RootPitch(Moved(chords[j]), key, rootStep);
             }
 
+            Unslide(chords[0]);
             chains.Add((change, [..chords], Device.Chain));
         }
 
@@ -301,14 +318,10 @@ public sealed record KeyChange(double Position, int Semitones)
             ? StateTimelineMap.Create(duration)
             : StateTimelineMap.Create(duration,
             [
+                // the chords it moves in the section's scale, unshifted, as every chord a root moves is (Plain)
                 StateTimeline.Create(duration, StateKinds.ChordRoot, [..roots.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
-                ..scales.Count > 0
-                    ? new IStateTimeline[]
-                    {
-                        StateTimeline.Create(duration, StateKinds.ScaleAlterations, [..scales.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
-                        StateTimeline.Create(duration, StateKinds.ChordShift, [..shifts.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change")
-                    }
-                    : []
+                StateTimeline.Create(duration, StateKinds.ScaleAlterations, [..scales.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
+                StateTimeline.Create(duration, StateKinds.ChordShift, [..shifts.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change")
             ]);
         return ([..keys.OrderBy(x => x.Position)], moved, chains.ToImmutable());
     }

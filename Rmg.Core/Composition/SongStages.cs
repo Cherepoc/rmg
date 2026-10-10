@@ -117,12 +117,15 @@ internal static class SongStages
         var sectionTempos = SectionTempo.Generate(place => song.AppearanceStream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre);
         StateTrace.RecordSong(TracePoints.SectionTempo, string.Join(", ", sectionTempos.Select(x => $"{x:F2}")), sectionTempos);
         StateTrace.RecordSong(TracePoints.KeyChange, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
+        var homes = draft.Timeline.TrackTimelineMap.First(x => song.Tracks.Definitions[x.Key] is PitchInstrumentTrack).Value.StateTimelineMap;
         var (preparedKeys, preparedRoots, chains) = KeyChange.Prepare(
             keyChanges,
             draft.Timeline.CommonStateTimelineMap,
             form.Map,
             song.Facets[Facet.Scale],
-            place => song.Stream(SongStream.KeyPreparation, place)
+            place => song.Stream(SongStream.KeyPreparation, place),
+            // the sections' homes, which every pitched part's state holds over the progression's roots
+            position => homes.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot)
         );
         StateTrace.RecordSong(TracePoints.KeyPreparation, string.Join(", ", chains.Select(x => $"{x.Chords.Length} into {x.Change}")), chains);
         var timeline = draft.Timeline.MergeStateTimelineMap(form.SongState)

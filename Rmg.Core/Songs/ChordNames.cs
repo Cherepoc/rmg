@@ -35,6 +35,7 @@ public static class ChordNames
             (_, _, true, 9) => "dim7",
             (_, _, true, _) => "dim",
             (_, true, _, 11) => ninth ? "m(maj9)" : "m(maj7)",
+            (_, _, _, 11) when augmented => ninth ? "maj9♯5" : "maj7♯5",
             (_, _, _, 11) => ninth ? "maj9" : "maj7",
             (_, _, _, 10) => (minor ? "m" : augmented ? "aug" : "") + (ninth ? "9" : "7"),
             _ when sixth => (minor ? "m6" : "6") + (ninth ? "/9" : ""),

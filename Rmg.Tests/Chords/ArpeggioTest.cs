@@ -7,7 +7,8 @@ public sealed class ArpeggioTest
 {
     private static readonly System.Collections.Immutable.ImmutableArray<int> Chord = [60, 64, 67, 72];
 
-    private static int[] Play(ArpeggioPattern pattern, int notes) => [..Enumerable.Range(0, notes).Select(place => Arpeggios.Pick(pattern, Chord, place, place * 0.5))];
+    private static int[] Play(ArpeggioPattern pattern, int notes, System.Collections.Immutable.ImmutableArray<int>? chord = null) =>
+        [..Enumerable.Range(0, notes).Select(place => Arpeggios.Pick(pattern, chord ?? Chord, place, place * 0.5, 60))];
 
     [Test]
     public async Task APattern_PlaysTheChordsNotes_InItsOrder()
@@ -18,6 +19,10 @@ public sealed class ArpeggioTest
         await Assert.That(Play(ArpeggioPattern.Alberti, 4)).IsEquivalentTo(new[] { 60, 72, 67, 72 }, CollectionOrdering.Matching);
         await Assert.That(Play(ArpeggioPattern.RootFifth, 4)).IsEquivalentTo(new[] { 60, 67, 60, 67 }, CollectionOrdering.Matching);
         await Assert.That(Play(ArpeggioPattern.UpTwoOctaves, 8)).IsEquivalentTo(new[] { 60, 64, 67, 72, 72, 76, 79, 84 }, CollectionOrdering.Matching);
+        // the root and its fifth by their notes, a triad in root position and inverted alike, and the pedal on the root
+        await Assert.That(Play(ArpeggioPattern.RootFifth, 4, [60, 64, 67])).IsEquivalentTo(new[] { 60, 67, 60, 67 }, CollectionOrdering.Matching);
+        await Assert.That(Play(ArpeggioPattern.RootFifth, 4, [55, 60, 64, 67])).IsEquivalentTo(new[] { 60, 67, 60, 67 }, CollectionOrdering.Matching);
+        await Assert.That(Play(ArpeggioPattern.Pedal, 6, [55, 60, 64])).IsEquivalentTo(new[] { 60, 55, 60, 64, 60, 55 }, CollectionOrdering.Matching);
     }
 
     [Test]

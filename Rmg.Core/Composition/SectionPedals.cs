@@ -16,7 +16,10 @@ internal static class SectionPedals
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var bass = song.Track(TrackRole.Bass);
-        var common = draft.Timeline.CommonStateTimelineMap;
+        if (!draft.Timeline.TrackTimelineMap.TryGetValue(bass.Key, out var bassTrack))
+            return draft;
+        // a section's home, which the bass's state holds over the progression's roots
+        int Home(double position) => bassTrack.StateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
         // a section's pedal now and then, by its progression facet, from a sequence of its own: its home under its
         // appearances' first phrase, or its dominant under their last, building into what follows
         var pedalling = song.SectionIds.Distinct().ToDictionary(id => id, id =>
@@ -30,7 +33,7 @@ internal static class SectionPedals
         var sections = song.Form.Map.Sections.Where(x => pedalling[x.SectionId] is not null)
             .Select(x => (Phrase: x.Meter.PhraseDuration, Root: pedalling[x.SectionId]!.Value, Span: x))
             .Select(x => (x.Root == 0 ? x.Span.Start : x.Span.Start + Math.Floor((x.Span.Duration - 1e-9) / x.Phrase) * x.Phrase, x.Root == 0 ? Math.Min(x.Span.End, x.Span.Start + x.Phrase) : x.Span.End,
-                x.Span.Start, common.GetEffectiveStateMapAt(x.Span.Start).GetStateValue(StateKinds.ChordRoot) + x.Root));
+                x.Span.Start, Home(x.Span.Start) + x.Root));
         var changes = draft.Chains.Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Chords[0], x.Change, x.Change, 4));
         return draft with { Timeline = KeyChange.Pedal(draft.Timeline, bass.Key, (PitchInstrumentTrack)bass.Value, changes.Concat(sections)) };
     }

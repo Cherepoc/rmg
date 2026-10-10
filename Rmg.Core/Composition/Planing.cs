@@ -37,7 +37,7 @@ internal static class Planing
     ///     Every chord's move from the home's, the first home, a draw a chord whatever is played; where the section leads home,
     ///     as the song's last does, its last chord home again by a move of its own, the chord before a move away from it.
     /// </summary>
-    public static ImmutableArray<int> Draw(IGenerationContext context, int count, bool endsHome = false)
+    public static ImmutableArray<int> Draw(IGenerationContext context, int count, bool endsHome)
     {
         var shifts = new int[count];
         var moves = Moves.Select(x => x.Value).Where(x => x > 0).Select(Math.Abs).ToHashSet();

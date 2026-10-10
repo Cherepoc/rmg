@@ -325,15 +325,17 @@ internal sealed class SectionGenerator
         // from a sequence of its own, the song's last too, which ends in the language the song spoke, sliding home at its end
         // a section vamping on its home, a genre's, from a sequence of its own, as planing does without its moves, the
         // cadence's raise with it, the progression's other draws made all the same
-        if (Stream(sectionId, SectionStream.Vamp).TestProbability(Vamp.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Vamp, "sections"))))
+        var vamps = Stream(sectionId, SectionStream.Vamp).TestProbability(Vamp.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Vamp, "sections")));
+        if (vamps)
             // the changes as drawn, without the passing chords', which a vamp on one chord has none of
             (harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep) = (drawnRhythm, [..Enumerable.Repeat(0, drawnRhythm.Count)],
                 [..Enumerable.Repeat(ChordScale.Section, drawnRhythm.Count)], [..Enumerable.Repeat(0, drawnRhythm.Count)], null, null);
         var planingContext = Stream(sectionId, SectionStream.Planing);
         // the song's last section planing back home, its last move a slide onto the tonic's shape on the tonic, but one of
         // two chords, which has no move to slide by
+        // but a vamp, which holds its one chord, drawn all the same
         var planes = planingContext.TestProbability(Planing.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "sections")))
-                     && (!plan.HasTonicHome || progression.Length >= 3);
+                     && (!plan.HasTonicHome || progression.Length >= 3) && !vamps;
         var planed = Planing.Draw(planingContext, progression.Length, plan.HasTonicHome);
         // its chords each in a mode of their own now and then, rather than the home's structure, by the progression facet and
         // a genre's, from a sequence of its own
@@ -350,7 +352,8 @@ internal sealed class SectionGenerator
         if (plan.KeepsSongScale)
             _firstHarmony = (harmony, meter);
         else if (loops && (_firstHarmony ?? throw new InvalidOperationException("A section loops before the song's first is made.")).Meter.Equals(meter))
-            harmony = _firstHarmony.Value.Harmony;
+            // the song's last on its tonic as it must be, to land the ending home
+            harmony = plan.HasTonicHome ? _firstHarmony.Value.Harmony with { Home = 0 } : _firstHarmony.Value.Harmony;
         (scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep) = harmony;
         StateTrace.RecordSection(TracePoints.SectionScale, SectionTrace, sectionId, scale.Name, scale);
         StateTrace.RecordSection(TracePoints.HarmonicRhythm, SectionTrace, sectionId, $"{harmonicRhythm.Span}", harmonicRhythm);

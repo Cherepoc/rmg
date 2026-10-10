@@ -13,9 +13,17 @@ public sealed class KeyPreparationTest
     private static (double Change, ImmutableArray<double> Chords, KeyChange.Device Device)[] Chains(CorpusSong song) =>
         [..Preparations(song).Where(x => x.Device == KeyChange.Device.Chain)];
 
+    /// <summary>The state at a place as every part reads it: the common state's, its chord's root over the section's home, which the parts' own state holds.</summary>
+    private static StateMap State(CorpusSong song, double position)
+    {
+        var map = song.Song.TrackEventStateTimelineMap;
+        var common = map.CommonStateTimelineMap.GetEffectiveStateMapAt(position);
+        var home = map.TrackTimelineMap.First(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).Value.StateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
+        return common.With(StateKinds.ChordRoot, common.GetStateValue(StateKinds.ChordRoot) + home);
+    }
+
     /// <summary>The root's pitch class of the chord sounding at a place, as every part reads it.</summary>
-    private static int Root(CorpusSong song, double position) =>
-        Realizer.GetChord(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(position)).Chord.GetPitch(0).Mod(12);
+    private static int Root(CorpusSong song, double position) => Realizer.GetChord(State(song, position)).Chord.GetPitch(0).Mod(12);
 
     /// <summary>Every chain's links, the semitones from each chord's root down to the next's: 7 a dominant's, 1 a substitute's, 11 a leading tone's, 4 a mediant's, in a major scale.</summary>
     private static int[][] Links(CorpusSong song) =>
@@ -52,7 +60,7 @@ public sealed class KeyPreparationTest
             foreach (var (_, chords, _) in Preparations(song).Where(x => x.Device == KeyChange.Device.Pivot))
             {
                 // its triad's notes, as every part reads them, all of the scale the moment before it plays
-                var state = common.GetEffectiveStateMapAt(chords[0]);
+                var state = State(song, chords[0]);
                 var triad = new[] { 0, 2, 4 }.Select(x => Realizer.GetChord(state).Chord.GetPitch(x).Mod(12));
                 // the scale there in the key before
                 var key = common.GetEffectiveStateMapAt(chords[0] - 1e-6).GetStateValue(StateKinds.KeyOffset);

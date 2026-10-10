@@ -270,8 +270,11 @@ internal static class Realizer
         var duration = Math.Min(nextNoteDuration.WeightedAverage(nextNoteDurationFactor, quarterNoteDuration), bar);
         // a melody sings one note at a time, so a note ends by the next, unless it is held, as a phrase's last note is
         var heldDuration = stateMap.GetStateValue(StateKinds.HeldDuration);
-        // how long it would sound but for a change of chord, which a held note, as a phrase's or an ending's, is not cut by
-        unclipped = heldDuration > 0 ? 0 : duration;
+        // a bass's pedal, which holds its note through the chords' changes, to its next note
+        var pedals = role == TrackRole.Bass && stateMap.GetStateValue(CompositionStateKinds.BassPedal) > 0;
+        // how long it would sound but for a change of chord, which a held note, as a phrase's or an ending's, and a pedal's,
+        // is not cut by
+        unclipped = heldDuration > 0 || pedals ? 0 : duration;
         // a solo's note is a line's, whatever part plays it
         var isLine = role.PlaysLine() || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1;
         if (heldDuration > 0)
@@ -281,7 +284,7 @@ internal static class Realizer
         else
             // a note that plays the chord, the chords' or the bass's, ends where the chord changes, rather than sound the
             // old chord over the new; a melody's may, as a suspension does; the bass's by its next note too, one at a time
-            duration = Math.Min(role == TrackRole.Bass ? Math.Min(duration, nextNoteDuration) : duration, UntilChange(changes, position));
+            duration = pedals ? Math.Min(duration, nextNoteDuration) : Math.Min(role == TrackRole.Bass ? Math.Min(duration, nextNoteDuration) : duration, UntilChange(changes, position));
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 
@@ -328,7 +331,7 @@ internal static class Realizer
         // lays on it among them
         var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio);
         if (role.PlaysChords() && !isLine && arpeggio != ArpeggioPattern.None)
-            notes = [Arpeggios.Pick(arpeggio, Arpeggios.Coloured(notes, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour)), place, position)];
+            notes = [Arpeggios.Pick(arpeggio, Arpeggios.Coloured(notes, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour)), place, position, ToNote(0))];
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
     }

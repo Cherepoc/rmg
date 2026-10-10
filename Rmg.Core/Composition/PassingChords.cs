@@ -93,9 +93,10 @@ internal static class PassingChords
             var dominant = Normalize(next + 4);
             if (kind == PassingKind.Dominant && Mod(dominant - progression[chord]) == 0)
                 continue;
-            // a mode on the next chord's root, the tritone's and the diminished's, where its scale leaves its root as the
-            // section's has it; and a diminished chord between roots a whole step apart alone, up to the next
-            if (kind is PassingKind.Tritone or PassingKind.Diminished && chordScales[chord + 1].Steps.Moves(Mod(home + next)))
+            // a mode on the next chord's root, the tritone's and the diminished's, and a dominant a fifth above it, where its
+            // scale leaves its root as the section's has it; and a diminished chord between roots a whole step apart alone,
+            // up to the next
+            if (kind is PassingKind.Tritone or PassingKind.Diminished or PassingKind.Dominant && chordScales[chord + 1].Steps.Moves(Mod(home + next)))
                 continue;
             if (kind == PassingKind.Diminished && (RootOf(scale, home, next, chordScales[chord + 1]) - RootOf(scale, home, progression[chord], chordScales[chord])).Mod(12) != 2)
                 continue;
