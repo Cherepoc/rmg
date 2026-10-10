@@ -64,3 +64,4 @@ rejected while fixing: the place, what was decided, why.
 - The audio worklet (spessasynth_processor) and the MP3 worker's encoder load from the CDN with no integrity hash: addModule and a worker's static import take none; the import map's three modules carry theirs. Self-hosting them is the remedy if the CDN is ever in doubt.
 - Listening mode's A and B alternate by the song's index (listening.js): the listener is the operator, alternating balances which is heard first, and a drawn order would cost every listening test a way to learn it; kept.
 - DyadicRankTimeline.Generate kept though only tests call it: it is how a dozen tests read a rhythm as a timeline.
+- The thinning texture (Texture, TextureKind.Thin) may drop the melody among the parts, its order drawn: kept on listening (Synthwave IrBYcTV7F1B's second verse ending on four bars without it), a band's instrumental breath.
