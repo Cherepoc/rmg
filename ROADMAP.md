@@ -209,6 +209,9 @@ groups and out of its chord's scale, a polymeter's copies in the wrong chord sha
 where a texture rests its source, a drop the band does not come back on, a stop's silence struck again, a quieter form
 recorded unplayed), the rest tests assuming what new songs break and calibrations given 128 songs.
 
+**Planned next** (11 October 2026): held tones, let ring, a riff's drone with leaps, key steps by genre, and
+Classical and Power ballad presets (*Open work*, *Planned: held tones, let ring, and two genres*).
+
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
 ratings by conventionality once enough are in, continuously and never as a gate.
@@ -452,6 +455,47 @@ What it left, all in `reviews/2026-10-10.md`'s *Open*:
   the fine-tune grid's layout and the editor's drum setups; and 23 left open by their packages.
 - A test that lists the calibrations measuring fewer than 64 songs, which both reviews found.
 
+### Planned: held tones, let ring, and two genres
+
+Planned 11 October 2026, reviewed the same day; each step through the implementation loop, with a listening question
+and a deploy to test. In order:
+
+1. **Held tones** (P1): sweet chords made bittersweet by notes held over every chord, as a clean guitar's open strings
+   ring through a progression: a seventh chord a semitone from one of them, an add9 rubbing its third. A part's colour
+   (`GenreChoices.Colour`) "held": the key's second and third steps (its 9th and 3rd, two notes of the scale a tone
+   apart) kept in every chord's voicing whatever its root, so that over one chord they are its tensions and over the
+   next its own notes; at the wild end wider pairs, the 4th or the 7th among them. A held step the chord's scale alters
+   is left out of that chord rather than bent. Clean and decaying instruments only (a clean guitar, a piano, a harp),
+   where a held second is heard as a colour, not as mud. One rule for every genre that names the option, not a list of
+   chords; measured by the semitones held tones make against a chord's notes, on and off over the same songs.
+2. **Let ring** (P1): a broken chord's notes sustaining to the chord's change rather than each stopping where the next
+   starts, so that its seconds sound together; the arpeggio's notes stay single strokes, their length the chord's.
+   Only for figures of 8ths or slower, and decaying instruments, where a held note fades on its own; a choice of a
+   part's (`Arpeggios`), by a genre's chance. With the held tones it is the sound asked for: an arpeggio, its notes
+   let ring.
+3. **A riff's drone, with leaps** (P2): *A riff's drone, reworked* (*Form and sections*), and with it a riff of an open
+   string and wide leaps, a fretted note an octave or more above it played against it in turn, its melody on the strong
+   notes and the open string between; no chugs. Djent's chugs drawn down to 40–60% of its riffs and the drone given
+   20–40%; asked as `?listen=djent-open`.
+4. **Key steps by genre** (P2): where a key change goes, a genre's pool (`keySteps`), as Classical's to its dominant
+   and its relative, a power ballad's up a step for its last chorus; the songs' own as they are.
+5. **Classical** (P2): chamber music: a melody on violin, flute or clarinet, the piano's broken chords (an Alberti
+   figure) under it, the cello's bass, no drums; raised cadences, ornaments, phrases of four and four, the forms AABA,
+   ABA and a rondo; terraced dynamics, a section louder or quieter as a whole; 80–140 BPM in 4/4, 3/4 and 6/8; key
+   changes to the dominant and the relative (step 4). Risk: the rule that no two parts share an instrument rules out
+   music for the piano alone, left for later.
+6. **Power ballad** (P2): a clean guitar's broken chords let ring with held tones (steps 1 and 2), an overdriven lead
+   for the melody, a fingered bass and string pads; 60–85 BPM in 4/4 and 12/8, natural minor and major, sus2, add9 and
+   major seventh chords; the texture building section by section, the chorus heavy where the verse is clean (the
+   quieter form, the other way round), a guitar solo, the last chorus lifted (step 4), ending by a fade or a ring-out.
+
+Review: **overengineering** cut: held tones are a colour, not a new harmony system, and let ring a note's length, not a
+new figure; the two presets are data over them, no code of their own but the key steps. **Musicality**: held seconds
+are sweet only on clean, decaying sounds and only as a few notes, so they are the clean instruments' and stop where the
+chord's scale would make them a wrong note; let ring on fast figures or sustained sounds would blur, so it is 8ths or
+slower on decaying ones. Classical without drums leans on the cadences and the dynamics, which are what it will be
+judged by.
+
 ### Conventionality
 
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
@@ -511,7 +555,7 @@ What it left, all in `reviews/2026-10-10.md`'s *Open*:
   it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
   melody with an open string, the string the key's own (its tonic or fifth, not every chord's root), in a pattern of
-  the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it.
+  the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it. Planned with wide leaps (*Planned: held tones, let ring, and two genres*, step 3).
 - **Acoustic sections, fitted** (P2, heard 8 October 2026: acoustic sections are great for metal and rock, but not every
   quieter section fits one; and 9 October 2026, on Black metal's: turning every part from heavy is not enough): a driven
   guitar turned acoustic only where no other part plays a heavy riff, the riff, its twin and the rhythm all turning
