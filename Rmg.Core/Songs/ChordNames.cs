@@ -11,6 +11,9 @@ public static class ChordNames
 {
     private static readonly ImmutableArray<int> MajorOffsets = [0, 2, 4, 5, 7, 9, 11];
 
+    /// <summary>The twelve pitch classes' names, from C, a black key's by the name its keys use most.</summary>
+    public static IReadOnlyList<string> KeyNames { get; } = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
+
     private static readonly string[] Numerals = ["I", "II", "III", "IV", "V", "VI", "VII"];
 
     /// <summary>What a chord is, by the pitch classes it plays above its root, from 0 to 11.</summary>

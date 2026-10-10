@@ -605,10 +605,21 @@ button.icon[aria-pressed="true"],
     flex-wrap: nowrap;
 }
 
-.transport time {
+.transport .times {
     font-variant-numeric: tabular-nums;
     font-size: 14px;
     color: var(--muted);
+    white-space: nowrap;
+}
+
+/* the key, its mode and the chord playing, as much of them as the line leaves room for */
+.harmony {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
 }
 
 input[type="range"] {
@@ -617,9 +628,10 @@ input[type="range"] {
 
 /* the seek bar, and over it a mark where each section starts, which lets the bar take every pointer, set in as far as
    the thumb's middle travels (SEEK_INSET in app.js) */
+/* the seek bar on a line of its own, as wide as the panel */
 .seek {
     flex: 1;
-    min-width: 80px;
+    min-width: 0;
     position: relative;
     display: flex;
     align-items: center;
@@ -1627,10 +1639,17 @@ canvas.pulse {
         order: 4;
     }
 
-    .transport time,
-    .seek,
+    .transport .times,
+    .transport .harmony,
     .transport .volume {
         order: 5;
+    }
+
+    /* and the seek bar on a line of its own under them */
+    .seek-row {
+        flex-basis: 100%;
+        order: 5;
+        margin-top: 16px;
     }
 
     .now-playing > span:first-child {
@@ -1687,10 +1706,6 @@ canvas.pulse {
         font-size: 13px;
         line-height: normal;
         z-index: 1;
-    }
-
-    .seek {
-        min-width: 60px;
     }
 
     .transport .volume {

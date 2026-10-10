@@ -193,13 +193,13 @@ public static class Midi
         _ => channel
     };
 
-    private static byte[] Text(string text)
+    private static byte[] Text(string text, byte type = 0x01)
     {
         var bytes = System.Text.Encoding.UTF8.GetBytes(text);
         return
         [
             0xff,
-            0x01,
+            type,
             ..IntToBytesVariable((uint)bytes.Length),
             ..bytes
         ];
@@ -311,8 +311,12 @@ public static class Midi
         stream.Write(allEvents, 0, allEvents.Length);
     }
 
+    /// <summary>A marker's meta event type, a place in the song named, which a DAW shows over its time line.</summary>
+    private const byte Marker = 0x06;
+
+    /// <param name="harmony">The chords where they change, each marked "A Dorian: Dm7", its key and mode and its chord.</param>
     private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, ImmutableArray<(double Position, Meter Meter)> meters, int? room,
-        (InsertionKind Kind, ImmutableArray<byte> Channels)? insertion, double? echo, string? label, uint durationDelta, Stream stream)
+        (InsertionKind Kind, ImmutableArray<byte> Channels)? insertion, double? echo, ImmutableArray<SongHarmony.Change> harmony, string? label, uint durationDelta, Stream stream)
     {
         // the song's tempos, the base tempo at its start where it has none of its own there
         (double Position, double Value)[] tempos = tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0
@@ -346,6 +350,7 @@ public static class Midi
         }
         if (label is not null)
             events = events.Prepend(new MidiEvent(0, Text(label)));
+        events = events.Concat(harmony.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Text($"{x.Key}: {x.Chord}", Marker))));
 
         WriteTrack(events, durationDelta, stream);
     }
@@ -472,7 +477,7 @@ public static class Midi
         var insertion = song.Insertion is { } effect
             ? (effect.Kind, song.Tracks.ToChannels().Zip(song.Tracks).Where(x => x.Second.Role == effect.Part && !x.Second.IsRiser).Select(x => x.First).ToImmutableArray())
             : ((InsertionKind, ImmutableArray<byte>)?)null;
-        WriteSystemTrack(song.TempoTimeline, song.Meters, song.Room, insertion, song.Echo, label, songDurationDelta, stream);
+        WriteSystemTrack(song.TempoTimeline, song.Meters, song.Room, insertion, song.Echo, song.Harmony, label, songDurationDelta, stream);
 
         var indexedTracks = song.Tracks.ToIndexedTracks();
         foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, song.FadeTimeline, songDurationDelta, stream);

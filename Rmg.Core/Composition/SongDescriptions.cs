@@ -12,8 +12,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 public static class SongDescriptions
 {
-    private static readonly string[] KeyNames = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
-
     /// <summary>The song the seed makes with what is given, and as the mix plays it, described.</summary>
     public static SongDescription Describe(ulong seed, SongOverrides overrides, SongMix mix, CancellationToken cancellation)
     {
@@ -36,7 +34,7 @@ public static class SongDescriptions
 
         var (_, songScale) = Value<(HarmonicUnconventionality, Scale)>(TracePoints.SongHarmony);
         var sectionScales = trace.Where(x => x.Point == TracePoints.SectionScale).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => (Scale)x.First().Value!);
-        string KeyAt(double position, Scale scale) => $"{KeyNames[keys.GetEffectiveValueAt(position).Mod(12)]} {scale.Name}";
+        string KeyAt(double position, Scale scale) => $"{ChordNames.KeyNames[keys.GetEffectiveValueAt(position).Mod(12)]} {scale.Name}";
 
         var origin = map.Origin;
         var songKey = KeyAt(origin, songScale);
@@ -85,7 +83,7 @@ public static class SongDescriptions
                             continue;
 
                         var played = ChordNames.Of(intervals);
-                        return new ChordDescription(ChordNames.Numeral(step, scale.Offsets, played), KeyNames[root] + played.Suffix);
+                        return new ChordDescription(ChordNames.Numeral(step, scale.Offsets, played), ChordNames.KeyNames[root] + played.Suffix);
                     }
 
                     return new ChordDescription(ChordNames.Numeral(step, scale.Offsets, ChordNames.Of(ChordNames.Triad(step, scale.Offsets))), null);
@@ -316,5 +314,5 @@ public static class SongDescriptions
         );
     }
 
-    private static string NoteName(int pitch) => $"{KeyNames[pitch.Mod(12)]}{pitch / 12 - 1}";
+    private static string NoteName(int pitch) => $"{ChordNames.KeyNames[pitch.Mod(12)]}{pitch / 12 - 1}";
 }

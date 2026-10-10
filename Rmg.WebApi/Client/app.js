@@ -53,6 +53,7 @@ import { asGenre, byName, hasAGenre, isSameGenre, nestedChoices, presetById, pre
 import { createGenreEditor } from "./genre-editor.js";
 import { createGenreManager } from "./genre-manager.js";
 import { since, tell, track } from "./tally.js";
+import { harmonyAt, readHarmony } from "./harmony.js";
 import { createListeningIndex, createListeningStrip, listeningQuestion, loadQuestions, withoutDevice } from "./listening.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
@@ -92,6 +93,7 @@ const elements = {
     seek: document.getElementById("seek"),
     elapsed: document.getElementById("elapsed"),
     total: document.getElementById("total"),
+    harmony: document.getElementById("harmony"),
     sections: document.getElementById("seek-sections"),
     volume: document.getElementById("volume"),
     volumeValue: document.getElementById("volume-value"),
@@ -166,6 +168,14 @@ let songSkipped = [];
 // the song's sections as its report gives them, where each starts in seconds, its role and its soloists, and its length
 let songSections = [];
 let songSeconds = 0;
+// the song's chords where they change, and their keys, as its file marks them (harmony.js)
+let songHarmony = [];
+
+/** The key, its mode and the chord playing at a time, shown beside the times. */
+function showHarmony(seconds) {
+    const playing = harmonyAt(songHarmony, seconds);
+    elements.harmony.textContent = playing === null ? "" : `${playing.key} · ${playing.chord}`;
+}
 let isSeeking = false;
 let seekedFrom = null;
 let isExporting = false;
@@ -981,6 +991,8 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         drumGroupsPresent = made.drumGroups;
         drumPiecesPlayed = made.drumPieces;
         songSeed = response.headers.get("X-Song-Seed") ?? seed;
+        songHarmony = readHarmony(song);
+        showHarmony(0);
         songSkipped = skip;
         // a preset by its id, which a link reads as it is, another genre by the key the server keeps it by
         songGenreKey = presetOf(settings.genre)?.id ?? response.headers.get("X-Genre-Key");
@@ -1639,8 +1651,11 @@ elements.seek.addEventListener("pointercancel", () => {
 // a seek replays the song up to the new place, so dragging only shows where it would go, and the
 // sequencer is moved once, when the bar is let go of
 elements.seek.addEventListener("input", async () => {
+    // the key and chord where it would go, by the song's own length, whether or not the player has the song yet
+    showHarmony(Number(elements.seek.value) * songSeconds);
     await withPlayer((player) => {
-        elements.elapsed.textContent = formatTime(Number(elements.seek.value) * player.duration);
+        // the song's own length until the player has it, as the total shows it
+        elements.elapsed.textContent = formatTime(Number(elements.seek.value) * (player.duration > 0 ? player.duration : songSeconds));
     }, "Seeking failed");
 });
 
@@ -2685,6 +2700,7 @@ function render(player, time = player.currentTime) {
     if (!isSeeking) {
         if (duration > 0) elements.seek.value = String(time / duration);
         elements.elapsed.textContent = formatTime(time);
+        showHarmony(time);
     }
 
     // every part's level, the loudest of its channels, rising at once and falling back steadily, as a meter's does

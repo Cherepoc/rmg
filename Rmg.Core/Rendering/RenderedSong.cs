@@ -1,3 +1,4 @@
+using Rmg.Core.Songs;
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -37,6 +38,9 @@ public sealed class RenderedSong
 
     /// <summary>How long the echo waits, in beats, which the Roland GS delay plays at the song's tempo; none for a song that does not echo.</summary>
     public double? Echo { get; init; }
+
+    /// <summary>Its chords where they change, with the key and mode they are in, which the file marks (<see cref="SongHarmony" />); none for none.</summary>
+    public ImmutableArray<SongHarmony.Change> Harmony { get; init; } = [];
 
     public double Duration { get; }
 
