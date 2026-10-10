@@ -245,7 +245,7 @@ ratings by conventionality once enough are in, continuously and never as a gate.
 **When the need shows** (P3), each by what listening says: the items left in the sections below, each marked P3, any
 genre first (see *Genres*).
 
-**Put off** until its uses ask for it: a tag (see *Form and sections*).
+**Put off** until its uses ask for it: a tag (see *Parked*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
 *Architecture*: plainer prose); and the music's: the
@@ -604,8 +604,6 @@ dynamics, as it has no drums.
 - **A dance track's ending stripped back** (P3, from the review of 9 October 2026): House, Techno and Trance end
   by fading, opening or stopping; a DJ's ending drops the parts out one by one to the drums alone, an ending of its own
   beside the fade, the reverse of an intro of entries.
-- **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
-  the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a
   section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`), the chorus 2.6 semitones over
@@ -712,8 +710,7 @@ dynamics, as it has no drums.
 
 - **Free chords, the rest** (P3): a chord moved by semitones (`StateKinds.ChordShift`), planing (`Planing`) and a
   chord's own scale on its root (`ChordScaleKind.Own`) are built. Left: planing choosing the next chord by the voice
-  leader's least move among free shapes, should it sound mechanical; the diminished scale, of eight notes, which the
-  seven-note scales cannot hold. Its uses past these: a fusion genre, a long-lined guitar player's, its harmony and
+  leader's least move among free shapes, should it sound mechanical. Its uses past these: a fusion genre, a long-lined guitar player's, its harmony and
   lines as a genre's data (free chords, melodic minor, octatonic and whole-tone line scales, leaping, stretched
   voicings, swells, odd meters); not its tone, which General MIDI has not, its long legato soloing, which the solo's
   gestures (licks, runs, held notes) are not built for, its drumming and its melodic bass, gaps of their own.
@@ -754,9 +751,6 @@ dynamics, as it has no drums.
 - **Plainer prose:** comments that say in a plain sentence what the code cannot, and commits' lines of about a hundred
   characters; CLAUDE.md's paragraph on conventionality as rules a test can check.
 - **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
-- **A mix written by the page** (P4): a change of the mix asks the server for the file again only for the download;
-  writing the mix into the file in the page would leave the server out of it, at the cost of MIDI writing in
-  JavaScript.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
 - **Analytics written off the request** (P4, from the review of 9 October 2026): every tally and song measurement opens
@@ -806,30 +800,16 @@ left:
   quiet sections are presets now. Left:
   - The riff between the sections (P3): one part alone is a texture already (`TextureKind.Alone`), the riff a genre's
     weight of it, but not placed as an interlude of its own.
-  - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
-- **A heavy band's time and backbeat heard together** (P2, heard 9 October 2026 in Black metal, `ADFFnPdywKu` among
-  other songs): a section's leads are the drums that play their roles in it, every section keeps time, and a drum
-  keeping a role plays in a cycle of a bar at most, so a kit's bars with drums sound both 98.5% of the corpus's, Black
-  metal's 98.8% (`KitRolesTest`); a blast's cymbal rides it on every 8th. Left, by listening on the page: whether the
-  snare is heard against a wall of driven guitars. Its velocity is balanced against theirs (Metal's snare 91 at the
-  middle against the riff's 71, October 2026); a render measured it 8 to 11 dB under them in its mids, which is the
-  sound set's, not the MIDI's, and a velocity says only how hard a note is struck, so nothing in the song is to change
-  for it.
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:
   - Rolls splintering into 32nds, a breakbeat chopped and drilled, figures finer than a 16th (P3, by listening): the
     figures' grid in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
-- **More genres** (P3). What the genres made in October 2026 still want: Fusion's
-  roots off the scale (built: a planed section's own modes, *Roots off the scale, the rest*) and a lead's wide-interval legato lines (*A melody's leaping by
-  genre*).
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
-- **Harmony for Jazz and Soul** (P3): a ii–V elsewhere (*Approach chords*, *Harmony's devices*); call and response
-  (*The band's devices*); a part resting by its section's role.
 - **The choices grouped into families** (P4): bass, harmony, form, drum devices, one choice of several chances rather
   than fifteen of one, which would read better in the editor; should the editor grow hard to use.
 - **What the genres cannot play yet** (P3, each by what listening to the presets says; `GenreDevicesReportTest`,
@@ -884,6 +864,8 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   obstacle: an hour's song asked of the generator is made in one to two seconds, but plays 33 to 45 minutes at 120
   bpm, its form's parts running out (`SongLength`'s free form of up to 32), and the page's length stops at fifteen
   minutes (`LengthScale`); an hour and more is the endless song's, not the length's.
+- **A tag** (put off twice, 8 and 10 October 2026): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
+  the phrases; with the meter as state, an engine's change for a rare idiom.
 - **A parallel CLI batch** (P4): `--count` making its songs in parallel; a song takes about a second.
 - **The rare devices pruned** (P4, the review of October 2026): a device that plays in under about 1% of songs, with
   and without genres, and was never heard as good, taken out or folded into another, the options at
@@ -894,6 +876,13 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 
 ## Decided, and kept
 
+- **A heavy band's time and backbeat** (decided 11 October 2026): every section keeps time and a kit's bars sound both
+  98.5% of the corpus's, Black metal's 98.8% (`KitRolesTest`); the snare under driven guitars is 8 to 11 dB down in a
+  render's mids, the sound set's, not the MIDI's, so nothing in the song changes for it.
+- **A mix written by the page** (decided 11 October 2026): a change of the mix asks the server for the file again for
+  the download alone; writing MIDI in JavaScript to save that request would keep two writers of one format.
+- **The diminished scale and tremolo picking as their own items** (decided 11 October 2026): the first is a scale of
+  eight notes, against *Harmony in seven steps*; the second is Black metal's figure already, 51% of its sections.
 - **Harmony in seven steps, lines in any scale** (decided 9 October 2026, after a trial on 8 October and two reviews):
   scales of other sizes as the harmony's, a section's chords built and moved in a pentatonic, whole-tone or octatonic
   scale, will not be built. The genres play as the code does: harmony from a seven-note scale, melodies gapping it,
