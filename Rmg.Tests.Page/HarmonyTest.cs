@@ -58,4 +58,42 @@ public sealed class HarmonyTest(Site site)
         await Assert.That(measures[4]).IsLessThanOrEqualTo(0);
         await Assert.That(page.Errors).IsEmpty();
     }
+
+    /// <summary>The key and chord follow the bar as a hand drags it, playing or not, and stay where it is let go.</summary>
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task TheKeyAndChord_FollowTheBar_AsAHandDragsIt(bool playing)
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        var harmony = page.Page.Locator("#harmony");
+        await page.Until(async () => System.Text.RegularExpressions.Regex.IsMatch(await harmony.TextContentAsync() ?? "", Shown), "the key and chord shown");
+        if (playing)
+        {
+            await page.Page.Locator("#play").ClickAsync();
+            await page.Until(async () => await page.Page.Locator("#play").GetAttributeAsync("aria-label") == "Pause", "the song playing");
+        }
+
+        var bar = (await page.Page.Locator("#seek").BoundingBoxAsync())!;
+        double X(double share) => bar.X + 8 + (bar.Width - 16) * share;
+        var y = bar.Y + bar.Height / 2;
+        var seen = new List<string>();
+        await page.Page.Mouse.MoveAsync((float)X(0.1), (float)y);
+        await page.Page.Mouse.DownAsync();
+        foreach (var share in new[] { 0.3, 0.6, 0.9 })
+        {
+            await page.Page.Mouse.MoveAsync((float)X(share), (float)y, new() { Steps = 4 });
+            seen.Add((await harmony.TextContentAsync())!);
+        }
+
+        await page.Page.Mouse.UpAsync();
+        await Task.Delay(SongPage.PastRemake);
+        var after = (await harmony.TextContentAsync())!;
+        Console.WriteLine($"seen while dragging: {string.Join(" | ", seen)}; after: {after}");
+        // it changed as the bar moved, and after the bar is let go of it shows the last place's
+        await Assert.That(seen.Distinct().Count()).IsGreaterThan(1);
+        await Assert.That(after).IsEqualTo(seen[^1]);
+        await Assert.That(page.Errors).IsEmpty();
+    }
 }
