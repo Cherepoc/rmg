@@ -30,27 +30,32 @@ public sealed class HarmonyTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>The seek bar on a line of its own, the time played and the song's length either side of it, the three as wide as the panel.</summary>
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task TheSeekBar_IsOnALineOfItsOwn_AsWideAsThePanel(bool phone)
+    public async Task TheSeekBar_IsOnALineOfItsOwn_BetweenItsTimes_AsWideAsThePanel(bool phone)
     {
         await using var page = await SongPage.Open(site, phone: phone);
         await page.FirstSong();
 
         var measures = await page.Page.EvaluateAsync<double[]>("""
             () => {
-                const bar = document.getElementById("seek").getBoundingClientRect();
+                const box = (id) => document.getElementById(id).getBoundingClientRect();
                 const panel = document.querySelector(".song-panel");
                 const style = getComputedStyle(panel);
                 const inner = panel.getBoundingClientRect().width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-                return [bar.width, inner, document.getElementById("play").getBoundingClientRect().bottom - bar.top];
+                const middle = (r) => r.top + r.height / 2;
+                const [elapsed, seek, total] = [box("elapsed"), box("seek"), box("total")];
+                return [total.right - elapsed.left, inner, Math.max(Math.abs(middle(seek) - middle(elapsed)), Math.abs(middle(seek) - middle(total))),
+                    elapsed.right <= seek.left && seek.right <= total.left ? 1 : 0, box("play").bottom - seek.top];
             }
             """);
-        var (bar, panel, transport) = (measures[0], measures[1], measures[2]);
-        await Assert.That(bar).IsGreaterThanOrEqualTo(panel - 2);
-        // under the playing buttons, not beside them
-        await Assert.That(transport).IsLessThanOrEqualTo(0);
+        // the row the panel's width, the times either side of the bar on its line, and the line under the playing buttons
+        await Assert.That(measures[0]).IsGreaterThanOrEqualTo(measures[1] - 2);
+        await Assert.That(measures[2]).IsLessThan(8);
+        await Assert.That(measures[3]).IsEqualTo(1);
+        await Assert.That(measures[4]).IsLessThanOrEqualTo(0);
         await Assert.That(page.Errors).IsEmpty();
     }
 }

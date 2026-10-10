@@ -34,14 +34,14 @@ public sealed class PhoneTest(Site site)
     }
 
     [Test]
-    public async Task OnAPhone_TheSongPanel_IsALineEach_ForTheSong_ItsButtonsRatingAndShare_ItsTimesHarmonyAndVolume_WhereItIs_AndItsDownloads()
+    public async Task OnAPhone_TheSongPanel_IsALineEach_ForTheSong_ItsButtonsRatingAndShare_ItsHarmonyAndVolume_WhereItIsWithItsTimes_AndItsDownloads()
     {
         await using var page = await SongPage.Open(site, phone: true);
         await page.FirstSong();
 
         // each line's controls side by side, and each line under the one before it
-        string[][] lines = [["generate", "autoplay", "seed"], ["previous", "play", "stop", "next", "like", "dislike", "share"], ["elapsed", "total", "harmony", "volume"],
-            ["seek"], ["download", "export-mp3", "bitrate"]];
+        string[][] lines = [["generate", "autoplay", "seed"], ["previous", "play", "stop", "next", "like", "dislike", "share"], ["harmony", "volume"],
+            ["elapsed", "seek", "total"], ["download", "export-mp3", "bitrate"]];
         var tops = await page.Page.EvaluateAsync<double[][]>(
             "lines => lines.map(ids => ids.map(id => { const r = document.getElementById(id).getBoundingClientRect(); return r.top + r.height / 2; }))", lines);
         for (var i = 0; i < lines.Length; i++)

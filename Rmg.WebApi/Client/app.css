@@ -605,7 +605,12 @@ button.icon[aria-pressed="true"],
     flex-wrap: nowrap;
 }
 
-.transport .times {
+/* the seek bar on a line of its own, the time played and the song's length either side of it */
+.seek-row {
+    flex-wrap: nowrap;
+}
+
+.seek-row time {
     font-variant-numeric: tabular-nums;
     font-size: 14px;
     color: var(--muted);
@@ -628,7 +633,6 @@ input[type="range"] {
 
 /* the seek bar, and over it a mark where each section starts, which lets the bar take every pointer, set in as far as
    the thumb's middle travels (SEEK_INSET in app.js) */
-/* the seek bar on a line of its own, as wide as the panel */
 .seek {
     flex: 1;
     min-width: 0;
@@ -1639,7 +1643,6 @@ canvas.pulse {
         order: 4;
     }
 
-    .transport .times,
     .transport .harmony,
     .transport .volume {
         order: 5;
