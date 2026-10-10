@@ -88,10 +88,11 @@ public sealed class SongDrumRule
         var picks = Pool(min, max, drums);
         return (context, selectedDrums, pool) =>
         {
-            // picked as the songs pick them, and a genre's each kept by its weight, once
+            // picked as the songs pick them, drawn all the same, and a genre's each kept by its weight, once, its heaviest in
+            // every song
             var picked = new List<PercussionInstrumentDefinition>();
             picks(context, picked, null);
-            selectedDrums.AddRange(pool is null ? picked : picked.Where(x => context.TestProbability(Math.Min(1, pool(x)))));
+            selectedDrums.AddRange(pool is null ? picked : drums.Where(x => context.TestProbability(pool(x))));
         };
     }
 
@@ -109,8 +110,8 @@ public sealed class SongDrumRule
         {
             // one draw whatever the selection, so that the sequence stays as it is; a pool's weight, as a share of its heaviest,
             // the chance in place of the songs', a jazz genre's ride at its heaviest always
-            var isAvailable = context.TestProbability(pool is null ? probability : Math.Min(1, pool(drum)));
-            if (isAvailable && (pool is null || pool(drum) > 0) && !selectedDrums.Contains(drum) && !selectedDrums.Intersect(unlessSelected).Any())
+            var isAvailable = context.TestProbability(pool is null ? probability : pool(drum));
+            if (isAvailable && !selectedDrums.Contains(drum) && !selectedDrums.Intersect(unlessSelected).Any())
                 selectedDrums.Add(drum);
         };
     }

@@ -365,8 +365,12 @@ internal sealed record SongDecisions(
                 [..lateEntries.Where(x => index == x.Value).Select(x => x.Key), ..index == 0 && plan.RiffFirst ? [TrackRole.Riff] : Array.Empty<TrackRole>()]
             );
             // as loud as its energy's step from the section's, by the lift's measure of loudness, so that its last chorus
-            // plays the louder
-            section = section with { Timeline = section.Timeline.MergeStateMap(StateMap.FromStates([StateKinds.Velocity.CreateState(FormLayers.LiftVelocity * energyStep)])) };
+            // plays the louder, and its energy the appearance's, which the fills and the lifts into it read
+            section = section with
+            {
+                Timeline = section.Timeline.MergeStateMap(StateMap.FromStates([StateKinds.Velocity.CreateState(FormLayers.LiftVelocity * energyStep)])),
+                Energy = section.Energy + energyStep
+            };
             if (solo is not null)
             {
                 solos[index] = solo;

@@ -108,8 +108,11 @@ internal static class Figures
             var figures = new Dictionary<FigurePlayer, Figure?>();
             foreach (var player in players)
             {
-                var options = ByConvention.Weigh(OptionsOf(player).Select(x => (x.Name, x.Weight)), section.Facets[Facet.Feel],
-                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || Of(player, x.Value) is not { FollowsRiff: false, Step: 0 });
+                // the player's own rhythm where a genre's pool keeps no figure a bar not in four plays
+                Weighted<string>[] options = [..ByConvention.Weigh(OptionsOf(player).Select(x => (x.Name, x.Weight)), section.Facets[Facet.Feel],
+                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || Of(player, x.Value) is not { FollowsRiff: false, Step: 0 })];
+                if (options.Length == 0)
+                    options = [new Weighted<string>(1, Own)];
                 var name = context.Pick(energy.Weigh(options, x => Of(player, x)?.EnergyLean ?? 0));
                 // a figure an earlier player drew that this one plays too, a blast's snare with its kick, drawn all the same
                 // so that the draws are as many

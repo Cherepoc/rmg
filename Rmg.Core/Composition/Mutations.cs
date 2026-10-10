@@ -104,10 +104,13 @@ internal static class Mutations
                 // the bar as long as it is, a short last bar's (ShortBars)
                 var length = Math.Min(barLength, span.End - start);
                 var count = context.TestProbability(chance) ? context.TestProbability(SecondEdit) ? 2 : 1 : 0;
+                // every edit drawn, those that find something to edit made
                 for (var edit = 0; edit < count; edit++)
                     if (Draw(context, played, own, start, length, span.Meter, kicks, snares, anchored) is { } mutation)
+                    {
                         edits.Add(mutation);
-                made += count;
+                        made++;
+                    }
                 if (edits.Count > 0)
                 {
                     foreach (var mutation in edits)
@@ -132,9 +135,9 @@ internal static class Mutations
     private static IEnumerable<double> HitsIn(List<TimelineItem<StateMap>> notes, double start, double length) =>
         notes.Where(x => x.IsWithin(start, start + length)).Select(x => x.Position - start);
 
-    /// <summary>Whether a hit is an anchor: the downbeat's kick, a snare on a later group of the meter, its backbeat in any meter.</summary>
+    /// <summary>Whether a hit is an anchor: the downbeat's kick, a snare on a pulse of the meter after its first, its backbeat in any meter.</summary>
     private static bool IsAnchor(int track, double at, Meter meter, IReadOnlySet<int> kicks, IReadOnlySet<int> snares) =>
-        kicks.Contains(track) && at < 1e-9 || snares.Contains(track) && at > 1e-9 && meter.Levels[1].Any(x => Math.Abs(x.Start / 4.0 - at) < 1e-9);
+        kicks.Contains(track) && at < 1e-9 || snares.Contains(track) && at > 1e-9 && meter.Pulses.Skip(1).Any(x => Math.Abs(x - at) < 1e-9);
 
     /// <summary>An edit drawn on the bar as it is, none where it finds nothing to edit; every draw made whatever it finds.</summary>
     /// <param name="length">How long the bar is, in beats, a short last bar's shorter than its meter's.</param>
@@ -226,10 +229,10 @@ internal static class Mutations
                     break;
                 var (kickHits, snareHits) = (played[kick].Where(x => In(x.Position, mutation.At, 1)).ToArray(), played[snare].Where(x => In(x.Position, mutation.At, 1)).ToArray());
                 // each struck where the other was, as the other's note was
-                var kickNote = kickHits.FirstOrDefault().Value ?? played[kick].FirstOrDefault().Value;
-                var snareNote = snareHits.FirstOrDefault().Value ?? played[snare].FirstOrDefault().Value;
-                if (kickNote is null || snareNote is null)
+                // where both strike in the beat, as a trade of their hits; none where either rests there
+                if (kickHits.Length == 0 || snareHits.Length == 0)
                     break;
+                var (kickNote, snareNote) = (kickHits[0].Value, snareHits[0].Value);
                 played[kick] = [..played[kick].Except(kickHits), ..snareHits.Select(x => kickNote.ToTimelineItem(x.Position))];
                 played[snare] = [..played[snare].Except(snareHits), ..kickHits.Select(x => snareNote.ToTimelineItem(x.Position))];
                 break;

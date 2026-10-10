@@ -203,7 +203,8 @@ internal sealed class FillGenerator
         var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, meter);
         _lastRun = [];
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId, meter);
-        if (span > 0 && line.Ending != line.Next && !_lastRun.IsEmpty)
+        // a run into a change of section, another appearance of the same section's too, which the lines walk with
+        if (span > 0 && (line.Ending != line.Next || map is not null && map.Sections.Any(x => Math.Abs(x.Start - line.Position) < 1e-9)) && !_lastRun.IsEmpty)
             Runs.Add(new PlayedRun(line.Position, _lastRun, lift * ending.Rhythm.Coupling));
 
         // the drums land after they stopped, as they come back, and always where the song's form marks the line,
