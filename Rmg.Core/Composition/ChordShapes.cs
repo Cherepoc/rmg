@@ -173,18 +173,21 @@ internal static class ChordShapes
         return context.Pick(isOwn ? ByConvention.Lean(shapes, unconventionality, pool.Lean) : ByConvention.Weigh(shapes, unconventionality, pool.Middle));
     }
 
+    /// <summary>How much likelier a genre's cadence plays a shape made for it, one that pulls towards home, than its other chords.</summary>
+    public const double CadenceOdds = 4;
+
     /// <summary>
     ///     A cadence's shape at the chords' unconventionality: one made for it, or one of a strange level; within a genre's
-    ///     pool, a shape drawn at once among them, the pool leaning the cadence's own weights.
+    ///     pool, the pool's shapes as a chord of it weighs them, those made for a cadence the likelier (<see cref="CadenceOdds" />),
+    ///     so that a metal cadence lands on its power chord or its triad, as the genre plays them, and never on a shape the
+    ///     pool keeps rare.
     /// </summary>
     public static ChordShape PickCadence(IGenerationContext context, double unconventionality, GenrePool? pool)
     {
         if (pool is not null)
-            return context.Pick(ByConvention.Lean(
-                CadenceLevels.SelectMany(x => Shares(x.Level is { } level ? OfLevel(level) : CadenceShapes, x.Weight)),
-                unconventionality,
-                pool.Lean
-            ));
+            return context.Pick(Tilt.Of(CadenceOdds, 1).Weigh(
+                ByConvention.Weigh(All.Select(x => (x, new ByConvention(1, 1, 1))), unconventionality, pool.Middle),
+                shape => CadenceShapes.Any(x => x.Value == shape) ? 1 : 0));
 
         var level = context.Pick(ByConvention.Weigh(CadenceLevels.Select(x => (x.Level, x.Weight)), unconventionality));
         return level is { } strange ? Pick(context, strange) : PickCadence(context);
