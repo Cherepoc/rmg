@@ -50,7 +50,11 @@ public sealed class PowerChordRiffTest
                 var riff = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff))?.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray() ?? [];
                 if (riff.Length == 0)
                     continue;
-                var fast = riff.Length / span.Duration >= Chugs.FastNotes;
+                // its notes a beat over the patterns it plays in, as a texture may rest it in others
+                var patterns = Enumerable.Range(0, (int)Math.Ceiling(span.Duration / span.Meter.PatternDuration - 1e-9))
+                    .Select(p => (Start: span.Start + p * span.Meter.PatternDuration, End: Math.Min(span.Start + (p + 1) * span.Meter.PatternDuration, span.End)))
+                    .Where(p => riff.Any(x => x.Position >= p.Start - 1e-9 && x.Position < p.End - 1e-9)).ToArray();
+                var fast = riff.Length / patterns.Sum(p => p.End - p.Start) >= Chugs.FastNotes;
                 foreach (var note in riff)
                 {
                     var accent = note.Value.State.GetStateValue(CompositionStateKinds.BeatRank) == 0;

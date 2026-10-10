@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Rmg.Core.Events;
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
@@ -123,16 +124,17 @@ public sealed class RiffTest
     [Test]
     public async Task ADoubledLine_PlaysTheOthersNotes_AtTheirPlaces()
     {
-        var doubled = 0;
+        var (doubled, unison, unisonSame) = (0, 0, 0);
         foreach (var song in TestCorpus.Range(64))
-        foreach (var (index, source, target, _) in Doublings(song))
+        foreach (var (index, source, target, step) in Doublings(song))
         {
             var span = song.Map.Sections[index];
             // a solo plays over a doubling, and stop time's hits the band strikes together, the bass walking out of them
             if (song.IsSolo(span) || song.Trace.Any(x => x.Point == TracePoints.StopTime && x.Section == span.SectionId && x.Value is true))
                 continue;
+            // but a part's walk into the next section, which it plays as its own
             double[] At(TrackRole role) => [..song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == role).Value
-                .Where(x => x.Position >= span.Start && x.Position < span.End).Select(x => x.Position)];
+                .Where(x => x.Position >= span.Start && x.Position < span.End && x.Value.State.GetStateValue(CompositionStateKinds.Walk) == 0).Select(x => x.Position)];
             var (sourceAt, targetAt) = (At(source), At(target));
             if (targetAt.Length == 0)
                 continue;
@@ -147,10 +149,25 @@ public sealed class RiffTest
             }
 
             await Assert.That(targetAt.Where(InPlayedPattern).All(x => sourceAt.Concat(changes).Any(y => Math.Abs(x - y) < 1e-6))).IsTrue().Because($"seed {song.Seed}, section {index}");
+            // and in unison every note it doubles the doubled part's pitch class, a chromatic passing note's too
+            if (step == 0)
+            {
+                Dictionary<double, int> Classes(TrackRole role) => song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == role).Value
+                    .Where(x => x.Position >= span.Start && x.Position < span.End && (role == source || x.Value.State.GetStateValue(CompositionStateKinds.Doubled) > 0)).GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.First().Value.Pitches[0].Mod(12));
+                var (from, to) = (Classes(source), Classes(target));
+                foreach (var (at, pitch) in to.Where(x => from.ContainsKey(x.Key)))
+                    (unison, unisonSame) = (unison + 1, unisonSame + (pitch == from[at] ? 1 : 0));
+            }
             doubled++;
         }
 
         await Assert.That(doubled).IsGreaterThan(10);
+
+        // a calibration: a later stage may move a note the doubled part plays, a riff's landing say, which the doubling
+        // played as it was; a unison's chromatic notes doubled a semitone apart would fall far below it (all but one in 2,710 seen)
+        Console.WriteLine($"of {unison} notes doubled in unison, {unisonSame / (double)Math.Max(1, unison):P1} in the doubled part's pitch class");
+        await Assert.That(unison).IsGreaterThan(50);
+        await Assert.That(unisonSame / (double)unison).IsGreaterThan(0.9);
     }
 
     [Test]

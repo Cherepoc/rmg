@@ -66,7 +66,9 @@ internal static class Mutations
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var timelines = draft.Timeline.TrackTimelineMap;
-        var drums = song.Playing.Where(x => x.Value == TrackRole.Drum && timelines.ContainsKey(x.Key)).Select(x => x.Key).Order().ToArray();
+        // the drums the song plays but those it pins to their figure, which every bar plays as given
+        var drums = song.Playing.Where(x => x.Value == TrackRole.Drum && timelines.ContainsKey(x.Key) && song.Tracks.Definitions[x.Key].StateMap.GetStateValue(CompositionStateKinds.Pinned) == 0)
+            .Select(x => x.Key).Order().ToArray();
         if (drums.Length == 0)
             return draft;
         var kicks = DrumGroups.Kick.Tracks.ToHashSet();

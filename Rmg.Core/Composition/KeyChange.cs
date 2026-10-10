@@ -344,7 +344,9 @@ public sealed record KeyChange(double Position, int Semitones)
                 var pitch = LinePlacement.PitchOf(chord, note);
                 var held = pitch + ((dominant - pitch).Mod(12) is var up && up > 6 ? up - 12 : up);
                 var step = LinePlacement.GetScaleStep(chord, held);
-                events[i] = note.With(StateKinds.ScaleStep, step).With(StateKinds.Alteration, held - chord.GetPitch(step)).With(CompositionStateKinds.BassPedal, 1).ToTimelineItem(position);
+                // the pedal's note, a doubling's no longer, which the pedal holds under the line it doubled
+                events[i] = note.Except([CompositionStateKinds.Doubled]).With(StateKinds.ScaleStep, step).With(StateKinds.Alteration, held - chord.GetPitch(step)).With(CompositionStateKinds.BassPedal, 1)
+                    .ToTimelineItem(position);
             }
         }
 

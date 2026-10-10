@@ -71,8 +71,8 @@ internal static class SongStages
         new("Doubling", Doubling, CanSkip: true),
         new("Line chords", LineChordsStage, CanSkip: true),
         new("Chugs", Chugs.Apply, CanSkip: true),
-        new("Solos", Solos, CanSkip: true),
         new("Pedal", SectionPedals.Apply, CanSkip: true),
+        new("Solos", Solos, CanSkip: true),
         new("Solo answers", SoloAnswers, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
         new("Drum marks", DrumMarks.Apply, CanSkip: true),
@@ -148,6 +148,7 @@ internal static class SongStages
     /// </summary>
     internal static SongDraft Polymeter(SongDecisions song, SongDraft draft)
     {
+        var stopped = song.Form.Map.Sections.Where(s => song.StopTime.Any(p => p.Start < s.End - 1e-9 && p.End > s.Start + 1e-9)).Select(s => s.SectionId).ToHashSet();
         var polymeters = Composition.Polymeter.Generate(
             id => song.Stream(SongStream.Polymeter, id),
             id => song.SectionOf(id).Facets[Facet.Feel],
@@ -156,8 +157,9 @@ internal static class SongStages
             song.Absent,
             song.Genre,
             song.Pinned
-        ).Where(x => !song.SectionOf(x.Key).Breakdown).ToImmutableDictionary();
-        // but a breakdown, its kick locked to the riff, drawn all the same
+        ).Where(x => !song.SectionOf(x.Key).Breakdown && !stopped.Contains(x.Key)).ToImmutableDictionary();
+        // but a breakdown, its kick locked to the riff, and a section in stop time, whose band hits the bar's first beat,
+        // drawn all the same
         StateTrace.RecordSong(TracePoints.Polymeter, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
         return draft with
         {
@@ -181,7 +183,8 @@ internal static class SongStages
         // a stop-time phrase's end as heavy as a section's, the drums filling the band back in as often
         var stops = song.StopTime;
         var lines = song.Form.Lines.Select(x => stops.Any(p => Math.Abs(p.End - x.Position) < 1e-6) ? x with { Weight = Math.Max(x.Weight, 0) } : x).ToImmutableArray();
-        return draft with { Timeline = fills.Generate(draft.Timeline, lines, song.Form.Map), Runs = fills.Runs };
+        // the runs handed on to the lines' walks and the drums' touches, none where the drums mark the form, which plays none
+        return draft with { Timeline = fills.Generate(draft.Timeline, lines, song.Form.Map), Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs };
     }
 
     /// <summary>A bigger section announced, the hi-hat opening and the snare on its head before it.</summary>

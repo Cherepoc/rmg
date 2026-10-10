@@ -106,6 +106,13 @@ internal static class CompositionStateKinds
     // 1 for a drum a song pins to its figure, which plays its song's rhythm settings in every bar (DrumRoles.Pins)
     public static StateKind<int> Pinned { get; } = StateKinds.CreateAdditive<int>(Prefix + "Pinned");
 
+    // 1 for a note of a line's walk into the next section (LineFills), which a doubling of the part leaves as it is
+    public static StateKind<int> Walk { get; } = StateKinds.CreateAdditive<int>(Prefix + "Walk", StateScope.Render);
+
+    // 1 for a note a part plays doubling another's line note for note (LineDoubling), which the bass's own octaves and
+    // alternating fifths leave as the line has it
+    public static StateKind<int> Doubled { get; } = StateKinds.CreateAdditive<int>(Prefix + "Doubled", StateScope.Render);
+
     // a section's time, a step of every drum's period: 1 for half time, -1 for double time (Groove.DrawTimeFeel), apart from
     // the drum's own rhythm, so that a pinned drum, whose rhythm its song sets, plays in it too
     public static StateKind<int> TimeStep { get; } = StateKinds.CreateAdditive<int>(Prefix + "TimeStep");

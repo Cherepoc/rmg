@@ -321,6 +321,9 @@ internal sealed record SongDecisions(
             songUnconventionality[Facet.Form],
             absent
         );
+        // but the riff where the song opens on it alone, which plays from the start, its draws made all the same
+        if (plan.RiffFirst)
+            lateEntries = lateEntries.Remove(TrackRole.Riff);
         StateTrace.RecordSong(TracePoints.LateEntries, string.Join(", ", lateEntries.Select(x => $"{x.Key} at {x.Value}")), lateEntries);
         // every appearance's parts, a part held back yet soloing no sooner than it comes in
         IReadOnlyCollection<TrackRole>[] partsAt = [..played.Select((_, index) => SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray())];

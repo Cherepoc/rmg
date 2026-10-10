@@ -59,8 +59,10 @@ internal static class Articulations
                 last = k;
             }
 
-            // whether each note was played an octave from its own, which the next of a run of weak notes turns back from
+            // whether each note was played an octave from the note before, which the next of a run of weak notes turns back
+            // to, and the pitches each was played at
             var octaved = new bool[timeline.Count];
+            var played = new ImmutableArray<int>[timeline.Count];
             // the strumming grid, the shortest step between the part's chords, an 8th at the finest, a strum down on its
             // even steps and up on its odd
             var strummed = timeline.Where(x => x.Value.Pitches.Length > 1).Select(x => x.Position).ToArray();
@@ -85,16 +87,18 @@ internal static class Articulations
                 var leads = i + 1 < timeline.Count && timeline[i + 1].Value.State.GetStateValue(StateKinds.ChordChange) != note.Value.State.GetStateValue(StateKinds.ChordChange);
                 // a bass's own line, never a solo's
                 var ownLine = state.GetStateValue(CompositionStateKinds.LineSolo) == 0;
-                // a weak note after one played an octave away turning back to the note before's own, so that a run alternates
-                if (part.Role == TrackRole.Bass && ownLine && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
-                    && timeline[i - 1].Value.Pitches is var before && (octaved[i - 1] || before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
+                // a weak note after one played an octave away turning back to the note it was taken from, so that a run
+                // alternates; but a note the bass plays doubling another's line, which plays the line's
+                var doubled = state.GetStateValue(CompositionStateKinds.Doubled) > 0;
+                if (part.Role == TrackRole.Bass && ownLine && !doubled && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
+                    && played[i - 1] is var before && (octaved[i - 1] || before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
                 {
-                    pitches = octaved[i - 1] ? before : [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
+                    pitches = octaved[i - 1] ? played[i - 2 < 0 ? 0 : i - 2] : [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
                     octaved[i] = !octaved[i - 1];
                 }
                 // a bass alternating the root and the fifth, every other strong note of a chord its fifth, below the note
                 // before where its range has it and above where not, as a country bass plays
-                if (part.Role == TrackRole.Bass && ownLine && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1)
+                if (part.Role == TrackRole.Bass && ownLine && !doubled && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1)
                 {
                     var fifth = Realizer.GetChord(note.Value.State).Chord.GetPitch(4);
                     var below = timeline[Array.LastIndexOf(strongPlaces, strongPlaces[i] - 1, i)].Value.Pitches.Min() - 1;
@@ -111,6 +115,7 @@ internal static class Articulations
                     state = state.With(CompositionStateKinds.Strum, Beats(Roll));
 
                 var duration = stabs ? Math.Min(note.Value.Duration, StabLength) : note.Value.Duration;
+                played[i] = pitches;
                 return state == note.Value.State && pitches == note.Value.Pitches && duration == note.Value.Duration
                     ? note
                     : (note.Value with { State = state, Pitches = pitches, Duration = duration }).ToTimelineItem(note.Position);

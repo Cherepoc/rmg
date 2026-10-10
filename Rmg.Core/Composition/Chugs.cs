@@ -24,13 +24,23 @@ internal static class Chugs
 
         var spans = song.Form.Map.Sections.Select((span, index) => (span, song.Sections[index])).Where(x => x.Item2.Chugs).ToArray();
         var notes = track.EventTimeline;
+        // how many notes a beat the riff plays in each span, over the patterns it plays in, a texture or a late entry
+        // resting it in the others
+        var density = spans.ToDictionary(x => x.span, x =>
+        {
+            var patterns = Enumerable.Range(0, (int)Math.Ceiling(x.span.Duration / x.span.Meter.PatternDuration - 1e-9))
+                .Select(p => (Start: x.span.Start + p * x.span.Meter.PatternDuration, End: Math.Min(x.span.Start + (p + 1) * x.span.Meter.PatternDuration, x.span.End)))
+                .Select(p => (Length: p.End - p.Start, Count: notes.Count(n => n.IsWithin(p.Start, p.End))))
+                .Where(p => p.Count > 0)
+                .ToArray();
+            return patterns.Length == 0 ? 0 : patterns.Sum(p => p.Count) / patterns.Sum(p => p.Length);
+        });
         var chorded = notes.Select(note =>
         {
             var (span, section) = spans.FirstOrDefault(x => note.IsWithin(x.span.Start, x.span.End));
             if (span is null)
                 return note;
-            var count = notes.Count(x => x.IsWithin(span.Start, span.End));
-            var isFast = count / span.Duration >= FastNotes;
+            var isFast = density[span] >= FastNotes;
             var isAccent = note.Value.GetStateValue(CompositionStateKinds.BeatRank) == 0;
             return !isFast || isAccent && section.RiffPowerChords ? note.Value.With(CompositionStateKinds.PowerChord, 1).ToTimelineItem(note.Position) : note;
         });

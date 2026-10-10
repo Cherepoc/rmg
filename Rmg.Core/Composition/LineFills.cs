@@ -101,7 +101,7 @@ internal static class LineFills
         {
             var state = before.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed]);
             var chord = Chord(state.ToTimelineItem(position));
-            return state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(chord, pitch)).With(StateKinds.Alteration, 0).ToTimelineItem(position);
+            return state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(chord, pitch)).With(StateKinds.Alteration, 0).With(CompositionStateKinds.Walk, 1).ToTimelineItem(position);
         }
     }
 

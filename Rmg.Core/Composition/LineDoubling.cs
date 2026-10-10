@@ -175,10 +175,16 @@ internal static class LineDoubling
                     .Select(k => (Start: span.Start + k * span.Meter.PatternDuration, End: Math.Min(span.End, span.Start + (k + 1) * span.Meter.PatternDuration)))
                     .Where(p => events[sourceTrack].EventTimeline.Any(x => x.IsWithin(p.Start, p.End)))
                     .ToArray();
-                bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && patterns.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
+                // but from the doubling part's walk into the next section on, which it plays as its own, as LineFills placed it
+                var walk = events[targetTrack].EventTimeline.Where(x => x.IsWithin(span.Start, span.End) && x.Value.GetStateValue(CompositionStateKinds.Walk) > 0)
+                    .Select(x => x.Position).DefaultIfEmpty(double.MaxValue).Min();
+                bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && position < walk - 1e-9 && patterns.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
+                // in unison the source's alteration as it is, a chromatic riff's passing note too; a harmony a step away on the
+                // scale
                 var doubled = events[sourceTrack].EventTimeline
                     .Where(x => Doubles(x.Position))
-                    .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, 0)
+                    .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, step == 0 ? x.Value.GetStateValue(StateKinds.Alteration) : 0)
+                        .With(CompositionStateKinds.Doubled, 1)
                         .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0).ToTimelineItem(x.Position))
                     .Select(x => block ? x.Value.With(CompositionStateKinds.LineVoices, Math.Max(x.Value.GetStateValue(CompositionStateKinds.LineVoices), BlockVoices)).ToTimelineItem(x.Position) : x);
                 song = song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
@@ -210,7 +216,7 @@ internal static class LineDoubling
                         continue;
 
                     StateTrace.RecordSection(TracePoints.RiffBass, bassTrack, span.SectionId, $"{start}", (index, start));
-                    filled.AddRange(riff.Select(x => x.Value.With(StateKinds.Alteration, 0).With(CompositionStateKinds.SoundsAs, 0).ToTimelineItem(x.Position)));
+                    filled.AddRange(riff.Select(x => x.Value.With(CompositionStateKinds.SoundsAs, 0).With(CompositionStateKinds.Doubled, 1).ToTimelineItem(x.Position)));
                 }
 
                 if (filled.Count > 0)
