@@ -178,14 +178,14 @@ internal sealed class BarStateGenerator
             .WithLayer("Bar");
     }
 
-    /// <summary>The shape the section's melody phrases take: the register the melody aims at in each bar.</summary>
+    /// <summary>The shape the section's melody phrases take: the register the melody aims at in each bar, every phrase of the pattern arcing alike.</summary>
     private StateTimeline<double> GenerateMelodyContour(IGenerationContext context, IGenerationContext periodContext, double unconventionality)
     {
         var contour = MelodyLayers.GenerateContour(context, periodContext, unconventionality, _meter.PhraseBars);
         return StateTimeline.Create(
                 _meter.PatternDuration,
                 CompositionStateKinds.LineRegister,
-                contour.Select((register, bar) => register.ToTimelineItem(bar * _meter.BarDuration)).ToArray()
+                Enumerable.Range(0, _meter.PatternBarCount).Select(bar => contour[bar % contour.Length].ToTimelineItem(bar * _meter.BarDuration)).ToArray()
             )
             .WithLayer("Bar");
     }

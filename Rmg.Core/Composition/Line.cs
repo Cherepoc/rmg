@@ -146,7 +146,9 @@ internal sealed class Line
             if (_echoRun?.Root != chord.Root)
             {
                 var asHeard = chord.Root == heard.Root && !(_echoesNear && _previous is { } last && Math.Abs(chord.GetPitch(heard.Step) - last) >= _profile.LeapSize);
-                _echoRun = (chord.Root, asHeard ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step, inverts ? heard.Step : null);
+                // inverted only where it moves to another root, a sequence's figure, never where it plays as heard, as a
+                // section that comes back does
+                _echoRun = (chord.Root, asHeard ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step, inverts && !asHeard ? heard.Step : null);
             }
 
             // its step as heard, or mirrored about the run's first where the run plays the figure inverted
@@ -244,7 +246,10 @@ internal sealed class Line
             ChordApproach.Anticipation => root,
             _ => throw new ArgumentOutOfRangeException(nameof(approach), approach, null)
         };
-        // an approach past the range's edge moves an octave into it, as close to the edge as it can
+        // a half step past the range's edge taken from the root's other side, a half step still; another approach past it
+        // moves an octave into it, as close to the edge as it can
+        if (approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove && (approached < _low || approached > _high))
+            approached = 2 * root - approached;
         while (approached < _low)
             approached += OctaveNoteCount;
         while (approached > _high)
