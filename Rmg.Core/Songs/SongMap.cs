@@ -93,6 +93,9 @@ public sealed record SectionSpan(int SectionId, double Start, double Duration, M
     /// <summary>Where its last bar starts, a short one's.</summary>
     public double LastBar => End - Meter.BarDuration + Cut;
 
+    /// <summary>Whether a position is in it, a hair early counting as at its start.</summary>
+    public bool IsWithin(double position) => position >= Start - 1e-9 && position < End - 1e-9;
+
     /// <summary>How many bars it plays, a short last one among them.</summary>
     public int BarCount => (int)Math.Ceiling(Duration / Meter.BarDuration - 1e-9);
 

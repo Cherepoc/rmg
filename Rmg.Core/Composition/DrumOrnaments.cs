@@ -47,6 +47,7 @@ internal static class DrumOrnaments
         var snares = notes.Keys.Where(x => x == DrumGroups.GetTrackNumber(DrumDefinitions.AcousticSnare) || x == DrumGroups.GetTrackNumber(DrumDefinitions.ElectricSnare)).ToArray();
         var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var (fills, stops, map) = (draft.FillSpans, song.StopTime, song.Form.Map);
+        var solos = SongDraft.DrumSoloSpans(song);
         var result = notes.ToBuilder();
         foreach (var track in snares)
         {
@@ -54,8 +55,10 @@ internal static class DrumOrnaments
             result[track] = EventTimeline.Create(notes[track].Duration, notes[track].Select(note =>
             {
                 var position = note.Position;
-                // the snare's head in a section, a count-in's clicks aside, out of stop time
-                if (note.Value.Pitches is not [var code] || code != head || map.SectionAt(position) is not { } section || stops.Any(x => position >= x.Start - 1e-9 && position < x.End - 1e-9))
+                // the snare's head in a section, a count-in's clicks aside, out of stop time and of a drum solo, whose strokes are
+                // the drummer's own
+                if (note.Value.Pitches is not [var code] || code != head || map.SectionAt(position) is not { } section || stops.Any(x => position >= x.Start - 1e-9 && position < x.End - 1e-9)
+                    || solos.Any(x => x.IsWithin(position)))
                     return note;
                 // in a fill on an 8th, its accents, and elsewhere on a pulse of its bar, its backbeat
                 var inFill = fills.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9);

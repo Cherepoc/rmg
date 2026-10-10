@@ -158,6 +158,7 @@ internal static class DrumSolos
     /// <param name="motifs">A solo's draws of which phrases restate the phrase before's motif, by its appearance's place.</param>
     /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
+    /// <param name="drops">Where the song drops, whose build a solo before it leaves to roll.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IEnumerable<PercussionInstrumentDefinition> songDrums,
@@ -172,6 +173,7 @@ internal static class DrumSolos
         Func<int, IGenerationContext> stickings,
         Func<int, IGenerationContext> motifs,
         Func<int, double> groove,
+        IReadOnlyCollection<double> drops,
         Genre genre,
         Meter meter,
         Func<int, double> odds
@@ -187,14 +189,22 @@ internal static class DrumSolos
             // a solo traded with the drums their turns alone, the band laying out for them
             var drumsTurn = solo.Soloists.IndexOf(TrackRole.Drum);
             bool IsDrumsTurn(double position) => !solo.TradesWithDrums || solo.TurnAt(whole, position) == drumsTurn;
-            // all but its last bar, a short one's, the fill's into the section after
-            var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, whole.LastBar - whole.Start) };
+            // all but its last bar, a short one's, the fill's into the section after, and the bars a build rolls over into a
+            // drop after it
+            var until = drops.Any(x => Math.Abs(x - whole.End) < 1e-9) ? whole.LastBar - FormLayers.BuildRollBars * whole.Meter.BarDuration : whole.LastBar;
+            var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, until - whole.Start) };
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
                                           track.EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
             RunSound[] Of(FillDrumRole role) => sounds.TryGetValue(role, out var all) ? [..all.Where(Plays).DistinctBy(x => x.Track)] : [];
+            // the song's toms where the section's kit plays, its snare or its kick, every one of them by its note, as the toms are
+            // one drum of several sounds, whether the groove there struck them or not; none in a section of percussion alone
+            var kitPlays = Of(FillDrumRole.Snare).Length > 0 || Of(FillDrumRole.Kick).Length > 0;
+            RunSound[] kitToms = kitPlays && sounds.TryGetValue(FillDrumRole.Toms, out var tomSounds)
+                ? [..tomSounds.Where(x => song.TrackTimelineMap.ContainsKey(x.Track)).DistinctBy(x => x.Code)]
+                : [];
             // the hands' kit from its highest to its lowest: the snare, the toms by their notes, and the kick unless the
             // feet keep time on it
-            RunSound[] hands = [..Of(FillDrumRole.Snare).Take(1), ..Of(FillDrumRole.Toms).OrderByDescending(x => x.Code)];
+            RunSound[] hands = [..Of(FillDrumRole.Snare).Take(1), ..kitToms.OrderByDescending(x => x.Code)];
             var kicks = Of(FillDrumRole.Kick);
             var kick = kicks.FirstOrDefault();
             var feetKeepTime = feet(index).TestProbability(FeetKeepTime) && kick is not null && hands.Length > 0;
@@ -206,7 +216,8 @@ internal static class DrumSolos
             var tracks = song.TrackTimelineMap.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
             // every percussion drum a player of its own, its sounds from the highest, and the kit's drummer playing the rest
             var percussion = sounds.TryGetValue(FillDrumRole.Percussion, out var all) ? all.Where(Plays).GroupBy(x => x.Track)
-                .Select(x => new Player([..x.DistinctBy(y => y.Articulation).OrderByDescending(y => y.Code)], new HashSet<int> { x.Key }, false)).ToArray() : [];
+                // a hand drum's sounds from its high tone to its low, which its number runs up, as a pair's high drum is the lower
+                .Select(x => new Player([..x.DistinctBy(y => y.Articulation).OrderBy(y => y.Code)], new HashSet<int> { x.Key }, false)).ToArray() : [];
             var kit = new Player(feetKeepTime ? hands : [..hands, ..kicks.Take(1)], tracks.Except(percussion.SelectMany(x => x.Tracks)).ToHashSet(), true);
             Player[] band = [kit, ..percussion];
 
@@ -321,7 +332,9 @@ internal static class DrumSolos
                             // a sticking, the right hand round the toms, the left on the snare, the foot on the kick, but where the
                             // feet keep time on it
                             var kickFree = kick is not null && !feetTracks.Contains(kick.Track);
-                            var sticking = sticks.Pick(kickFree ? stickingWeights : [..stickingWeights.Where(x => x.Value != Sticking.HandFoot)]);
+                            // the hands' own where the feet keep time and a genre's pool names the hand and foot alone
+                            ImmutableArray<Weighted<Sticking>> handsOnly = [..stickingWeights.Where(x => x.Value != Sticking.HandFoot)];
+                            var sticking = sticks.Pick(kickFree ? stickingWeights : handsOnly.IsEmpty ? [new Weighted<Sticking>(1, Sticking.Singles)] : handsOnly);
                             var snare = scale[0];
                             RunSound[] toms = [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)];
                             var at = Math.Clamp(player.At, 0, Math.Max(0, toms.Length - 1));

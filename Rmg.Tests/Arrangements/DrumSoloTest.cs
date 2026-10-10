@@ -128,9 +128,11 @@ public sealed class DrumSoloTest
                     // a lick's cell on every note's place: the first of every cell the louder
                     if (segment.Gesture == SoloGesture.Lick && !segment.GoesOn)
                     {
+                        // counted by onset, a kick stacked under another drum's accent one with it, each its loudest
                         var size = segment.Sizes[0];
-                        foreach (var (hit, i) in hits.Where(x => !(feet && x.Track == kick)).OrderBy(x => x.Note.Position).Select((x, i) => (x, i)))
-                            (i % size == 0 ? first : rest).Add(hit.Note.Value.Velocity);
+                        foreach (var (onset, i) in hits.Where(x => !(feet && x.Track == kick)).GroupBy(x => Math.Round(x.Note.Position, 6)).OrderBy(x => x.Key)
+                                     .Select((x, i) => (x.Max(y => y.Note.Value.Velocity), i)))
+                            (i % size == 0 ? first : rest).Add(onset);
                     }
                 }
             }
@@ -186,12 +188,16 @@ public sealed class DrumSoloTest
     [Test]
     public async Task AJazzDrumSolosFeet_PlayTheHiHatsPedalOnTwoAndFour_TheHandsTheSnareAndToms()
     {
-        var hat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
-        var (solos, pedals) = (0, 0);
+        var (hat, tom) = (DrumGroups.GetTrackNumber(DrumDefinitions.HiHat), DrumGroups.GetTrackNumber(DrumDefinitions.Tom));
+        var (solos, pedals, roundTheKit) = (0, 0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild with { Genre = Rmg.Tests.Genres.GenrePresets.Genre("jazz") })))
         foreach (var (span, plan, feet, _) in KitSolos(song).Where(x => x.Feet && x.Span.Meter.Sixteenths == 16))
         {
             solos++;
+            // the hands round the toms, two of them at least, where the song's kit has toms
+            var struck = plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick)
+                .SelectMany(x => song.Song.Notes!.GetValueOrDefault(tom)?.Where(n => n.IsWithin(x.Start, x.End)) ?? []).SelectMany(x => x.Value.Pitches).Distinct().Count();
+            roundTheKit += struck >= 2 ? 1 : 0;
             foreach (var segment in plan.Where(x => x.Gesture != SoloGesture.Quote))
             foreach (var hit in song.Song.Notes!.GetValueOrDefault(hat)?.Where(x => x.Position >= segment.Start - 1e-9 && x.Position < segment.End - 1e-9) ?? [])
             {
@@ -201,9 +207,10 @@ public sealed class DrumSoloTest
             }
         }
 
-        Console.WriteLine($"{solos} jazz kit solos with the feet keeping time, {pedals} pedal strokes");
+        Console.WriteLine($"{solos} jazz kit solos with the feet keeping time, {pedals} pedal strokes, {roundTheKit} round two toms or more");
         await Assert.That(solos).IsGreaterThan(2);
         await Assert.That(pedals).IsGreaterThan(10);
+        await Assert.That(roundTheKit).IsGreaterThan(solos / 2);
     }
 
     /// <summary>

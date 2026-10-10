@@ -26,12 +26,18 @@ internal sealed record SongDraft(
     /// <summary>Where the drums fill, from a run's first note to its line, which the stages that play around a fill keep out of.</summary>
     public (double From, double To)[] FillSpans => [..Runs.Where(x => !x.Positions.IsEmpty).Select(x => (x.Positions.Min(), x.Line))];
 
-    /// <summary>Whether a span meets a fill, from its first note to its line, or the song's stop time: where the drums' own touches keep out.</summary>
+    /// <summary>Whether a span meets a fill, from its first note to its line, the song's stop time or a drum solo: where the drums' own touches keep out.</summary>
     public Func<double, double, bool> Busy(SongDecisions song)
     {
         var (fills, stops) = (FillSpans, song.StopTime);
-        return (from, to) => fills.Any(x => x.From < to - 1e-9 && x.To > from + 1e-9) || stops.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9);
+        var solos = DrumSoloSpans(song);
+        return (from, to) => fills.Any(x => x.From < to - 1e-9 && x.To > from + 1e-9) || stops.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9)
+                             || solos.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9);
     }
+
+    /// <summary>The appearances the drums solo in, alone or trading with the band, which the drummer plays as the solo has it.</summary>
+    public static SectionSpan[] DrumSoloSpans(SongDecisions song) =>
+        [..song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key])];
 }
 
 /// <summary>A stage of the song after it is put together: its name, what it does, and whether a test may leave it out.</summary>
@@ -200,6 +206,7 @@ internal static class SongStages
                 index => song.AppearanceStream(SongStream.DrumSoloStickings, index),
                 index => song.AppearanceStream(SongStream.DrumSoloMotifs, index),
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
+                song.Form.Drops,
                 song.Genre,
                 song.Meter,
                 DrumSounds.OddsOf(song.Genre, GenreChoices.DrumSounds)
