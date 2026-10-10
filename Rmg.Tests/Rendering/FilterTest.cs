@@ -10,7 +10,7 @@ namespace Rmg.Tests.Rendering;
 public sealed class FilterTest
 {
     /// <summary>A genre whose songs play the one strong effect given, and no part's tone nor the mix filtered, which would move the brightness of the others.</summary>
-    private static Genre Playing(StrongEffect effect) => new(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
+    internal static Genre Playing(StrongEffect effect) => new(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
         .Add(GenreChoices.StrongEffect.Name, ImmutableDictionary<string, ByConvention>.Empty.Add(GenreChoices.Name(effect.ToString()), new ByConvention(1, 1, 1)))
         .Add(GenreChoices.Effects.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("tone", new ByConvention(0, 0, 0)))
         .Add(GenreChoices.MixFilter.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("opening", new ByConvention(0, 0, 0))));

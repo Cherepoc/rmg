@@ -754,13 +754,6 @@ dynamics, as it has no drums.
   into its change; each passing kind's shape (the tritone substitute's dominant, the half-diminished's whole step);
   the melody's joins at every pattern; the busyness reports' facets read from the trace; the MIDI file parsed for its
   program changes; the stages' hand-offs, each read after it is made.
-- **A third corpus** (P2, 10 October 2026): at an offset of two million (`RMG_CORPUS_OFFSET=2000000`) 14 tests fail,
-  none of them checked yet against bug or calibration: the counter-melody in the melody's sound, the chords and the
-  bass striking their changes in range, a chromatic passing chord's shift, a drum accenting its lead, every drum
-  heard, a middling song mutating, a hook intro's notes, the final chord on its line and the closed endings on the
-  tonic, a quieter form, the notes as the render decides them, a swell's brightness, a note longer than a bar, and a
-  resting part's notes. Each checked against the committed code over the same songs, then fixed as a bug or its
-  calibration widened, as the second corpus's were.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than

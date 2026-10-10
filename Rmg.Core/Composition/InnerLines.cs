@@ -49,7 +49,7 @@ internal static class InnerLines
         var map = song.Form.Map;
         List<(double Start, double End, Meter Meter)> spans = [..map.Sections.Where((x, i) => lining[x.SectionId] && !song.Solos.ContainsKey(i)).Select(x => (x.Start, x.End, x.Meter))];
         // a chord's bars counted from its section's start, a hook intro's from the song's
-        if (map.Intro.Kind == IntroKind.Hook && map.Sections.Select((x, i) => (Span: x, Index: i)).First(x => song.Structure.Roles[x.Span.SectionId] == SectionRole.Chorus) is var (chorus, chorusIndex)
+        if (map.Intro.Kind == IntroKind.Hook && song.FirstChorus is var (chorus, chorusIndex)
             && lining[chorus.SectionId] && !song.Solos.ContainsKey(chorusIndex))
             spans.Insert(0, (0, map.Origin, chorus.Meter));
         var held = spans

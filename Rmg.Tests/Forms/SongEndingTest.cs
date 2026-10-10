@@ -201,6 +201,31 @@ public sealed class SongEndingTest
         await Assert.That(melody.Value.GetStateValue(CompositionStateKinds.LineLanding)).IsEqualTo((int)ChordArrival.Root);
     }
 
+    /// <summary>
+    ///     An intro before the first section in the sound the part plays the song in, not dry and plain before it: its reverb,
+    ///     its tape and its filter, which a part keeps through the song (its tone is a section's, the one its intro is made of).
+    /// </summary>
+    [Test]
+    public async Task AnIntro_PlaysInThePartsSound()
+    {
+        var checkedNotes = 0;
+        foreach (var song in TestCorpus.Range(64).Where(x => x.Origin > 1e-9))
+        foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack))
+        {
+            var played = notes.FirstOrDefault(x => x.Position >= song.Origin - 1e-9);
+            if (played.Value is null)
+                continue;
+            foreach (var note in notes.Where(x => x.Position < song.Origin - 1e-9))
+            foreach (var kind in new[] { CompositionStateKinds.Reverb, CompositionStateKinds.Wow, CompositionStateKinds.Filter })
+            {
+                checkedNotes++;
+                await Assert.That(note.Value.State.GetStateValue(kind)).IsEqualTo(played.Value.State.GetStateValue(kind)).Because($"seed {song.Seed}, track {track} at {note.Position}, {kind.Name}");
+            }
+        }
+
+        await Assert.That(checkedNotes).IsGreaterThan(100);
+    }
+
     /// <summary>The final chord in the sound the last section left each part in: its reverb, its tone and its tape, not reset at the ending.</summary>
     [Test]
     public async Task TheFinalChord_KeepsTheLastSectionsSound()

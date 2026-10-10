@@ -53,6 +53,19 @@ internal sealed record SongDecisions(
 
     private ImmutableArray<(double Start, double End, double BarDuration)>? _stopTime;
 
+    /// <summary>
+    ///     The song's first chorus where it plays and its place among the sections, which a hook intro quotes (<see
+    ///     cref="IntroKind.Hook" />); none for a song without a chorus.
+    /// </summary>
+    public (SectionSpan Span, int Index)? FirstChorus =>
+        Form.Map.Sections.Select((x, i) => (Span: x, Index: i)).Cast<(SectionSpan Span, int Index)?>().FirstOrDefault(x => Structure.Roles[x!.Value.Span.SectionId] == SectionRole.Chorus);
+
+    /// <summary>
+    ///     The section an intro before the first is made of, whose sound it plays in: the chorus a hook intro quotes, or the
+    ///     first section, which an intro's entries, a count-in or a cold start lead into.
+    /// </summary>
+    public SectionSpan IntroSource => Form.Map.Intro.Kind == IntroKind.Hook && FirstChorus is { } chorus ? chorus.Span : Form.Map.Sections[0];
+
     /// <summary>A stage's own stream.</summary>
     public IGenerationContext Stream(SongStream stream) => SongGenerator.CreateStream(Seed, stream);
 

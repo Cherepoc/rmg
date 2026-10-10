@@ -228,7 +228,7 @@ internal static class SongStages
     internal static SongDraft Lines(SongDecisions song, SongDraft draft)
     {
         var map = song.Form.Map;
-        var hookChorus = map.Sections.FirstOrDefault(x => song.Structure.Roles[x.SectionId] == SectionRole.Chorus)?.Start ?? 0;
+        var hookChorus = song.FirstChorus?.Span.Start ?? 0;
         TrackEventStateTimelineMap<StateMap> Place(TrackEventStateTimelineMap<StateMap> timeline, KeyValuePair<int, IInstrumentTrack> track, LineProfile profile) =>
             SongFormGenerator.QuoteHook(LinePattern.Place(timeline, track.Key, (PitchInstrumentTrack)track.Value, profile, map), track.Key, map, hookChorus);
         var (melody, bass, counter, riff) = (song.Track(TrackRole.Melody), song.Track(TrackRole.Bass), song.Track(TrackRole.CounterMelody), song.Track(TrackRole.Riff));
@@ -348,9 +348,8 @@ internal static class SongStages
         var map = song.Form.Map;
         if (map.Intro.Kind != IntroKind.Hook)
             return draft;
-        var (chorus, index) = map.Sections.Select((x, i) => (Span: x, Index: i)).FirstOrDefault(x => song.Structure.Roles[x.Span.SectionId] == SectionRole.Chorus);
         var lead = map.Origin - map.Meter.BarDuration;
-        if (chorus is null || song.Solos.ContainsKey(index) || lead <= 1e-9)
+        if (song.FirstChorus is not var (chorus, index) || song.Solos.ContainsKey(index) || lead <= 1e-9)
             return draft;
 
         // but a chorus in a key or at a tempo of its own, which the intro's would move, and which the lines' quote plays as it is
@@ -395,7 +394,8 @@ internal static class SongStages
                 song.Genre,
                 [..draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)],
                 song.Form.Edits.CutsOf,
-                [..song.StopTime.Select(x => (x.Start, x.End))]
+                [..song.StopTime.Select(x => (x.Start, x.End))],
+                song.IntroSource
             )
         };
 

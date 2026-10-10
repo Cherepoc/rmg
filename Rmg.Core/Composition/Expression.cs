@@ -126,13 +126,23 @@ internal static class Expression
     /// <summary>Whether a strong effect is a filter's, which only a part it suits plays, a synth's.</summary>
     private static bool IsFilter(StrongEffect effect) => effect is StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening;
 
-    /// <summary>The states a part's notes keep into the ending from the last section: those it plays steadily, not a note's gestures.</summary>
-    private static readonly IStateKind[] EndingKinds =
+    /// <summary>
+    ///     The states a part plays steadily, not a note's gestures, which an intro's notes take from the section it is made of
+    ///     and the ending's from the last.
+    /// </summary>
+    private static readonly IStateKind[] SteadyKinds =
     [
         CompositionStateKinds.Reverb, CompositionStateKinds.Chorus, CompositionStateKinds.Tone, CompositionStateKinds.Wow, CompositionStateKinds.Detune,
         CompositionStateKinds.AutoPan, CompositionStateKinds.Tremolo, CompositionStateKinds.Echo, CompositionStateKinds.Filter, CompositionStateKinds.FilterCycle,
         CompositionStateKinds.FilterDepth
     ];
+
+    /// <summary>A note in the steady sound of another's state, a tremolo's on a held note alone, as everywhere.</summary>
+    private static StateMap Steady(RealizedNote note, StateMap source)
+    {
+        var state = note.State.MergeWith(source.Subset(SteadyKinds));
+        return note.Duration >= 1 - 1e-9 ? state : state.With(CompositionStateKinds.Tremolo, 0);
+    }
 
     /// <summary>Whether a strong effect is played only by a part it suits: a filter's, a synth's, and a gate's, held chords'.</summary>
     private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect == StrongEffect.Gate;
@@ -569,7 +579,8 @@ internal static class Expression
         Genre genre,
         IReadOnlyList<double> changes,
         Func<int, IReadOnlyList<double>> cuts,
-        IReadOnlyList<(double Start, double End)> stopTime
+        IReadOnlyList<(double Start, double End)> stopTime,
+        SectionSpan introSource
     )
     {
         var ((songVibrato, songChorus, songSwell, songBends, _, _), carriers) = songEffects;
@@ -841,12 +852,21 @@ internal static class Expression
                 }
             }
 
+            // an intro's notes before the first section, in the sound the part plays the section it is made of in, as the
+            // ending's below: a hook intro's last bar, which leads into the chorus as its own, and a hook not quoted, the
+            // chorus's; an intro's entries before the first section, the first's
+            if (Array.FindIndex(states, x => x is not null) is var firstPlayed and >= 0
+                && Enumerable.Range(0, timeline.Count).FirstOrDefault(i => states[i] is not null && introSource.IsWithin(timeline[i].Position), firstPlayed) is var sourced)
+                for (var i = 0; i < timeline.Count && timeline[i].Position < map.Origin - 1e-9; i++)
+                    if (states[i] is null)
+                        states[i] = Steady(timeline[i].Value, states[sourced]!);
+
             // the ending's notes, the final chord, in the sound the last section left the part in: its sends, its tone, its
             // tape and its steady effects, none of a note's own gestures
             if (Array.FindLastIndex(states, x => x is not null) is var lastPlayed and >= 0 && timeline[lastPlayed].Position >= map.Sections[^1].Start - 1e-9)
                 for (var i = lastPlayed + 1; i < timeline.Count; i++)
                     if (states[i] is null && timeline[i].Position >= map.Ending.Start - 1e-9)
-                        states[i] = timeline[i].Value.State.MergeWith(states[lastPlayed]!.Subset(EndingKinds));
+                        states[i] = Steady(timeline[i].Value, states[lastPlayed]!);
 
             result[track] = EventTimeline.Create(
                 timeline.Duration,

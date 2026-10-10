@@ -59,14 +59,22 @@ internal static class StopTime
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var phrases = song.StopTime;
-        foreach (var id in song.SectionIds.Distinct())
+        // whether a section is stopped wherever it plays, as it is played: a phrase drawn that nothing carries is not
+        void Record(Func<(double Start, double End, double BarDuration), bool> played)
         {
-            var stops = song.Form.Map.Sections.Any(x => x.SectionId == id && phrases.Any(p => Math.Abs(p.Start - x.Start) < 1e-9));
-            StateTrace.RecordSection(TracePoints.StopTime, SectionGenerator.SectionTrace, id, $"{stops}", stops);
+            foreach (var id in song.SectionIds.Distinct())
+            {
+                var drawn = phrases.Where(p => song.Form.Map.Sections.Any(x => x.SectionId == id && Math.Abs(p.Start - x.Start) < 1e-9)).ToArray();
+                var stops = drawn.Length > 0 && drawn.All(played);
+                StateTrace.RecordSection(TracePoints.StopTime, SectionGenerator.SectionTrace, id, $"{stops}", stops);
+            }
         }
 
         if (phrases.Length == 0)
+        {
+            Record(_ => false);
             return draft;
+        }
 
         var notes = SongStages.NotesOf(draft);
         var lines = notes.Where(x => song.Tracks.Definitions[x.Key].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo).SelectMany(x => x.Value).ToArray();
@@ -90,6 +98,8 @@ internal static class StopTime
             foreach (var (at, carrier) in bars)
                 carriers[Math.Round(at, 6)] = carried ? carrier : Carrier.None;
         }
+
+        Record(p => carriers[Math.Round(p.Start, 6)] != Carrier.None);
 
         // where a note falls in stop time, a bar a part plays through left out: off the bar's first beat, or on it, a hit
         (bool In, bool OnTheBar) Place(double position, int track)

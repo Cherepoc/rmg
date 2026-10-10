@@ -296,14 +296,17 @@ public sealed class GenreTest
     public async Task ATempoRange_IsItsOwnAtEveryEnd()
     {
         // 70 to 85 beats a minute up to the middle, 100 to 130 at the wild end
+        var (from, to) = (new ByConvention(TempoAmount(70), TempoAmount(70), TempoAmount(100)), new ByConvention(TempoAmount(85), TempoAmount(85), TempoAmount(130)));
         var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty.Add(GenreChoices.Tempo.Name,
-            ImmutableDictionary<string, ByConvention>.Empty
-                .Add("from", new ByConvention(TempoAmount(70), TempoAmount(70), TempoAmount(100)))
-                .Add("to", new ByConvention(TempoAmount(85), TempoAmount(85), TempoAmount(130)))));
+            ImmutableDictionary<string, ByConvention>.Empty.Add("from", from).Add("to", to)));
         foreach (var seed in Enumerable.Range(0, 16))
         {
             await Assert.That(Bpm(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre)))).IsBetween(70, 85);
-            await Assert.That(Bpm(TestCorpus.Get(seed, new SongOverrides(Base: 0.5, Genre: genre)))).IsBetween(70, 85);
+            // a middling song's range at its feel, which strays around its base
+            var middling = TestCorpus.Get(seed, new SongOverrides(Base: 0.5, Genre: genre));
+            var feel = middling.Unconventionality.Facets[Facet.Feel];
+            await Assert.That(Bpm(middling)).IsBetween(GenreChoices.TempoOf(from.At(feel)) * Meter.BaseTempo - 1e-6, GenreChoices.TempoOf(to.At(feel)) * Meter.BaseTempo + 1e-6)
+                .Because($"seed {seed} at a feel of {feel}");
             await Assert.That(Bpm(TestCorpus.Get(seed, new SongOverrides(Base: 1, Genre: genre)))).IsBetween(100, 130);
         }
     }

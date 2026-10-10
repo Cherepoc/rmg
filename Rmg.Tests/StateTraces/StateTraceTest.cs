@@ -63,14 +63,27 @@ public sealed class StateTraceTest
         await Assert.That(layers).Contains("Bar");
     }
 
+    /// <summary>
+    ///     The snare's bar patterns of the corpus's first song that plays a snare, traced, as a song of another corpus may
+    ///     play none.
+    /// </summary>
+    private static StateTraceEntry[] SnareBarPatterns()
+    {
+        for (var index = 1; ; index++)
+        {
+            using var trace = StateTrace.Start();
+            SongGenerator.GenerateSong(TestCorpus.SongSeed(index));
+            var entries = trace.Entries.Where(x => x.Point == TracePoints.BarPattern && SnareTracks.Contains(x.Track)).ToArray();
+            if (entries.Length > 0)
+                return entries;
+        }
+    }
+
     [Test]
     public async Task SnareBackbeat_IsExplainedByItsLayers()
     {
-        using var trace = StateTrace.Start();
-        SongGenerator.GenerateSong(TestCorpus.SongSeed(1));
-
         var kind = CompositionStateKinds.Rhythm.Phase.Rank;
-        var snareEntries = trace.Entries.Where(x => x.Point == TracePoints.BarPattern && SnareTracks.Contains(x.Track)).ToArray();
+        var snareEntries = SnareBarPatterns();
 
         await Assert.That(snareEntries.Length).IsGreaterThan(0);
         // a value the layers add up to 0 is the default, which a map does not keep, nor its parts
@@ -90,11 +103,7 @@ public sealed class StateTraceTest
     [Test]
     public async Task EveryRhythmLayer_ContributesToSomeBarPattern()
     {
-        using var trace = StateTrace.Start();
-        SongGenerator.GenerateSong(TestCorpus.SongSeed(1));
-
-        var layers = trace.Entries
-            .Where(x => x.Point == TracePoints.BarPattern && SnareTracks.Contains(x.Track))
+        var layers = SnareBarPatterns()
             .SelectMany(x => x.StateMap.Explain(CompositionStateKinds.Rhythm.Phase.RankedOffset))
             .Select(x => x.Layer)
             .ToHashSet();
