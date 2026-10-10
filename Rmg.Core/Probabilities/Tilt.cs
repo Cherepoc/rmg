@@ -27,7 +27,13 @@ public readonly record struct Tilt(double LogOdds)
     public double HighChance => 1 / (1 + Math.Exp(-LogOdds));
 
     /// <summary>The skew of a value around 0 (<see cref="Generators.SplineValue" />) that is positive with the high chance.</summary>
-    public double Skew => Math.Log(0.5) / Math.Log(1 - HighChance);
+    public double Skew => Math.Log(2) / LowLogChance;
+
+    /// <summary>
+    ///     How unlikely the low side is, the negative log of its chance, log(1 + e^LogOdds), computed so that it stays
+    ///     exact at odds however far out, where 1 minus the high chance would round to 0 or 1.
+    /// </summary>
+    private double LowLogChance => LogOdds > 0 ? LogOdds + Math.Log(1 + Math.Exp(-LogOdds)) : Math.Log(1 + Math.Exp(LogOdds));
 
     /// <summary>A value around 0, as <see cref="Generators.SplineValue" /> draws it, leaning to the high side.</summary>
     public Func<IGenerationContext, double> SplineValue(double c = 1)

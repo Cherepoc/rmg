@@ -119,6 +119,12 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
     {
         if (_stateMapEventTimeline is not null || IsDefault || position >= Duration)
             return GetEffectiveStateMapAt(position);
+        return ReadAt(position);
+    }
+
+    /// <summary>The state at a position, read from every timeline there.</summary>
+    private StateMap ReadAt(double position)
+    {
         var states = new IState[StateTimelines.Length];
         for (var i = 0; i < states.Length; i++)
             states[i] = StateTimelines[i].GetEffectiveStateAt(position);
@@ -129,7 +135,13 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
     {
         ArgumentOutOfRangeException.ThrowIfNegative(position);
 
-        if (IsDefault || position >= Duration || position < StateMapEventTimeline[0].Position)
+        if (IsDefault || position >= Duration)
+            return StateMap.Default;
+        // while a trace explains, every layer's contribution at the place itself, which the state at the last change of a
+        // value misses where a layer comes in or goes without changing it
+        if (StateTrace.IsExplaining)
+            return ReadAt(position);
+        if (position < StateMapEventTimeline[0].Position)
             return StateMap.Default;
 
         var index = StateMapEventTimeline.ToImmutableArray().GetIndexAtFloor(position);

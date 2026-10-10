@@ -105,7 +105,8 @@ public static class GenreChoices
             TrackRole.Pad => "The pad",
             TrackRole.Chords => "The chords",
             TrackRole.Rhythm => "The rhythm part",
-            _ => "The riff, a stutter"
+            TrackRole.Riff => "The riff, a stutter",
+            _ => throw new ArgumentOutOfRangeException(nameof(x.Role), x.Role, "No label for the gate's part.")
         }, x.Weight)));
 
     /// <summary>The chance a drum bar adds an edit to a mutating groove, an IDM or a drum and bass track's (<see cref="Composition.Mutations" />).</summary>
@@ -118,7 +119,8 @@ public static class GenreChoices
             SoloFeet.Groove => "The groove's kick",
             SoloFeet.HatFoot => "The hi-hat's pedal on 2 and 4",
             SoloFeet.DoubleKick => "A double kick in 16ths",
-            _ => "The bossa's kick"
+            SoloFeet.Bossa => "The bossa's kick",
+            _ => throw new ArgumentOutOfRangeException(nameof(x.Feet), x.Feet, "No label for the feet.")
         }, x.Weight)));
 
     /// <summary>The stickings a drum solo's runs play (<see cref="DrumSolos.Stickings" />).</summary>
@@ -129,7 +131,8 @@ public static class GenreChoices
             Sticking.Doubles => "Double strokes",
             Sticking.Paradiddle => "Paradiddles",
             Sticking.SixStroke => "Six-stroke rolls",
-            _ => "Hands and foot in triplets"
+            Sticking.HandFoot => "Hands and foot in triplets",
+            _ => throw new ArgumentOutOfRangeException(nameof(x.Sticking), x.Sticking, "No label for the sticking.")
         }, x.Weight)));
 
     /// <summary>The chances the whole mix is filtered: opening up a song, dipping before a section, closing as it ends (<see cref="Composition.MixFilter" />).</summary>
@@ -698,11 +701,10 @@ public static class GenreChoices
     private static GenreChoice Chances(string name, string label, IEnumerable<(string Name, string Label, ByConvention Chance)> options) =>
         new(name, label, GenreChoiceKind.Chances, [..options.Select(x => new GenreOption(x.Name, x.Label, x.Chance))]);
 
-    /// <summary>A choice of values, every one's own as it is.</summary>
-    /// <summary>A choice of values, each a lean from the songs' own, read at the song's facet it follows (<see cref="Genre.AtSong" />).</summary>
     /// <summary>Parts as options of a choice, by their names and their labels.</summary>
     private static IEnumerable<(string Name, string Label)> PartsOf(params TrackRole[] roles) => roles.Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)));
 
+    /// <summary>A choice of values, each a lean from the songs' own, read at the song's facet it follows (<see cref="Genre.AtSong" />).</summary>
     private static GenreChoice Values(string name, string label, IEnumerable<(string Name, string Label)> options, Facet follows) =>
         new(name, label, GenreChoiceKind.Values, [..options.Select(x => new GenreOption(x.Name, x.Label, Even(0.5)))]) { Follows = follows };
 
@@ -721,6 +723,7 @@ public static class GenreChoices
     {
         Composition.DrumSetup.Kit => "kit",
         Composition.DrumSetup.KitAndPercussion => "kitAndPercussion",
-        _ => "percussion"
+        Composition.DrumSetup.Percussion => "percussion",
+        _ => throw new ArgumentOutOfRangeException(nameof(setup), setup, "No name for the drum setup.")
     };
 }

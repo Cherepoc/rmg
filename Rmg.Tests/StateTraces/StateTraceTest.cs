@@ -22,7 +22,7 @@ public sealed class StateTraceTest
     public async Task Trace_RecordsEveryTracksBarPatterns()
     {
         using var trace = StateTrace.Start();
-        var song = SongGenerator.GenerateSong(1);
+        var song = SongGenerator.GenerateSong(TestCorpus.SongSeed(1));
 
         var tracks = trace.Entries.Select(x => x.Track).ToHashSet();
 
@@ -38,22 +38,24 @@ public sealed class StateTraceTest
     [Test]
     public async Task ChordPick_IsExplainedBySongSectionAndBar()
     {
-        using var trace = StateTrace.Start();
-        SongGenerator.GenerateSong(1);
-
         var index = CompositionStateKinds.ChordPool.Index;
-        var chordEntries = trace.Entries.Where(x => x.Point == TracePoints.Chord).ToArray();
         var layers = new HashSet<string>();
-
-        await Assert.That(chordEntries.Length).IsGreaterThan(0);
-        foreach (var entry in chordEntries)
+        // over a few songs, as a plain song's bars may move none of its picks
+        foreach (var seed in Enumerable.Range(1, 8))
         {
-            var contributions = entry.StateMap.Explain(index);
-            layers.UnionWith(contributions.Select(x => x.Layer));
+            using var trace = StateTrace.Start();
+            SongGenerator.GenerateSong(TestCorpus.SongSeed(seed));
+            var chordEntries = trace.Entries.Where(x => x.Point == TracePoints.Chord).ToArray();
+            await Assert.That(chordEntries.Length).IsGreaterThan(0);
+            foreach (var entry in chordEntries)
+            {
+                var contributions = entry.StateMap.Explain(index);
+                layers.UnionWith(contributions.Select(x => x.Layer));
 
-            // the pick adds up from the shared layers alone, and the pool it picks from is there
-            await Assert.That(contributions.Sum(x => (int)x.Value)).IsEqualTo(entry.StateMap.GetStateValue(index));
-            await Assert.That(entry.StateMap.GetStateValue(CompositionStateKinds.ChordPool.Collection).Length).IsGreaterThan(0);
+                // the pick adds up from the shared layers alone, and the pool it picks from is there
+                await Assert.That(contributions.Sum(x => (int)x.Value)).IsEqualTo(entry.StateMap.GetStateValue(index));
+                await Assert.That(entry.StateMap.GetStateValue(CompositionStateKinds.ChordPool.Collection).Length).IsGreaterThan(0);
+            }
         }
 
         // the bar's part is named now, and no track's layer takes part
@@ -65,7 +67,7 @@ public sealed class StateTraceTest
     public async Task SnareBackbeat_IsExplainedByItsLayers()
     {
         using var trace = StateTrace.Start();
-        SongGenerator.GenerateSong(1);
+        SongGenerator.GenerateSong(TestCorpus.SongSeed(1));
 
         var kind = CompositionStateKinds.Rhythm.Phase.Rank;
         var snareEntries = trace.Entries.Where(x => x.Point == TracePoints.BarPattern && SnareTracks.Contains(x.Track)).ToArray();
@@ -89,7 +91,7 @@ public sealed class StateTraceTest
     public async Task EveryRhythmLayer_ContributesToSomeBarPattern()
     {
         using var trace = StateTrace.Start();
-        SongGenerator.GenerateSong(1);
+        SongGenerator.GenerateSong(TestCorpus.SongSeed(1));
 
         var layers = trace.Entries
             .Where(x => x.Point == TracePoints.BarPattern && SnareTracks.Contains(x.Track))
@@ -128,7 +130,7 @@ public sealed class StateTraceTest
     public async Task ARecordingTrace_KeepsNoContributions()
     {
         using var trace = StateTrace.Start(explains: false);
-        SongGenerator.GenerateSong(1);
+        SongGenerator.GenerateSong(TestCorpus.SongSeed(1));
 
         var entries = trace.Entries.Where(x => x.Point == TracePoints.BarPattern).ToArray();
         await Assert.That(entries.Length).IsGreaterThan(0);
@@ -159,7 +161,7 @@ public sealed class StateTraceTest
     {
         var trace = StateTrace.Start();
         trace.Dispose();
-        SongGenerator.GenerateSong(1);
+        SongGenerator.GenerateSong(TestCorpus.SongSeed(1));
 
         await Assert.That(trace.Entries.Count).IsEqualTo(0);
 

@@ -35,7 +35,10 @@ public static class SongFingerprint
         new(Key: 5),
         new(Swing: 0.6),
         new(Length: 120),
-        new(DrumSetup: DrumSetup.Percussion)
+        new(DrumSetup: DrumSetup.Percussion),
+        new(DrumPieces: ["kick", "conga", "tambourine"]),
+        new(Parts: ImmutableDictionary<Songs.TrackRole, bool>.Empty.Add(Songs.TrackRole.Pad, false).Add(Songs.TrackRole.Solo, true)),
+        new(Scale: Scales.Dorian, Meter: Meter.Options[2].Meter)
     ];
 
     /// <summary>The fingerprint of the songs of seeds 0 to <paramref name="count" /> - 1 and of <paramref name="genres" />' songs, as 16 hex digits.</summary>

@@ -55,3 +55,4 @@ rejected while fixing: the place, what was decided, why.
 - A pedal wins over a doubling: a bass note a pedal holds is the pedal's, no longer the doubled line's.
 - A hook intro quotes its chorus's notes only where the chorus plays in the intro's key and tempo; elsewhere the lines' quote alone.
 - Black metal inheriting the songs' ornaments: measured nearly inaudible under its distorted band (0.02 heard difference over 24 songs), so neither a question nor a change.
+- The fingerprint's determinism checked only within one process (SongsVersionTest): a second process would need a CLI run of the whole corpus, and a per-process drift would show at once as a version raised on every deploy.

@@ -89,11 +89,13 @@ public static class ProbabilityThreshold
         if (!(weightSum > 0) || double.IsInfinity(weightSum))
             throw new InvalidOperationException($"The options' weights sum to {weightSum}, which picks none.");
 
+        // the last option that weighs, and any after it, at 1 exactly, so that the sum's rounding drops no option at the tail
+        var lastWeighed = Enumerable.Range(0, weights.Length).Last(i => weights[i].Weight > 0);
         double lastThreshold = 0;
         for (var i = 0; i < weights.Length; i++)
         {
             var weightItem = weights[i];
-            lastThreshold = (lastThreshold + weightItem.Weight / weightSum).RoundByEpsilon(1);
+            lastThreshold = i >= lastWeighed ? 1 : Math.Min(1, lastThreshold + weightItem.Weight / weightSum);
             result[i] = new ProbabilityThreshold<T>(lastThreshold, weightItem.Value);
         }
 

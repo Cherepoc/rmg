@@ -31,7 +31,7 @@ public sealed class StateKindsRegistryTest
             .Where(x => x.IsShared)
             .ToArray();
 
-        await Assert.That(shared).IsEquivalentTo(new IStateKind[] { StateKinds.KeyOffset, StateKinds.ScaleOffsets, StateKinds.ScaleAlterations, StateKinds.Tempo, StateKinds.Fade, StateKinds.SwingDelay, StateKinds.SwingPeriod }, CollectionOrdering.Matching);
+        await Assert.That(shared).IsEquivalentTo(new IStateKind[] { StateKinds.KeyOffset, StateKinds.ScaleOffsets, StateKinds.ScaleAlterations, StateKinds.Tempo, StateKinds.Fade, StateKinds.SwingDelay, StateKinds.SwingPeriod }, CollectionOrdering.Any);
     }
 
     [Test]

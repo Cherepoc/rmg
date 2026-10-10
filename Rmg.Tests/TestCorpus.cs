@@ -74,9 +74,11 @@ internal static class TestCorpus
 
     private static ExecutionContext CaptureClean()
     {
+        // the caller's flow not passed to the thread, so that a trace it has started is not captured with it
         ExecutionContext? context = null;
         var thread = new Thread(() => context = ExecutionContext.Capture());
-        thread.Start();
+        using (ExecutionContext.SuppressFlow())
+            thread.Start();
         thread.Join();
         return context!;
     }

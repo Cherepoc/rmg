@@ -17,15 +17,19 @@ public static class Generators
             sum += option.Weight;
         var probability = context.GenerateDouble();
         var threshold = 0.0;
+        var last = -1;
         for (var i = 0; i < options.Length; i++)
         {
-            threshold = (threshold + options[i].Weight / sum).RoundByEpsilon(1);
-            ProbabilityThreshold.ValidateProbabilityThreshold(threshold);
+            if (!(options[i].Weight > 0))
+                continue;
+            threshold += options[i].Weight / sum;
             if (threshold >= probability)
                 return options[i].Value;
+            last = i;
         }
 
-        throw new IndexOutOfRangeException("No option's threshold reaches the draw.");
+        // a draw past the sum's rounding falls to the last option that weighs
+        return last >= 0 ? options[last].Value : throw new InvalidOperationException($"The options' weights sum to {sum}, which picks none.");
     }
 
     public static Func<IGenerationContext, int> WeightedIndex<T>(ImmutableArray<Weighted<T>> items)
