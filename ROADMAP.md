@@ -435,6 +435,18 @@ plain or wild the songs are.
 
 Each item with its plan, and what it waits for.
 
+### From the review of 10 October
+
+What it left, all in `reviews/2026-10-10.md`'s *Open*:
+
+- **Two fix loops** with the review of 9 October. The analytics file's size, a `VACUUM` added and removed again:
+  shrink it with `auto_vacuum = INCREMENTAL`, an `incremental_vacuum` after each prune and a `wal_checkpoint(TRUNCATE)`.
+  The per-network cap, keyed on the address after 9 October warned against it: count ratings and verdicts apart from
+  it, so that a shared NAT keeps them.
+- **44 findings moved between packages and never worked**: tests of the drums, the sound and the form, stale docs,
+  the fine-tune grid's layout and the editor's drum setups; and 23 left open by their packages.
+- A test that lists the calibrations measuring fewer than 64 songs, which both reviews found.
+
 ### Conventionality
 
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two

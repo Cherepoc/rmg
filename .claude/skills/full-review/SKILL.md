@@ -19,7 +19,8 @@ the slices) and which model the agents use (the current one by default: the user
 ## The files
 
 - **The review's folder**, outside the repository and kept between sessions: `R=~/Projects/sw/rmg-reviews/<date>`.
-  The latest earlier folder there is the last review, `L`. Nothing is written in the repository.
+  The latest earlier folder there is the last review, `L`. Nothing is written in the repository until the fixes are
+  done, when the review's record is (*The record*, below).
 - **The briefs**, this skill's own (`S=<repo>/.claude/skills/full-review`): `primer.md` (the project, the checklist,
   the output), `angles.md` (the cross-cutting concerns, the device families, the genre-fit reviewers), `verify.md` (the
   verifiers' brief) and `decided.md` (findings decided against or kept on purpose, which no reviewer raises again).
@@ -136,7 +137,7 @@ writes `$R/report.md`: the totals, the proposed listening questions (the finding
 and every area's findings as a table, the runs' failures and the genre fit among them. The comparison names the
 findings new, recurring and gone since the last review; read each recurring one before calling it a regression. Write
 the summary at the top of `report.md`: what is in good shape, the high findings and what to fix first, the themes, what
-recurs. Give the user the report and wait. Do not commit the review or its report.
+recurs. Give the user the report and wait. Do not commit the review's folder or its report.
 
 ## After the report
 
@@ -149,3 +150,19 @@ musicality named), written in the review's folder. Each package goes through the
 - A genre-fit change is data in `Client/genres.json`, the presets' choices named whole (a chances choice's every option,
   so that naming one does not switch the others off).
 - As findings are rejected or kept on purpose while fixing, add each to `decided.md` with its reason, one line each.
+
+## The record
+
+Once the packages are done, the review's record goes in the repository, `reviews/<date>.md`, committed: every finding
+with what became of it (fixed in which commit, partly, decided, a question of taste asked or queued, or open, and why),
+the packages with their commits and the songs they changed, and a comparison with the last review's record, whose
+statuses are brought up to date from this review (found again, or not, its file changed by the fixes or never). The
+comparison names:
+
+- **fix loops:** an issue fixed one way and then back. Blame every line this review's fixes removed (`git diff -U0`
+  over the fixes' range, `git blame` of the base): a removed line the last review's fixes wrote is a place to read,
+  and one that undoes that fix's intent is a loop. Do the same within the review's own commits.
+- **fixes that made the next finding**, the findings found again (read each pair `compare.py` gives), and those
+  decided again for want of a line in `decided.md`.
+- the review's own slips, such as a finding moved between packages and never worked.
+
