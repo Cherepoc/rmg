@@ -137,7 +137,8 @@ internal static class Polymeter
 
             var bar = meters[id].Groups.Sum();
             var lengths = Lengths.Where(x => bar % x.Sixteenths != 0).ToArray();
-            var length = context.Pick(ByConvention.Weigh(lengths, unconventionality));
+            // a bar both plain lengths divide, as 3/4's and 6/8's, plays the middle's at the plain end
+            var length = context.Pick(ByConvention.WeighFilled(lengths, unconventionality));
             var hasRiff = !absent.Contains(TrackRole.Riff);
             var bassJoins = context.TestProbability(BassChance.At(unconventionality));
             var kick = context.TestProbability(KickChance.At(unconventionality)) && !absent.Contains(TrackRole.Drum);

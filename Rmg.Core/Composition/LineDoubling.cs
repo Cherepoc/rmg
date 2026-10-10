@@ -130,6 +130,9 @@ internal static class LineDoubling
         var doubling = new HashSet<(int Track, int Section)>();
         foreach (var ((source, target, steps, chance, option, isTwin), pair) in Pairs.Select((x, i) => (x, i)))
         {
+            var intervals = steps.Any(x => x.Step != 0) ? genre.Pool<int>(GenreChoices.HarmonyInterval, IntervalOf) : null;
+            // a genre whose intervals keep none of the pair's never doubles it
+            var allowed = intervals is null || steps.Any(x => intervals(x.Step) is not null);
             if (!trackOf.TryGetValue(source, out var sourceTrack) || !trackOf.TryGetValue(target, out var targetTrack))
                 continue;
 
@@ -145,7 +148,9 @@ internal static class LineDoubling
                 var context = streams(pair, index);
                 var isDoubled = context.TestProbability(chance.At(melody, option is null ? null : genre.Chance(GenreChoices.Doubling, option)));
                 // the bass with the riff in unison, which no interval of a genre's moves
-                var step = context.Pick(ByConvention.Weigh(steps, melody, steps.Any(x => x.Step != 0) ? genre.Pool<int>(GenreChoices.HarmonyInterval, IntervalOf) : null));
+                if (!allowed)
+                    continue;
+                var step = context.Pick(ByConvention.Weigh(steps, melody, intervals));
                 var events = song.TrackTimelineMap;
                 bool Plays(int track) => events[track].EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
                 // a riff in power chords plays no twin, whose third over a distorted fifth is mud

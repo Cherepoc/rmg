@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
 using Rmg.Core.Composition;
 
@@ -78,12 +80,41 @@ public sealed class GenrePresetsTest
         await Assert.That(GenrePresets.All.Count).IsEqualTo(32);
     }
 
+    /// <summary>Every preset makes its songs at both ends, 64 at the plain and 32 at the wild, where a choice an end leaves empty would fail (as Punk's length and Techno's intro did).</summary>
     [Test]
-    public async Task APreset_MakesSongs()
+    public async Task APreset_MakesSongs_AtBothEnds()
     {
-        foreach (var preset in GenrePresets.All)
-        foreach (var @base in new[] { 0.0, 1.0 })
-            await Assert.That(TestCorpus.Get(1, new SongOverrides(Base: @base, Genre: GenrePresets.Genre(preset))).Song.Notes!.Values.Sum(x => x.Count)).IsGreaterThan(0).Because(preset.Name);
+        var cases = (from preset in GenrePresets.All from @base in new[] { 0.0, 1.0 } from seed in Enumerable.Range(0, @base == 0 ? 64 : 32) select (Preset: preset, Base: @base, Seed: seed)).ToArray();
+        var made = TestCorpus.InParallel(Enumerable.Range(0, cases.Length), i =>
+            (cases[i].Preset.Name, cases[i].Base, cases[i].Seed, Notes: TestCorpus.Get(cases[i].Seed, new SongOverrides(Base: cases[i].Base, Genre: GenrePresets.Genre(cases[i].Preset))).Song.Notes!.Values.Sum(n => n.Count)));
+        await Assert.That(made.Where(x => x.Notes == 0).Select(x => $"{x.Name} {x.Base} {x.Seed}")).IsEmpty();
+    }
+
+    /// <summary>A polymeter at the plain end in a bar both of its plain lengths divide, 3/4's and 6/8's twelve 16ths, plays the middle's lengths.</summary>
+    [Test]
+    public async Task APlainPolymeter_InABarOfTwelve_MakesSongs()
+    {
+        foreach (var groups in new[] { new[] { 4, 4, 4 }, [6, 6] })
+        {
+            var option = Meter.Options.Select((x, i) => (x.Meter, i)).Single(x => x.Meter.Groups.SequenceEqual(groups)).i;
+            foreach (var seed in Enumerable.Range(0, 8))
+                await Assert.That(TestCorpus.Get(seed, new SongOverrides(Base: 0, MeterOption: option, Genre: GenrePresets.Genre("djent"))).Song.Notes!.Count).IsGreaterThan(0);
+        }
+    }
+
+    /// <summary>A genre that keeps its harmony to seconds and its homes to the wild end makes its songs at the plain end, doubling none and taking the wild end's homes.</summary>
+    [Test]
+    public async Task AGenre_KeepingAnEndEmpty_MakesSongs()
+    {
+        var genre = GenrePresets.Genre("rock");
+        genre = genre with
+        {
+            Choices = genre.Choices
+                .SetItem(GenreChoices.HarmonyInterval.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("seconds", new ByConvention(1, 1, 1)))
+                .SetItem(GenreChoices.SectionHome.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("tonic", new ByConvention(0, 0, 1)))
+        };
+        foreach (var seed in Enumerable.Range(0, 16))
+            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre)).Song.Notes!.Count).IsGreaterThan(0);
     }
 }
 

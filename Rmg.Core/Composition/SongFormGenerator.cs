@@ -408,7 +408,8 @@ internal sealed class SongFormGenerator
 
     /// <summary>
     ///     When the parts of the band come in, over an intro's window: those that play in it, in an order drawn part by
-    ///     part, each likelier as <see cref="FormLayers.IntroParts" /> weighs it, leaned by the song's rhythm; a drawn
+    ///     part, each likelier as <see cref="FormLayers.IntroParts" /> weighs it, leaned by the song's rhythm, a part its
+    ///     rhythm gives no weight, as the plainest rhythm gives the unconventional ones, after the rest; a drawn
     ///     number of them, at least one and one fewer than all, come in over the window, spread evenly from its start,
     ///     and the rest together at its end, so that the window never plays the whole band.
     /// </summary>
@@ -427,18 +428,21 @@ internal sealed class SongFormGenerator
         if (parts.Count == 0)
             return [];
 
-        var options = ByConvention.Weigh(
-                FormLayers.IntroParts.Where(x => parts.ContainsKey(x.Part)).Select(x => (x.Part, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))),
-                _songRhythm.Value
-            )
-            .ToList();
+        // every part that plays comes in: those the rhythm weighs first, then those it gives none, by their own weights
+        var playing = FormLayers.IntroParts.Where(x => parts.ContainsKey(x.Part)).ToArray();
+        var weighed = playing.Where(x => RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean).At(_songRhythm.Value) > 0).ToArray();
         var order = new List<IntroPart>();
-        while (options.Count > 0)
-        {
-            var index = Generators.WeightedIndex([..options])(_introContext);
-            order.Add(options[index].Value);
-            options.RemoveAt(index);
-        }
+        foreach (var options in new[]
+                 {
+                     weighed.Length == 0 ? [] : ByConvention.Weigh(weighed.Select(x => (x.Part, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))), _songRhythm.Value).ToList(),
+                     playing.Except(weighed).Select(x => new Weighted<IntroPart>(x.Weight, x.Part)).ToList()
+                 })
+            while (options.Count > 0)
+            {
+                var index = Generators.WeightedIndex([..options])(_introContext);
+                order.Add(options[index].Value);
+                options.RemoveAt(index);
+            }
         // the riff first where the song opens on it, the rest in the order drawn
         var riff = new IntroPart(TrackRole.Riff);
         if (riffFirst && order.Remove(riff))

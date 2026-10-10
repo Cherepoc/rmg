@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
@@ -38,7 +39,8 @@ internal sealed record SongLength(double Target, Func<SectionRole, double, doubl
     public double FormChance(double chance, IEnumerable<IEnumerable<SectionRole>> forms)
     {
         var nearest = forms.Max(x => Closeness(Math.Clamp(Target, x.Sum(r => SecondsAt(r, Leans[0])), x.Sum(r => SecondsAt(r, Leans[^1])))));
-        return chance * nearest / (chance * nearest + 1 - chance);
+        // the chance's odds times the closeness, exact at a chance of 0 or 1
+        return new Tilt(Math.Log(nearest)).Chance(chance, 1);
     }
 
     /// <summary>How long an appearance of a section of a role plays on the average at the lean a form is planned at (<see cref="PlanningLean" />).</summary>

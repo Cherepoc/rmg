@@ -85,6 +85,9 @@ public static class ProbabilityThreshold
 
         var result = new ProbabilityThreshold<T>[weights.Length];
         var weightSum = weights.Sum(x => x.Weight);
+        // weights of no sum, or of none a number, have no option to pick, which is a choice gone wrong
+        if (!(weightSum > 0) || double.IsInfinity(weightSum))
+            throw new InvalidOperationException($"The options' weights sum to {weightSum}, which picks none.");
 
         double lastThreshold = 0;
         for (var i = 0; i < weights.Length; i++)

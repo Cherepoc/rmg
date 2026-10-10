@@ -131,10 +131,11 @@ internal static class Progressions
         var relativeStep = GetQuality(scale.Offsets, 0) == TriadQuality.Minor ? 2 : 5;
         int[] steps = [0, Normalize(relativeStep), Normalize(3), Normalize(4)];
         var pool = genre.Pool<string>(GenreChoices.SectionHome, x => x);
-        ImmutableArray<Weighted<int>> homes =
-        [
-            ..Homes.Select((x, i) => new Weighted<int>(pool is null ? x.Weight : pool(x.Name)?.At(progression) ?? 0, steps[i])).Where(x => x.Weight > 0)
-        ];
+        // a genre's homes weighed as its pool keeps them, an end it leaves empty playing the nearer end's
+        ImmutableArray<Weighted<int>> homes = pool is null
+            ? [..Homes.Select((x, i) => new Weighted<int>(x.Weight, steps[i]))]
+            : [..ByConvention.Weigh(Homes.Select((x, i) => (Option: i, Weight: new ByConvention(x.Weight, x.Weight, x.Weight))), progression, i => pool(Homes[i].Name))
+                .Select(x => new Weighted<int>(x.Weight, steps[x.Value]))];
         var away = Tilt.Of(BridgeAwayOdds, role == SectionRole.Bridge ? 1 : 0);
         return context.Pick(away.Weigh(homes, home => home == 0 ? 0 : 1));
     }
