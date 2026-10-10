@@ -26,10 +26,10 @@ internal static class Chugs
         var notes = track.EventTimeline;
         var chorded = notes.Select(note =>
         {
-            var (span, section) = spans.FirstOrDefault(x => note.Position >= x.span.Start - 1e-9 && note.Position < x.span.End - 1e-9);
+            var (span, section) = spans.FirstOrDefault(x => note.IsWithin(x.span.Start, x.span.End));
             if (span is null)
                 return note;
-            var count = notes.Count(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
+            var count = notes.Count(x => x.IsWithin(span.Start, span.End));
             var isFast = count / span.Duration >= FastNotes;
             var isAccent = note.Value.GetStateValue(CompositionStateKinds.BeatRank) == 0;
             return !isFast || isAccent && section.RiffPowerChords ? note.Value.With(CompositionStateKinds.PowerChord, 1).ToTimelineItem(note.Position) : note;

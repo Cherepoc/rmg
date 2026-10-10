@@ -47,7 +47,7 @@ internal static class SoloAnswers
         Genre genre
     )
     {
-        var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
+        var trackOf = roles.TrackOf();
         if (!trackOf.TryGetValue(TrackRole.Solo, out var soloTrack) || !song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Melody], out var melodyTrack))
             return song;
 
@@ -60,7 +60,7 @@ internal static class SoloAnswers
         {
             var context = streams(index);
             var answering = context.TestProbability(Chance.At(melodyFacet(index), genre.Chance(GenreChoices.SoloAnswers, "sections")));
-            bool IsIn(TimelineItem<StateMap> note) => note.Position >= span.Start - 1e-9 && note.Position < span.End - 1e-9;
+            bool IsIn(TimelineItem<StateMap> note) => note.IsWithin(span.Start, span.End);
             var counterRests = !trackOf.TryGetValue(TrackRole.CounterMelody, out var counter) || !song.TrackTimelineMap.TryGetValue(counter, out var counterTrack) || !counterTrack.EventTimeline.Any(IsIn);
             var melody = melodyTrack.EventTimeline.Where(IsIn).ToArray();
             var band = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];

@@ -39,7 +39,7 @@ public sealed class FiguresTest
         {
             // the riff where it plays, else the bass
             var leader = song.Song.TrackDefinitions.Where(x => x.Value.Role == TrackRole.Riff && song.Song.Notes!.GetValueOrDefault(x.Key)?.Count > 0).Select(x => (int?)x.Key).FirstOrDefault()
-                         ?? song.Song.TrackDefinitions.First(x => x.Value.Role == TrackRole.Bass).Key;
+                         ?? song.Track(TrackRole.Bass);
             // the riff's notes as its pattern places them, before a held note takes the next into it
             var onsets = song.Song.TrackEventStateTimelineMap.TrackTimelineMap[leader].EventTimeline.Select(x => x.Position).ToArray();
             foreach (var (span, bar, position) in Hits(song, kicks, Playing(song, FigurePlayer.Ground, "withRiff")))
@@ -137,7 +137,7 @@ public sealed class FiguresTest
         var (notes, off) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trance")))))
         {
-            var bass = song.Song.TrackDefinitions.First(x => x.Value.Role == TrackRole.Bass).Key;
+            var bass = song.Track(TrackRole.Bass);
             var rolling = Playing(song, FigurePlayer.Bass, "rolling");
             foreach (var span in song.Map.Sections.Where(x => rolling.Contains(x.SectionId)))
             foreach (var note in song.Song.Notes!.GetValueOrDefault(bass)?.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9) ?? [])

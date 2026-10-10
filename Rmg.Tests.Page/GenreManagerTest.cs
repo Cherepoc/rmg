@@ -13,12 +13,7 @@ public sealed class GenreManagerTest(Site site)
     {
         await page.FirstSong();
         await page.Settled();
-        var manage = page.Page.Locator("button.genre-manage");
-        await page.Until(() => manage.IsEnabledAsync(), "the genres listed");
-        await manage.ClickAsync();
-        var manager = page.Page.Locator("dialog.genre-manager");
-        await page.Until(() => manager.IsVisibleAsync(), "the window open");
-        return manager;
+        return await page.Manager();
     }
 
     [Test]
@@ -70,7 +65,7 @@ public sealed class GenreManagerTest(Site site)
         await page.FromManager("Yours", "Jazz 1", "Edit");
         await Assert.That(await editor.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Jazz 1");
         await editor.Locator(":scope > header > button.genre-close").ClickAsync();
-        manager = await page.Manager();
+        await page.Manager();
         await Assert.That(await yours.CountAsync()).IsEqualTo(1);
 
         // removed once that is confirmed, and gone from the list on the page too

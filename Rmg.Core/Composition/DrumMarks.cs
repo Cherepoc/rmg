@@ -85,7 +85,7 @@ internal static class DrumMarks
         var map = song.Form.Map;
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         // where the drums play in a section, which they mark only there
-        bool Plays(SectionSpan span) => drums.Any(x => notes[x].Any(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9));
+        bool Plays(SectionSpan span) => drums.Any(x => notes[x].Any(n => n.IsWithin(span.Start, span.End)));
         var often = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.Marks, "often"));
         var swells = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.Marks, "swells"));
         var marks = marking.ToDictionary(x => x, _ => new List<TimelineItem<RealizedNote>>());

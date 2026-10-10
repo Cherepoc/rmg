@@ -79,7 +79,7 @@ public static class SongDescriptions
                         var start = span.Start + rhythm.Changes[i];
                         var end = start + rhythm.LengthOf(i);
                         var root = (keys.GetEffectiveValueAt(start) + scale.Offsets[step]).Mod(12);
-                        var intervals = chordNotes.Where(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9)
+                        var intervals = chordNotes.Where(n => n.IsWithin(start, end))
                             .SelectMany(n => n.Value.Pitches).Select(pitch => (pitch - root).Mod(12)).ToHashSet();
                         if (intervals.Count < 2)
                             continue;

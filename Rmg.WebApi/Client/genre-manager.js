@@ -1,3 +1,4 @@
+import { button, downloadJson, jsonFileInput } from "./dialog-parts.js";
 import { byName, NOT_A_GENRE, readGenreFile } from "./genres.js";
 
 /**
@@ -11,16 +12,6 @@ export function createGenreManager({ presets, own, current, onKeep, onNew, onDup
     const dialog = document.createElement("dialog");
     dialog.className = "genre-manager";
     dialog.setAttribute("aria-label", "Genres");
-
-    function button(text, title, action, className = "") {
-        const element = document.createElement("button");
-        element.type = "button";
-        element.textContent = text;
-        element.title = title;
-        if (className) element.className = className;
-        element.addEventListener("click", action);
-        return element;
-    }
 
     const title = document.createElement("h2");
     title.textContent = "Genres";
@@ -40,28 +31,14 @@ export function createGenreManager({ presets, own, current, onKeep, onNew, onDup
         told.hidden = false;
     };
 
-    const file = document.createElement("input");
-    file.type = "file";
-    file.accept = "application/json,.json";
-    file.hidden = true;
-    file.setAttribute("aria-label", "Genre file");
-    file.addEventListener("change", async () => {
-        const chosen = file.files[0];
-        file.value = "";
-        if (!chosen) return;
-        const read = readGenreFile(await chosen.text(), knows);
+    const file = jsonFileInput((text) => {
+        const read = readGenreFile(text, knows);
         if (read === null) tell(NOT_A_GENRE);
         else tell(`${onKeepAll(read.genres ?? [read.genre])} kept among yours.`);
     });
     const imported = button("Import JSON", "Keep a genre saved as a JSON file, or every one of a list of them, among yours", () => file.click(), "genre-export");
     // every genre of one's own as one file, so that they outlive this browser
-    const exportedAll = button("Export all", "Save every genre of yours as one JSON file", () => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([JSON.stringify([...own()].sort(byName).map(asFile), null, 1)], { type: "application/json" }));
-        link.download = "genres.json";
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href));
-    });
+    const exportedAll = button("Export all", "Save every genre of yours as one JSON file", () => downloadJson("genres.json", [...own()].sort(byName).map(asFile)));
     const made = button("New genre", "Make a genre of your own from none", () => onNew(), "primary");
     const footer = document.createElement("footer");
     footer.append(told, file, imported, exportedAll, made);

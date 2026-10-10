@@ -20,13 +20,17 @@ public sealed class FillArchetypeTest
 
     private static readonly Drummer Middle = new(0.5, FillPath.OneWay);
 
+    /// <summary>A middling song's tracks, every draw from the one context, for a fill's tests.</summary>
+    internal static SongTracks Tracks(GenerationContext context) =>
+        SongTracks.Create(context, context, _ => context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null, Genre.None, _ => context, 0.5, 0.5, []);
+
     private sealed record Setup(FillGenerator Generator, TrackEventStateTimelineMap<StateMap> Song, int Snare);
 
     /// <summary>A groove of kick on the beats, snare on the backbeats and hi-hat in 8ths, for three bars.</summary>
     private static Setup Create(int seed)
     {
         var context = new GenerationContext((ulong)seed);
-        var tracks = SongTracks.Create(context, context, _ => context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null, Genre.None, _ => context, 0.5, 0.5, []);
+        var tracks = Tracks(context);
         // the fills play the snare itself, when the song has a sidestick too
         var snare = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap }
             .Where(tracks.SongDrums.Contains)

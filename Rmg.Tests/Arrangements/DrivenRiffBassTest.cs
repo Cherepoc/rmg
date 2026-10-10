@@ -19,9 +19,6 @@ public sealed class DrivenRiffBassTest
     private static bool Sounds(CorpusSong song, int track, double start, double end) =>
         song.Song.Notes!.GetValueOrDefault(track)?.Any(x => x.Position < end - 1e-9 && x.Position + x.Value.Duration > start + 1e-6) ?? false;
 
-    private static ImmutableDictionary<int, Polymeter.Plan> Plans(CorpusSong song) =>
-        (ImmutableDictionary<int, Polymeter.Plan>)song.Trace.Single(x => x.Point == TracePoints.Polymeter).Value!;
-
     [Test]
     public async Task APartPlayingAPolymeter_PlaysInEverySectionItPlaysOtherwise()
     {
@@ -29,7 +26,7 @@ public sealed class DrivenRiffBassTest
         foreach (var genre in Genres)
             foreach (var song in Songs(genre))
             {
-                var plans = Plans(song);
+                var plans = song.PolymeterPlans;
                 var spans = song.Map.Sections.Where(x => plans.TryGetValue(x.SectionId, out var plan) && plan.Parts.Contains(TrackRole.Bass)).ToArray();
                 if (spans.Length == 0)
                     continue;

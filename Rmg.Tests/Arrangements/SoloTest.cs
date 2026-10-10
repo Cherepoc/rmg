@@ -174,7 +174,7 @@ public sealed class SoloTest
     /// </summary>
     private static (Soloist Soloist, double Start, double End, SoloShape Shape, int[] Cells, TimelineItem<RealizedNote>[] Notes)[] Runs(CorpusSong song)
     {
-        var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+        var soloists = song.Soloists;
         var cells = song.Trace.Where(x => x.Point == TracePoints.SoloCells).Select(x => ((double Start, SoloShape Shape, int[] Cells))x.Value!).ToDictionary(x => Math.Round(x.Start, 6));
         return
         [
@@ -418,7 +418,7 @@ public sealed class SoloTest
         var checkedRuns = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
         {
-            var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+            var soloists = song.Soloists;
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             foreach (var (index, _, plan) in Plans(song))
             {
@@ -464,7 +464,7 @@ public sealed class SoloTest
             }
 
             // its note the chord's, marked as a release, on the first soloist's part
-            var soloist = song.Song.TrackDefinitions.First(x => x.Value.Role == song.Solos[index].Soloists[0]).Key;
+            var soloist = song.Track(song.Solos[index].Soloists[0]);
             foreach (var note in song.Song.Notes![soloist].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.SoloRelease) == 1 && x.Position >= span.Start && x.Position < span.End))
             {
                 releases++;
@@ -484,7 +484,7 @@ public sealed class SoloTest
         var releases = new List<(double Intensity, BendKind Bend, bool Vibrato)>();
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild)))
         {
-            var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+            var soloists = song.Soloists;
             foreach (var (track, notes) in song.Song.Notes!)
             {
                 var role = song.Song.TrackDefinitions[track].Role;
@@ -574,7 +574,7 @@ public sealed class SoloTest
         {
             var overrides = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, value).Add(Facet.Melody, value).Add(Facet.Sound, value));
             var songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, overrides));
-            var soloists = songs.SelectMany(s => s.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => (((TrackRole, Soloist))x.Value!).Item2)).ToArray();
+            var soloists = songs.SelectMany(s => s.Soloists.Values).ToArray();
             var plans = songs.SelectMany(Plans).ToArray();
             var segments = plans.SelectMany(x => x.Plan).ToArray();
             var runs = segments.Where(x => x.Gesture == SoloGesture.Run).ToArray();
@@ -655,7 +655,7 @@ public sealed class SoloTest
         var notes = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
         {
             var song = TestCorpus.Get(seed, Facets(1, 1));
-            var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+            var soloists = song.Soloists;
             return Plans(song).Where(x => song.Solos[x.Index].Soloists.Length == 1).SelectMany(plan =>
             {
                 var role = song.Solos[plan.Index].Soloists[0];
@@ -689,7 +689,7 @@ public sealed class SoloTest
     /// <summary>Every note of a song's pitched solos, with its soloist and the gesture it plays in.</summary>
     private static (Soloist Soloist, SoloGesture Gesture, RealizedNote Note)[] SoloistNotes(CorpusSong song)
     {
-        var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+        var soloists = song.Soloists;
         return
         [
             ..Plans(song).SelectMany(plan => song.Song.Notes!

@@ -47,7 +47,7 @@ public static class Registers
 
     /// <summary>How many octaves a genre moves a part, the riff's twin as the riff: -1, 0 or 1, by its register's shift.</summary>
     public static int OctavesOf(Genre genre, TrackRole role) =>
-        GenreChoices.Name((role == TrackRole.RiffTwin ? TrackRole.Riff : role).ToString()) is var name && GenreChoices.Register.Options.Any(x => x.Name == name)
+        GenreChoices.Name(role.Source().ToString()) is var name && GenreChoices.Register.Options.Any(x => x.Name == name)
             ? genre.Shift(GenreChoices.Register, name) switch { <= -0.5 => -1, >= 0.5 => 1, _ => 0 }
             : 0;
 

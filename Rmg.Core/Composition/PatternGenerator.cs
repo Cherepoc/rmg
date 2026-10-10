@@ -366,7 +366,7 @@ internal sealed class PatternGenerator
             var before = led.Where(x => x.Position < pickup - 1e-9).ToArray();
             if (barStateTimelineMap.GetEffectiveStateMapAt(start + pickup).GetStateValue(StateKinds.ChordApproach) == 0
                 || before.Length == 0
-                || led.Any(x => x.Position >= pickup - 1e-9 && x.Position < change - 1e-9))
+                || led.Any(x => x.IsWithin(pickup, change)))
                 continue;
 
             var chord = PickChord(stateMap, barStateTimelineMap.GetEffectiveStateMapAt(start + pickup));

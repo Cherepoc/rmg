@@ -160,7 +160,7 @@ internal sealed class SongTracks
 
         // a part's lowest and highest octaves drawn, each from its range
         (int, int) Octaves(IGenerationContext partContext, (int From, int To) low, (int From, int To) high) =>
-            (Generators.Int(low.From, low.To).WithContext(partContext)(), Generators.Int(high.From, high.To).WithContext(partContext)());
+            (Generators.Int(low.From, low.To)(partContext), Generators.Int(high.From, high.To)(partContext));
 
         // the riff's state, which its twin shares, so that the two play its notes alike
         var riffLayer = PartLayer(riffContext, TrackRole.Riff, x => x

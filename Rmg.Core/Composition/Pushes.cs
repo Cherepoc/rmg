@@ -48,13 +48,13 @@ internal static class Pushes
         // played the bar before, their notes on a pushed change struck an eighth early, the kick as its notes in that bar
         // sound, the others as themselves, where none strikes there already; only drums keeping time, as drums that only
         // mark the form mark it where it moves
-        var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(notes.ContainsKey).ToArray();
+        var kicks = DrumGroups.Kick.Tracks.Where(notes.ContainsKey).ToArray();
         var onKick = song.SectionIds.Distinct().Where(id => pushing[id]).SelectMany(id => song.SectionOf(id).Bindings.Where(x => kicks.Contains(x.Value)).Select(x => x.Key));
         int[] withKicks = [..kicks, ..onKick.Distinct().Except(kicks).Where(notes.ContainsKey)];
         var crash = DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal);
         foreach (var group in song.DrumJob == DrumJob.Groove ? new[] { withKicks, notes.ContainsKey(crash) ? [crash] : Array.Empty<int>() } : [])
         {
-            var own = pushes.Where(x => group.Any(t => notes[t].Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9))).Select(x => x.At).ToArray();
+            var own = pushes.Where(x => group.Any(t => notes[t].Any(n => n.IsWithin(x.At - x.BarDuration, x.At)))).Select(x => x.At).ToArray();
             bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);
             bool Early(double position) => group.Any(t => notes[t].Any(n => Math.Abs(n.Position - (position - Pushes.Early)) < 1e-6));
             foreach (var track in group)
@@ -78,7 +78,7 @@ internal static class Pushes
                 continue;
             // a part pushes a change where it played in the bar before, not where it comes in, and strikes the change, not
             // where it ties over it or anticipates it already
-            var pushed = pushes.Where(x => timeline.Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9)
+            var pushed = pushes.Where(x => timeline.Any(n => n.IsWithin(x.At - x.BarDuration, x.At))
                                            && timeline.Any(n => Math.Abs(n.Position - x.At) < 1e-6)).ToArray();
             var own = pushed.Select(x => x.At).ToArray();
             // the bar of the push a note strikes, which it is held for at most

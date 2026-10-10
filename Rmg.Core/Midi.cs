@@ -312,9 +312,11 @@ public static class Midi
     private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, ImmutableArray<(double Position, Meter Meter)> meters, int? room,
         (InsertionKind Kind, ImmutableArray<byte> Channels)? insertion, double? echo, string? label, uint durationDelta, Stream stream)
     {
-        var events = tempoTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Tempo(x.Value)));
-        if (tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0)
-            events = events.Prepend(new MidiEvent(0, Tempo(1)));
+        // the song's tempos, the base tempo at its start where it has none of its own there
+        (double Position, double Value)[] tempos = tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0
+            ? [..tempoTimeline.Select(x => (x.Position, x.Value)).Prepend((0, 1))]
+            : [..tempoTimeline.Select(x => (x.Position, x.Value))];
+        var events = tempos.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Tempo(x.Value)));
 
         // every meter where it starts, a click on every pulse of it, six clocks a 16th
         events = meters
@@ -335,7 +337,6 @@ public static class Midi
         // each quieter by its feedback, a little darker, from the middle alone
         if (echo is { } beats)
         {
-            var tempos = tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0 ? tempoTimeline.Select(x => (x.Position, x.Value)).Prepend((0, 1)) : tempoTimeline.Select(x => (x.Position, x.Value));
             events = tempos.Select(x => new MidiEvent(AbsoluteDelta(x.Position), GsMessage([0x40, 0x01, 0x52], [DelayTime(beats * 1000 * Meter.SecondsPerBeat(x.Value))])))
                 .Concat(events)
                 .Prepend(new MidiEvent(0, GsMessage([0x40, 0x01, 0x51], [DelayDarkness])))

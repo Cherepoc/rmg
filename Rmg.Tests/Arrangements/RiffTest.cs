@@ -7,16 +7,13 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class RiffTest
 {
-    private static ImmutableHashSet<TrackRole> Absent(CorpusSong song) =>
-        (ImmutableHashSet<TrackRole>)song.Trace.Single(x => x.Point == TracePoints.SongParts).Value!;
-
     private static (int Index, TrackRole Source, TrackRole Target, int Step)[] Doublings(CorpusSong song) =>
         [..song.Trace.Where(x => x.Point == TracePoints.LineDoubling).Select(x => ((int, TrackRole, TrackRole, int))x.Value!)];
 
     [Test]
     public async Task HalfTheSongs_HaveARiff()
     {
-        var absent = TestCorpus.Measure(256, Absent);
+        var absent = TestCorpus.Measure(256, x => x.Absent);
 
         // bounded widely, about half
         var share = absent.Count(x => !x.Contains(TrackRole.Riff)) / 256.0;
@@ -28,7 +25,7 @@ public sealed class RiffTest
     public async Task ARiff_StacksANote_OnlyWhereASectionStarts_OnAnInstrumentThatPlaysChords()
     {
         var (starts, stacked) = (0, 0);
-        foreach (var song in TestCorpus.Range(256).Where(x => !Absent(x).Contains(TrackRole.Riff)))
+        foreach (var song in TestCorpus.Range(256).Where(x => !x.Absent.Contains(TrackRole.Riff)))
         {
             var riff = (PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Riff)];
             var sectionStarts = song.Map.Sections.Select(x => Math.Round(x.Start, 6)).ToHashSet();
@@ -161,7 +158,7 @@ public sealed class RiffTest
     public async Task Report()
     {
         var songs = TestCorpus.Range(256);
-        var withRiff = songs.Where(x => !Absent(x).Contains(TrackRole.Riff)).ToArray();
+        var withRiff = songs.Where(x => !x.Absent.Contains(TrackRole.Riff)).ToArray();
         var riffSections = withRiff.Sum(x => x.Map.Sections.Count(span => !x.Resting(span).Contains(TrackRole.Riff)));
         var sections = withRiff.Sum(x => x.Map.Sections.Length);
         var doublings = songs.SelectMany(Doublings).ToArray();

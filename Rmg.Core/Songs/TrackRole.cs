@@ -40,6 +40,16 @@ public static class TrackRoles
     /// </summary>
     public static bool HasNotesOfItsOwn(this TrackRole role) => role is not (TrackRole.RiffTwin or TrackRole.Solo);
 
+    /// <summary>Whether the part plays lines, single notes one after another, rather than chords, a pad or drums.</summary>
+    public static bool PlaysLine(this TrackRole role) => role is TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody or TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Solo;
+
+    /// <summary>The part a part plays as: the riff for its twin, which plays the riff's line, and any other itself.</summary>
+    public static TrackRole Source(this TrackRole role) => role == TrackRole.RiffTwin ? TrackRole.Riff : role;
+
+    /// <summary>Each part's track by its role, the first of its tracks for a part of several, as the drums.</summary>
+    public static IReadOnlyDictionary<TrackRole, int> TrackOf(this IReadOnlyDictionary<int, TrackRole> roles) =>
+        roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
+
     /// <summary>A part's name as a genre's page shows it, where a part names an option of a choice, such as its level.</summary>
     public static string LabelOf(TrackRole role) => role switch
     {

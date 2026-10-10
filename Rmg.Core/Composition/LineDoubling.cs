@@ -125,7 +125,7 @@ internal static class LineDoubling
         Genre genre
     )
     {
-        var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
+        var trackOf = roles.TrackOf();
         // the parts that double or are doubled in a section, by its place, which play no other doubling there
         var doubling = new HashSet<(int Track, int Section)>();
         foreach (var ((source, target, steps, chance, option, isTwin), pair) in Pairs.Select((x, i) => (x, i)))
@@ -152,7 +152,7 @@ internal static class LineDoubling
                     continue;
                 var step = context.Pick(ByConvention.Weigh(steps, melody, intervals));
                 var events = song.TrackTimelineMap;
-                bool Plays(int track) => events[track].EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
+                bool Plays(int track) => events[track].EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
                 // a riff in power chords plays no twin, whose third over a distorted fifth is mud
                 if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && riffPowerChords(index))
                     continue;
@@ -162,7 +162,7 @@ internal static class LineDoubling
                 doubling.Add((targetTrack, index));
                 // where the doubling part plays in the section, from its first note to its last, so that it joins no earlier
                 // than it would, as into an intro that brings it in
-                var own = events[isTwin ? sourceTrack : targetTrack].EventTimeline.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).Select(x => x.Position).ToArray();
+                var own = events[isTwin ? sourceTrack : targetTrack].EventTimeline.Where(x => x.IsWithin(span.Start, span.End)).Select(x => x.Position).ToArray();
                 var (from, to) = (own.Min(), own.Max());
                 // a counter-melody harmonising the melody in the melody's own sound now and then, as twin leads play, and in
                 // a block now and then, its notes stacking their chord's
@@ -173,7 +173,7 @@ internal static class LineDoubling
                 // in every pattern the doubled part plays, its own kept where a texture rests the doubled part
                 var patterns = Enumerable.Range(0, (int)Math.Ceiling(span.Duration / span.Meter.PatternDuration - 1e-9))
                     .Select(k => (Start: span.Start + k * span.Meter.PatternDuration, End: Math.Min(span.End, span.Start + (k + 1) * span.Meter.PatternDuration)))
-                    .Where(p => events[sourceTrack].EventTimeline.Any(x => x.Position >= p.Start - 1e-9 && x.Position < p.End - 1e-9))
+                    .Where(p => events[sourceTrack].EventTimeline.Any(x => x.IsWithin(p.Start, p.End)))
                     .ToArray();
                 bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && patterns.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
                 var doubled = events[sourceTrack].EventTimeline
@@ -198,7 +198,7 @@ internal static class LineDoubling
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)).Skip(1))
             {
                 var events = song.TrackTimelineMap;
-                TimelineItem<StateMap>[] In(int track, double start, double end) => [..events[track].EventTimeline.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9)];
+                TimelineItem<StateMap>[] In(int track, double start, double end) => [..events[track].EventTimeline.Where(x => x.IsWithin(start, end))];
                 if (In(bassTrack, span.Start, span.End).Length == 0)
                     continue;
 
@@ -232,7 +232,7 @@ internal static class LineDoubling
             {
                 var context = streams(place, index);
                 var inOctaves = context.TestProbability(SectionEnergy.Tilt(energies[index], OctaveCoupling).Chance(OctaveChance.At(sound, genre.Chance(GenreChoices.Doubling, "octaves")), 1));
-                bool Plays() => song.TrackTimelineMap[track].EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
+                bool Plays() => song.TrackTimelineMap[track].EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
                 if (doubling.Contains((track, index)) || !Plays())
                     continue;
 
@@ -244,7 +244,7 @@ internal static class LineDoubling
                 {
                     [track] = notes => EventTimeline.Create(
                         notes.Duration,
-                        notes.Select(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9
+                        notes.Select(x => x.IsWithin(span.Start, span.End)
                             ? x.Value.With(CompositionStateKinds.Octave, 1).ToTimelineItem(x.Position)
                             : x)
                     )

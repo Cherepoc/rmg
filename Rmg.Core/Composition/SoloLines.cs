@@ -244,7 +244,7 @@ internal static class SoloLines
             span,
             soloist,
             // a quote wants the melody's notes there
-            (start, end) => !melody.Any(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9) ? 0 : isOwn ? OwnQuoteWeight : MelodyQuoteWeight,
+            (start, end) => !melody.Any(n => n.IsWithin(start, end)) ? 0 : isOwn ? OwnQuoteWeight : MelodyQuoteWeight,
             position => Meter.BeatsPerSecond(common.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(position)),
             turn
         );
@@ -313,7 +313,7 @@ internal static class SoloLines
                     break;
                 }
                 case SoloGesture.Quote:
-                    foreach (var note in melody.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9))
+                    foreach (var note in melody.Where(x => x.IsWithin(start, end)))
                     {
                         current = Nearest(ScaleNotes(note.Position), FoldTowards(MelodyPitch(note), current));
                         line.Add(Place(note.Position, current, level, stacked: stacks, octave: true));

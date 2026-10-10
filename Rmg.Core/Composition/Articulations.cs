@@ -119,8 +119,8 @@ internal static class Articulations
 
         // and a line's steps slurred where its part slurs, the riff's twin as its riff does
         foreach (var (track, timeline) in result.ToArray())
-            if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Riff or TrackRole.RiffTwin
-                && song.Stream(SongStream.Legato, song.Tracks.Definitions[track].Role == TrackRole.RiffTwin ? song.Track(TrackRole.Riff).Key : track)
+            if (song.Tracks.Definitions[track].Role is var role && role.PlaysLine() && role != TrackRole.Bass
+                && song.Stream(SongStream.Legato, song.DrawsAs(track))
                     .TestProbability(LegatoChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "legato"))))
                 result[track] = Slur(timeline);
 

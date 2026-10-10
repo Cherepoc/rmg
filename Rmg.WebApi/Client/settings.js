@@ -127,6 +127,11 @@ function givenSetting(settings, name) {
     return FACETS.includes(name) ? settings.facets[name] : settings[name];
 }
 
+/** How many of the values the link keeps are given, the parts and the drum pieces aside. */
+export function givenCount(settings) {
+    return GIVEN.filter((name) => givenSetting(settings, name).isGiven).length;
+}
+
 /** Five switches a character, the first the lowest bit. */
 function packSwitches(switches) {
     const values = [];

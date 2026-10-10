@@ -52,6 +52,9 @@ public sealed class DrumGroup
 
     public ImmutableArray<PercussionInstrumentDefinition> Drums { get; }
 
+    /// <summary>The group's drums' tracks, in the drums' order.</summary>
+    public ImmutableArray<int> Tracks => [..Drums.Select(DrumGroups.GetTrackNumber)];
+
     /// <summary>How likely the group is to be chosen among the other optional groups.</summary>
     public double SelectionWeight { get; }
 

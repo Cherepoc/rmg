@@ -61,7 +61,7 @@ internal static class LineFills
             // where the line plays on either side, not into a section it rests in or out of one, and into its own rest
             // where it walks only there
             if (before < 0 || after < 0 || events[after].Position > run.Line + meterAt(run.Line).BarDuration || events[before].Position < from - way.ReachBars * meterAt(from).BarDuration
-                || way.IntoRest && events.Any(x => x.Position >= from - 1e-9 && x.Position < run.Line - 1e-9) || taken.Contains(run.Line))
+                || way.IntoRest && events.Any(x => x.IsWithin(from, run.Line)) || taken.Contains(run.Line))
                 continue;
 
             var start = Pitch(events[before]);
@@ -75,7 +75,7 @@ internal static class LineFills
             var held = events[before].Value.GetStateValue(StateKinds.HeldDuration);
             if (held > from - events[before].Position)
                 events[before] = events[before].Value.With(StateKinds.HeldDuration, from - events[before].Position).ToTimelineItem(events[before].Position);
-            events.RemoveAll(x => x.Position >= from - 1e-9 && x.Position < run.Line - 1e-9);
+            events.RemoveAll(x => x.IsWithin(from, run.Line));
             events.AddRange(walked);
             events.Sort((x, y) => x.Position.CompareTo(y.Position));
         }

@@ -9,16 +9,8 @@ public sealed class MeterSeedsReportTest
     [Explicit]
     public async Task Report()
     {
-        // the meter drawn as the song draws it, from its own stream, by the song's feel facet
-        static Meter Of(int seed) => Meter.Draw(
-            SongGenerator.CreateStream((ulong)seed, SongStream.Meter),
-            Unconventionality.Generate(
-                Unconventionality.DrawBase(SongGenerator.CreateStream((ulong)seed, SongStream.Rhythm)),
-                facet => SongGenerator.CreateStream((ulong)seed, SongStream.Unconventionality, (int)facet)
-            )[Facet.Feel],
-            null,
-            Genre.None
-        );
+        // the meter the song draws, its decisions alone made
+        static Meter Of(int seed) => SongDecisions.Draw(TestCorpus.SongSeed(seed), SongOverrides.None, CancellationToken.None).Meter;
 
         foreach (var meter in Enumerable.Range(0, 3000).Select(seed => (Seed: seed, Meter: Of(seed))).GroupBy(x => x.Meter.TimeSignature))
             Console.WriteLine($"{meter.Key.Numerator}/{meter.Key.Denominator}: {string.Join(", ", meter.Take(4).Select(x => $"{x.Seed} ({string.Join("+", x.Meter.Groups)})"))}");

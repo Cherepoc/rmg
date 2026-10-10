@@ -190,7 +190,7 @@ internal static class DrumSolos
             // all but its last bar, the fill's into the section after
             var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, whole.Duration - whole.Meter.BarDuration) };
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
-                                          track.EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
+                                          track.EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
             RunSound[] Of(FillDrumRole role) => sounds.TryGetValue(role, out var all) ? [..all.Where(Plays).DistinctBy(x => x.Track)] : [];
             // the hands' kit from its highest to its lowest: the snare, the toms by their notes, and the kick unless the
             // feet keep time on it
@@ -283,7 +283,7 @@ internal static class DrumSolos
                 // the groove quoted as it plays, and anything else in place of it
                 if (gesture == SoloGesture.Quote)
                     continue;
-                bool IsIn(TimelineItem<StateMap> note) => note.Position >= start - 1e-9 && note.Position < end - 1e-9;
+                bool IsIn(TimelineItem<StateMap> note) => note.IsWithin(start, end);
                 // every drum cleared but the feet's where they replay the groove's kick
                 foreach (var track in tracks.Where(x => !feetTracks.Contains(x) || feetPattern != SoloFeet.Groove))
                     edits.Clear(track, start, end);

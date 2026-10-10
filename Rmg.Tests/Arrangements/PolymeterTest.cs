@@ -7,16 +7,13 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class PolymeterTest
 {
-    private static ImmutableDictionary<int, Polymeter.Plan> Plans(CorpusSong song) =>
-        (ImmutableDictionary<int, Polymeter.Plan>)song.Trace.Single(x => x.Point == TracePoints.Polymeter).Value!;
-
     [Test]
     public async Task APolymetricPart_PlaysItsCycleCellByCellAcrossTheBars_FromEveryFramesStart_EachCellItsFirstsMotifCut()
     {
         var (checkedSections, composite, frames) = (0, 0, 0);
-        foreach (var song in TestCorpus.Range(256).Where(x => !Plans(x).IsEmpty))
+        foreach (var song in TestCorpus.Range(256).Where(x => !x.PolymeterPlans.IsEmpty))
         {
-            var plans = Plans(song);
+            var plans = song.PolymeterPlans;
             foreach (var span in song.Map.Sections)
             {
                 if (!plans.TryGetValue(span.SectionId, out var plan) || !plan.Parts.Contains(TrackRole.Riff) || song.IsSolo(span))
@@ -71,10 +68,10 @@ public sealed class PolymeterTest
     public async Task ThePolymetersChords_JoinItsCycle_ByTheirRhythm_TheLongerItsCellsTheOftener()
     {
         var (joined, plans, longJoined, longPlans) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.Range(512).Where(x => !Plans(x).IsEmpty))
+        foreach (var song in TestCorpus.Range(512).Where(x => !x.PolymeterPlans.IsEmpty))
         foreach (var span in song.Map.Sections)
         {
-            if (!Plans(song).TryGetValue(span.SectionId, out var plan) || song.IsSolo(span))
+            if (!song.PolymeterPlans.TryGetValue(span.SectionId, out var plan) || song.IsSolo(span))
                 continue;
 
             plans++;
@@ -118,10 +115,10 @@ public sealed class PolymeterTest
     {
         var checkedSections = 0;
         var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
-        foreach (var song in TestCorpus.Range(512).Where(x => !Plans(x).IsEmpty))
+        foreach (var song in TestCorpus.Range(512).Where(x => !x.PolymeterPlans.IsEmpty))
         foreach (var span in song.Map.Sections)
         {
-            if (!Plans(song).TryGetValue(span.SectionId, out var plan) || !plan.Snare || song.IsSolo(span))
+            if (!song.PolymeterPlans.TryGetValue(span.SectionId, out var plan) || !plan.Snare || song.IsSolo(span))
                 continue;
 
             var frame = (plan.Patterns == Polymeter.Plan.Section ? span.Duration : span.Meter.PatternDuration * plan.Patterns);
@@ -146,8 +143,8 @@ public sealed class PolymeterTest
             .Add("polymeter", ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("sections", new(1, 1, 1))));
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre)));
         // every plainest song playing one
-        await Assert.That(songs.All(x => !Plans(x).IsEmpty)).IsTrue();
-        foreach (var (plan, drums) in songs.SelectMany(x => Plans(x).Values.Select(plan => (plan, x.PlaysDrums))))
+        await Assert.That(songs.All(x => !x.PolymeterPlans.IsEmpty)).IsTrue();
+        foreach (var (plan, drums) in songs.SelectMany(x => x.PolymeterPlans.Values.Select(plan => (plan, x.PlaysDrums))))
         {
             await Assert.That(plan.Cells.All(x => x is 3 or 6)).IsTrue().Because(string.Join("+", plan.Cells));
             // the kick with the riff, where the song has drums
@@ -160,7 +157,7 @@ public sealed class PolymeterTest
     public async Task ThePlainestSongs_PlayNoPolymeter()
     {
         foreach (var seed in Enumerable.Range(0, 8))
-            await Assert.That(Plans(TestCorpus.Get(seed, new SongOverrides(Base: 0)))).IsEmpty();
+            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Base: 0)).PolymeterPlans).IsEmpty();
     }
 
     [Test]
@@ -169,7 +166,7 @@ public sealed class PolymeterTest
     {
         var sections = TestCorpus.Measure(1024, song =>
         {
-            var plans = Plans(song);
+            var plans = song.PolymeterPlans;
             return song.Trace.Where(x => x.Point == TracePoints.SectionUnconventionality).DistinctBy(x => x.Section)
                 .Select(x => (Band: Math.Clamp((int)(((Unconventionality)x.Value!)[Facet.Feel] * 5), 0, 4), Plan: plans.GetValueOrDefault(x.Section)))
                 .ToArray();

@@ -19,6 +19,9 @@ public readonly struct TimelineItem<T>
 
     public T Value { get; }
 
+    /// <summary>Whether the item is from <paramref name="start" /> up to <paramref name="end" />, a hair early counting as at either.</summary>
+    public bool IsWithin(double start, double end) => Position >= start - TimelineItem.Tolerance && Position < end - TimelineItem.Tolerance;
+
     public TimelineItem<T> Shift(double offset)
     {
         var newPosition = Position + offset;
@@ -66,6 +69,9 @@ public readonly struct TimelineItem<T>
 
 public static class TimelineItem
 {
+    /// <summary>How far before a position an item still counts as at it, against a sum's rounding.</summary>
+    public const double Tolerance = 1e-9;
+
     public static TimelineItem<T> ToTimelineItem<T>(this T value, double position)
         where T : notnull
     {

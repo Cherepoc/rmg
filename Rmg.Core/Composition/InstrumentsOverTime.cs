@@ -150,7 +150,7 @@ internal static class InstrumentsOverTime
                 var context = streams(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track);
                 var switches = context.TestProbability(SwitchChance.At(sound[index], genre.Chance(GenreChoices.InstrumentSwitches, "sections")));
                 var role = RoleOf(pitched.Role);
-                var pool = PoolOf(pitched.Role == TrackRole.RiffTwin ? TrackRole.Riff : pitched.Role, sound[index], genre);
+                var pool = PoolOf(pitched.Role.Source(), sound[index], genre);
                 double Weight(RoleInstrument instrument) => pool?.Invoke(instrument) ?? instrument.Weight.At(sound[index]);
                 // within the family where it keeps to it and the role has another of it, or to any other of the role's
                 var keeps = families(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track).TestProbability(FamilyChance.At(sound[index]));
@@ -169,7 +169,7 @@ internal static class InstrumentsOverTime
                 var (variants, variant) = leftOut ? (ImmutableArray<int>.Empty, program) : (drawnVariants, drawnVariant);
                 var bars = Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.BarDuration)).Select(_ => context.TestProbability(BarChance)).ToArray();
 
-                var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => x.Note.Position >= span.Start - 1e-9 && x.Note.Position < span.End - 1e-9).ToArray();
+                var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => x.Note.IsWithin(span.Start, span.End)).ToArray();
                 var accent = inSpan.Length == 0 ? double.MaxValue : inSpan.Select(x => x.Note.Value.Velocity).OrderDescending().ElementAt((int)(inSpan.Length * AccentShare));
                 if (switches || mode != ArticulationMode.None && !variants.IsEmpty)
                     StateTrace.RecordSection(TracePoints.InstrumentOverTime, track, span.SectionId, $"{program} {mode} {variant}", (index, pitched.Role, program, variants.IsEmpty ? ArticulationMode.None : mode, variant));

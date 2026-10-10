@@ -188,7 +188,7 @@ internal static class Polymeter
         Func<int, IReadOnlyDictionary<int, int>> bindings
     )
     {
-        var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
+        var trackOf = roles.TrackOf();
         var kicks = kickTracks.ToArray();
         var snares = snareTracks.ToArray();
         // the chord's shape at a place, as the pitched parts' notes there have it, all alike, so that a note played again at
@@ -200,7 +200,7 @@ internal static class Polymeter
         {
             var from = changes.LastOrDefault(x => x <= position + 1e-9);
             var to = changes.FirstOrDefault(x => x > position + 1e-9, double.PositiveInfinity);
-            return shaped.FirstOrDefault(x => x.Position >= from - 1e-9 && x.Position < to - 1e-9).Value?.Subset(ShapeKinds);
+            return shaped.FirstOrDefault(x => x.IsWithin(from, to)).Value?.Subset(ShapeKinds);
         }
 
         TimelineItem<StateMap> PlayedAt(StateMap note, double position) =>
@@ -215,30 +215,43 @@ internal static class Polymeter
             var tracks = plan.Parts.Where(trackOf.ContainsKey).Select(x => trackOf[x]).Concat(plan.Kick ? kicks.Concat(bound) : []).Distinct().Where(song.TrackTimelineMap.ContainsKey);
             var longest = plan.Longest * Sixteenth;
             var frame = plan.Patterns == Plan.Section ? span.Duration : span.Meter.PatternDuration * plan.Patterns;
-            song = song.MapTrackEvents(tracks.ToDictionary(x => x, x => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
+
+            // every frame's cells across the section: the frame's start and end, and the cell's start and length
+            IEnumerable<(double Start, double End, double At, double Length)> Cells()
             {
-                // in the bars the part plays, none where it sits out
-                int Bar(double position) => (int)Math.Floor((position - span.Start) / span.Meter.BarDuration + 1e-9);
-                var plays = notes.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).Select(x => Bar(x.Position)).ToHashSet();
-                var played = new List<TimelineItem<StateMap>>();
                 for (var start = span.Start; start < span.End - 1e-9; start += frame)
                 {
                     var end = Math.Min(start + frame, span.End);
+                    var cell = 0;
+                    for (var at = start; at < end - 1e-9; at += plan.CellAt(cell++) * Sixteenth)
+                        yield return (start, end, at, plan.CellAt(cell) * Sixteenth);
+                }
+            }
+
+            int Bar(double position) => (int)Math.Floor((position - span.Start) / span.Meter.BarDuration + 1e-9);
+            // the notes before and after the section as they are, and the section's as played
+            EventTimeline<StateMap> Within(EventTimeline<StateMap> notes, IEnumerable<TimelineItem<StateMap>> played) =>
+                EventTimeline.Create(notes.Duration, notes.Where(x => !x.IsWithin(span.Start, span.End)).Concat(played).OrderBy(x => x.Position));
+
+            song = song.MapTrackEvents(tracks.ToDictionary(x => x, x => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
+            {
+                // in the bars the part plays, none where it sits out
+                var plays = notes.Where(x => x.IsWithin(span.Start, span.End)).Select(x => Bar(x.Position)).ToHashSet();
+                var played = new List<TimelineItem<StateMap>>();
+                foreach (var frameCells in Cells().GroupBy(c => (c.Start, c.End)))
+                {
+                    var (start, end) = frameCells.Key;
                     // a part with no note of its own in the first cell, a bass under a busy riff, starts every cell with its
                     // first note in the frame, so that it plays the cycle rather than nothing; but a drum doubling the kick,
                     // which plays only where the kick does
-                    var first = notes.Where(x => x.Position >= start - 1e-9 && x.Position < start + longest - 1e-9).ToArray();
+                    var first = notes.Where(x => x.IsWithin(start, start + longest)).ToArray();
                     if (first.Length == 0 && !bound.Contains(x))
-                        first = [..notes.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).Take(1).Select(x => x.Value.ToTimelineItem(start))];
-                    var cell = 0;
-                    for (var repeat = start; repeat < end - 1e-9; repeat += plan.CellAt(cell++) * Sixteenth)
-                    {
-                        var length = plan.CellAt(cell) * Sixteenth;
-                        played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => PlayedAt(x.Value, x.Position - start + repeat)).Where(x => x.Position < end - 1e-9 && plays.Contains(Bar(x.Position))));
-                    }
+                        first = [..notes.Where(x => x.IsWithin(start, end)).Take(1).Select(x => x.Value.ToTimelineItem(start))];
+                    foreach (var (_, _, at, length) in frameCells)
+                        played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => PlayedAt(x.Value, x.Position - start + at)).Where(x => x.Position < end - 1e-9 && plays.Contains(Bar(x.Position))));
                 }
 
-                return EventTimeline.Create(notes.Duration, notes.Where(x => x.Position < span.Start - 1e-9 || x.Position >= span.End - 1e-9).Concat(played).OrderBy(x => x.Position));
+                return Within(notes, played);
             })));
 
             // the snare on every cell's start, as its first note there plays, in the bars it plays, and the drums bound to it
@@ -247,23 +260,12 @@ internal static class Polymeter
             if (plan.Snare)
                 song = song.MapTrackEvents(snares.Concat(onSnare).Distinct().Where(song.TrackTimelineMap.ContainsKey).ToDictionary(x => x, _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
                 {
-                    int Bar(double position) => (int)Math.Floor((position - span.Start) / span.Meter.BarDuration + 1e-9);
-                    var inSpan = notes.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).ToArray();
+                    var inSpan = notes.Where(x => x.IsWithin(span.Start, span.End)).ToArray();
                     if (inSpan.Length == 0)
                         return notes;
 
                     var plays = inSpan.Select(x => Bar(x.Position)).ToHashSet();
-                    var struck = new List<TimelineItem<StateMap>>();
-                    for (var start = span.Start; start < span.End - 1e-9; start += frame)
-                    {
-                        var end = Math.Min(start + frame, span.End);
-                        var cell = 0;
-                        for (var at = start; at < end - 1e-9; at += plan.CellAt(cell++) * Sixteenth)
-                            if (plays.Contains(Bar(at)))
-                                struck.Add(PlayedAt(inSpan[0].Value, at));
-                    }
-
-                    return EventTimeline.Create(notes.Duration, notes.Where(x => x.Position < span.Start - 1e-9 || x.Position >= span.End - 1e-9).Concat(struck).OrderBy(x => x.Position));
+                    return Within(notes, Cells().Where(c => plays.Contains(Bar(c.At))).Select(c => PlayedAt(inSpan[0].Value, c.At)));
                 })));
         }
 

@@ -146,9 +146,9 @@ internal static class Figures
         var all = draft.Timeline.TrackTimelineMap;
         var tracks = new Dictionary<FigurePlayer, int[]>
         {
-            [FigurePlayer.Ground] = [..DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(all.ContainsKey)],
-            [FigurePlayer.Backbeat] = [..DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).Where(all.ContainsKey)],
-            [FigurePlayer.Time] = [..DrumGroups.Timekeepers.Drums.Select(DrumGroups.GetTrackNumber).Where(all.ContainsKey)],
+            [FigurePlayer.Ground] = [..DrumGroups.Kick.Tracks.Where(all.ContainsKey)],
+            [FigurePlayer.Backbeat] = [..DrumGroups.Snare.Tracks.Where(all.ContainsKey)],
+            [FigurePlayer.Time] = [..DrumGroups.Timekeepers.Tracks.Where(all.ContainsKey)],
             [FigurePlayer.Riff] = TrackOf(TrackRole.Riff) is { } own ? [own] : [],
             [FigurePlayer.Claves] = [..new[] { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }.Where(all.ContainsKey)],
             [FigurePlayer.Chords] = TrackOf(TrackRole.Chords) is { } chords ? [chords] : [],

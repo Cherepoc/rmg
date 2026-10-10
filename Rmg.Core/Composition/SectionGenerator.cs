@@ -474,7 +474,7 @@ internal sealed class SectionGenerator
     /// </summary>
     internal static FillGrooves GetGrooves(IEnumerable<BarFeel> feels, Meter meter)
     {
-        var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var snares = DrumGroups.Snare.Tracks.ToHashSet();
         var lastBar = feels.Where(x => x.Bar == meter.PatternBarCount - 1).ToArray();
         var source = lastBar
             .Where(x => x.NoteCount > 0)

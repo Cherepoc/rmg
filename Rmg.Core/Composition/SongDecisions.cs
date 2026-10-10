@@ -88,6 +88,9 @@ internal sealed record SongDecisions(
     /// <summary>A part's track, by its role.</summary>
     public KeyValuePair<int, IInstrumentTrack> Track(TrackRole role) => Tracks.Definitions.Single(x => x.Value.Role == role);
 
+    /// <summary>The track a part draws as: the riff's for its twin, which plays as the riff does, and any other's own.</summary>
+    public int DrawsAs(int track) => Tracks.Definitions[track].Role == TrackRole.RiffTwin ? Track(TrackRole.Riff).Key : track;
+
     /// <summary>
     ///     Everything the song of the seed decides before it is put together, every stage drawing from its own random
     ///     sequence, derived from the seed by the stage, so that a change to what one stage draws leaves the others' as they

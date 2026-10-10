@@ -69,9 +69,9 @@ internal static class Mutations
         var drums = song.Playing.Where(x => x.Value == TrackRole.Drum && timelines.ContainsKey(x.Key)).Select(x => x.Key).Order().ToArray();
         if (drums.Length == 0)
             return draft;
-        var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
-        var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
-        var timekeepers = DrumGroups.Timekeepers.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var kicks = DrumGroups.Kick.Tracks.ToHashSet();
+        var snares = DrumGroups.Snare.Tracks.ToHashSet();
+        var timekeepers = DrumGroups.Timekeepers.Tracks.ToHashSet();
         var played = drums.ToDictionary(x => x, x => timelines[x].EventTimeline.ToList());
         var any = false;
         var claves = DrumGroups.GetTrackNumber(DrumDefinitions.Claves);
@@ -128,7 +128,7 @@ internal static class Mutations
 
     /// <summary>The hits of a drum in a bar, in beats from its start.</summary>
     private static IEnumerable<double> HitsIn(List<TimelineItem<StateMap>> notes, double start, double length) =>
-        notes.Where(x => x.Position >= start - 1e-9 && x.Position < start + length - 1e-9).Select(x => x.Position - start);
+        notes.Where(x => x.IsWithin(start, start + length)).Select(x => x.Position - start);
 
     /// <summary>Whether a hit is an anchor: the downbeat's kick, a snare on a later group of the meter, its backbeat in any meter.</summary>
     private static bool IsAnchor(int track, double at, Meter meter, IReadOnlySet<int> kicks, IReadOnlySet<int> snares) =>

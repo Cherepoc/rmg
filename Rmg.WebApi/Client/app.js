@@ -37,6 +37,7 @@ import {
     FACETS,
     formatSettings,
     fromStep,
+    givenCount,
     identityOf,
     LAST_STEP,
     MIDDLE_STEP,
@@ -1140,7 +1141,7 @@ function restoreSettings() {
 function keepCurrentSettings() {
     keepSettings(formatSettings(givenOnly(settings)));
     keepGenre(hasAGenre(settings.genre) ? settings.genre : null);
-    const given = [settings.unconventionality, settings.tempo, settings.key, settings.mode, settings.meter, settings.swing, settings.length, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
+    const given = givenCount(settings)
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
         + (settings.drumPieces.isGiven ? 1 : 0);
     elements.settingsState.textContent = given === 0 ? "All drawn" : `${given} given`;

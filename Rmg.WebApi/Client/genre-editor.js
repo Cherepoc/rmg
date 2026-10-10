@@ -1,3 +1,4 @@
+import { button, downloadJson, jsonFileInput } from "./dialog-parts.js";
 import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
 import { endsOf, isPresetName, nestedChoices, NOT_A_GENRE, ownOf, readGenreFile, sameName } from "./genres.js";
@@ -92,16 +93,6 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     const asKept = () => JSON.stringify({ name: draft.name, description: draft.description, choices: draft.choices });
 
     // --- the parts --------------------------------------------------------------------------------------------------------
-
-    function button(text, title, action, className = "") {
-        const element = document.createElement("button");
-        element.type = "button";
-        element.textContent = text;
-        element.title = title;
-        if (className) element.className = className;
-        element.addEventListener("click", action);
-        return element;
-    }
 
     function html(tag, className, text) {
         const element = document.createElement(tag);
@@ -435,24 +426,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     problem.setAttribute("role", "alert");
     problem.hidden = true;
 
-    const exported = button("Export JSON", "Save this genre as a JSON file", () => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([JSON.stringify(asFile(finishedOrDraft()), null, 1)], { type: "application/json" }));
-        link.download = `${draft.name.trim() || "genre"}.json`;
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href));
-    }, "genre-export");
+    const exported = button("Export JSON", "Save this genre as a JSON file", () => downloadJson(`${draft.name.trim() || "genre"}.json`, asFile(finishedOrDraft())), "genre-export");
 
-    const file = document.createElement("input");
-    file.type = "file";
-    file.accept = "application/json,.json";
-    file.hidden = true;
-    file.setAttribute("aria-label", "Genre file");
-    file.addEventListener("change", async () => {
-        const chosen = file.files[0];
-        file.value = "";
-        if (!chosen) return;
-        const read = readGenreFile(await chosen.text(), (x) => choices.has(x));
+    const file = jsonFileInput((text) => {
+        const read = readGenreFile(text, (x) => choices.has(x));
         // a list of genres, every one of them, kept among one's own; one genre opened as the draft
         if (read?.genres) {
             told.textContent = `${onKeepAll(read.genres)} kept among yours.`;

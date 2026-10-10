@@ -35,7 +35,7 @@ internal static class LiftCues
                 {
                     var from = line.Position - Math.Min(x.Beats, line.Ending.Meter.BarDuration);
                     var index = x.Drum.GetArticulationIndex(x.Sound);
-                    return EventTimeline.Create(notes.Duration, notes.Select(n => n.Position >= from - 1e-9 && n.Position < line.Position - 1e-9
+                    return EventTimeline.Create(notes.Duration, notes.Select(n => n.IsWithin(from, line.Position)
                         ? n.Value.With(StateKinds.ArticulationIndex, index).ToTimelineItem(n.Position)
                         : n));
                 })

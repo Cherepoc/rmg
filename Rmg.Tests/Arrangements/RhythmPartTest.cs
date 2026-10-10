@@ -7,8 +7,7 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class RhythmPartTest
 {
-    private static bool Plays(CorpusSong song) =>
-        !((System.Collections.Immutable.ImmutableHashSet<TrackRole>)song.Trace.Single(x => x.Point == TracePoints.SongParts).Value!).Contains(TrackRole.Rhythm);
+    private static bool Plays(CorpusSong song) => !song.Absent.Contains(TrackRole.Rhythm);
 
     [Test]
     public async Task TheRhythmPart_PlaysTheChordsInASoundOfItsOwn_AsTheChordsPlayThem()

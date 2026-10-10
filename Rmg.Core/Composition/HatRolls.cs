@@ -50,9 +50,8 @@ internal static class HatRolls
         }
 
         // but where a fill plays, from its first note to its line, and in stop time, after the draws so that they are as many
-        var fills = draft.FillSpans;
-        var stops = song.StopTime;
-        rolls.RemoveAll(r => fills.Any(x => x.From < r.To - 1e-9 && x.To > r.From + 1e-9) || stops.Any(x => x.Start < r.To - 1e-9 && x.End > r.From + 1e-9));
+        var busy = draft.Busy(song);
+        rolls.RemoveAll(r => busy(r.From, r.To));
 
         var result = notes.ToBuilder();
         foreach (var track in times)
@@ -62,10 +61,10 @@ internal static class HatRolls
             foreach (var (from, to, rate) in rolls)
             {
                 // the drum's note where the roll starts, which every note of it plays, where it plays there
-                var own = timeline.FirstOrDefault(x => x.Position >= from - 1e-9 && x.Position < to - 1e-9);
+                var own = timeline.FirstOrDefault(x => x.IsWithin(from, to));
                 if (own.Value is null)
                     continue;
-                rolled.RemoveAll(x => x.Position >= from - 1e-9 && x.Position < to - 1e-9);
+                rolled.RemoveAll(x => x.IsWithin(from, to));
                 var count = (int)Math.Round((to - from) * rate);
                 rolled.AddRange(Enumerable.Range(0, count).Select(k => (own.Value with
                 {

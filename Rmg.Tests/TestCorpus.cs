@@ -129,8 +129,17 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
 {
     public SongMap Map => Song.Map!;
 
+    /// <summary>The parts the song leaves out (<see cref="SongParts" />).</summary>
+    public ImmutableHashSet<TrackRole> Absent => field ??= (ImmutableHashSet<TrackRole>)Trace.Single(x => x.Point == TracePoints.SongParts).Value!;
+
     /// <summary>Whether the song has drums, which a few songs leave out (<see cref="SongParts" />).</summary>
-    public bool PlaysDrums => !((ImmutableHashSet<TrackRole>)Trace.Single(x => x.Point == TracePoints.SongParts).Value!).Contains(TrackRole.Drum);
+    public bool PlaysDrums => !Absent.Contains(TrackRole.Drum);
+
+    /// <summary>The sections' polymeters, by their ids (<see cref="Polymeter" />).</summary>
+    public ImmutableDictionary<int, Polymeter.Plan> PolymeterPlans => (ImmutableDictionary<int, Polymeter.Plan>)Trace.Single(x => x.Point == TracePoints.Polymeter).Value!;
+
+    /// <summary>Each soloist the song draws, by its part (<see cref="TracePoints.Soloist" />).</summary>
+    public Dictionary<TrackRole, Soloist> Soloists => Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
 
     public void Deconstruct(out Song song, out double origin)
     {

@@ -7,9 +7,6 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class SongPartsTest
 {
-    private static ImmutableHashSet<TrackRole> Absent(CorpusSong song) =>
-        (ImmutableHashSet<TrackRole>)song.Trace.Single(x => x.Point == TracePoints.SongParts).Value!;
-
     private static SongOverrides Given(TrackRole part, bool isIn) => new(Parts: ImmutableDictionary<TrackRole, bool>.Empty.Add(part, isIn));
 
     // the notes of a part's tracks, the drums' all together
@@ -26,7 +23,7 @@ public sealed class SongPartsTest
     [Test]
     public async Task ASong_LeavesOutThePad_TheCounterMelody_AndTheDrums_NowAndThen_AndNeverTheRest()
     {
-        var absent = TestCorpus.Measure(256, Absent);
+        var absent = TestCorpus.Measure(256, x => x.Absent);
         double Share(TrackRole part) => absent.Count(x => x.Contains(part)) / (double)absent.Length;
 
         // bounded widely, the targets in the Report
@@ -42,7 +39,7 @@ public sealed class SongPartsTest
     [Explicit]
     public async Task Report()
     {
-        var absent = TestCorpus.Measure(1024, Absent);
+        var absent = TestCorpus.Measure(1024, x => x.Absent);
         foreach (var (part, target) in new[] { (TrackRole.Pad, 0.2), (TrackRole.CounterMelody, 0.4), (TrackRole.Drum, 0.05) })
             Console.WriteLine($"{part}: left out of {absent.Count(x => x.Contains(part)) / (double)absent.Length:P1}, the target {target:P0}");
         await Task.CompletedTask;
@@ -65,10 +62,10 @@ public sealed class SongPartsTest
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var drawn = TestCorpus.Get(seed);
-            var isIn = !Absent(drawn).Contains(TrackRole.Pad);
+            var isIn = !drawn.Absent.Contains(TrackRole.Pad);
             var given = TestCorpus.Get(seed, Given(TrackRole.CounterMelody, true));
 
-            await Assert.That(Absent(given).Contains(TrackRole.CounterMelody)).IsFalse();
+            await Assert.That(given.Absent.Contains(TrackRole.CounterMelody)).IsFalse();
             await Assert.That(Write(TestCorpus.Get(seed, Given(TrackRole.Pad, isIn)))).IsEquivalentTo(Write(drawn), CollectionOrdering.Matching);
         }
     }
@@ -82,8 +79,8 @@ public sealed class SongPartsTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Parts: parts))))
         {
             // the riff where the seed drew it out, its part playing as it comes in
-            var riff = song.Song.TrackDefinitions.Single(x => x.Value.Role == TrackRole.Riff).Key;
-            riffs += Absent(TestCorpus.Get(song.Seed)).Contains(TrackRole.Riff) ? 1 : 0;
+            var riff = song.Track(TrackRole.Riff);
+            riffs += TestCorpus.Get(song.Seed).Absent.Contains(TrackRole.Riff) ? 1 : 0;
             await Assert.That(song.Song.Notes![riff].Count).IsGreaterThan(0);
         }
 

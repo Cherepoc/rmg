@@ -40,7 +40,7 @@ internal static class InnerLines
         var chordsMap = draft.Timeline.TrackTimelineMap.GetValueOrDefault(chordsTrack.Key);
         var chords = chordsMap?.EventTimeline;
         bool Lines((double Start, double End) chord) =>
-            chords?.Where(x => x.Position >= chord.Start - 1e-9 && x.Position < chord.End - 1e-9).Select(x => x.Value).ToArray() is { Length: > 0 } notes
+            chords?.Where(x => x.IsWithin(chord.Start, chord.End)).Select(x => x.Value).ToArray() is { Length: > 0 } notes
             && notes.All(note => note.GetStateValue(StateKinds.ChordNotePitchOffsets) is { IsEmpty: false } heights
                                  && heights.Any(IsRoot) && heights.All(x => IsRoot(x) || x * Realizer.OctaveNoteCount < Highest));
         static bool IsRoot(double height) => Math.Abs(height - Math.Round(height)) < 1e-9;

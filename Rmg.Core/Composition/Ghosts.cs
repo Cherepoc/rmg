@@ -48,9 +48,7 @@ internal static class Ghosts
             return draft;
 
         // but where a fill plays, from its first note to its line, and in stop time
-        var fills = draft.FillSpans;
-        var stops = song.StopTime;
-        bool Busy(double from, double to) => fills.Any(x => x.From < to - 1e-9 && x.To > from + 1e-9) || stops.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9);
+        var busy = draft.Busy(song);
 
         var result = notes.ToBuilder();
         foreach (var track in snares)
@@ -65,8 +63,8 @@ internal static class Ghosts
                 for (var start = span.Start; start < span.End - 1e-9; start += bar)
                 {
                     var end = Math.Min(span.End, start + bar);
-                    var own = timeline.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).ToArray();
-                    if (own.Length == 0 || Busy(start, end))
+                    var own = timeline.Where(x => x.IsWithin(start, end)).ToArray();
+                    if (own.Length == 0 || busy(start, end))
                         continue;
                     var loudest = own.MaxBy(x => x.Value.Velocity);
                     // a ghost weaker than any beat of the bar

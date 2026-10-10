@@ -101,7 +101,7 @@ public sealed class DrumSoloTest
             if (KitSolos(song).Length == 0)
                 continue;
 
-            var drummer = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).Single(x => x.Role == TrackRole.Drum).Soloist;
+            var drummer = song.Soloists[TrackRole.Drum];
             var drums = song.Song.Notes!.Where(x => song.IsDrum(x.Key)).ToArray();
             foreach (var (span, plan, feet, _) in KitSolos(song))
             {

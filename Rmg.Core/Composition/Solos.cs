@@ -249,12 +249,12 @@ internal static class Solos
         Func<int, IGenerationContext> motifs
     )
     {
-        var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
+        var trackOf = roles.TrackOf();
         foreach (var (index, solo) in solos.Where(x => !x.Value.IsDrumSolo).OrderBy(x => x.Key))
         {
             var span = map.Sections[index];
             var context = streams(index);
-            bool IsIn(TimelineItem<StateMap> note) => note.Position >= span.Start - 1e-9 && note.Position < span.End - 1e-9;
+            bool IsIn(TimelineItem<StateMap> note) => note.IsWithin(span.Start, span.End);
             var melody = song.TrackTimelineMap[trackOf[TrackRole.Melody]].EventTimeline.Where(IsIn).ToArray();
             StateTrace.RecordSection(TracePoints.SoloLine, trackOf[TrackRole.Melody], span.SectionId, $"{melody.Length} notes", (index, melody.Length));
             // a melody with no notes there leaves nothing to solo on, and the parts play as they would

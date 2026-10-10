@@ -52,7 +52,7 @@ internal static class LouderForms
             var part = (PitchInstrumentTrack)definition;
             // drawn for every part, so that the draws are as many, the quieter form from a sequence of its own
             // the riff's twin as its riff plays, from the riff's sequences
-            var keyed = definition.Role == TrackRole.RiffTwin ? song.Track(TrackRole.Riff).Key : track;
+            var keyed = song.DrawsAs(track);
             var context = song.Stream(SongStream.LouderForms, keyed);
             var (plays, form) = (context.TestProbability(Chance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.LouderForms, "guitars"))), context.GenerateDouble());
             var quieterContext = song.Stream(SongStream.QuieterForms, keyed);
@@ -68,7 +68,7 @@ internal static class LouderForms
                 if (program is not { } played || spans.Length == 0)
                     continue;
                 bool Takes(TimelineItem<RealizedNote> x) => x.Value.State.GetStateValue(CompositionStateKinds.Program) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0
-                                                            && spans.Any(s => x.Position >= s.Start - 1e-9 && x.Position < s.End - 1e-9);
+                                                            && spans.Any(s => x.IsWithin(s.Start, s.End));
                 // recorded where a note takes it, none where the part rests in those appearances
                 if (!result[track].Any(Takes))
                     continue;

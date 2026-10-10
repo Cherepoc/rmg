@@ -161,13 +161,6 @@ header h1 {
     margin-bottom: 8px;
 }
 
-/* the answer chosen, pressed until Next tells it */
-.listening-controls button[aria-pressed="true"] {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-text);
-}
-
 .panel h2 {
     margin: 0 0 12px;
     font-size: 13px;
@@ -502,8 +495,10 @@ summary .work {
     gap: 4px;
 }
 
-/* a switch pressed in, the song rated or autoplay on, shown as the accent, as the mixer's switches are */
-button.icon[aria-pressed="true"] {
+/* a switch pressed in, the song rated or autoplay on, shown as the accent, as the mixer's switches are, and a listening
+   answer chosen, pressed until Next tells it */
+button.icon[aria-pressed="true"],
+.listening-controls button[aria-pressed="true"] {
     background: var(--accent);
     border-color: var(--accent);
     color: var(--accent-text);
@@ -2247,8 +2242,8 @@ canvas.pulse {
     font: inherit;
 }
 
-.tune-shares-heading {
-    margin-top: 6px !important;
+.genre-tune .tune-shares-heading {
+    margin-top: 6px;
 }
 
 .tune-shares {

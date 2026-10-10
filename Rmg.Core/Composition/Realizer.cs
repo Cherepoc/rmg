@@ -178,13 +178,10 @@ internal static class Realizer
     {
         var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
         var octaveCount = track.MaxOctaveOffset - track.MinOctaveOffset + 1;
+        var range = GetRange(track);
 
         // the chords are placed in order, each following from the one before
-        var voiceLeader = new VoiceLeader(
-            absoluteMinOctave * OctaveNoteCount,
-            (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
-            notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes)
-        );
+        var voiceLeader = new VoiceLeader(range.Low, range.High, notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes));
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
         crossings = [];
@@ -193,7 +190,7 @@ internal static class Realizer
         for (var i = 0; i < items.Length; i++)
         {
             place = i > 0 && UntilChange(changes, items[i - 1].Position) > items[i].Position - items[i - 1].Position + 1e-9 ? place + 1 : 0;
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, GetRange(track), meterAt(items[i].Position).BarDuration, changes, place, out var unclipped);
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, range, meterAt(items[i].Position).BarDuration, changes, place, out var unclipped);
             var change = items[i].Position + UntilChange(changes, items[i].Position);
             var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;
             if (items[i].Position + unclipped > change + 1e-9 && next > change + 1e-9)
@@ -276,7 +273,7 @@ internal static class Realizer
         // how long it would sound but for a change of chord, which a held note, as a phrase's or an ending's, is not cut by
         unclipped = heldDuration > 0 ? 0 : duration;
         // a solo's note is a line's, whatever part plays it
-        var isLine = role is TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody or TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Solo || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1;
+        var isLine = role.PlaysLine() || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1;
         if (heldDuration > 0)
             duration = heldDuration;
         else if (isLine && role != TrackRole.Bass)

@@ -130,10 +130,7 @@ internal static class Expression
     private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect == StrongEffect.Gate;
 
     /// <summary>Whether a part may echo: one that plays lines, or the rhythm part, whose stabs a dub echoes.</summary>
-    private static bool EchoesFrom(TrackRole role) => IsLineRole(role) || role == TrackRole.Rhythm;
-
-    /// <summary>Whether a part plays lines, single notes one after another, rather than chords or drums.</summary>
-    private static bool IsLineRole(TrackRole role) => !role.PlaysChords() && role is not (TrackRole.Pad or TrackRole.Drum);
+    private static bool EchoesFrom(TrackRole role) => role.PlaysLine() || role == TrackRole.Rhythm;
 
     /// <summary>The chances a song plays each gentle effect at all, on whichever of its parts take it.</summary>
     public static ByConvention SongVibratoChance { get; } = new(0, 0.7, 1);
@@ -238,7 +235,7 @@ internal static class Expression
     private static bool LongestOfBar(EventTimeline<RealizedNote> notes, int index, SectionSpan span)
     {
         var bar = span.Start + Math.Floor((notes[index].Position - span.Start) / span.Meter.BarDuration + 1e-9) * span.Meter.BarDuration;
-        return notes.Where(x => x.Position >= bar - 1e-9 && x.Position < bar + span.Meter.BarDuration - 1e-9).All(x => x.Value.Duration <= notes[index].Value.Duration + 1e-9);
+        return notes.Where(x => x.IsWithin(bar, bar + span.Meter.BarDuration)).All(x => x.Value.Duration <= notes[index].Value.Duration + 1e-9);
     }
 
     /// <summary>Whether a program is a driven guitar, which pinches.</summary>
@@ -452,7 +449,7 @@ internal static class Expression
     /// </summary>
     public static double Reverb(TrackRole role, Genre genre)
     {
-        var lean = genre.Shift(GenreChoices.Space, GenreChoices.Name((role == TrackRole.RiffTwin ? TrackRole.Riff : role).ToString()));
+        var lean = genre.Shift(GenreChoices.Space, GenreChoices.Name(role.Source().ToString()));
         return Reverb(role) + lean * (lean > 0 ? 127 - Reverb(role) : Reverb(role));
     }
 
@@ -574,7 +571,7 @@ internal static class Expression
                 note => InstrumentTraits.Has(ProgramOf(note, ((PitchInstrumentTrack)definitions[gated]).InstrumentCode), InstrumentTrait.Decays)));
 
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
-        var backbeat = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var backbeat = DrumGroups.Snare.Tracks.ToHashSet();
         double? carrierDelay = null;
         // whether the song gives its parts tones at all, the genre's where it names it
         var songTone = toneStream.TestProbability(SongToneChance.At(songSound, genre.Chance(GenreChoices.Effects, "tone")));
@@ -703,7 +700,7 @@ internal static class Expression
                     var noteProgram = ProgramOf(note.Value, program);
                     // one note at a time, or in octaves, which bend and echo together
                     var isLine = (note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
-                                 && (IsLineRole(role) || note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1);
+                                 && (role.PlaysLine() || note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1);
                     var isSolo = note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;
                     // a solo's note plays as its soloist leans, its strength in place of the part's, and the more intense the
                     // solo there, the bigger and the oftener; whether it bends at all is the soloist's choice, not the song's,

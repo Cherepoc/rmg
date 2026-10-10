@@ -25,6 +25,13 @@ internal sealed record SongDraft(
 {
     /// <summary>Where the drums fill, from a run's first note to its line, which the stages that play around a fill keep out of.</summary>
     public (double From, double To)[] FillSpans => [..Runs.Where(x => !x.Positions.IsEmpty).Select(x => (x.Positions.Min(), x.Line))];
+
+    /// <summary>Whether a span meets a fill, from its first note to its line, or the song's stop time: where the drums' own touches keep out.</summary>
+    public Func<double, double, bool> Busy(SongDecisions song)
+    {
+        var (fills, stops) = (FillSpans, song.StopTime);
+        return (from, to) => fills.Any(x => x.From < to - 1e-9 && x.To > from + 1e-9) || stops.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9);
+    }
 }
 
 /// <summary>A stage of the song after it is put together: its name, what it does, and whether a test may leave it out.</summary>
@@ -151,8 +158,8 @@ internal static class SongStages
             Timeline = Composition.Polymeter.Apply(
                 draft.Timeline,
                 song.Playing,
-                DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber),
-                DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber),
+                DrumGroups.Kick.Tracks,
+                DrumGroups.Snare.Tracks,
                 song.Form.Map,
                 polymeters,
                 id => song.SectionOf(id).Bindings

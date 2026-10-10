@@ -9,16 +9,13 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class RiffTwinTest
 {
-    private static ImmutableHashSet<TrackRole> Absent(CorpusSong song) =>
-        (ImmutableHashSet<TrackRole>)song.Trace.Single(x => x.Point == TracePoints.SongParts).Value!;
-
     [Test]
     public async Task ATwin_PlaysTheRiffsNotes_ByAStepOfItsOwn_AllTheWayToTheOtherSide()
     {
         var twins = 0;
         foreach (var song in TestCorpus.Range(64))
         {
-            var absent = Absent(song);
+            var absent = song.Absent;
             var riffPan = ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Riff)]).Pan;
             var twinPan = ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.RiffTwin)]).Pan;
             var twin = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.RiffTwin))?.ToArray() ?? [];
@@ -58,7 +55,7 @@ public sealed class RiffTwinTest
     public async Task APlainSong_HarmonisesNoRiff_AndOneGivenATwin_InThirdsAndSixthsAlone()
     {
         var drawn = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Melody(0, null)));
-        await Assert.That(drawn.Count(x => !Absent(x).Contains(TrackRole.RiffTwin))).IsEqualTo(0);
+        await Assert.That(drawn.Count(x => !x.Absent.Contains(TrackRole.RiffTwin))).IsEqualTo(0);
 
         var given = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Melody(0, true)));
         await Assert.That(given.SelectMany(Intervals).Distinct().Order()).IsEquivalentTo(new[] { -5, 2 }, CollectionOrdering.Matching);
@@ -92,10 +89,10 @@ public sealed class RiffTwinTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Range(512).Where(x => !Absent(x).Contains(TrackRole.Riff)).ToArray();
+        var songs = TestCorpus.Range(512).Where(x => !x.Absent.Contains(TrackRole.Riff)).ToArray();
         foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Unconventionality[Facet.Melody] * 5), 0, 4)).OrderBy(x => x.Key))
         {
-            var twins = band.Where(x => !Absent(x).Contains(TrackRole.RiffTwin)).ToArray();
+            var twins = band.Where(x => !x.Absent.Contains(TrackRole.RiffTwin)).ToArray();
             var intervals = twins.SelectMany(Intervals).ToArray();
             var shares = intervals.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key:+0;-0} {x.Count() / (double)intervals.Length:P0}");
             Console.WriteLine($"  melody {band.Key}/5: {twins.Length} of {band.Count()} songs with a riff have a twin ({twins.Length / (double)band.Count():P0}); its sections apart by {string.Join(", ", shares)}");
