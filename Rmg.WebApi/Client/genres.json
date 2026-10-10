@@ -17,7 +17,7 @@
       "feelChances": { "swing": [5, 20, 25], "halfTime": 8, "doubleTime": 4 },
       "pins": { "ground": [40, 40, 20], "backbeat": [80, 80, 50] },
       "push": { "sections": [5, 15, 20] },
-      "keyChanges": { "lastSection": [0, 20, 100], "sections": [0, 8, 100], "patterns": [0, 0, 100] },
+      "keyChanges": { "lastSection": [0, 8, 100], "sections": [0, 8, 100], "patterns": [0, 0, 100] },
       "tempo": { "from": [110, 110, 85], "to": [150, 150, 190] },
       "meter": { "4/4": [100, 100, 60], "6/8": [5, 8, 20], "7/8": [0, 0, 25], "5/4": [0, 0, 15], "7/4": [0, 0, 10] },
       "scale": { "naturalMinor": [100, 100, 60], "mixolydian": [50, 65, 60], "major": [45, 45, 30], "dorian": [10, 25, 30], "phrygian": [0, 10, 40] },
@@ -907,6 +907,7 @@
       },
       "kit": { "power": 100, "standard": 60 },
       "drumSetup": { "kit": 100 },
+      "turnaround": { "sections": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [30, 30, 50], "counterMelody": 25, "drum": 100, "riff": 100, "riffTwin": [0, 15, 20], "rhythm": [80, 80, 60], "solo": [0, 40, 70] },
       "rhythm": {
         "ground": { "speed": 100, "fineness": 100, "fullness": 100, "repetition": 82 },
@@ -1208,7 +1209,7 @@
       "ghosts": { "sections": [10, 20, 30] },
       "vamp": { "sections": [20, 30, 40] },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": [20, 30, 40] },
-      "strongEffect": { "none": [100, 70, 30], "pump": [0, 25, 40], "echo": [0, 5, 20], "sweep": [0, 5, 20] },
+      "strongEffect": { "none": [100, 70, 30], "pump": 0, "echo": [0, 5, 20], "sweep": [0, 5, 20] },
       "insertion": { "none": 100, "phaser": [30, 40, 50], "wah": [10, 20, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [110, 110, 100], "to": [130, 130, 140] },
@@ -1287,6 +1288,7 @@
       "loop": { "sections": [90, 90, 70] },
       "phraseScheme": { "aaaa": 100, "aaab": 30 },
       "voice": { "verses": [60, 70, 70] },
+      "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [70, 70, 70], "counterMelody": [10, 10, 30], "drum": 100, "riff": [10, 10, 30], "riffTwin": 0, "rhythm": 0, "solo": [0, 0, 20] },
       "instrument": {
         "melody": { "glockenspiel": 60, "acousticGrandPiano": 60, "flute": 50, "lead1Square": 40, "musicBox": [20, 15, 20], "celesta": [15, 10, 20], "lead6Voice": [10, 20, 30], "tubularBells": [0, 10, 20] },

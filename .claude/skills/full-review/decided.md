@@ -65,3 +65,5 @@ rejected while fixing: the place, what was decided, why.
 - Listening mode's A and B alternate by the song's index (listening.js): the listener is the operator, alternating balances which is heard first, and a drawn order would cost every listening test a way to learn it; kept.
 - DyadicRankTimeline.Generate kept though only tests call it: it is how a dozen tests read a rhythm as a timeline.
 - The thinning texture (Texture, TextureKind.Thin) may drop the melody among the parts, its order drawn: kept on listening (Synthwave IrBYcTV7F1B's second verse ending on four bars without it), a band's instrumental breath.
+- Medieval's raised cadence (cadenceRaise at the songs' own) kept on listening, 5 of 6: the leading tone raised at a cadence is medieval practice (musica ficta, the double leading-tone cadence); only its full major triad on the fifth is later.
+- Funk's key changes and pushes, Nu metal's half time, Techno's half and double time and Djent's polymeter kept on listening (10–11 October 2026).
