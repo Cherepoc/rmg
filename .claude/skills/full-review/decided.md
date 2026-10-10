@@ -50,3 +50,7 @@ rejected while fixing: the place, what was decided, why.
 
 - `Polymeter`: a copied note takes its new place's chord shape from any pitched part's note in that chord, every part sharing it; a chord's pool index is gone by that stage.
 - `SongMap.MeterAt` gives a short last bar its own meter, while `PatternBarAt` and `BeatInBar` count by the section's: deliberate, so that the bar before a section is the bar there is.
+- `Solos.WithSoloist` is not gated by a genre's `solos.sections`: gating it would scale one chance by another by hand, or cut the songs' own soloist solos fivefold; a preset that keeps solos rare sets `parts.solo` low instead.
+- Jazz's plainest song passes no chord (`PassingChordTest.ThePlainestSongs_PassNoChord`); its turnaround at the plain end is the preset's.
+- A pedal wins over a doubling: a bass note a pedal holds is the pedal's, no longer the doubled line's.
+- A hook intro quotes its chorus's notes only where the chorus plays in the intro's key and tempo; elsewhere the lines' quote alone.

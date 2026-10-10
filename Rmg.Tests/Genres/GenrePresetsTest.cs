@@ -90,6 +90,31 @@ public sealed class GenrePresetsTest
         await Assert.That(made.Where(x => x.Notes == 0).Select(x => $"{x.Name} {x.Base} {x.Seed}")).IsEmpty();
     }
 
+    /// <summary>Every setup a preset allows at an end is one its drum pieces kept there can make: kit and percussion a drum of the percussion group among them, percussion a drum outside the kit's family.</summary>
+    [Test]
+    public async Task APresetsDrumSetup_IsOneItsPiecesCanMake()
+    {
+        var percussionGroup = DrumGroups.Percussion.Drums.Select(DrumPieces.NameOf).ToHashSet();
+        var outsideKit = DrumGroups.AllDrums.Where(x => x.Family != DrumFamily.Kit).Select(DrumPieces.NameOf).ToHashSet();
+        var wrong = new List<string>();
+        foreach (var preset in GenrePresets.All)
+        {
+            var choices = GenrePresets.Genre(preset).Choices;
+            if (!choices.TryGetValue(GenreChoices.DrumSetup.Name, out var setups) || !choices.TryGetValue(GenreChoices.DrumPieces.Name, out var pieces))
+                continue;
+            foreach (var end in new[] { 0.0, 0.5, 1.0 })
+            {
+                var kept = pieces.Where(x => x.Value.At(end) > 0).Select(x => x.Key).ToHashSet();
+                if (setups.TryGetValue("kitAndPercussion", out var both) && both.At(end) > 0 && !kept.Overlaps(percussionGroup))
+                    wrong.Add($"{preset.Id} kitAndPercussion at {end}");
+                if (setups.TryGetValue("percussion", out var alone) && alone.At(end) > 0 && !kept.Overlaps(outsideKit))
+                    wrong.Add($"{preset.Id} percussion at {end}");
+            }
+        }
+
+        await Assert.That(wrong).IsEmpty();
+    }
+
     /// <summary>A polymeter at the plain end in a bar both of its plain lengths divide, 3/4's and 6/8's twelve 16ths, plays the middle's lengths.</summary>
     [Test]
     public async Task APlainPolymeter_InABarOfTwelve_MakesSongs()

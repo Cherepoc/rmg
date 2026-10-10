@@ -44,7 +44,7 @@
       },
       "kit": { "standard": [65, 65, 100], "room": [30, 30, 7], "power": [100, 100, 22] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [65, 65, 70], "counterMelody": 35, "drum": 95, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": [60, 60, 48], "solo": [0, 30, 79] },
-      "drumSetup": { "kit": 100, "kitAndPercussion": [0, 12, 62] },
+      "drumSetup": { "kit": 100 },
       "levels": { "riff": 65, "drum": 60 },
       "grooveHold": { "held": 80 },
       "stopTime": { "sections": [5, 12, 15] },
@@ -81,7 +81,7 @@
       "keyChanges": { "lastSection": [0, 8, 100], "sections": [0, 25, 100], "patterns": [0, 0, 100] },
       "rests": { "pad": 90 },
       "pocket": { "laidBack": 65 },
-      "turnaround": { "sections": [0, 80, 80] },
+      "turnaround": { "sections": [60, 80, 80] },
       "passingChords": { "chords": [0, 50, 60] },
       "passingKind": { "dominant": 100, "tritone": [60, 80, 80], "diminished": [40, 60, 60], "chromatic": [20, 30, 40], "chromaticBelow": [10, 20, 30] },
       "tempo": { "from": [80, 90, 70], "to": [180, 180, 240] },
@@ -195,7 +195,7 @@
         "rhythm": { "electricPiano1": 100, "electricGuitarMuted": 50, "clavinet": 40, "electricGuitarClean": 30 }
       },
       "kit": { "electronic": 100, "tr808": 100 },
-      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [95, 95, 81], "counterMelody": 30, "drum": 95, "riff": [70, 70, 56], "riffTwin": [0, 15, 15], "rhythm": [10, 10, 37], "solo": [0, 20, 80] },
+      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [95, 95, 81], "counterMelody": 30, "drum": 95, "riff": [70, 70, 56], "riffTwin": [0, 15, 15], "rhythm": [10, 10, 37], "solo": [0, 5, 20] },
       "drumSetup": { "kit": 100 },
       "drumPieces": { "kick": [100, 100, 83], "electricSnare": [100, 100, 77], "clap": [100, 100, 77], "hiHat": [100, 100, 83], "tambourine": [25, 25, 19], "maracas": [25, 25, 19], "tom": [30, 30, 100], "cymbal": [65, 65, 92] },
       "levels": { "melody": 30, "bass": 70, "pad": 35, "drum": 90 },
@@ -276,6 +276,7 @@
         "rhythm": { "clavinet": 100, "electricPiano1": 60, "electricGuitarMuted": [20, 20, 40] }
       },
       "kit": { "electronic": 100, "tr808": 100 },
+      "cadenceRaise": { "sections": 0 },
       "parts": { "melody": [60, 60, 50], "chords": [70, 70, 70], "bass": 100, "pad": [60, 60, 60], "counterMelody": 30, "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [10, 10, 30], "solo": [0, 10, 50] },
       "drumSetup": { "kit": 100 },
       "drumPieces": { "kick": 100, "electricSnare": [60, 60, 60], "clap": 100, "hiHat": 100, "tom": [10, 10, 60], "cymbal": [50, 50, 80] },
@@ -421,7 +422,7 @@
         "solo": { "altoSax": 60, "tenorSax": 60, "flute": 60, "trumpet": 50, "electricGuitarClean": 40, "lead1Square": 40, "lead2Sawtooth": 30 }
       },
       "kit": { "electronic": 40, "tr808": 100 },
-      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [90, 90, 81], "counterMelody": [15, 20, 40], "drum": 95, "riff": [25, 25, 44], "riffTwin": [0, 15, 15], "rhythm": [10, 10, 37], "solo": [0, 20, 80] },
+      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [90, 90, 81], "counterMelody": [15, 20, 40], "drum": 95, "riff": [25, 25, 44], "riffTwin": [0, 15, 15], "rhythm": [10, 10, 37], "solo": [0, 5, 25] },
       "drumSetup": { "kit": 100 },
       "drumPieces": { "kick": [100, 100, 89], "acousticSnare": [45, 45, 96], "electricSnare": [65, 65, 58], "clap": [100, 100, 89], "hiHat": [100, 100, 89], "cymbal": [30, 30, 100] },
       "levels": { "melody": 25, "chords": 35, "bass": 70, "drum": 95 },
@@ -530,6 +531,7 @@
         "solo": { "trumpet": 100, "flute": 70, "altoSax": 60, "tenorSax": 50, "electricGuitarJazz": 30 }
       },
       "kit": { "standard": 100, "room": [45, 45, 27] },
+      "phraseBars": { "fourBars": 100, "sixBars": [0, 4, 30] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [20, 25, 40], "counterMelody": 55, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": [70, 70, 49], "solo": [0, 20, 80] },
       "drumSetup": { "kitAndPercussion": [100, 100, 70], "percussion": [45, 45, 100] },
       "drumPieces": { "kick": [100, 100, 76], "acousticSnare": [80, 80, 83], "hiHat": [65, 65, 88], "ride": [30, 30, 45], "cabasa": [40, 40, 14], "maracas": [65, 65, 23], "tom": [30, 30, 100], "cymbal": [45, 45, 95], "bongo": [100, 100, 36], "conga": [100, 100, 36], "timbale": [80, 80, 29], "agogo": [45, 45, 16], "cowbell": [80, 80, 29], "claves": [100, 100, 36], "woodBlock": [30, 30, 11], "guiro": [65, 65, 23] },
@@ -599,7 +601,7 @@
         "solo": { "altoSax": 100, "tenorSax": 100, "trumpet": 80, "electricGuitarClean": 50, "lead1Square": [30, 30, 60] }
       },
       "kit": { "standard": 100, "room": [65, 65, 31] },
-      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [20, 25, 40], "counterMelody": 50, "drum": 95, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": 100, "solo": [0, 20, 80] },
+      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [20, 25, 40], "counterMelody": 50, "drum": 100, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": 100, "solo": [0, 20, 80] },
       "levels": { "bass": 65, "drum": 65 },
       "grooveHold": { "held": 75 },
       "pocket": { "laidBack": 35 },
@@ -709,12 +711,13 @@
         "riff": { "overdrivenGuitar": 100, "electricGuitarClean": 80, "baritoneSax": 30, "brassSection": 30, "percussiveOrgan": 30 }
       },
       "kit": { "standard": 100, "room": [65, 65, 23], "brush": [30, 30, 11] },
+      "cadenceDegree": { "fifth": 90 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [55, 55, 66], "counterMelody": 35, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": [60, 60, 48], "solo": [0, 40, 73] },
       "drumSetup": { "kit": 100 },
       "grooveHold": { "held": 75 },
       "pocket": { "laidBack": 70 },
       "stopTime": { "sections": [10, 35, 35] },
-      "turnaround": { "sections": [0, 70, 70] },
+      "turnaround": { "sections": [40, 70, 70] },
       "riff": { "powerChords": [15, 25, 30] },
       "solos": { "sections": [20, 25, 35], "trades": 0 },
       "soloists": { "solo": 100, "melody": [40, 40, 50], "chords": [10, 20, 30] },
@@ -774,8 +777,8 @@
         "solo": { "flute": 100, "violin": 60, "electricGuitarClean": 50, "sopranoSax": 50, "lead2Sawtooth": [0, 20, 50] }
       },
       "kit": { "room": 69, "brush": 100, "orchestra": 100 },
-      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": 60, "drum": [25, 30, 50], "riff": [6, 6, 47], "riffTwin": [0, 15, 15], "rhythm": [5, 5, 38], "solo": [0, 10, 68] },
-      "drumSetup": { "kit": [100, 100, 68], "percussion": [0, 0, 30], "kitAndPercussion": [60, 60, 60] },
+      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": 60, "drum": [25, 30, 50], "riff": [6, 6, 47], "riffTwin": [0, 15, 15], "rhythm": [5, 5, 38], "solo": [0, 0, 10] },
+      "drumSetup": { "kit": 100 },
       "levels": { "pad": 65, "drum": 30 },
       "fills": { "amount": 25 },
       "intro": { "entries": 100, "cold": [30, 30, 40] },
@@ -786,7 +789,7 @@
         "bass": { "speed": 19, "fullness": 31 },
         "time": { "fullness": 19 }
       },
-      "articulation": { "legato": [40, 60, 70], "roll": [40, 50, 60] },
+      "articulation": { "legato": [40, 60, 70], "roll": 0 },
       "formChances": { "forms": [50, 30, 0] },
       "sectionLength": { "bars16": 100, "bars8": [60, 60, 60], "bars32": [30, 40, 50] },
       "texture": { "steady": [100, 70, 50], "build": [50, 60, 60], "thin": [30, 40, 50], "alone": [0, 10, 30] },
@@ -797,13 +800,14 @@
   {
     "id": "pop",
     "name": "Pop",
-    "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus lifted a key and played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, major, 95 to 125.",
+    "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus now and then lifted a key or played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, mostly major, 95 to 125.",
     "choices": {
       "phraseBars": { "fourBars": 100, "sixBars": [0, 5, 20] },
       "chordScales": { "applied": [0, 35, 35], "borrowed": [0, 12, 12], "own": [0, 0, 30], "mediant": [10, 20, 20] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "electricSnare": 30, "clap": 40, "hiHat": 100, "ride": 30, "tom": 60, "cymbal": 80, "tambourine": [30, 40, 50], "maracas": [20, 30, 40] },
       "strongEffect": { "none": [100, 80, 30], "pump": [0, 5, 20], "echo": [0, 10, 30], "tremolo": [0, 5, 20], "sweep": [0, 3, 20] },
       "louderForms": { "guitars": [10, 30, 40] },
+      "effects": { "vibrato": [0, 70, 100], "chorus": [0, 50, 100], "swell": [0, 35, 100], "bends": [0, 50, 100], "tone": [0, 50, 50], "tape": [0, 5, 5], "pinch": [0, 10, 10], "dive": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 80, "counterMelody": 45, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": 40, "solo": [0, 20, 80] },
       "rootMotion": { "fourthDown": 85, "stepUp": 80, "thirdDown": 80 },
       "tempo": { "from": [95, 95, 85], "to": [125, 125, 140] },
@@ -832,7 +836,7 @@
         "solo": { "overdrivenGuitar": 100, "electricGuitarClean": 60, "altoSax": 50, "lead2Sawtooth": 40, "sopranoSax": 20 }
       },
       "kit": { "standard": 100, "power": [20, 20, 30], "electronic": [20, 20, 40] },
-      "drumSetup": { "kit": 100, "kitAndPercussion": [10, 20, 40] },
+      "drumSetup": { "kit": 100 },
       "fills": { "amount": 50 },
       "dynamics": { "energy": 60, "contrast": 70, "lift": 70, "evenness": 75 },
       "phraseScheme": { "aaab": 100, "abab": [60, 60, 60], "aaaa": [40, 40, 30], "aaba": [40, 40, 40] },
@@ -920,7 +924,7 @@
     "description": "Calm and modal: recorders, flutes and a fiddle over a lute and a harp, a choir and a drone, open fifths, a second voice in fourths and fifths, 3/4 and 6/8, slow, a tambourine, a triangle and a frame drum marking the form.",
     "choices": {
       "phraseBars": { "fourBars": 100, "threeBars": [0, 10, 30], "sixBars": [0, 10, 25] },
-      "rudiments": { "flams": [0, 40, 80], "drags": [0, 20, 60] },
+      "rudiments": { "flams": [0, 0, 80], "drags": [0, 0, 60] },
       "octaveBass": { "sections": 0 },
       "stopTime": { "sections": 0 },
       "push": { "sections": 0 },
@@ -939,7 +943,7 @@
       "harmonyDevices": { "pedal": [60, 60, 50], "reharmonised": 0, "innerLine": 0 },
       "harmonicRhythm": { "twoBars": 100, "oneBar": [40, 40, 60] },
       "harmonyInterval": { "fourths": 100, "thirds": [30, 40, 60] },
-      "doubling": { "harmony": [30, 40, 40], "octaves": [7, 11, 15], "riff": 0 },
+      "doubling": { "harmony": [60, 70, 70], "octaves": [7, 11, 15], "riff": 0 },
       "lineScale": { "section": 100, "pentatonic": 40 },
       "melodyRange": { "wide": 40 },
       "arpeggio": { "none": 100, "up": [10, 20, 30], "upDown": [10, 10, 20] },
@@ -949,7 +953,7 @@
       "keyChanges": { "lastSection": [0, 2, 10], "sections": [0, 2, 10], "patterns": 0 },
       "hook": { "choruses": [30, 30, 20] },
       "solos": { "sections": [0, 3, 10], "trades": 0 },
-      "parts": { "melody": 100, "chords": 100, "bass": [20, 25, 40], "pad": [60, 60, 70], "counterMelody": [50, 50, 60], "drum": [50, 50, 60], "riff": 0, "riffTwin": 0, "rhythm": 0, "solo": [0, 10, 40] },
+      "parts": { "melody": 100, "chords": 100, "bass": [20, 25, 40], "pad": [60, 60, 70], "counterMelody": [70, 70, 75], "drum": [50, 50, 60], "riff": 0, "riffTwin": 0, "rhythm": 0, "solo": [0, 10, 40] },
       "instrument": {
         "melody": { "recorder": 100, "flute": 80, "fiddle": 70, "panFlute": 50, "dulcimer": 40, "ocarina": 30, "oboe": 20, "shanai": [20, 20, 30], "bagpipe": [0, 10, 30] },
         "chords": { "acousticGuitarNylon": 100, "orchestralHarp": 90, "harpsichord": 50, "dulcimer": 40, "reedOrgan": [20, 20, 30], "churchOrgan": [10, 10, 30] },
@@ -1000,6 +1004,7 @@
       "harmonyDevices": { "pedal": [40, 40, 50], "reharmonised": 0, "innerLine": 0 },
       "arpeggio": { "none": 100, "up": 70, "upDown": 60, "alberti": 40, "downUp": 30 },
       "lineScale": { "section": 100, "melodicMinor": [0, 10, 20] },
+      "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": [40, 40, 60], "pad": 100, "counterMelody": [40, 40, 50], "drum": [40, 40, 60], "riff": 0, "riffTwin": 0, "rhythm": 0, "solo": [0, 0, 20] },
       "instrument": {
         "melody": { "celesta": 80, "musicBox": 60, "flute": 60, "frenchHorn": 60, "synthBrass1": 50, "lead4Chiff": 40, "glockenspiel": 30, "oboe": 30, "lead2Sawtooth": [30, 30, 40], "tubularBells": [10, 10, 30] },
@@ -1033,7 +1038,7 @@
   {
     "id": "djent",
     "name": "Djent",
-    "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
+    "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, now and then a clean lead floating over.",
     "choices": {
       "phraseBars": { "fourBars": 100 },
       "riffIntro": { "songs": [20, 30, 40] },
@@ -1213,6 +1218,7 @@
       "harmonicRhythm": { "oneBar": 100, "twoBars": 60 },
       "rootMotion": { "fifthDown": 65, "stepUp": 60 },
       "octaveBass": { "sections": [60, 70, 70] },
+      "arpeggio": { "none": 100, "up": [0, 5, 15], "upDown": [0, 0, 10] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [70, 70, 70], "counterMelody": [50, 50, 60], "drum": 100, "riff": [50, 50, 60], "riffTwin": 0, "rhythm": [80, 80, 70], "solo": [0, 20, 50] },
       "instrument": {
         "melody": { "violin": 60, "trumpet": 60, "altoSax": 60, "flute": 50, "electricPiano1": 50, "lead6Voice": [0, 10, 20] },
@@ -1322,7 +1328,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
-      "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
+      "sectionChanges": {},
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
@@ -1447,7 +1453,7 @@
   {
     "id": "ska",
     "name": "Ska",
-    "description": "Fast, the guitar and the piano skanking on the offbeats, a walking bass, horns on a riff and in solos, trumpet and sax leads, major and Mixolydian.",
+    "description": "Fast, the guitar and the piano skanking on the offbeats, a walking bass, horns on a riff and in solos, trumpet and sax leads, major, Mixolydian or minor.",
     "choices": {
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50 },
       "louderForms": { "guitars": 0, "quieter": 0 },
@@ -1462,6 +1468,7 @@
       "rootMotion": { "fifthDown": 70, "fourthDown": 65 },
       "bass": { "leading": 75 },
       "articulation": { "stabs": [60, 70, 70], "legato": 0, "roll": 0 },
+      "arpeggio": { "none": 100 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [30, 30, 40], "counterMelody": [50, 50, 60], "drum": 100, "riff": [70, 70, 70], "riffTwin": [0, 10, 15], "rhythm": [90, 90, 80], "solo": [10, 30, 60] },
       "instrument": {
         "melody": { "trumpet": 100, "altoSax": 70, "tenorSax": 70, "electricGuitarClean": 40, "acousticGrandPiano": 30 },
@@ -1502,7 +1509,7 @@
   {
     "id": "punk",
     "name": "Punk",
-    "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major and Mixolydian, a count-in and a stop.",
+    "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major, Mixolydian or minor, a count-in and a stop.",
     "choices": {
       "rudiments": { "flams": [0, 30, 60], "drags": [0, 0, 20] },
       "drumStrokes": { "openHiHat": 85 },
@@ -1518,6 +1525,7 @@
       "harmonicRhythm": { "oneBar": 100, "halfBar": 50 },
       "rootMotion": { "fourthDown": 70, "stepUp": 60 },
       "riff": { "powerChords": [90, 90, 80], "chugs": [20, 20, 30] },
+      "arpeggio": { "none": 100 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 0, "counterMelody": 0, "drum": 100, "riff": [50, 50, 60], "riffTwin": 0, "rhythm": [80, 80, 70], "solo": [0, 10, 30] },
       "instrument": {
         "melody": { "overdrivenGuitar": 100, "electricGuitarClean": 60, "harmonica": [0, 10, 20] },
@@ -1594,7 +1602,7 @@
         "solo": { "electricGuitarClean": 100, "lead2Sawtooth": 70, "sopranoSax": 80, "overdrivenGuitar": 40 }
       },
       "kit": { "standard": 100, "jazz": 60, "room": 40 },
-      "drumSetup": { "kit": 100, "kitAndPercussion": [30, 40, 50] },
+      "drumSetup": { "kit": 100, "kitAndPercussion": [0, 40, 50] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 80, "tom": 70, "cymbal": 80, "conga": [0, 20, 40], "cowbell": [0, 10, 20] },
       "rhythm": {
         "time": { "speed": 100, "fullness": 82 },
@@ -1621,7 +1629,7 @@
       "insertion": { "none": 100, "wah": [10, 20, 30], "phaser": [10, 20, 30] },
       "room": { "plate": 100, "room": 60 },
       "tempo": { "from": [65, 65, 60], "to": [105, 105, 125] },
-      "meter": { "4/4": 100, "6/8": [60, 60, 50], "3/4": [10, 10, 20] },
+      "meter": { "4/4": 100, "6/8": [40, 50, 50], "3/4": [0, 0, 10] },
       "feelChances": { "swing": [40, 50, 50], "halfTime": 8, "doubleTime": 4 },
       "feelValues": { "swing": 60 },
       "scale": { "major": 100, "dorian": 60, "mixolydian": 50, "naturalMinor": 40 },
@@ -1648,7 +1656,7 @@
         "solo": { "tenorSax": 100, "altoSax": 80, "electricGuitarClean": 60, "trumpet": 50 }
       },
       "kit": { "standard": 100, "room": 70 },
-      "drumSetup": { "kit": 100, "kitAndPercussion": [20, 30, 40] },
+      "drumSetup": { "kit": 100 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "tambourine": 60, "ride": 40, "tom": 40, "cymbal": 60 },
       "drumStrokes": { "crossStick": 65 },
       "pins": { "backbeat": 90 },
@@ -1673,7 +1681,7 @@
     "description": "A fiddle, a steel-string guitar strummed, a banjo and a honky-tonk piano, plain triads moving by fourths and fifths, the bass on the root and the fifth, the snare on 2 and 4, major and Mixolydian.",
     "choices": {
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 25] },
-      "alternatingBass": { "sections": [60, 70, 80] },
+      "alternatingBass": { "sections": [85, 75, 60] },
       "soloAnswers": { "sections": [20, 30, 40] },
       "stopTime": { "sections": [5, 10, 15] },
       "phrases": { "fourBars": 100, "eightBars": [40, 40, 50], "twelveBars": [5, 10, 15] },
@@ -1683,7 +1691,7 @@
       "feelChances": { "swing": [10, 20, 30], "halfTime": 8, "doubleTime": 4 },
       "feelValues": { "sixteenths": 0 },
       "scale": { "major": 100, "mixolydian": 60, "naturalMinor": [10, 20, 30] },
-      "chordShape": { "triad": 100, "seventh": 30, "sixth": [10, 20, 30], "sus4": 20 },
+      "chordShape": { "triad": 100, "seventh": [0, 20, 30], "sixth": [0, 15, 30], "sus4": [5, 15, 20] },
       "harmonicRhythm": { "oneBar": 100, "twoBars": 70 },
       "rootMotion": { "fifthDown": 75, "stepUp": 65, "fourthDown": 60 },
       "bass": { "leading": 55 },
@@ -1806,7 +1814,7 @@
       "keyChanges": { "lastSection": [15, 25, 40], "sections": [0, 5, 30], "patterns": 0 },
       "harmonyDevices": { "pedal": [30, 40, 50], "innerLine": [10, 20, 30], "reharmonised": 0 },
       "arpeggio": { "none": 100, "alberti": 50, "up": 40, "upDown": 40, "upTwoOctaves": [10, 20, 30] },
-      "articulation": { "legato": [60, 70, 80], "roll": [30, 40, 50] },
+      "articulation": { "legato": [60, 70, 80], "roll": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": [80, 80, 80], "drum": [70, 70, 70], "riff": [20, 20, 40], "riffTwin": 0, "rhythm": 0, "solo": [0, 10, 30] },
       "instrument": {
         "melody": { "violin": 100, "flute": 70, "oboe": 60, "frenchHorn": 60, "clarinet": 50, "trumpet": 40, "cello": 40 },
@@ -1818,7 +1826,7 @@
         "solo": { "violin": 100, "flute": 60, "trumpet": 40 }
       },
       "kit": { "orchestra": 100 },
-      "drumSetup": { "kitAndPercussion": 100 },
+      "drumSetup": { "kit": 100 },
       "drumPieces": { "tom": 100, "cymbal": 80, "acousticSnare": 50, "kick": [0, 20, 40], "triangle": 40 },
       "drumJob": { "marks": [80, 80, 50], "groove": [20, 20, 50] },
       "marks": { "often": 55, "swells": 70 },
@@ -1913,14 +1921,14 @@
       "tempo": { "from": [85, 85, 90], "to": [100, 110, 170] },
       "meter": { "4/4": [100, 100, 60], "3/4": [5, 10, 20], "6/8": [5, 10, 20], "7/8": [0, 5, 25], "5/4": [0, 5, 20] },
       "feel": { "straight": [100, 100, 60], "tuplets3": [0, 10, 30], "grouped3": [0, 10, 30] },
-      "feelChances": { "swing": [40, 50, 30], "halfTime": [5, 10, 15], "doubleTime": [0, 5, 25] },
+      "feelChances": { "swing": [70, 55, 30], "halfTime": [5, 10, 15], "doubleTime": [0, 5, 25] },
       "scale": { "naturalMinor": 100, "dorian": 70, "major": [0, 10, 20], "lydian": [0, 10, 20] },
       "chordShape": { "seventh": 100, "ninth": 80, "add9": 60, "triad": 50, "sus2": 40, "quartalTriad": [0, 10, 30], "minorMajorSeventh": [0, 5, 20] },
       "rootMotion": { "stepUp": 65, "thirdDown": 60 },
       "harmonicRhythm": { "twoBars": 100, "oneBar": 50 },
       "chordScales": { "borrowed": [10, 20, 30], "applied": 0, "own": 0, "mediant": [0, 10, 20] },
       "arpeggio": { "none": 100, "up": [30, 40, 50], "upDown": [20, 30, 40], "random": [0, 10, 40] },
-      "figure": { "ground": { "own": 100, "breakbeat": [40, 50, 40] } },
+      "figure": { "ground": { "own": [40, 80, 100], "breakbeat": [100, 70, 40] } },
       "glide": { "bass": [10, 20, 60] },
       "strongEffect": { "none": [60, 50, 30], "squelch": [10, 20, 40], "wobble": [0, 10, 30], "opening": [10, 15, 20], "sweep": [10, 15, 20], "echo": [20, 25, 30], "tremolo": [5, 10, 15] },
       "effects": { "chorus": [40, 50, 60], "vibrato": [20, 30, 40], "swell": [30, 40, 50], "tone": [50, 70, 80], "tape": [30, 50, 70], "bends": 0, "pinch": 0, "dive": 0 },
@@ -1935,6 +1943,7 @@
       "dynamics": { "contrast": 50 },
       "kit": { "tr808": 100, "electronic": 80, "standard": [30, 30, 20] },
       "drumSetup": { "kit": 100 },
+      "solos": { "sections": [0, 1, 10], "trades": 0, "twins": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": [30, 40, 50], "drum": [90, 90, 95], "riff": [10, 20, 40], "riffTwin": 0, "rhythm": 0, "solo": [0, 5, 20] },
       "instrument": {
         "melody": { "electricPiano1": 80, "musicBox": 60, "vibraphone": 50, "lead4Chiff": 50, "lead1Square": 40, "glockenspiel": 40, "kalimba": 30, "lead2Sawtooth": [20, 30, 40] },
