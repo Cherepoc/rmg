@@ -462,14 +462,17 @@ and a deploy to test. In order:
 
 1. **Held tones** (P1): sweet chords made bittersweet by notes held over every chord, as a clean guitar's open strings
    ring through a progression: a seventh chord a semitone from one of them, an add9 rubbing its third. A part's colour
-   (`GenreChoices.Colour`) "held": the key's second and third steps (its 9th and 3rd, two notes of the scale a tone
-   apart) kept in every chord's voicing whatever its root, so that over one chord they are its tensions and over the
+   (`GenreChoices.Colour`) "held": the key's second and third steps (a tone apart in a major key, a semitone in a
+   minor one, which is the rub asked for) kept in every chord's voicing whatever its root, so that over one chord they are its tensions and over the
    next its own notes; at the wild end wider pairs, the 4th or the 7th among them. A held step the chord's scale alters
-   is left out of that chord rather than bent. Clean and decaying instruments only (a clean guitar, a piano, a harp),
+   is left out of that chord rather than bent. A new `ChordColour` beside the ninth and the others, but of the key's
+   steps rather than the chord's intervals; the chord's name on the page stays its state's (`SongHarmony`). Clean and decaying instruments only (a clean guitar, a piano, a harp),
    where a held second is heard as a colour, not as mud. One rule for every genre that names the option, not a list of
    chords; measured by the semitones held tones make against a chord's notes, on and off over the same songs.
 2. **Let ring** (P1): a broken chord's notes sustaining to the chord's change rather than each stopping where the next
-   starts, so that its seconds sound together; the arpeggio's notes stay single strokes, their length the chord's.
+   starts, so that its seconds sound together; the arpeggio's notes stay single strokes, their length the chord's, a
+   note cut where its own pitch is struck again. Note lengths in the state, not a sustain pedal, which synthesizers
+   honour unevenly.
    Only for figures of 8ths or slower, and decaying instruments, where a held note fades on its own; a choice of a
    part's (`Arpeggios`), by a genre's chance. With the held tones it is the sound asked for: an arpeggio, its notes
    let ring.
@@ -477,15 +480,19 @@ and a deploy to test. In order:
    string and wide leaps, a fretted note an octave or more above it played against it in turn, its melody on the strong
    notes and the open string between; no chugs. Djent's chugs drawn down to 40–60% of its riffs and the drone given
    20–40%; asked as `?listen=djent-open`.
-4. **Key steps by genre** (P2): where a key change goes, a genre's pool (`keySteps`), as Classical's to its dominant
-   and its relative, a power ballad's up a step for its last chorus; the songs' own as they are.
+4. **Key steps by genre** (P2, only if Classical needs it): where a key change goes, a genre's pool (`keySteps`), as
+   Classical's to its dominant. A power ballad's last chorus up a step is the plain end's already (`KeyChange`); and
+   the relative is a change of mode, not of key, which a key change keeps, so it is a section's mode or left out.
 5. **Classical** (P2): chamber music: a melody on violin, flute or clarinet, the piano's broken chords (an Alberti
    figure) under it, the cello's bass, no drums; raised cadences, ornaments, phrases of four and four, the forms AABA,
    ABA and a rondo; terraced dynamics, a section louder or quieter as a whole; 80–140 BPM in 4/4, 3/4 and 6/8; key
-   changes to the dominant and the relative (step 4). Risk: the rule that no two parts share an instrument rules out
-   music for the piano alone, left for later.
+   changes to the dominant (step 4). Unlike Orchestral, which has its ornaments, meters and hall already: a few
+   players, the piano's broken chords, no timpani, a lighter, galant sound. Risks: the rule that no two parts share an
+   instrument rules out music for the piano alone, left for later; and a bass on its chords' roots sounds like pop on
+   strings, so the bass's inversions and walks are leaned up.
 6. **Power ballad** (P2): a clean guitar's broken chords let ring with held tones (steps 1 and 2), an overdriven lead
-   for the melody, a fingered bass and string pads; 60–85 BPM in 4/4 and 12/8, natural minor and major, sus2, add9 and
+   for the melody, a fingered bass and string pads; 60–85 BPM in 4/4 and 12/8 (a
+   meter to add, `Meter`, four groups of three 8ths, or 4/4 with a triplet feel), natural minor and major, sus2, add9 and
    major seventh chords; the texture building section by section, the chorus heavy where the verse is clean (the
    quieter form, the other way round), a guitar solo, the last chorus lifted (step 4), ending by a fade or a ring-out.
 
