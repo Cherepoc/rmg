@@ -11,7 +11,9 @@ public static class AnalyticsEndpoints
 
     /// <summary>
     ///     How many visitors' worth of events one network writes in a day at most, an IPv4 address or an IPv6 /64, so that
-    ///     a client changing its user agent or its address within its network cannot spend the day's cap for everyone.
+    ///     a client changing its user agent or its address within its network cannot spend the day's cap for everyone; its
+    ///     ratings and verdicts counted apart from what its pages tell by themselves, as a visitor's are, so that an office's
+    ///     or a carrier's many listeners behind one address never lose what they tell on purpose to their pages' telemetry.
     /// </summary>
     public const int VisitorsPerNetwork = 8;
 
@@ -38,7 +40,8 @@ public static class AnalyticsEndpoints
 
             var now = DateTimeOffset.UtcNow;
             var day = EventStore.Day(now);
-            if (!networks.Admit(day, context.Connection.RemoteIpAddress, store.DailyEventsPerVisitor * VisitorsPerNetwork)) return Results.NoContent();
+            if (!networks.Admit(day, context.Connection.RemoteIpAddress, EventNames.IsDeliberate(request.Name), store.DailyEventsPerVisitor * VisitorsPerNetwork))
+                return Results.NoContent();
 
             // the address is hashed and dropped on the floor; nothing here writes it down
             var visitor = hasher.Hash(
@@ -72,14 +75,14 @@ public static class AnalyticsEndpoints
         });
     }
 
-    /// <summary>The events every network wrote in the day, forgotten the next.</summary>
-    private sealed class NetworkCount
+    /// <summary>The events every network wrote in the day, what it told on purpose and what its pages told apart, forgotten the next.</summary>
+    public sealed class NetworkCount
     {
-        private readonly Dictionary<string, int> _counts = [];
+        private readonly Dictionary<(string, bool), int> _counts = [];
         private string _day = "";
 
         /// <summary>Whether a network may write one more event today, counting it if it may.</summary>
-        public bool Admit(string day, System.Net.IPAddress? address, int most)
+        public bool Admit(string day, System.Net.IPAddress? address, bool deliberate, int most)
         {
             var network = address is null ? "" : address.IsIPv4MappedToIPv6 ? address.MapToIPv4().ToString()
                 : address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 ? Convert.ToHexString(address.GetAddressBytes()[..8]) : address.ToString();
@@ -90,10 +93,10 @@ public static class AnalyticsEndpoints
                     _day = day;
                     _counts.Clear();
                 }
-                var count = _counts.GetValueOrDefault(network);
+                var count = _counts.GetValueOrDefault((network, deliberate));
                 if (count >= most)
                     return false;
-                _counts[network] = count + 1;
+                _counts[(network, deliberate)] = count + 1;
                 return true;
             }
         }

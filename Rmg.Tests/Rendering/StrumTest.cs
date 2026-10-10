@@ -21,7 +21,7 @@ public sealed class StrumTest
                 continue;
             var rendered = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument && !x.IsDouble && x.Role == part.Role).SelectMany(x => x.NoteTimeline).ToArray();
             int Program(RealizedNote note) => InstrumentsOverTime.ProgramOf(note.State, part.InstrumentCode);
-            // the strumming grid, the shortest step between the part's chords, an 8th at the finest
+            // the strumming grid, the shortest step between the part's chords, a 16th at the finest
             var chords = notes.Where(x => x.Value.Pitches.Length > 1).Select(x => x.Position).ToArray();
             var grid = Math.Max(0.25, chords.Zip(chords.Skip(1), (a, b) => b - a).Where(x => x > 1e-6).DefaultIfEmpty(0.5).Min());
             (double Position, double Strum)? previous = null;

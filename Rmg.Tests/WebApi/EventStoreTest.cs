@@ -289,6 +289,81 @@ public sealed class EventStoreTest : IDisposable
         }
     }
 
+    /// <summary>The file gives back to the disk what a prune throws away, a day at a time, and the journal is cut.</summary>
+    [Test]
+    public async Task TheFile_Shrinks_AsItsOldDaysAreThrownAway()
+    {
+        var old = Now.AddDays(-_store.RetentionDays - 1);
+        for (var i = 0; i < 4000; i++)
+            _store.Write(new StoredEvent(old, EventStore.Day(old), $"visitor {i}", EventNames.PageOpen, null, null, null, null, new string('x', 40), null, null, null));
+        var file = Path.Combine(_directory, EventStore.FileName);
+        long Pages(string pragma)
+        {
+            using var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={file}");
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = $"PRAGMA {pragma}";
+            return Convert.ToInt64(command.ExecuteScalar());
+        }
+
+        var before = Pages("page_count");
+        await Assert.That(_store.Prune(Now)).IsEqualTo(4000);
+        await Assert.That(Pages("freelist_count")).IsEqualTo(0);
+        await Assert.That(Pages("page_count")).IsLessThan(before / 4);
+        await Assert.That(new FileInfo(file + "-wal") is { Exists: false } or { Length: 0 }).IsTrue();
+    }
+
+    /// <summary>A file from before it frees its pages is rewritten to as the server starts.</summary>
+    [Test]
+    public async Task AFileFromBefore_IsMadeToShrinkToo()
+    {
+        var directory = Path.Combine(_directory, "before vacuum");
+        Directory.CreateDirectory(directory);
+        var file = Path.Combine(directory, EventStore.FileName);
+        using (var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={file}"))
+        {
+            connection.Open();
+            using var making = connection.CreateCommand();
+            making.CommandText = "PRAGMA journal_mode = WAL; CREATE TABLE kept (x INTEGER)";
+            making.ExecuteNonQuery();
+        }
+
+        EventStore.Create(directory);
+        // a connection of its own, as a pooled one opened before the rewrite reads the file's old header
+        using (var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={file};Pooling=False"))
+        {
+            connection.Open();
+            using var reading = connection.CreateCommand();
+            reading.CommandText = "PRAGMA auto_vacuum";
+            await Assert.That(Convert.ToInt64(reading.ExecuteScalar())).IsEqualTo(2);
+        }
+    }
+
+    /// <summary>A network's ratings and verdicts are counted apart from its pages' telemetry, so a busy office still rates.</summary>
+    [Test]
+    public async Task ANetworksRatings_AreCountedApartFromItsTelemetry()
+    {
+        var count = new AnalyticsEndpoints.NetworkCount();
+        var address = System.Net.IPAddress.Parse("192.0.2.1");
+        for (var i = 0; i < 3; i++)
+            await Assert.That(count.Admit("day", address, false, 3)).IsTrue();
+        await Assert.That(count.Admit("day", address, false, 3)).IsFalse();
+        await Assert.That(count.Admit("day", address, true, 3)).IsTrue();
+        await Assert.That(count.Admit("next day", address, false, 3)).IsTrue();
+    }
+
+    /// <summary>How long an event takes to write, measured, which a queue's writer would save a request.</summary>
+    [Test, Explicit]
+    public async Task Report_AnEventsWrite()
+    {
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        const int events = 2000;
+        for (var i = 0; i < events; i++)
+            Write(EventNames.Played, $"visitor {i % 50}");
+        Console.WriteLine($"an event written in {watch.Elapsed.TotalMilliseconds / events:F3} ms");
+        await Task.CompletedTask;
+    }
+
     /// <summary>Every event the page's scripts send, read from them, is a name the server knows, and every name the server knows one they send.</summary>
     [Test]
     public async Task EveryEventTheClientSendsIsAKnownName()

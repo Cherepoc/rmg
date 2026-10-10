@@ -15,6 +15,14 @@ public static class AdminArea
 
     public const string User = "admin";
 
+    /// <summary>
+    ///     How long a wrong password is answered after, one at a time for everyone, so that guessing it goes a guess a
+    ///     second however many are asked at once, should the area face the internet without a proxy's own limit.
+    /// </summary>
+    public static readonly TimeSpan WrongPasswordPause = TimeSpan.FromSeconds(1);
+
+    private static readonly SemaphoreSlim Guessing = new(1, 1);
+
     /// <param name="password">The password, or null to serve nothing under <see cref="Path" />.</param>
     public static void UseAdmin(this WebApplication app, string? password)
     {
@@ -36,6 +44,20 @@ public static class AdminArea
 
             if (!IsAllowed(context, password))
             {
+                // a browser's first request, which offers none, answered at once
+                if (context.Request.Headers.Authorization.Count > 0)
+                {
+                    await Guessing.WaitAsync(context.RequestAborted);
+                    try
+                    {
+                        await Task.Delay(WrongPasswordPause, context.RequestAborted);
+                    }
+                    finally
+                    {
+                        Guessing.Release();
+                    }
+                }
+
                 context.Response.Headers.WWWAuthenticate = "Basic realm=\"RMG admin\", charset=\"UTF-8\"";
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return;

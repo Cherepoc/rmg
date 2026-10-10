@@ -21,6 +21,19 @@ public sealed class AdminTest(Site site)
         request.Headers.Authorization = new("Basic", Convert.ToBase64String("admin:wrong"u8.ToArray()));
         await Assert.That((int)(await client.SendAsync(request)).StatusCode).IsEqualTo(401);
 
+        // two wrong guesses at once answered one after the other, a pause each
+        var guessing = System.Diagnostics.Stopwatch.StartNew();
+        var guesses = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ =>
+        {
+            var guess = new HttpRequestMessage(HttpMethod.Get, path);
+            guess.Headers.Authorization = new("Basic", Convert.ToBase64String("admin:guess"u8.ToArray()));
+            return client.SendAsync(guess);
+        }));
+        foreach (var guess in guesses)
+            await Assert.That((int)guess.StatusCode).IsEqualTo(401);
+        // the server's pause a second (AdminArea.WrongPasswordPause)
+        await Assert.That(guessing.Elapsed).IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(1.95));
+
         request = new HttpRequestMessage(HttpMethod.Get, path);
         request.Headers.Authorization = new("Basic", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"admin:{Site.Token}")));
         await Assert.That((int)(await client.SendAsync(request)).StatusCode).IsEqualTo(200);

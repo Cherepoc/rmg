@@ -73,6 +73,9 @@ public sealed class EventStore
         return store;
     }
 
+    /// <summary>SQLite's value of <c>auto_vacuum</c> for a file that frees its pages when asked to (<c>incremental_vacuum</c>).</summary>
+    private const long IncrementalVacuum = 2;
+
     private SqliteConnection Open()
     {
         var connection = new SqliteConnection(_connectionString);
@@ -101,6 +104,18 @@ public sealed class EventStore
 
         // the columns are the measurements the events are allowed to carry, rather than a bag of JSON:
         // the shapes are known in advance, so they may as well be queryable without parsing anything
+        // a file whose pages freed by a prune are given back to the disk a little at a time (Prune), rather than by a whole
+        // VACUUM under the lock; a file from before it rewritten once, here, as the server starts and before it serves
+        using (var vacuuming = connection.CreateCommand())
+        {
+            vacuuming.CommandText = "PRAGMA auto_vacuum";
+            if (Convert.ToInt64(vacuuming.ExecuteScalar()) != IncrementalVacuum)
+            {
+                vacuuming.CommandText = "PRAGMA auto_vacuum = INCREMENTAL; VACUUM";
+                vacuuming.ExecuteNonQuery();
+            }
+        }
+
         command.CommandText = """
             PRAGMA journal_mode = WAL;
 
@@ -188,7 +203,7 @@ public sealed class EventStore
             counting.CommandText = $"SELECT COUNT(*) FROM events WHERE visitor = $visitor AND day = $day AND (name IN ('{EventNames.Rated}', '{EventNames.Verdict}')) = $deliberate";
             counting.Parameters.AddWithValue("$visitor", stored.Visitor);
             counting.Parameters.AddWithValue("$day", stored.Day);
-            counting.Parameters.AddWithValue("$deliberate", stored.Name is EventNames.Rated or EventNames.Verdict ? 1 : 0);
+            counting.Parameters.AddWithValue("$deliberate", EventNames.IsDeliberate(stored.Name) ? 1 : 0);
 
             if (Convert.ToInt64(counting.ExecuteScalar()) >= DailyEventsPerVisitor) return false;
 
@@ -279,9 +294,9 @@ public sealed class EventStore
     }
 
     /// <summary>
-    ///     Throws away everything older than <see cref="RetentionDays" />, and says how much went: the pages it frees taken
-    ///     by the next days' rows, so that the file stays about the size of what it keeps, with no shrinking of it under
-    ///     the lock.
+    ///     Throws away everything older than <see cref="RetentionDays" />, and says how much went: the pages it frees given
+    ///     back to the disk and the journal emptied into the file and cut, so that the file stays the size of what it keeps,
+    ///     a day's pages moved at a time rather than the whole file rewritten under the lock.
     /// </summary>
     public int Prune(DateTimeOffset now)
     {
@@ -298,6 +313,13 @@ public sealed class EventStore
         command.CommandText = "DELETE FROM events WHERE day < $oldest; DELETE FROM songs WHERE day < $oldest";
         command.Parameters.AddWithValue("$oldest", Day(now.AddDays(-RetentionDays)));
         var pruned = command.ExecuteNonQuery();
+        if (pruned > 0)
+        {
+            using var shrinking = connection.CreateCommand();
+            shrinking.CommandText = "PRAGMA incremental_vacuum; PRAGMA wal_checkpoint(TRUNCATE)";
+            shrinking.ExecuteNonQuery();
+        }
+
         _prunedDay = Day(now);
         return pruned;
     }

@@ -471,10 +471,6 @@ Each item with its plan, and what it waits for.
 
 What it left, all in `reviews/2026-10-10.md`'s *Open*:
 
-- **Two fix loops** with the review of 9 October. The analytics file's size, a `VACUUM` added and removed again:
-  shrink it with `auto_vacuum = INCREMENTAL`, an `incremental_vacuum` after each prune and a `wal_checkpoint(TRUNCATE)`.
-  The per-network cap, keyed on the address after 9 October warned against it: count ratings and verdicts apart from
-  it, so that a shared NAT keeps them.
 - **44 findings moved between packages and never worked**: tests of the drums, the sound and the form, stale docs,
   the fine-tune grid's layout and the editor's drum setups; and 23 left open by their packages.
 - A test that lists the calibrations measuring fewer than 64 songs, which both reviews found.
@@ -753,10 +749,6 @@ dynamics, as it has no drums.
 - **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
-- **Analytics written off the request** (P4, from the review of 9 October 2026): every tally and song measurement opens
-  SQLite and writes under one lock on a pool thread, so a burst of tallies holds threads that songs wait for; a queue
-  one writer drains, in batches, would answer at once. And the admin password tried without a limit: a pause after a
-  few wrong ones, should the area ever face the open internet without the proxy's.
 - **Tests that check less than their names** (P4, from the review of 9 October 2026): the louder and quieter forms
   per appearance, both ways; a breakdown's riff chugging and its kick on its onsets; a solo's approach off the beat
   into its change; each passing kind's shape (the tritone substitute's dominant, the half-diminished's whole step);
@@ -876,6 +868,9 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 
 ## Decided, and kept
 
+- **Analytics written off the request** (decided 11 October 2026): an event is written in 0.042 ms
+  (`EventStoreTest.Report_AnEventsWrite`), so a burst of ten thousand holds the lock under half a second; a queue's
+  writer would answer no sooner that anyone could tell. The admin password's pause is built (`AdminArea.WrongPasswordPause`).
 - **A heavy band's time and backbeat** (decided 11 October 2026): every section keeps time and a kit's bars sound both
   98.5% of the corpus's, Black metal's 98.8% (`KitRolesTest`); the snare under driven guitars is 8 to 11 dB down in a
   render's mids, the sound set's, not the MIDI's, so nothing in the song changes for it.

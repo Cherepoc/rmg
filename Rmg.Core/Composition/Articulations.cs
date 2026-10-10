@@ -26,7 +26,8 @@ internal static class Articulations
     ///     The notes' articulations: in a section that chugs, a guitar's or a picked bass's note that repeats the one before
     ///     on a weak beat palm-muted, its accents and its moves ringing, as a chug riff mutes its eighths on the root and
     ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments. And every chord a guitar
-    ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums, and a piano's held
+    ///     plays strummed, down and up in turn on the steps of its part's chords, a 16th at the finest, as quickly as the
+    ///     song strums, and a piano's held
     ///     chord rolled upward where its part rolls, and the chords struck short where they stab; and a bass in
     ///     octaves, its notes off the beat the note before an octave away, or alternating its chord's root and fifth.
     /// </summary>
@@ -63,7 +64,7 @@ internal static class Articulations
             // to, and the pitches each was played at
             var octaved = new bool[timeline.Count];
             var played = new ImmutableArray<int>[timeline.Count];
-            // the strumming grid, the shortest step between the part's chords, an 8th at the finest, a strum down on its
+            // the strumming grid, the shortest step between the part's chords, a 16th at the finest, a strum down on its
             // even steps and up on its odd
             var strummed = timeline.Where(x => x.Value.Pitches.Length > 1).Select(x => x.Position).ToArray();
             var grid = Math.Max(0.25, strummed.Zip(strummed.Skip(1), (a, b) => b - a).Where(x => x > 1e-6).DefaultIfEmpty(0.5).Min());

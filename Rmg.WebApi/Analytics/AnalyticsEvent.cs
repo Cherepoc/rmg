@@ -47,6 +47,9 @@ public static class EventNames
     {
         return name is not null && All.Contains(name);
     }
+
+    /// <summary>Whether a visitor tells it on purpose, a rating or a verdict, rather than its page by itself; the caps count the two apart.</summary>
+    public static bool IsDeliberate(string? name) => name is Rated or Verdict;
 }
 
 /// <param name="Name">One of <see cref="EventNames" />. Anything else is refused.</param>

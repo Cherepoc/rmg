@@ -26,11 +26,15 @@ public sealed class SongRequest(JsonElement body)
     /// <summary>The status it was answered with, "aborted" for one let go of, null while on its way.</summary>
     public string? Ended { get; private set; }
 
-    public void End(string ended, long at)
+    /// <summary>The song's settings as the server answered them (<c>X-Song-Settings</c>), its length in seconds among them; null for none.</summary>
+    public JsonElement? Answered { get; private set; }
+
+    public void End(string ended, long at, string? answered = null)
     {
         if (Ended is not null) return;
         Ended = ended;
         EndedAt = at;
+        Answered = answered is null ? null : JsonDocument.Parse(answered).RootElement.Clone();
     }
 
     public override string ToString() => $"{Seed ?? "random"}: {Ended ?? "on its way"}";
@@ -143,7 +147,7 @@ public sealed class SongPage : IAsyncDisposable
             try
             {
                 var response = await request.ResponseAsync();
-                songPage.End(request, response is null ? "aborted" : response.Status.ToString(), at);
+                songPage.End(request, response is null ? "aborted" : response.Status.ToString(), at, response?.Headers.GetValueOrDefault("x-song-settings"));
             }
             catch (PlaywrightException) when (page.IsClosed)
             {
@@ -190,11 +194,11 @@ public sealed class SongPage : IAsyncDisposable
         }
     }
 
-    private void End(IRequest request, string ended, long at)
+    private void End(IRequest request, string ended, long at, string? answered = null)
     {
         lock (_requests)
             if (_byRequest.TryGetValue(request, out var asked))
-                asked.End(ended, at);
+                asked.End(ended, at, answered);
     }
 
     /// <summary>Waits until the condition holds, and fails saying what was asked for if it does not in time.</summary>
