@@ -287,11 +287,12 @@ function listen(player) {
         // one on its way keeps the controls playing across the gap, or a locked phone may let go of them
         if (!advance()) mediaControls.paused(elements.seed.value, player.duration, player.duration);
     });
-    // a drum struck lifts its group's pulse, as loud as it is struck and its group plays, which one channel's level cannot tell apart
+    // a drum struck lifts its group's pulse, as loud as it is struck, its group's volume in the file's velocity already,
+    // which one channel's level cannot tell apart
     player.onNoteOn((channel, note, velocity) => {
         const group = drumGroupOfNote.get(note);
         if (channel !== channels.drum || group === undefined || isGroupSilenced(group)) return;
-        const hit = (velocity / 127) * fromStep(settings.drumGroups[group].volume);
+        const hit = velocity / 127;
         drumHits.set(group, Math.max(drumHits.get(group) ?? 0, hit));
     });
     player.masterGain = Number(elements.volume.value);
@@ -1162,6 +1163,11 @@ function keepCurrentSettings() {
     // a preset by its id, so that the next visit hears it as it is then, another genre whole
     const preset = presetOf(settings.genre);
     keepGenre(!hasAGenre(settings.genre) ? null : preset !== null ? { preset: preset.id } : settings.genre);
+    showGiven();
+}
+
+/** How many of the settings change the song, as the panel's heading says. */
+function showGiven() {
     const given = givenCount(settings)
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
         + (settings.drumPieces.isGiven ? 1 : 0);
@@ -1961,7 +1967,8 @@ function listedGenres() {
     const byItsName = (first, second) => byName(first.genre, second.genre);
     return [
         ...PRESETS.map((preset) => ({ value: `preset:${preset.id}`, genre: asGenre(preset), group: "Presets", description: preset.description })).sort(byItsName),
-        ...recallGenres().map((genre, i) => ({ value: `own:${i}`, genre: asGenre(genre), group: "Yours", description: genre.description ?? "" })).sort(byItsName),
+        // one's own by its name, which no two share, so that another tab's list changing between leaves it its own
+        ...recallGenres().map((genre) => ({ value: `own:${genre.name}`, genre: asGenre(genre), group: "Yours", description: genre.description ?? "" })).sort(byItsName),
     ];
 }
 
@@ -1994,9 +2001,15 @@ function showGenre() {
 /** Asks for the song again in the genre chosen, or in none. */
 function chooseGenre(value) {
     if (value === "song") return;
+    // a genre of one's own another tab took away since the list was shown: the list shown again as it is
+    const listed = listedGenres().find((x) => x.value === value);
+    if (!["any", "none"].includes(value) && listed === undefined) {
+        showGenre();
+        return;
+    }
     isAnyGenre = value === "any";
     keepAnyGenre(isAnyGenre);
-    settings.genre = isAnyGenre ? drawAnyGenre() : value === "none" ? noGenre() : asGenre(listedGenres().find((x) => x.value === value).genre);
+    settings.genre = isAnyGenre ? drawAnyGenre() : value === "none" ? noGenre() : asGenre(listed.genre);
     track("genre_chosen", { detail: value.startsWith("preset:") ? value.slice("preset:".length) : value.startsWith("own:") ? "own" : value });
     showGenre();
     settingsChanged(true);
@@ -2398,7 +2411,14 @@ document.addEventListener("pointerdown", (event) => {
     const isDouble = lastTap !== null && lastTap.slider === slider && tap.time - lastTap.time < DOUBLE_TAP_MS
         && Math.hypot(tap.x - lastTap.x, tap.y - lastTap.y) < DOUBLE_TAP_REACH;
     lastTap = isDouble || !isResettable(slider) ? null : tap;
-    if (isDouble && isResettable(slider)) slider.addEventListener("pointerup", () => resetSlider(slider), { once: true });
+    if (!isDouble || !isResettable(slider)) return;
+    // reset where the press lets go, not where it turns into a scroll, either ending the wait for the other
+    const ended = new AbortController();
+    slider.addEventListener("pointerup", () => {
+        ended.abort();
+        resetSlider(slider);
+    }, { signal: ended.signal });
+    slider.addEventListener("pointercancel", () => ended.abort(), { signal: ended.signal });
 });
 
 /** Puts the settings, and what the song on the page drew and is made of, on the panel. */
@@ -2451,17 +2471,32 @@ function showSettings() {
  *     again, for a change of what it is made of, or its file fetched again with the mix, for one only heard.
  */
 function settingsChanged(isRemade) {
-    keepCurrentSettings();
-    // the address once a slider rests, as a browser takes only so many rewrites of it in a while
+    showGiven();
+    // kept, and the address, once a slider rests, as a browser takes only so many rewrites of it in a while, and a drag
+    // need not write them at every step
     clearTimeout(rememberTimer);
-    rememberTimer = setTimeout(() => rememberSong(), REMEMBER_WAIT);
+    rememberTimer = setTimeout(rest, REMEMBER_WAIT);
     if (isRemade) scheduleRegeneration();
     else scheduleDownloadRefresh();
 }
 
-// how long the settings rest, in milliseconds, before the address takes them, and the wait under way
+// how long the settings rest, in milliseconds, before they are kept and the address takes them, and the wait under way
 const REMEMBER_WAIT = 250;
 let rememberTimer = 0;
+
+/** The settings kept and the address on them, once they rest. */
+function rest() {
+    rememberTimer = 0;
+    keepCurrentSettings();
+    rememberSong();
+}
+
+// and at once where the page is left before they rest
+window.addEventListener("pagehide", () => {
+    if (rememberTimer === 0) return;
+    clearTimeout(rememberTimer);
+    rest();
+});
 
 /** A part's instrument set, a change of it told where somebody made one, not where giving the part set it. */
 function setPartInstrument(part, instrument, isChange) {
@@ -2773,8 +2808,12 @@ function askQuestion(questions, asked) {
             startAt = from;
             const arrived = generate(seed, { isRolled: false, asked: { ...defaultSettings(), volume: settings.volume, genre: { name: genre.name, choices } } });
             skipped = [];
-            // and played at once, from where to listen, the button pressed the gesture the player waits for
-            arrived.then((isThere) => isThere && playOrPause(true));
+            // and played at once, from where to listen, the button pressed the gesture the player waits for; a song that
+            // never arrives leaves no place to start the next one from
+            arrived.then((isThere) => {
+                if (isThere) playOrPause(true);
+                else if (startAt === from) startAt = null;
+            });
         },
         // the version of the song heard, or, of one not heard yet, the server's, which makes it
         verdict: (seed, choice) => tell("verdict", { seed, version: songSeed === seed && songVersion !== null ? songVersion : serverVersion, detail: `${question.id}:${choice}` }),

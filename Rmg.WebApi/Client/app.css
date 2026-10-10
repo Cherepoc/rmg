@@ -647,12 +647,12 @@ input[type="range"] {
     transform: translate(-50%, -50%);
 }
 
-.volume {
+/* a volume's label, the playback's and the song's, not the mixer's column of the same name, whose faders are its own */
+.field.volume {
     flex-shrink: 0;
 }
 
-
-.volume input {
+.field.volume input {
     width: 90px;
 }
 

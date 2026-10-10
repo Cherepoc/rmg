@@ -8,7 +8,8 @@ public sealed record Spread(double? Median, double? Upper, double? Worst, int Co
 
 /// <param name="Name">What happened, and how far down the page it is.</param>
 /// <param name="Visitors">How many visitors got that far.</param>
-public sealed record FunnelStep(string Name, int Visitors);
+/// <param name="Key">The step by a name that stays, for the dashboard to find it by, whatever its label says.</param>
+public sealed record FunnelStep(string Key, string Name, int Visitors);
 
 /// <param name="Day">The day, as yyyy-MM-dd.</param>
 public sealed record DayCount(string Day, int Visitors, int Songs, int Plays);

@@ -40,6 +40,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     let unchecked = new Map();
     // what the songs draw of every choice, as the server last said (/api/genres/previews)
     let previews = null;
+    // how many tab panels are named so far, each by its number
+    let tabPanels = 0;
     let waiting = null;
     // the draft as it was opened, played or saved last, which closing the editor loses nothing of
     let kept = "";
@@ -182,6 +184,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
             if (choice === null) return;
             chart.replaceChildren();
             ends.replaceChildren();
+            // named by its choice before its graph comes, or where none does, and by its ends once it has them
+            graph.setAttribute("aria-label", `${input.checked ? "Change" : "Override"} ${choice.label}`);
             const preview = previews?.choices?.[choice.name];
             if (!preview) return;
             if (choice.kind === "pool") {
@@ -253,10 +257,18 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         strip.setAttribute("role", "tablist");
         strip.setAttribute("aria-label", label);
         let current = 0;
+        const panels = [...new Set(items.map((x) => x.panel))];
+        for (const panel of panels) {
+            panel.element.classList.add("tab-panel");
+            panel.element.setAttribute("role", "tabpanel");
+            panel.element.id ||= `genre-panel-${++tabPanels}`;
+        }
         const buttons = items.map((item, i) => {
             const tab = document.createElement("button");
             tab.type = "button";
             tab.setAttribute("role", "tab");
+            tab.id = `${item.panel.element.id}-tab-${i}`;
+            tab.setAttribute("aria-controls", item.panel.element.id);
             tab.textContent = item.label;
             tab.addEventListener("click", () => {
                 current = i;
@@ -264,9 +276,18 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
             });
             return tab;
         });
+        // the arrows, Home and End move among the tabs shown, as a tab strip's keys do, the tab taking its panel
+        strip.addEventListener("keydown", (event) => {
+            const shown = buttons.map((_, i) => i).filter((i) => !buttons[i].hidden);
+            const at = shown.indexOf(current);
+            const to = { ArrowRight: shown[(at + 1) % shown.length], ArrowLeft: shown[(at - 1 + shown.length) % shown.length], Home: shown[0], End: shown[shown.length - 1] }[event.key];
+            if (to === undefined) return;
+            event.preventDefault();
+            current = to;
+            show();
+            buttons[current].focus();
+        });
         strip.append(...buttons);
-        const panels = [...new Set(items.map((x) => x.panel))];
-        for (const panel of panels) panel.element.classList.add("tab-panel");
         element.append(strip, ...panels.map((x) => x.element));
 
         function show() {
@@ -274,9 +295,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
             if (!shown[current]) current = shown.indexOf(true);
             for (const panel of panels) panel.element.hidden = current < 0 || panel !== items[current].panel;
             if (current >= 0) items[current].panel.show(items[current].part);
+            if (current >= 0) items[current].panel.element.setAttribute("aria-labelledby", buttons[current].id);
             buttons.forEach((tab, i) => {
                 tab.hidden = !shown[i];
                 tab.setAttribute("aria-selected", String(i === current));
+                // the one chosen alone in the page's tab order, the others reached by the arrows
+                tab.tabIndex = i === current ? 0 : -1;
                 tab.classList.toggle("named", items[i].names.some((x) => x in draft.choices));
             });
         }
@@ -498,7 +522,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     function load(genre) {
         draft = { name: genre.name, description: genre.description ?? "", choices: structuredClone(genre.choices) };
         unchecked = new Map();
+        // and any previews still on their way let go of, which were of the draft before
         previews = null;
+        previewsAsked++;
         for (const { element, names } of sections) element.open = names.some((x) => x in draft.choices);
         changed();
     }

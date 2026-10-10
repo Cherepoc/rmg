@@ -94,19 +94,20 @@ public static class EventStoreSummary
     /// </summary>
     private static List<FunnelStep> Funnel(SqliteConnection connection, string since)
     {
-        (string Label, string Sql)[] steps =
+        (string Key, string Label, string Sql)[] steps =
         [
-            ("Opened the page", $"name = '{EventNames.PageOpen}'"),
-            ("Got a song", $"name = '{EventNames.SongGenerated}'"),
-            ("Got a soundfont", $"name = '{EventNames.SoundFontReady}'"),
-            ("Touched the page", $"name = '{EventNames.AudioReady}'"),
-            ("Pressed play", $"name = '{EventNames.Played}'"),
-            ("Listened past 30s", $"name = '{EventNames.Listened}' AND seconds >= 30"),
-            ("Took the song away", $"name IN ('{EventNames.DownloadedMidi}', '{EventNames.ExportedMp3}', '{EventNames.Shared}')")
+            ("opened", "Opened the page", $"name = '{EventNames.PageOpen}'"),
+            ("song", "Got a song", $"name = '{EventNames.SongGenerated}'"),
+            ("soundfont", "Got a soundfont", $"name = '{EventNames.SoundFontReady}'"),
+            ("touched", "Touched the page", $"name = '{EventNames.AudioReady}'"),
+            ("played", "Pressed play", $"name = '{EventNames.Played}'"),
+            ("listened", "Listened past 30s", $"name = '{EventNames.Listened}' AND seconds >= 30"),
+            ("taken", "Took the song away", $"name IN ('{EventNames.DownloadedMidi}', '{EventNames.ExportedMp3}', '{EventNames.Shared}')")
         ];
 
         return steps
             .Select(step => new FunnelStep(
+                step.Key,
                 step.Label,
                 Count(connection, $"SELECT COUNT(DISTINCT visitor) FROM events WHERE {step.Sql} AND day >= $since", since)))
             .ToList();

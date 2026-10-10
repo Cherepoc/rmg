@@ -92,7 +92,9 @@ async function load() {
         response = await fetch(new URL(`api/summary?days=${encodeURIComponent(elements.range.value)}`, location.href));
         read = response.ok ? await response.json() : null;
     } catch (error) {
-        if (asked === loads) setStatus(`Could not read the summary: ${error.message}`, true);
+        if (asked !== loads) return;
+        elements.controls.hidden = false;
+        setStatus(`Could not read the summary: ${error.message}`, true);
         return;
     }
     if (asked !== loads) return;
@@ -104,6 +106,8 @@ async function load() {
     }
 
     if (!response.ok) {
+        // the controls shown, so that a failed first read can be tried again
+        elements.controls.hidden = false;
         setStatus(`The server answered ${response.status}.`, true);
         return;
     }
@@ -150,7 +154,7 @@ function set(id, text) {
 // --- drawing ---------------------------------------------------------------
 
 function draw() {
-    const played = summary.funnel.find((step) => step.name === "Pressed play")?.visitors ?? 0;
+    const played = summary.funnel.find((step) => step.key === "played")?.visitors ?? 0;
 
     set("visitors", count(summary.visitors));
     set("visitors-note", `in the last ${summary.days} days`);
@@ -473,7 +477,11 @@ function table(headings, rows) {
     header.append(head);
     element.append(header, body);
 
-    return element;
+    // in a box of its own that scrolls sideways, so that a wide table on a phone moves within its panel, not the page
+    const box = document.createElement("div");
+    box.className = "grid-scroll";
+    box.append(element);
+    return box;
 }
 
 function drawSeeds() {

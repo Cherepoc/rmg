@@ -91,6 +91,28 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>The parts' tabs a tab strip as the pattern has it: its tab chosen alone in the tab order, the arrows moving to the next shown, which takes its panel.</summary>
+    [Test]
+    public async Task ThePartsTabs_MoveByTheArrows_EachNamingItsPanel()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var parts = await Section(dialog, "Parts");
+        var chosen = parts.Locator("[role=tab][aria-selected=true]");
+        var first = await chosen.TextContentAsync();
+        await Assert.That(await chosen.GetAttributeAsync("tabindex")).IsEqualTo("0");
+        var panel = await chosen.GetAttributeAsync("aria-controls");
+        await Assert.That(await page.Page.Locator($"#{panel}").GetAttributeAsync("role")).IsEqualTo("tabpanel");
+
+        await chosen.FocusAsync();
+        await page.Page.Keyboard.PressAsync("ArrowRight");
+        await page.Until(async () => await chosen.TextContentAsync() != first, "the next tab chosen");
+        await Assert.That(await page.Page.EvaluateAsync<string>("() => document.activeElement.getAttribute('aria-selected')")).IsEqualTo("true");
+        await page.Page.Keyboard.PressAsync("ArrowLeft");
+        await page.Until(async () => await chosen.TextContentAsync() == first, "back to the first");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task AMeterChanged_IsTheGenres_SavedAmongOnesOwn_AndListedOnTheNextVisit()
     {
@@ -114,7 +136,12 @@ public sealed class GenreEditorTest(Site site)
         var genre = page.Page.Locator("select[aria-label='Genre']");
         await page.Until(async () => await genre.Locator("optgroup[label='Yours'] option").CountAsync() == 1, "the genre made listed");
         await Assert.That(await genre.Locator("optgroup[label='Yours'] option").TextContentAsync()).IsEqualTo("Waltzes");
-        await Assert.That(await genre.InputValueAsync()).IsEqualTo("own:0");
+        await Assert.That(await genre.InputValueAsync()).IsEqualTo("own:Waltzes");
+
+        // taken away in another tab, then chosen in this one's list as it was: the list shown again, no error
+        await page.Page.EvaluateAsync("() => localStorage.removeItem('rmg.genres')");
+        await genre.EvaluateAsync("select => { select.value = 'own:Waltzes'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(async () => await genre.Locator("optgroup[label='Yours'] option").CountAsync() == 0, "the list shown as it is");
         await Assert.That(page.Errors).IsEmpty();
     }
 

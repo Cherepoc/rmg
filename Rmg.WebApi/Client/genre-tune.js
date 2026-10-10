@@ -150,7 +150,7 @@ export function createGenreTune() {
 
     // the charts drawn again to the window's width as it changes
     new ResizeObserver(() => {
-        if (dialog.open && choice) renderCharts();
+        if (dialog.open && choice) redraw();
     }).observe(plot);
 
     const optionOf = (name) => choice.options.find((x) => x.name === name);
@@ -232,7 +232,7 @@ export function createGenreTune() {
             if (asked !== previewsAsked) return;
             preview = answered;
             // the charts alone, so that what is pressed or focused meanwhile stays where it is
-            renderCharts();
+            redraw();
         } catch {
             // without the server's lines, the handles' straight ones stand
         }
@@ -390,6 +390,15 @@ export function createGenreTune() {
     }
 
     /** The chart of the amounts, its handles, a pool's chances and the legend, the handle focused kept so. */
+    // whether the charts are to be drawn again once a drag ends, which a redraw would cut short by taking its handle away
+    let isRedrawWaiting = false;
+
+    /** The charts drawn again, or once the drag under way ends. */
+    function redraw() {
+        isRedrawWaiting = dragging !== null;
+        if (!isRedrawWaiting) renderCharts();
+    }
+
     function renderCharts() {
         if (selected === null) return;
         const width = plot.clientWidth;
@@ -533,13 +542,15 @@ export function createGenreTune() {
             if (dragging !== end || selected !== name) return;
             setEnd(end, valueAt(name, end, event.clientY - chart.getBoundingClientRect().top - MARGIN));
         });
-        element.addEventListener("pointerup", () => {
+        // a drag let go of, or broken off by the browser, as a touch turned scroll, kept as far as it went, and the charts
+        // drawn again if anything asked to meanwhile
+        const letGo = () => {
+            if (dragging !== end) return;
             dragging = null;
             if (JSON.stringify(amounts[name]) !== before) edited();
-        });
-        // a drag the browser broke off, as a touch turned scroll, let go of
-        for (const type of ["pointercancel", "lostpointercapture"])
-            element.addEventListener(type, () => (dragging = null));
+            if (isRedrawWaiting) redraw();
+        };
+        for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) element.addEventListener(type, letGo);
         return element;
     }
 
