@@ -86,10 +86,14 @@ export function keepSettings(settings) {
     }
 }
 
-/** The genre the next songs are asked for in, a name and what it says of the choices; null for none. */
+/**
+ *     The genre the next songs are asked for in: a preset by its id ({ preset }), so that a preset tuned since is heard as
+ *     it is now, or a name and what it says of the choices; null for none.
+ */
 export function recallGenre() {
     try {
         const kept = JSON.parse(localStorage.getItem(GENRE) ?? "null");
+        if (typeof kept?.preset === "string") return { preset: kept.preset };
         return typeof kept?.name === "string" && typeof kept?.choices === "object" && kept.choices !== null ? kept : null;
     } catch {
         return null;
@@ -137,7 +141,7 @@ export function keepAnyGenre(any) {
     }
 }
 
-/** Keeps the genre the next songs are asked for in, none for no genre. */
+/** Keeps the genre the next songs are asked for in, a preset by its id ({ preset }), none for no genre. */
 export function keepGenre(genre) {
     try {
         if (genre === null) localStorage.removeItem(GENRE);

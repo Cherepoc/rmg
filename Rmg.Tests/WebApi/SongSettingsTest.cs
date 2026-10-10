@@ -157,6 +157,16 @@ public sealed class SongSettingsTest
 
         await Assert.That(request.DrumPieces!.Count).IsEqualTo(Mixed.DrumPieces.Pieces.Count(x => x));
         await Assert.That(request.Length).IsEqualTo(20);
+        // the values passed by their places, each its own
+        int? Given(Setting setting) => setting.IsGiven ? setting.Value : null;
+        await Assert.That(request.Tempo).IsEqualTo(Given(Mixed.Tempo));
+        await Assert.That(request.Key).IsEqualTo(Given(Mixed.Key));
+        await Assert.That(request.Meter).IsEqualTo(Given(Mixed.Meter));
+        await Assert.That(request.Mode).IsEqualTo(Given(Mixed.Mode));
+        await Assert.That(request.Swing).IsEqualTo(Given(Mixed.Swing));
+        await Assert.That(request.Volume).IsEqualTo(Mixed.Volume);
+        foreach (var (name, group) in Rmg.Core.Rendering.SongMix.DrumGroupNames.Zip(Mixed.DrumGroups))
+            await Assert.That(request.DrumGroups![name].Volume).IsEqualTo(group.Volume);
         await Assert.That(request.Genre).IsNull();
         // and read as any request is
         await Assert.That(request.TryRead(out _, out _, out _, out var error)).IsTrue().Because(error ?? "");

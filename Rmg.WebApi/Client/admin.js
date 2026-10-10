@@ -3,6 +3,8 @@
  *     agent to name the song by.
  */
 
+import { parseSettings, readLinkedSeed } from "./settings.js";
+
 const elements = {
     link: document.getElementById("song-link"),
     describe: document.getElementById("describe"),
@@ -16,12 +18,16 @@ function setStatus(message, isError = false) {
     elements.status.classList.toggle("error", isError);
 }
 
-/** The song a link asks for, its seed, its settings and its genre, or a seed given by itself. */
+/**
+ *     The song a link asks for, its seed, its settings and its genre, or a seed given by itself, as the page reads them: an
+ *     old link's seed in its old digits, and its settings, which the page no longer reads, left out.
+ */
 function songOf(text) {
     const trimmed = text.trim();
     try {
         const parameters = new URL(trimmed).searchParams;
-        return { song: parameters.get("song"), settings: parameters.get("settings"), genre: parameters.get("genre") };
+        const [song, settings] = [parameters.get("song"), parameters.get("settings")];
+        return { song: song === null ? null : readLinkedSeed(song, settings) ?? song, settings: parseSettings(settings) === null ? null : settings, genre: parameters.get("genre") };
     } catch {
         return { song: trimmed, settings: null, genre: null };
     }
@@ -46,7 +52,7 @@ async function describe() {
         const response = await fetch(new URL(`api/songs/describe?${query}`, location.href));
         if (!response.ok) {
             const body = await response.json().catch(() => null);
-            setStatus(body?.error ?? body?.title ?? `The server answered ${response.status}.`, true);
+            setStatus(body?.detail ?? body?.error ?? body?.title ?? `The server answered ${response.status}.`, true);
             return;
         }
 

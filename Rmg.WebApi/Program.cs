@@ -97,6 +97,16 @@ if (soundFonts.IsPreferredMissing())
 // the operator's pages and what they ask for, before anything is served from them
 if (settings.DashboardToken is null)
     app.Logger.LogInformation("No DashboardToken, so the admin area is not served at all");
+// every response: its type as said, the page framed by none but itself, and a link out telling no more than the site
+app.Use((context, next) =>
+{
+    var headers = context.Response.Headers;
+    headers.XContentTypeOptions = "nosniff";
+    headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    headers.ContentSecurityPolicy = "frame-ancestors 'self'";
+    return next(context);
+});
+
 app.UseAdmin(settings.DashboardToken);
 
 app.UseDefaultFiles();

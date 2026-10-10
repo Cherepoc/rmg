@@ -80,8 +80,6 @@ public static class SongEndpoints
         }
 
         var songSeed = seed ?? Seeds.Random();
-        // the genre kept, so that a link to the song carries it by its key, once the song has its turn
-        var genreKey = request.Genre is { } genre ? genres.Keep(Genres.GenreStore.Canonical(request.GenreName?.Trim() ?? "", genre)) : null;
 
         IResult result;
         SongOutcome ended;
@@ -105,7 +103,7 @@ public static class SongEndpoints
                 unconventionality = report.Unconventionality.Value;
 
                 ended = SongOutcome.Made;
-                result = Respond(context, songSeed, report, stream, genreKey);
+                result = Respond(context, songSeed, report, stream);
             }
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
             {
@@ -121,22 +119,32 @@ public static class SongEndpoints
             }
         }
 
+        // the genre kept once the song is made and its core given back, so that a link to the song carries it by its key;
+        // a store that fails leaves the song as it is, linked without it
+        if (ended == SongOutcome.Made && request.Genre is { } genre)
+            try
+            {
+                if (genres.Keep(Genres.GenreStore.Canonical(request.GenreName?.Trim() ?? "", genre)) is { } genreKey)
+                    context.Response.Headers["X-Genre-Key"] = genreKey;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Song {Seed}'s genre could not be kept", Base62.FromSeed(songSeed));
+            }
+
         Record(ended);
         return result;
     }
 
     private static long Milliseconds(long since) => (long)Stopwatch.GetElapsedTime(since).TotalMilliseconds;
 
-    /// <param name="genreKey">The key the song's genre is kept by, which a link to it carries; none for no genre.</param>
-    private static IResult Respond(HttpContext context, ulong songSeed, SongReport report, MemoryStream stream, string? genreKey)
+    private static IResult Respond(HttpContext context, ulong songSeed, SongReport report, MemoryStream stream)
     {
         // lets the page show and reuse the seed it actually got when it asked for a random one
         context.Response.Headers["X-Song-Seed"] = Base62.FromSeed(songSeed);
 
         // and which songs' version it is, which the page reports with what it tells of the song
         context.Response.Headers["X-Song-Version"] = SongsVersion.Number;
-        if (genreKey is not null)
-            context.Response.Headers["X-Genre-Key"] = genreKey;
 
         // and everything the song drew or was given, and which channel plays which part, for the page to show and
         // set before a note of it is heard

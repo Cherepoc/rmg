@@ -70,6 +70,29 @@ public sealed class GenreTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A preset chosen is kept by its id, so that the next visit asks in it as the page has it then, retuned or not.</summary>
+    [Test]
+    public async Task APresetChosen_IsKeptByItsId_AndTheNextVisitAsksInItAsItIsNow()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        await page.FirstSong();
+        await page.Settled();
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        await page.Until(async () => await genre.IsEnabledAsync() && await genre.Locator("option").CountAsync() > 10, "the genres listed");
+        await genre.EvaluateAsync("select => { select.value = 'preset:jazz'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(() => page.Page.EvaluateAsync<bool>("() => localStorage.getItem('rmg.genre') === JSON.stringify({ preset: 'jazz' })"), "the preset kept by its id");
+        await page.Settled();
+
+        // the next visit, with no link, which would name its own genre
+        var count = page.Requests.Count;
+        await page.Page.GotoAsync("/");
+        await page.Until(() => page.Requests.Count > count && page.Requests[^1].Body.TryGetProperty("genre", out _), "the next visit's song asked for in the genre kept");
+        var asked = page.Requests[^1].Body;
+        await Assert.That(asked.GetProperty("genre").GetProperty("kit").GetProperty("jazz").GetInt32()).IsEqualTo(100);
+        await Assert.That(asked.GetProperty("genreName").GetString()).IsEqualTo("Jazz");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task ASongsLink_CarriesItsGenresKey_AndOpensInIt_WhereTheBrowserNeverHadIt()
     {

@@ -105,8 +105,10 @@ public sealed record GenerateSongRequest(
         var facets = ImmutableDictionary.CreateBuilder<Facet, double>();
         foreach (var (name, step) in Facets ?? ImmutableDictionary<string, int>.Empty)
         {
-            if (!Enum.TryParse<Facet>(name, true, out var facet) || !Enum.IsDefined(facet))
+            if (!TryName<Facet>(name, out var facet))
                 return Fail($"{name} is not a facet. Facets are {string.Join(", ", Enum.GetNames<Facet>())}.", out error);
+            if (facets.ContainsKey(facet))
+                return Fail($"The facet {name} is named twice.", out error);
             if (!TryReadStep(step, $"Facet {name}", out error))
                 return false;
             facets[facet] = StepScale.ToAmount(step);
@@ -116,8 +118,10 @@ public sealed record GenerateSongRequest(
         var partMixes = ImmutableDictionary.CreateBuilder<TrackRole, PartMix>();
         foreach (var (name, part) in Parts ?? ImmutableDictionary<string, PartRequest>.Empty)
         {
-            if (!Enum.TryParse<TrackRole>(name, true, out var role) || !Enum.IsDefined(role))
+            if (!TryName<TrackRole>(name, out var role))
                 return Fail($"{name} is not a part. Parts are {string.Join(", ", Enum.GetNames<TrackRole>())}.", out error);
+            if (partMixes.ContainsKey(role))
+                return Fail($"The part {name} is named twice.", out error);
             if (part is null)
                 return Fail($"The {name} is given as nothing; leave it out instead.", out error);
             if (part.Instrument is < 0 or > 127)
@@ -225,6 +229,14 @@ public sealed record GenerateSongRequest(
     {
         error = null;
         return step is null or >= 0 and <= StepScale.Last || Fail($"{what} {step} is not a step from 0 to {StepScale.Last}.", out error);
+    }
+
+    /// <summary>A member of an enum by its name, whatever its case; not a number, nor a list of names, which parsing would take.</summary>
+    private static bool TryName<T>(string name, out T value) where T : struct, Enum
+    {
+        var found = Enum.GetNames<T>().FirstOrDefault(x => string.Equals(x, name, StringComparison.OrdinalIgnoreCase));
+        value = found is null ? default : Enum.Parse<T>(found);
+        return found is not null;
     }
 
     private static bool Fail(string message, out string? error)

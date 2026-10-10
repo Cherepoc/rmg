@@ -58,6 +58,22 @@ public sealed class AdminTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A refusal's own message is shown, a busy server's say, not its status's name.</summary>
+    [Test]
+    public async Task ARefusal_TellsTheServersMessage()
+    {
+        await using var page = await SongPage.Open(site, "admin/", admin: true);
+        await page.Page.RouteAsync("**/api/songs/describe**", route => route.FulfillAsync(new RouteFulfillOptions
+        {
+            Status = 503, ContentType = "application/problem+json",
+            Body = """{"title":"Service Unavailable","status":503,"detail":"The server is busy making other songs."}"""
+        }));
+        await page.Page.Locator("#song-link").FillAsync($"{site.Address}?song=1A");
+        await page.Page.Locator("#describe").ClickAsync();
+
+        await Assertions.Expect(page.Page.Locator("#describe-status")).ToHaveTextAsync("The server is busy making other songs.");
+    }
+
     [Test]
     public async Task ASongsLink_IsDescribed_AsTextToCopy()
     {

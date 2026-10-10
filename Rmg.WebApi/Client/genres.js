@@ -83,9 +83,17 @@ function sameChoices(first, second) {
     for (const choice of choices) {
         const [a, b] = [first[choice] ?? {}, second[choice] ?? {}];
         const options = new Set([...Object.keys(a), ...Object.keys(b)]);
-        for (const option of options) if (JSON.stringify(a[option]) !== JSON.stringify(b[option])) return false;
+        for (const option of options) if (!sameAmount(a[option], b[option])) return false;
     }
     return true;
+}
+
+/** Whether two amounts are alike: by their three ends, one written alike at every end as three, anything else as written. */
+function sameAmount(first, second) {
+    const amount = (x) => typeof x === "number" || (Array.isArray(x) && x.length === 3 && x.every((y) => typeof y === "number"));
+    return amount(first) && amount(second)
+        ? endsOf(first).every((x, i) => x === endsOf(second)[i])
+        : JSON.stringify(first) === JSON.stringify(second);
 }
 
 /** Whether settings carry a genre: a name or a choice it names. */

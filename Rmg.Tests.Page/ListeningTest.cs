@@ -185,6 +185,7 @@ public sealed class ListeningTest(Site site)
         await using var page = await SongPage.Open(site, "?listen=ghosts-left-out");
         var strip = page.Page.Locator("section.listening");
         await page.Until(() => strip.IsVisibleAsync(), "the question asked");
+        var (listed, linked) = (0, "");
         foreach (var (letter, skips) in new[] { ("A", false), ("B", true) })
         {
             var count = page.Requests.Count;
@@ -195,6 +196,15 @@ public sealed class ListeningTest(Site site)
             await Assert.That(body.TryGetProperty("skip", out var skip) ? skip.EnumerateArray().Select(x => x.GetString()).ToArray() : [])
                 .IsEquivalentTo(skips ? ["Ghosts"] : Array.Empty<string?>(), CollectionOrdering.Matching);
             await page.Settled();
+            // the song without, which its seed and settings do not name, neither rated, nor linked, nor listed
+            if (skips)
+            {
+                await Assert.That(await page.Page.Locator("#like").IsDisabledAsync()).IsTrue();
+                await Assert.That(page.Page.Url).IsEqualTo(linked);
+                await Assert.That(await page.Page.Locator("#history > *").CountAsync()).IsEqualTo(listed);
+            }
+            else
+                (listed, linked) = (await page.Page.Locator("#history > *").CountAsync(), page.Page.Url);
         }
 
         await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();

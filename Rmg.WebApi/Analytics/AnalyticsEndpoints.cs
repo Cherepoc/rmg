@@ -10,6 +10,12 @@ public static class AnalyticsEndpoints
     public const int DetailLength = 40;
 
     /// <summary>
+    ///     How many visitors' worth of events one network writes in a day at most, an IPv4 address or an IPv6 /64, so that
+    ///     a client changing its user agent or its address within its network cannot spend the day's cap for everyone.
+    /// </summary>
+    public const int VisitorsPerNetwork = 8;
+
+    /// <summary>
     ///     The events the pages send, and the summary of them, which is the operator's, served in the admin area only
     ///     (<see cref="Admin.AdminArea" />).
     /// </summary>
@@ -22,12 +28,17 @@ public static class AnalyticsEndpoints
         if (isListening)
             routes.MapGet("/api/listening/verdicts", () => Results.Ok(store.LatestVerdicts()));
 
+        // the events each network wrote today, counted here, as nothing about an address is written down
+        var networks = new NetworkCount();
         routes.MapPost("/api/tally", (HttpContext context, EventRequest? request) =>
         {
-            if (!EventNames.IsKnown(request?.Name)) return Results.NoContent();
+            // a verdict only where the server listens, as elsewhere its song without the device cannot be made, and only as the
+            // page gives it, its question and its choice
+            if (!EventNames.IsKnown(request?.Name) || request!.Name == EventNames.Verdict && (!isListening || !IsVerdict(request.Detail))) return Results.NoContent();
 
             var now = DateTimeOffset.UtcNow;
             var day = EventStore.Day(now);
+            if (!networks.Admit(day, context.Connection.RemoteIpAddress, store.DailyEventsPerVisitor * VisitorsPerNetwork)) return Results.NoContent();
 
             // the address is hashed and dropped on the floor; nothing here writes it down
             var visitor = hasher.Hash(
@@ -60,6 +71,37 @@ public static class AnalyticsEndpoints
             return Results.Ok(store.Summarise(DateTimeOffset.UtcNow, Math.Clamp(days ?? 30, 1, store.RetentionDays)));
         });
     }
+
+    /// <summary>The events every network wrote in the day, forgotten the next.</summary>
+    private sealed class NetworkCount
+    {
+        private readonly Dictionary<string, int> _counts = [];
+        private string _day = "";
+
+        /// <summary>Whether a network may write one more event today, counting it if it may.</summary>
+        public bool Admit(string day, System.Net.IPAddress? address, int most)
+        {
+            var network = address is null ? "" : address.IsIPv4MappedToIPv6 ? address.MapToIPv4().ToString()
+                : address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 ? Convert.ToHexString(address.GetAddressBytes()[..8]) : address.ToString();
+            lock (_counts)
+            {
+                if (_day != day)
+                {
+                    _day = day;
+                    _counts.Clear();
+                }
+                var count = _counts.GetValueOrDefault(network);
+                if (count >= most)
+                    return false;
+                _counts[network] = count + 1;
+                return true;
+            }
+        }
+    }
+
+    /// <summary>A verdict's detail as the page writes it, "question:choice", its question a word or two, its choice one of the four.</summary>
+    public static bool IsVerdict(string? detail) =>
+        detail?.Split(':') is [{ Length: > 0 } question, "with" or "without" or "same" or "unsure"] && question.All(x => char.IsAsciiLetterLower(x) || char.IsAsciiDigit(x) || x == '-');
 
     private static long? Sane(long? value, long lowest, long highest)
     {

@@ -25,8 +25,10 @@ public sealed class GenrePreviewTest
         // as the songs draw it: the engine's own weighing at every point
         var meters = Meter.Options.Select(x => (Meter.NameOf(x.Meter), x.Weight));
         Func<string, ByConvention?> pool = x => x == "4/4" ? new ByConvention(1, 0.8, 0) : x == "7/8" ? new ByConvention(0, 0.2, 1) : null;
-        var weights = ByConvention.Weigh(meters, 0.7, pool);
-        await Assert.That(preview.Shares!["7/8"][14]).IsEqualTo(100 * weights.Single(x => x.Value == "7/8").Weight / weights.Sum(x => x.Weight)).Within(1e-9);
+        // at the point 0.7 along, whatever the points' count
+        var point = (int)Math.Round(0.7 * (GenrePreview.Points - 1));
+        var weights = ByConvention.Weigh(meters, preview.Conventionality[point], pool);
+        await Assert.That(preview.Shares!["7/8"][point]).IsEqualTo(100 * weights.Single(x => x.Value == "7/8").Weight / weights.Sum(x => x.Weight)).Within(1e-9);
     }
 
     [Test]

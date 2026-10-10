@@ -78,6 +78,9 @@ public sealed class GenrePresetsTest
 
         await Assert.That(GenrePresets.All.Select(x => x.Id).Distinct().Count()).IsEqualTo(GenrePresets.All.Count);
         await Assert.That(GenrePresets.All.Count).IsGreaterThan(0);
+        // an id letters alone and shorter than a kept genre's key, so that the tally and the page never take one for the other
+        foreach (var preset in GenrePresets.All)
+            await Assert.That(preset.Id.All(char.IsAsciiLetter) && preset.Id.Length < Rmg.WebApi.Genres.GenreStore.KeyLength).IsTrue().Because(preset.Id);
     }
 
     /// <summary>Every preset makes its songs at both ends, 64 at the plain and 32 at the wild, where a choice an end leaves empty would fail (as Punk's length and Techno's intro did).</summary>

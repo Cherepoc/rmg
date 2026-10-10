@@ -41,13 +41,14 @@ public sealed class EventStore
 
     /// <summary>
     ///     How many songs' measurements are kept in one day, well above what the server makes, as many as two a second
-    ///     all day long, and a few megabytes.
+    ///     all day long: about 20 MB a day at the most.
     /// </summary>
     public const int DailySongs = 200_000;
 
     /// <summary>
     ///     How many events are kept in one day from everyone together, well above honest use, so that clients posing as
-    ///     new visitors on every request cannot fill the disk.
+    ///     new visitors on every request cannot fill the disk faster than this: at the caps every day, events and songs
+    ///     together, some 40 MB a day, about 7 GB over 180 days kept, which honest use stays far below.
     /// </summary>
     public const int DailyEvents = 200_000;
 
@@ -277,7 +278,11 @@ public sealed class EventStore
         }
     }
 
-    /// <summary>Throws away everything older than <see cref="RetentionDays" />, the file shrunk after it, and says how much went.</summary>
+    /// <summary>
+    ///     Throws away everything older than <see cref="RetentionDays" />, and says how much went: the pages it frees taken
+    ///     by the next days' rows, so that the file stays about the size of what it keeps, with no shrinking of it under
+    ///     the lock.
+    /// </summary>
     public int Prune(DateTimeOffset now)
     {
         lock (_writing)
@@ -294,14 +299,6 @@ public sealed class EventStore
         command.Parameters.AddWithValue("$oldest", Day(now.AddDays(-RetentionDays)));
         var pruned = command.ExecuteNonQuery();
         _prunedDay = Day(now);
-        // and the file shrunk to what it keeps, once a day at most, so that a busy day leaves no high-water mark
-        if (pruned > 0)
-        {
-            using var vacuum = connection.CreateCommand();
-            vacuum.CommandText = "VACUUM";
-            vacuum.ExecuteNonQuery();
-        }
-
         return pruned;
     }
 

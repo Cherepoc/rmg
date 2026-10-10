@@ -36,15 +36,16 @@ public static class EventNames
     /// </summary>
     public const string Verdict = "verdict";
 
-    private static readonly HashSet<string> Known =
-    [
+    /// <summary>Every name an event may have.</summary>
+    public static IReadOnlySet<string> All { get; } = new HashSet<string>
+    {
         PageOpen, SongGenerated, SongFailed, SoundFontReady, SoundFontFailed, AudioReady,
         Played, Listened, MixChanged, DownloadedMidi, ExportedMp3, Shared, Rated, GenreChosen, Verdict
-    ];
+    };
 
     public static bool IsKnown(string? name)
     {
-        return name is not null && Known.Contains(name);
+        return name is not null && All.Contains(name);
     }
 }
 

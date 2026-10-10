@@ -245,8 +245,8 @@ function updateTransport() {
     elements.share.disabled = !hasSong;
 
     // nor is rating it, though it is mostly done while it plays
-    elements.like.disabled = !hasSong || songVersion === null;
-    elements.dislike.disabled = !hasSong || songVersion === null;
+    elements.like.disabled = !hasSong || songVersion === null || !isNamed();
+    elements.dislike.disabled = !hasSong || songVersion === null || !isNamed();
 }
 
 function setPlayIcon(isPlaying) {
@@ -834,6 +834,14 @@ function rememberSong(wasRolled = history.state?.rolled === true) {
     }
 }
 
+/**
+ *     Whether the song on the page is one its seed, its settings and its genre name, which a link, the list and a rating
+ *     carry: not one with stages left out, a listening question's without, nor one in a genre the server did not keep.
+ */
+function isNamed() {
+    return songSkipped.length === 0 && (songGenreKey !== null || !hasAGenre(settings.genre));
+}
+
 /** The link to the song on the page, which is this address with its seed and its settings as they are now. */
 function songLink() {
     const address = new URL(location.href);
@@ -986,8 +994,11 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         }
         showSettings();
         showRating(recallRating(songVersion, currentSong()));
-        rememberSong(isRemade ? undefined : isRolled);
-        addToHistory(isRemade, keepsPlace);
+        // a song no link, list or rating could name is heard here alone (isNamed)
+        if (isNamed()) {
+            rememberSong(isRemade ? undefined : isRolled);
+            addToHistory(isRemade, keepsPlace);
+        }
         // offered for download first, and as a copy, so it stays usable whatever the audio stack does
         offerDownload(song);
         if (isRemade) {
@@ -1134,13 +1145,23 @@ elements.download.addEventListener("click", () => {
 /** The settings and the genre this browser left last time, every value given as it was; none given on a first visit. */
 function restoreSettings() {
     const kept = parseSettings(recallSettings());
-    return { ...(kept === null ? defaultSettings() : givenOnly(kept)), genre: recallGenre() ?? noGenre() };
+    return { ...(kept === null ? defaultSettings() : givenOnly(kept)), genre: keptGenre(recallGenre()) };
+}
+
+/** The genre kept: a preset's as it is now, by its id, none for a preset gone since, or the copy kept. */
+function keptGenre(kept) {
+    if (kept === null) return noGenre();
+    if (kept.preset === undefined) return kept;
+    const preset = presetById(kept.preset);
+    return preset === null ? noGenre() : asGenre(preset);
 }
 
 /** Keeps the settings for the next visit, and says how many of them change the song. */
 function keepCurrentSettings() {
     keepSettings(formatSettings(givenOnly(settings)));
-    keepGenre(hasAGenre(settings.genre) ? settings.genre : null);
+    // a preset by its id, so that the next visit hears it as it is then, another genre whole
+    const preset = presetOf(settings.genre);
+    keepGenre(!hasAGenre(settings.genre) ? null : preset !== null ? { preset: preset.id } : settings.genre);
     const given = givenCount(settings)
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
         + (settings.drumPieces.isGiven ? 1 : 0);
@@ -2692,7 +2713,8 @@ window.addEventListener("pagehide", reportListening);
  */
 function rate(rating) {
     const song = currentSong();
-    if (song === null || songVersion === null) return;
+    // but a song its seed, settings and genre do not name
+    if (song === null || songVersion === null || !isNamed()) return;
 
     const current = recallRating(songVersion, song);
     const next = current === rating ? null : rating;

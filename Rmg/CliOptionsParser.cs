@@ -142,7 +142,7 @@ public static class CliOptionsParser
             return true;
         }
 
-        // the next argument is always the value, so negative numbers like "--seed -5" work
+        // the next argument is always the value, whatever it starts with, a dash too
         if (index + 1 < args.Length)
         {
             value = args[++index];

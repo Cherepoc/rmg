@@ -138,10 +138,10 @@ public static class EventStoreSummary
     {
         using var command = connection.CreateCommand();
         command.CommandText = $"""
-            SELECT seed, SUM(seconds), COUNT(*)
+            SELECT seed, version, genre, SUM(seconds), COUNT(*)
             FROM events
             WHERE name = '{EventNames.Listened}' AND seed IS NOT NULL AND seconds IS NOT NULL AND day >= $since
-            GROUP BY seed
+            GROUP BY seed, version, genre
             ORDER BY SUM(seconds) DESC
             LIMIT 10
             """;
@@ -149,7 +149,10 @@ public static class EventStoreSummary
 
         var seeds = new List<SeedListening>();
         using var reader = command.ExecuteReader();
-        while (reader.Read()) seeds.Add(new SeedListening(Base62.FromSeed(unchecked((ulong)reader.GetInt64(0))), Math.Round(reader.GetDouble(1), 1), reader.GetInt32(2)));
+        // a song by its seed, its songs' version and its genre, as a seed alone names no song
+        while (reader.Read())
+            seeds.Add(new SeedListening(Base62.FromSeed(unchecked((ulong)reader.GetInt64(0))), reader.IsDBNull(1) ? null : reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2),
+                Math.Round(reader.GetDouble(3), 1), reader.GetInt32(4)));
 
         return seeds;
     }
@@ -234,13 +237,14 @@ public static class EventStoreSummary
     ///     "up>down", from what the browser had to what it has, so a song's likes are the changes to a like less the
     ///     changes from one, whoever and whenever they came from. A visitor is a hash of a day, so it could not tell
     ///     that a dislike today takes back yesterday's like; the change can. A change whose rating before it is no
-    ///     longer kept would take more than there is, so a count stops at none.
+    ///     longer kept would take more than there is, so a count stops at none. A visitor's change that does not follow its
+    ///     own last change of the song, such as one posted twice, is left out.
     /// </summary>
     private static List<SongRating> Ratings(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
         command.CommandText = $"""
-            SELECT version, seed, detail, unconventionality, given, identity, genre
+            SELECT version, seed, detail, unconventionality, given, identity, genre, visitor
             FROM events
             WHERE name = '{EventNames.Rated}' AND version IS NOT NULL AND seed IS NOT NULL AND detail IS NOT NULL
             ORDER BY id
@@ -248,6 +252,8 @@ public static class EventStoreSummary
 
         // a song its version, its seed, its settings and its genre, which its settings leave out
         var counts = new Dictionary<(string Version, long Seed, string Identity, string Genre), (int? Unconventionality, bool IsGiven, int Likes, int Dislikes)>();
+        // every visitor's rating of a song as its last change left it
+        var rated = new Dictionary<(string Visitor, (string, long, string, string) Song), string>();
         using (var reader = command.ExecuteReader())
             while (reader.Read())
             {
@@ -257,6 +263,9 @@ public static class EventStoreSummary
                 int? unconventionality = reader.IsDBNull(3) ? null : reader.GetInt32(3);
                 var isGiven = !reader.IsDBNull(4) && reader.GetBoolean(4);
                 var key = (reader.GetString(0), reader.GetInt64(1), reader.IsDBNull(5) ? "" : reader.GetString(5), reader.IsDBNull(6) ? "" : reader.GetString(6));
+                var visitor = (reader.GetString(7), key);
+                if (rated.TryGetValue(visitor, out var last) && last != from) continue;
+                rated[visitor] = to;
                 var (known, _, likes, dislikes) = counts.GetValueOrDefault(key);
                 counts[key] = (unconventionality ?? known, isGiven, likes + Count(to, "up") - Count(from, "up"), dislikes + Count(to, "down") - Count(from, "down"));
             }
@@ -462,7 +471,8 @@ public static class EventStoreSummary
         while (reader.Read())
         {
             var detail = reader.GetString(1);
-            var colon = detail.LastIndexOf(':');
+            // the question up to its colon, as the query reads it, a verdict holding one (AnalyticsEndpoints.IsVerdict)
+            var colon = detail.IndexOf(':');
             verdicts.Add((reader.GetString(0), detail[..colon], detail[(colon + 1)..], reader.GetInt32(2)));
         }
 

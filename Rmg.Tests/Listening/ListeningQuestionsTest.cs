@@ -221,6 +221,8 @@ public sealed class ListeningQuestionsTest
             await Assert.That(question.Skip.All(SongGenerator.SkippableStages.Contains)).IsTrue().Because(question.Id);
             // its verdicts kept whole, the longest choice after its id
             await Assert.That($"{question.Id}:without".Length).IsLessThanOrEqualTo(Rmg.WebApi.Analytics.AnalyticsEndpoints.DetailLength).Because(question.Id);
+            // and a verdict the server takes
+            await Assert.That(Rmg.WebApi.Analytics.AnalyticsEndpoints.IsVerdict($"{question.Id}:with")).IsTrue().Because(question.Id);
         }
 
         var path = QuestionsFile();

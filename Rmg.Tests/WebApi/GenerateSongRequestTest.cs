@@ -123,6 +123,9 @@ public sealed class GenerateSongRequestTest
     [Arguments("facet")]
     [Arguments("unknownFacet")]
     [Arguments("part")]
+    [Arguments("numberPart")]
+    [Arguments("listPart")]
+    [Arguments("twicePart")]
     [Arguments("instrument")]
     [Arguments("group")]
     [Arguments("seed")]
@@ -146,6 +149,9 @@ public sealed class GenerateSongRequestTest
             "facet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["feel"] = -1 }),
             "unknownFacet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["tempo"] = 1 }),
             "part" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["kazoo"] = new() }),
+            "numberPart" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["3"] = new() }),
+            "listPart" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["melody, bass"] = new() }),
+            "twicePart" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["melody"] = new(), ["Melody"] = new() }),
             "instrument" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Instrument: 128) }),
             "noPieces" => new GenerateSongRequest(DrumPieces: []),
             "piece" => new GenerateSongRequest(DrumPieces: ["kick", "gong"]),
@@ -174,8 +180,9 @@ public sealed class GenerateSongRequestTest
     {
         ["unconventionality"] = "Unconventionality 62", ["facet"] = "Facet feel -1", ["unknownFacet"] = "tempo is not a facet", ["part"] = "kazoo is not a part",
         ["instrument"] = "instrument 128", ["group"] = "gong is not a drum group", ["seed"] = "is not a seed", ["tempo"] = "Tempo 62", ["key"] = "Key 12",
-        ["meter"] = "Meter -1", ["mode"] = "Mode 13", ["swing"] = "Swing 62", ["genreChoice"] = "kazoo is not a choice", ["genreOption"] = "1/1 is not an option",
+        ["meter"] = "Meter -1", ["mode"] = $"Mode {Core.Composition.Scales.All.Length}", ["swing"] = "Swing 62", ["genreChoice"] = "kazoo is not a choice", ["genreOption"] = "1/1 is not an option",
         ["genreStep"] = "meter 3/4 is not a whole number", ["genreEnds"] = "meter 3/4 is not a whole number", ["genreEmptyPool"] = "keeps none of its options",
-        ["noPieces"] = "No drum pieces", ["piece"] = "gong is not a drum piece"
+        ["noPieces"] = "No drum pieces", ["piece"] = "gong is not a drum piece", ["numberPart"] = "3 is not a part", ["listPart"] = "melody, bass is not a part",
+        ["twicePart"] = "named twice"
     };
 }

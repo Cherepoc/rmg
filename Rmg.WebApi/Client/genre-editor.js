@@ -556,7 +556,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
 
     function problemOf(genre) {
         if (new TextEncoder().encode(genre.name).length > MAX_GENRE_NAME_BYTES) return "The name is too long.";
-        const empty = Object.entries(genre.choices).find(([name, options]) => choices.get(name)?.kind === "pool" && Object.keys(options).length === 0);
+        // a pool with no options, or whose every option weighs nothing at every end, as the server refuses it
+        const weighs = (amount) => endsOf(amount).some((x) => typeof x === "number" && x > 0);
+        const empty = Object.entries(genre.choices).find(([name, options]) => choices.get(name)?.kind === "pool" && !Object.values(options).some(weighs));
         return empty ? `${poolName(empty[0])} keeps none of its options.` : null;
     }
 

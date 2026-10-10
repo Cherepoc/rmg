@@ -116,7 +116,8 @@ public sealed class ServerSettingsTest
             ("KnownProxies", "10.0.0.5, 10.0.0.6"),
             ("StateDirectory", "/var/lib/rmg"),
             ("DashboardToken", "s3cret"),
-            ("RetentionDays", "30"));
+            ("RetentionDays", "30"),
+            ("EventsPerVisitorPerDay", "250"));
 
         await Assert.That(settings.Port).IsEqualTo(8080);
         await Assert.That(settings.Interfaces).IsEqualTo(Interfaces.One);
@@ -126,6 +127,7 @@ public sealed class ServerSettingsTest
         await Assert.That(settings.StateDirectory).IsEqualTo("/var/lib/rmg");
         await Assert.That(settings.DashboardToken).IsEqualTo("s3cret");
         await Assert.That(settings.RetentionDays).IsEqualTo(30);
+        await Assert.That(settings.EventsPerVisitorPerDay).IsEqualTo(250);
     }
 
     [Test]

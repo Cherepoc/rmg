@@ -289,18 +289,21 @@ public sealed class EventStoreTest : IDisposable
         }
     }
 
+    /// <summary>Every event the page's scripts send, read from them, is a name the server knows, and every name the server knows one they send.</summary>
     [Test]
     public async Task EveryEventTheClientSendsIsAKnownName()
     {
-        string[] sent =
-        [
-            EventNames.PageOpen, EventNames.SongGenerated, EventNames.SongFailed, EventNames.SoundFontReady,
-            EventNames.SoundFontFailed, EventNames.AudioReady, EventNames.Played, EventNames.Listened,
-            EventNames.MixChanged, EventNames.DownloadedMidi, EventNames.ExportedMp3, EventNames.Shared,
-            EventNames.Rated
-        ];
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "Rmg.WebApi", "Client")))
+            directory = directory.Parent;
+        var client = Path.Combine(directory?.FullName ?? throw new InvalidOperationException("No repository above the tests."), "Rmg.WebApi", "Client");
+        var sent = Directory.GetFiles(client, "*.js")
+            .SelectMany(file => System.Text.RegularExpressions.Regex.Matches(File.ReadAllText(file), @"\b(?:track|tell)\(""([a-z0-9_]+)""").Select(x => x.Groups[1].Value))
+            .ToHashSet();
 
-        foreach (var name in sent) await Assert.That(EventNames.IsKnown(name)).IsTrue();
+        await Assert.That(sent.Count).IsGreaterThan(10);
+        foreach (var name in sent) await Assert.That(EventNames.IsKnown(name)).IsTrue().Because(name);
+        foreach (var name in EventNames.All) await Assert.That(sent).Contains(name).Because(name);
 
         await Assert.That(EventNames.IsKnown("something_else")).IsFalse();
         await Assert.That(EventNames.IsKnown(null)).IsFalse();
@@ -376,6 +379,18 @@ public sealed class EventStoreTest : IDisposable
         {
             Directory.Delete(directory, true);
         }
+    }
+
+    /// <summary>A visitor's change that does not follow its own last change of the song, a like posted twice, counts once.</summary>
+    [Test]
+    public async Task ARatingPostedTwice_CountsOnce()
+    {
+        Write(EventNames.Rated, seed: 1, detail: "none>up", version: "0.5.000");
+        Write(EventNames.Rated, seed: 1, detail: "none>up", version: "0.5.000", at: Now.AddMinutes(1));
+
+        var version = _store.Summarise(Now.AddMinutes(2), 30).Versions.Single(x => x.Version == "0.5.000");
+
+        await Assert.That(version.Likes).IsEqualTo(1);
     }
 
     [Test]
