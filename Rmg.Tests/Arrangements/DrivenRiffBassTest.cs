@@ -27,17 +27,18 @@ public sealed class DrivenRiffBassTest
             foreach (var song in Songs(genre))
             {
                 var plans = song.PolymeterPlans;
-                var spans = song.Map.Sections.Where(x => plans.TryGetValue(x.SectionId, out var plan) && plan.Parts.Contains(TrackRole.Bass)).ToArray();
+                var spans = song.Map.Sections.Where(x => plans.ContainsKey(x.SectionId)).ToArray();
                 if (spans.Length == 0)
                     continue;
 
-                // the song with its sections in their bars, where the bass plays what it plays without the cycle
+                // the song with its sections in their bars, where every part plays what it plays without the cycle
                 var unrolled = SongGenerator.GenerateSong(TestCorpus.SongSeed(song.Seed), new SongOverrides(Genre: GenrePresets.Genre(genre)),
                     new HashSet<string> { "Polymeter" }, (_, _) => { }, CancellationToken.None);
-                foreach (var span in spans.Where(x => unrolled.Notes![unrolled.Track(TrackRole.Bass)].Any(n => n.Position >= x.Start && n.Position < x.End)))
+                foreach (var span in spans)
+                foreach (var part in plans[span.SectionId].Parts.Where(x => unrolled.Notes!.GetValueOrDefault(unrolled.Track(x))?.Any(n => n.Position >= span.Start && n.Position < span.End) ?? false))
                 {
                     sections++;
-                    await Assert.That(Sounds(song, song.Track(TrackRole.Bass), span.Start, span.End)).IsTrue().Because($"{genre} seed {song.Seed}, section at {span.Start}");
+                    await Assert.That(Sounds(song, song.Track(part), span.Start, span.End)).IsTrue().Because($"{genre} seed {song.Seed}, {part} in the section at {span.Start}");
                 }
             }
 

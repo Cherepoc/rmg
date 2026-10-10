@@ -16,7 +16,7 @@ public sealed class StopTimeTest
     public async Task InStopTime_TheBandHitsOnceABar_UnderAPartThatGoesOn()
     {
         int bars = 0, stopped = 0, timed = 0, melodyNotes = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))))
         {
             var all = song.Song.Notes!.Values.SelectMany(x => x).ToArray();
             bool IsLine(int track) => song.Song.TrackDefinitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo;
@@ -31,13 +31,20 @@ public sealed class StopTimeTest
                 // little past its hit
                 await Assert.That(all.Any(x => x.Position < to - 1e-9 && x.Position + x.Value.Duration > from + 1e-9)
                                   || song.Song.Notes!.Where(x => KeepsTime(x.Key)).Any(x => x.Value.Any(n => n.Position > at + 1e-6 && n.Position < to - 1e-9))).IsTrue().Because(because);
-                // the drums' fill out of the section, in its last bar, which goes on as a drummer fills into the next
+                // the drums' fill out of the section, in its last bar, which goes on as a drummer fills into the next, and the
+                // drums and the bass in every phrase's last half bar, leading the band back in (StopTime)
                 var section = song.Song.Map!.Sections.Last(x => x.Start <= at + 1e-9);
                 var fill = section.End - bar;
+                bool Leads(int track, double position) => song.Song.TrackDefinitions[track].Role switch
+                {
+                    TrackRole.Drum => position >= fill - 1e-9 || position >= end - bar / 2 - 1e-9,
+                    TrackRole.Bass => position >= end - bar / 2 - 1e-9,
+                    _ => false
+                };
                 // past the hit, but a line's, a time keeper's or a fill's
                 var past = song.Song.Notes!.Where(x => !IsLine(x.Key) && !KeepsTime(x.Key))
                     .SelectMany(x => x.Value.Select(n => (Track: x.Key, Note: n)))
-                    .Where(x => x.Note.Position >= at - 1e-9 && x.Note.Position < to - 1e-9 && !(song.Song.TrackDefinitions[x.Track].Role == TrackRole.Drum && x.Note.Position >= fill - 1e-9))
+                    .Where(x => x.Note.Position >= at - 1e-9 && x.Note.Position < to - 1e-9 && !Leads(x.Track, x.Note.Position))
                     .Any(x => Math.Abs(x.Note.Position - at) > 1e-6 || x.Note.Value.Duration > StopTime.Hit + 1e-9);
                 if (past)
                     continue;
@@ -69,7 +76,7 @@ public sealed class StopTimeTest
                 foreach (var (start, end, bar) in StopTimeSpans(song))
                 for (var at = start; at < end - 1e-9; at += bar)
                 {
-                    var (from, to) = (at + StopTime.Hit, at + bar);
+                    var (from, to) = (at + StopTime.Hit, Math.Min(end, at + bar));
                     bars++;
                     rest += to - from;
                     var covered = Covered(notes.Where(x => x.Position < to - 1e-9 && x.Position + x.Value.Duration > from + 1e-9)

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 
@@ -37,7 +38,13 @@ public sealed class ChordScalesReportTest
         var measured = TestCorpus.Measure(256, Clashes);
         var clashes = measured.Sum(x => x.Clashes);
         var notes = measured.Sum(x => x.Notes);
-        Console.WriteLine($"melody notes on a beat a semitone from the chords: {clashes} of {notes}, {100.0 * clashes / notes:F1}%");
+        // the same songs with no chord in a scale of its own, every kind's chance at none
+        var none = new Genre(System.Collections.Immutable.ImmutableDictionary<string, System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+            .Add(GenreChoices.ChordScales.Name, GenreChoices.ChordScales.Options.ToImmutableDictionary(x => x.Name, _ => new Rmg.Core.Probabilities.ByConvention(0, 0, 0))));
+        var without = TestCorpus.InParallel(Enumerable.Range(0, 256), seed => Clashes(TestCorpus.Get(seed, new SongOverrides(Genre: none))));
+        var (clashesWithout, notesWithout) = (without.Sum(x => x.Clashes), without.Sum(x => x.Notes));
+        Console.WriteLine($"melody notes on a beat a semitone from the chords: {clashes} of {notes}, {100.0 * clashes / notes:F1}%; " +
+                          $"the same songs with no chord in a scale of its own {clashesWithout} of {notesWithout}, {100.0 * clashesWithout / notesWithout:F1}%");
         // the chords by the scale they play in, by fifths of their section's progression facet
         var chords = TestCorpus.Measure(256, song => song.Trace.Where(x => x.Point == TracePoints.ChordScales)
             .Select(x => (Fifth: Math.Min(4, (int)(((Unconventionality)song.Trace.First(y => y.Point == TracePoints.SectionUnconventionality && y.Section == x.Section).Value!)[Facet.Progression] * 5)),

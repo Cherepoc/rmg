@@ -158,7 +158,7 @@ public sealed class ListeningQuestionsTest
     /// </summary>
     private static (double Difference, double At, string[] Listen) Measure(Question question, int seed, CorpusSong with, double first)
     {
-        var without = SongGenerator.GenerateSong((ulong)seed, new SongOverrides(Genre: GenreOf(question, true)), question.Skip.ToImmutableHashSet(), CancellationToken.None);
+        var without = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), new SongOverrides(Genre: GenreOf(question, true)), question.Skip.ToImmutableHashSet(), CancellationToken.None);
         var difference = new HeardDifference(with.Rendered, Rmg.Core.Rendering.Render.RenderSong(without));
         var places = Enumerable.Range(0, (int)Math.Max(1, Math.Ceiling((with.Rendered.Seconds - Heard - first) / Step)))
             .Select(k => first + k * Step).Select(at => (Difference: difference.Between(at, at + Heard), At: at)).ToArray();
@@ -204,7 +204,7 @@ public sealed class ListeningQuestionsTest
                 genre = question.Genre,
                 // an object of choices always, as the page reads it, empty where the song without the device patches none
                 without = new { skip = question.Skip, genre = question.GenrePatch ?? new Dictionary<string, Dictionary<string, int>>() },
-                seeds = asked.Select(x => new { seed = Base62.FromSeed((ulong)x.Seed), at = Math.Round(x.At, 1), listen = x.Listen }).ToArray()
+                seeds = asked.Select(x => new { seed = Base62.FromSeed(TestCorpus.SongSeed(x.Seed)), at = Math.Round(x.At, 1), listen = x.Listen }).ToArray()
             });
         }
 

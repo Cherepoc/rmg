@@ -17,7 +17,6 @@ public sealed class GenreRhythmReportTest
     {
         // a part's onsets once, whichever of its tracks plays them
         var parts = new Dictionary<RhythmPart, HashSet<double>>();
-        var bars = new Dictionary<RhythmPart, (int Same, int All)>();
         foreach (var (track, notes) in song.Song.Notes!)
         {
             RhythmPart? part = song.Song.TrackDefinitions[track] switch
@@ -33,14 +32,8 @@ public sealed class GenreRhythmReportTest
             if (part is not { } of || notes.Count == 0)
                 continue;
 
-            var onsets = notes.Select(x => x.Position).Distinct().ToArray();
             parts.TryAdd(of, []);
-            parts[of].UnionWith(onsets.Select(x => Math.Round(x, 6)));
-            // by the bars of each section, in its meter, from its start
-            var byBar = onsets.GroupBy(x => Math.Round(x - song.Map.BeatInBar(x), 6)).ToDictionary(x => x.Key, x => string.Join(",", x.Select(y => Math.Round(song.Map.BeatInBar(y), 3))));
-            var same = byBar.Count(x => byBar.TryGetValue(Math.Round(x.Key - song.Map.MeterAt(x.Key - 1e-6).BarDuration, 6), out var before) && before == x.Value);
-            var (s, a) = bars.GetValueOrDefault(of);
-            bars[of] = (s + same, a + byBar.Count);
+            parts[of].UnionWith(notes.Select(x => Math.Round(x.Position, 6)));
         }
 
         return parts.ToDictionary(x => x.Key, x =>
@@ -48,12 +41,15 @@ public sealed class GenreRhythmReportTest
             double Share(Func<double, bool> on) => x.Value.Count(on) / (double)x.Value.Count;
             // a position on a grid counted from its bar's start
             bool Near(double position, double grid, double at) => Math.Abs((song.Map.BeatInBar(position) % grid + grid) % grid - at) < 1e-6;
+            // the part's bars, by the bars of each section, in its meter, from its start, the same as the bar before
+            var byBar = x.Value.GroupBy(y => Math.Round(y - song.Map.BeatInBar(y), 6)).ToDictionary(y => y.Key, y => string.Join(",", y.Order().Select(z => Math.Round(song.Map.BeatInBar(z), 3))));
+            var same = byBar.Count(y => byBar.TryGetValue(Math.Round(y.Key - song.Map.MeterAt(y.Key - 1e-6).BarDuration, 6), out var before) && before == y.Value);
             return new Fall(
                 x.Value.Count / song.Map.Duration,
                 Share(p => Near(p, 1, 0)),
                 Share(p => Near(p, 1, 0.5)),
                 Share(p => Near(p, 0.5, 0.25)),
-                bars[x.Key].Same / (double)Math.Max(1, bars[x.Key].All)
+                same / (double)Math.Max(1, byBar.Count)
             );
         });
     }

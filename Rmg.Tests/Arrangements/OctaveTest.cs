@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Events;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 
@@ -20,7 +21,7 @@ public sealed class OctaveTest
         .Select(x => (x.Role, x.InOctaves, x.Energy));
 
     [Test]
-    public async Task ANoteInOctaves_IsAPartsLine_ItsOwnNoteFirst_AndTheOtherAnOctaveFromIt()
+    public async Task ANoteInOctaves_IsAPartsLine_TwoNotesAnOctaveApart()
     {
         var doubled = 0;
         foreach (var song in TestCorpus.Range(64))
@@ -42,15 +43,21 @@ public sealed class OctaveTest
         await Assert.That(doubled).IsGreaterThan(0);
     }
 
+    /// <summary>A line in octaves bends and sings a vibrato about as often as the same parts' lines of one note, in the same songs.</summary>
     [Test]
     public async Task ALineInOctaves_BendsAndSingsAVibrato_AsAnyLine()
     {
-        var notes = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1)))
-            .SelectMany(x => x.Song.Notes!.Values.SelectMany(n => n))
-            .Where(x => x.Value.Pitches.Length == 2 && x.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
+        static bool Shaped(TimelineItem<RealizedNote> x) => x.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0
+                                                             || x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.Value.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0;
+        var notes = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Sound(1)))
+            .SelectMany(song => song.Song.Notes!.Where(x => LineDoubling.OctaveRoles.Contains(song.Song.TrackDefinitions[x.Key].Role)).SelectMany(n => n.Value))
             .ToArray();
-
-        await Assert.That(notes.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0 || (x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.Value.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0))).IsGreaterThan(0);
+        var (octaves, single) = (notes.Where(x => x.Value.Pitches.Length == 2 && x.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0).ToArray(), notes.Where(x => x.Value.Pitches.Length == 1).ToArray());
+        var (inOctaves, alone) = (octaves.Average(x => Shaped(x) ? 1.0 : 0), single.Average(x => Shaped(x) ? 1.0 : 0));
+        Console.WriteLine($"bent or sung with a vibrato: {inOctaves:P1} of {octaves.Length} notes in octaves, {alone:P1} of {single.Length} alone");
+        await Assert.That(octaves.Length).IsGreaterThan(100);
+        // seen 35% in octaves against 30% alone
+        await Assert.That(inOctaves).IsGreaterThan(alone / 2);
     }
 
     [Test]

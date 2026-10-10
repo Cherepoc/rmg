@@ -6,7 +6,7 @@ namespace Rmg.Tests.SongGenerators;
 
 /// <summary>
 ///     How the sections of a song differ: their loudness, the drums' notes and how many drums play, and the other
-///     tracks' notes, each section as it last plays, leaving out the last bar of each 4-bar pattern, where the fills are.
+///     tracks' notes, each section as it last plays, leaving out the last bar of each pattern, where the fills are.
 /// </summary>
 public sealed class SectionDynamicsTest
 {
@@ -36,6 +36,8 @@ public sealed class SectionDynamicsTest
     {
         var growth = TestCorpus.Measure(256, Growth).SelectMany(x => x).ToArray();
 
+        // seen over three corpora: louder by 0.080 to 0.085, louder in 95% to 97%
+        Console.WriteLine($"{growth.Length} sections played again: louder by {growth.Average():F3} on the average, louder in {growth.Count(x => x > 0) / (double)growth.Length:P0}");
         await Assert.That(growth.Length).IsGreaterThan(100);
         // louder the last time, a section growing as it comes back, on the average and in most of them
         await Assert.That(growth.Average()).IsGreaterThan(0.05);

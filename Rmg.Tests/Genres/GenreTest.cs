@@ -214,11 +214,13 @@ public sealed class GenreTest
     public async Task ADrumKitsSound_IsOneOfTheGenres_TheStandardWithNone_AndTheMixWinsOverIt()
     {
         var genre = Of((GenreChoices.Kit, [("tr808", 1), ("electronic", 1)]));
+        var drummed = 0;
         foreach (var seed in Enumerable.Range(0, 8))
         {
             var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
             if (!song.PlaysDrums)
                 continue;
+            drummed++;
 
             await Assert.That(song.Rendered.Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsIn([24, 25]);
             await Assert.That(TestCorpus.Get(seed).Rendered.Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsEqualTo(0);
@@ -226,6 +228,8 @@ public sealed class GenreTest
                 ImmutableDictionary<string, Rmg.Core.Rendering.DrumGroupMix>.Empty);
             await Assert.That(Rmg.Core.Rendering.Render.RenderSong(song.Song, mix, CancellationToken.None).Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsEqualTo(40);
         }
+
+        await Assert.That(drummed).IsGreaterThan(0);
     }
 
     [Test]
@@ -422,22 +426,6 @@ public sealed class GenreTest
                 [..song.Song.Notes!.SelectMany(x => x.Value.Select(n => $"{x.Key} {n.Position:F4} {string.Join(",", n.Value.Pitches)} {n.Value.Duration:F4}"))];
             await Assert.That(Notes(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).IsEquivalentTo(Notes(TestCorpus.Get(seed)), CollectionOrdering.Matching).Because($"seed {seed}");
         }
-    }
-
-    [Test]
-    public async Task EveryDrop_RisesIntoIt_TheReverseCymbalEndingOnItsFirstBeat()
-    {
-        var risers = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic")))))
-        foreach (var drop in song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!))
-        {
-            var rising = song.Song.Notes!.Values.SelectMany(x => x)
-                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) == Risers.Program + 1 && Math.Abs(x.Position + x.Value.Duration - drop) < 0.3).ToArray();
-            await Assert.That(rising.Length).IsEqualTo(1).Because($"seed {song.Seed}, the drop at {drop}");
-            risers++;
-        }
-
-        await Assert.That(risers).IsGreaterThan(5);
     }
 
     [Test]

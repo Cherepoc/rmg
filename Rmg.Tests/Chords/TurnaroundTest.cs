@@ -21,7 +21,7 @@ public sealed class TurnaroundTest
     [Test]
     public async Task ASectionTurnedAround_EndsOnV_AndAJazzSongsSectionsMostly()
     {
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz"))));
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz"))));
         // but a section that planes, its chords the home's shape moved rather than its progression's
         // each section's turnaround with its own progression, joined by the section
         var sections = songs.SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.Turnaround)
@@ -30,6 +30,8 @@ public sealed class TurnaroundTest
             .Select(x => (x.Turns, x.Progression))).ToArray();
 
         await Assert.That(sections.Where(x => x.Item1).All(x => x.Item2[^1] == -3)).IsTrue();
+        Console.WriteLine($"Jazz's sections turned around: {sections.Count(x => x.Item1) / (double)sections.Length:P0}");
+        // seen 72% to 83% over three corpora's 64 songs
         await Assert.That(sections.Count(x => x.Item1) / (double)sections.Length).IsGreaterThan(0.6);
     }
 

@@ -79,10 +79,10 @@ public sealed class SoloAnswerTest
             var facet = song.Unconventionality[Facet.Melody];
             // the bars of the sections it answers in
             var bars = song.Map.Sections.Where(s => answers.Any(a => a.Position >= s.Start && a.Position < s.End)).Sum(s => s.Duration / s.Meter.BarDuration);
-            return (Facet: facet, Plays: plays, Answers: answers.Length, PerBar: answers.Length / Math.Max(1, bars), Velocity: answers.Length > 0 ? answers.Average(x => x.Value.Velocity) - melody.Average(x => x.Value.Velocity) : double.NaN);
+            return (Facet: facet, Plays: plays, Answers: answers.Length, PerBar: answers.Length / Math.Max(1, bars), Velocity: answers.Length > 0 ? answers.Average(x => Render.ToMidiVelocity(x.Value.Velocity)) - melody.Average(x => Render.ToMidiVelocity(x.Value.Velocity)) : double.NaN);
         });
         Console.WriteLine($"  the solo part playing in {songs.Count(x => x.Plays) / (double)songs.Length:P0} of the songs, answering in {songs.Count(x => x.Answers > 0) / (double)songs.Length:P0}; " +
-                          $"{songs.Where(x => x.Answers > 0).Average(x => x.PerBar):F2} notes a bar in the sections answering, {songs.Where(x => x.Answers > 0).Average(x => x.Velocity):+0.000;-0.000} of velocity against the melody");
+                          $"{songs.Where(x => x.Answers > 0).Average(x => x.PerBar):F2} notes a bar in the sections answering, {songs.Where(x => x.Answers > 0).Average(x => x.Velocity):+0.0;-0.0} of MIDI velocity, as heard, against the melody");
         foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Facet * 5), 0, 4)).OrderBy(x => x.Key))
             Console.WriteLine($"  melody {band.Key}/5, {band.Count()} songs: answering {band.Count(x => x.Answers > 0) / (double)band.Count():P0}");
         await Task.CompletedTask;

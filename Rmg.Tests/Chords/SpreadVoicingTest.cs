@@ -22,10 +22,23 @@ public sealed class SpreadVoicingTest
     [Test]
     public async Task AWilderSongsChords_SpreadOverTwoOctaves_NowAndThen_APlainOnesNever()
     {
-        var (plain, wild) = (TwoOctaves(0), TwoOctaves(0.75));
-        // (0.1% to 3% of the chords, in 2 songs of 64, over these songs)
-        Console.WriteLine($"spread over two octaves: {wild.Share:P1} of the chords in {wild.Songs} songs of 64 at 0.75, {plain.Share:P1} at 0");
+        // the songs: a plain one's chords never spread, wherever its instrument would leave room
+        var (plain, wild) = (TwoOctaves(0), TwoOctaves(1));
+        // (none at 0; at 1, 0% to 2.6% of the chords, in no song to one of 64, over three corpora's, the chords' instrument
+        // and register pulling most spreads back in)
+        Console.WriteLine($"spread over two octaves: {wild.Share:P1} of the chords in {wild.Songs} songs of 64 at 1, {plain.Share:P1} at 0");
         await Assert.That(plain.Share).IsEqualTo(0);
-        await Assert.That(wild.Songs).IsGreaterThan(0);
+
+        // the voicing drawn: a triad laid out over two octaves now and then at the wild end, never at the plain
+        var triad = ChordShapes.All.Single(x => x.Name == "Triad");
+        double Spread(double chords)
+        {
+            var context = new Rmg.Core.Probabilities.GenerationContext(1);
+            return Enumerable.Range(0, 2_000).Average(_ => ChordVoicing.Apply(context, triad, chords) is var x && x.Max() - x.Min() >= 24 ? 1.0 : 0);
+        }
+
+        // its weight 0.5 of 4.5 at 1, about 11%, and none at 0
+        await Assert.That(Spread(0)).IsEqualTo(0);
+        await Assert.That(Spread(1)).IsGreaterThan(0.05);
     }
 }

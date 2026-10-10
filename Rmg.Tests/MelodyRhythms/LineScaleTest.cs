@@ -79,7 +79,9 @@ public sealed class LineScaleTest
         var genre = new Genre(System.Collections.Immutable.ImmutableDictionary<string, System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
             .Add("lineScale", System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("section", new(1, 1, 1)))
             .Add("riffScale", System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("chromatic", new(1, 1, 1))));
-        var scales = TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
+        // the riff given, as a song draws one half the time
+        var scales = TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre,
+                Parts: System.Collections.Immutable.ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true))))
             .SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.LineScale).Select(x => (Role: song.Song.TrackDefinitions[x.Track].Role, Scale: (LineScale)x.Value!))).ToArray();
 
         await Assert.That(scales.Where(x => x.Role == TrackRole.Riff).All(x => x.Scale == LineScale.Chromatic)).IsTrue();

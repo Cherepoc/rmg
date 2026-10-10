@@ -129,9 +129,8 @@ public sealed class VoiceLeaderTest
     public async Task Songs_ChordTracksRarelyJumpRegister()
     {
         int changes = 0, jumps = 0;
-        for (var seed = 0; seed < 16; seed++)
+        for (var seed = 0; seed < 64; seed++)
         {
-            var song = TestCorpus.Get(seed).Song;
             var chords = TestCorpus.Get(seed).Rendered.Tracks
                 .First(x => x.Role == TrackRole.Chords && !x.IsDouble)
                 .NoteTimeline.GroupBy(x => x.Position)
@@ -148,6 +147,7 @@ public sealed class VoiceLeaderTest
 
         // only a bar that starts afresh jumps, by design
         Console.WriteLine($"{jumps} of {changes} chord changes jumping an octave's register");
+        // seen 0.4% to 1.1% over three corpora's 64 songs
         await Assert.That(jumps / (double)changes).IsLessThan(0.05);
     }
 

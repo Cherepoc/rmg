@@ -6,7 +6,7 @@ using Rmg.Core.Songs;
 namespace Rmg.Tests.MelodyRhythms;
 
 /// <summary>
-///     How closely the melody follows the shape its phrases aim at: within every 4-bar pattern, each bar's mean pitch
+///     How closely the melody follows the shape its phrases aim at: within every pattern, each bar's mean pitch
 ///     against the register the bar aims at, both from the pattern's mean, so that where the phrase sits and the octave
 ///     it plays in are left out.
 /// </summary>

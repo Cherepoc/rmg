@@ -67,6 +67,7 @@ public sealed class GivenDrumPiecesTest
     [Arguments(1.0)]
     public async Task TheKickAndPercussionGiven_AreHeard_HoweverWildTheGroove(double groove)
     {
+        var heard = 0;
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var song = TestCorpus.Get(seed, new SongOverrides(DrumPieces: ["kick", "bongo", "conga"], Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Groove, groove)));
@@ -77,7 +78,10 @@ public sealed class GivenDrumPiecesTest
                 .Where(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0)
                 .Select(x => DrumPieces.NameOf(DrumGroups.GetDrum(x)));
             await Assert.That(silent).IsEmpty().Because($"seed {seed}");
+            heard++;
         }
+
+        await Assert.That(heard).IsGreaterThan(0);
     }
 
     [Test]

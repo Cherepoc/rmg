@@ -4,8 +4,8 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Tests.SongGenerators;
 
 /// <summary>
-///     A bar of a track pattern in which the rhythm drops every hit must still take its 4 beats. The song generator
-///     builds a 4-bar pattern the same way as below: each bar is a note pattern turned into a
+///     A bar of a track pattern in which the rhythm drops every hit must still take its beats. The pattern generator
+///     builds a pattern the same way as below: each bar is a note pattern turned into a
 ///     <see cref="TrackEventStateTimelineMap{T}" />, and the bars are put one after another with <c>Unroll</c>.
 /// </summary>
 public sealed class SongGeneratorSilentBarTest
@@ -60,7 +60,7 @@ public sealed class SongGeneratorSilentBarTest
 
     private static TrackEventStateTimelineMap<StateMap> CreateBar(TimelineItem<StateMap>[] notes)
     {
-        // the same calls as SongGenerator's noteHigherPatternGenerator makes for a bar
+        // the same calls as PatternGenerator makes for a bar
         var noteTimeline = EventTimeline.Create(BarDuration, notes);
         var trackTimeline = noteTimeline.ToEventStateTimelineMap(BarStateMap);
         return TrackEventStateTimelineMap.Create(

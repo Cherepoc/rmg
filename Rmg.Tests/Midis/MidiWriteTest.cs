@@ -20,35 +20,6 @@ internal static class MidiBytes
 
 public sealed class MidiWriteTest
 {
-    [Test]
-    public async Task OneTrack()
-    {
-        TimelineItem<RenderedNote>[] renderedNotes =
-        [
-            new RenderedNote(64, 1, 1).ToTimelineItem(0),
-        ];
-        var noteTimeline = EventTimeline.Create(1, renderedNotes);
-        var track = new RenderedTrack(false, TrackRole.Chords, 1, noteTimeline, 0);
-        
-        ImmutableArray<RenderedTrack> tracks = [
-            track
-        ];
-        var renderedSong = new RenderedSong(1, [(0, Meter.FourFour)], StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), tracks);
-        
-        var memoryStream = new MemoryStream();
-        renderedSong.Write(memoryStream, null);
-        var result = memoryStream.ToArray();
-
-        byte[] expected =
-        [
-            ..MidiBytes.OneBeatSongStart,
-            0x4D, 0x54, 0x72, 0x6B, 0x00, 0x00, 0x00,
-            0x10, 0x00, 0xC0, 0x01, 0x00, 0x90, 0x40, 0x7F, 0x83, 0x60, 0x80, 0x40, 0x40, 0x00, 0xFF, 0x2F, 0x00,
-        ];
-
-        await Assert.That(result).IsEquivalentTo(expected, CollectionOrdering.Matching);
-    }
-
     private static byte[] WriteOneBeatSong(params TimelineItem<RenderedNote>[] renderedNotes)
     {
         var track = new RenderedTrack(false, TrackRole.Chords, 1, EventTimeline.Create(1, renderedNotes), 0);

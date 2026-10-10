@@ -92,7 +92,8 @@ public sealed class ExpressionTest
         {
             var kind = (BendKind)note.Value.State.GetStateValue(CompositionStateKinds.Bend);
             var depth = note.Value.State.GetStateValue(CompositionStateKinds.BendDepth);
-            if (kind is BendKind.None or BendKind.Slide)
+            // but a slide, from the note before, and a dive, a whammy bar's drop by its own depth
+            if (kind is BendKind.None or BendKind.Slide or BendKind.Dive)
                 continue;
 
             var direction = kind is BendKind.BendAndRelease or BendKind.PrebendRelease ? 1 : -1;
@@ -286,7 +287,9 @@ public sealed class ExpressionTest
         {
             var program = InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
             await Assert.That(Expression.Bends(program)).IsTrue();
-            await Assert.That(note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0).IsTrue();
+            // a line's note, in octaves too, or a riff's dive, which takes its power chord down with it
+            await Assert.That(note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0
+                              || (BendKind)note.Value.State.GetStateValue(CompositionStateKinds.Bend) == BendKind.Dive).IsTrue();
         }
     }
 

@@ -46,11 +46,11 @@ public sealed class LineTest
     {
         var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
 
-        // the middle of the range is between F4 and F#4 (65.5), so aiming 2 below it is about E♭4, nearest a chord's note
+        // the middle of the range is between F4 and F#4 (65.5), so aiming 2 below it is about E♭4, whose nearest chord's
+        // note is E4
         var note = Place(line, C, CTones, Strong, 0, -2);
 
-        await Assert.That(CTones).Contains(note % 12);
-        await Assert.That(Math.Abs(note - 65)).IsLessThanOrEqualTo(2);
+        await Assert.That(note).IsEqualTo(64);
     }
 
     [Test]
@@ -238,18 +238,14 @@ public sealed class LineTest
             var heard = TrackOf(TrackRole.Melody).NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray();
             await Assert.That(heard.Length).IsEqualTo(solo.Length);
             var melody = heard.Where((_, i) => !solo[i]).ToArray();
-            var chords = TrackOf(TrackRole.Chords).NoteTimeline.GroupBy(x => x.Position)
-                .Select(x => (Position: x.Key, Classes: x.Select(note => note.Value.Offset % 12).ToHashSet()))
-                .ToArray();
-
             moves.AddRange(melody.Zip(melody.Skip(1)).Select(x => Math.Abs(x.Second.Value.Offset - x.First.Value.Offset)));
-            foreach (var note in melody.Where(x => Math.Abs(x.Position - Math.Round(x.Position)) < 1e-9))
+            // a note on the beat against its own chord, as its state has it, not the chords' part's strokes, which an
+            // arpeggio or a rest leaves out
+            foreach (var note in song.Notes![song.Track(TrackRole.Melody)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0
+                                                                                        && Math.Abs(x.Position - Math.Round(x.Position)) < 1e-9))
             {
-                var chord = chords.LastOrDefault(x => x.Position <= note.Position);
-                if (chord.Classes is null)
-                    continue;
                 onBeat++;
-                if (chord.Classes.Contains(note.Value.Offset % 12))
+                if (Realizer.GetChordNotes(note.Value.State).Classes.Contains(note.Value.Pitches[0].Mod(12)))
                     onBeatChordNotes++;
             }
         }

@@ -79,7 +79,8 @@ public sealed class MidiPartChannelsTest
         var memoryStream = new MemoryStream();
         song.Write(memoryStream, null);
 
-        // the song plays at that volume unasked, so nothing about it is worth a byte
-        await Assert.That(memoryStream.ToArray().Contains((byte)0xB0)).IsFalse();
+        // the song plays at that volume unasked, so nothing about it is worth a byte: no controller 7, the channel's volume
+        var bytes = memoryStream.ToArray();
+        await Assert.That(bytes.Zip(bytes.Skip(1)).Any(x => (x.First & 0xF0) == 0xB0 && x.Second == 0x07)).IsFalse();
     }
 }

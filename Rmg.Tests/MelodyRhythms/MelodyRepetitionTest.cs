@@ -5,7 +5,7 @@ using Rmg.Core.Events;
 namespace Rmg.Tests.MelodyRhythms;
 
 /// <summary>
-///     How the melody plays again what comes back: a section's second 4-bar pattern against its first, which has the
+///     How the melody plays again what comes back: a section's second pattern against its first, which has the
 ///     same state, and a section that recurs against where it first played; and how the melody moves, within its
 ///     phrases and where a phrase starts again, which it does mostly after a rest.
 /// </summary>
@@ -17,7 +17,7 @@ public sealed class MelodyRepetitionTest
     /// <param name="Same">Of those, the ones that play the same note.</param>
     /// <param name="SameClass">Of those, the ones that play the same note in some octave.</param>
     /// <param name="SectionStartLeaps">Moves into a section's first note that are leaps.</param>
-    /// <param name="Joins">Moves into the first note of a 4-bar pattern, where a phrase starts again.</param>
+    /// <param name="Joins">Moves into the first note of a pattern, where a phrase starts again.</param>
     /// <param name="JoinLeaps">Of those, the leaps.</param>
     /// <param name="RestedJoinLeaps">Of those, the ones after a rest of half a beat or more.</param>
     internal sealed record Measures(
@@ -47,7 +47,8 @@ public sealed class MelodyRepetitionTest
                 .Select(x => (Position: x.Key, Classes: x.SelectMany(n => n.Value.Pitches).Select(p => p.Mod(12)).ToHashSet()))
                 .ToArray();
             notes += melody.Length;
-            var patternStarts = song.Map.Sections.SelectMany(x => new[] { x.Start, x.Start + x.Meter.PatternDuration }).ToArray();
+            // every pattern's start in its section, the third and fourth of a long section's too
+            var patternStarts = song.Map.Sections.SelectMany(x => Enumerable.Range(0, (int)Math.Ceiling(x.Duration / x.Meter.PatternDuration - 1e-9)).Select(p => x.Start + p * x.Meter.PatternDuration)).ToArray();
             for (var i = 1; i < melody.Length; i++)
             {
                 var move = Math.Abs(melody[i].Value.Pitches[0] - melody[i - 1].Value.Pitches[0]);
@@ -130,9 +131,8 @@ public sealed class MelodyRepetitionTest
     }
 
     /// <summary>
-    ///     How much of a recurring section's melody plays the notes of its first appearance, in songs that improvise and
-    ///     in songs that do not (<see cref="MelodyLayers.Improvisation" />), and how much of its answer the question's,
-    ///     its first half and its second.
+    ///     A melody over three phrases states, restates and answers: its second phrase keeps more of the first's onsets
+    ///     than its third, and of those it keeps, the first's contour more often.
     /// </summary>
     [Test]
     public async Task ATwelveBarMelody_StatesRestatesAndAnswers_ItsThirdPhraseTheOneThatChanges()
@@ -140,7 +140,7 @@ public sealed class MelodyRepetitionTest
         // of the first phrase's onsets in a section's first play, the share the second phrase keeps and the third, and of
         // those kept, the share whose step to the next note is the first phrase's, its contour
         int onsets = 0, keptSecond = 0, keptThird = 0, contourSecond = 0, contourThird = 0, sameSecond = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
         {
             var notes = song.Notes(song.Track(TrackRole.Melody)).OrderBy(x => x.Position).ToArray();
             var at = notes.Select((x, i) => (Position: Math.Round(x.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
@@ -170,6 +170,7 @@ public sealed class MelodyRepetitionTest
                           + $"the third {keptThird / (double)onsets:P0}, its contour {contourThird / (double)keptThird:P0}");
         await Assert.That(onsets).IsGreaterThan(100);
         await Assert.That(keptSecond).IsGreaterThan(keptThird);
+        await Assert.That(contourSecond / (double)keptSecond).IsGreaterThan(contourThird / (double)keptThird);
     }
 
     /// <summary>
@@ -204,6 +205,11 @@ public sealed class MelodyRepetitionTest
         await Assert.That(middleRoots / (double)middleChanges).IsGreaterThan(roots / (double)changes - 0.05);
     }
 
+    /// <summary>
+    ///     How much of a recurring section's melody plays the notes of its first appearance, in songs that improvise and
+    ///     in songs that do not (<see cref="MelodyLayers.Improvisation" />), and how much of its answer the question's,
+    ///     its first half and its second.
+    /// </summary>
     internal static (double Fixed, double Improvised, double AnswerFirstHalf, double AnswerSecondHalf, double[] OnsetsKept, double[] ImprovisedByHalf, double FixedClass, double AnswerFirstHalfClass) MeasureRecurrence(IEnumerable<CorpusSong> songs)
     {
         // the same note, and the same note in any octave, as a tune an octave off
@@ -279,6 +285,11 @@ public sealed class MelodyRepetitionTest
         await Assert.That(m.Improvised).IsBetween(0.5, 0.95);
         await Assert.That(m.AnswerFirstHalfClass).IsGreaterThan(0.6);
         await Assert.That(m.AnswerSecondHalf).IsBetween(0.5, 0.9);
+        // the two sides the name contrasts: a song that improvises keeps less, and an answer changes after its first half
+        Console.WriteLine($"not improvised {m.Fixed:P1}, improvised {m.Improvised:P1}; an answer's halves {m.AnswerFirstHalf:P1} and {m.AnswerSecondHalf:P1}");
+        // seen over three corpora: 80% to 82% against 57% to 60%, an answer's halves 79% to 82% against 57% to 62%
+        await Assert.That(m.Fixed).IsGreaterThan(m.Improvised);
+        await Assert.That(m.AnswerFirstHalf).IsGreaterThan(m.AnswerSecondHalf);
     }
 
     [Test]

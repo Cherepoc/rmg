@@ -80,16 +80,11 @@ public sealed class MelodyRhythmTest
         await Assert.That(values.All(x => x is >= 0 and <= 1)).IsTrue();
     }
 
-    private static TimelineItem<RenderedNote>[] RenderMelody(int seed) => RenderMelodyFrom(seed).Melody;
-
-    /// <summary>The melody, a note in octaves once, by its own pitch, which comes first, and where the song's first section starts.</summary>
-    private static (TimelineItem<RenderedNote>[] Melody, double Origin) RenderMelodyFrom(int seed)
-    {
-        var (song, origin) = TestCorpus.Get(seed);
-        return (Render.RenderSong(TestCorpus.Unornamented(song))
+    /// <summary>The melody without its ornaments, a note in octaves once, by its own pitch, which comes first.</summary>
+    private static TimelineItem<RenderedNote>[] RenderUnornamentedMelody(int seed) =>
+        [..Render.RenderSong(TestCorpus.Unornamented(TestCorpus.Get(seed).Song))
             .Tracks.First(x => x.Role == TrackRole.Melody && !x.IsDouble)
-            .NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray(), origin);
-    }
+            .NoteTimeline.GroupBy(x => x.Position).Select(x => x.First())];
 
     [Test]
     public async Task Melody_PlaysOneNoteAtATime()
@@ -97,7 +92,7 @@ public sealed class MelodyRhythmTest
         var pairs = 0;
         for (var seed = 0; seed < 32; seed++)
         {
-            var melody = RenderMelody(seed);
+            var melody = RenderUnornamentedMelody(seed);
             for (var i = 1; i < melody.Length; i++)
                 await Assert.That(melody[i - 1].Position + melody[i - 1].Value.Duration).IsLessThanOrEqualTo(melody[i].Position + 1e-9);
             pairs += Math.Max(0, melody.Length - 1);
@@ -112,13 +107,14 @@ public sealed class MelodyRhythmTest
         int phrases = 0, held = 0, rested = 0;
         for (var seed = 0; seed < 256; seed++)
         {
-            var (melody, origin) = RenderMelodyFrom(seed);
+            var melody = RenderUnornamentedMelody(seed);
             var map = TestCorpus.Get(seed).Map;
             // a walk into a section is the next phrase's pickup, not this one's end (LineFills), however swung
             var walks = TestCorpus.Get(seed).Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == TestCorpus.Get(seed).Track(TrackRole.Melody))
                 .SelectMany(x => (((double, double[]))x.Value!).Item2).ToArray();
             melody = [..melody.Where(x => !walks.Any(w => Math.Abs(x.Position - w) < 0.2))];
-            // a phrase is a section's 4-bar pattern, so its last bar ends at every pattern's end in its section's meter
+            // a phrase is a section's pattern, so its last bar ends at every pattern's end in its section's meter, a short
+            // last bar's at the section's end
             var ends = map.Sections.SelectMany(x => Enumerable.Range(1, (int)Math.Ceiling(x.Duration / x.Meter.PatternDuration - 1e-9)).Select(p => (End: Math.Min(x.Start + p * x.Meter.PatternDuration, x.End), Meter: x.Start + p * x.Meter.PatternDuration > x.End + 1e-9 ? map.MeterAt(x.End - 1e-6) : x.Meter)));
             foreach (var (end, meter) in ends)
             {
@@ -138,6 +134,7 @@ public sealed class MelodyRhythmTest
         // a fifth of the phrases run on into the next, and a phrase ending late holds its note a short while: about half
         // end on a held note, a calibration's bound well under it
         Console.WriteLine($"of {phrases} phrases, {held / (double)phrases:P1} end on a held note, {rested / (double)phrases:P1} with a rest");
+        // seen over three corpora: 51% to 55% held, 77% to 79% with a rest
         await Assert.That(held / (double)phrases).IsGreaterThan(0.4);
         await Assert.That(rested / (double)phrases).IsGreaterThan(0.7);
     }

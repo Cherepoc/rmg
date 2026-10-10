@@ -10,7 +10,7 @@ public sealed class SongGeneratorDrumsTest
     {
         // the cross-stick is a stroke of either snare, so a snare is told by its own sound
         var mainSnareCodes = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare }
-            .Select(x => x.ArticulationCodes.Except([37]).ToHashSet())
+            .Select(x => x.ArticulationCodes.Except([DrumSounds.CrossStick]).ToHashSet())
             .ToArray();
 
         for (var seed = 0; seed < 64; seed++)

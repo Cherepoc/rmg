@@ -38,7 +38,7 @@ public sealed class MediantTest
     ///     songs' never.
     /// </summary>
     [Test]
-    public async Task AMediant_IsIiiOrViTurnedMajor_ATenthOfThemInMiddlingSongs()
+    public async Task AMediant_IsIiiOrViTurnedMajor_NowAndThenInMiddlingSongs_NeverInThePlainest()
     {
         foreach (var (name, songs) in new[]
                  {

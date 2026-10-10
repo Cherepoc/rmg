@@ -291,13 +291,13 @@ public sealed class DrumSoloTest
             Console.WriteLine($"  {setup.Key}: {setup.Count()} solos of {Songs.Count(x => x.Song.Draws!.DrumSetup == setup.Key && x.PlaysDrums)} songs; drums " +
                               string.Join(", ", setup.SelectMany(x => x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key) && n.Value.Any(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End)).Select(n => DrumGroups.GetDrum(n.Key).Name))
                                   .GroupBy(x => x).OrderByDescending(x => x.Count()).Take(10).Select(x => $"{x.Key} {x.Count()}")));
-        Console.WriteLine($"  the kick {kicks.Select((x, i) => x.Length / bars[i]).Average():F2} hits a bar, velocity {kicks.SelectMany(x => x).Select(x => (double)x.Value.Velocity).DefaultIfEmpty().Average():F2}; " +
+        Console.WriteLine($"  the kick {kicks.Select((x, i) => x.Length / bars[i]).Average():F2} hits a bar, velocity {kicks.SelectMany(x => x).Select(x => Rmg.Core.Rendering.Render.ToMidiVelocity(x.Value.Velocity)).DefaultIfEmpty().Average():F2}; " +
                           $"under a pause in {pausing.Count(x => x) / (double)solos.Length:P0} of the solos; the hands {handsABeat.Average():F2} hits a beat");
         // its arc, its runs and licks: the hands' hits a beat and their loudness by the intensity's third, and the intensity by the solo's third
         var arc = solos.SelectMany(x => x.Plan.Where(p => p.Gesture is SoloGesture.Run or SoloGesture.Lick).Select(p =>
         {
             var hits = x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key) && n.Key != kick).SelectMany(n => n.Value).Where(h => h.Position >= p.Start - 1e-9 && h.Position < p.End - 1e-9).ToArray();
-            return (p.Intensity, Place: (p.Start - x.Span.Start) / (x.Plan[^1].End - x.Span.Start), ABeat: hits.Length / (p.End - p.Start), Velocity: hits.Select(h => h.Value.Velocity).DefaultIfEmpty().Average());
+            return (p.Intensity, Place: (p.Start - x.Span.Start) / (x.Plan[^1].End - x.Span.Start), ABeat: hits.Length / (p.End - p.Start), Velocity: hits.Select(h => Rmg.Core.Rendering.Render.ToMidiVelocity(h.Value.Velocity)).DefaultIfEmpty().Average());
         })).ToArray();
         Console.WriteLine($"  the arc: by intensity, " + string.Join(", ", arc.GroupBy(x => Math.Min(2, (int)(x.Intensity * 3))).OrderBy(x => x.Key)
             .Select(x => $"third {x.Key + 1} {x.Average(y => y.ABeat):F2} hits a beat at {x.Average(y => y.Velocity):F2}")) + "; by place, intensity " +

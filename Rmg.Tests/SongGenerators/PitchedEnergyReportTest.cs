@@ -16,7 +16,7 @@ public sealed class PitchedEnergyReportTest
         var rows = TestCorpus.Measure(256, song =>
         {
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
-            var answers = song.Trace.Where(x => x.Point == TracePoints.MelodyAnswer).ToDictionary(x => x.Section, x => (double)x.Value!);
+            var grooves = song.Trace.Where(x => x.Point == TracePoints.SectionUnconventionality).ToDictionary(x => x.Section, x => ((Unconventionality)x.Value!)[Facet.Groove]);
             var notes = song.Song.Notes!;
             var melody = notes.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
             if (melody.Length == 0)
@@ -29,7 +29,7 @@ public sealed class PitchedEnergyReportTest
                 var inSpan = melody.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray();
                 if (inSpan.Length == 0)
                     continue;
-                var rhythm = 0.5 + Math.Log(answers[span.SectionId] / (1 - answers[span.SectionId])) / Math.Log(16);
+                var rhythm = grooves[span.SectionId];
                 songRows.Add((energy[span.SectionId], rhythm, PerBar(song.Track(TrackRole.Melody)), PerBar(song.Track(TrackRole.Chords)), PerBar(song.Track(TrackRole.Bass)),
                     inSpan.Average(x => x.Value.Pitches[0]) - songPitch));
             }

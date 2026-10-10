@@ -11,7 +11,8 @@ public sealed class TextureTest
     public async Task NoAppearanceOfASection_FallsSilent_ItsPartAloneOneWithNotesThere()
     {
         var silent = TestCorpus.Measure(512, song => song.Map.Sections
-            .Where(span => !song.Song.Notes!.Values.Any(notes => notes.Any(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9)))
+            // a note sounding past its first beat, not a landing on its downbeat out of the section before
+            .Where(span => !song.Song.Notes!.Values.Any(notes => notes.Any(n => n.Position < span.End - 1e-9 && n.Position + n.Value.Duration > Math.Min(span.End, span.Start + 1) + 1e-9)))
             .Select(span => $"seed {song.Seed} at {span.Start}")
             .ToArray()).SelectMany(x => x).ToArray();
 
