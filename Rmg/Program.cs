@@ -1,6 +1,7 @@
 using Rmg;
 using Rmg.Core.Composition;
 using Rmg.Core.Versions;
+using Rmg.WebApi.Genres;
 
 var parseResult = CliOptionsParser.Parse(args);
 
@@ -18,13 +19,13 @@ if (parseResult.Command == CliCommand.Version)
 
 if (parseResult.Command == CliCommand.Fingerprint)
 {
-    Console.Out.WriteLine(SongFingerprint.Compute(SongFingerprint.CorpusSize));
+    Console.Out.WriteLine(SongFingerprint.Compute(SongFingerprint.CorpusSize, GenrePresetFile.Genres()));
     return 0;
 }
 
 if (parseResult.Command == CliCommand.FingerprintSongs)
 {
-    foreach (var line in SongFingerprint.ComputeBySong(SongFingerprint.CorpusSize))
+    foreach (var line in SongFingerprint.ComputeBySong(SongFingerprint.CorpusSize, GenrePresetFile.Genres()))
         Console.Out.WriteLine(line);
     return 0;
 }

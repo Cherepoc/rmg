@@ -14,10 +14,7 @@ internal static class GenrePresets
 
     /// <summary>A preset's genre, as a request reads it (<see cref="Rmg.WebApi.Songs.GenerateSongRequest.Genre" />); what is wrong with it fails.</summary>
     public static Genre Genre(Preset preset) =>
-        new Rmg.WebApi.Songs.GenerateSongRequest(Genre: preset.Choices.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, JsonElement>)x.Value))
-            .TryRead(out _, out var overrides, out _, out var error)
-            ? overrides.Genre!
-            : throw new InvalidOperationException($"{preset.Name}: {error}");
+        Rmg.WebApi.Genres.GenrePresetFile.Genre(new Rmg.WebApi.Genres.GenrePreset(preset.Id, preset.Name, preset.Description, preset.Choices));
 
     public static Genre Genre(string id) => Genre(All.Single(x => x.Id == id));
 }

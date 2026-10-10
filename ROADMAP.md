@@ -53,7 +53,7 @@ fixed; the review and the plan are kept outside the repository):
    pitched track, a pinch and a dive by their note, key changes, octaves and dips by their place, and every appearance
    by its section and how often it played, each from a stream of its own; a soloist's draws whatever its instrument; a
    key named apart from a seed (`Seeds.Key`). The fingerprint over songs with values supplied, the deploy's over the
-   page's genres, and a report over every preset's songs (`CorpusFingerprintTest.ReportGenres`). The new songs showed,
+   page's genres, and over every preset's songs (`--fingerprint-songs`). The new songs showed,
    and the step fixed: a soloing bass's run octaved, the kick's doubles left behind by its push and its polymeter, a
    ghost counted a downbeat, a line cliché through a chord a later note voices otherwise, marking drums soloing into
    silence, and a strum's turn rounded the wrong way.

@@ -63,7 +63,7 @@ public sealed class SongsVersionTest
     [Test]
     public async Task TheFingerprint_IsTheSameEveryTime()
     {
-        await Assert.That(SongFingerprint.Compute(1)).IsEqualTo(SongFingerprint.Compute(1));
+        await Assert.That(SongFingerprint.Compute(1, [])).IsEqualTo(SongFingerprint.Compute(1, []));
     }
 
     private static string FindVersionFile()
