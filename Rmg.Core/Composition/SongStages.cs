@@ -83,6 +83,7 @@ internal static class SongStages
         new("Silent start", Composition.SilentStart.Apply, CanSkip: true),
         new("Timing", Pocket.Apply, CanSkip: true),
         new("Expression", ExpressionStage, CanSkip: true),
+        new("Hook intro", HookIntro, CanSkip: true),
         new("Risers", Composition.Risers.Apply, CanSkip: true)
     ];
 
@@ -323,6 +324,42 @@ internal static class SongStages
         };
 
     /// <summary>How the parts are played beyond their notes, by every section's sound facet.</summary>
+    /// <summary>
+    ///     A hook intro as its chorus plays: every part's notes of the chorus's first phrase as every stage before made them,
+    ///     the twin's, the chugs', a figure's, a polymeter's, stop time's, the louder form's and the expression's among them,
+    ///     played again over the intro but its last bar, which leads into the chorus as its own; a chorus played as a solo
+    ///     left for the intro to quote as written.
+    /// </summary>
+    internal static SongDraft HookIntro(SongDecisions song, SongDraft draft)
+    {
+        var map = song.Form.Map;
+        if (map.Intro.Kind != IntroKind.Hook)
+            return draft;
+        var (chorus, index) = map.Sections.Select((x, i) => (Span: x, Index: i)).FirstOrDefault(x => song.Structure.Roles[x.Span.SectionId] == SectionRole.Chorus);
+        var lead = map.Origin - map.Meter.BarDuration;
+        if (chorus is null || song.Solos.ContainsKey(index) || lead <= 1e-9)
+            return draft;
+
+        // but a chorus in a key or at a tempo of its own, which the intro's would move, and which the lines' quote plays as it is
+        bool Alike<T>(StateKind<T> kind) where T : notnull
+        {
+            var timeline = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(kind);
+            return !timeline.Any(x => x.Position > 1e-9 && x.Position < lead - 1e-9 || x.Position > chorus.Start + 1e-9 && x.Position < chorus.Start + lead - 1e-9)
+                   && Equals(timeline.GetEffectiveValueAt(chorus.Start), timeline.GetEffectiveValueAt(0));
+        }
+
+        if (!Alike(StateKinds.KeyOffset) || !Alike(StateKinds.Tempo))
+            return draft;
+
+        return draft with
+        {
+            Notes = NotesOf(draft).ToImmutableSortedDictionary(x => x.Key, x => EventTimeline.Create(x.Value.Duration,
+                x.Value.Where(n => !n.IsWithin(0, lead))
+                    .Concat(x.Value.Where(n => n.IsWithin(chorus.Start, chorus.Start + lead)).Select(n => n.Value.ToTimelineItem(n.Position - chorus.Start)))
+                    .OrderBy(n => n.Position)))
+        };
+    }
+
     internal static SongDraft ExpressionStage(SongDecisions song, SongDraft draft) =>
         draft with
         {

@@ -129,6 +129,17 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
 {
     public SongMap Map => Song.Map!;
 
+    /// <summary>
+    ///     The sections where the song plays them, and before them a hook intro, its chorus's first phrase quoted (<see cref="IntroKind.Hook" />),
+    ///     as the span its chorus would be there.
+    /// </summary>
+    public SectionSpan[] PlayedSpans => field ??= Map.Intro.Kind == IntroKind.Hook && Map.Origin > 0
+        ? [new SectionSpan(Map.Sections[0].SectionId, 0, Map.Origin, Map.Meter, 0), ..Map.Sections]
+        : [..Map.Sections];
+
+    /// <summary>The span a position plays in, a hook intro's among them (<see cref="PlayedSpans" />); none for an intro of another kind or the ending.</summary>
+    public SectionSpan? SpanAt(double position) => position < Map.Origin - 1e-9 ? PlayedSpans.FirstOrDefault(x => x.Start < 1e-9 && x.End > position) : Map.SectionAt(position);
+
     /// <summary>The parts the song leaves out (<see cref="SongParts" />).</summary>
     public ImmutableHashSet<TrackRole> Absent => field ??= (ImmutableHashSet<TrackRole>)Trace.Single(x => x.Point == TracePoints.SongParts).Value!;
 

@@ -64,7 +64,9 @@ internal static class ExpressionRender
 
     /// <summary>The section a note plays in, which a gate's bars and a filter's opening count from; a note outside every section is a mistake.</summary>
     private static SectionSpan SectionAt(SongMap? map, double position) =>
-        map?.SectionAt(position + 1e-9) ?? (map is { Sections.Length: > 0 } && position >= map.Sections[^1].End - 1e-9 ? map.Sections[^1] : null)
+        // an intro's notes, a hook's quoting its chorus, counted from the song's start in the first section's meter
+        map is { Sections.Length: > 0 } && position < map.Origin - 1e-9 ? new SectionSpan(map.Sections[0].SectionId, 0, map.Origin, map.Meter, 0)
+        : map?.SectionAt(position + 1e-9) ?? (map is { Sections.Length: > 0 } && position >= map.Sections[^1].End - 1e-9 ? map.Sections[^1] : null)
         ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
 
     /// <summary>How far a time is from its bar's pulse before to the next, from 0 to 1: the beats of 4/4, the dotted quarters of 6/8, the groups of 7/8.</summary>

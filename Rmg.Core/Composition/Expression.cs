@@ -126,6 +126,14 @@ internal static class Expression
     /// <summary>Whether a strong effect is a filter's, which only a part it suits plays, a synth's.</summary>
     private static bool IsFilter(StrongEffect effect) => effect is StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening;
 
+    /// <summary>The states a part's notes keep into the ending from the last section: those it plays steadily, not a note's gestures.</summary>
+    private static readonly IStateKind[] EndingKinds =
+    [
+        CompositionStateKinds.Reverb, CompositionStateKinds.Chorus, CompositionStateKinds.Tone, CompositionStateKinds.Wow, CompositionStateKinds.Detune,
+        CompositionStateKinds.AutoPan, CompositionStateKinds.Tremolo, CompositionStateKinds.Echo, CompositionStateKinds.Filter, CompositionStateKinds.FilterCycle,
+        CompositionStateKinds.FilterDepth
+    ];
+
     /// <summary>Whether a strong effect is played only by a part it suits: a filter's, a synth's, and a gate's, held chords'.</summary>
     private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect == StrongEffect.Gate;
 
@@ -828,6 +836,13 @@ internal static class Expression
                     states[i] = state;
                 }
             }
+
+            // the ending's notes, the final chord, in the sound the last section left the part in: its sends, its tone, its
+            // tape and its steady effects, none of a note's own gestures
+            if (Array.FindLastIndex(states, x => x is not null) is var lastPlayed and >= 0 && timeline[lastPlayed].Position >= map.Sections[^1].Start - 1e-9)
+                for (var i = lastPlayed + 1; i < timeline.Count; i++)
+                    if (states[i] is null && timeline[i].Position >= map.Ending.Start - 1e-9)
+                        states[i] = timeline[i].Value.State.MergeWith(states[lastPlayed]!.Subset(EndingKinds));
 
             result[track] = EventTimeline.Create(
                 timeline.Duration,

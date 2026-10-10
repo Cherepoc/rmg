@@ -40,15 +40,29 @@ public sealed class HookIntroTest
             await Assert.That(song.Origin).IsEqualTo(chorus.Meter.PhraseDuration).Because($"seed {song.Seed}");
             // every line's notes as the chorus plays them, but in the last bar, which leads into the first section
             var quoted = song.Origin - chorus.Meter.BarDuration;
-            // in its key, and where the chorus doubles a line an octave apart, the intro's notes among its own
-            foreach (var track in new[] { song.Track(TrackRole.Melody), song.Track(TrackRole.CounterMelody) })
+            // every part's, the drums' too: the same notes at the same places, as every stage made the chorus's; but where the
+            // chorus is in a key or at a tempo of its own, which the quote leaves to the lines
+            bool Alike<T>(Rmg.Core.Events.StateKind<T> kind) where T : notnull
             {
-                var played = InKey(song, track, chorus.Start, quoted).ToDictionary(x => x.At, x => x.Classes);
-                // where the chorus plays them, which may rest a part the intro plays
-                foreach (var (at, pitches) in InKey(song, track, 0, quoted).Where(x => played.ContainsKey(x.At)))
+                var timeline = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(kind);
+                return !timeline.Any(x => x.Position > 1e-9 && x.Position < quoted - 1e-9 || x.Position > chorus.Start + 1e-9 && x.Position < chorus.Start + quoted - 1e-9)
+                       && Equals(timeline.GetEffectiveValueAt(chorus.Start), timeline.GetEffectiveValueAt(0));
+            }
+
+            if (!Alike(Rmg.Core.Events.StateKinds.KeyOffset) || !Alike(Rmg.Core.Events.StateKinds.Tempo))
+                continue;
+            foreach (var track in song.Song.Notes!.Keys)
+            {
+                // a drum's notes as they are, which no key moves
+                (double At, int[] Classes)[] Of(double from) => song.IsDrum(track)
+                    ? [..song.Song.Notes[track].Where(x => x.IsWithin(from, from + quoted)).Select(x => (Math.Round(x.Position - from, 6), x.Value.Pitches.ToArray()))]
+                    : InKey(song, track, from, quoted);
+                var (intro, played) = (Of(0), Of(chorus.Start));
+                await Assert.That(intro.Select(x => x.At)).IsEquivalentTo(played.Select(x => x.At)).Because($"seed {song.Seed}, track {track}");
+                foreach (var ((at, pitches), (_, chorusPitches)) in intro.Zip(played))
                 {
                     compared++;
-                    await Assert.That(pitches.All(played[at].Contains)).IsTrue().Because($"seed {song.Seed}, track {track} at {at}");
+                    await Assert.That(pitches.Order()).IsEquivalentTo(chorusPitches.Order()).Because($"seed {song.Seed}, track {track} at {at}");
                 }
             }
         }

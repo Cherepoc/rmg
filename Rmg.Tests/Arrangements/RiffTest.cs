@@ -28,7 +28,7 @@ public sealed class RiffTest
         foreach (var song in TestCorpus.Range(256).Where(x => !x.Absent.Contains(TrackRole.Riff)))
         {
             var riff = (PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Riff)];
-            var sectionStarts = song.Map.Sections.Select(x => Math.Round(x.Start, 6)).ToHashSet();
+            var sectionStarts = song.PlayedSpans.Select(x => Math.Round(x.Start, 6)).ToHashSet();
             foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff), Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0))
                          .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
             {

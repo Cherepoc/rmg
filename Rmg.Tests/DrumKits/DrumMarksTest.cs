@@ -34,7 +34,7 @@ public sealed class DrumMarksTest
             var map = song.Map;
             var changes = song.ChordChanges;
             bool Marks(double at) =>
-                map.Sections.Any(span => Math.Abs(at - span.Start) < DrumMarks.SwellBeats + 1e-6
+                song.PlayedSpans.Any(span => Math.Abs(at - span.Start) < DrumMarks.SwellBeats + 1e-6
                                          || at > span.Start && at < span.End && Math.Abs(Math.IEEERemainder(at - span.Start, span.Meter.PhraseDuration)) < 1e-6)
                 || changes.Any(x => Math.Abs(x - at) < 1e-6)
                 || Math.Abs(at - map.Ending.Start) < DrumMarks.SwellBeats + 1e-6;

@@ -25,9 +25,10 @@ public sealed class PalmMuteTest
                 if (items[i].Value.State.GetStateValue(CompositionStateKinds.PalmMute) == 0)
                     continue;
                 muted++;
-                // on a weak beat, a repeat of the note before or a riff's note chugging on its pedal
+                // on a weak beat, a repeat of the note before or a riff's note chugging on its pedal; but a hook intro's first,
+                // which quotes the chorus's after the note before it
                 var onPedal = items[i].Value.State.GetStateValue(CompositionStateKinds.LinePedal) > 0;
-                await Assert.That(onPedal || i > 0 && items[i].Value.Pitches.SequenceEqual(items[i - 1].Value.Pitches)).IsTrue();
+                await Assert.That(onPedal || i == 0 && song.Map.Intro.Kind == IntroKind.Hook || i > 0 && items[i].Value.Pitches.SequenceEqual(items[i - 1].Value.Pitches)).IsTrue();
                 await Assert.That(items[i].Value.State.GetStateValue(CompositionStateKinds.BeatRank)).IsGreaterThan(0);
                 shorter += rendered.Where(x => Math.Abs(x.Position - swing.Apply(items[i].Position)) < 0.05).Any(x => x.Value.Duration < items[i].Value.Duration - 1e-6) ? 1 : 0;
             }

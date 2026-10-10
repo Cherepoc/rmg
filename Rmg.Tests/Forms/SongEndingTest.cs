@@ -199,4 +199,26 @@ public sealed class SongEndingTest
         await Assert.That(bass.Value.GetStateValue(CompositionStateKinds.LineLanding)).IsEqualTo((int)ChordArrival.Root);
         await Assert.That(melody.Value.GetStateValue(CompositionStateKinds.LineLanding)).IsEqualTo((int)ChordArrival.Root);
     }
+
+    /// <summary>The final chord in the sound the last section left each part in: its reverb, its tone and its tape, not reset at the ending.</summary>
+    [Test]
+    public async Task TheFinalChord_KeepsTheLastSectionsSound()
+    {
+        var checkedNotes = 0;
+        foreach (var song in TestCorpus.Range(64).Where(x => x.Map.Ending.Duration > 0))
+        foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack))
+        {
+            var last = notes.LastOrDefault(x => x.IsWithin(song.Map.Sections[^1].Start, song.Map.Ending.Start));
+            if (last.Value is null)
+                continue;
+            foreach (var note in notes.Where(x => x.Position >= song.Map.Ending.Start - 1e-9))
+            foreach (var kind in new[] { CompositionStateKinds.Reverb, CompositionStateKinds.Tone, CompositionStateKinds.Wow })
+            {
+                checkedNotes++;
+                await Assert.That(note.Value.State.GetStateValue(kind)).IsEqualTo(last.Value.State.GetStateValue(kind)).Because($"seed {song.Seed}, track {track}, {kind.Name}");
+            }
+        }
+
+        await Assert.That(checkedNotes).IsGreaterThan(100);
+    }
 }

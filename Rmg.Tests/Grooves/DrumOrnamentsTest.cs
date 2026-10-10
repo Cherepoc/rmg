@@ -48,7 +48,7 @@ public sealed class DrumOrnamentsTest
                 var strokes = StrokesOf(note.Value);
                 await Assert.That(track == DrumGroups.GetTrackNumber(DrumDefinitions.AcousticSnare) || track == DrumGroups.GetTrackNumber(DrumDefinitions.ElectricSnare)).IsTrue().Because(because);
                 await Assert.That(note.Value.Pitches.Single()).IsEqualTo(DrumGroups.GetDrum(track).Sounds[0].Code).Because(because);
-                await Assert.That(map.SectionAt(note.Position) is { } section && note.Position - strokes * note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep) >= section.Start - 1e-9)
+                await Assert.That(song.SpanAt(note.Position) is { } section && note.Position - strokes * note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep) >= section.Start - 1e-9)
                     .IsTrue().Because(because);
                 await Assert.That(strokes is DrumOrnaments.FlamStrokes or DrumOrnaments.DragStrokes).IsTrue().Because(because);
                 // a flam on an 8th, a drag on a pulse
