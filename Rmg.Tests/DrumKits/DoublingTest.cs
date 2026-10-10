@@ -56,9 +56,7 @@ public sealed class DoublingTest
     {
         var accents = 0;
         foreach (var song in TestCorpus.Range(128))
-        // but where the kick plays a polymeter's cycle rather than its groove, which a drum bound to it plays only where the
-        // cycle's first cell has it (Polymeter)
-        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Doubles && !(song.PolymeterPlans.GetValueOrDefault(x.Section)?.Kick ?? false)))
+        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Doubles))
         foreach (var (track, doubling) in ((ImmutableDictionary<int, Doubling>)entry.Value!).Where(x => x.Value.Binding == DrumBinding.Accent))
         foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
         {

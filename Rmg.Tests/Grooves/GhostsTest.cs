@@ -23,7 +23,8 @@ public sealed class GhostsTest
         foreach (var (track, notes) in with.Song.Notes!.Where(x => snares.Contains(x.Key)))
         {
             var before = without.Song.Notes!.GetValueOrDefault(track)?.Select(x => Math.Round(x.Position, 6)).ToHashSet() ?? [];
-            foreach (var note in notes.Where(x => !before.Contains(Math.Round(x.Position, 6))))
+            // in a section, not a hook intro's quote of its chorus's, which HookIntroTest holds to its source
+            foreach (var note in notes.Where(x => !before.Contains(Math.Round(x.Position, 6)) && with.Map.SectionAt(x.Position) is not null))
             {
                 var bar = with.Map.SectionAt(note.Position)!;
                 var start = bar.Start + Math.Floor((note.Position - bar.Start + 1e-6) / bar.Meter.BarDuration) * bar.Meter.BarDuration;

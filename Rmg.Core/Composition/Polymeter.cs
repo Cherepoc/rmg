@@ -242,10 +242,10 @@ internal static class Polymeter
                 {
                     var (start, end) = frameCells.Key;
                     // a part with no note of its own in the first cell, a bass under a busy riff, starts every cell with its
-                    // first note in the frame, so that it plays the cycle rather than nothing; but a drum doubling the kick,
-                    // which plays only where the kick does
+                    // first note in the frame, so that it plays the cycle rather than nothing; a drum accenting the kick too,
+                    // on the cell's start, where the kick's cycle strikes
                     var first = notes.Where(x => x.IsWithin(start, start + longest)).ToArray();
-                    if (first.Length == 0 && !bound.Contains(x))
+                    if (first.Length == 0)
                         first = [..notes.Where(x => x.IsWithin(start, end)).Take(1).Select(x => x.Value.ToTimelineItem(start))];
                     foreach (var (_, _, at, length) in frameCells)
                         played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => PlayedAt(x.Value, x.Position - start + at)).Where(x => x.Position < end - 1e-9 && plays.Contains(Bar(x.Position))));

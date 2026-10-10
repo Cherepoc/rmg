@@ -59,7 +59,9 @@ internal static class LineFills
 
             var positions = Thin(run.Positions).TakeLast(way.MostNotes).ToArray();
             var from = positions[0];
-            var before = events.FindLastIndex(x => x.Position < from - 1e-9);
+            // from the last note in the scale before it, a note leading into the change by a half step giving way to the
+            // walk, which leads there now
+            var before = events.FindLastIndex(x => x.Position < from - 1e-9 && x.Value.GetStateValue(StateKinds.Alteration) == 0);
             var after = events.FindIndex(x => x.Position >= run.Line - 1e-9);
             // where the line plays on either side, not into a section it rests in or out of one, and into its own rest
             // where it walks only there
@@ -78,7 +80,8 @@ internal static class LineFills
             var held = events[before].Value.GetStateValue(StateKinds.HeldDuration);
             if (held > from - events[before].Position)
                 events[before] = events[before].Value.With(StateKinds.HeldDuration, from - events[before].Position).ToTimelineItem(events[before].Position);
-            events.RemoveAll(x => x.IsWithin(from, run.Line));
+            var last = events[before].Position;
+            events.RemoveAll(x => x.Position > last + 1e-9 && x.Position < run.Line - 1e-9);
             events.AddRange(walked);
             events.Sort((x, y) => x.Position.CompareTo(y.Position));
         }

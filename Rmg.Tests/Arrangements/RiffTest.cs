@@ -109,8 +109,9 @@ public sealed class RiffTest
                 // in the program the melody plays there
                 foreach (var note in twinned)
                 {
-                    // the melody's note sounding there, or the nearest
-                    var near = melody.MinBy(x => x.Position <= note.Position + 1e-9 && x.Position + x.Value.Duration > note.Position ? -1 : Math.Abs(x.Position - note.Position));
+                    // the melody's note sounding there, or the nearest, but a pinch's, which sounds its harmonic on its own program
+                    var near = melody.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Pinch) == 0)
+                        .MinBy(x => x.Position <= note.Position + 1e-9 && x.Position + x.Value.Duration > note.Position ? -1 : Math.Abs(x.Position - note.Position));
                     await Assert.That(program(song.Track(TrackRole.CounterMelody), note)).IsEqualTo(program(song.Track(TrackRole.Melody), near)).Because($"seed {song.Seed} at {note.Position}");
                 }
             }
@@ -140,8 +141,10 @@ public sealed class RiffTest
                 continue;
 
             // the doubling part's notes are the doubled part's in every pattern that part plays, and a held note struck again
-            // where a chord changes; its own where a texture rests the doubled part
-            var changes = song.ChordChanges;
+            // where a chord changes, an eighth early where the section pushes its changes (Pushes); its own where a texture
+            // rests the doubled part
+            var pushes = song.Trace.Any(x => x.Point == TracePoints.Push && x.Section == span.SectionId && x.Value is true);
+            var changes = song.ChordChanges.Concat(pushes ? song.ChordChanges.Select(x => x - Pushes.Early) : []).ToArray();
             bool InPlayedPattern(double position)
             {
                 var start = span.Start + Math.Floor((position - span.Start) / span.Meter.PatternDuration + 1e-9) * span.Meter.PatternDuration;

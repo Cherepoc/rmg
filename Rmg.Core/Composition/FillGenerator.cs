@@ -89,10 +89,12 @@ internal sealed class FillGenerator
     /// <param name="song">The song's sections and its intro and ending, put one after another.</param>
     /// <param name="lines">Every line the drums mark, in the song's order.</param>
     /// <param name="map">Where the song's parts are; none for a song that starts with its first section.</param>
+    /// <param name="stops">Where the song plays in stop time, which takes the drums' groove out, so that a drum heard only there is not.</param>
     public TrackEventStateTimelineMap<StateMap> Generate(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyList<FillLine> lines,
-        SongMap? map = null
+        SongMap? map = null,
+        IReadOnlyList<(double Start, double End, double BarDuration)>? stops = null
     )
     {
         // a fast section's runs play coarser notes, which finer ones would blur, at the tempo the section the fill ends
@@ -112,7 +114,7 @@ internal sealed class FillGenerator
             MarkLine(song, edits, line, MinNote(line.Position), drummer, map);
         }
 
-        LandTheUnheard(song, edits);
+        LandTheUnheard(song, edits, stops ?? []);
 
         return edits.ApplyTo(song);
     }
@@ -125,16 +127,17 @@ internal sealed class FillGenerator
     ///     any where none is, into a section it fits, a drum of the kit not into one of percussion only, drawn from a
     ///     sequence of its own, so that a drum the song has is heard.
     /// </summary>
-    private void LandTheUnheard(TrackEventStateTimelineMap<StateMap> song, TimelineEdits edits)
+    private void LandTheUnheard(TrackEventStateTimelineMap<StateMap> song, TimelineEdits edits, IReadOnlyList<(double Start, double End, double BarDuration)> stops)
     {
+        bool Stopped(double position) => stops.Any(x => position >= x.Start - 1e-9 && position < x.End - 1e-9);
         foreach (var sounds in _sounds.Sounds.Values.SelectMany(x => x.GroupBy(y => y.Track)))
         {
             var drum = DrumGroups.GetDrum(sounds.Key);
-            if (_filled.Contains(sounds.Key) || song.TrackTimelineMap.TryGetValue(sounds.Key, out var timeline) && timeline.EventTimeline.Any())
+            if (_filled.Contains(sounds.Key) || song.TrackTimelineMap.TryGetValue(sounds.Key, out var timeline) && timeline.EventTimeline.Any(x => !Stopped(x.Position)))
                 continue;
 
             var sound = sounds.MaxBy(x => drum.Sounds.First(y => y.Code == x.Code).Loudness)!;
-            var fits = _landings.Where(x => !x.IsPercussionOnly || drum.Family.HasFlag(DrumFamily.Percussion)).ToArray();
+            var fits = _landings.Where(x => (!x.IsPercussionOnly || drum.Family.HasFlag(DrumFamily.Percussion)) && !Stopped(x.Position)).ToArray();
             var withRole = fits.Where(x => x.Sounds.Any(y => y.Role == sound.Role)).ToArray();
             var landings = withRole.Length > 0 ? withRole : fits;
             if (landings.Length == 0)
