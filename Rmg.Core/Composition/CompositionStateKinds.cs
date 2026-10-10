@@ -162,6 +162,9 @@ internal static class CompositionStateKinds
     // how a section's chords are broken, an ArpeggioPattern, 0 for the whole chord at once
     public static StateKind<int> Arpeggio { get; } = StateKinds.CreateAdditive<int>(Prefix + "Arpeggio", StateScope.Render);
 
+    // the seed a chord broken in no pattern's order draws its notes by, the section's own for its part
+    public static StateKind<long> ArpeggioOrder { get; } = StateKinds.CreateAdditive<long>(Prefix + "ArpeggioOrder", StateScope.Render);
+
     // the tone a part breaking its chord lays on it, a ChordColour, 0 for none
     public static StateKind<int> Colour { get; } = StateKinds.CreateAdditive<int>(Prefix + "Colour", StateScope.Render);
 

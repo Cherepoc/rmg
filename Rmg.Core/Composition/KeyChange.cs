@@ -183,7 +183,7 @@ public sealed record KeyChange(double Position, int Semitones)
     ///     the scale making their quality, a cadence's raised step a minor scale's dominant major.
     /// </summary>
     /// <param name="common">The song's common state, its chords and scales, before any key change.</param>
-    /// <param name="streams">A key change's draws, by where it is, in 96ths of a beat (<see cref="PlacesPerBeat" />).</param>
+    /// <param name="streams">A key change's draws, by where it is (<see cref="SongMap.PlaceKey" />).</param>
     /// <param name="home">A section's home where a position is, in scale steps, which a chord's root plays over the progression's.</param>
     /// <returns>The key changes, the chains' among them; the roots' moves, a layer of the common state; and every chain, for the trace.</returns>
     internal static (ImmutableArray<KeyChange> Keys, StateTimelineMap Roots, ImmutableArray<(double Change, ImmutableArray<double> Chords, Device Device)> Chains) Prepare(
@@ -191,7 +191,7 @@ public sealed record KeyChange(double Position, int Semitones)
         StateTimelineMap common,
         SongMap map,
         double unconventionality,
-        Func<int, IGenerationContext> streams,
+        Func<long, IGenerationContext> streams,
         Func<double, int> home
     )
     {
@@ -232,7 +232,7 @@ public sealed record KeyChange(double Position, int Semitones)
         for (var i = 0; i < changes.Length; i++)
         {
             // each change's from a sequence of its own, by its place, so that a change before it leaves it as it was
-            var context = streams((int)Math.Round(changes[i].Position * PlacesPerBeat));
+            var context = streams(map.PlaceKey(changes[i].Position, PlacesPerBeat));
             var prepares = context.TestProbability(PrepareChance);
             var length = context.Pick(ByConvention.Weigh(ChainLengths, unconventionality));
             var (keyFromNext, rootStep) = context.Pick(ByConvention.Weigh(Links, unconventionality));

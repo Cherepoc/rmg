@@ -22,7 +22,7 @@ public sealed class FillArchetypeTest
 
     /// <summary>A middling song's tracks, every draw from the one context, for a fill's tests.</summary>
     internal static SongTracks Tracks(GenerationContext context) =>
-        SongTracks.Create(context, context, _ => context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null, Genre.None, _ => context, 0.5, 0.5, []);
+        SongTracks.Create(context, context, _ => context, true, new RhythmicUnconventionality(0.5), _ => context, _ => context, _ => context, context, DrumSetup.KitAndPercussion, null, Genre.None, _ => context, 0.5, 0.5, []);
 
     private sealed record Setup(FillGenerator Generator, TrackEventStateTimelineMap<StateMap> Song, int Snare);
 

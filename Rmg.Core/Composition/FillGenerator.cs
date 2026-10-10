@@ -30,6 +30,12 @@ internal sealed class FillGenerator
     ///     was; the generator's own until a line is marked, as the tests play one.
     /// </summary>
     private IGenerationContext _line;
+
+    /// <summary>The stream of the line's landing, apart from its fill's, whose draws vary with the fill; the line's own until a line is marked.</summary>
+    private IGenerationContext _landing;
+
+    // the landing's stream within the line's
+    private const int LandingStream = 1;
     private readonly RhythmicUnconventionality _songRhythm;
     private readonly ImmutableArray<int> _drumTracks;
 
@@ -63,7 +69,7 @@ internal sealed class FillGenerator
         _genre = genre;
         _unheard = unheard;
         _context = context;
-        _line = context;
+        (_line, _landing) = (context, context);
         _songRhythm = songRhythm;
         _drumTracks = [..tracks.SongDrums.Select(DrumGroups.GetTrackNumber)];
         _sounds = new FillSounds(tracks.SongDrums, DrumSounds.OddsOf(genre, GenreChoices.DrumSounds));
@@ -101,7 +107,8 @@ internal sealed class FillGenerator
         var lineSeed = _context.GenerateSeed();
         foreach (var line in lines)
         {
-            _line = new GenerationContext(Seeds.Derive(lineSeed, (long)Math.Round(line.Position * LinePlacesPerBeat)));
+            var key = map?.PlaceKey(line.Position, LinePlacesPerBeat) ?? (long)Math.Round(line.Position * LinePlacesPerBeat);
+            (_line, _landing) = (new GenerationContext(Seeds.Derive(lineSeed, key)), new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, key), LandingStream)));
             MarkLine(song, edits, line, MinNote(line.Position), drummer, map);
         }
 
@@ -216,10 +223,11 @@ internal sealed class FillGenerator
                 : span > 0 && play.Treatment == GrooveTreatment.Stop ? FillLayers.StopLandingChance
                 : tilt.Chance(x.Value, FillLayers.LandingLean)
         );
-        var landing = _sounds.DrawLanding(_line, landings, fills);
+        // the landing from a sequence of its own, so that the fill's draws before it leave it
+        var landing = _sounds.DrawLanding(_landing, landings, fills);
         // a pushed landing comes a note of the fill's rhythm near an 8th early, after a fill, not where the band stops
         // or counts in and lands on the line together
-        var isEarly = _line.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill && span > 0 && !line.IsLandingForced;
+        var isEarly = _landing.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill && span > 0 && !line.IsLandingForced;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
         if (!landing.IsEmpty)

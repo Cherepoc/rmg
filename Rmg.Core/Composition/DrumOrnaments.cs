@@ -67,7 +67,7 @@ internal static class DrumOrnaments
                     return note;
                 var (plays, share, strokes) = inFill ? (flams, FlamShare, FlamStrokes) : (drags, DragShare, DragStrokes);
                 // drawn by the note's place, so that a song made again plays it alike
-                if (!plays || song.Stream(SongStream.DrumOrnaments, track, (long)Math.Round(position * PlacesPerBeat)).GenerateDouble() >= share)
+                if (!plays || song.Stream(SongStream.DrumOrnaments, track, map.PlaceKey(position, PlacesPerBeat)).GenerateDouble() >= share)
                     return note;
                 var step = Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)) / Rate;
                 // its strokes in its section, none before a section's first note, and clear of the drum's own notes, which a

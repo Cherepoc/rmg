@@ -34,7 +34,7 @@ public sealed class UnconventionalityReportTest
         static bool Near(double value) => value < 0.1 || value > 0.9;
         string Share(Func<Unconventionality, bool> of) => $"{songs.Count(of) / (double)songs.Length:P1}";
         Console.WriteLine($"near an end: the song as a whole, its facets' mean, {Share(x => Near(x.Facets.Values.Average()))}, the base {Share(x => Near(x.Base))}, any facet {Share(x => x.Facets.Values.Any(Near))}, " +
-                          $"any facet of a section {Share(x => Enumerable.Range(0, 5).Any(section => x.GenerateSection(facet => new Rmg.Core.Probabilities.GenerationContext((uint)Rmg.Core.Probabilities.Seeds.Key((int)(x.Base * 1e6) + section, (int)facet))).Facets.Values.Any(Near)))}; " +
+                          $"any facet of a section {Share(x => Enumerable.Range(0, 5).Any(section => x.GenerateSection(facet => new Rmg.Core.Probabilities.GenerationContext((ulong)Rmg.Core.Probabilities.Seeds.Key(Rmg.Core.Probabilities.Seeds.Key(BitConverter.DoubleToInt64Bits(x.Base), section), (long)facet))).Facets.Values.Any(Near)))}; " +
                           $"by facet {string.Join(", ", Enum.GetValues<Facet>().Select(f => $"{f} {Share(x => Near(x[f]))}"))}");
         Console.WriteLine($"chords with groove {Correlation([..songs.Select(x => x[Facet.Chords])], [..songs.Select(x => x[Facet.Groove])]):F2}, " +
                           $"chords with the base {Correlation([..songs.Select(x => x[Facet.Chords])], [..songs.Select(x => x.Base)]):F2}");

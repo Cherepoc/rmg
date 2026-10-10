@@ -21,6 +21,9 @@ internal sealed class BarStateGenerator
     // how the bass leads into its chords
     private const int BassLeadingStream = 101;
 
+    // the home's and the cadence's chords, the voicing's resets, the melody's contour and its phrase end, each its own
+    private const int HomeChordStream = 102, CadenceChordStream = 103, ResetsStream = 104, ContourStream = 105, PhraseEndStream = 106;
+
     // the state that changes along the pattern besides the progression; every state has its own timeline, so each can
     // change at its own pace
     private readonly ImmutableArray<IStateTimelineGenerator> _timelineGenerators;
@@ -124,8 +127,8 @@ internal sealed class BarStateGenerator
             .WithLayer(Layers.Progression);
 
         // the home chord plays a plain chord and the cadence one with pull; the chords between pick from the pool
-        var homeChord = ImmutableArray.Create(unconventionality.GenerateHomeChord(context)).ToTimelineItem(0.0);
-        var cadenceChord = ImmutableArray.Create(unconventionality.GenerateCadenceChord(context)).ToTimelineItem(cadencePosition);
+        var homeChord = ImmutableArray.Create(unconventionality.GenerateHomeChord(context.CreateContext(Seeds.Derive(seed, HomeChordStream)))).ToTimelineItem(0.0);
+        var cadenceChord = ImmutableArray.Create(unconventionality.GenerateCadenceChord(context.CreateContext(Seeds.Derive(seed, CadenceChordStream)))).ToTimelineItem(cadencePosition);
         var roleChordTimeline = StateTimeline.Create(
                 _meter.PatternDuration,
                 CompositionStateKinds.RoleChord,
@@ -145,10 +148,10 @@ internal sealed class BarStateGenerator
                 scaleTimeline,
                 ..shiftTimeline,
                 roleChordTimeline,
-                GenerateResets(context, facets[Facet.Chords]),
+                GenerateResets(context.CreateContext(Seeds.Derive(seed, ResetsStream)), facets[Facet.Chords]),
                 ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),
-                GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), facets[Facet.Melody]),
-                GenerateMelodyPhraseEnd(context)
+                GenerateMelodyContour(context.CreateContext(Seeds.Derive(seed, ContourStream)), context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), facets[Facet.Melody]),
+                GenerateMelodyPhraseEnd(context.CreateContext(Seeds.Derive(seed, PhraseEndStream)))
             ]
         );
     }

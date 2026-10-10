@@ -54,8 +54,10 @@ internal sealed class SongTracks
     public double BassLeading { get; }
 
     /// <param name="rhythmicUnconventionality">How far the song's rhythm strays, which its tracks' layers are scaled by.</param>
-    /// <param name="strokeContext">The sequence the drums' strokes in the song are drawn from (<see cref="DrumStrokes" />).</param>
-    /// <param name="roleContext">The sequence the drums' roles in the song are drawn from (<see cref="DrumRoles" />).</param>
+    /// <param name="drumStreams">The sequence a drum's state in the song is drawn from, by its track, each drum's its own.</param>
+    /// <param name="strokeStreams">The sequence a drum's stroke in the song is drawn from, by its track (<see cref="DrumStrokes" />).</param>
+    /// <param name="roleStreams">The sequence a drum's role in the song is drawn from, by its track (<see cref="DrumRoles" />).</param>
+    /// <param name="groupContext">The sequence the state the drums share is drawn from.</param>
     /// <param name="drumSetup">What the song's drums are (<see cref="DrumSetups" />).</param>
     /// <param name="panningContext">The sequence the pitched tracks' places from left to right are drawn from (<see cref="Panning" />).</param>
     /// <param name="partStreams">The sequence a pitched part's instrument, register and state are drawn from, each part's its own.</param>
@@ -71,8 +73,10 @@ internal sealed class SongTracks
         Func<TrackRole, IGenerationContext> partStreams,
         bool hasTwin,
         RhythmicUnconventionality rhythmicUnconventionality,
-        IGenerationContext strokeContext,
-        IGenerationContext roleContext,
+        Func<int, IGenerationContext> drumStreams,
+        Func<int, IGenerationContext> strokeStreams,
+        Func<int, IGenerationContext> roleStreams,
+        IGenerationContext groupContext,
         DrumSetup drumSetup,
         ImmutableArray<PercussionInstrumentDefinition>? givenDrums,
         Genre genre,
@@ -208,6 +212,9 @@ internal sealed class SongTracks
         {
             foreach (var drum in drumGroup.Drums.Where(songDrums.Contains))
             {
+                // each drum from sequences of its own, so that it is the same whichever other drums the song has
+                var track = DrumGroups.GetTrackNumber(drum);
+                var drumContext = drumStreams(track);
                 // a drum that strikes plays its stroke, the song's here, and does not walk its sounds
                 var builder = drum.ConfigureStateMap(drumGroup.ConfigureStateMap(new StateMapBuilder("Drum", perTrack: true)));
                 if (!drum.Walks)
@@ -215,16 +222,16 @@ internal sealed class SongTracks
                 // a percussion song's figures repeat more, as an ensemble's do
                 if (drumSetup == DrumSetup.Percussion)
                     builder.Add(CompositionStateKinds.Rhythm.Variation, DrumSetups.PercussionVariation);
-                var drumStateMap = builder.ToStateMap(context)
-                    .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum, DrumSounds.OddsOf(genre, GenreChoices.DrumStrokes)))
-                    .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Value, genre));
+                var drumStateMap = builder.ToStateMap(drumContext)
+                    .MergeWith(DrumStrokes.GenerateSong(strokeStreams(track), drum, DrumSounds.OddsOf(genre, GenreChoices.DrumStrokes)))
+                    .MergeWith(DrumRoles.GenerateSong(roleStreams(track), drum, rhythmicUnconventionality.Value, genre));
                 drumStateMap = drumStateMap.MergeWith(FeelOf(DrumRoles.PartOf(DrumRoles.Of(drumStateMap))));
                 // a drum of a pinned role plays its figure as given, its own layer moving none of it (PatternGenerator)
                 var pins = pinned.Contains(DrumRoles.PartOf(DrumRoles.Of(drumStateMap)));
                 if (pins)
                     drumStateMap = drumStateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.Pinned.CreateState(1)]));
-                definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
-                    LayerStates.CreateTrackLayer(context, Layers.Track, drumStateMap, _ => 0,
+                definitions[track] = new PercussionInstrumentTrack(
+                    LayerStates.CreateTrackLayer(drumContext, Layers.Track, drumStateMap, _ => 0,
                         pins ? RhythmLayers.Still : DrumRoles.Hold(trackRhythmLayer, DrumRoles.Of(drumStateMap))),
                     drum.Sounds
                 );
@@ -254,7 +261,7 @@ internal sealed class SongTracks
         (definitions[MelodyTrack], definitions[ChordsTrack]) = Registers.Apart((PitchInstrumentTrack)definitions[MelodyTrack], (PitchInstrumentTrack)definitions[ChordsTrack]);
 
         // the drums share the rhythm-related state
-        var drumsShared = LayerStates.CreateTrackLayer(context, Layers.DrumGroup, StateMap.Default, _ => Level(TrackRole.Drum), rhythmicUnconventionality.Lean(RhythmLayers.DrumGroup));
+        var drumsShared = LayerStates.CreateTrackLayer(groupContext, Layers.DrumGroup, StateMap.Default, _ => Level(TrackRole.Drum), rhythmicUnconventionality.Lean(RhythmLayers.DrumGroup));
 
         return new SongTracks(definitions.ToImmutableSortedDictionary(), songDrums, drumsShared, bassLeading, drumSetup);
     }

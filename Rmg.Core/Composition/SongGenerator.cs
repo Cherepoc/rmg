@@ -242,5 +242,6 @@ internal enum SongStream
     BlockHarmony = 105,
     DrumOrnaments = 106,
     SectionPhraseBars = 107,
-    ShortBars = 108
+    ShortBars = 108,
+    DrumGroup = 109
 }

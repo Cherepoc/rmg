@@ -27,9 +27,13 @@ internal static class LineFills
     /// <summary>The counter-melody, as the melody, where the melody does not.</summary>
     public static Way CounterMelody { get; } = Melody;
 
+    /// <summary>How finely a run's line keys its stream: a 96th of a beat.</summary>
+    private const int PlacesPerBeat = 96;
+
     /// <summary>The shortest a walk's note is, in beats: an 8th.</summary>
     public const double ShortestNote = 0.5;
 
+    /// <param name="streams">A run's own sequence, by its line's place (<see cref="SongMap.PlaceKey" />), so that the runs before it leave it.</param>
     /// <param name="taken">The lines another line walks into, which this one leaves to it.</param>
     /// <returns>The song, and the lines this line walks into.</returns>
     public static (TrackEventStateTimelineMap<StateMap> Song, ImmutableHashSet<double> Walked) Apply(
@@ -37,8 +41,8 @@ internal static class LineFills
         int lineTrack,
         PitchInstrumentTrack definition,
         IReadOnlyList<PlayedRun> runs,
-        IGenerationContext context,
-        Func<double, Meter> meterAt,
+        Func<long, IGenerationContext> streams,
+        SongMap map,
         Way way,
         IReadOnlySet<double> taken
     )
@@ -50,8 +54,7 @@ internal static class LineFills
         var events = track.EventTimeline.ToList();
         foreach (var run in runs)
         {
-            // drawn for every run, so that the draws are as many whatever the chance
-            if (!context.TestProbability(Tilt.Of(SectionEnergy.HighOdds, run.Lift).Chance(way.Chance, 1)))
+            if (!streams(map.PlaceKey(run.Line, PlacesPerBeat)).TestProbability(Tilt.Of(SectionEnergy.HighOdds, run.Lift).Chance(way.Chance, 1)))
                 continue;
 
             var positions = Thin(run.Positions).TakeLast(way.MostNotes).ToArray();
@@ -60,7 +63,7 @@ internal static class LineFills
             var after = events.FindIndex(x => x.Position >= run.Line - 1e-9);
             // where the line plays on either side, not into a section it rests in or out of one, and into its own rest
             // where it walks only there
-            if (before < 0 || after < 0 || events[after].Position > run.Line + meterAt(run.Line).BarDuration || events[before].Position < from - way.ReachBars * meterAt(from).BarDuration
+            if (before < 0 || after < 0 || events[after].Position > run.Line + map.MeterAt(run.Line).BarDuration || events[before].Position < from - way.ReachBars * map.MeterAt(from).BarDuration
                 || way.IntoRest && events.Any(x => x.IsWithin(from, run.Line)) || taken.Contains(run.Line))
                 continue;
 

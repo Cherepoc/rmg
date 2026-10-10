@@ -106,11 +106,13 @@ internal static class DrumMarks
 
             // a section's start and the ending swelling, from a sequence of the section's own, so that the strikes' draws stay
             var swelling = song.AppearanceStream(SongStream.DrumMarks, index);
+            // and its strikes and its roll from sequences of its own, so that an earlier section's places leave them
+            var (striking, rolling) = (song.AppearanceStream(SongStream.DrumMarks, index, 1), song.AppearanceStream(SongStream.DrumMarks, index, 2));
             foreach (var (at, strength) in places)
             {
                 // drawn for every place, so that the draws are as many
                 var (chance, loudness) = Places[strength];
-                var (hits, drum) = (context.TestProbability(often.Chance(energy.Chance(chance, 1), 1)), marking[context.GenerateInt(0, marking.Length)]);
+                var (hits, drum) = (striking.TestProbability(often.Chance(energy.Chance(chance, 1), 1)), marking[striking.GenerateInt(0, marking.Length)]);
                 var (swell, swellRate) = (swelling.TestProbability(swells.Chance(SwellChance, 1)), swelling.Pick(RollRates));
                 if (hits && plays && strength == 0 && swell && at >= SwellBeats)
                     marks[drum].AddRange(Roll(loudest[drum], at, SwellBeats, SwellBeats, swellRate));
@@ -119,7 +121,7 @@ internal static class DrumMarks
             }
 
             // a roll into the section on the beat before it, where the drums play the section
-            var (rolls, rate, roller) = (context.TestProbability(often.Chance(energy.Chance(RollChance, 1), 1)), context.Pick(RollRates), marking[context.GenerateInt(0, marking.Length)]);
+            var (rolls, rate, roller) = (rolling.TestProbability(often.Chance(energy.Chance(RollChance, 1), 1)), rolling.Pick(RollRates), marking[rolling.GenerateInt(0, marking.Length)]);
             if (rolls && plays && span.Start >= 1)
                 marks[roller].AddRange(Roll(loudest[roller], span.Start, 1, 0, rate));
         }

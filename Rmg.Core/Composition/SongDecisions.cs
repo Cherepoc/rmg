@@ -16,7 +16,6 @@ namespace Rmg.Core.Composition;
 /// <param name="Solos">The appearances played as solos, by their places.</param>
 /// <param name="Pinned">The parts the song pins to their figures, a genre's (<see cref="DrumRoles.DrawPinned" />).</param>
 /// <param name="Repeats">Whether the last section plays once more, as a last chorus.</param>
-/// <param name="GrooveContext">The groove's stream, whose draws the swing made, which the swing's state is built with and draws nothing of.</param>
 /// <param name="Scale">The scale the song starts in.</param>
 /// <param name="Sound">The effects the song plays at all, and the part playing its strong one (<see cref="Expression.DrawSound" />).</param>
 /// <param name="DrumJob">What the song's drums do, keep time or mark its form, a genre's (<see cref="DrumMarks" />).</param>
@@ -41,7 +40,6 @@ internal sealed record SongDecisions(
     bool Repeats,
     StateMap CommonStateMap,
     Swing Swing,
-    IGenerationContext GrooveContext,
     Scale Scale,
     DrumJob DrumJob,
     SongSound Sound
@@ -132,8 +130,10 @@ internal sealed record SongDecisions(
             role => SongGenerator.CreateStream(seed, SongStream.PartTracks, (int)role),
             !absent.Contains(TrackRole.RiffTwin),
             rhythmicUnconventionality,
-            Stream(SongStream.DrumStrokes),
-            Stream(SongStream.DrumRoles),
+            track => SongGenerator.CreateStream(seed, SongStream.Drums, track),
+            track => SongGenerator.CreateStream(seed, SongStream.DrumStrokes, track),
+            track => SongGenerator.CreateStream(seed, SongStream.DrumRoles, track),
+            Stream(SongStream.DrumGroup),
             // the drums given make the setup, which the song still draws its own drums by, so that the rest is as it was
             overrides.DrumPieces is { } pieces ? DrumPieces.SetupOf(pieces) : overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value, genre),
             overrides.DrumPieces is { } given ? DrumPieces.Of(given) : null,
@@ -186,8 +186,7 @@ internal sealed record SongDecisions(
         var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds, SectionEnergy.ContrastOf(genre));
 
         // how the song swings, which its tempo sets the notes of
-        var grooveContext = Stream(SongStream.Groove);
-        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing, genre);
+        var swing = Groove.Generate(Stream(SongStream.Groove), commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing, genre);
         StateTrace.RecordSong(TracePoints.Swing, $"{swing.Delay:F3} of {swing.Period}", swing);
 
         // what the drums do, decided before the sections, whose texture leaves no section to drums that only mark the form
@@ -402,7 +401,7 @@ internal sealed record SongDecisions(
         var form = formGenerator.Assemble(plan, played, sections, shortBars);
         return new SongDecisions(
             seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections, energies,
-            solos, soloists, pinned, form, repeats, commonStateMap, swing, grooveContext, scale, drumJob,
+            solos, soloists, pinned, form, repeats, commonStateMap, swing, scale, drumJob,
             // the song's effects, decided before its notes, the part playing its strong one among those it plays
             Expression.DrawSound(Stream(SongStream.Effects), songUnconventionality[Facet.Sound], genre, tracks.Definitions,
                 tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).Select(x => x.Key).ToHashSet(),

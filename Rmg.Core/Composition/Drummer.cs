@@ -32,11 +32,11 @@ internal sealed record Drummer(double Busyness, FillPath Favourite, StateMap? La
         var favourite = context.Pick(FillLayers.Paths);
         // and any of the rarer choices the signature, the likelier ones more often
         var builder = new StateMapBuilder("Drummer", perTrack: true);
-        if (context.TestProbability(RhythmicUnconventionality.Ends(FillLayers.SignatureChance, 1).At(unconventionality)))
-        {
-            ImmutableArray<Weighted<StateKind<double>>> kinds = [..FillLayers.Chances.Select(x => new Weighted<StateKind<double>>(x.Chance, x.Kind))];
-            builder.Add(context.Pick(kinds), FillLayers.SignatureWeight);
-        }
+        // its kind drawn whether it has one, so that the draws after it are as many
+        var signs = context.TestProbability(RhythmicUnconventionality.Ends(FillLayers.SignatureChance, 1).At(unconventionality));
+        var kind = context.Pick([..FillLayers.Chances.Select(x => new Weighted<StateKind<double>>(x.Chance, x.Kind))]);
+        if (signs)
+            builder.Add(kind, FillLayers.SignatureWeight);
 
         return new Drummer(busyness, favourite, builder.ToStateMap(context));
     }

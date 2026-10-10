@@ -8,7 +8,7 @@ public sealed class ArpeggioTest
     private static readonly System.Collections.Immutable.ImmutableArray<int> Chord = [60, 64, 67, 72];
 
     private static int[] Play(ArpeggioPattern pattern, int notes, System.Collections.Immutable.ImmutableArray<int>? chord = null) =>
-        [..Enumerable.Range(0, notes).Select(place => Arpeggios.Pick(pattern, chord ?? Chord, place, place * 0.5, 60))];
+        [..Enumerable.Range(0, notes).Select(place => Arpeggios.Pick(pattern, chord ?? Chord, place, place * 0.5, 60, 0))];
 
     [Test]
     public async Task APattern_PlaysTheChordsNotes_InItsOrder()

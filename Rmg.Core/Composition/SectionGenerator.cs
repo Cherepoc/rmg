@@ -179,7 +179,7 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.ChordRoot, home)
                 // the melody higher the more energy the section has than the song, a chorus over its verse
                 .Add(CompositionStateKinds.LineLift, MelodyLayers.EnergyRegister * _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy))
-                .ToStateMap(Stream(sectionId, SectionStream.SectionState))
+                .ToStateMap(Stream(sectionId, SectionStream.SectionPool))
         );
         var (sectionRoles, kit, isPercussionOnly, doubles, feelLeads) = _drums.DrawDrumParts(sectionId, plan.Drums, rhythm);
         var activeDrumTrackNumbers = kit.Drums.Select(DrumGroups.GetTrackNumber).ToImmutableHashSet();
@@ -685,6 +685,9 @@ internal sealed class SectionGenerator
             var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre);
             StateTrace.RecordSection(TracePoints.Arpeggio, trackNumber, sectionId, $"{arpeggio}", arpeggio);
             sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
+            // and, broken in no pattern's order, the seed of its order, from a sequence of its own
+            if (arpeggio == ArpeggioPattern.Random)
+                sectionTrackLayer.Add(CompositionStateKinds.ArpeggioOrder, (long)TrackStream(sectionId, SectionStream.ArpeggioOrder, trackNumber).GenerateSeed());
             // and the colour it lays on its broken chord, from a sequence of its own
             var colour = Arpeggios.DrawColour(new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Colour), trackNumber)), sectionRhythm.Facets[Facet.Chords], _genre);
             if (arpeggio != ArpeggioPattern.None && colour != ChordColour.None)
@@ -1021,5 +1024,7 @@ internal enum SectionStream
     PitchedTracks = 56,
     DrumTracks = 57,
     PlaningModes = 58,
-    Mediants = 59
+    Mediants = 59,
+    SectionPool = 60,
+    ArpeggioOrder = 61
 }

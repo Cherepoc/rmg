@@ -19,7 +19,7 @@ internal static class DrumPresence
 
     /// <summary>
     ///     How every drum plays the bars of every letter after the first: the drums that lead no role that sit out, and
-    ///     the strokes the leads change to; drawn from a sequence of its own, in the order of the tracks and the letters.
+    ///     the strokes the leads change to; each drum drawn from a sequence of its own, in the order of the letters.
     /// </summary>
     /// <param name="tracks">The drums the section plays, by their track numbers.</param>
     /// <param name="leads">The drums that lead a role in the section, by their track numbers.</param>
@@ -27,8 +27,9 @@ internal static class DrumPresence
     /// <param name="rhythm">How unconventional the section's rhythm is, which leans a drum to sit out or change.</param>
     /// <param name="energy">The section's pull of its energy, which leans a drum to keep playing and its strokes by loudness.</param>
     /// <param name="odds">How much likelier a genre has each sound, by its note number (<see cref="DrumSounds.OddsOf" />).</param>
+    /// <param name="streams">A drum's own sequence, by its track.</param>
     public static BarDrums Draw(
-        IGenerationContext context,
+        Func<int, IGenerationContext> streams,
         IEnumerable<int> tracks,
         PhraseScheme scheme,
         IReadOnlySet<int> leads,
@@ -45,6 +46,7 @@ internal static class DrumPresence
         {
             var drum = DrumGroups.GetDrum(track);
             var holdsARole = leads.Contains(track);
+            var context = streams(track);
             foreach (var letter in Enumerable.Range(1, scheme.PatternCount - 1))
             {
                 if (!holdsARole)

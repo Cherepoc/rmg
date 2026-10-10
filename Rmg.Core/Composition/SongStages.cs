@@ -133,7 +133,7 @@ internal static class SongStages
             .MergeStateTimelineMap(preparedRoots)
             .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration, place => song.AppearanceStream(SongStream.TempoRamps, place)))
             .MergeStateMap(song.CommonStateMap)
-            .MergeStateMap(Groove.ToStateMap(song.Swing, song.GrooveContext));
+            .MergeStateMap(Groove.ToStateMap(song.Swing, song.Stream(SongStream.Groove)));
         return draft with { Timeline = timeline, Chains = chains };
     }
 
@@ -235,11 +235,11 @@ internal static class SongStages
 
         var timeline = Place(draft.Timeline, melody, MelodyLayers.LineOf(song.Genre));
         timeline = Place(timeline, bass, BassLeadingLayers.Line);
-        (timeline, _) = LineFills.Apply(timeline, bass.Key, (PitchInstrumentTrack)bass.Value, draft.Runs, song.Stream(SongStream.BassFills), map.MeterAt, LineFills.Bass, ImmutableHashSet<double>.Empty);
-        (timeline, var melodyWalks) = LineFills.Apply(timeline, melody.Key, (PitchInstrumentTrack)melody.Value, draft.Runs, song.Stream(SongStream.MelodyFills), map.MeterAt, LineFills.Melody, ImmutableHashSet<double>.Empty);
+        (timeline, _) = LineFills.Apply(timeline, bass.Key, (PitchInstrumentTrack)bass.Value, draft.Runs, place => song.Stream(SongStream.BassFills, place), map, LineFills.Bass, ImmutableHashSet<double>.Empty);
+        (timeline, var melodyWalks) = LineFills.Apply(timeline, melody.Key, (PitchInstrumentTrack)melody.Value, draft.Runs, place => song.Stream(SongStream.MelodyFills, place), map, LineFills.Melody, ImmutableHashSet<double>.Empty);
         timeline = Place(timeline, counter, CounterLayers.Line);
         if (timeline.TrackTimelineMap.ContainsKey(counter.Key))
-            (timeline, _) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, draft.Runs, song.Stream(SongStream.CounterFills), map.MeterAt, LineFills.CounterMelody, melodyWalks);
+            (timeline, _) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, draft.Runs, place => song.Stream(SongStream.CounterFills, place), map, LineFills.CounterMelody, melodyWalks);
         timeline = Place(timeline, riff, RiffLayers.Line);
         return draft with { Timeline = timeline };
     }

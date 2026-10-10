@@ -70,12 +70,14 @@ internal sealed class PatternGenerator
         return BuildBars(seeds, sectionId, trackStateMaps, barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, answer, []);
     }
 
-    /// <summary>The seeds of the tracks' bar patterns, a set for every letter of the scheme, one seed per track.</summary>
+    /// <summary>
+    ///     The seeds of the tracks' bar patterns, a set for every letter of the scheme, one seed per track, each derived
+    ///     by its track and letter from a single draw, so that a track's are the same whichever others play.
+    /// </summary>
     public static ImmutableArray<ImmutableDictionary<int, ulong>> DrawSeeds(IGenerationContext context, IEnumerable<int> trackNumbers, PhraseScheme scheme)
     {
-        var tracks = trackNumbers.ToArray();
-        var trackSeedMapGenerator = (IGenerationContext innerContext) => tracks.ToImmutableDictionary(x => x, _ => innerContext.GenerateSeed());
-        return Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(context);
+        var (seed, tracks) = (context.GenerateSeed(), trackNumbers.ToArray());
+        return [..Enumerable.Range(0, scheme.PatternCount).Select(letter => tracks.ToImmutableDictionary(x => x, x => Seeds.Derive(Seeds.Derive(seed, x), letter)))];
     }
 
     /// <summary>

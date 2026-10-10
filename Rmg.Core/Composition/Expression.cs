@@ -541,11 +541,11 @@ internal static class Expression
     /// <param name="soloists">Every part's soloist, whose leans its solos' notes play by, as intense as the solo is there.</param>
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
-    /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them and each part's, in order.</param>
+    /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them, and each part's derived from it by its track.</param>
     /// <param name="pinchStream">The song's sequence of whether its guitars pinch and how it sounds.</param>
     /// <param name="pinchStreams">A part's sequence of its pinches, by its track.</param>
     /// <param name="beatSeconds">How long a beat lasts at a position, in seconds, which a pinched note's length is held to.</param>
-    /// <param name="tapeStream">The song's sequence of its tape's wow, whether it plays one, how deep, and each part's detune, in order.</param>
+    /// <param name="tapeStream">The song's sequence of its tape's wow, whether it plays one, how deep, and each part's detune derived from it by its track.</param>
     /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
     /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
     /// <param name="cuts">Where a part's notes end as the band stops, by its track, which a gated part's held chords end by.</param>
@@ -586,6 +586,8 @@ internal static class Expression
         // and whether it plays off a tape, and how far its pitch drifts
         var tape = tapeStream.TestProbability(TapeChance.At(songSound, genre.Chance(GenreChoices.Effects, "tape")));
         var wow = (int)Math.Round(Wow.At(songSound) * (0.5 + tapeStream.GenerateDouble()));
+        // each part's tone and detune derived from these by its track, so that whether another part plays leaves them
+        var (toneSeed, tapeSeed) = (toneStream.GenerateSeed(), tapeStream.GenerateSeed());
         // and whether its riff dives into a louder section
         var songDives = pinchStream.TestProbability(SongDiveChance.At(songSound, genre.Chance(GenreChoices.Effects, "dive")));
         // and whether its guitars pinch, and how a pinch sounds
@@ -670,17 +672,19 @@ internal static class Expression
             var patterned = part.TestProbability(GatePatternChance.At(songSound));
             var steps = Enumerable.Range(0, 16).Select(_ => part.TestProbability(GateStepChance)).ToArray();
             var gate = Carries(StrongEffect.Gate) ? steps.Select((x, i) => i == 0 || !patterned || x ? 1 << i : 0).Sum() : 0;
-            // and its tone, from a sequence of its own, every part drawing whatever it plays
-            var toned = toneStream.TestProbability(ToneChance.At(songSound)) & songTone && role != TrackRole.Drum;
-            var toneDepth = 0.3 + 0.7 * toneStream.GenerateDouble();
-            // and its detune, either way, every part drawing whatever it plays; a drum's kit and a part holding chords left in tune
-            var detuned = tapeStream.TestProbability(DetuneChance) && tape && role is not (TrackRole.Drum or TrackRole.Pad) && !role.PlaysChords();
-            var detune = (tapeStream.TestProbability(0.5) ? 1 : -1) * tapeStream.GenerateInt(2, DetuneMost + 1);
+            // and its tone, from a sequence of its own
+            var partTone = new GenerationContext(Seeds.Derive(toneSeed, track));
+            var toned = partTone.TestProbability(ToneChance.At(songSound)) & songTone && role != TrackRole.Drum;
+            var toneDepth = 0.3 + 0.7 * partTone.GenerateDouble();
+            // and its detune, either way, from a sequence of its own; a drum's kit and a part holding chords left in tune
+            var partTape = new GenerationContext(Seeds.Derive(tapeSeed, track));
+            var detuned = partTape.TestProbability(DetuneChance) && tape && role is not (TrackRole.Drum or TrackRole.Pad) && !role.PlaysChords();
+            var detune = (partTape.TestProbability(0.5) ? 1 : -1) * partTape.GenerateInt(2, DetuneMost + 1);
             // and its pinches and its dive, from a sequence of its own, each note's by its place, so that a note let pass
             // leaves the others' draws as they were, one a phrase at most
             var pinchSeed = pinchStreams(track).GenerateSeed();
             IGenerationContext Pinching(double position, int decision) =>
-                new GenerationContext(Seeds.Derive(Seeds.Derive(pinchSeed, (long)Math.Round(position * NotePlacesPerBeat)), decision));
+                new GenerationContext(Seeds.Derive(Seeds.Derive(pinchSeed, map.PlaceKey(position, NotePlacesPerBeat)), decision));
             var pinchedPhrases = new HashSet<(int, int)>();
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {

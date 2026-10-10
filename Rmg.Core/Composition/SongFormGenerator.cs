@@ -93,8 +93,10 @@ internal sealed class SongFormGenerator
     {
         var intro = _context.Pick(FormLayers.WeighIntros(_songRhythm.Value, _genre));
         var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Value, _genre));
-        var window = intro == IntroKind.Entries ? _introContext.Pick(FormLayers.IntroWindows) : default;
-        var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
+        // the entries' window and a count-in's half drawn whatever the intro, so that the draws after them are as many
+        var drawnWindow = _introContext.Pick(FormLayers.IntroWindows);
+        var window = intro == IntroKind.Entries ? drawnWindow : default;
+        var halfCountIn = _context.TestProbability(FormLayers.HalfCountInChance) && intro == IntroKind.CountIn;
         // a song without drums that keep time has nobody to count it in, so it starts cold, drawn as it would be all the same
         if (intro == IntroKind.CountIn && !_drumsKeepTime)
             (intro, halfCountIn) = (IntroKind.Cold, false);

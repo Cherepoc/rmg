@@ -47,6 +47,21 @@ public sealed class GivenDrumPiecesTest
         return stream.ToArray();
     }
 
+    /// <summary>A drum added to the song's leaves every other drum's own state as it was, each drawn from a sequence of its own.</summary>
+    [Test]
+    public async Task ADrumAdded_LeavesTheOtherDrumsStates()
+    {
+        // the snare added between the kick and the hi-hat, as the drums draw in turn, so that a shared sequence would show
+        string[] kit = ["kick", "hiHat", "tambourine"];
+        foreach (var seed in Enumerable.Range(0, 32))
+        {
+            var (without, with) = (TestCorpus.Get(seed, new SongOverrides(DrumPieces: [..kit])), TestCorpus.Get(seed, new SongOverrides(DrumPieces: [..kit, "acousticSnare"])));
+            foreach (var track in without.Song.TrackDefinitions.Keys.Where(x => without.IsDrum(x)))
+                await Assert.That(with.Song.TrackDefinitions[track].StateMap).IsEqualTo(without.Song.TrackDefinitions[track].StateMap)
+                    .Because($"seed {seed}, {DrumGroups.GetDrum(track).Name}");
+        }
+    }
+
     [Test]
     [Arguments(0.5)]
     [Arguments(1.0)]

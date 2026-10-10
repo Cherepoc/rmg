@@ -44,8 +44,11 @@ internal static class DrumKitGenerator
         {
             // a lead of a group that grooves, not of one that all but never does, such as the calls
             var grooving = family.Where(x => !leads.ContainsValue(x) && DrumGroups.GroupOf(x).GrooveChance >= 1).ToArray();
+            // among the drums playing it, one whose own role it is where any is, so that a drum drawn into it from
+            // another is left to lead its own
             var playing = grooving.Where(x => roles[x] == lead).ToArray();
-            var candidates = playing.Length > 0 ? playing : grooving.Where(x => x.MainRole == lead).ToArray();
+            var own = grooving.Where(x => x.MainRole == lead).ToArray();
+            var candidates = playing.Intersect(own).ToArray() is { Length: > 0 } both ? both : playing.Length > 0 ? playing : own;
             if (candidates.Length == 0)
                 continue;
 
@@ -55,7 +58,7 @@ internal static class DrumKitGenerator
                 kit.Add(picked);
             // and in a kit a drum whose main role it is, in the role it plays, as a jazz snare comps while the hi-hat plays the
             // backbeat; a section of percussion only fills its room with more of its drums after its leads
-            if (!isPercussionOnly && !kit.Any(x => x.MainRole == lead) && grooving.Where(x => x.MainRole == lead).ToArray() is { Length: > 0 } own)
+            if (!isPercussionOnly && !kit.Any(x => x.MainRole == lead) && own.Length > 0)
                 kit.Add(Pick(own));
         }
 

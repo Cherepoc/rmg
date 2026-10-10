@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
+using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Songs;
 
@@ -18,7 +19,14 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     /// <summary>The section a position is in; none before the first or after the last.</summary>
     public SectionSpan? SectionAt(double position)
     {
-        // the sections one after another: the last starting at or before it, by halving, as every note asks
+        var index = IndexAt(position);
+        return index >= 0 && position < Sections[index].End ? Sections[index] : null;
+    }
+
+    /// <summary>The last section starting at or before a position, by its index; -1 before the first.</summary>
+    private int IndexAt(double position)
+    {
+        // the sections one after another, by halving, as every note asks
         var (low, high) = (0, Sections.Length - 1);
         while (low <= high)
         {
@@ -29,7 +37,18 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
                 high = middle - 1;
         }
 
-        return high >= 0 && position < Sections[high].End ? Sections[high] : null;
+        return high;
+    }
+
+    /// <summary>
+    ///     A place's key, by the section it is in or after, the intro's for none, and how far into it, in places a beat:
+    ///     a stream keyed by it stays as it was where something before the section moves, such as an intro's length or a
+    ///     short bar.
+    /// </summary>
+    public long PlaceKey(double position, int placesPerBeat)
+    {
+        var index = IndexAt(position + 1e-9);
+        return Seeds.Key(index, (long)Math.Round((position - (index >= 0 ? Sections[index].Start : 0)) * placesPerBeat));
     }
 
     /// <summary>

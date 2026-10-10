@@ -23,15 +23,21 @@
       },
       {
         "seed": "H",
-        "at": 0,
+        "at": 82,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))",
           "Riff (Electric Guitar (clean))"
         ]
       },
       {
+        "seed": "S",
+        "at": 70.3,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
         "seed": "b",
-        "at": 217.1,
+        "at": 217.2,
         "listen": [
           "Riff (Acoustic Guitar (steel))"
         ]
@@ -45,16 +51,9 @@
       },
       {
         "seed": "j",
-        "at": 17,
+        "at": 16.1,
         "listen": [
           "Chords (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "12",
-        "at": 94.1,
-        "listen": [
-          "Riff (Acoustic Guitar (steel))"
         ]
       }
     ]
@@ -78,34 +77,35 @@
         "at": 164.9,
         "listen": [
           "Pad (String Ensemble 1)",
-          "Chords (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
+          "Bass (Electric Bass (finger))",
+          "Chords (Overdriven Guitar)"
         ]
       },
       {
         "seed": "K",
-        "at": 69.2,
+        "at": 66,
         "listen": [
           "Chords (Acoustic Guitar (steel))",
-          "Melody (Electric Piano 1)",
-          "Rhythm part (Overdriven Guitar)"
+          "Riff (Overdriven Guitar)",
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 135.4,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Solo (Distortion Guitar)",
+          "Chords (Distortion Guitar)"
         ]
       },
       {
         "seed": "S",
-        "at": 206.8,
+        "at": 195.6,
         "listen": [
           "Rhythm part (Electric Guitar (clean))",
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "f",
-        "at": 94.6,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Rhythm part (Electric Guitar (clean))",
-          "Bass (Electric Bass (pick))"
+          "Bass (Electric Bass (pick))",
+          "Melody (Overdriven Guitar)"
         ]
       },
       {
@@ -114,12 +114,12 @@
         "listen": [
           "Melody (Electric Guitar (clean))",
           "Chords (Overdriven Guitar)",
-          "Pad (Choir Aahs)"
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
         "seed": "h",
-        "at": 156.6,
+        "at": 155.2,
         "listen": [
           "Rhythm part (Electric Guitar (clean))",
           "Melody (Electric Piano 1)",
@@ -148,7 +148,6 @@
         "seed": "3",
         "at": 18.3,
         "listen": [
-          "Chords (Drawbar Organ)",
           "Melody (Trumpet)"
         ]
       },
@@ -156,22 +155,12 @@
         "seed": "5",
         "at": 79.6,
         "listen": [
-          "Rhythm part (Clavinet)",
-          "Bass (Slap Bass 1)"
-        ]
-      },
-      {
-        "seed": "C",
-        "at": 30.3,
-        "listen": [
-          "Rhythm part (Clavinet)",
-          "Bass (Electric Bass (finger))",
-          "Chords (Electric Guitar (clean))"
+          "Rhythm part (Clavinet)"
         ]
       },
       {
         "seed": "F",
-        "at": 138.5,
+        "at": 138.1,
         "listen": [
           "Riff (Brass Section)"
         ]
@@ -185,12 +174,20 @@
         ]
       },
       {
-        "seed": "J",
-        "at": 166.6,
+        "seed": "K",
+        "at": 8.2,
         "listen": [
-          "Melody (Alto Sax)",
           "Rhythm part (Electric Guitar (muted))",
-          "Bass (Slap Bass 1)"
+          "Bass (Slap Bass 2)",
+          "Riff's twin (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "o",
+        "at": 21.1,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Melody (Tenor Sax)"
         ]
       }
     ]
@@ -210,48 +207,46 @@
     },
     "seeds": [
       {
-        "seed": "5",
-        "at": 140.1,
+        "seed": "2",
+        "at": 67.4,
         "listen": [
-          "Bass (Slap Bass 1)"
+          "Rhythm part (Electric Guitar (clean))"
         ]
       },
       {
-        "seed": "B",
-        "at": 6.4,
+        "seed": "9",
+        "at": 0.4,
         "listen": [
           "Chords (Electric Guitar (clean))",
           "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "D",
-        "at": 20.4,
+        "seed": "B",
+        "at": 6.3,
         "listen": [
-          "Chords (Electric Guitar (clean))",
-          "Bass (Slap Bass 1)"
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
         "seed": "I",
-        "at": 65.9,
+        "at": 145,
         "listen": [
+          "Bass (Slap Bass 2)",
           "Rhythm part (Electric Guitar (muted))",
-          "Chords (Electric Guitar (clean))",
-          "Bass (Slap Bass 2)"
+          "Chords (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "L",
         "at": 231.7,
         "listen": [
-          "Chords (Electric Piano 1)",
-          "Riff (Brass Section)"
+          "Chords (Electric Piano 1)"
         ]
       },
       {
         "seed": "N",
-        "at": 213.7,
+        "at": 213.6,
         "listen": [
           "Bass (Slap Bass 1)",
           "Chords (Drawbar Organ)"
@@ -291,23 +286,6 @@
         ]
       },
       {
-        "seed": "8",
-        "at": 44.1,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 186.4,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))",
-          "Kick"
-        ]
-      },
-      {
         "seed": "B",
         "at": 0,
         "listen": [
@@ -317,10 +295,28 @@
       },
       {
         "seed": "L",
-        "at": 28.6,
+        "at": 30,
         "listen": [
           "Bass (Electric Bass (pick))",
           "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 154.6,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Riff (Distortion Guitar)",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 192.2,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Riff (Overdriven Guitar)",
+          "Chords (Distortion Guitar)"
         ]
       }
     ]
@@ -341,18 +337,9 @@
     "seeds": [
       {
         "seed": "0",
-        "at": 18.4,
+        "at": 19,
         "listen": [
           "Tom",
-          "Kick",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "3",
-        "at": 58.7,
-        "listen": [
-          "Ride",
           "Acoustic Snare"
         ]
       },
@@ -373,20 +360,25 @@
         ]
       },
       {
+        "seed": "A",
+        "at": 84.7,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
         "seed": "D",
-        "at": 30.2,
+        "at": 38.2,
         "listen": [
           "Ride",
           "Acoustic Snare"
         ]
       },
       {
-        "seed": "I",
-        "at": 0,
+        "seed": "J",
+        "at": 129.4,
         "listen": [
-          "Hi-Hat",
-          "Acoustic Snare",
-          "Kick"
+          "Hi-Hat"
         ]
       }
     ]
@@ -411,31 +403,29 @@
         "at": 0,
         "listen": [
           "Hi-Hat",
-          "Electric Snare",
           "Kick"
         ]
       },
       {
         "seed": "4",
-        "at": 24.7,
+        "at": 24.6,
         "listen": [
           "Hi-Hat",
-          "Kick",
-          "Electric Snare"
+          "Kick"
         ]
       },
       {
         "seed": "B",
-        "at": 119.6,
+        "at": 120.3,
         "listen": [
-          "Hi-Hat",
           "Kick",
+          "Hi-Hat",
           "Electric Snare"
         ]
       },
       {
-        "seed": "H",
-        "at": 0,
+        "seed": "J",
+        "at": 24.3,
         "listen": [
           "Hi-Hat",
           "Kick",
@@ -444,19 +434,19 @@
       },
       {
         "seed": "N",
-        "at": 51.9,
+        "at": 58,
         "listen": [
           "Hi-Hat",
-          "Kick"
+          "Electric Snare"
         ]
       },
       {
-        "seed": "O",
-        "at": 298.4,
+        "seed": "S",
+        "at": 84.2,
         "listen": [
           "Hi-Hat",
-          "Kick",
-          "Acoustic Snare"
+          "Electric Snare",
+          "Kick"
         ]
       }
     ]
@@ -476,14 +466,6 @@
     },
     "seeds": [
       {
-        "seed": "2",
-        "at": 0,
-        "listen": [
-          "Drums",
-          "Chords (Electric Piano 1)"
-        ]
-      },
-      {
         "seed": "A",
         "at": 0,
         "listen": [
@@ -493,10 +475,10 @@
       },
       {
         "seed": "J",
-        "at": 52,
+        "at": 54,
         "listen": [
-          "Bass (Electric Bass (finger))",
           "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))",
           "Chords (Electric Piano 1)"
         ]
       },
@@ -508,6 +490,15 @@
         ]
       },
       {
+        "seed": "v",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))",
+          "Bass (Synth Bass 1)",
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
         "seed": "1B",
         "at": 4,
         "listen": [
@@ -516,7 +507,7 @@
       },
       {
         "seed": "1S",
-        "at": 6.2,
+        "at": 6.8,
         "listen": [
           "Chords (String Ensemble 1)"
         ]
@@ -539,51 +530,53 @@
     "seeds": [
       {
         "seed": "9",
-        "at": 56,
+        "at": 91,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Chords (Distortion Guitar)",
+          "Rhythm part (Electric Guitar (clean))",
+          "Melody (Lead 5 (charang))",
           "Bass (Electric Bass (finger))"
         ]
       },
       {
         "seed": "L",
-        "at": 151.7,
+        "at": 147.5,
         "listen": [
+          "Bass (Electric Bass (pick))",
           "Riff (Distortion Guitar)",
-          "Rhythm part (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
+          "Chords (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "a",
-        "at": 173.8,
+        "at": 176.3,
         "listen": [
           "Solo (Distortion Guitar)"
         ]
       },
       {
-        "seed": "h",
-        "at": 27.8,
+        "seed": "14",
+        "at": 62.1,
         "listen": [
-          "Bass (Electric Bass (pick))"
+          "Rhythm part (Electric Guitar (clean))",
+          "Riff (Distortion Guitar)",
+          "Chords (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "14",
-        "at": 120.6,
+        "seed": "16",
+        "at": 25.8,
         "listen": [
-          "Melody (Lead 5 (charang))",
-          "Rhythm part (Electric Guitar (clean))",
-          "Riff (Distortion Guitar)"
+          "Solo (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
         "seed": "1B",
-        "at": 0.6,
+        "at": 4.8,
         "listen": [
           "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)"
+          "Riff (Overdriven Guitar)",
+          "Chords (Overdriven Guitar)"
         ]
       }
     ]
@@ -603,19 +596,25 @@
     },
     "seeds": [
       {
-        "seed": "B",
-        "at": 58.4,
+        "seed": "E",
+        "at": 27.1,
         "listen": [
-          "Melody (Flute)",
-          "Chords (Orchestral Harp)"
+          "Chords (Acoustic Guitar (nylon))",
+          "Bass (Contrabass)"
         ]
       },
       {
-        "seed": "G",
-        "at": 22,
+        "seed": "L",
+        "at": 24.7,
         "listen": [
-          "Melody (Shanai)",
-          "Counter-melody (Shanai)"
+          "Melody (Recorder)"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 181.7,
+        "listen": [
+          "Melody (Fiddle)"
         ]
       },
       {
@@ -627,25 +626,18 @@
         ]
       },
       {
-        "seed": "l",
-        "at": 210.9,
+        "seed": "m",
+        "at": 124.1,
         "listen": [
-          "Melody (Pan Flute)",
-          "Counter-melody (Pan Flute)"
+          "Melody (Recorder)",
+          "Counter-melody (Recorder)"
         ]
       },
       {
         "seed": "o",
-        "at": 93.6,
+        "at": 92.8,
         "listen": [
           "Melody (Recorder)"
-        ]
-      },
-      {
-        "seed": "r",
-        "at": 11.8,
-        "listen": [
-          "Melody (Shanai)"
         ]
       }
     ]
@@ -666,49 +658,44 @@
     "seeds": [
       {
         "seed": "1",
-        "at": 106,
+        "at": 464.2,
         "listen": [
-          "Chords (Pad 7 (halo))",
-          "Bass (Contrabass)",
           "Melody (Music Box)"
         ]
       },
       {
         "seed": "3",
-        "at": 180,
+        "at": 0,
         "listen": [
           "Melody (Celesta)"
         ]
       },
       {
         "seed": "c",
-        "at": 534.6,
-        "listen": [
-          "Hi-Hat",
-          "Chords (Pad 7 (halo))"
-        ]
-      },
-      {
-        "seed": "1M",
-        "at": 8.4,
+        "at": 534.1,
         "listen": [
           "Hi-Hat"
         ]
       },
       {
-        "seed": "1X",
-        "at": 652.1,
+        "seed": "q",
+        "at": 626.2,
         "listen": [
-          "Melody (Kalimba)"
+          "Cymbal"
+        ]
+      },
+      {
+        "seed": "1M",
+        "at": 666.6,
+        "listen": [
+          "Hi-Hat"
         ]
       },
       {
         "seed": "1o",
-        "at": 380.1,
+        "at": 1008.1,
         "listen": [
-          "Counter-melody (French Horn)",
-          "Rhythm part (Acoustic Guitar (steel))",
-          "Chords (String Ensemble 1)"
+          "Counter-melody (French Horn)"
         ]
       }
     ]
@@ -728,28 +715,20 @@
     },
     "seeds": [
       {
-        "seed": "K",
-        "at": 50.2,
+        "seed": "R",
+        "at": 131.3,
         "listen": [
-          "Melody (Celesta)",
-          "Chords (String Ensemble 1)",
-          "Bass (Synth Bass 2)"
+          "Chords (Pad 2 (warm))",
+          "Melody (Glockenspiel)"
         ]
       },
       {
-        "seed": "L",
-        "at": 207.8,
+        "seed": "T",
+        "at": 91.8,
         "listen": [
-          "Chords (Electric Piano 1)",
-          "Melody (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "d",
-        "at": 294.3,
-        "listen": [
-          "Melody (Glockenspiel)",
-          "Chords (Choir Aahs)"
+          "Melody (Acoustic Grand Piano)",
+          "Chords (Pad 2 (warm))",
+          "Bass (Synth Bass 1)"
         ]
       },
       {
@@ -759,6 +738,15 @@
           "Chords (Electric Piano 1)",
           "Melody (Acoustic Grand Piano)",
           "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "1D",
+        "at": 106.1,
+        "listen": [
+          "Chords (Pad 2 (warm))",
+          "Bass (Synth Bass 1)",
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
@@ -773,7 +761,9 @@
         "seed": "1N",
         "at": 175.6,
         "listen": [
-          "Melody (Acoustic Grand Piano)"
+          "Melody (Acoustic Grand Piano)",
+          "Bass (Synth Bass 2)",
+          "Chords (Pad 2 (warm))"
         ]
       }
     ]
