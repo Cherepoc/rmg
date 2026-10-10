@@ -61,8 +61,46 @@ public sealed class ListeningQuestionsTest
         new("quieter-form", "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
             "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?
-                .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min())
+                .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min()),
+        new("rock-key-lift", "Rock's last section lifted a key: this rock song's climb, or a pop ballad's?",
+            "Rock's chance of lifting its last section.", "rock", [], new() { ["keyChanges"] = new() { ["lastSection"] = 0 } }, x => Before(x, FirstKeyChange(x), 2)),
+        new("funk-key", "A funk vamp moving key, a lifted last section or new keys every few bars: still the groove, or a song wandering?",
+            "Funk's key changes, now the songs' own.", "funk", [], new() { ["keyChanges"] = new() { ["lastSection"] = 0, ["sections"] = 0, ["patterns"] = 0 } },
+            x => Before(x, FirstKeyChange(x), 2)),
+        new("funk-pushes", "Funk's band landing an eighth early on the change, the kick and the bass off the downbeat: funk, or the one lost?",
+            "Funk's push chance, the most of any preset.", "funk", [], new() { ["push"] = new() { ["sections"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.Push, v => (bool)v!), 2)),
+        new("djent-polymeter", "Djent's riff cycling across the bar: the style's sound in nearly every section, or wanting square sections between?",
+            "Djent's polymeter chance, 0.6 at the plain end.", "djent", [], new() { ["polymeter"] = new() { ["sections"] = 0 } },
+            x => ((ImmutableDictionary<int, Polymeter.Plan>)x.Trace.Single(t => t.Point == TracePoints.Polymeter).Value!).Keys
+                .Select(id => x.Map.Sections.Where(s => s.SectionId == id).Select(s => (double?)s.Start).Min()).Min()),
+        new("numetal-half-time", "Nu metal's drums in half time, the snare on three: the style's heavy sit, or a drag?",
+            "Nu metal's half-time chance, 30 to 40 now.", "nuMetal", [], new() { ["feelChances"] = new() { ["halfTime"] = 10 } },
+            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == 1), 2)),
+        new("techno-feel", "A techno section whose clap falls to half or double time: a deliberate shift, or the groove losing its drive?",
+            "Techno's half and double time.", "techno", [], new() { ["feelChances"] = new() { ["halfTime"] = 0, ["doubleTime"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! != 0), 2)),
+        new("disco-pump", "The pads and bass pumping on every beat: disco, or house?",
+            "Disco's pump among its strong effects.", "disco", [], new() { ["strongEffect"] = new() { ["pump"] = 0 } },
+            x => x.Trace.Single(t => t.Point == TracePoints.SongEffects).Value is SongEffects { Strong: StrongEffect.Pump } ? 0 : null),
+        new("metal-turnaround", "The chord leading a metal section back to its start: this song's harmony, or a pop or jazz turnaround?",
+            "Metal's turnaround, now the songs' own.", "metal", [], new() { ["turnaround"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.Turnaround, v => (bool)v!)),
+        new("medieval-raise", "The raised, major chord before home at a phrase's end: medieval, or a later classical cadence?",
+            "Medieval's cadence raise, now the songs' own.", "medieval", [], new() { ["cadenceRaise"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.CadenceRaise, v => (((int?, bool))v!).Item2)),
+        new("ambient-swing", "An ambient piece's arpeggios swung long-short: right, or should they float evenly?",
+            "Ambient's swing, now the songs' own.", "ambient", [], new() { ["feelChances"] = new() { ["swing"] = 0 } },
+            x => ((Swing)x.Trace.Single(t => t.Point == TracePoints.Swing).Value!).Delay > 0 ? 0 : null),
+        new("trap-reharm", "The last hook's loop changing its chords: this trap song, or its beat lost?",
+            "Trap's reharmonisation, now the songs' own.", "trap", [], new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
+            x => x.Trace.Where(t => t.Point == TracePoints.Reharmonisation && t.Value is not null)
+                .Select(t => ((ValueTuple<int, ImmutableArray<double>>)t.Value!).Item2.Select(p => (double?)p).Min()).Min() is { } at ? Before(x, at, 2) : null)
     ];
+
+    /// <summary>Where the song first changes key.</summary>
+    private static double? FirstKeyChange(CorpusSong song) =>
+        ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Select(x => (double?)x.Position).Min();
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

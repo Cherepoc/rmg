@@ -54,3 +54,4 @@ rejected while fixing: the place, what was decided, why.
 - Jazz's plainest song passes no chord (`PassingChordTest.ThePlainestSongs_PassNoChord`); its turnaround at the plain end is the preset's.
 - A pedal wins over a doubling: a bass note a pedal holds is the pedal's, no longer the doubled line's.
 - A hook intro quotes its chorus's notes only where the chorus plays in the intro's key and tempo; elsewhere the lines' quote alone.
+- Black metal inheriting the songs' ornaments: measured nearly inaudible under its distorted band (0.02 heard difference over 24 songs), so neither a question nor a change.

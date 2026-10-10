@@ -23,8 +23,9 @@
       },
       {
         "seed": "H",
-        "at": 82,
+        "at": 0,
         "listen": [
+          "Rhythm part (Electric Guitar (clean))",
           "Riff (Electric Guitar (clean))"
         ]
       },
@@ -50,10 +51,729 @@
         ]
       },
       {
-        "seed": "13",
-        "at": 10,
+        "seed": "12",
+        "at": 94.1,
         "listen": [
-          "Riff (Electric Guitar (clean))"
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rock-key-lift",
+    "question": "Rock's last section lifted a key: this rock song's climb, or a pop ballad's?",
+    "decides": "Rock's chance of lifting its last section.",
+    "genre": "rock",
+    "without": {
+      "skip": [],
+      "genre": {
+        "keyChanges": {
+          "lastSection": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "F",
+        "at": 164.9,
+        "listen": [
+          "Pad (String Ensemble 1)",
+          "Chords (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "K",
+        "at": 69.2,
+        "listen": [
+          "Chords (Acoustic Guitar (steel))",
+          "Melody (Electric Piano 1)",
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 206.8,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "f",
+        "at": 94.6,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "g",
+        "at": 154.3,
+        "listen": [
+          "Melody (Electric Guitar (clean))",
+          "Chords (Overdriven Guitar)",
+          "Pad (Choir Aahs)"
+        ]
+      },
+      {
+        "seed": "h",
+        "at": 156.6,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Melody (Electric Piano 1)",
+          "Riff (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "funk-key",
+    "question": "A funk vamp moving key, a lifted last section or new keys every few bars: still the groove, or a song wandering?",
+    "decides": "Funk's key changes, now the songs' own.",
+    "genre": "funk",
+    "without": {
+      "skip": [],
+      "genre": {
+        "keyChanges": {
+          "lastSection": 0,
+          "sections": 0,
+          "patterns": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 18.3,
+        "listen": [
+          "Chords (Drawbar Organ)",
+          "Melody (Trumpet)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 79.6,
+        "listen": [
+          "Rhythm part (Clavinet)",
+          "Bass (Slap Bass 1)"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 30.3,
+        "listen": [
+          "Rhythm part (Clavinet)",
+          "Bass (Electric Bass (finger))",
+          "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 138.5,
+        "listen": [
+          "Riff (Brass Section)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 0.6,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 166.6,
+        "listen": [
+          "Melody (Alto Sax)",
+          "Rhythm part (Electric Guitar (muted))",
+          "Bass (Slap Bass 1)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "funk-pushes",
+    "question": "Funk's band landing an eighth early on the change, the kick and the bass off the downbeat: funk, or the one lost?",
+    "decides": "Funk's push chance, the most of any preset.",
+    "genre": "funk",
+    "without": {
+      "skip": [],
+      "genre": {
+        "push": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 140.1,
+        "listen": [
+          "Bass (Slap Bass 1)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 6.4,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 20.4,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Bass (Slap Bass 1)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 65.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))",
+          "Chords (Electric Guitar (clean))",
+          "Bass (Slap Bass 2)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 231.7,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Riff (Brass Section)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 213.7,
+        "listen": [
+          "Bass (Slap Bass 1)",
+          "Chords (Drawbar Organ)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "djent-polymeter",
+    "question": "Djent's riff cycling across the bar: the style's sound in nearly every section, or wanting square sections between?",
+    "decides": "Djent's polymeter chance, 0.6 at the plain end.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "polymeter": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 15,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 44.1,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 186.4,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 28.6,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Riff (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "numetal-half-time",
+    "question": "Nu metal's drums in half time, the snare on three: the style's heavy sit, or a drag?",
+    "decides": "Nu metal's half-time chance, 30 to 40 now.",
+    "genre": "nuMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelChances": {
+          "halfTime": 10
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 18.4,
+        "listen": [
+          "Tom",
+          "Kick",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 58.7,
+        "listen": [
+          "Ride",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 24.5,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 134.4,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 30.2,
+        "listen": [
+          "Ride",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare",
+          "Kick"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "techno-feel",
+    "question": "A techno section whose clap falls to half or double time: a deliberate shift, or the groove losing its drive?",
+    "decides": "Techno's half and double time.",
+    "genre": "techno",
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelChances": {
+          "halfTime": 0,
+          "doubleTime": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Electric Snare",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "4",
+        "at": 24.7,
+        "listen": [
+          "Hi-Hat",
+          "Kick",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 119.6,
+        "listen": [
+          "Hi-Hat",
+          "Kick",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Kick",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 51.9,
+        "listen": [
+          "Hi-Hat",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 298.4,
+        "listen": [
+          "Hi-Hat",
+          "Kick",
+          "Acoustic Snare"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disco-pump",
+    "question": "The pads and bass pumping on every beat: disco, or house?",
+    "decides": "Disco's pump among its strong effects.",
+    "genre": "disco",
+    "without": {
+      "skip": [],
+      "genre": {
+        "strongEffect": {
+          "pump": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 0,
+        "listen": [
+          "Drums",
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 0,
+        "listen": [
+          "Melody (Alto Sax)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 52,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "Z",
+        "at": 93.8,
+        "listen": [
+          "Chords (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "1B",
+        "at": 4,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "1S",
+        "at": 6.2,
+        "listen": [
+          "Chords (String Ensemble 1)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "metal-turnaround",
+    "question": "The chord leading a metal section back to its start: this song's harmony, or a pop or jazz turnaround?",
+    "decides": "Metal's turnaround, now the songs' own.",
+    "genre": "metal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "turnaround": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "9",
+        "at": 56,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 151.7,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Rhythm part (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 173.8,
+        "listen": [
+          "Solo (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "h",
+        "at": 27.8,
+        "listen": [
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "14",
+        "at": 120.6,
+        "listen": [
+          "Melody (Lead 5 (charang))",
+          "Rhythm part (Electric Guitar (clean))",
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "1B",
+        "at": 0.6,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Riff (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medieval-raise",
+    "question": "The raised, major chord before home at a phrase's end: medieval, or a later classical cadence?",
+    "decides": "Medieval's cadence raise, now the songs' own.",
+    "genre": "medieval",
+    "without": {
+      "skip": [],
+      "genre": {
+        "cadenceRaise": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "B",
+        "at": 58.4,
+        "listen": [
+          "Melody (Flute)",
+          "Chords (Orchestral Harp)"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 22,
+        "listen": [
+          "Melody (Shanai)",
+          "Counter-melody (Shanai)"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 483.9,
+        "listen": [
+          "Melody (Fiddle)",
+          "Chords (Acoustic Guitar (nylon))"
+        ]
+      },
+      {
+        "seed": "l",
+        "at": 210.9,
+        "listen": [
+          "Melody (Pan Flute)",
+          "Counter-melody (Pan Flute)"
+        ]
+      },
+      {
+        "seed": "o",
+        "at": 93.6,
+        "listen": [
+          "Melody (Recorder)"
+        ]
+      },
+      {
+        "seed": "r",
+        "at": 11.8,
+        "listen": [
+          "Melody (Shanai)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ambient-swing",
+    "question": "An ambient piece's arpeggios swung long-short: right, or should they float evenly?",
+    "decides": "Ambient's swing, now the songs' own.",
+    "genre": "ambient",
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelChances": {
+          "swing": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 106,
+        "listen": [
+          "Chords (Pad 7 (halo))",
+          "Bass (Contrabass)",
+          "Melody (Music Box)"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 180,
+        "listen": [
+          "Melody (Celesta)"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 534.6,
+        "listen": [
+          "Hi-Hat",
+          "Chords (Pad 7 (halo))"
+        ]
+      },
+      {
+        "seed": "1M",
+        "at": 8.4,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "1X",
+        "at": 652.1,
+        "listen": [
+          "Melody (Kalimba)"
+        ]
+      },
+      {
+        "seed": "1o",
+        "at": 380.1,
+        "listen": [
+          "Counter-melody (French Horn)",
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Chords (String Ensemble 1)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "trap-reharm",
+    "question": "The last hook's loop changing its chords: this trap song, or its beat lost?",
+    "decides": "Trap's reharmonisation, now the songs' own.",
+    "genre": "trap",
+    "without": {
+      "skip": [],
+      "genre": {
+        "harmonyDevices": {
+          "reharmonised": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "K",
+        "at": 50.2,
+        "listen": [
+          "Melody (Celesta)",
+          "Chords (String Ensemble 1)",
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 207.8,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 294.3,
+        "listen": [
+          "Melody (Glockenspiel)",
+          "Chords (Choir Aahs)"
+        ]
+      },
+      {
+        "seed": "11",
+        "at": 157.1,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Melody (Acoustic Grand Piano)",
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 126.3,
+        "listen": [
+          "Melody (Glockenspiel)",
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "1N",
+        "at": 175.6,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
         ]
       }
     ]
