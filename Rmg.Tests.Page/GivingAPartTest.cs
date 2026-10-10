@@ -38,6 +38,7 @@ public sealed class GivingAPartTest(Site site)
         // the slider where it was on the screen, rather than the page scrolled up to the songs so far
         await Assert.That(await page.Page.EvaluateAsync<double>("() => scrollY")).IsGreaterThan(300);
         await Assert.That(Math.Abs((await slider.BoundingBoxAsync())!.Y - before)).IsLessThan(1);
+        await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]
@@ -50,6 +51,7 @@ public sealed class GivingAPartTest(Site site)
         // every song setting's and every part's
         await Assert.That(titles.Length).IsGreaterThan(20);
         await Assert.That(titles.Distinct()).IsEquivalentTo(["Check to override, uncheck to randomize"], CollectionOrdering.Matching);
+        await Assert.That(page.Errors).IsEmpty();
     }
 
     /// <summary>Clicks a control of the melody's row, wherever its panel is folded away, and waits for the song made again.</summary>
@@ -103,7 +105,7 @@ public sealed class GivingAPartTest(Site site)
             await Assert.That(await page.Page.EvaluateAsync<string>("selector => document.querySelector(selector).getAttribute('aria-pressed')", control)).IsEqualTo("false");
         }
 
-        await Task.Delay(800);
+        await Task.Delay(SongPage.PastRemake);
         await Assert.That(page.Requests.Count).IsEqualTo(asked);
         await Assert.That(page.Errors).IsEmpty();
     }

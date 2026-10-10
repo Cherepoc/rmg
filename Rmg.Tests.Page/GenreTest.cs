@@ -8,13 +8,12 @@ public sealed class GenreTest(Site site)
     public async Task ALinksPreset_IsTheOneOfItsId_AskedOfNoServer_AndEveryIdIsNeverAKey()
     {
         await using var page = await SongPage.Open(site, $"?song=1&settings=B{new string('0', 70)}&genre=reggae");
-        var asked = new List<string>();
-        page.Page.Request += (_, request) => asked.Add(request.Url);
         await page.FirstSong();
         await page.Settled();
 
         await Assert.That(page.Requests[0].Body.GetProperty("genre").TryGetProperty("kit", out _)).IsTrue();
-        await Assert.That(asked.Any(x => x.Contains("/api/genres/reggae"))).IsFalse();
+        // every request from the page's start, as it reads the link
+        await Assert.That(page.Urls.Any(x => x.Contains("/api/genres/reggae"))).IsFalse();
         await Assert.That(await page.Page.Locator("select[aria-label='Genre']").InputValueAsync()).IsEqualTo("preset:reggae");
         // letters alone, and shorter than a key's 11, so that no key is ever an id
         var ids = await page.Page.EvaluateAsync<string[]>("() => [...document.querySelectorAll(\"select[aria-label='Genre'] option[value^='preset:']\")].map(x => x.value.slice(7))");

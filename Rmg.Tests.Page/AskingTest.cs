@@ -149,7 +149,7 @@ public sealed class AskingTest(Site site)
 
         await page.Until(() => page.Requests.Count > asked, "the song asked for again");
         await page.Settled();
-        await Task.Delay(600);
+        await Task.Delay(SongPage.PastRemake);
 
         var remade = page.Since(asked).Single();
         await Assert.That(remade.Seed).IsEqualTo(await page.Seed());

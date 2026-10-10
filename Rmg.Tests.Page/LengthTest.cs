@@ -15,6 +15,13 @@ public sealed class LengthTest(Site site)
 
         // drawn, the length the song played, in minutes and seconds
         await page.Until(async () => System.Text.RegularExpressions.Regex.IsMatch(await Output(page).TextContentAsync() ?? "", @"^\d+:\d\d$"), "the length shown");
+        // the song's as it played, its total on the transport, at the nearest step of the lengths a song may be given
+        static int Seconds(string? time) => time!.Split(':') is [var minutes, var seconds] ? int.Parse(minutes) * 60 + int.Parse(seconds) : -1;
+        var lengths = await page.Page.EvaluateAsync<double[]>("async () => (await (await fetch('api/songs/options')).json()).lengths");
+        await page.Until(async () => await page.Page.Locator("#total").TextContentAsync() != "0:00", "the song's total shown");
+        var total = Seconds(await page.Page.Locator("#total").TextContentAsync());
+        var nearest = lengths.MinBy(x => Math.Abs(x - total));
+        await Assert.That(Seconds(await Output(page).TextContentAsync())).IsEqualTo((int)Math.Round(nearest)).Because($"total {total}, steps {string.Join(", ", lengths)}");
         await Assert.That(page.Requests[^1].Body.TryGetProperty("length", out _)).IsFalse();
 
         // given at its first step, half a minute, and asked for

@@ -24,7 +24,7 @@ public sealed class ListeningTest(Site site)
         // and the parts to listen to, those that differ the most there
         await Assert.That(await strip.Locator(".listening-focus").TextContentAsync()).StartsWith("Listen to: ");
         // no song rolled as the page opens, the question asking for its own; a tempo given here none of them
-        await Task.Delay(500);
+        await Task.Delay(SongPage.PastRemake);
         await Assert.That(page.Requests).IsEmpty();
         await page.SetSetting("tempo", 40);
 
@@ -222,7 +222,7 @@ public sealed class ListeningTest(Site site)
         var question = index.Locator("li[data-question='quieter-form']");
         await Assert.That(await question.Locator("a").GetAttributeAsync("href")).IsEqualTo("?listen=quieter-form");
         await Assert.That(await question.Locator(".listening-where").TextContentAsync()).StartsWith("Black metal · ");
-        await Task.Delay(500);
+        await Task.Delay(SongPage.PastRemake);
         await Assert.That(page.Requests).IsEmpty();
 
         // a link asks its question

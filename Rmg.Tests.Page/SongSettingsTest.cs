@@ -11,6 +11,7 @@ public sealed class SongSettingsTest(Site site)
         await page.FirstSong();
         await page.Page.Locator("#settings-panel summary").ClickAsync();
 
+        await Assert.That(await page.Page.Locator(".setting .end").CountAsync()).IsGreaterThan(0);
         var over = await page.Page.EvaluateAsync<string[]>(
             "() => [...document.querySelectorAll('.setting .end')].filter(x => x.scrollWidth > x.clientWidth + 1).map(x => x.textContent)");
         await Assert.That(over).IsEmpty();

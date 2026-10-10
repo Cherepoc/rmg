@@ -19,8 +19,10 @@ public sealed class SeekSectionsTest(Site site)
 
         // the bar names the section under the pointer: past the first mark, the second section
         var box = (await page.Page.Locator("#seek").BoundingBoxAsync())!;
-        // the marks set in as far as the thumb's middle travels, 8 pixels
-        await page.Page.Mouse.MoveAsync((float)(box.X + 8 + (box.Width - 16) * (lefts[0] / 100 + 0.01)), box.Y + box.Height / 2);
+        // the marks set in as far as the thumb's middle travels, 8 pixels; halfway to the next mark, however short the second
+        // section is
+        var between = (lefts[0] + (lefts.Length > 1 ? lefts[1] : 100)) / 2;
+        await page.Page.Mouse.MoveAsync((float)(box.X + 8 + (box.Width - 16) * between / 100), box.Y + box.Height / 2);
         var name = await marks.First.GetAttributeAsync("data-name");
         await page.Until(async () => await page.Page.Locator("#seek").GetAttributeAsync("title") == name, "the section under the pointer named");
         await Assert.That(page.Errors).IsEmpty();

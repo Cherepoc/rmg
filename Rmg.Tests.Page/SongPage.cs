@@ -46,6 +46,7 @@ public sealed class SongPage : IAsyncDisposable
     private readonly List<SongRequest> _requests = [];
     private readonly Dictionary<IRequest, SongRequest> _byRequest = [];
     private readonly List<string> _errors = [];
+    private readonly List<string> _urls = [];
 
     private SongPage(IBrowserContext context, IPage page)
     {
@@ -73,6 +74,15 @@ public sealed class SongPage : IAsyncDisposable
         get
         {
             lock (_requests) return [.._requests];
+        }
+    }
+
+    /// <summary>Every address the page has asked for, from before its first load on.</summary>
+    public IReadOnlyList<string> Urls
+    {
+        get
+        {
+            lock (_urls) return [.._urls];
         }
     }
 
@@ -118,6 +128,10 @@ public sealed class SongPage : IAsyncDisposable
         page.PageError += (_, error) =>
         {
             lock (songPage._errors) songPage._errors.Add(error);
+        };
+        page.Request += (_, request) =>
+        {
+            lock (songPage._urls) songPage._urls.Add(request.Url);
         };
         page.RequestFailed += (_, request) => songPage.End(request, "aborted", Stopwatch.GetTimestamp());
         page.RequestFinished += async (_, request) =>

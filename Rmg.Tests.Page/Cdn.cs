@@ -30,9 +30,19 @@ internal static class Cdn
         }
         catch
         {
-            // a failed fetch not kept, so that the next page fetches it again
+            // a failed fetch not kept, so that the next page fetches it again, and this one's request failed at once
+            // rather than left to hang until the page gives up
             Files.TryRemove(new KeyValuePair<string, Lazy<Task<(byte[] Body, string Type)>>>(route.Request.Url, file));
-            throw;
+            try
+            {
+                await route.AbortAsync("failed");
+            }
+            catch (PlaywrightException)
+            {
+                // let go of by the page as it closed
+            }
+
+            return;
         }
 
         var (body, type) = loaded;

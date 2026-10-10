@@ -104,6 +104,16 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(page.Requests[^1].Body.GetProperty("mode").GetInt32()).IsEqualTo(2);
         await page.Settled();
         await Assert.That(await page.Given()).IsEqualTo("2 given");
+
+        // and the link, opened where nothing is kept, asks for both
+        await page.Until(() => Task.FromResult(page.Page.Url.Contains("settings=")), "the link written");
+        var link = page.Page.Url;
+        await page.Page.EvaluateAsync("() => localStorage.clear()");
+        count = page.Requests.Count;
+        await page.Page.GotoAsync(link);
+        await page.Until(() => page.Requests.Count > count, "the linked song asked for");
+        await Assert.That(page.Requests[^1].Body.GetProperty("mode").GetInt32()).IsEqualTo(2);
+        await Assert.That(page.Requests[^1].Body.GetProperty("swing").GetInt32()).IsEqualTo(40);
         await Assert.That(page.Errors).IsEmpty();
     }
 

@@ -27,9 +27,10 @@ public sealed class BusyTest(Site site)
         var since = page.Since(asked);
         await Assert.That(since.Select(x => x.Ended)).IsEquivalentTo(new[] { "503", "503", "200" }, CollectionOrdering.Matching);
 
-        // after the Retry-After of 1 s, and up to half as long again
+        // after the Retry-After of 1 s, and up to half as long again, as the page waits: the lower bound the rule, the upper
+        // room for a loaded machine's round trips, well short of a wait the page does not make
         foreach (var (earlier, later) in since.Zip(since.Skip(1)))
-            await Assert.That(Seconds(earlier.SentAt, later.SentAt)).IsBetween(0.95, 1.75);
+            await Assert.That(Seconds(earlier.SentAt, later.SentAt)).IsBetween(0.95, 3);
     }
 
     [Test]

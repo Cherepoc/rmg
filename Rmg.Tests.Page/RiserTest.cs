@@ -21,14 +21,25 @@ public sealed class RiserTest(Site site)
                 return post.call(this, message, ...rest);
             };
             """);
-        // a Techno song whose pad carries a riser
+        // a Techno song whose pad carries a riser, the first seed's that does, whichever it is as the songs are now
         string? report = null;
+        string? seed = null;
         await page.Page.RouteAsync("**/api/songs/generate", async route =>
         {
             var body = JsonNode.Parse(route.Request.PostData ?? "{}")!.AsObject();
-            body["seed"] = "0";
-            var response = await route.FetchAsync(new RouteFetchOptions { PostData = System.Text.Encoding.UTF8.GetBytes(body.ToJsonString()) });
-            report = response.Headers["x-song-settings"];
+            IAPIResponse? response = null;
+            foreach (var tried in seed is null ? Enumerable.Range(0, 64).Select(x => x.ToString()) : [seed])
+            {
+                body["seed"] = tried;
+                response = await route.FetchAsync(new RouteFetchOptions { PostData = System.Text.Encoding.UTF8.GetBytes(body.ToJsonString()) });
+                report = response.Headers["x-song-settings"];
+                if (JsonDocument.Parse(report).RootElement.GetProperty("parts").GetProperty("pad").TryGetProperty("riser", out var carried) && carried.ValueKind == JsonValueKind.Number)
+                {
+                    seed = tried;
+                    break;
+                }
+            }
+
             await route.FulfillAsync(new RouteFulfillOptions { Response = response });
         });
         await page.Page.ReloadAsync();
@@ -46,11 +57,11 @@ public sealed class RiserTest(Site site)
         await page.Until(async () => await page.Page.EvaluateAsync<int>("() => window.posted.length") > before, "the synthesizer told");
         var muted = await page.Page.EvaluateAsync<string[]>("before => window.posted.slice(before).filter(x => x.includes('isMuted'))", before);
         foreach (var channel in new[] { own, riser })
-            await Assert.That(muted.Any(x => x.Contains($"\"channelNumber\":{channel},") && x.Contains("true"))).IsTrue().Because($"channel {channel} in {string.Join(" ", muted)}");
+            await Assert.That(muted.Any(x => x.Contains($"\"channelNumber\":{channel},") && x.Contains("\"parameter\":\"isMuted\",\"value\":true"))).IsTrue().Because($"channel {channel} in {string.Join(" ", muted)}");
 
         // the pad's instrument given: its own channel takes it, the riser keeps the reverse cymbal
         before = await page.Page.EvaluateAsync<int>("() => window.posted.length");
-        await page.Page.EvaluateAsync("""
+        var chosen = await page.Page.EvaluateAsync<int>("""
             () => {
                 const row = document.querySelector("#mixer tr.part button.listen[aria-label='Mute the pad']").closest("tr");
                 const given = row.querySelector("input[type=checkbox]");
@@ -58,14 +69,17 @@ public sealed class RiserTest(Site site)
                 const select = row.querySelector("select");
                 select.value = [...select.options].find(x => x.value !== select.value).value;
                 select.dispatchEvent(new Event("change"));
+                return Number(select.value);
             }
             """);
-        await page.Until(async () => await page.Page.EvaluateAsync<int>("() => window.posted.length") > before, "the synthesizer told");
-        // a program change as the synthesizer takes it, a MIDI message of its channel's status byte
+        // a program change to the instrument chosen, as the synthesizer takes it, a MIDI message of its channel's status
+        // byte and the program; the riser's own, which a song made again sends it, no change to it
+        bool ChangedTo(IEnumerable<string> posted, int channel) => posted.Any(x => x.Contains($"\"messageData\":{{\"0\":{0xC0 + channel},\"1\":{chosen}}}"));
+        await page.Until(async () => ChangedTo(await page.Page.EvaluateAsync<string[]>("before => window.posted.slice(before)", before), own), "the pad's channel given the instrument");
+        // and a while for the song made again, whose messages the route in front of the page's own does not wait for
+        await Task.Delay(SongPage.PastRemake * 4);
         var posted = await page.Page.EvaluateAsync<string[]>("before => window.posted.slice(before)", before);
-        bool Changed(int channel) => posted.Any(x => x.Contains($"\"messageData\":{{\"0\":{0xC0 + channel},"));
-        await Assert.That(Changed(own)).IsTrue().Because(string.Join(" ", posted));
-        await Assert.That(Changed(riser)).IsFalse().Because(string.Join(" ", posted));
+        await Assert.That(ChangedTo(posted, riser)).IsFalse().Because(string.Join(" ", posted));
         await Assert.That(page.Errors).IsEmpty();
     }
 }

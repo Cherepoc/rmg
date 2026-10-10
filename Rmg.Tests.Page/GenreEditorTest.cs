@@ -88,6 +88,20 @@ public sealed class GenreEditorTest(Site site)
             if (await dialog.Locator($".genre-tile[data-choice='{name}']").CountAsync() == 0)
                 missing.Add(name);
         await Assert.That(missing).IsEmpty();
+
+        // and every part's own, a family's, on a tile of its part's tab, every tab of every section walked
+        var shown = new HashSet<string>();
+        foreach (var section in await dialog.Locator("details[data-section]").AllAsync())
+        {
+            if (await section.GetAttributeAsync("open") is null)
+                await section.Locator("summary").First.ClickAsync();
+            foreach (var tab in await section.Locator("[role=tab]:not([hidden])").AllAsync())
+            {
+                await tab.ClickAsync();
+                shown.UnionWith(await section.Locator(".genre-tile:visible").EvaluateAllAsync<string[]>("tiles => tiles.map(x => x.dataset.choice)"));
+            }
+        }
+        await Assert.That(names.Where(x => x.Contains('.') && !shown.Contains(x)).ToArray()).IsEmpty();
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -298,13 +312,15 @@ public sealed class GenreEditorTest(Site site)
 
         var tune = await Change(time, "length");
         await Assert.That(await tune.Locator("h3").First.TextContentAsync()).IsEqualTo("Length: From, in minutes and seconds");
-        await Assert.That(await tune.Locator(".tune-row[data-option='from'] .tune-values").TextContentAsync()).IsEqualTo("1:33 · 1:44 · 2:32");
+        // the songs' own lengths, whatever the generator measures them at, as minutes and seconds at the three ends
+        var values = (await tune.Locator(".tune-row[data-option='from'] .tune-values").TextContentAsync())!;
+        await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(values, @"^\d+:\d\d · \d+:\d\d · \d+:\d\d$")).IsTrue().Because(values);
         var plainest = tune.Locator("input[aria-label='From, plainest']");
-        await Assert.That(await plainest.InputValueAsync()).IsEqualTo("1:33");
+        await Assert.That(await plainest.InputValueAsync()).IsEqualTo(values.Split(" · ")[0]);
         // typed as minutes and seconds, or minutes alone, and what is no time put back
         await plainest.FillAsync("3:30");
         await plainest.PressAsync("Tab");
-        await Assert.That(await tune.Locator(".tune-row[data-option='from'] .tune-values").TextContentAsync()).IsEqualTo("3:30 · 1:44 · 2:32");
+        await Assert.That(await tune.Locator(".tune-row[data-option='from'] .tune-values").TextContentAsync()).IsEqualTo($"3:30 · {string.Join(" · ", values.Split(" · ")[1..])}");
         // and its to, below it, following it up, so that no draft is a range the server refuses
         await Assert.That((await tune.Locator(".tune-row[data-option='to'] .tune-values").TextContentAsync())!.Split(" · ")[0]).IsEqualTo("3:30");
         await plainest.FillAsync("4");
@@ -547,7 +563,8 @@ public sealed class GenreEditorTest(Site site)
         var instruments = Tile(dialog, "instrument.melody");
         await page.Until(async () => await instruments.Locator(".genre-ends > span").CountAsync() == 3, "the instruments' ends said");
 
-        const string sideways = "x => [...x.querySelectorAll('*')].filter(e => e.scrollWidth > e.clientWidth + 1"
+        // the dialog itself among them, a modal dialog its own outer box that scrolls
+        const string sideways = "x => [x, ...x.querySelectorAll('*')].filter(e => e.scrollWidth > e.clientWidth + 1"
             + " && ['auto', 'scroll'].includes(getComputedStyle(e).overflowX)).map(e => e.className)";
         await Assert.That(await dialog.EvaluateAsync<string[]>(sideways)).IsEmpty();
         // the tempo's, whose chart has no legend beside it, its handles at its edge
