@@ -6,6 +6,9 @@ namespace Rmg.Tests.WebApi;
 
 public sealed class SongSettingsTest
 {
+    /// <summary>The drum pieces as a song draws them, none given.</summary>
+    internal static DrumPieceSettings DrawnPieces { get; } = new(false, [..Rmg.Core.Composition.DrumPieces.All.Select(_ => false)]);
+
     /// <summary>
     ///     Settings with every field set apart from its neighbours, the ends among them: the last step, the last program and
     ///     the last drum piece, whose bit is the last character's.
@@ -41,7 +44,7 @@ public sealed class SongSettingsTest
         [..SongSettings.PartOrder.Select(_ => new PartSettings(0, new Setting(false, 0), 0, new Setting(false, 0)))],
         [..SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(0))],
         0,
-        DrumPieceSettings.Drawn
+        DrawnPieces
     );
 
     private static bool AreSame(SongSettings first, SongSettings second) =>
@@ -107,7 +110,7 @@ public sealed class SongSettingsTest
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
     {
         await Assert.That(TempoScale.Multiplier(0) * Meter.BaseTempo).IsEqualTo(60).Within(1e-9);
-        await Assert.That(TempoScale.Multiplier(TempoScale.Middle) * Meter.BaseTempo).IsEqualTo(120).Within(1e-9);
+        await Assert.That(TempoScale.Multiplier(StepScale.Middle) * Meter.BaseTempo).IsEqualTo(120).Within(1e-9);
         await Assert.That(TempoScale.Multiplier(TempoScale.Steps - 1) * Meter.BaseTempo).IsEqualTo(240).Within(1e-9);
         var ratios = Enumerable.Range(1, TempoScale.Steps - 1).Select(x => TempoScale.Multiplier(x) / TempoScale.Multiplier(x - 1)).ToArray();
         await Assert.That(ratios.Min()).IsGreaterThan(1.02);

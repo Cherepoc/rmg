@@ -16,7 +16,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task Empty_ResultsIn_Default()
     {
-        var result = new StateMapBuilder().ToStateMap(Context);
+        var result = new StateMapBuilder("Test").ToStateMap(Context);
 
         await Assert.That(result.IsDefault).IsTrue();
     }
@@ -24,7 +24,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task AddState_IsIncluded()
     {
-        var result = new StateMapBuilder()
+        var result = new StateMapBuilder("Test")
             .Add(KeyOffset.CreateState(3))
             .ToStateMap(Context);
 
@@ -34,7 +34,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task AddKindAndValue_IsIncluded()
     {
-        var result = new StateMapBuilder()
+        var result = new StateMapBuilder("Test")
             .Add(KeyOffset, 3)
             .ToStateMap(Context);
 
@@ -44,7 +44,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task AddKindAndGenerator_UsesGeneratedValue()
     {
-        var result = new StateMapBuilder()
+        var result = new StateMapBuilder("Test")
             .Add(Tempo, context => context.GenerateDouble() * 4)
             .ToStateMap(Context);
 
@@ -55,7 +55,7 @@ public sealed class StateMapBuilderTest
     public async Task AddKindAndGenerator_GeneratesAgainOnEachToStateMap()
     {
         var context = new FakeGenerationContext { NextDouble = 2 };
-        var builder = new StateMapBuilder().Add(Tempo, c => c.GenerateDouble());
+        var builder = new StateMapBuilder("Test").Add(Tempo, c => c.GenerateDouble());
 
         var first = builder.ToStateMap(context);
         context.NextDouble = 3;
@@ -66,32 +66,11 @@ public sealed class StateMapBuilderTest
     }
 
     [Test]
-    public async Task AddCollectionOfOne_WrapsGeneratedValueInCollection()
-    {
-        var result = new StateMapBuilder()
-            .AddCollectionOfOne(ScaleOffsets, _ => 4)
-            .ToStateMap(Context);
-
-        await Assert.That(result.GetStateValue(ScaleOffsets).AsEnumerable()).IsEquivalentTo(new[] { 4 }, CollectionOrdering.Matching);
-    }
-
-    [Test]
-    public async Task AddCollectionOfOne_MultipleTimes_MergesValues()
-    {
-        var result = new StateMapBuilder()
-            .AddCollectionOfOne(ScaleOffsets, _ => 4)
-            .AddCollectionOfOne(ScaleOffsets, _ => 2)
-            .ToStateMap(Context);
-
-        await Assert.That(result.GetStateValue(ScaleOffsets).AsEnumerable()).IsEquivalentTo(new[] { 2, 4 }, CollectionOrdering.Matching);
-    }
-
-    [Test]
     public async Task AddStateMap_IsIncluded()
     {
         var stateMap = StateMap.FromStates([KeyOffset.CreateState(1), Tempo.CreateState(2)]);
 
-        var result = new StateMapBuilder()
+        var result = new StateMapBuilder("Test")
             .Add(stateMap)
             .ToStateMap(Context);
 
@@ -101,7 +80,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task AddStateMapGenerator_ReceivesContext()
     {
-        var result = new StateMapBuilder()
+        var result = new StateMapBuilder("Test")
             .Add(context => StateMap.FromStates([Tempo.CreateState(context.GenerateDouble())]))
             .ToStateMap(Context);
 
@@ -111,7 +90,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task MixedSources_AreAggregatedPerKind()
     {
-        var result = new StateMapBuilder()
+        var result = new StateMapBuilder("Test")
             .Add(KeyOffset, 1)
             .Add(KeyOffset.CreateState(2))
             .Add(StateMap.FromStates([KeyOffset.CreateState(4), OctaveOffset.CreateState(1)]))
@@ -124,7 +103,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task DefaultValues_AreDropped()
     {
-        var result = new StateMapBuilder()
+        var result = new StateMapBuilder("Test")
             .Add(KeyOffset, 0)
             .ToStateMap(Context);
 
@@ -134,7 +113,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task AddMethods_ReturnSameBuilder()
     {
-        var builder = new StateMapBuilder();
+        var builder = new StateMapBuilder("Test");
 
         await Assert.That(builder.Add(KeyOffset, 1)).IsSameReferenceAs(builder);
         await Assert.That(builder.Add(KeyOffset.CreateState(1))).IsSameReferenceAs(builder);
@@ -144,7 +123,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task ToStateMapGenerator_ProducesSameResultAsToStateMap()
     {
-        var builder = new StateMapBuilder()
+        var builder = new StateMapBuilder("Test")
             .Add(KeyOffset, 2)
             .Add(Tempo, c => c.GenerateDouble());
 
@@ -156,7 +135,7 @@ public sealed class StateMapBuilderTest
     [Test]
     public async Task ToStateMapGenerator_IsNotAffectedByLaterAdds()
     {
-        var builder = new StateMapBuilder().Add(KeyOffset, 2);
+        var builder = new StateMapBuilder("Test").Add(KeyOffset, 2);
         var generator = builder.ToStateMapGenerator();
 
         builder.Add(OctaveOffset, 5).Add(StateMap.FromStates([Tempo.CreateState(3)]));

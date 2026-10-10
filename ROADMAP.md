@@ -247,6 +247,12 @@ channel of its own; `rudiments`, Jazz's flams and drags; `phrase-length`, Orches
 three; and `short-bar`, Djent's sections ending on a bar cut short, which the loops' genres play none of now (Trance,
 Drum and bass, Trap, Disco, Funk, Ambient and Chiptune beside the five that named none), their sections square.
 
+Asked on the test instance since the review of 10 October 2026, its findings of taste: `rock-key-lift`, `funk-key`,
+`funk-pushes`, `djent-polymeter`, `numetal-half-time`, `techno-feel`, `disco-pump`, `metal-turnaround`, `medieval-raise`,
+`ambient-swing` and `trap-reharm`, each a preset's device heard with and without, its answer the preset's change. The
+review's other fifty proposed questions (its report's table) wait on these: asked a few at a time as they are answered,
+those of a preset whose device these settle let go of.
+
 Answered on 9 October 2026, late, and kept: `own-modes`, Fusion's planed chords in modes of their own; and `mediant`,
 Orchestral's iii or vi turned major.
 

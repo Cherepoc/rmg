@@ -542,7 +542,7 @@ internal readonly record struct ResolvedRhythm(
     }
 
     /// <summary>
-    ///     How many parts a cycle splits into first, before every part halves (<see cref="DyadicTimelineDescriptor.Split" />):
+    ///     How many parts a cycle splits into first, before every part halves (<see cref="RhythmCycle.Split" />):
     ///     a grouped one by the odd number it groups the grid's steps by, a dotted 8th into its three 16ths and a dotted
     ///     quarter into its three 8ths, its first strong and the others weak, as a group of three is felt; any other in two.
     /// </summary>

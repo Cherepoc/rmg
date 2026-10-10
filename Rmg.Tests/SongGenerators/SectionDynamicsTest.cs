@@ -6,7 +6,7 @@ namespace Rmg.Tests.SongGenerators;
 
 /// <summary>
 ///     How the sections of a song differ: their loudness, the drums' notes and how many drums play, and the other
-///     tracks' notes, each section as it last plays, leaving out the last bar of each pattern, where the fills are.
+///     tracks' notes, each section as it last plays, leaving out the last bar of each phrase in its own meter, where the fills are.
 /// </summary>
 public sealed class SectionDynamicsTest
 {

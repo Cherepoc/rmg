@@ -20,10 +20,10 @@ public sealed class ListeningSetTest
     private static double Bpm(CorpusSong song) =>
         song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo;
 
-    // a position as the time it is heard at, at the song's tempo, which only an ending's ritardando moves
+    // a position as the time it is heard at, every section's tempo and the ending's ritardando as the song plays them
     private static string Time(CorpusSong song, double position)
     {
-        var seconds = (int)Math.Round(position * 60 / Bpm(song));
+        var seconds = (int)Math.Round(song.Rendered.SecondsAt(position));
         return $"{seconds / 60}:{seconds % 60:D2}";
     }
 
@@ -83,7 +83,7 @@ public sealed class ListeningSetTest
         foreach (var (kind, (song, rhythms)) in slow.Select(x => ("slow", x)).Concat(fast.Select(x => ("fast", x))))
         {
             var seed = song.Seed;
-            var sections = string.Join(", ", song.Map.Sections.Select(x => $"{Time(song, x.Start)} {rhythms[x.SectionId].Span * 60 / Bpm(song):F1} s"));
+            var sections = string.Join(", ", song.Map.Sections.Select(x => $"{Time(song, x.Start)} {song.Rendered.SecondsAt(x.Start + rhythms[x.SectionId].Span) - song.Rendered.SecondsAt(x.Start):F1} s"));
             await Write(directory, $"chords-{kind}-{seed}", song);
             checklist.AppendLine($"- `chords-{kind}-{seed}.mid`: {Describe(song)}; each section's start and chord length: {sections}");
         }

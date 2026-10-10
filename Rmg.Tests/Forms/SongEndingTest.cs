@@ -47,7 +47,7 @@ public sealed class SongEndingTest
             await Assert.That(sections[^1].SectionId).IsEqualTo(sections[^2].SectionId);
             await Assert.That(Ending(song).Duration).IsEqualTo(0);
             await Assert.That(song.Map.Duration).IsEqualTo(sections[^1].End).Within(1e-9);
-            // its first step down a step into the last section, or eight bars from the end where the section is shorter, as a
+            // its first step down a step into the last section, or two patterns from the end where the section is shorter, as a
             // step of 1, as loud as the band plays, is none
             var fadeStart = Math.Min(sections[^1].Start, sections[^1].End - 2 * sections[^1].Meter.PatternDuration);
             await Assert.That(fade[0].Position).IsEqualTo(fadeStart + FormLayers.FadeStep).Within(1e-9);

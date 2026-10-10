@@ -63,3 +63,4 @@ rejected while fixing: the place, what was decided, why.
 - An imported genre's options, amounts and name are not checked on the page (genre-editor): the server reads every request's genre and its refusal reaches the page; a second validator in the page would only drift from it.
 - The audio worklet (spessasynth_processor) and the MP3 worker's encoder load from the CDN with no integrity hash: addModule and a worker's static import take none; the import map's three modules carry theirs. Self-hosting them is the remedy if the CDN is ever in doubt.
 - Listening mode's A and B alternate by the song's index (listening.js): the listener is the operator, alternating balances which is heard first, and a drawn order would cost every listening test a way to learn it; kept.
+- DyadicRankTimeline.Generate kept though only tests call it: it is how a dozen tests read a rhythm as a timeline.

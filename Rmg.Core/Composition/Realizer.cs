@@ -521,7 +521,8 @@ internal static class Realizer
         return (int)Math.Round(offset * length, MidpointRounding.AwayFromZero);
     }
 
-    // each value is rounded before summing, so every layer shifts a pattern by a whole step - see README "How it works"
+    // each value is rounded before summing, so that every layer shifts a pattern by a whole step, a small offset of one
+    // layer never tipping another's over into the next step
     private static int ToIndex(this ImmutableArray<double> offset, int length)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);

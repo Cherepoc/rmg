@@ -428,7 +428,7 @@ public sealed class EventStoreTest : IDisposable
             Length = SongSettingsTest.Mixed.Length with { IsGiven = false },
             Facets = [..SongSettingsTest.Mixed.Facets.Select(x => x with { IsGiven = false })],
             Parts = [..SongSettingsTest.Mixed.Parts.Select(x => x with { Plays = 0 })],
-            DrumPieces = DrumPieceSettings.Drawn
+            DrumPieces = SongSettingsTest.DrawnPieces
         };
         // seed 1 drawn at the step 5 of 61, liked, and asked for at 60, disliked; seed 2 drawn at 10, liked; seed 3
         // from before the settings were kept, liked

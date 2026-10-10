@@ -236,11 +236,7 @@ public sealed record PartSettings(int Plays, Setting Instrument, int Volume, Set
 
 /// <param name="IsGiven">Whether the drum pieces are given, in place of those the song draws.</param>
 /// <param name="Pieces">Every piece's being in the song, in the order of <see cref="Core.Composition.DrumPieces.All" />, where they are given.</param>
-public sealed record DrumPieceSettings(bool IsGiven, ImmutableArray<bool> Pieces)
-{
-    /// <summary>The song's own drum pieces.</summary>
-    public static DrumPieceSettings Drawn { get; } = new(false, [..Core.Composition.DrumPieces.All.Select(_ => false)]);
-}
+public sealed record DrumPieceSettings(bool IsGiven, ImmutableArray<bool> Pieces);
 
 /// <param name="Volume">How loud its drums play, from 0 to 61.</param>
 public sealed record DrumGroupSettings(int Volume);

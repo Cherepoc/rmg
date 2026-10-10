@@ -86,8 +86,9 @@ public static class GenreChoices
 
     /// <summary>
     ///     The chords that leave the section's scale, each its chance as the songs have it (<see cref="Composition.ChordScales" />):
-    ///     a chord before a root a fifth below its dominant, a chord in a mode borrowed from the home's parallels, and a
-    ///     section's every chord but its home its own dominant, the blues', which the songs never play.
+    ///     a chord before a root a fifth below its dominant, a chord in a mode borrowed from the home's parallels, a
+    ///     section's every chord but its home its own dominant, the blues', which the songs never play, a chord in a scale of
+    ///     its own, and a chromatic mediant, iii or vi turned major.
     /// </summary>
     public static GenreChoice ChordScales { get; } = Chances("chordScales", "Chords off the scale",
     [
@@ -439,7 +440,7 @@ public static class GenreChoices
     /// <summary>A last section that came back before played once more, as a last chorus (<see cref="SongForms.LastRepeatChance" />).</summary>
     public static GenreChoice LastRepeat { get; } = Chances("lastRepeat", "Last repeat", [("songs", "A last chorus played twice", SongForms.LastRepeatChance)]);
 
-    /// <summary>A line doubled: in octaves by its own part, the melody harmonised by the counter-melody, the bass with the riff (<see cref="LineDoubling" />).</summary>
+    /// <summary>A line doubled: in octaves by its own part, the melody harmonised by the counter-melody, in three voices now and then, the bass with the riff (<see cref="LineDoubling" />).</summary>
     public static GenreChoice Doubling { get; } = Chances("doubling", "Doubling",
     [
         ("octaves", "Lines in octaves", LineDoubling.OctaveChance), ("harmony", "The melody harmonised", LineDoubling.HarmonyChance),
@@ -450,7 +451,10 @@ public static class GenreChoices
     /// <summary>A part switching its instrument in a section (<see cref="InstrumentsOverTime" />).</summary>
     public static GenreChoice InstrumentSwitches { get; } = Chances("instrumentSwitches", "Instrument switches", [("sections", "Sections switching an instrument", InstrumentsOverTime.SwitchChance)]);
 
-    /// <summary>The strong effect a song plays on one part, or none: an echo, a tremolo or a sweep, or a pump on its pads, chords and bass (<see cref="Expression.StrongEffects" />).</summary>
+    /// <summary>
+    ///     The strong effect a song plays on one part, or none: an echo, a tremolo, a sweep, a gate, a filter's wobble, squelch
+    ///     or opening, or a pump on its pads, chords and bass (<see cref="Expression.StrongEffects" />).
+    /// </summary>
     public static GenreChoice StrongEffect { get; } = Pool("strongEffect", "Strong effect",
         Expression.StrongEffects.Select(x => (Name(x.Effect.ToString()), Expression.LabelOf(x.Effect), x.Weight)));
 

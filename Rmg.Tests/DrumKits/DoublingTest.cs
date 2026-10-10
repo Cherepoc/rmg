@@ -6,8 +6,8 @@ namespace Rmg.Tests.DrumKits;
 
 public sealed class DoublingTest
 {
-    /// <summary>The bars before a line a fill may play in, in beats: a fill's four beats at the most, in as many bars as they take.</summary>
-    private static double FillBars(Meter meter) => Math.Ceiling(4 / meter.BarDuration - 1e-9) * meter.BarDuration;
+    /// <summary>The bars before a line a fill may play in, in beats: the bar before it, a fill a span of that bar at the most.</summary>
+    private static double FillBars(Meter meter) => meter.BarDuration;
 
     [Test]
     public async Task ADrumThatDoublesOrAccentsALead_PlaysOnlyBeatsTheLeadPlays_AnAccentFewerOfThem()

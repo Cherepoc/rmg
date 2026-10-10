@@ -37,24 +37,12 @@ public sealed class ListeningQuestionsTest
         int[]? Heard = null
     );
 
-    /// <summary>A patch keeping a choice to one option alone, every other of its options at none, as a song without a device's has it.</summary>
-    private static Dictionary<string, int> Only(GenreChoice choice, string option) => choice.Options.ToDictionary(x => x.Name, x => x.Name == option ? 100 : 0);
-
-    /// <summary>The first note of the song, of the parts given or any, whose state says it plays the device.</summary>
-    private static double? FirstNote(CorpusSong song, Func<RealizedNote, bool> plays, Func<TrackRole, bool>? parts = null) =>
-        song.Song.Notes!.Where(x => parts is null || parts(song.Song.TrackDefinitions[x.Key].Role)).SelectMany(x => x.Value).Where(x => plays(x.Value))
-            .Select(x => (double?)x.Position).Min();
-
     /// <summary>Where a section the trace finds playing the device first plays.</summary>
     private static double? FirstSection(CorpusSong song, string point, Func<object?, bool> plays) =>
         song.Trace.Where(x => x.Point == point && plays(x.Value)).Select(x => song.Map.Sections.Where(s => s.SectionId == x.Section).Select(s => (double?)s.Start).Min()).Min();
 
-    private static double? Plays(CorpusSong song, FigurePlayer player, string figure) =>
-        FirstSection(song, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(player) == figure);
-
     /// <summary>Bars before a place, to hear what leads into it, never before the song's start.</summary>
     private static double? Before(CorpusSong song, double? at, int bars) => at is { } place ? Math.Max(0, place - bars * song.Song.MeterAt(place).BarDuration) : null;
-
 
     private static readonly Question[] Questions =
     [

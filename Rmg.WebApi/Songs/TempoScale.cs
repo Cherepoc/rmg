@@ -11,8 +11,6 @@ public static class TempoScale
 {
     public const int Steps = StepScale.Steps;
 
-    public const int Middle = StepScale.Middle;
-
     /// <summary>A step's tempo, as a multiple of <see cref="Meter.BaseTempo" />.</summary>
     public static double Multiplier(int step) => Math.Pow(2, 2 * StepScale.ToAmount(step) - 1);
 

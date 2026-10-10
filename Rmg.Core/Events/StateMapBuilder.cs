@@ -10,10 +10,6 @@ public sealed class StateMapBuilder
     private readonly List<Func<IGenerationContext, IState>> _stateGenerators = [];
     private readonly List<Func<IGenerationContext, StateMap>> _stateMapGenerators = [];
 
-    public StateMapBuilder()
-    {
-    }
-
     /// <param name="layer">
     ///     The layer the states made here belong to, such as the song or a section, which a <see cref="StateTrace" />
     ///     records as their origin.
@@ -46,13 +42,6 @@ public sealed class StateMapBuilder
         where T : notnull
     {
         _stateGenerators.Add(context => stateKind.CreateState(generator(context)));
-        return this;
-    }
-
-    public StateMapBuilder AddCollectionOfOne<T>(StateKind<ImmutableArray<T>> stateKind, Func<IGenerationContext, T> generator)
-        where T : notnull
-    {
-        _stateGenerators.Add(context => stateKind.CreateState([generator(context)]));
         return this;
     }
 

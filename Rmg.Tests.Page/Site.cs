@@ -53,8 +53,8 @@ public sealed class Site : IAsyncInitializer, IAsyncDisposable
         if (Directory.Exists(_state)) Directory.Delete(_state, true);
     }
 
-    /// <summary>What the server has written, for a test that failed to say why.</summary>
-    public string Output
+    /// <summary>What the server has written, which a server that would not start is told by.</summary>
+    private string Output
     {
         get
         {

@@ -5,8 +5,6 @@ namespace Rmg.Tests.ProbabilityThresholds;
 
 public sealed class ProbabilityThresholdTest
 {
-    private const double Tolerance = 1e-9;
-
     // 25% -> "a", 25% -> "b", 50% -> "c"
     private static readonly ImmutableArray<ProbabilityThreshold<string>> Thresholds =
     [

@@ -27,6 +27,7 @@ public sealed class DyadicRankTimeline
         return EventTimeline.Create(1, items.OrderBy(x => x.Position));
     }
 
+    /// <summary>The ranks of a period's cycles over the duration as a timeline, as the tests read a rhythm.</summary>
     public static EventTimeline<int> Generate(double duration, double phase, double period, int maxRank, double restart, int split)
     {
         return EventTimeline.Create(

@@ -40,9 +40,9 @@ public sealed class GroupedCycleTest
     [Test]
     public async Task ADottedQuarter_SplitsIntoThree8ths_ItsFirstStrong_AndThenInto16ths()
     {
-        var slots = DyadicRankTimeline.Generate(1.5, 0, 1.5, 2, 1.5, ResolvedRhythm.SplitOf(1.5)).ToArray();
+        var slots = DyadicRankTimeline.GenerateSlots(1.5, 0, 1.5, 2, 1.5, ResolvedRhythm.SplitOf(1.5)).ToArray();
 
         await Assert.That(slots.Select(x => x.Position)).IsEquivalentTo([0, 0.25, 0.5, 0.75, 1, 1.25], CollectionOrdering.Matching);
-        await Assert.That(slots.Select(x => x.Value)).IsEquivalentTo([0, 2, 1, 2, 1, 2], CollectionOrdering.Matching);
+        await Assert.That(slots.Select(x => x.Rank)).IsEquivalentTo([0, 2, 1, 2, 1, 2], CollectionOrdering.Matching);
     }
 }

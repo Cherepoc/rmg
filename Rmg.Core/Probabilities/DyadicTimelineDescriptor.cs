@@ -18,11 +18,7 @@ public sealed class DyadicTimelineDescriptor
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(restart);
 
         Duration = duration;
-        Period = period;
-        Phase = phase;
         MaxRank = maxRank;
-        Restart = restart;
-        Split = split;
         Cycles = DyadicRankTimeline.GenerateCycles(duration, phase, period, restart, split);
     }
 
@@ -35,22 +31,11 @@ public sealed class DyadicTimelineDescriptor
         Duration = duration;
         MaxRank = maxRank;
         Cycles = cycles;
-        Period = cycles.IsEmpty ? duration : cycles[0].Length;
-        Restart = duration;
-        Split = cycles.IsEmpty ? 2 : cycles[0].Split;
     }
 
     /// <summary>The rhythm's cycles, in order.</summary>
     public ImmutableArray<RhythmCycle> Cycles { get; }
 
-    /// <summary>How many parts a cycle splits into first, before every part halves.</summary>
-    public int Split { get; }
-
-    /// <summary>How often the cycles start again, the last before cut off.</summary>
-    public double Restart { get; }
-
     public double Duration { get; }
-    public double Period { get; }
-    public double Phase { get; }
     public int MaxRank { get; }
 }
