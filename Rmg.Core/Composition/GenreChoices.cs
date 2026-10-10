@@ -492,7 +492,7 @@ public static class GenreChoices
         PhraseLengths.Options.Select(x => (PhraseLengths.NameOf(x.Bars), PhraseLengths.LabelOf(x.Bars), x.Weight)));
 
     /// <summary>Whether a song takes one of the forms songs are written in, or one of its own (<see cref="SongForms" />).</summary>
-    public static GenreChoice FormChances { get; } = Chances("formChances", "Form or its own", [("forms", "One of the forms", SongForms.OwnFormChance)]);
+    public static GenreChoice FormChances { get; } = Chances("formChances", "Form or its own", [("forms", "One of the forms", SongForms.FormsChance)]);
 
     /// <summary>The forms songs are written in, a verse and a chorus coming back, with a pre-chorus or a bridge (<see cref="SongForms.Forms" />).</summary>
     public static GenreChoice Form { get; } = Shortened(Pool("form", "Form", SongForms.Forms.Select(x => (SongForms.NameOf(x.Value), SongForms.LabelOf(x.Value), new ByConvention(x.Weight, x.Weight, x.Weight)))),

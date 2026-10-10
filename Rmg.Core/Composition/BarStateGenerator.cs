@@ -72,9 +72,9 @@ internal sealed class BarStateGenerator
     /// <param name="scale">The section's scale, which every bar plays in.</param>
     /// <param name="progression">The roots of the chords, in steps above the home.</param>
     /// <param name="harmonicRhythm">Where the chords change.</param>
-    /// <param name="home">The step of the section's home above the song's tonic.</param>
     /// <param name="chordScales">Every chord's own scale, the section's with steps raised or lowered (<see cref="ChordScales" />).</param>
     /// <param name="shifts">Every chord moved by semitones, a chromatic passing chord's (<see cref="PassingChords" />), most none.</param>
+    /// <param name="unconventionality">The chords facet, which the home's and the cadence's chord shapes are drawn by.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
     /// <param name="context">The section's random sequence.</param>
     /// <param name="facets">How far the section strays from convention: its melody facet leans the melody's contour, its chords facet the bass's arrivals.</param>
@@ -83,7 +83,6 @@ internal sealed class BarStateGenerator
         Scale scale,
         ImmutableArray<int> progression,
         HarmonicRhythm harmonicRhythm,
-        int home,
         ImmutableArray<ChordScale> chordScales,
         ImmutableArray<int> shifts,
         HarmonicUnconventionality unconventionality,

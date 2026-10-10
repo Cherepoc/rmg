@@ -8,8 +8,8 @@ namespace Rmg.Core.Composition;
 /// <summary>Pushes, the band's changes an eighth early, a stage of the song after it is put together (<see cref="SongStages" />).</summary>
 internal static class Pushes
 {
-    /// <summary>The chance a section pushes its chord changes, by its groove facet: never in the plainest songs; a genre's where it names it.</summary>
-    public static ByConvention Chance { get; } = new(0, 0.08, 0.15);
+    /// <summary>The chance a section pushes its chord changes, by its groove facet: never in the plainest songs, and as often in the wildest as in a middling one; a genre's where it names it.</summary>
+    public static ByConvention Chance { get; } = new(0, 0.08, 0.08);
 
     /// <summary>How early a push plays its change, in beats: an eighth.</summary>
     public const double Early = 0.5;

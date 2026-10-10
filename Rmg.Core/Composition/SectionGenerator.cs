@@ -191,7 +191,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _generators(meter).Bars.Generate(Stream(sectionId, SectionStream.BarStates), scale, progression, harmonicRhythm, home, chordScales, shifts, unconventionality, bassLeading, facets);
+        var barStateTimelineMap = _generators(meter).Bars.Generate(Stream(sectionId, SectionStream.BarStates), scale, progression, harmonicRhythm, chordScales, shifts, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.RecordSection(TracePoints.MelodyContour, SectionTrace, sectionId, string.Join(", ", contour), contour);
 
@@ -444,7 +444,7 @@ internal sealed class SectionGenerator
             Stream(sectionId, SectionStream.Scale),
             _songScale,
             unconventionality,
-            SectionEnergy.Tilt(energy, Unconventionality.Coupling(unconventionality)),
+            SectionEnergy.Tilt(energy, new RhythmicUnconventionality(unconventionality).Coupling),
             SectionContrast.Of(role),
             _genre
         );

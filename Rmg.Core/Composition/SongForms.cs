@@ -89,7 +89,7 @@ internal static class SongForms
     /// <param name="genre">The genre, whose chance of one of the forms and whose pool of them are the song's where it names them.</param>
     public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality, SongLength? length, Genre genre)
     {
-        var formChance = OwnFormChance.At(unconventionality, genre.Chance(GenreChoices.FormChances, "forms"));
+        var formChance = FormsChance.At(unconventionality, genre.Chance(GenreChoices.FormChances, "forms"));
         // the forms as the genre weighs them where it names them, its plainest at the plain end and its wildest at the wild;
         // a length given weighs those that may be drawn
         var forms = genre.Pool<ImmutableArray<SectionRole>>(GenreChoices.Form, NameOf) is { } pool
@@ -121,7 +121,7 @@ internal static class SongForms
     }
 
     /// <summary>The chance a song takes one of the forms, by its form facet: the plainest always, the wildest never.</summary>
-    public static ByConvention OwnFormChance { get; } = RhythmicUnconventionality.Ends(FormChance, -1);
+    public static ByConvention FormsChance { get; } = RhythmicUnconventionality.Ends(FormChance, -1);
 
     /// <summary>A form's name, as a genre gives it: its roles' letters, "vcvcbc".</summary>
     public static string NameOf(ImmutableArray<SectionRole> form) => string.Concat(form.Select(x => x switch

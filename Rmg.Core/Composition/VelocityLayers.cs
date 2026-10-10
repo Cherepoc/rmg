@@ -23,9 +23,10 @@ internal static class VelocityLayers
         TrackRole.Chords => 0.1,
         TrackRole.Pad => -0.1,
         TrackRole.CounterMelody => 0.05,
-        TrackRole.Riff => 0.15,
+        TrackRole.Riff or TrackRole.RiffTwin => 0.15,
         TrackRole.Rhythm => 0.1,
-        _ => 0
+        TrackRole.Drum => 0,
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A part with no level.")
     };
 
     /// <summary>
@@ -67,9 +68,10 @@ internal static class VelocityLayers
         TrackRole.Melody or TrackRole.Solo => 0.8,
         TrackRole.Pad => 0.2,
         TrackRole.CounterMelody => 0.6,
-        TrackRole.Riff => 0.7,
+        TrackRole.Riff or TrackRole.RiffTwin => 0.7,
         TrackRole.Rhythm => 0.45,
-        _ => 1
+        TrackRole.Drum => 1,
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A part with no dynamics.")
     };
 
     /// <summary>

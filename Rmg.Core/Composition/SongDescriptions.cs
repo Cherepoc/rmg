@@ -305,7 +305,7 @@ public static class SongDescriptions
 
         var pitches = notes.SelectMany(x => x.Value.Pitches).ToArray();
         // the bars it plays in, each by where it starts, counted from its section's start in its section's meter
-        var bars = notes.Select(x => song.Map is { } map ? Math.Round(x.Position - map.BeatInBar(x.Position), 6) : Math.Floor(x.Position / song.MeterAt(x.Position).BarDuration + 1e-9))
+        var bars = notes.Select(x => Math.Round(x.Position - song.Map!.BeatInBar(x.Position), 6))
             .Distinct().Count();
         var improvisation = (double)trace.First(x => x.Point == TracePoints.MelodyImprovisation).Value!;
         return new MelodyDescription(

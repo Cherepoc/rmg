@@ -40,4 +40,29 @@ public sealed class LiftTest
         await Assert.That(earlier).IsGreaterThan(0);
         await Assert.That((double)louder).IsGreaterThan(earlier * 0.95);
     }
+
+    /// <summary>
+    ///     The band lifts into a louder section at a change of section, whether its drums mark the line or not: every lift
+    ///     at a section's start, a hook intro's end among them, rising, and drumless songs lifting as the others do.
+    /// </summary>
+    [Test]
+    public async Task TheBand_LiftsIntoALouderSection_AtEveryChangeOfSection_DrumsOrNone()
+    {
+        var (lifts, drumless) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Parts: ImmutableDictionary<Rmg.Core.Songs.TrackRole, bool>.Empty.Add(Rmg.Core.Songs.TrackRole.Drum, seed % 2 == 0)))))
+        {
+            var starts = song.Map.Sections.Select(x => Math.Round(x.Start, 6)).ToHashSet();
+            foreach (var (position, lift) in song.Trace.Where(x => x.Point == TracePoints.Lift).Select(x => ((double, double))x.Value!))
+            {
+                lifts++;
+                drumless += song.PlaysDrums ? 0 : 1;
+                await Assert.That(starts.Contains(Math.Round(position, 6))).IsTrue().Because($"seed {song.Seed} at {position}");
+                await Assert.That(lift).IsGreaterThan(0);
+            }
+        }
+
+        Console.WriteLine($"{lifts} lifts, {drumless} in songs without drums");
+        await Assert.That(lifts).IsGreaterThan(50);
+        await Assert.That(drumless).IsGreaterThan(lifts / 5);
+    }
 }
