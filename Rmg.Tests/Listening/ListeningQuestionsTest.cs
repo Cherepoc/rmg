@@ -77,7 +77,7 @@ public sealed class ListeningQuestionsTest
         new("medieval-raise", "The raised, major chord before home at a phrase's end: medieval, or a later classical cadence?",
             "Medieval's cadence raise, now the songs' own.", "medieval", [], new() { ["cadenceRaise"] = new() { ["sections"] = 0 } },
             x => FirstSection(x, TracePoints.CadenceRaise, v => (((int?, bool))v!).Item2)),
-        new("ambient-swing", "An ambient piece's arpeggios swung long-short: right, or should they float evenly?",
+        new("ambient-swing", "An ambient piece swung long-short: right, or should it float evenly?",
             "Ambient's swing, now the songs' own.", "ambient", [], new() { ["feelChances"] = new() { ["swing"] = 0 } },
             x => ((Swing)x.Trace.Single(t => t.Point == TracePoints.Swing).Value!).Delay > 0 ? 0 : null),
         new("trap-reharm", "The last hook's loop changing its chords: this trap song, or its beat lost?",
@@ -111,21 +111,47 @@ public sealed class ListeningQuestionsTest
     /// <summary>How near the best a place to listen may be and still be taken for being earlier, as a share of the best.</summary>
     private const double NearBest = 0.9;
 
+    /// <summary>
+    ///     A question's patch as the page lays it: its options, and of a choice its genre does not name, every other option
+    ///     at the songs' own amounts, as a choice named switches off the options it leaves out, so that the song without
+    ///     differs by the device alone; none for no patch.
+    /// </summary>
+    private static Dictionary<string, Dictionary<string, object>>? PatchOf(Question question)
+    {
+        if (question.GenrePatch is null)
+            return null;
+        var named = question.Genre is null ? [] : GenrePresets.All.Single(x => x.Id == question.Genre).Choices;
+        var patch = new Dictionary<string, Dictionary<string, object>>();
+        foreach (var (choice, options) in question.GenrePatch)
+        {
+            var completed = options.ToDictionary(x => x.Key, x => (object)x.Value);
+            if (!named.ContainsKey(choice))
+                foreach (var option in GenreChoices.All.Single(x => x.Name == choice).Options.Where(x => !options.ContainsKey(x.Name)))
+                {
+                    int[] ends = [..new[] { option.Own.Plain, option.Own.Tuned, option.Own.Wild }.Select(x => x * 100).Select(x => Math.Abs(x - Math.Round(x)) < 1e-9
+                        ? (int)Math.Round(x) : throw new InvalidOperationException($"{question.Id}: {choice}'s {option.Name} is no whole percent, which a genre could give."))];
+                    completed[option.Name] = ends.Distinct().Count() == 1 ? ends[0] : ends;
+                }
+            patch[choice] = completed;
+        }
+        return patch;
+    }
+
     /// <summary>A question's genre as its song without the device has it, its choices patched as the page patches them; none for no genre.</summary>
     private static Genre? GenreOf(Question question, bool without)
     {
         if (question.Genre is null)
             return null;
         var preset = GenrePresets.All.Single(x => x.Id == question.Genre);
-        if (!without || question.GenrePatch is null)
+        if (!without || PatchOf(question) is not { } patch)
             return GenrePresets.Genre(preset);
         var choices = new Dictionary<string, Dictionary<string, JsonElement>>(preset.Choices);
         // every option the patch names its amount, the genre's others as they are, as the page lays it (listening.js)
-        foreach (var (choice, options) in question.GenrePatch)
+        foreach (var (choice, options) in patch)
         {
             var patched = choices.TryGetValue(choice, out var own) ? new Dictionary<string, JsonElement>(own) : [];
             foreach (var (option, amount) in options)
-                patched[option] = JsonDocument.Parse(amount.ToString()).RootElement;
+                patched[option] = JsonSerializer.SerializeToElement(amount);
             choices[choice] = patched;
         }
         return GenrePresets.Genre(preset with { Choices = choices });
@@ -191,7 +217,7 @@ public sealed class ListeningQuestionsTest
                 decides = question.Decides,
                 genre = question.Genre,
                 // an object of choices always, as the page reads it, empty where the song without the device patches none
-                without = new { skip = question.Skip, genre = question.GenrePatch ?? new Dictionary<string, Dictionary<string, int>>() },
+                without = new { skip = question.Skip, genre = PatchOf(question) ?? new Dictionary<string, Dictionary<string, object>>() },
                 seeds = asked.Select(x => new { seed = Base62.FromSeed(TestCorpus.SongSeed(x.Seed)), at = Math.Round(x.At, 1), listen = x.Listen }).ToArray()
             });
         }
@@ -211,6 +237,11 @@ public sealed class ListeningQuestionsTest
             await Assert.That($"{question.Id}:without".Length).IsLessThanOrEqualTo(Rmg.WebApi.Analytics.AnalyticsEndpoints.DetailLength).Because(question.Id);
             // and a verdict the server takes
             await Assert.That(Rmg.WebApi.Analytics.AnalyticsEndpoints.IsVerdict($"{question.Id}:with")).IsTrue().Because(question.Id);
+            // and its patch switching off no option it does not name: a choice its genre leaves to the songs named whole
+            var named = question.Genre is null ? [] : GenrePresets.All.Single(x => x.Id == question.Genre).Choices;
+            foreach (var (choice, options) in PatchOf(question) ?? [])
+                if (!named.ContainsKey(choice))
+                    await Assert.That(options.Keys.ToHashSet().SetEquals(GenreChoices.All.Single(x => x.Name == choice).Options.Select(x => x.Name))).IsTrue().Because($"{question.Id}: {choice}");
         }
 
         var path = QuestionsFile();

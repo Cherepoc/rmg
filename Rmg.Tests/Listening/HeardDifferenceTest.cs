@@ -1,3 +1,4 @@
+using Rmg.Core.Events;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
@@ -9,6 +10,23 @@ public sealed class HeardDifferenceTest
     // the song with a part's tracks taken out, its notes all gone
     private static RenderedSong Without(RenderedSong song, TrackRole role) =>
         new(song.Duration, song.Meters, song.TempoTimeline, song.FadeTimeline, [..song.Tracks.Where(x => x.Role != role)]);
+
+    // a song of eight beats, a note on each, every note moved by the beats given, as a swing or a pocket moves it
+    private static RenderedSong Moved(double by) =>
+        new(8, [(0, Rmg.Core.Composition.Meter.FourFour)], Rmg.Core.Events.StateKinds.Tempo.CreateDefaultTimeline(0), Rmg.Core.Events.StateKinds.Fade.CreateDefaultTimeline(0),
+        [
+            new RenderedTrack(false, TrackRole.Melody, 0,
+                Rmg.Core.Events.EventTimeline.Create(8, Enumerable.Range(0, 8).Select(x => new RenderedNote(60, 0.8, 0.5, by).ToTimelineItem(x))), 0)
+        ]);
+
+    /// <summary>A note moved too little to be heard as moved is the same note; one moved as far as a heard swing moves it is not.</summary>
+    [Test]
+    public async Task ANoteMovedLessThanIsHeard_IsTheSameNote()
+    {
+        // at the base tempo a beat is half a second: 0.03 beats 15 ms, 0.2 beats 100 ms
+        await Assert.That(new HeardDifference(Moved(0), Moved(0.03)).Between(0, 4)).IsEqualTo(0);
+        await Assert.That(new HeardDifference(Moved(0), Moved(0.2)).Between(0, 4)).IsGreaterThan(0.9);
+    }
 
     [Test]
     public async Task ASong_DiffersFromItselfNowhere()

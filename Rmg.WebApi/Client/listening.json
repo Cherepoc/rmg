@@ -94,18 +94,18 @@
         "seed": "R",
         "at": 135.4,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))",
           "Solo (Distortion Guitar)",
+          "Rhythm part (Electric Guitar (clean))",
           "Chords (Distortion Guitar)"
         ]
       },
       {
         "seed": "S",
-        "at": 195.6,
+        "at": 196.7,
         "listen": [
           "Rhythm part (Electric Guitar (clean))",
-          "Bass (Electric Bass (pick))",
-          "Melody (Overdriven Guitar)"
+          "Melody (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
@@ -286,6 +286,14 @@
         ]
       },
       {
+        "seed": "8",
+        "at": 44.4,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
         "seed": "B",
         "at": 0,
         "listen": [
@@ -299,15 +307,6 @@
         "listen": [
           "Bass (Electric Bass (pick))",
           "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "M",
-        "at": 154.6,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Riff (Distortion Guitar)",
-          "Chords (Distortion Guitar)"
         ]
       },
       {
@@ -529,20 +528,20 @@
     },
     "seeds": [
       {
-        "seed": "9",
-        "at": 91,
+        "seed": "6",
+        "at": 96,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Melody (Lead 5 (charang))",
-          "Bass (Electric Bass (finger))"
+          "Melody (Violin)",
+          "Riff (Distortion Guitar)",
+          "Chords (Overdriven Guitar)"
         ]
       },
       {
         "seed": "L",
-        "at": 147.5,
+        "at": 146.2,
         "listen": [
-          "Bass (Electric Bass (pick))",
           "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
           "Chords (Electric Guitar (clean))"
         ]
       },
@@ -551,6 +550,14 @@
         "at": 176.3,
         "listen": [
           "Solo (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "i",
+        "at": 170.6,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
@@ -563,20 +570,11 @@
         ]
       },
       {
-        "seed": "16",
-        "at": 25.8,
-        "listen": [
-          "Solo (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
         "seed": "1B",
         "at": 4.8,
         "listen": [
           "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)",
-          "Chords (Overdriven Guitar)"
+          "Riff (Overdriven Guitar)"
         ]
       }
     ]
@@ -644,58 +642,63 @@
   },
   {
     "id": "ambient-swing",
-    "question": "An ambient piece's arpeggios swung long-short: right, or should they float evenly?",
+    "question": "An ambient piece swung long-short: right, or should it float evenly?",
     "decides": "Ambient's swing, now the songs' own.",
     "genre": "ambient",
     "without": {
       "skip": [],
       "genre": {
         "feelChances": {
-          "swing": 0
+          "swing": 0,
+          "halfTime": 8,
+          "doubleTime": 4
         }
       }
     },
     "seeds": [
       {
-        "seed": "1",
-        "at": 464.2,
-        "listen": [
-          "Melody (Music Box)"
-        ]
-      },
-      {
         "seed": "3",
-        "at": 0,
+        "at": 1080.7,
         "listen": [
           "Melody (Celesta)"
         ]
       },
       {
-        "seed": "c",
-        "at": 534.1,
+        "seed": "P",
+        "at": 130.4,
         "listen": [
-          "Hi-Hat"
+          "Melody (Celesta)"
         ]
       },
       {
-        "seed": "q",
-        "at": 626.2,
+        "seed": "S",
+        "at": 752.1,
         "listen": [
-          "Cymbal"
+          "Counter-melody (Flute)"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 524.2,
+        "listen": [
+          "Bass (Contrabass)",
+          "Chords (Pad 7 (halo))"
         ]
       },
       {
         "seed": "1M",
-        "at": 666.6,
+        "at": 666.9,
         "listen": [
           "Hi-Hat"
         ]
       },
       {
         "seed": "1o",
-        "at": 1008.1,
+        "at": 742.5,
         "listen": [
-          "Counter-melody (French Horn)"
+          "Chords (Pad 2 (warm))",
+          "Riff (Electric Guitar (clean))",
+          "Acoustic Snare"
         ]
       }
     ]
@@ -709,7 +712,17 @@
       "skip": [],
       "genre": {
         "harmonyDevices": {
-          "reharmonised": 0
+          "reharmonised": 0,
+          "innerLine": [
+            0,
+            15,
+            30
+          ],
+          "pedal": [
+            0,
+            6,
+            15
+          ]
         }
       }
     },
@@ -732,12 +745,12 @@
         ]
       },
       {
-        "seed": "11",
-        "at": 157.1,
+        "seed": "u",
+        "at": 110.9,
         "listen": [
-          "Chords (Electric Piano 1)",
+          "Chords (Choir Aahs)",
           "Melody (Acoustic Grand Piano)",
-          "Bass (Synth Bass 2)"
+          "Bass (Synth Bass 1)"
         ]
       },
       {
@@ -762,8 +775,7 @@
         "at": 175.6,
         "listen": [
           "Melody (Acoustic Grand Piano)",
-          "Bass (Synth Bass 2)",
-          "Chords (Pad 2 (warm))"
+          "Bass (Synth Bass 2)"
         ]
       }
     ]

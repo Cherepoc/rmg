@@ -21,6 +21,12 @@ internal sealed class HeardDifference
 
     private const int ControllerDifference = 8;
 
+    /// <summary>
+    ///     How far a note may move and be heard as the same note, in seconds: a swing or a pocket nudging it less is felt at
+    ///     most, not heard, and a question whose songs differ only so is no question to ask.
+    /// </summary>
+    public const double TimingDifference = 0.03;
+
     private readonly Rendering _with;
     private readonly Rendering _without;
 
@@ -41,8 +47,8 @@ internal sealed class HeardDifference
     {
         var parts = new Dictionary<string, double>();
         var (with, without) = (_with.NotesBetween(from, to), _without.NotesBetween(from, to));
-        var all = with.Sum(x => x.Value.Loudness) + without.Sum(x => x.Value.Loudness);
-        foreach (var (key, (part, loudness, _)) in with.Where(x => !without.ContainsKey(x.Key)).Concat(without.Where(x => !with.ContainsKey(x.Key))))
+        var all = with.Sum(x => x.Loudness) + without.Sum(x => x.Loudness);
+        foreach (var (_, part, loudness, _) in Unmatched(with, without))
             parts[part] = parts.GetValueOrDefault(part) + loudness / all;
 
         var moments = 0;
@@ -70,9 +76,7 @@ internal sealed class HeardDifference
     /// <summary>The first second from one to another where the two differ, a note or an effect; none where they do not.</summary>
     public double? FirstDifference(double from, double to)
     {
-        var (with, without) = (_with.NotesBetween(from, to), _without.NotesBetween(from, to));
-        var notes = with.Where(x => !without.ContainsKey(x.Key)).Select(x => x.Value.Seconds).Concat(without.Where(x => !with.ContainsKey(x.Key)).Select(x => x.Value.Seconds))
-            .Select(x => (double?)x).Min();
+        var notes = Unmatched(_with.NotesBetween(from, to), _without.NotesBetween(from, to)).Select(x => (double?)x.Seconds).Min();
         double? effects = null;
         foreach (var track in _with.Tracks.Keys.Intersect(_without.Tracks.Keys))
         {
@@ -92,6 +96,34 @@ internal sealed class HeardDifference
         return notes is { } n && effects is { } e ? Math.Min(n, e) : notes ?? effects;
     }
 
+    /// <summary>
+    ///     The notes of either that the other has none of alike, its track, pitch, loudness and instrument, within
+    ///     <see cref="TimingDifference" /> of it; each note matched once, in order.
+    /// </summary>
+    private static IEnumerable<(string Key, string Part, double Loudness, double Seconds)> Unmatched(
+        IReadOnlyList<(string Key, string Part, double Loudness, double Seconds)> with, IReadOnlyList<(string Key, string Part, double Loudness, double Seconds)> without)
+    {
+        var free = without.Select((x, i) => (x, i)).GroupBy(x => x.x.Key).ToDictionary(x => x.Key, x => x.Select(y => y.i).ToList());
+        var matched = new bool[without.Count];
+        foreach (var note in with)
+        {
+            var match = free.TryGetValue(note.Key, out var candidates)
+                ? candidates.Where(i => Math.Abs(without[i].Seconds - note.Seconds) <= TimingDifference).DefaultIfEmpty(-1).MinBy(i => i < 0 ? double.MaxValue : Math.Abs(without[i].Seconds - note.Seconds))
+                : -1;
+            if (match < 0)
+                yield return note;
+            else
+            {
+                matched[match] = true;
+                candidates!.Remove(match);
+            }
+        }
+
+        foreach (var (note, i) in without.Select((x, i) => (x, i)))
+            if (!matched[i])
+                yield return note;
+    }
+
     /// <summary>A part as a listener knows it: a pitched part's role and the instrument it plays there, a drum by its name.</summary>
     private static string NameOf(TrackRole role, bool isPercussion, int code) => isPercussion
         ? DrumGroups.AllDrums.FirstOrDefault(x => x.ArticulationCodes.Contains(code))?.Name ?? "Drums"
@@ -106,7 +138,7 @@ internal sealed class HeardDifference
     /// <summary>A rendering in seconds: its notes as heard, and every track's effects over time.</summary>
     private sealed class Rendering
     {
-        // every note by its track, its second, its pitch, its loudness and its instrument, with its part's name and its loudness
+        // every note by its track, its pitch, its loudness and its instrument, with its part's name, its second and its loudness
         private readonly (string Key, string Part, double Seconds, double Loudness)[] _notes;
 
         public Dictionary<string, Track> Tracks { get; }
@@ -125,7 +157,7 @@ internal sealed class HeardDifference
                     // where it is heard, its part's pocket moving it off its place, and on which instrument
                     var seconds = song.SecondsAt(note.Position + note.Value.Shift);
                     var program = track.ProgramChanges.LastOrDefault(x => x.Position <= note.Position + 1e-9, (0, track.PitchInstrumentCode)).Program;
-                    notes.Add(($"{name} {Math.Round(seconds, 2)} {note.Value.Offset} {Math.Round(note.Value.Velocity, 2)} {program}",
+                    notes.Add(($"{name} {note.Value.Offset} {Math.Round(note.Value.Velocity, 2)} {program}",
                         NameOf(track.Role, track.IsPercussionInstrument, track.IsPercussionInstrument ? note.Value.Offset : program), seconds, note.Value.Velocity * track.Volume));
                     sounding.Add((seconds, song.SecondsAt(note.Position + note.Value.Shift + note.Value.Duration)));
                 }
@@ -147,15 +179,9 @@ internal sealed class HeardDifference
             _notes = [..notes.OrderBy(x => x.Item3)];
         }
 
-        /// <summary>The notes starting from one second to another, by their keys, each its part's name, its loudness and its second.</summary>
-        public Dictionary<string, (string Part, double Loudness, double Seconds)> NotesBetween(double from, double to)
-        {
-            var result = new Dictionary<string, (string Part, double Loudness, double Seconds)>();
-            foreach (var (key, part, seconds, loudness) in _notes)
-                if (seconds >= from && seconds < to)
-                    result[key] = (part, result.GetValueOrDefault(key).Loudness + loudness, seconds);
-            return result;
-        }
+        /// <summary>The notes starting from one second to another, in order, each its key, its part's name, its loudness and its second.</summary>
+        public List<(string Key, string Part, double Loudness, double Seconds)> NotesBetween(double from, double to) =>
+            [.._notes.Where(x => x.Seconds >= from && x.Seconds < to).Select(x => (x.Key, x.Part, x.Loudness, x.Seconds))];
     }
 
     /// <summary>A track's part's name, whether it sounds at every sample, and its bend in semitones, its expression and its controllers over time, in seconds.</summary>
