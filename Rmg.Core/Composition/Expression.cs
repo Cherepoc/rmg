@@ -655,8 +655,8 @@ internal static class Expression
             var slides = part.TestProbability(SlideChance.At(songSound)) & !echoes;
             var slideRate = SlideRate.At(songSound) * 2 * part.GenerateDouble();
             // a bass that glides, a genre's, into most of its notes from the note before, as an 808's or an acid line's
-            // does; drawn last, so that the part's other draws stay
-            var glides = part.TestProbability(GlideChance.At(songSound, genre.Chance(GenreChoices.Glide, "bass"))) && role == TrackRole.Bass && !echoes;
+            // does, on an instrument that bends; drawn last, so that the part's other draws stay
+            var glides = part.TestProbability(GlideChance.At(songSound, genre.Chance(GenreChoices.Glide, "bass"))) && role == TrackRole.Bass && !echoes && Bends(program);
             if (glides)
                 (slides, slideRate) = (true, GlideRate);
             // and from across a gap, into a short note too

@@ -8,7 +8,8 @@ namespace Rmg.Core;
 
 public static class Midi
 {
-    private const uint TicksPerQuarterNote = 96;
+    // fine enough for a pocket's and a double take's offsets, a few milliseconds each
+    private const uint TicksPerQuarterNote = 480;
     private const byte PercussionChannel = 9;
     private const byte MainVolumeController = 7;
     private const byte ExpressionController = 11;
@@ -250,8 +251,9 @@ public static class Midi
                 (byte)x.Value.Offset,
                 x.Value.Velocity
             ))
+            // each key's notes in the order they sound, which a shift may have moved past another's
             .GroupBy(x => x.Key)
-            .SelectMany(TrimOverlaps)
+            .SelectMany(x => TrimOverlaps(x.OrderBy(n => n.OnDelta)))
             // a note that ends where the next note of its key starts is written before it, so its note-off comes first
             .OrderBy(x => x.OnDelta);
     }
@@ -465,9 +467,10 @@ public static class Midi
         var ticksPerQuarterNoteBytes = IntToBytesFixed(TicksPerQuarterNote, 2);
         stream.Write(ticksPerQuarterNoteBytes, 0, ticksPerQuarterNoteBytes.Length);
 
-        // the insertion effect, and every channel its part plays on through it, its second take's too
+        // the insertion effect, and every channel its part plays on through it, its second take's too, but its riser's, a
+        // sweep of its own
         var insertion = song.Insertion is { } effect
-            ? (effect.Kind, Channels: song.Tracks.ToChannels().Zip(song.Tracks).Where(x => x.Second.Role == effect.Part).Select(x => x.First).ToImmutableArray())
+            ? (effect.Kind, song.Tracks.ToChannels().Zip(song.Tracks).Where(x => x.Second.Role == effect.Part && !x.Second.IsRiser).Select(x => x.First).ToImmutableArray())
             : ((InsertionKind, ImmutableArray<byte>)?)null;
         WriteSystemTrack(song.TempoTimeline, song.Meters, song.Room, insertion, song.Echo, label, songDurationDelta, stream);
 
