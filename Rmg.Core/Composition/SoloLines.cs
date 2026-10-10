@@ -329,7 +329,7 @@ internal static class SoloLines
         var arc = LinePattern.PhraseArc([..marks.Select(x => x.Phrase)], [..marks.Select(x => x.Pitch)], PhraseArc);
         int ChangeAt(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordChange);
         bool Approaches(int i) => soloist.Approaches && i + 1 < line.Count && line[i].Value.GetStateValue(CompositionStateKinds.LineVoices) > 1
-                                  && Math.Abs(line[i].Position - Math.Round(line[i].Position)) > 1e-6 && ChangeAt(line[i + 1].Position) != ChangeAt(line[i].Position);
+                                  && Math.Abs(line[i].Position - span.Start - Math.Round(line[i].Position - span.Start)) > 1e-6 && ChangeAt(line[i + 1].Position) != ChangeAt(line[i].Position);
         return ([
             ..line.Select((x, i) =>
             {
@@ -372,7 +372,17 @@ internal static class SoloLines
         double turn)
     {
         var bar = span.Meter.BarDuration;
-        var strong = bar >= 4 ? bar / 2 : bar;
+        // a bar's strong beats: its groups' starts in a bar of four beats or more, as an odd meter's 3+2 are, and its downbeat
+        // alone in a shorter one
+        double[] strong = bar >= 4 ? [..span.Meter.Levels[1].Select(x => x.Start / 4.0)] : [0];
+        // the last strong beat at or before a position, counted in bars from a phrase's start
+        double LastStrong(double from, double limit)
+        {
+            for (var b = Math.Floor((limit - from) / bar + 1e-9); b >= 0; b--)
+                if (strong.Select(x => from + b * bar + x).Where(x => x <= limit + 1e-9).DefaultIfEmpty(double.NaN).Max() is var at && !double.IsNaN(at))
+                    return at;
+            return from;
+        }
         var segments = new List<Segment>();
         // how long the run going on has played at each speed, which the soloist's stamina keeps it to
         var played = new Dictionary<int, double>();
@@ -396,7 +406,7 @@ internal static class SoloLines
             var late = context.GenerateInt(1, 3);
             var start = isLate && to - from >= 2 * bar ? from + late : from;
             // and its release from the last strong beat a beat or more before its end, and whether a breath follows
-            var releaseAt = Math.Max(start, from + Math.Floor((to - 1 - from) / strong + 1e-9) * strong);
+            var releaseAt = Math.Max(start, LastStrong(from, to - 1));
             var breathes = context.TestProbability(soloist.BreathChance);
             if (start > from)
                 segments.Add(new Segment(from, start, peak * Contour(contour, 0), SoloGesture.Pause, soloist.Speeds[0], soloist.Shapes[0], [soloist.CellSizes[0]], false, phrase, false));

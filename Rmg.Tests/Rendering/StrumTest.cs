@@ -39,8 +39,12 @@ public sealed class StrumTest
                 var strum = note.Value.State.GetStateValue(CompositionStateKinds.Strum);
                 strummed++;
                 down += strum > 0 ? 1 : 0;
-                // down and up in turn on the strumming grid: a chord a step after another the other way
-                if (previous is { } last && Math.Abs(note.Position - last.Position - grid) < 1e-6)
+                // down on the bar's first beat, counted from the bar, and down and up in turn on the strumming grid within the bar:
+                // a chord a step after another the other way
+                var beat = song.Map.BeatInBar(note.Position);
+                if (beat < 1e-6)
+                    await Assert.That(strum).IsGreaterThan(0).Because($"seed {song.Seed}, {part.Role} at {note.Position}");
+                else if (previous is { } last && Math.Abs(note.Position - last.Position - grid) < 1e-6 && last.Position >= note.Position - beat - 1e-6)
                     await Assert.That(strum > 0).IsNotEqualTo(last.Strum > 0).Because($"seed {song.Seed}, {part.Role} at {note.Position} after {last.Position}, grid {grid}");
                 previous = (note.Position, strum);
                 // its strings in order from the stroke's first, the last a whole stroke after it

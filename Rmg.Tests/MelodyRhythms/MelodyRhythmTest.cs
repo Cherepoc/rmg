@@ -119,7 +119,7 @@ public sealed class MelodyRhythmTest
                 .SelectMany(x => (((double, double[]))x.Value!).Item2).ToArray();
             melody = [..melody.Where(x => !walks.Any(w => Math.Abs(x.Position - w) < 0.2))];
             // a phrase is a section's 4-bar pattern, so its last bar ends at every pattern's end in its section's meter
-            var ends = map.Sections.SelectMany(x => Enumerable.Range(1, (int)Math.Round(x.Duration / x.Meter.PatternDuration)).Select(p => (End: x.Start + p * x.Meter.PatternDuration, x.Meter)));
+            var ends = map.Sections.SelectMany(x => Enumerable.Range(1, (int)Math.Ceiling(x.Duration / x.Meter.PatternDuration - 1e-9)).Select(p => (End: Math.Min(x.Start + p * x.Meter.PatternDuration, x.End), Meter: x.Start + p * x.Meter.PatternDuration > x.End + 1e-9 ? map.MeterAt(x.End - 1e-6) : x.Meter)));
             foreach (var (end, meter) in ends)
             {
                 var last = melody.Where(x => x.Position < end && x.Position >= end - meter.BarDuration).ToArray();
@@ -145,15 +145,14 @@ public sealed class MelodyRhythmTest
     [Test]
     public async Task Melody_IsBusierThanANoteOrTwoABar()
     {
-        var notesPerBar = Enumerable.Range(0, 32)
-            .Select(seed =>
-                {
-                    var melody = RenderMelody(seed);
-                    var bar = TestCorpus.Get(seed).Map.Meter.BarDuration;
-                    return melody.Length / ((melody[^1].Position + bar) / bar);
-                }
-            )
-            .ToArray();
+        // the melody's notes in the sections over their bars, each section's in its own meter
+        var notesPerBar = TestCorpus.Measure(64, song =>
+            {
+                var melody = song.Song.Notes![song.Track(TrackRole.Melody)];
+                return song.Map.Sections.Sum(x => melody.Count(n => n.IsWithin(x.Start, x.End))) / (double)song.Map.Sections.Sum(x => x.BarCount);
+            }
+        );
+        Console.WriteLine($"notes a bar: {notesPerBar.Min():F1} to {notesPerBar.Max():F1}, {notesPerBar.Average():F1} on the average");
 
         await Assert.That(notesPerBar.Average()).IsGreaterThan(3);
         // and songs differ: some sparse, some busy

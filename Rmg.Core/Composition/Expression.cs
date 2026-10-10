@@ -234,8 +234,8 @@ internal static class Expression
     /// <summary>Whether a note is the longest of its bar, a held one among the part's, which a pinch takes.</summary>
     private static bool LongestOfBar(EventTimeline<RealizedNote> notes, int index, SectionSpan span)
     {
-        var bar = span.Start + Math.Floor((notes[index].Position - span.Start) / span.Meter.BarDuration + 1e-9) * span.Meter.BarDuration;
-        return notes.Where(x => x.IsWithin(bar, bar + span.Meter.BarDuration)).All(x => x.Value.Duration <= notes[index].Value.Duration + 1e-9);
+        var (start, end) = span.Bar(span.BarOf(notes[index].Position));
+        return notes.Where(x => x.IsWithin(start, end)).All(x => x.Value.Duration <= notes[index].Value.Duration + 1e-9);
     }
 
     /// <summary>Whether a program is a driven guitar, which pinches.</summary>
@@ -764,7 +764,7 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Tremolo, note.Value.Duration >= 1 - 1e-9 ? tremolo : 0).With(CompositionStateKinds.AutoPan, sweeps);
                     if (pumps)
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
-                    if (echoes && (isLine || role == TrackRole.Rhythm) || echoesBackbeat && Math.Abs(note.Position - Math.Round(note.Position)) < 1e-9)
+                    if (echoes && (isLine || role == TrackRole.Rhythm) || echoesBackbeat && Math.Abs(map.BeatInBar(note.Position) - Math.Round(map.BeatInBar(note.Position))) < 1e-9)
                         state = state.With(CompositionStateKinds.Echo, (int)Math.Round((echoesBackbeat ? carrierDelay ?? throw new InvalidOperationException("A snare echoes before its part does.") : delay) * 4));
                     if (gate != 0)
                         state = state.With(CompositionStateKinds.Gate, gate);
@@ -812,7 +812,7 @@ internal static class Expression
                     // the riff's longest note of its last bar before a louder section diving into it, where the song dives, the
                     // riff letting go of its notes after it, as a guitarist leaves the riff for the bar
                     if (songDives && role is TrackRole.Riff && !isSolo && Pinches(noteProgram) && note.Value.Pitches.Length <= 2
-                        && note.Position >= span.End - span.Meter.BarDuration - 1e-9 && LongestOfBar(timeline, i, span)
+                        && note.Position >= span.LastBar - 1e-9 && LongestOfBar(timeline, i, span)
                         && index + 1 < energies.Count && energies[index + 1] > energies[index]
                         && note.Value.Duration >= 1 && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
                         && state.GetStateValue(CompositionStateKinds.Pinch) == 0 && Pinching(note.Position, 1).TestProbability(DiveChance))

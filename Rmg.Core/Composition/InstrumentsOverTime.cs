@@ -167,7 +167,7 @@ internal static class InstrumentsOverTime
                 var drawnVariant = drawnVariants.IsEmpty ? program : drawnVariants[context.GenerateInt(0, drawnVariants.Length)];
                 var leftOut = pool is not null && role?.Of(pool).FirstOrDefault(x => x.Program == drawnVariant) is { } listed && !(Weight(listed) > 0);
                 var (variants, variant) = leftOut ? (ImmutableArray<int>.Empty, program) : (drawnVariants, drawnVariant);
-                var bars = Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.BarDuration)).Select(_ => context.TestProbability(BarChance)).ToArray();
+                var bars = Enumerable.Range(0, span.BarCount).Select(_ => context.TestProbability(BarChance)).ToArray();
 
                 var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => x.Note.IsWithin(span.Start, span.End)).ToArray();
                 var accent = inSpan.Length == 0 ? double.MaxValue : inSpan.Select(x => x.Note.Value.Velocity).OrderDescending().ElementAt((int)(inSpan.Length * AccentShare));
@@ -175,7 +175,7 @@ internal static class InstrumentsOverTime
                     StateTrace.RecordSection(TracePoints.InstrumentOverTime, track, span.SectionId, $"{program} {mode} {variant}", (index, pitched.Role, program, variants.IsEmpty ? ArticulationMode.None : mode, variant));
                 foreach (var (note, i) in inSpan)
                 {
-                    var bar = Math.Min(bars.Length - 1, (int)Math.Floor((note.Position - span.Start) / span.Meter.BarDuration + 1e-9));
+                    var bar = Math.Min(bars.Length - 1, span.BarOf(note.Position));
                     var articulated = !variants.IsEmpty && mode switch
                     {
                         ArticulationMode.Bars => bars[bar],

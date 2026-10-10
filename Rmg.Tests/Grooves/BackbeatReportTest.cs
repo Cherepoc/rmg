@@ -92,11 +92,12 @@ public sealed class BackbeatReportTest
                 var outcome = prime != 0 ? "tuplet" : power < expected ? "faster" : power > expected ? "slower" : phase != 1 ? "shifted" : "backbeat";
 
                 bool? strikesBoth = null;
-                if (meter == Meter.FourFour && feels[span.SectionId] == 0)
+                // in a section of common time, its own meter's
+                if (span.Meter.HasSameBar(Meter.FourFour) && feels[span.SectionId] == 0)
                 {
-                    var start = span.Start + entry.Bar * meter.BarDuration;
+                    var start = span.Start + entry.Bar * span.Meter.BarDuration;
                     var places = song.Song.Notes[track]
-                        .Where(x => x.Position >= start - 1e-9 && x.Position < start + meter.BarDuration - 1e-9 && x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0)
+                        .Where(x => x.Position >= start - 1e-9 && x.Position < start + span.Meter.BarDuration - 1e-9 && x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0)
                         .Select(x => Math.Round(x.Position - start, 3))
                         .ToHashSet();
                     strikesBoth = places.Contains(1) && places.Contains(3);

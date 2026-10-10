@@ -12,12 +12,12 @@ public sealed class TimeFeelReportTest
     {
         var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var stats = new Dictionary<int, (int Sections, int Bars, int Drums, int[] SnareBeats, double Energy)>();
-        // in four, whose beats the snare is counted on
-        foreach (var song in TestCorpus.Range(256).Where(x => x.Map.Meter == Meter.FourFour))
+        // the sections in four, whose beats the snare is counted on, each in its own meter
+        foreach (var song in TestCorpus.Range(256))
         {
             var feels = song.Trace.Where(x => x.Point == TracePoints.TimeFeel).ToDictionary(x => x.Section, x => (int)x.Value!);
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
-            foreach (var span in song.Map.Sections)
+            foreach (var span in song.Map.Sections.Where(x => x.Meter.HasSameBar(Meter.FourFour)))
             {
                 var feel = feels[span.SectionId];
                 var s = stats.GetValueOrDefault(feel, (0, 0, 0, new int[4], 0));
@@ -31,7 +31,7 @@ public sealed class TimeFeelReportTest
                     if (snares.Contains(track) && Math.Abs(beat - Math.Round(beat)) < 1e-6)
                         s.SnareBeats[(int)Math.Round(beat) % 4]++;
                 }
-                s.Bars += (int)(span.Duration / 4);
+                s.Bars += span.BarCount;
                 stats[feel] = s;
             }
         }

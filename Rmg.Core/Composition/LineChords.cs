@@ -45,7 +45,7 @@ internal static class LineChords
             var voices = context.Pick(way.Voices);
             if (!stacks)
                 continue;
-            var bars = way.EveryBar ? (int)Math.Round(span.Duration / span.Meter.BarDuration) : 1;
+            var bars = way.EveryBar ? span.BarCount : 1;
             for (var bar = 0; bar < bars; bar++)
                 landings[Math.Round(span.Start + bar * span.Meter.BarDuration, 6)] = voices;
         }

@@ -266,7 +266,7 @@ public static class Render
         );
         return song.Map is not { } map ? swing : swing with
         {
-            Spans = [..map.Sections.Select(x => (x.Start, x.Meter.Pairs(swing.Period))), (map.Ending.Start, map.Meter.Pairs(swing.Period))]
+            Spans = [..map.Sections.Select(x => (x.Start, x.Meter.Pairs(swing.Period))), (map.Ending.Start, (map.Sections.IsEmpty ? map.Meter : map.Sections[^1].Meter).Pairs(swing.Period))]
         };
     }
 

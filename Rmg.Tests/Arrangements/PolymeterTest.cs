@@ -128,7 +128,7 @@ public sealed class PolymeterTest
                 starts.Add(Math.Round(at, 6));
             // but in the bar before a line, a phrase's end, which the fill takes
             var notes = song.Song.Notes!.Where(x => snares.Contains(x.Key)).SelectMany(x => x.Value)
-                .Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - span.Meter.BarDuration - 1e-9 && (x.Position - span.Start) % span.Meter.PhraseDuration < (span.Meter.PhraseBars - 1) * span.Meter.BarDuration).ToArray();
+                .Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.LastBar - 1e-9 && (x.Position - span.Start) % span.Meter.PhraseDuration < (span.Meter.PhraseBars - 1) * span.Meter.BarDuration).ToArray();
             await Assert.That(notes.All(x => starts.Contains(Math.Round(x.Position, 6)))).IsTrue().Because($"seed {song.Seed} at {span.Start}");
             checkedSections++;
         }

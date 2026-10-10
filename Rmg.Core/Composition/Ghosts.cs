@@ -72,8 +72,8 @@ internal static class Ghosts
                     for (var k = 0; k < draws.Length; k++)
                     {
                         var at = start + k * Length;
-                        // off the beat, where the snare does not play, the likelier next to its note
-                        if (at >= end - 1e-9 || k % 4 == 0 || own.Any(x => Math.Abs(x.Position - at) < Length - 1e-9))
+                        // off the meter's pulses, where the snare does not play, the likelier next to its note
+                        if (at >= end - 1e-9 || span.Meter.Pulses.Any(x => Math.Abs(x - k * Length) < 1e-9) || own.Any(x => Math.Abs(x.Position - at) < Length - 1e-9))
                             continue;
                         var near = own.Any(x => Math.Abs(x.Position - at) < 2 * Length - 1e-9);
                         if (draws[k] < (near ? NearChance : FarChance))

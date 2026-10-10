@@ -64,7 +64,19 @@ internal static class ExpressionRender
 
     /// <summary>The section a note plays in, which a gate's bars and a filter's opening count from; a note outside every section is a mistake.</summary>
     private static SectionSpan SectionAt(SongMap? map, double position) =>
-        map?.Sections.LastOrDefault(x => x.Start <= position + 1e-9) ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
+        map?.SectionAt(position + 1e-9) ?? (map is { Sections.Length: > 0 } && position >= map.Sections[^1].End - 1e-9 ? map.Sections[^1] : null)
+        ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
+
+    /// <summary>How far a time is from its bar's pulse before to the next, from 0 to 1: the beats of 4/4, the dotted quarters of 6/8, the groups of 7/8.</summary>
+    private static double SincePulse(SongMap? map, double at)
+    {
+        if (map is null)
+            return at - Math.Floor(at);
+        var (beat, meter) = (map.BeatInBar(at), map.MeterAt(at));
+        var last = meter.Pulses.Where(x => x <= beat + 1e-9).DefaultIfEmpty(0).Max();
+        var next = meter.Pulses.Where(x => x > beat + 1e-9).DefaultIfEmpty(meter.BarDuration).Min();
+        return (beat - last) / (next - last);
+    }
 
     /// <summary>Where the whole mix's closing changes, swung, and how closed it is from there, in the brightness controller's steps (<see cref="CompositionStateKinds.MixClosed" />).</summary>
     public static ImmutableArray<(double At, double Steps)> MixSteps(StateTimeline<double> mix, Swing swing) => [..mix.Select(x => (swing.Apply(x.Position), x.Value * FilterReach))];
@@ -190,8 +202,8 @@ internal static class ExpressionRender
                     var t = at - start;
                     var swell = swells ? Math.Min(1, 0.25 + 0.75 * t / Math.Min(1, duration / 2)) : 1;
                     var shake = 1 - tremolo / 100.0 * (0.5 + 0.5 * Math.Sin(2 * Math.PI * t / 0.25));
-                    // ducked on the beat and swelling back over it
-                    var duck = 1 - pump / 100.0 * Math.Pow(1 - at % 1, 2);
+                    // ducked on the bar's pulse and swelling back over it
+                    var duck = pump > 0 ? 1 - pump / 100.0 * Math.Pow(1 - SincePulse(map, at), 2) : 1;
                     return swell * shake * duck;
                 }
 

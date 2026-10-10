@@ -48,9 +48,9 @@ public sealed class LiftReportTest
             for (var i = 1; i < sections.Length; i++)
             {
                 var line = sections[i].Start;
-                // by the bar of the section the line ends
-                var bar = sections[i - 1].Meter.BarDuration;
-                var step = Loudness(line - bar, line) - Loudness(line - 2 * bar, line - bar);
+                // the bar before the line, the bar there is, a short last bar's, against the section's full bar before it
+                var (last, bar) = (song.Map.BarBefore(line), sections[i - 1].Meter.BarDuration);
+                var step = Loudness(line - last, line) - Loudness(line - last - bar, line - last);
                 if (double.IsNaN(step))
                     continue;
                 (energy[sections[i].SectionId] > energy[sections[i - 1].SectionId] ? louder : quieter).Add(step);

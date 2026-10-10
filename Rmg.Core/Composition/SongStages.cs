@@ -179,7 +179,7 @@ internal static class SongStages
 
     /// <summary>A bigger section announced, the hi-hat opening and the snare on its head before it.</summary>
     internal static SongDraft LiftCues(SongDecisions song, SongDraft draft) =>
-        draft with { Timeline = Composition.LiftCues.Apply(draft.Timeline, song.Form.Lines) };
+        draft with { Timeline = Composition.LiftCues.Apply(draft.Timeline, song.Form.Lines, song.Form.Map) };
 
     /// <summary>The drum solos, the drummer's own, over the groove they quote.</summary>
     internal static SongDraft DrumSolos(SongDecisions song, SongDraft draft) =>

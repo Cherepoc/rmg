@@ -15,7 +15,8 @@ public sealed class LiftTest
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var (own, longer) = (TestCorpus.Get(seed), TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
-            var starts = own.Map.Sections.Skip(1).Select(x => (x.Start, x.Meter.BarDuration)).ToArray();
+            // each change of section, the bar before it, a short last bar's, and the full bars of the section it ends
+            var starts = own.Map.Sections.Skip(1).Select((x, i) => (x.Start, Last: own.Map.BarBefore(x.Start), own.Map.Sections[i].Meter.BarDuration)).ToArray();
             foreach (var (track, notes) in own.Song.Notes!)
             {
                 var other = longer.Song.Notes![track];
@@ -24,7 +25,7 @@ public sealed class LiftTest
                 {
                     await Assert.That(b.Position).IsEqualTo(a.Position);
                     if (Math.Abs(a.Value.Velocity - b.Value.Velocity) > 1e-9
-                        && starts.Any(x => a.Position < x.Start - x.BarDuration - 1e-9 && a.Position >= x.Start - 4 * x.BarDuration - 1e-9))
+                        && starts.Any(x => a.Position < x.Start - x.Last - 1e-9 && a.Position >= x.Start - x.Last - 3 * x.BarDuration - 1e-9))
                     {
                         earlier++;
                         louder += b.Value.Velocity > a.Value.Velocity ? 1 : 0;

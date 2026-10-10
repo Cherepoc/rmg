@@ -55,11 +55,14 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
             : span.Meter;
     }
 
+    /// <summary>How long the bar ending at a position is: a section's short last bar before the next section's start, its meter's bar otherwise.</summary>
+    public double BarBefore(double position) => MeterAt(position - 1e-6).BarDuration;
+
     /// <summary>The bar of a section's pattern a position is in, counted from its section's start, before the first too, a short last bar the pattern's own.</summary>
     public int PatternBarAt(double position)
     {
         var meter = BarsAt(position)?.Meter ?? Meter;
-        return ((int)Math.Floor((position - (BarsAt(position)?.Start ?? Origin)) / meter.BarDuration)).Mod(meter.PatternBarCount);
+        return ((int)Math.Floor((position - (BarsAt(position)?.Start ?? Origin)) / meter.BarDuration + 1e-9)).Mod(meter.PatternBarCount);
     }
 
     /// <summary>How far into its bar a position is, in beats, the bars counted from its section's start.</summary>
@@ -67,7 +70,8 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     {
         var meter = BarsAt(position)?.Meter ?? Meter;
         var fromStart = position - (BarsAt(position)?.Start ?? Origin);
-        return fromStart - Math.Floor(fromStart / meter.BarDuration) * meter.BarDuration;
+        // a hair before a bar line counted at it, against a sum's rounding
+        return Math.Max(0, fromStart - Math.Floor(fromStart / meter.BarDuration + 1e-9) * meter.BarDuration);
     }
 }
 
@@ -88,6 +92,15 @@ public sealed record SectionSpan(int SectionId, double Start, double Duration, M
 
     /// <summary>Where its last bar starts, a short one's.</summary>
     public double LastBar => End - Meter.BarDuration + Cut;
+
+    /// <summary>How many bars it plays, a short last one among them.</summary>
+    public int BarCount => (int)Math.Ceiling(Duration / Meter.BarDuration - 1e-9);
+
+    /// <summary>The bar a position is in, counted from its start, a hair early counting as the bar it is at.</summary>
+    public int BarOf(double position) => (int)Math.Floor((position - Start) / Meter.BarDuration + 1e-9);
+
+    /// <summary>Where a bar of it starts and ends, a short last one ending at the section's end.</summary>
+    public (double Start, double End) Bar(int index) => (Start + index * Meter.BarDuration, Math.Min(Start + (index + 1) * Meter.BarDuration, End));
 }
 
 /// <summary>How a song ends: the ending's kind, where it starts, how long it is, and its final chord's length.</summary>

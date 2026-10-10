@@ -105,7 +105,7 @@ internal static class Articulations
                 double Beats(double seconds) => seconds * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position));
                 if (note.Value.Pitches.Length > 1 && InstrumentTraits.Has(program, InstrumentTrait.Strums))
                     // down on the grid's even steps and up on its odd, as the hand swings
-                    state = state.With(CompositionStateKinds.Strum, (long)Math.Floor(note.Position / grid + 1e-9) % 2 == 0 ? Beats(stroke) : -Beats(stroke));
+                    state = state.With(CompositionStateKinds.Strum, (long)Math.Floor(song.Form.Map.BeatInBar(note.Position) / grid + 1e-9) % 2 == 0 ? Beats(stroke) : -Beats(stroke));
                 // a piano's chord held a beat or longer rolled upward, slower, where its part rolls
                 else if (rolls && note.Value.Pitches.Length >= 3 && note.Value.Duration >= 1 - 1e-9 && InstrumentTraits.Has(program, InstrumentTrait.Rolls))
                     state = state.With(CompositionStateKinds.Strum, Beats(Roll));

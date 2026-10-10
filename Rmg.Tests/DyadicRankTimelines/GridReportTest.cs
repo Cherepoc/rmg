@@ -20,7 +20,8 @@ public sealed class GridReportTest
             {
                 var positions = drum.Select(x => x.Position).ToArray();
                 notes += positions.Length;
-                offGrid += positions.Count(x => !IsOn(x, 0.25) && !IsOn(x, 1 / 3.0));
+                // each from its bar's start, as a meter of no whole beats moves the grids
+                offGrid += positions.Select(song.Map.BeatInBar).Count(x => !IsOn(x, 0.25) && !IsOn(x, 1 / 3.0));
                 rushed += positions.Zip(positions.Skip(1), (a, b) => b - a).Count(x => x > 1e-9 && x < 0.125 - 1e-9);
             }
 

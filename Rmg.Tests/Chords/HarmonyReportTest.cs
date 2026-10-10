@@ -112,7 +112,7 @@ public sealed class HarmonyReportTest
         // the chords' bars that start afresh in a register of their own, rather than led from the chord before
         var bars = song.Song.Notes![song.Song.Track(TrackRole.Chords)]
             .Where(x => song.Map.SectionAt(x.Position) is not null)
-            .GroupBy(x => (int)Math.Floor(x.Position / song.Map.Meter.BarDuration + 1e-9))
+            .GroupBy(x => Math.Round(x.Position - song.Map.BeatInBar(x.Position), 6))
             .Select(x => (Band: ChordsBand(sectionHarmony[song.Map.SectionAt(x.First().Position)!.SectionId]), IsReset: x.First().Value.State.GetStateValue(StateKinds.ChordVoicingReset) > 0));
 
         var raises = song.Trace.Where(x => x.Point == TracePoints.CadenceRaise)

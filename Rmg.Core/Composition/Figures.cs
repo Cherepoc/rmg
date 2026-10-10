@@ -173,11 +173,10 @@ internal static class Figures
                         // the riff's where the song has a riff or a bass
                         if (figure.FollowsRiff && riff is null)
                             continue;
-                        var bars = (int)Math.Round(span.Duration / span.Meter.BarDuration);
-                        for (var index = 0; index < bars; index++)
+                        // every bar, a short last one's figure cut at the section's end
+                        for (var index = 0; index < span.BarCount; index++)
                         {
-                            var bar = span.Start + index * span.Meter.BarDuration;
-                            var end = bar + span.Meter.BarDuration;
+                            var (bar, end) = span.Bar(index);
                             bool In(double position) => position >= bar - 1e-9 && position < end - 1e-9;
                             var own = played.Where(x => In(x.Position)).ToArray();
                             double[] onsets = figure.FollowsRiff
@@ -190,7 +189,7 @@ internal static class Figures
                             if (own.Length == 0 || onsets.Length == 0 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
                                 continue;
                             played.RemoveAll(x => In(x.Position));
-                            played.AddRange(onsets.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
+                            played.AddRange(onsets.Where(In).Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
                         }
                     }
 

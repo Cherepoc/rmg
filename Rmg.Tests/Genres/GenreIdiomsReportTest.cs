@@ -29,7 +29,8 @@ public sealed class GenreIdiomsReportTest
         // its groove's bars: where the drums play, but a phrase's last, where a fill does
         var drums = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack && notes.ContainsKey(x.Key)).Select(x => x.Key).ToArray();
         bool DrumsPlay(double start) => drums.Any(t => notes[t].Any(x => x.Position >= start - 1e-9 && x.Position < start + 4 - 1e-9));
-        var bars = common.SelectMany(x => Enumerable.Range(0, (int)Math.Round(x.Duration / x.Meter.BarDuration))
+        // its whole bars, a short last one left out
+        var bars = common.SelectMany(x => Enumerable.Range(0, (int)Math.Floor(x.Duration / x.Meter.BarDuration + 1e-9))
                 .Where(b => b % x.Meter.PhraseBars != x.Meter.PhraseBars - 1)
                 .Select(b => x.Start + b * x.Meter.BarDuration))
             .Where(DrumsPlay)
@@ -116,7 +117,7 @@ public sealed class GenreIdiomsReportTest
             ["kick on every beat"] = bars.Length > 0 ? bars.Count(x => Enumerable.Range(0, 4).All(b => HitsAt(kicks, x + b))) / (double)bars.Length : double.NaN,
             ["one drop (kick and snare on 3 alone)"] = bars.Length > 0 ? bars.Count(x => HitsAt(kicks, x + 2) && HitsAt(snares, x + 2) && !HitsAt(kicks, x) && !HitsAt(snares, x + 1) && !HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
             ["chords on the offbeat 8ths"] = notes.GetValueOrDefault(song.Track(TrackRole.Chords)) is { Count: > 0 } chordNotes
-                ? chordNotes.Average(x => Math.Abs(x.Position % 1 - 0.5) < 0.05 ? 1.0 : 0)
+                ? chordNotes.Average(x => Math.Abs(map.BeatInBar(x.Position) % 1 - 0.5) < 0.05 ? 1.0 : 0)
                 : double.NaN,
             ["time in the tresillo (1 and-of-2 4 alone)"] = bars.Length > 0 ? bars.Count(x => HitsAt(times, x) && HitsAt(times, x + 1.5) && HitsAt(times, x + 3) && !HitsAt(times, x + 1) && !HitsAt(times, x + 2)) / (double)bars.Length : double.NaN,
             ["chords stabbed (a 16th or shorter)"] = notes.GetValueOrDefault(song.Track(TrackRole.Chords)) is { Count: > 0 } chordStabs

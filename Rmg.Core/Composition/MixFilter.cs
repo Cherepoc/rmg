@@ -62,7 +62,8 @@ internal static class MixFilter
             if (!dipsHere || song.Form.Drops.Contains(next.Start))
                 continue;
             dips.Add(next.Start);
-            ramps.Add((next.Start - Math.Min(span.Duration, bars * span.Meter.BarDuration), next.Start, 0, depth));
+            // the last bar as long as it is, a short one's, and a whole bar before it for a dip of two
+            ramps.Add((next.Start - Math.Min(span.Duration, span.End - span.LastBar + (bars - 1) * span.Meter.BarDuration), next.Start, 0, depth));
         }
 
         // a filtered drop's bar before it closing all the way, opening on its downbeat (FormLayers.DropKinds)

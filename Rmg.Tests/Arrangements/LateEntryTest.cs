@@ -20,7 +20,7 @@ public sealed class LateEntryTest
         {
             var sections = song.Map.Sections;
             // the bar before the entry is the fill's, which brings the drums in
-            var until = sections[entry].Start - (part == TrackRole.Drum ? sections[entry - 1].Meter.BarDuration : 0);
+            var until = part == TrackRole.Drum ? sections[entry - 1].LastBar : sections[entry].Start;
             int Notes(double from, double to) => song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == part)
                 .Sum(x => x.Value.Count(n => n.Position >= from - 1e-9 && n.Position < to - 1e-9));
             // but in a section it would otherwise leave silent, which plays it

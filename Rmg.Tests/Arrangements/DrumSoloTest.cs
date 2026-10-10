@@ -108,7 +108,7 @@ public sealed class DrumSoloTest
                 solos++;
                 var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
                 // all but the last bar, which the fill into the next section plays
-                await Assert.That(plan[^1].End).IsLessThanOrEqualTo(span.End - span.Meter.BarDuration + 1e-9);
+                await Assert.That(plan[^1].End).IsLessThanOrEqualTo(span.LastBar + 1e-9);
                 foreach (var segment in plan)
                 {
                     var hits = drums.SelectMany(x => x.Value.Where(n => n.Position >= segment.Start - 1e-9 && n.Position < segment.End - 1e-9).Select(n => (Track: x.Key, Note: n))).ToArray();

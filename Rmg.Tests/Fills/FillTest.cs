@@ -123,7 +123,7 @@ public sealed class FillTest
     public async Task EarlyLandings_ComeBeforeTheLine()
     {
         var early = 0;
-        for (var seed = 0; seed < 256 && early < 5; seed++)
+        for (var seed = 0; seed < 64; seed++)
         {
             var landings = new List<StateTraceEntry>();
             var song = TestCorpus.Get(seed);
@@ -134,11 +134,13 @@ public sealed class FillTest
                 if (entry.Point != TracePoints.FillDecision)
                     continue;
 
-                if (((FillDecision)entry.Value!).IsEarly && landings.Count > 0)
+                if (entry.Value is FillDecision { IsEarly: true } decision && landings.Count > 0)
                 {
                     early++;
-                    // in the last bar before the line, where the fill is
-                    await Assert.That(landings.All(x => x.Bar == entry.Bar && x.Position > song.Map.Sections.First(s => s.SectionId == entry.Section).Meter.BarDuration - 1)).IsTrue();
+                    // in the last bar before the line, where the fill is, the bar there is, a short last bar's: its length the
+                    // fill's start in it and the fill's span
+                    var bar = decision.Span > 0 ? entry.Position + decision.Span : song.Map.Sections.First(s => s.SectionId == entry.Section).Meter.BarDuration;
+                    await Assert.That(landings.All(x => x.Bar == entry.Bar && x.Position > bar - 1)).IsTrue().Because($"seed {seed}");
                 }
 
                 landings.Clear();

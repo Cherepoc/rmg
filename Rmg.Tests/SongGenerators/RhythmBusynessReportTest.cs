@@ -56,10 +56,10 @@ public sealed class RhythmBusynessReportTest
             // the fills that play, at the lines the drums mark, as the fill test finds them
             var map = song.Map;
             var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).ToArray();
-            var first = map.Intro.Duration > 0 ? 0 : 1;
-            var last = (int)Math.Round((map.Sections[^1].End - song.Origin) / song.Map.Meter.PatternDuration) - (FormLayers.HasFinalChord(map.Ending.Kind) ? 0 : 1);
-            var lines = Enumerable.Range(first, last - first + 1).Select(x => song.Origin + x * song.Map.Meter.PatternDuration).ToArray();
-            for (var i = 0; i < Math.Min(lines.Length, decisions.Length); i++)
+            var lines = song.FillLines();
+            if (lines.Length != decisions.Length)
+                throw new InvalidOperationException($"seed {song.Seed}: {lines.Length} lines against {decisions.Length} fill decisions");
+            for (var i = 0; i < lines.Length; i++)
             {
                 var decision = (FillDecision)decisions[i].Value!;
                 if (decision.Span <= 0 || decision.Rests || map.SectionAt(lines[i] - 1e-3) is not { } section)

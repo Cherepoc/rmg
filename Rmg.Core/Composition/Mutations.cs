@@ -91,7 +91,7 @@ internal static class Mutations
             var chance = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling).Chance(Chance.At(groove, song.Genre.Chance(GenreChoices.Mutation, "bars")), 1);
             var anchored = context.TestProbability(KeepsAnchors.At(groove));
             var barLength = span.Meter.BarDuration;
-            var bars = (int)Math.Round(span.Duration / barLength);
+            var bars = span.BarCount;
             var edits = new List<Mutation>();
             var made = 0;
             for (var bar = 1; bar < bars; bar++)
@@ -171,6 +171,10 @@ internal static class Mutations
     private static void Lay(Mutation mutation, Dictionary<int, List<TimelineItem<StateMap>>> played, int[] drums, double start, double length,
         IReadOnlySet<int> kicks, IReadOnlySet<int> snares)
     {
+        // an edit drawn on a full bar that reaches past a short one's end, which the next section plays, is left
+        if (mutation.At >= length - 1e-9 || mutation.Kind == MutationKind.Swap && Math.Max(mutation.At, mutation.By) + 2 * Sixteenth > length + 1e-9
+            || mutation.Kind == MutationKind.Trade && mutation.At + 1 > length + 1e-9)
+            return;
         bool In(double position, double from, double width) => position >= start + from - 1e-9 && position < start + from + width - 1e-9;
         var notes = played[mutation.Track];
         var at = notes.FindIndex(x => Math.Abs(x.Position - (start + mutation.At)) < 1e-9);

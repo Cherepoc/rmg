@@ -15,16 +15,19 @@ public sealed class SongGeneratorVelocityTest
         var offGrid = new List<double>();
         foreach (var seed in Enumerable.Range(0, 128))
         {
-            // the bars of the song's meter, from the first section on
-            var (bar, origin) = (TestCorpus.Get(seed).Map.Meter.BarDuration, TestCorpus.Get(seed).Origin);
+            // each bar counted from its section's start in its own meter, from the first section on
+            var (map, origin) = (TestCorpus.Get(seed).Map, TestCorpus.Get(seed).Origin);
             // but a pad, which holds its chords evenly, with no accent to measure
             foreach (var track in TestCorpus.Get(seed).Rendered.Tracks.Where(x => x.Role != TrackRole.Pad))
             {
                 foreach (var note in track.NoteTimeline)
                 {
-                    if (note.Position >= origin && IsOnGrid(note.Position - origin, bar))
+                    if (note.Position < origin)
+                        continue;
+                    var beat = map.BeatInBar(note.Position);
+                    if (IsOnGrid(beat, map.MeterAt(note.Position).BarDuration))
                         barStart.Add(note.Value.Velocity);
-                    else if (!IsOnGrid(note.Position - origin, 0.5))
+                    else if (!IsOnGrid(beat, 0.5))
                         offGrid.Add(note.Value.Velocity);
                 }
             }

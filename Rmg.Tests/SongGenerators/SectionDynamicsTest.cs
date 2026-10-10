@@ -125,7 +125,7 @@ public sealed class SectionDynamicsTest
             .Select(span =>
                 {
                     var (energy, unconventionality) = energies.GetValueOrDefault(span.SectionId, (0, 0.5));
-                    return new SectionMeasures(span.SectionId, [..Bars(span, song.Map.Meter).Select(bar => MeasureBar(song.Song, notes, bar, song.Map.Meter))], energy, unconventionality);
+                    return new SectionMeasures(span.SectionId, [..Bars(span, span.Meter).Select(bar => MeasureBar(song.Song, notes, bar, span.Meter))], energy, unconventionality);
                 }
             )
             .ToArray();

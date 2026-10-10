@@ -114,7 +114,8 @@ public sealed class BassArrivalReportTest
             for (var i = 0; i + 1 < bass.Length; i++)
             {
                 var (last, next) = (bass[i], bass[i + 1]);
-                var change = (Math.Floor(last.Position / song.Map.Meter.BarDuration) + 1) * song.Map.Meter.BarDuration;
+                // the next bar line, counted from the note's section in its meter
+                var change = last.Position - song.Map.BeatInBar(last.Position) + song.Map.MeterAt(last.Position).BarDuration;
                 if (Math.Abs(next.Position - change) > 1e-9 || song.Map.SectionAt(next.Position) is not { } section)
                     continue;
 

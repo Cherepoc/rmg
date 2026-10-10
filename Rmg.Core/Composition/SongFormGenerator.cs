@@ -109,16 +109,21 @@ internal sealed class SongFormGenerator
             (intro, window, halfCountIn) = (IntroKind.Entries, intro == IntroKind.Entries ? window : _riffContext.Pick(FormLayers.IntroWindows), false);
 
         double held = 0, stop = 0;
+        double ringOutBars = 0;
         var slowsDown = false;
         if (FormLayers.HasFinalChord(ending))
         {
-            held = ending == EndingKind.RingOut ? _context.Pick(FormLayers.RingOutLengths) * _meter.BarDuration : FormLayers.ButtonLength;
+            // a ringing ending's bars, which the last section's meter makes beats once its sections are drawn
+            if (ending == EndingKind.RingOut)
+                ringOutBars = _context.Pick(FormLayers.RingOutLengths);
+            else
+                held = FormLayers.ButtonLength;
             if (ending == EndingKind.Stop)
                 stop = _context.Pick(FormLayers.StopLengths);
             slowsDown = ending == EndingKind.RingOut && _context.TestProbability(FormLayers.RitardandoChance);
         }
 
-        return new FormPlan(intro, window, halfCountIn, riffFirst, ending, held, stop, slowsDown, sectionIds[^1]);
+        return new FormPlan(intro, window, halfCountIn, riffFirst, ending, held, ringOutBars, stop, slowsDown, sectionIds[^1]);
     }
 
     /// <summary>
@@ -220,18 +225,20 @@ internal sealed class SongFormGenerator
             start += timeline.Duration;
         }
 
+        // the final chord's length in beats, a ringing ending's in the last section's bars
+        var held = plan.RingOutBars > 0 ? plan.RingOutBars * last.BarDuration : plan.Held;
         var end = start;
         var endingDuration = plan.Ending switch
         {
             _ when !FormLayers.HasFinalChord(plan.Ending) => 0,
             // a bar of the last section's meter at least, as the final chord's block is
-            _ => Math.Max(plan.Held, last.BarDuration)
+            _ => Math.Max(held, last.BarDuration)
         };
         var map = new SongMap(
             meter,
             new IntroSpan(plan.Intro, origin, plan.Window, entries),
             spans.ToImmutable(),
-            new EndingSpan(plan.Ending, end, endingDuration, plan.Held, plan.Stop, plan.SlowsDown)
+            new EndingSpan(plan.Ending, end, endingDuration, held, plan.Stop, plan.SlowsDown)
         );
 
         var blocks = ImmutableArray.CreateBuilder<TrackEventStateTimelineMap<StateMap>>();
@@ -292,7 +299,7 @@ internal sealed class SongFormGenerator
         var description = $"{plan.Ending} ending";
         if (FormLayers.HasFinalChord(plan.Ending))
         {
-            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), plan.Held, endingDuration, _roles));
+            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), held, endingDuration, _roles));
 
             if (plan.Ending == EndingKind.Stop)
             {
@@ -316,10 +323,10 @@ internal sealed class SongFormGenerator
                     new FillLine(end, fillSections[^1], fillSections[^1], 0, plan.Ending != EndingKind.Stop, IsLandingForced: true)
                 );
 
-            description += $", at beat {end}, held {plan.Held} beats";
+            description += $", at beat {end}, held {held} beats";
             if (plan.SlowsDown)
             {
-                songState = songState.MergeWith(CreateRitardando(end, end + plan.Held, last.BarDuration));
+                songState = songState.MergeWith(CreateRitardando(end, end + held, last.BarDuration));
                 description += ", slowing down";
             }
         }
@@ -355,8 +362,9 @@ internal sealed class SongFormGenerator
             if (landing.x is { } next && !timelines[landing.index].TrackTimelineMap.Any(x => _roles.TryGetValue(x.Key, out var role) && role != TrackRole.Drum
                     && x.Value.EventTimeline.Any(n => n.Position < next.Meter.BarDuration - 1e-9)))
                 continue;
-            var gap = line.Position - line.Ending.Meter.BarDuration;
-            // the band silent over the bar before it, or playing on, filtered (MixFilter)
+            // the band silent over the bar before it, the bar there is, a short last bar's (ShortBars), or playing on,
+            // filtered (MixFilter)
+            var gap = line.Position - map.BarBefore(line.Position);
             var kind = _dropKindContext.Pick(kinds);
             // the drums' hits kept for their fill, every other part, a soloist's too, kept out of it once the lines walk
             // into the section
@@ -401,7 +409,7 @@ internal sealed class SongFormGenerator
         List<(double Position, FillSection Ending, FillSection Next)> changes = [..map.Sections.Skip(1).Select((x, i) => (x.Start, fillSections[i], fillSections[i + 1]))];
         if (plan.Intro == IntroKind.Hook)
             changes.Insert(0, (origin, fillSections[hook.Index], fillSections[0]));
-        songState = songState.MergeWith(CreateLifts(changes, end, drops, Math.Pow(FormLayers.GenreLiftReach, _genre.Shift(GenreChoices.Dynamics, "lift"))));
+        songState = songState.MergeWith(CreateLifts(changes, end, drops, Math.Pow(FormLayers.GenreLiftReach, _genre.Shift(GenreChoices.Dynamics, "lift")), map.BarBefore));
 
         return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState, [..drops.Order()], [..filtered.Order()]);
     }
@@ -594,8 +602,10 @@ internal sealed class SongFormGenerator
     ///     follows its energy, a step every <see cref="FormLayers.FadeStep" />, the next section then as loud as it plays.
     /// </summary>
     /// <param name="bars">How many bars a lift swells over, a genre's, where no drop builds to it.</param>
+    /// <param name="barBefore">How long the bar before a position is, a short last bar's (<see cref="SongMap.BarBefore" />).</param>
     /// <param name="changes">The changes of section, in order: where each is, the section it ends and the one it leads into.</param>
-    private static StateTimelineMap CreateLifts(IReadOnlyList<(double Position, FillSection Ending, FillSection Next)> changes, double end, IReadOnlySet<double> drops, double bars)
+    private static StateTimelineMap CreateLifts(IReadOnlyList<(double Position, FillSection Ending, FillSection Next)> changes, double end, IReadOnlySet<double> drops, double bars,
+        Func<double, double> barBefore)
     {
         var items = new List<TimelineItem<double>>();
         for (var i = 0; i < changes.Count; i++)
@@ -606,7 +616,9 @@ internal sealed class SongFormGenerator
                 continue;
 
             // over the last bar of the section it ends, or the phrase before a drop, within the section
-            var length = ending.Meter.BarDuration * (drops.Contains(position) ? FormLayers.BuildBars : bars);
+            // the last bar as long as it is, a short one's, and whole bars before it
+            var reach = drops.Contains(position) ? FormLayers.BuildBars : bars;
+            var length = reach >= 1 ? barBefore(position) + (reach - 1) * ending.Meter.BarDuration : reach * barBefore(position);
             var start = Math.Max(position - length, i > 0 ? changes[i - 1].Position : 0);
             var count = (int)Math.Round((position - start) / FormLayers.FadeStep);
             items.AddRange(Enumerable.Range(1, count).Select(j => (FormLayers.LiftVelocity * lift * j / count).ToTimelineItem(start + j * FormLayers.FadeStep - FormLayers.FadeStep)));
@@ -648,7 +660,8 @@ internal sealed class SongFormGenerator
 /// <summary>What a song's form will be, decided before its sections.</summary>
 /// <param name="Window">Where the band comes in part by part, for an intro of entries.</param>
 /// <param name="HalfCountIn">Whether a count-in clicks only the last two beats.</param>
-/// <param name="Held">How long the final chord is held, in beats; 0 for an ending with none, open or fading.</param>
+/// <param name="Held">How long a button's final chord is held, in beats; 0 for a ringing ending's and an ending with none, open or fading.</param>
+/// <param name="RingOutBars">How many bars a ringing ending's final chord is held, in the last section's meter; 0 for any other ending.</param>
 /// <param name="Stop">How long the band is silent before a stopped ending's chord, in beats.</param>
 /// <param name="SlowsDown">Whether the bar before a ringing ending slows down.</param>
 /// <param name="TonicHomeSectionId">The section whose home is the song's tonic, the last, which leads home to the ending.</param>
@@ -659,6 +672,7 @@ internal sealed record FormPlan(
     bool RiffFirst,
     EndingKind Ending,
     double Held,
+    double RingOutBars,
     double Stop,
     bool SlowsDown,
     int TonicHomeSectionId

@@ -187,8 +187,8 @@ internal static class DrumSolos
             // a solo traded with the drums their turns alone, the band laying out for them
             var drumsTurn = solo.Soloists.IndexOf(TrackRole.Drum);
             bool IsDrumsTurn(double position) => !solo.TradesWithDrums || solo.TurnAt(whole, position) == drumsTurn;
-            // all but its last bar, the fill's into the section after
-            var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, whole.Duration - whole.Meter.BarDuration) };
+            // all but its last bar, a short one's, the fill's into the section after
+            var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, whole.LastBar - whole.Start) };
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
                                           track.EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
             RunSound[] Of(FillDrumRole role) => sounds.TryGetValue(role, out var all) ? [..all.Where(Plays).DistinctBy(x => x.Track)] : [];

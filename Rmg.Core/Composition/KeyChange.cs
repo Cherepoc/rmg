@@ -224,8 +224,13 @@ public sealed record KeyChange(double Position, int Semitones)
             var device = context.Pick(ByConvention.Weigh(Devices, unconventionality));
             var pivotDraw = context.GenerateDouble();
             var (change, target) = (changes[i].Position, changes[i].Semitones);
+            // the section the change ends, and its last pattern, counted from its start in its own meter, a short last bar's
+            // cut among it
+            var section = map.Sections.LastOrDefault(x => x.Start < change - 1e-9);
+            var patternStart = section is null ? Math.Max(0, change - map.Meter.PatternDuration)
+                : section.Start + Math.Floor((change - section.Start - 1e-9) / section.Meter.PatternDuration) * section.Meter.PatternDuration;
             // the chords of the pattern before, after any change before it
-            var since = Math.Max(i > 0 ? changes[i - 1].Position : 0, change - map.MeterAt(Math.Max(0, change - 1e-6)).PatternDuration);
+            var since = Math.Max(i > 0 ? changes[i - 1].Position : 0, patternStart);
             var chords = chordStarts.Where(x => x > since + 1e-9 && x < change - 1e-9).TakeLast(length).ToArray();
             if (!prepares || chords.Length == 0)
                 continue;
@@ -238,12 +243,11 @@ public sealed record KeyChange(double Position, int Semitones)
             ImmutableArray<Weighted<int>> pivots = [..PivotSteps.Where(x => Triad(chords[^1], target, x.Value).All(old.Contains))];
             // a sequence: the section's last pattern, its phrase again, halfway to the new key, where the section plays its
             // phrase twice and the change leaves a step between
-            var pattern = map.MeterAt(change - 1e-6).PatternDuration;
-            var section = map.Sections.Last(x => x.Start < change - 1e-9);
+            var pattern = change - patternStart;
             // the way to the new key round the octave, as a whole step up from 5 to -5 is
             var way = (target - before + 6).Mod(12) - 6;
             var halfway = (before + (int)Math.Round(way / 2.0, MidpointRounding.AwayFromZero) + 5).Mod(12) - 5;
-            if (device == Device.Sequence && Math.Abs(way) >= 2 && section.Start <= change - 2 * pattern + 1e-9 && (i == 0 || changes[i - 1].Position < change - pattern - 1e-9))
+            if (device == Device.Sequence && Math.Abs(way) >= 2 && section is not null && section.Start <= patternStart - section.Meter.PatternDuration + 1e-9 && (i == 0 || changes[i - 1].Position < change - pattern - 1e-9))
             {
                 keys.Add(new KeyChange(change - pattern, halfway));
                 chains.Add((change, [change - pattern], Device.Sequence));

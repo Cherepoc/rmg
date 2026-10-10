@@ -46,7 +46,8 @@ public sealed class GenreRhythmReportTest
         return parts.ToDictionary(x => x.Key, x =>
         {
             double Share(Func<double, bool> on) => x.Value.Count(on) / (double)x.Value.Count;
-            bool Near(double position, double grid, double at) => Math.Abs((position % grid + grid) % grid - at) < 1e-6;
+            // a position on a grid counted from its bar's start
+            bool Near(double position, double grid, double at) => Math.Abs((song.Map.BeatInBar(position) % grid + grid) % grid - at) < 1e-6;
             return new Fall(
                 x.Value.Count / song.Map.Duration,
                 Share(p => Near(p, 1, 0)),

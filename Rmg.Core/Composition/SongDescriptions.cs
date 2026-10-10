@@ -118,7 +118,7 @@ public static class SongDescriptions
             return new SectionDescription(
                 index + 1,
                 role == SectionRole.Free ? $"Section {letters[id]}" : RoleName(role),
-                (int)Math.Round(span.Duration / span.Meter.BarDuration),
+                span.BarCount,
                 levels[id],
                 densities[index],
                 key == songKey ? null : key,

@@ -43,8 +43,9 @@ public sealed class MelodyContourTest
                 var bars = contour
                     .Select((aim, bar) =>
                         {
+                            // a bar's window within the section, a short last bar's cut at its end
                             var from = start + bar * span.Meter.BarDuration;
-                            var notes = melody.Where(x => x.Position >= from && x.Position < from + span.Meter.BarDuration).ToArray();
+                            var notes = melody.Where(x => x.Position >= from && x.Position < Math.Min(from + span.Meter.BarDuration, span.End)).ToArray();
                             return (Aim: aim, Pitch: notes.Length == 0 ? (double?)null : notes.Average(x => x.Value.Pitches[0]));
                         }
                     )

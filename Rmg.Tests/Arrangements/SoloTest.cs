@@ -51,7 +51,7 @@ public sealed class SoloTest
 
             var span = song.Map.Sections[index];
             int Notes(TrackRole role) => song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role)
-                .Sum(x => x.Value.Count(n => n.Position >= span.Start + 1e-9 && n.Position < span.End - span.Meter.BarDuration));
+                .Sum(x => x.Value.Count(n => n.Position >= span.Start + 1e-9 && n.Position < span.LastBar));
             if (solo.IsDrumSolo)
             {
                 foreach (var part in Enum.GetValues<TrackRole>().Where(x => x != TrackRole.Drum))
@@ -454,12 +454,14 @@ public sealed class SoloTest
         foreach (var (index, _, plan) in Plans(song))
         {
             var span = song.Map.Sections[index];
-            var strong = span.Meter.BarDuration >= 4 ? span.Meter.BarDuration / 2 : span.Meter.BarDuration;
+            // a bar's strong beats: its groups' starts in a bar of four beats or more, its downbeat in a shorter one
+            double[] strong = span.Meter.BarDuration >= 4 ? [..span.Meter.Levels[1].Select(x => x.Start / 4.0)] : [0];
             foreach (var phrase in plan.GroupBy(x => x.Phrase))
             {
                 var release = phrase.Last(x => x.Gesture != SoloGesture.Pause);
                 await Assert.That(release.IsRelease).IsTrue().Because($"seed {song.Seed} at {release.Start}");
-                await Assert.That(Math.Abs(Math.Round((release.Start - span.Start) / strong) * strong - (release.Start - span.Start))).IsLessThan(1e-6);
+                var beat = (release.Start - span.Start).Mod(span.Meter.BarDuration);
+                await Assert.That(strong.Any(x => Math.Abs(x - beat) < 1e-6 || Math.Abs(x + span.Meter.BarDuration - beat) < 1e-6)).IsTrue().Because($"seed {song.Seed} at {release.Start}");
                 await Assert.That(release.End - release.Start).IsGreaterThanOrEqualTo(1 - 1e-9);
             }
 

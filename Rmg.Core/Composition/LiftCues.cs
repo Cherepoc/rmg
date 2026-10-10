@@ -24,7 +24,7 @@ internal static class LiftCues
     ];
 
     /// <summary>The song with the drums' cues played into every section louder enough than the one before.</summary>
-    public static TrackEventStateTimelineMap<StateMap> Apply(TrackEventStateTimelineMap<StateMap> song, IEnumerable<FillLine> lines)
+    public static TrackEventStateTimelineMap<StateMap> Apply(TrackEventStateTimelineMap<StateMap> song, IEnumerable<FillLine> lines, SongMap map)
     {
         foreach (var line in lines.Where(x => x.Ending != x.Next && (x.Next.Energy - x.Ending.Energy) * x.Ending.Rhythm.Coupling > Threshold))
         {
@@ -33,7 +33,7 @@ internal static class LiftCues
                 x => x.Track,
                 x => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
                 {
-                    var from = line.Position - Math.Min(x.Beats, line.Ending.Meter.BarDuration);
+                    var from = line.Position - Math.Min(x.Beats, map.BarBefore(line.Position));
                     var index = x.Drum.GetArticulationIndex(x.Sound);
                     return EventTimeline.Create(notes.Duration, notes.Select(n => n.IsWithin(from, line.Position)
                         ? n.Value.With(StateKinds.ArticulationIndex, index).ToTimelineItem(n.Position)

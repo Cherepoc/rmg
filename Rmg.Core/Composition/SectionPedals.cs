@@ -29,7 +29,7 @@ internal static class SectionPedals
         });
         var sections = song.Form.Map.Sections.Where(x => pedalling[x.SectionId] is not null)
             .Select(x => (Phrase: x.Meter.PhraseDuration, Root: pedalling[x.SectionId]!.Value, Span: x))
-            .Select(x => (x.Root == 0 ? x.Span.Start : Math.Max(x.Span.Start, x.Span.End - x.Phrase), x.Root == 0 ? Math.Min(x.Span.End, x.Span.Start + x.Phrase) : x.Span.End,
+            .Select(x => (x.Root == 0 ? x.Span.Start : x.Span.Start + Math.Floor((x.Span.Duration - 1e-9) / x.Phrase) * x.Phrase, x.Root == 0 ? Math.Min(x.Span.End, x.Span.Start + x.Phrase) : x.Span.End,
                 x.Span.Start, common.GetEffectiveStateMapAt(x.Span.Start).GetStateValue(StateKinds.ChordRoot) + x.Root));
         var changes = draft.Chains.Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Chords[0], x.Change, x.Change, 4));
         return draft with { Timeline = KeyChange.Pedal(draft.Timeline, bass.Key, (PitchInstrumentTrack)bass.Value, changes.Concat(sections)) };
