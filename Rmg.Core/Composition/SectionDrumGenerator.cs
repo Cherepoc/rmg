@@ -206,7 +206,7 @@ internal sealed class SectionDrumGenerator
             .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup * VelocityLayers.SpreadOf(_genre)))
             .AddNoteDurationLayer()
             .ToStateMap(context)
-            .MergeWith(new StateMapBuilder("Section time").Add(CompositionStateKinds.Rhythm.Period.Power, timeFeel).ToStateMap(context))
+            .MergeWith(new StateMapBuilder("Section time").Add(CompositionStateKinds.TimeStep, timeFeel).ToStateMap(context))
             .MergeWith(_tracks.DrumStateMap)
             .MergeWith(sectionStateMap);
         var songDrums = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order().ToArray();

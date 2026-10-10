@@ -112,7 +112,8 @@ public static class SongDescriptions
             var drums = resting.Contains(TrackRole.Drum) || !parts.ContainsKey(TrackRole.Drum) ? "resting"
                 : solos.TryGetValue(index, out var drumSolo) && drumSolo.IsDrumSolo ? "a drum solo"
                 : percussionOnly.GetValueOrDefault(id) && draws.DrumSetup != DrumSetup.Percussion ? "percussion only"
-                : timeFeels.GetValueOrDefault(id) switch { < 0 => "half time", > 0 => "double time", _ => null };
+                // a step up of the period half time, as a breakdown's, and a step down double
+                : timeFeels.GetValueOrDefault(id) switch { > 0 => "half time", < 0 => "double time", _ => null };
             var playing = parts.Where(x => !resting.Contains(x.Key) && x.Value.Any(track => song.Notes![track].Any(n => n.Position >= span.Start && n.Position < span.End)))
                 .Select(x => PartName(x.Key)).Distinct().ToImmutableArray();
             return new SectionDescription(

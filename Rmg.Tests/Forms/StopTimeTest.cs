@@ -27,7 +27,10 @@ public sealed class StopTimeTest
                 var (from, to) = (at + StopTime.Hit, Math.Min(end, at + bar));
                 bars++;
                 var because = $"seed {song.Seed} at {at}";
-                await Assert.That(all.Any(x => x.Position < to - 1e-9 && x.Position + x.Value.Duration > from + 1e-9)).IsTrue().Because(because);
+                // a note sounding past the hit, or the drums keeping time after the bar's first beat, as a short last bar leaves
+                // little past its hit
+                await Assert.That(all.Any(x => x.Position < to - 1e-9 && x.Position + x.Value.Duration > from + 1e-9)
+                                  || song.Song.Notes!.Where(x => KeepsTime(x.Key)).Any(x => x.Value.Any(n => n.Position > at + 1e-6 && n.Position < to - 1e-9))).IsTrue().Because(because);
                 // the drums' fill out of the section, in its last bar, which goes on as a drummer fills into the next
                 var section = song.Song.Map!.Sections.Last(x => x.Start <= at + 1e-9);
                 var fill = section.End - bar;

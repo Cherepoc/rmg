@@ -257,6 +257,7 @@ internal sealed class SectionGenerator
             octaveBass,
             alternatingBass,
             breakdown,
+            timeFeel,
             _drumJob,
             _genre
         );
@@ -793,6 +794,7 @@ internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool 
 /// <param name="Meter">The meter the section's bars are in.</param>
 /// <param name="AlternatingBass">Whether its bass alternates the root and the fifth on its strong beats (<see cref="Articulations" />).</param>
 /// <param name="Breakdown">Whether the section is a heavy band's breakdown (<see cref="Breakdowns" />), which leaves its lines and pad out.</param>
+/// <param name="TimeFeel">How its drums keep time, 1 in half time, -1 in double time and 0 in the song's (<see cref="Groove.DrawTimeFeel" />).</param>
 /// <param name="DrumJob">What the song's drums do, which a part left alone must carry.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
@@ -816,6 +818,7 @@ internal sealed record GeneratedSection(
     bool OctaveBass,
     bool AlternatingBass,
     bool Breakdown,
+    int TimeFeel,
     DrumJob DrumJob,
     Genre Genre
 )

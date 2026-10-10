@@ -108,13 +108,15 @@ internal static class Groove
     /// <summary>
     ///     How a section's drums keep time: as a step of every drum's period, 1 for half time, the backbeat on the bar's
     ///     third beat and every cycle twice as long, -1 for double time, the backbeat on every beat, and 0 for the song's
-    ///     time; half time the likelier the less energy the section has, double time the more.
+    ///     time; half time the likelier the less energy the section has, double time the more, and neither in the plainest
+    ///     songs.
     /// </summary>
     /// <param name="groove">The groove facet of the section's unconventionality, by which a genre's chances lean.</param>
     /// <param name="genre">The genre whose chances of half and double time, at a section of middling energy, they take.</param>
     public static int DrawTimeFeel(IGenerationContext context, Tilt energy, double groove, Genre genre)
     {
-        double Within(double chance, string option) => new ByConvention(chance, chance, chance).At(groove, genre.Chance(GenreChoices.FeelChances, option));
+        // never in the plainest songs, which keep their time, and as often in the wildest as in a middling one
+        double Within(double chance, string option) => new ByConvention(0, chance, chance).At(groove, genre.Chance(GenreChoices.FeelChances, option));
         var half = energy.Chance(Within(HalfTimeChance, "halfTime"), -1);
         var twice = energy.Chance(Within(DoubleTimeChance, "doubleTime"), 1);
         var draw = context.GenerateDouble();

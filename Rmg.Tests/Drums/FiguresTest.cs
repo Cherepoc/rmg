@@ -13,6 +13,8 @@ public sealed class FiguresTest
     [
         ..song.Trace.Where(t => t.Point == TracePoints.Figures && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).GetValueOrDefault(player) == figure).Select(t => t.Section)
             .Except(song.Trace.Where(t => t.Point == TracePoints.DrumSolo).Select(t => t.Section))
+            // but in half or double time, whose player keeps its own rhythm stretched or pressed
+            .Except(song.Trace.Where(t => t.Point == TracePoints.TimeFeel && (int)t.Value! != 0).Select(t => t.Section))
     ];
 
     /// <summary>

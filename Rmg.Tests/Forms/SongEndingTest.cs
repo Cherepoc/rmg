@@ -175,6 +175,7 @@ public sealed class SongEndingTest
             false,
             false,
             false,
+            0,
             DrumJob.Groove,
             Genre.None
         );

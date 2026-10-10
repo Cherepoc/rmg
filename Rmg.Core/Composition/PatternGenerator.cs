@@ -602,7 +602,7 @@ internal readonly record struct ResolvedRhythm(
     {
         // a cycle kept under the longest by its limit, a step shorter while its feel stretches it past it
         var longest = 1 - Math.Max(0, stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Limit));
-        var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
+        var periodPower = (stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power) + stateMap.GetStateValue(CompositionStateKinds.TimeStep))
             .BounceInBounds(-2, longest);
         var feel = Feels.Of(stateMap);
         var periodValue = Math.Pow(2, periodPower) * feel.ToRhythmPeriodValue();

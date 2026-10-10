@@ -70,8 +70,9 @@ internal static class DrumOrnaments
                 if (!plays || song.Stream(SongStream.DrumOrnaments, track, (long)Math.Round(position * PlacesPerBeat)).GenerateDouble() >= share)
                     return note;
                 var step = Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)) / Rate;
-                // its strokes in its section, none before a section's first note
-                if (position - strokes * step < section.Start - 1e-9)
+                // its strokes in its section, none before a section's first note, and clear of the drum's own notes, which a
+                // tuplet or a busy groove may strike just before it
+                if (position - strokes * step < section.Start - 1e-9 || notes[track].Any(x => x.Position > position - strokes * step - 1e-9 && x.Position < position - 1e-9))
                     return note;
                 return (note.Value with
                 {
