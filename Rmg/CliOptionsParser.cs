@@ -51,6 +51,8 @@ public static class CliOptionsParser
           -s, --seed <seed>    Seed of the randomizer that provides a seed for every song, in letters
                                and digits as the page writes seeds (default: random, printed so the
                                run can be repeated)
+          -g, --genre <id>     The page's preset the songs are made in, by its id, such as rock or
+                               ballad (default: none, the songs' own)
           --version            Print RMG's songs' version and commit
           --fingerprint        Print the fingerprint of the songs of the corpus's seeds, which changes
                                when the songs do
@@ -66,6 +68,7 @@ public static class CliOptionsParser
         var outputDirectory = DefaultOutputDirectory;
         var count = DefaultCount;
         ulong? seed = null;
+        string? genre = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -113,6 +116,14 @@ public static class CliOptionsParser
                     seed = seedValue;
                     break;
 
+                case "-g" or "--genre":
+                    if (!TryReadValue(args, ref i, name, inlineValue, out var genreText, out var genreError))
+                        return CliParseResult.Failure(genreError);
+                    if (Rmg.WebApi.Genres.GenrePresetFile.All.All(x => x.Id != genreText))
+                        return CliParseResult.Failure($"'{genreText}' is no preset for '{name}'. The presets: {string.Join(", ", Rmg.WebApi.Genres.GenrePresetFile.All.Select(x => x.Id))}.");
+                    genre = genreText;
+                    break;
+
                 default:
                     return CliParseResult.Failure(
                         arg.StartsWith('-')
@@ -123,7 +134,7 @@ public static class CliOptionsParser
         }
 
         seed ??= (defaultSeedFactory ?? Seeds.Random)();
-        return CliParseResult.Success(new CliOptions(outputDirectory, count, seed.Value));
+        return CliParseResult.Success(new CliOptions(outputDirectory, count, seed.Value, genre));
     }
 
     private static bool TryReadValue(

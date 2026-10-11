@@ -671,7 +671,6 @@ dynamics, as it has no drums.
   stage takes `(SongDecisions, SongDraft)`, as fifteen do.
 - **Plainer prose:** comments that say in a plain sentence what the code cannot, and commits' lines of about a hundred
   characters; CLAUDE.md's paragraph on conventionality as rules a test can check.
-- **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
 - **Tests that check less than their names** (P4, from the review of 9 October 2026; a breakdown's riff chugging and its
@@ -693,17 +692,14 @@ end, the middle and the wild end; what each choice does is in the code and the n
 left:
 
 - **Any genre** (P3, a plan in steps): a song asked for with no genre drawing a preset, or the songs' own as one of its
-  outcomes, evenly, so that the plain band stays among them; the seed alone making the song again, the CLI's and the
-  API's too, and the ratings telling which genres are liked. Steps:
-  1. The presets the server's data rather than the page's alone (`Client/genres.json`), served to the page, which the
-     tests and the CLI read too (`--genre`).
-  2. The server drawing one when asked for any, from a stream of its own, so that the rest of the song stays as the
-     seed made it; the preset drawn in the response, the song's link and every analytics event about it, as its version
-     and settings are.
-  3. The page's Any genre, its preset drawn by the page for every new song, drawn by the server instead.
-  4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
-     not before the retuned presets, Pop and Metal most, are heard.
-  Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
+  outcomes, evenly, so that the plain band stays among them. Done: the presets the server's (`GenrePresetFile`, built
+  in), the tests' and the CLI's (`--genre <id>`, 11 October 2026); the page's Any genre draws a preset other than the
+  song's, and every event carries the genre, which the dashboard rates by. Put off (11 October 2026): the server
+  drawing it from the seed, the page asking for any, as a draw by the seed cannot keep the page's rule of another
+  preset than the last, and a link already names the preset drawn; taken up should the API or the CLI want any. Left:
+  the default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
+  not before the retuned presets, Pop and Metal most, are heard. Not weighed by the presets nor leaned by
+  conventionality: each preset spans the plainest songs to the wildest.
 - **Rock and metal as their bands play them** (P3, from 8 October 2026): what each lacks against the sound of a riff-driven
   hard rock band, a blues-rock band's shuffle, a twin-guitar heavy metal band, thrash and groove metal
   (`RockAndMetalReportTest`). Their solos (73% and 78% of songs) and their riffs of two and four bars (AAAB and ABAB a

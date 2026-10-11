@@ -1273,6 +1273,22 @@ function addToHistory(isRemade, keepsPlace) {
     elements.clearHistory.disabled = false;
 }
 
+/**
+ *     Shows on a song of the list how this browser rated it, liked or not, in the version the page plays, as the
+ *     song's own buttons do; nothing until the version is known, as the same seed is another song in another.
+ */
+function showRatingInList(item) {
+    const version = songVersion ?? serverVersion;
+    const rating = version === null ? null : recallRating(version, item.dataset.song);
+    item.textContent = rating === "up" ? `${item.dataset.text} ♥` : rating === "down" ? `${item.dataset.text} ✕` : item.dataset.text;
+    item.setAttribute("aria-label", rating === "up" ? `${item.dataset.label}, liked` : rating === "down" ? `${item.dataset.label}, disliked` : item.dataset.label);
+}
+
+/** Shows every song of the list's rating, once the version is known. */
+function showRatingsInList() {
+    for (const item of elements.history.children) showRatingInList(item);
+}
+
 /** Marks the song on the page, which is where the list is being read from. */
 function markCurrentSong(name) {
     for (const item of elements.history.children) {
@@ -1388,8 +1404,9 @@ function createHistoryItem(entry) {
     button.dataset.seed = seedText;
     button.dataset.song = songName(seed, entrySettings, genreKey);
     const isGiven = identity !== "" || genreKey !== null;
-    button.textContent = isGiven ? `${seedText} ⚙` : seedText;
-    button.setAttribute("aria-label", isGiven ? `Song ${seedText}, with its settings` : `Song ${seedText}`);
+    button.dataset.text = isGiven ? `${seedText} ⚙` : seedText;
+    button.dataset.label = isGiven ? `Song ${seedText}, with its settings` : `Song ${seedText}`;
+    showRatingInList(button);
 
     button.addEventListener("click", async () => playNew(seed, "history", await withGenre(entrySettings, genreKey)));
 
@@ -2795,6 +2812,7 @@ function rate(rating) {
     const next = current === rating ? null : rating;
     keepRating(songVersion, song, next);
     showRating(next);
+    showRatingsInList();
     // the change, rather than the rating, since the server has no one to tell today's rating from yesterday's by, and
     // with the settings it was heard with, which say what of them names the song
     tell("rated", aboutSong({ detail: `${current ?? "none"}>${next ?? "none"}` }));
@@ -2966,6 +2984,7 @@ async function showVersion() {
 
         const { version, commit } = await response.json();
         serverVersion = version;
+        showRatingsInList();
         elements.version.textContent = commit ? `RMG ${version} (${commit.slice(0, 7)})` : `RMG ${version}`;
         elements.version.hidden = false;
     } catch {

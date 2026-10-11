@@ -29,6 +29,25 @@ public sealed class WalkingTheListTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A song rated shows its rating on the list, as its buttons do, and loses it when the rating is taken back.</summary>
+    [Test]
+    public async Task ASongRated_ShowsItsRatingOnTheList()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Settled();
+        var current = page.Page.Locator("#history [aria-current]");
+        await page.Page.Locator("#like").ClickAsync();
+        await page.Until(async () => (await current.GetAttributeAsync("aria-label"))!.EndsWith(", liked"), "the song liked on the list");
+        await Assert.That(await current.TextContentAsync()).EndsWith("♥");
+        await page.Page.Locator("#dislike").ClickAsync();
+        await page.Until(async () => (await current.GetAttributeAsync("aria-label"))!.EndsWith(", disliked"), "the song disliked on the list");
+        await page.Page.Locator("#dislike").ClickAsync();
+        await page.Until(async () => !(await current.GetAttributeAsync("aria-label"))!.Contains("liked"), "the rating taken back on the list");
+        await Assert.That(await current.TextContentAsync()).IsEqualTo(await page.Seed());
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task TheList_IsKept_ForThePageOpenedAgain()
     {

@@ -32,6 +32,14 @@ public sealed class CliOptionsParserTest
     }
 
     [Test]
+    public async Task AGenre_IsAPresetsId_AndNoOtherWord()
+    {
+        await Assert.That(Parse("--genre", "ballad").Options!.Genre).IsEqualTo("ballad");
+        await Assert.That(Parse("--genre=rock").Options!.Genre).IsEqualTo("rock");
+        await Assert.That(Parse("--genre", "polka").Error).Contains("no preset");
+    }
+
+    [Test]
     public async Task NoSeed_WithoutFactory_ResultsIn_ARandomSeed_OfAll64Bits()
     {
         var seeds = Enumerable.Range(0, 64).Select(_ => CliOptionsParser.Parse([]).Options!.Seed).ToArray();

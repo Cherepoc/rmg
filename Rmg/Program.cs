@@ -1,5 +1,6 @@
 using Rmg;
 using Rmg.Core.Composition;
+using Rmg.Core.Songs;
 using Rmg.Core.Versions;
 using Rmg.WebApi.Genres;
 
@@ -38,4 +39,6 @@ if (parseResult.Options is null)
     return 2;
 }
 
-return SongBatch.Run(parseResult.Options, SongGenerator.GenerateSong, Console.Out, Console.Error);
+// the songs in the preset asked for, or their own
+var genre = parseResult.Options.Genre is { } id ? GenrePresetFile.Genre(GenrePresetFile.All.Single(x => x.Id == id)) : null;
+return SongBatch.Run(parseResult.Options, seed => SongGenerator.GenerateSong(seed, new SongOverrides(Genre: genre)), Console.Out, Console.Error);
