@@ -4,14 +4,22 @@ before calling it a regression.
 
     python3 compare.py <earlier review> <this review>        # findings, once this review has its deduped.json
     python3 compare.py <earlier review> <this review> --files  # the files added and removed since, before the review starts
+
+Where both reviews recorded their commits (review.json), it also counts the new findings in files unchanged between
+them: issues a full re-read found in code the last review read too. Their share is what tells whether a delta review,
+which reads only the changed files in full, misses much.
 """
-import json, os, re, sys
+import json, os, subprocess, sys
+from load import overlap, review
 
 old, new = sys.argv[1], sys.argv[2]
 
 
-def paths(review):
-    return {f['path']: f['lines'] for s in json.load(open(os.path.join(review, 'manifest.json'))) for f in s['files']}
+def paths(r):
+    p = os.path.join(r, 'files.json')
+    if os.path.exists(p):
+        return {f['path']: f['lines'] for f in json.load(open(p))}
+    return {f['path']: f['lines'] for s in json.load(open(os.path.join(r, 'manifest.json'))) for f in s['files']}
 
 
 if '--files' in sys.argv:
@@ -28,17 +36,12 @@ if '--files' in sys.argv:
     sys.exit(0)
 
 
-def words(text):
-    return {w for w in re.findall(r'[a-z]{4,}', (text or '').lower())}
-
-
 def same(f, g):
     if f['file'] != g['file'] or f.get('category') != g.get('category'):
         return False
     near = abs((f.get('line') or 0) - (g.get('line') or 0)) <= 10
-    a, b = words(f.get('summary')), words(g.get('summary'))
-    overlap = len(a & b) / max(1, min(len(a), len(b)))
-    return near and overlap >= 0.25 or overlap >= 0.5
+    o = overlap(f.get('summary'), g.get('summary'))
+    return near and o >= 0.25 or o >= 0.5
 
 
 earlier = json.load(open(os.path.join(old, 'deduped.json')))
@@ -48,10 +51,24 @@ seen_new = {id(f) for f, _ in recurring}
 seen_old = {id(g) for _, g in recurring}
 fresh = [f for f in now if id(f) not in seen_new]
 gone = [g for g in earlier if id(g) not in seen_old]
-print(f"{len(now)} findings now, {len(earlier)} then: {len(fresh)} new, {len({id(f) for f, _ in recurring})} recurring, {len(gone)} gone")
+print(f"{len(now)} findings now, {len(earlier)} then: {len(fresh)} new, {len(seen_new)} recurring, {len(gone)} gone")
+
+a, b = review(old), review(new)
+if a.get('commit') and b.get('commit'):
+    changed = set(subprocess.run(['git', '-C', b['repo'], 'diff', '--name-only', a['commit'], b['commit']],
+                                 check=True, capture_output=True, text=True).stdout.split())
+    unchanged = [f for f in fresh if f['file'] not in changed]
+    counts = ', '.join(f"{sum(1 for f in unchanged if f['severity'] == s)} {s}" for s in ('high', 'medium', 'low'))
+    print(f"\nNew findings in files unchanged since {a['commit'][:7]}: {len(unchanged)} of {len(fresh)} ({counts})")
+    for f in unchanged:
+        if f['severity'] in ('high', 'medium'):
+            print(f"  {f['severity'][0]} {f['file']}:{f.get('line')} [{f['category']}] {f.get('summary', '')[:110]}  ({f.get('source')})")
+else:
+    print("\n(no commit recorded for one of the reviews: the new findings in unchanged files cannot be counted)")
+
 print("\nRecurring (fixed and back, or never fixed; read each):")
 for f, g in recurring:
-    print(f"  {f['severity'][0]} {f['file']}:{f.get('line')} [{f['category']}] {f.get('summary', '')[:110]}  (then {g['id']})")
+    print(f"  {f['severity'][0]} {f['file']}:{f.get('line')} [{f['category']}] {f.get('summary', '')[:110]}  (then {g.get('n', g['id'])})")
 print("\nNew, high and medium:")
 for f in fresh:
     if f['severity'] in ('high', 'medium'):

@@ -1,9 +1,16 @@
 """The review's slices: every source file with its lines, grouped by subsystem and cut into slices small enough to
-read whole. Writes <out>/manifest.json and <out>/slices/<id>.txt, and prints the slices.
+read whole. Writes <out>/manifest.json, <out>/slices/<id>.txt, <out>/files.json (every source file, sliced or not) and
+<out>/review.json (the commit read, the date, the mode), and prints the slices.
 
-    python3 manifest.py <repo> <out> [--limit 2200] [--no-tests]
+    python3 manifest.py <repo> <out> [--limit 2200] [--no-tests]                  # every file
+    python3 manifest.py <repo> <out> --last <last review folder> [--no-tests]     # the files changed since its commit
+    python3 manifest.py <repo> <out> --since <commit> [--no-tests]                # the files changed since a commit
+
+A delta review slices only the files changed since the last review's commit, which take in the last review's fixes;
+the angles, the device families and the genre clusters still cover the whole code.
 """
-import argparse, glob, json, os, re
+import argparse, datetime, glob, json, os, re, subprocess
+from load import review, write_review
 
 parser = argparse.ArgumentParser()
 parser.add_argument('repo')
@@ -11,8 +18,22 @@ parser.add_argument('out')
 parser.add_argument('--limit', type=int, default=2200, help='the most lines in a slice')
 parser.add_argument('--small', type=int, default=700, help='a slice under this many lines is merged with others')
 parser.add_argument('--no-tests', action='store_true', help='leave the unit and page tests out')
+parser.add_argument('--last', help='the last review\'s folder: slice only the files changed since its commit')
+parser.add_argument('--since', help='a commit: slice only the files changed since it')
 args = parser.parse_args()
 root = args.repo
+
+
+def git(*a):
+    return subprocess.run(['git', '-C', root, *a], check=True, capture_output=True, text=True).stdout.strip()
+
+
+since = args.since
+if args.last:
+    since = review(args.last).get('commit')
+    if not since:
+        raise SystemExit(f"{args.last}/review.json names no commit: pass --since <the commit it read>")
+changed = set(git('diff', '--name-only', since, 'HEAD').splitlines()) if since else None
 
 
 def lines(path):
@@ -54,6 +75,11 @@ groups['client'] = [f for f in files('Rmg.WebApi/Client/**/*') if os.path.splite
 if not args.no_tests:
     groups['tests'] = files('Rmg.Tests/**/*.cs')
     groups['page-tests'] = files('Rmg.Tests.Page/**/*.cs')
+
+every_file = sorted(p for paths in groups.values() for p in paths)
+if changed is not None:
+    groups = {g: [p for p in paths if p in changed] for g, paths in groups.items()}
+    groups = {g: paths for g, paths in groups.items() if paths}
 
 # every group cut into slices of at most the limit, a file never split
 slices = []
@@ -99,11 +125,14 @@ os.makedirs(os.path.join(args.out, 'findings'), exist_ok=True)
 os.makedirs(os.path.join(args.out, 'verify'), exist_ok=True)
 with open(os.path.join(args.out, 'manifest.json'), 'w') as f:
     json.dump(slices, f, indent=1)
+json.dump([{'path': p, 'lines': lines(p)} for p in every_file], open(os.path.join(args.out, 'files.json'), 'w'), indent=1)
+write_review(args.out, repo=os.path.abspath(root), commit=git('rev-parse', 'HEAD'), date=datetime.date.today().isoformat(),
+             mode='delta' if since else 'full', since=since or '', tests=not args.no_tests)
 for s in slices:
     with open(os.path.join(args.out, 'slices', s['id'] + '.txt'), 'w') as f:
         f.write('\n'.join(f"{x['path']} ({x['lines']} lines)" for x in s['files']) + '\n')
 
 total = sum(s['lines'] for s in slices)
-print(f"{len(slices)} slices, {sum(len(s['files']) for s in slices)} files, {total} lines")
+print(f"{'delta since ' + since[:7] if since else 'full'}: {len(slices)} slices, {sum(len(s['files']) for s in slices)} files, {total} lines")
 for s in slices:
     print(f"  {s['id']:24} {s['lines']:6}  {' '.join(os.path.basename(x['path']) for x in s['files'])[:110]}")

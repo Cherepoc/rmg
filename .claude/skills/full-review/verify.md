@@ -13,8 +13,12 @@ For each finding in your input file:
 1. Open the cited file and line, and the surrounding code and callers needed to judge it. Check whether the evidence is quoted correctly and whether the failure scenario can actually happen. Trace the callers and the data: is the "empty list" ever empty, is the "wrong order" ever reached?
    - A `run` finding is a test failing on other songs: trace its cause by reading, a generator bug, a test assuming what
      those songs break, or a calibration over too few songs, and say which in the reason; you cannot run it.
-   - A `taste` finding cannot be confirmed by reading: `plausible` where the musical claim is grounded in the code and
-     the style, `rejected` where it is not; check its `listen` could be asked.
+   - An `elsewhere` finding is one a reviewer saw outside its own slice and noted in a line, with no evidence or
+     scenario: find the code, judge it as any other, and give it its real `category` and `severity` in your output.
+     Several reviewers may have noted the same issue: one `confirmed`, the others `duplicate` of it.
+   - A `genre-fit` mistake quotes a measured number from a report in the review folder's `run/` (beside `verify/`): check the number in that report and that
+     the description or the style settles it; a mistake without a number, or whose number is not there, is `rejected`.
+   - Findings of taste are not sent to you; they go to listening.
 2. Give a verdict:
    - `confirmed`: you traced it and it is real, with the scenario reachable.
    - `plausible`: likely real, but you could not prove reachability without running code.
@@ -26,7 +30,7 @@ For each finding in your input file:
 Write a JSON array to the output path given in your task, one object per input finding:
 
 ```json
-{ "id": "<the input id>", "verdict": "confirmed|plausible|rejected|duplicate", "severity": "high|medium|low", "reason": "...", "fix": "<the fix, refined if needed>" }
+{ "id": "<the input id>", "verdict": "confirmed|plausible|rejected|duplicate", "severity": "high|medium|low", "category": "<only for an elsewhere finding: its real category>", "reason": "...", "fix": "<the fix, refined if needed>" }
 ```
 
 Validate that the JSON parses. Your final message is one line: the path written and the counts of each verdict.

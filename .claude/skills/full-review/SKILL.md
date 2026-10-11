@@ -1,6 +1,6 @@
 ---
 name: full-review
-description: Review the whole codebase with many agents, every file read in full by one of them, every cross-cutting concern, every musical device and every genre's presets followed by another, the suite run on other songs first, every finding verified, and a report written. Use when asked for a "full review", to "review everything", to "rerun the review", or to have agents read all of the files.
+description: Review the whole codebase with many agents, every file read in full by one of them, every cross-cutting concern, every musical device and every cluster of genre presets followed by another, the suite run on other songs first, every finding verified, and a report written. Use when asked for a "full review", to "review everything", to "rerun the review", or to have agents read all of the files.
 ---
 
 # The full review
@@ -9,12 +9,24 @@ A review that reads every line rather than a sample, and runs the code before it
 and skims what does not fit, so coverage is made a contract: every file is given to exactly one reviewer, in slices
 small enough to read whole, each reviewer accounts for every file it was given, and the accounts are checked against
 the file list. Cross-cutting reviewers follow one concern each across the code, device reviewers one family of musical
-devices end to end and against each other, genre reviewers one preset each; verifiers check every finding, and
-the result is a report, not commits.
+devices end to end and against each other, genre reviewers one cluster of presets each; verifiers check every finding
+but those of taste, and the result is a report, not commits.
 
-A run costs about ninety reviewers and thirty verifiers, with three runs of the suite. Confirm with the user
-before starting where they did not ask for the full review by name, and ask whether to include the tests (about half
-the slices) and which model the agents use (the current one by default: the user chose it over a faster one).
+**Delta or full.** A delta review slices only the files changed since the last review's commit, which take in the last
+review's fixes; the angles, device families and genre clusters still cover the whole code. It is the default where the
+last review recorded its commit (`review.json`). A full review slices every file: when the user asks for a full re-read,
+when the last review recorded no commit, or when the last full one was more than about a hundred commits ago. Each
+review's comparison counts the new findings in files the last review read unchanged; while that count stays low, the
+delta reads enough.
+
+**One agent at a time.** Launch an agent, wait for its notification, check that its file exists and parses, then launch
+the next. Run several at once only where the user asked for it, and as many as they said.
+
+A full run is about 40 slices (about half of them the tests), 9 angles and the architecture reviewer, 6 device families
+and 7 genre clusters, about 25 verifier batches, and three runs of the suite; a delta run has as many slices as changed
+files fill, and no architecture reviewer. Confirm with the user before starting where they did not ask for the review by
+name, and ask: delta or full, whether to include the tests, which model the agents use (the current one by default: the
+user chose it over a faster one), and whether to run agents one at a time (the default) or several.
 
 ## The files
 
@@ -22,81 +34,92 @@ the slices) and which model the agents use (the current one by default: the user
   The latest earlier folder there is the last review, `L`. Nothing is written in the repository until the fixes are
   done, when the review's record is (*The record*, below).
 - **The briefs**, this skill's own (`S=<repo>/.claude/skills/full-review`): `primer.md` (the project, the checklist,
-  the output), `angles.md` (the cross-cutting concerns, the device families, the genre-fit reviewers), `verify.md` (the
+  the output), `angles.md` (the cross-cutting concerns, the device families, the genre clusters), `verify.md` (the
   verifiers' brief) and `decided.md` (findings decided against or kept on purpose, which no reviewer raises again).
-- **The scripts**, in `$S/scripts`: `manifest.py`, `devices.py`, `run_findings.py`, `coverage.py`,
-  `verify_batches.py`, `merge.py`, `compare.py`.
+- **The scripts**, in `$S/scripts`: `manifest.py` (the slices, the commit), `offsets.py` (the corpora), `devices.py`
+  (the devices, the genre clusters, the stages), `runs.sh`, `ledger.py` (what each device costs and earns), `run_findings.py`, `coverage.py`, `verify_batches.py`,
+  `merge.py`, `compare.py`, `status.py` (the fixing's bookkeeping); `load.py` and `areas.py` are shared.
+- **The review's record**, `$R/review.json`: the commit read, the date, the mode, the offsets and the holdout.
 
 ## Phase 0: what changed, and the briefs brought up to date
 
 ```
-python3 $S/scripts/manifest.py <repo> $R            # --no-tests to leave the tests out
-python3 $S/scripts/compare.py $L $R --files          # the files added, removed and grown since the last review
-python3 $S/scripts/devices.py <repo> $R              # every genre choice and stage, by family, and every preset
+python3 $S/scripts/manifest.py <repo> $R --last $L    # a delta; no --last for a full review; --no-tests to leave them out
+python3 $S/scripts/offsets.py $R                      # two corpora drawn afresh, and a holdout for after the fixes
+python3 $S/scripts/compare.py $L $R --files           # the files added, removed and grown since the last review
+python3 $S/scripts/devices.py <repo> $R               # every device by family, the presets by cluster, the stages in order
 git -C <repo> log --since=<L's date> --oneline
 ```
 
-The slicer cuts every source file (`.cs`, and the page's `.js`, `.css`, `.html`) into slices of about 2,200 lines by
-subsystem. The device inventory sorts every genre choice and stage into six families; place any it reports unplaced
-in `devices.py`'s table first. Then, for every file added and every commit since the last review, bring the briefs up
-to date: a new stage or device named in the primer or the angles where it belongs, a mechanism they name that is gone
-taken out, an angle a test now guards narrowed. Read the four briefs whole before going on.
+The slicer cuts the source files (`.cs`, and the page's `.js`, `.css`, `.html`) into slices of about 2,200 lines by
+subsystem. `devices.py` exits 1 on a genre choice, stage or preset its tables do not place, and on a name in them the
+code no longer has: put each right in its tables first. The stage list the primer points to (`$R/stages.txt`) is
+written by it, not by hand. Then, for every file added and every commit since the last review, bring the briefs up to
+date in what no script lists: a mechanism the primer or the angles name that is gone taken out, a new concern named
+where it belongs, an angle a guard test now keeps (*The record*) narrowed or its checklist line taken out. Read the four
+briefs whole before going on.
 
 ## Phase 1: the runs
 
-The main agent runs these, one at a time, under the memory cap (`systemd-run --user --scope -p MemoryMax=8G
--p MemorySwapMax=0 -p AllowedCPUs=0-$(( $(nproc) - 3 ))`), after a build:
-
 ```
-dotnet run --project Rmg.Tests -c Release --no-build > $R/run/offset-0.txt
-RMG_CORPUS_OFFSET=1000000 dotnet run --project Rmg.Tests -c Release --no-build > $R/run/offset-1000000.txt
-RMG_CORPUS_OFFSET=2000000 dotnet run --project Rmg.Tests -c Release --no-build > $R/run/offset-2000000.txt
-dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_EveryChance" --output detailed > $R/run/every-chance.txt
-dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/GenreDevicesReportTest/*" --output detailed > $R/run/genre-devices.txt
-dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_ChoicesByEnd" --output detailed > $R/run/every-preset.txt
-python3 $S/scripts/run_findings.py <repo> $R <offset> $R/run/offset-<offset>.txt     # for every run with a failure
+$S/scripts/runs.sh <repo> $R
 ```
 
-Every failure becomes a finding (`findings/run-<offset>.json`, category `run`) with its seed and offset, for the
-verifiers to trace. Runs on other songs find what reading does not: a second corpus found thirteen bugs, most of them
-two devices meeting, which no reviewer of one file sees.
+It builds, runs the suite at the review's offsets and the three preset reports, one at a time under the memory cap, and
+turns every failure into a finding (`findings/run-<offset>.json`, category `run`) with its seed and offset, for the
+verifiers to trace. Then the device ledger, from the reports:
+
+```
+python3 $S/scripts/ledger.py <repo> $R               # ledger.md: each device's presets, plays, code, past findings, questions
+```
+ Runs on other songs find what reading does not: a second corpus found thirteen bugs, most of them
+two devices meeting, which no reviewer of one file sees. The offsets are drawn afresh each review, as corpora fixed
+across reviews are ones the fixes have been tuned to.
 
 ## Phase 2: the reviewers
 
-About twelve at a time, in the background, every one read only (never building, never running tests).
+One at a time (see above), every one read only (never building, never running tests).
 
 **A slice reviewer per slice** (`$R/slices/<id>.txt`):
 
 > You are a code reviewer on one slice of a full-codebase review. First read the primer at `$S/primer.md`, then
-> `$S/decided.md`, then `<repo>/CLAUDE.md`, and follow the primer exactly.
+> `$S/decided.md`, then `<repo>/CLAUDE.md`, and follow the primer exactly. The review's folder is `$R`.
 >
 > Your slice is "`<id>`". Its files (repo root `<repo>`) are listed in `$R/slices/<id>.txt`. Read every line of every
 > one of them.
 >
 > Write your JSON to `$R/findings/<id>.json`. Read only: never edit repository files, never build or run dotnet.
 
-**A cross-cutting reviewer per concern**, the numbered angles of `angles.md` but musicality, which the device and genre reviewers below
-take:
+**A cross-cutting reviewer per concern**, the numbered angles of `angles.md` but musicality, which the device and genre
+reviewers below take:
 
 > You are a cross-cutting reviewer in a full-codebase review of `<repo>`. First read `$S/primer.md`, then
-> `$S/angles.md`, then `$S/decided.md`, then `<repo>/CLAUDE.md`.
+> `$S/angles.md`, then `$S/decided.md`, then `<repo>/CLAUDE.md`. The review's folder is `$R`.
 >
 > Your angle is number `<n>`, "`<id>`". Cover it completely as angles.md describes.
 >
 > Write your JSON to `$R/findings/angle-<id>.json`. Read only: never edit repository files, never build or run dotnet.
 
-**A device reviewer per family** (form, harmony, lines, drums, solos, sound), as `angles.md`'s *device families*
-describe, its devices in `$R/devices/<family>.txt`, its output `$R/findings/angle-device-<family>.json`.
+**The architecture reviewer**, on a full review only, the prompt of a cross-cutting reviewer with angle 12,
+"`architecture`", as `angles.md`'s *architecture reviewer* describes: at most three proposals of another design, each
+with what the current one has cost by the records' numbers and measurements, its migration and what it deletes. Run it
+last of the reviewers, so that this review's runs are in `$R/run/`.
 
-**A genre-fit reviewer per genre preset** (`$R/genres.txt`), as `angles.md`'s *genre-fit reviewers* describe, reading
-the three preset reports in `$R/run/`, its output `$R/findings/angle-genre-<preset id>.json`:
+**A device reviewer per family** (form, harmony, lines, drums, solos, sound), as `angles.md`'s *device families*
+describe, its devices in `$R/devices/<family>.txt`, the ledger in `$R/ledger.md`, its output
+`$R/findings/angle-device-<family>.json`: every device end to end, and whether each earns its place, a cut proposed
+only as a question heard with and without it.
+
+**A genre-fit reviewer per cluster of presets** (`$R/genres/<cluster>.txt`), as `angles.md`'s *genre-fit reviewers*
+describe; on a full review it also proposes at most two idiom gaps, devices the engine lacks, telling it so in its
+prompt:
 
 > You are a genre reviewer in a full-codebase review of `<repo>`. First read `$S/primer.md`, then `$S/angles.md` (its
 > *genre-fit reviewers*), then `$S/decided.md`, then `<repo>/CLAUDE.md`.
 >
-> Your genre is the preset "`<preset id>`". The reports are in `$R/run/`.
+> Your cluster is "`<cluster>`", its presets listed in `$R/genres/<cluster>.txt`. The reports are in `$R/run/`.
 >
-> Write your JSON to `$R/findings/angle-genre-<preset id>.json`. Read only: never edit repository files, never build or
+> Write your JSON to `$R/findings/angle-genre-<cluster>.json`. Read only: never edit repository files, never build or
 > run dotnet.
 
 ## The coverage check
@@ -106,18 +129,23 @@ python3 $S/scripts/coverage.py $R
 ```
 
 It reports the slices and angles done, the findings by severity, invalid JSON, every file a slice did not read in full
-or did not account for, every device a device family did not account for, and every preset without its genre
-reviewer. Give each gap to a fresh agent until
-none is left: a reviewer's message that it finished is not coverage, the lists are.
+or did not account for, every device a device family did not account for, every preset its cluster's reviewer did not,
+and a musical reviewer proposing more than three listening questions, three cuts or two idiom gaps. Give each gap to a fresh agent (or send the
+reviewer back to cut its questions to three) until none is left: a reviewer's message that it finished is not
+coverage, the lists are.
 
 ## Phase 3: verification
 
 ```
-python3 $S/scripts/verify_batches.py $R              # every finding; --high-medium for those alone
+python3 $S/scripts/verify_batches.py $R              # every finding but taste; --high-medium for those alone
 ```
 
 Every finding, the low ones too, as the fixing plans every one and a low finding unchecked costs more there than a
-verifier here; batches of at most 30 by area. One verifier per batch:
+verifier here; and every `elsewhere` entry, which a reviewer noted outside its slice and which is otherwise in no table
+(the half and double time named the wrong way round was raised by five reviewers this way and reached no table).
+Findings of taste (cuts among them) are not sent, as reading cannot verify how a thing sounds; nor are architecture
+proposals and idiom gaps. Batches
+of at most 30 by area, one verifier each:
 
 > You are a verifier in a full-codebase review of `<repo>`. Read `$S/verify.md` and follow it exactly.
 >
@@ -128,41 +156,79 @@ verifier here; batches of at most 30 by area. One verifier per batch:
 ## Phase 4: the report
 
 ```
-python3 $S/scripts/merge.py $R
+python3 $S/scripts/merge.py $R                       # once: the numbers it gives are the plan's
 python3 $S/scripts/compare.py $L $R
 ```
 
-The merge drops the rejected and the duplicates, merges findings on the same file, category and nearby lines, and
-writes `$R/report.md`: the totals, the proposed listening questions (the findings of taste), the high findings in full,
-and every area's findings as a table, the runs' failures and the genre fit among them. The comparison names the
-findings new, recurring and gone since the last review; read each recurring one before calling it a regression. Write
-the summary at the top of `report.md`: what is in good shape, the high findings and what to fix first, the themes, what
-recurs. Give the user the report and wait. Do not commit the review's folder or its report.
+The merge drops the rejected and the duplicates, merges only findings that are the same issue (the same file and
+category, and summaries of the same words), the most severe leading each group with every merged summary printed under
+it, and writes `$R/report.md`: the totals, the listening questions ranked, the high findings in full, and every area's
+findings as a table numbered by `n`, the verifier's severity with the reviewer's beside it where they differ. The
+comparison names the findings new, recurring and gone since the last review, and how many of the new are in files
+unchanged since it; read each recurring one before calling it a regression. Write the summary at the top of `report.md`:
+what is in good shape, the high findings and what to fix first, the themes, what recurs. Give the user the report and
+wait. Do not commit the review's folder or its report.
 
 ## After the report
 
 When the user asks for a plan, group every finding into packages by what they change together (the high findings
 first, then each concern), each package its goal, approach, verification and critical review (overengineering and
-musicality named), written in the review's folder. Each package goes through the implementation loop.
+musicality named), written in `$R/plan/plan.md`, every finding put in its package by number:
+
+```
+python3 $S/scripts/status.py $R init
+python3 $S/scripts/status.py $R assign <package> <n>...     # moving a finding to another package is assigning it there
+python3 $S/scripts/status.py $R check                        # until no finding is unassigned
+```
+
+Each package goes through the implementation loop, its findings read with `status.py $R show <package>` (never from
+`merged.json`, whose order is another: 44 findings were once looked up there and never worked). As each finding is
+done, `status.py $R set "<status>" <n>...`, the status starting fixed, partly, decided, kept, taste or open, and the
+package's commit with `status.py $R package <package> <commit> "<songs changed>"`. A package is done only when
+`status.py $R check <package>` passes.
 
 - A finding of **taste** is not a fix: it becomes a listening question (`ListeningQuestionsTest`, `?listen=`), its
-  change made only once the user has heard it. A **mistake** is fixed.
+  change made only once the user has heard it. Ask the first-ranked first, a round of ten at most; a question not
+  asked by the record stays open in it, not queued in the roadmap unasked. A **mistake** is fixed.
 - A genre-fit change is data in `Client/genres.json`, the presets' choices named whole (a chances choice's every option,
   so that naming one does not switch the others off).
+- Every commit that changes songs reruns `ListeningQuestionsTest.Write` in the same commit, so that the listening
+  file's songs are the songs.
+- A **cut** is a listening question heard with and without the device. Where listeners cannot tell, or prefer it
+  without, the device is taken out, its code, its choice, its tests and its presets' amounts, as a commit of its own
+  that counts the songs it changes; where they hear it earn its place, it goes to `decided.md` as kept, so that no
+  review proposes the cut again.
+- An **architecture proposal** or an **idiom gap** is not a package's fix: review each as the implementation loop
+  reviews a plan (overengineering and musicality named; for a gap, one mechanism over a case each) and give the user
+  the verdict. An accepted one goes to `ROADMAP.md` as a
+  plan (`status.py set "roadmap: <its entry>"`), a rejected one to `decided.md` with its reason (`set "decided: ..."`).
 - As findings are rejected or kept on purpose while fixing, add each to `decided.md` with its reason, one line each.
 
 ## The record
 
-Once the packages are done, the review's record goes in the repository, `reviews/<date>.md`, committed: every finding
-with what became of it (fixed in which commit, partly, decided, a question of taste asked or queued, or open, and why),
-the packages with their commits and the songs they changed, and a comparison with the last review's record, whose
-statuses are brought up to date from this review (found again, or not, its file changed by the fixes or never). The
-comparison names:
+Once the packages are done, run the suite at the holdout offset, songs neither the review nor its fixes have met:
 
-- **fix loops:** an issue fixed one way and then back. Blame every line this review's fixes removed (`git diff -U0`
-  over the fixes' range, `git blame` of the base): a removed line the last review's fixes wrote is a place to read,
-  and one that undoes that fix's intent is a loop. Do the same within the review's own commits.
-- **fixes that made the next finding**, the findings found again (read each pair `compare.py` gives), and those
-  decided again for want of a line in `decided.md`.
-- the review's own slips, such as a finding moved between packages and never worked.
+```
+$S/scripts/runs.sh <repo> $R --holdout               # its failures in $R/holdout/findings, triaged in the record
+```
 
+Each failure is checked against the committed code before the review's fixes (a `git worktree` of `review.json`'s
+commit): one the fixes made is fixed now, one older is a finding of the record.
+
+Then the review's record goes in the repository, `reviews/<date>.md`, committed, its tables written by
+`status.py $R record <file>`: the totals, the packages with their commits and the songs they changed, every finding
+open or partly done with why, and every finding by package with what became of it. To them add, by hand:
+
+- **The guards.** For each theme of the summary, a class of finding that came more than once, the test that now keeps
+  it closed (a rule over every preset at Base 0 against a crash at a plain end, a lint of calibrations under 64 songs),
+  or why none can; a theme with a guard has its checklist line in the primer or its angle narrowed or taken out.
+- **The holdout:** its failures and what became of each.
+- **A comparison with the last review's record**, whose statuses are brought up to date from this review (found again,
+  or not, its file changed by the fixes or never), naming:
+  - **fix loops:** an issue fixed one way and then back. Blame every line this review's fixes removed (`git diff -U0`
+    over the fixes' range, `git blame` of the base): a removed line the last review's fixes wrote is a place to read,
+    and one that undoes that fix's intent is a loop. Do the same within the review's own commits.
+  - **fixes that made the next finding**, the findings found again (read each pair `compare.py` gives), and those
+    decided again for want of a line in `decided.md`.
+  - **the delta's reach:** the new findings in files unchanged since the last review, as `compare.py` counts them.
+  - the review's own slips, such as a package committed with findings unworked.

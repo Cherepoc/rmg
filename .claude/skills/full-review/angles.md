@@ -79,12 +79,55 @@ You review one concern across the whole codebase rather than one slice.
    - tests that hold only for the corpus's own songs: a part, a device, an intro or a section kind assumed present, a seed's song named for what it happens to do (`RMG_CORPUS_OFFSET` moves the corpus);
    - calibrations over fewer than 64 songs, or comparing one genre's songs with another's rather than the same songs with a mechanism on and off.
 
-10. **musicality** is followed by genre, a reviewer per preset, and by device, a reviewer per family, below.
+10. **musicality** is followed by genre, a reviewer per cluster of presets, and by device, a reviewer per family, below.
 
 11. **bars.** Every place that turns a position into a bar, a beat, a group, a phrase or a pattern, or takes the bar before a line: `BarDuration`, `PhraseDuration`, `PatternDuration`, `PhraseBars`, `NearestGroupStart`, `BeatInBar`, `PatternBarAt`, `MeterAt`, `Math.Floor(position / ...)`.
     - Is the position counted from its section's start (or its pattern's), not the song's, in the section's own meter? A section starts wherever the sections before it end, a whole number of its bars from nowhere in particular.
     - Does it hold for a phrase of three or of six bars, a pattern of several phrases, a meter of odd groups, and a short last bar (`SectionSpan.Cut`), whose bar before the next section is shorter than the section's bar?
     - Does a loop over a section's bars reach its last, partial one, and keep its edits inside it?
+
+12. **architecture**, on a full review only, as described in *The architecture reviewer* below.
+
+## The architecture reviewer
+
+One reviewer, the id `architecture`, on a full review only, as a design changes more slowly than the deltas between
+reviews. Every other reviewer asks whether the code does what its design says; this one asks whether a design the code
+has chosen is the right one: a whole other way of doing a thing that would be better for its correctness, its speed or
+its organisation, such as one way of counting a section's bars that every stage asks rather than arithmetic in each,
+or another way of keeping the layered state that allocates less.
+
+It works from evidence, not from reading code for what looks cleaner:
+
+- **The history.** The records in `reviews/` (their themes, fix loops, fixes that made the next finding, findings found
+  twice), `decided.md`, and `ROADMAP.md`'s *Decided, and kept*, *Decided in the review of …* and *Parked* sections. A
+  class of finding that comes back review after review, or a fix that needed the same edit in many places, is what a
+  design costs.
+- **The measurements.** The allocation and profile reports (`AllocationReportTest`, the roadmap's performance entries,
+  `decided.md`'s profile), and `run/` of this review. A claim about speed or memory quotes a measurement; where none
+  measures the path, it says so and proposes the measurement, not the gain. A song takes about a tenth of a second, so
+  speed ranks below correctness and organisation unless the numbers say otherwise.
+- **The code** the design spans, read fully enough to describe it as it is and to plan the change.
+
+It writes **at most three proposals**, the strongest first, each a finding of `category: "architecture"`, `severity`
+by what the current design costs, `file` and `line` the design's centre, and these fields beside the usual ones:
+
+- `"cost"`: what the current design has cost, by number: the findings and fixes it caused (the records' numbers and
+  commits), the places that repeat it, the measured time or memory.
+- `"alternative"`: the other design, concretely: its types and who calls them.
+- `"deletes"` and `"adds"`: what the change would take out and put in, roughly by lines and files; a proposal that adds
+  more than it deletes says why it is worth it.
+- `"migration"`: the steps, each one that keeps the suite passing, and which of them move the fingerprint (CLAUDE.md:
+  a refactor keeps it where the right code keeps it; a step that redraws songs is a deliberate one).
+- `"decided"`: the roadmap's or `decided.md`'s entry on the same design, if any, and what has changed since that
+  decision undoes its reason; a proposal that is a decided item with nothing changed is not made.
+
+Against CLAUDE.md's principles: a simple, general mechanism over a realistic one, one mechanism over a case each. A
+proposal makes the code simpler or more general, or measurably faster; one that makes it more layered for its own sake
+is not made. Name overengineering and musicality in each: what the proposal risks of either. There is no quota: a
+review whose designs are right proposes nothing, and says so in `slice_notes`.
+
+Its proposals are not verified: each is critically reviewed by the main agent as the implementation loop reviews a
+plan, and an accepted one goes to `ROADMAP.md` as a plan, a rejected one to `decided.md` with its reason.
 
 ## The device families
 
@@ -102,19 +145,34 @@ choice and every stage of the family. The id is `device-<family>`. For every dev
   bugs a second corpus found were two devices meeting: a push moving a polymeter's cycle, a doubling silencing its
   part where a texture rested the doubled one, a drop landing on a section that builds.
 - **As it sounds.** What the device does to the music, whether a player would do it so, and where its amounts would
-  sound wrong. A finding of taste is `kind: "taste"` with a proposed listening question (see the primer's output).
-- **Coverage.** List every device of the family in `coverage`, `file` the device's main file and `note` its name and
-  what was checked; the coverage check fails a device not named there.
+  sound wrong. Where a rule the code or the music states settles it (notes against the chord, a device playing where
+  its doc says it does not), it is a mistake. Otherwise it is `kind: "taste"` with a proposed listening question (see
+  the primer's output): at most three for the family, ranked (`listen.rank`), the coverage check refusing more.
+- **Worth keeping.** Whether the device earns its place, from the review folder's `ledger.md` (written by
+  `scripts/ledger.py`): the presets that name it, how often the songs and each preset play it, the code that reads it,
+  the findings past reviews raised there, and the listening questions asking it; and from what listening has decided
+  of it before (`git log --grep 'Listening answered'`, `decided.md`, `ROADMAP.md`'s cuts). A preset that does not name
+  a choice plays it at the songs' own amounts, so a device no preset names is not unused: its plays say so. A
+  candidate to cut is one that plays rarely or nowhere its style wants it, that costs code and findings out of
+  proportion, or that listening has found hard to hear; one the report does not measure is `unsure`, and the measure
+  it needs is a `tests` finding on `GenreDevicesReportTest`. Simplicity counts for cutting: a device taken out is the
+  cheapest simplification there is. A cut is never a reviewer's to decide: each candidate is a finding of
+  `category: "cut"`, `kind: "taste"`, with a `listen` that plays the song with and without it (`without` the stage
+  skipped or the choice at 0), at most three for the family, ranked (`listen.rank`), apart from its other taste
+  findings' three. The ear decides.
+- **Coverage.** List every device of the family in `coverage`, `file` the device's main file and `note` its name,
+  what was checked and its verdict: `keep`, `cut candidate` or `unsure`. The coverage check fails a device not named
+  there.
 
 ## The genre-fit reviewers
 
-A reviewer per genre preset, the id `genre-<preset id>`, every preset of `Client/genres.json` (listed in `genres.txt`,
-written by `scripts/devices.py`). Read `run/every-chance.txt` (every chances option's three ends by preset, `*` marking
-the songs' own amounts a preset inherits), `run/genre-devices.txt` (how often each preset plays each device, measured),
-`run/every-preset.txt` (what each preset's songs draw at the plain end, the middle and the wild end), and the preset in
-`Client/genres.json` with its description, every choice it names read against `GenreChoices` and the code of the
-devices it switches on or leaves. Read the presets nearest it in style too, for contrast: what sets this genre apart is
-part of what it must play. Then, for the genre:
+A reviewer per cluster of genre presets, the id `genre-<cluster>`, every preset of `Client/genres.json` in one cluster
+(`genres/<cluster>.txt` in the review folder, written by `scripts/devices.py`): styles near enough that what sets each
+apart from the others is part of what it must play. Read `run/every-chance.txt` (every chances option's three ends by
+preset, `*` marking the songs' own amounts a preset inherits), `run/genre-devices.txt` (how often each preset plays
+each device, measured), `run/every-preset.txt` (what each preset's songs draw at the plain end, the middle and the wild
+end), and each preset in `Client/genres.json` with its description, every choice it names read against `GenreChoices`
+and the code of the devices it switches on or leaves. Then, for each genre of the cluster:
 
 - **Inherited where it does not belong.** A device the genre plays by the songs' own amounts (`*`) that its style would
   not play: a short bar in a genre built on square sections, a solo in a genre without soloists. The fix is the option
@@ -123,16 +181,33 @@ part of what it must play. Then, for the genre:
   or at 0: ghost notes for a genre whose drummers play them, a riff intro for one that opens on its riff. Only devices
   the engine has; a device it does not have is an idiom gap for the roadmap, said as such.
 - **Mis-set.** Amounts against the genre: a plain end playing what a plain song of the genre never does, a wild end
-  losing the genre, an amount the measured share shows far from the style, a pool whose weights contradict the
-  description, an instrument, a kit, a tempo, a meter or a form the style would not take.
+  losing the genre, a pool whose weights contradict the description, an instrument, a kit, a tempo, a meter or a form
+  the style would not take.
 - **Against the description.** What the preset's description says against what its choices do.
 - **Its conventionality.** The plain end the genre's most typical song, the middle a good one of it, the wild end still
   the genre: a device that should be the genre's plainest habit left to its wild end, or a wild device leaking into
   its plain end.
-- Each finding is `category: "genre-fit"`, `file` `Rmg.WebApi/Client/genres.json` and `line` the preset's line, with the
-  change to the JSON as the suggestion. A change of amounts is a matter of taste unless the description or the style's
-  plain convention settles it: `kind: "taste"` with a listening question, or `"mistake"`.
-- The strongest eight findings at most, so that the list stays one a person acts on. Name no artists or bands;
-  describe the sound.
-- In `coverage`, every choice the preset names and every device the inherited table shows it playing, each with what
-  was checked.
+- **Gaps, on a full review only.** An idiom the cluster's players use that the engine has no device for: a bass
+  figure, a comping pattern, a form, a drum habit. At most two for the cluster, each a finding of
+  `category: "idiom-gap"`, ranked by how many presets would play it, in this cluster and any other (name them all): a
+  device that serves several genres comes before one for a single genre, as CLAUDE.md wants one mechanism over a case
+  each. Say which mechanism it would extend (another figure of `Figures`, another option of a choice) rather than a
+  stage of its own where one would do, and what its plain and wild ends would be. Check `ROADMAP.md` first: an idiom
+  it plans, parks or has let go of is not proposed again unless something has changed since, and then say what. A gap
+  is not verified and goes to no package: it is reviewed as a plan, an accepted one going to the roadmap.
+
+What is a mistake and what is taste:
+
+- A **mistake** (`kind: "mistake"`) quotes a measured number from the three reports, with the report, the preset and
+  the end it was read at, against what the preset's own description or the style's plain convention settles: the
+  description names a room kit and the wild end plays the standard kit in 82% of songs. A mistake has no listening
+  question; the verifiers check its number. A mistake without a number is not one.
+- Everything else is **taste** (`kind: "taste"`): no verifier checks it, and listening has kept most of what reviewers
+  heard in their heads. Propose **at most three** for the whole cluster, ranked (`listen.rank` 1 to 3), the one whose
+  answer would change most songs first; the coverage check refuses more. A taste finding left out is not lost: say it
+  in a line of `slice_notes`.
+- Each finding but a gap is `category: "genre-fit"`, `file` `Rmg.WebApi/Client/genres.json` and `line` the preset's
+  line (a gap's too), the preset's id at the start of its summary, with the change to the JSON as the suggestion. There is no quota: a cluster
+  whose presets are right reports nothing. Name no artists or bands; describe the sound.
+- In `coverage`, every preset of the cluster, each an entry `{ "file": "Rmg.WebApi/Client/genres.json", "preset":
+  "<preset id>", "lines": <its line>, "read": "full", "note": "<the choices and inherited devices checked>" }`.
