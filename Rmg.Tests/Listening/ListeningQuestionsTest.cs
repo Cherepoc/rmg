@@ -44,16 +44,51 @@ public sealed class ListeningQuestionsTest
     /// <summary>Bars before a place, to hear what leads into it, never before the song's start.</summary>
     private static double? Before(CorpusSong song, double? at, int bars) => at is { } place ? Math.Max(0, place - bars * song.Song.MeterAt(place).BarDuration) : null;
 
-    private static readonly Question[] Questions = [];
+    private static readonly Question[] Questions =
+    [
+        new("idm-key", "IDM changing key as the songs do, now and then its last section lifted a step: a turn its electronic neighbours never take, or a lift?",
+            "IDM's key changes.", "idm", [], new() { ["keyChanges"] = new() { ["lastSection"] = 0, ["sections"] = 0, ["patterns"] = 0 } },
+            x => Before(x, LastKeyChange(x), 1)),
+        new("fusion-lift", "Fusion's last section lifted a key up, a pop ballad's gesture: a climax, or not what a fusion head does when it returns?",
+            "Fusion's last section's lift.", "fusion", [], new() { ["keyChanges"] = new() { ["lastSection"] = 0 } },
+            x => Before(x, LastKeyChange(x), 1)),
+        new("techno-comp", "Techno's rhythm part, a clavinet, an electric piano or a muted guitar comping: a texture of its own, or a funk band in the club?",
+            "Whether Techno plays a rhythm part.", "techno", [], new() { ["parts"] = new() { ["rhythm"] = 0 } },
+            x => x.Absent.Contains(TrackRole.Rhythm) ? null : FirstSection(x, TracePoints.Arrangement, v => ((ImmutableHashSet<TrackRole>)v!).Contains(TrackRole.Rhythm))),
+        new("techno-bass", "Techno's bass rolling, three 16ths after every kick, or on the 8th between the kicks: the club's bass line, or busy?",
+            "The rolling and offbeat bass in Techno.", "techno", [], new() { ["figure.bass"] = new() { ["rolling"] = 0, ["offbeat"] = 0 } },
+            x => FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).ContainsKey(FigurePlayer.Bass))),
+        new("djent-colour", "Djent's broken chords coloured, a major seventh, a flat second, a sharp fourth or a ninth laid on them: the genre's tension, or out of tune?",
+            "The colours' weight in Djent.", "djent", [], new() { ["colour"] = new() { ["majorSeventh"] = 0, ["flatSecond"] = 0, ["sharpFourth"] = 0, ["ninth"] = 0 } },
+            x => FirstColoured(x, colour => colour != ChordColour.None)),
+        new("metal-violin", "Metal's melody on a violin, as a folk or symphonic metal band's: a colour, or out of place in a metal band?",
+            "The violin's weight in Metal's melody.", "metal", [], new() { ["instrument.melody"] = new() { ["violin"] = 0 } },
+            x => x.Song.TrackDefinitions[x.Track(TrackRole.Melody)] is PitchInstrumentTrack { InstrumentCode: var code } && code == GeneralMidi.Programs.IndexOf("Violin")
+                ? x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Select(n => (double?)n.Position).FirstOrDefault() : null),
+        new("bossa-root-fifth", "Bossa nova's bass alternating root and fifth on its strong beats, as a surdo does, rather than walking into its chords: the style, or plain?",
+            "The root and fifth's chance in Bossa nova.", "bossa", [], new() { ["alternatingBass"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.AlternatingBass, v => (bool)v!)),
+        new("chiptune-octave", "Chiptune's bass bouncing in octaves, the sound chip's commonest bass: the console's sound, or a gimmick?",
+            "The octave bass's chance in Chiptune.", "chiptune", [], new() { ["octaveBass"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.OctaveBass, v => (bool)v!)),
+        new("punk-riff-intro", "A Punk song opening on its guitar riff alone, the band crashing in after it: a punk opening, or a slow start?",
+            "The riff intro's chance in Punk.", "punk", [], new() { ["riffIntro"] = new() { ["songs"] = 0 } },
+            x => x.Map.Intro is { Kind: IntroKind.Entries, Entries: [{ Part.Role: TrackRole.Riff, Entry: 0 }, ..] } ? 0 : null),
+        new("orchestral-switch", "Orchestral's theme handed to another instrument when its section returns: orchestration, or a part that changes its mind?",
+            "Instrument switches' chance in Orchestral.", "orchestral", [], new() { ["instrumentSwitches"] = new() { ["sections"] = 0 } },
+            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.InstrumentOverTime && x.Song.TrackDefinitions[t.Track] is PitchInstrumentTrack part
+                    && (((int, TrackRole, int, ArticulationMode, int))t.Value!).Item3 != part.InstrumentCode)
+                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 1))
+    ];
 
-    /// <summary>Where the song's chords first break in the colour given, a bar before it.</summary>
-    private static double? FirstColoured(CorpusSong song, ChordColour colour) =>
-        Before(song, song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Chords))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Colour) == (int)colour)
+    /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>
+    private static double? FirstColoured(CorpusSong song, Func<ChordColour, bool> colours) =>
+        Before(song, song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Chords))?.Where(x => colours((ChordColour)x.Value.State.GetStateValue(CompositionStateKinds.Colour)))
             .Select(x => (double?)x.Position).FirstOrDefault(), 1);
 
-    /// <summary>Where the song first changes key.</summary>
-    private static double? FirstKeyChange(CorpusSong song) =>
-        ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Select(x => (double?)x.Position).Min();
+    /// <summary>Where the song last changes key.</summary>
+    private static double? LastKeyChange(CorpusSong song) =>
+        ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Select(x => (double?)x.Position).Max();
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

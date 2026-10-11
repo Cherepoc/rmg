@@ -1,1 +1,636 @@
-[]
+[
+  {
+    "id": "idm-key",
+    "question": "IDM changing key as the songs do, now and then its last section lifted a step: a turn its electronic neighbours never take, or a lift?",
+    "decides": "IDM's key changes.",
+    "genre": "idm",
+    "without": {
+      "skip": [],
+      "genre": {
+        "keyChanges": {
+          "lastSection": 0,
+          "sections": 0,
+          "patterns": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 75.7,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Chords (Pad 3 (polysynth))",
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 165.4,
+        "listen": [
+          "Chords (Pad 1 (new age))",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 164.5,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Melody (Glockenspiel)",
+          "Chords (Pad 1 (new age))"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 191.9,
+        "listen": [
+          "Melody (Glockenspiel)",
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 227.8,
+        "listen": [
+          "Counter-melody (Lead 2 (sawtooth))",
+          "Chords (Pad 1 (new age))"
+        ]
+      },
+      {
+        "seed": "g",
+        "at": 156.4,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Melody (Lead 4 (chiff))",
+          "Counter-melody (Lead 2 (sawtooth))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fusion-lift",
+    "question": "Fusion's last section lifted a key up, a pop ballad's gesture: a climax, or not what a fusion head does when it returns?",
+    "decides": "Fusion's last section's lift.",
+    "genre": "fusion",
+    "without": {
+      "skip": [],
+      "genre": {
+        "keyChanges": {
+          "lastSection": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "E",
+        "at": 86.6,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Bass (Electric Bass (finger))",
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 375.8,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Riff (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 300.1,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Bass (Fretless Bass)"
+        ]
+      },
+      {
+        "seed": "K",
+        "at": 74.9,
+        "listen": [
+          "Rhythm part (Electric Piano 1)",
+          "Chords (Electric Piano 1)",
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 138.7,
+        "listen": [
+          "Rhythm part (Clavinet)",
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Fretless Bass)"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 261.5,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Fretless Bass)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "techno-comp",
+    "question": "Techno's rhythm part, a clavinet, an electric piano or a muted guitar comping: a texture of its own, or a funk band in the club?",
+    "decides": "Whether Techno plays a rhythm part.",
+    "genre": "techno",
+    "without": {
+      "skip": [],
+      "genre": {
+        "parts": {
+          "rhythm": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "T",
+        "at": 274,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Hi-Hat",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 167.8,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Drums",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 694.2,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "k",
+        "at": 51.3,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Hi-Hat",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "1V",
+        "at": 302.5,
+        "listen": [
+          "Kick",
+          "Pad (Pad 2 (warm))",
+          "Riff (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "1o",
+        "at": 353.8,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "techno-bass",
+    "question": "Techno's bass rolling, three 16ths after every kick, or on the 8th between the kicks: the club's bass line, or busy?",
+    "decides": "The rolling and offbeat bass in Techno.",
+    "genre": "techno",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "rolling": 0,
+          "offbeat": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 0,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 56.4,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 60.1,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 486.2,
+        "listen": [
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 316,
+        "listen": [
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 70.1,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "djent-colour",
+    "question": "Djent's broken chords coloured, a major seventh, a flat second, a sharp fourth or a ninth laid on them: the genre's tension, or out of tune?",
+    "decides": "The colours' weight in Djent.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "colour": {
+          "majorSeventh": 0,
+          "flatSecond": 0,
+          "sharpFourth": 0,
+          "ninth": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "F",
+        "at": 67.8,
+        "listen": [
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 116.8,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 100,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 67.2,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "e",
+        "at": 97.2,
+        "listen": [
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "k",
+        "at": 102.7,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "metal-violin",
+    "question": "Metal's melody on a violin, as a folk or symphonic metal band's: a colour, or out of place in a metal band?",
+    "decides": "The violin's weight in Metal's melody.",
+    "genre": "metal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "instrument.melody": {
+          "violin": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 59.3,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Melody (Violin)",
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 18,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 114.5,
+        "listen": [
+          "Melody (Violin)",
+          "Counter-melody (Violin)"
+        ]
+      },
+      {
+        "seed": "l",
+        "at": 38,
+        "listen": [
+          "Chords (Distortion Guitar)",
+          "Melody (Violin)"
+        ]
+      },
+      {
+        "seed": "1N",
+        "at": 160.7,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1a",
+        "at": 12.4,
+        "listen": [
+          "Chords (Overdriven Guitar)",
+          "Solo (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "bossa-root-fifth",
+    "question": "Bossa nova's bass alternating root and fifth on its strong beats, as a surdo does, rather than walking into its chords: the style, or plain?",
+    "decides": "The root and fifth's chance in Bossa nova.",
+    "genre": "bossa",
+    "without": {
+      "skip": [],
+      "genre": {
+        "alternatingBass": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 5.1,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 0,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 36.4,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 28.5,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 17,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 59.5,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "chiptune-octave",
+    "question": "Chiptune's bass bouncing in octaves, the sound chip's commonest bass: the console's sound, or a gimmick?",
+    "decides": "The octave bass's chance in Chiptune.",
+    "genre": "chiptune",
+    "without": {
+      "skip": [],
+      "genre": {
+        "octaveBass": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 3.8,
+        "listen": [
+          "Bass (Lead 8 (bass and lead))"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 0,
+        "listen": [
+          "Bass (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 59.7,
+        "listen": [
+          "Bass (Lead 8 (bass and lead))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 3.9,
+        "listen": [
+          "Bass (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 169.2,
+        "listen": [
+          "Bass (Lead 8 (bass and lead))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 0,
+        "listen": [
+          "Bass (Lead 1 (square))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "punk-riff-intro",
+    "question": "A Punk song opening on its guitar riff alone, the band crashing in after it: a punk opening, or a slow start?",
+    "decides": "The riff intro's chance in Punk.",
+    "genre": "punk",
+    "without": {
+      "skip": [],
+      "genre": {
+        "riffIntro": {
+          "songs": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "m",
+        "at": 0,
+        "listen": [
+          "Chords (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "17",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "1k",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Chords (Distortion Guitar)",
+          "Melody (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1n",
+        "at": 0,
+        "listen": [
+          "Chords (Distortion Guitar)",
+          "Riff (Distortion Guitar)",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "1u",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Melody (Overdriven Guitar)",
+          "Chords (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "orchestral-switch",
+    "question": "Orchestral's theme handed to another instrument when its section returns: orchestration, or a part that changes its mind?",
+    "decides": "Instrument switches' chance in Orchestral.",
+    "genre": "orchestral",
+    "without": {
+      "skip": [],
+      "genre": {
+        "instrumentSwitches": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 88.1,
+        "listen": [
+          "Pad (Voice Oohs)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 61,
+        "listen": [
+          "Melody (Trumpet)",
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 120.7,
+        "listen": [
+          "Pad (Tremolo Strings)"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 9.8,
+        "listen": [
+          "Chords (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 204.8,
+        "listen": [
+          "Melody (Oboe)",
+          "Chords (String Ensemble 2)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 19.2,
+        "listen": [
+          "Chords (Orchestral Harp)"
+        ]
+      }
+    ]
+  }
+]

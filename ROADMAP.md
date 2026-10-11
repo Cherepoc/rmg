@@ -262,8 +262,15 @@ out: `classical`, its cello on a chord's third, kept (4 to 2); `djent-frame`, th
 not told apart (5 unsure of 5) and let go of, the frames as they are; and `dnb-ghosts` (3 better, 1 worse, 2 unsure),
 heard good where a song ghosts little, about 1.2 to 1.6 a ghosting bar, and not told apart where it ghosts 3 to 5: a
 genre's ghosts now as many as it says (`ghostNotes`, `Ghosts.GenreOdds`), Drum and bass's 20, 1.09 ghosts a bar of
-its songs to 0.66, heard better again (`dnb-few-ghosts`, 5 of 6) and kept. Every question built so far answered;
-the next round from the review of 10 October's proposed questions.
+its songs to 0.66, heard better again (`dnb-few-ghosts`, 5 of 6) and kept. Every question built so far answered.
+
+Asked from 11 October 2026, ten of the review of 10 October's proposed questions (its findings queued for listening):
+as the presets are, `idm-key` (IDM's key changes, the songs' own, #472), `fusion-lift` (Fusion's last section lifted,
+#455), `techno-comp` (Techno's comping rhythm part, #397), `djent-colour` (Djent's colours on 84% of its broken chords,
+#432) and `metal-violin` (Metal's violin melody, #422); and added to try, each a device the engine has, `techno-bass`
+(Techno's rolling and offbeat bass, as Trance's, #398), `bossa-root-fifth` (Bossa nova's root and fifth, 40-50-50%,
+#463, the least heard of the round), `chiptune-octave` (Chiptune's octave bass, 30-40-40%, #476), `punk-riff-intro`
+(Punk opening on its riff, 20-30-30%, #453) and `orchestral-switch` (Orchestral's theme handed on, 10-20-40%, #464).
 
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's
