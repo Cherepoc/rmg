@@ -133,6 +133,7 @@ public static class GenreChoices
             Sticking.Paradiddle => "Paradiddles",
             Sticking.SixStroke => "Six-stroke rolls",
             Sticking.HandFoot => "Hands and foot in triplets",
+            Sticking.Cascade => "Tom cascades",
             _ => throw new ArgumentOutOfRangeException(nameof(x.Sticking), x.Sticking, "No label for the sticking.")
         }, x.Weight)));
 

@@ -574,18 +574,10 @@ dynamics, as it has no drums.
   of 6 Pop songs, a device of development rather than one to be heard at once): a run of echoes plays its figure
   inverted now and then (`LinePattern.Inversions`, 15% in the middle, 40% at the wild end); a figure displaced by an 8th or its rhythm
   stretched, should the inverted ones be heard as development rather than wrong notes.
-- **Two toms at once** (P3, reviewed 10 October 2026, put off: a rare accent, and the pair it would play the muddy one):
-  a drum note's sound a list of articulations (`StateKinds.ArticulationIndex` now one, `TimelineEdits.Hit` taking
-  one, `Realizer.RealizePercussionTrack` playing one), as an ornament and the articulation offset are lists, rather
-  than a second sound, which would cap it at a player's two hands; and a fill's window playing every sound of a drum
-  it holds, the gate in `FillSounds.GetNoteSounds` lifted, so that two toms strike together where a window is wide,
-  by its width's lean (`FillLayers.Widths`, one at the plain end, wider at the wild), with no chance, genre option or
-  rule for accents of its own; landings as they are, a sound a role. The render plays a note's pitches already, each
-  softer by the chord's rule. A window takes neighbouring sounds of the walk's order, the toms a whole step apart,
-  whose General MIDI samples beat into a cluster, where a drummer doubles a rack and a floor tom; and snare, kick or
-  cymbal with a tom strike together already, being drums apart. Taken up with the drum solos' tom cascades, which
-  want the far pair chosen, a rule that would earn its place there. Measured by the fill notes with two tom sounds,
-  by fifths of the fills facet; the stages reading one pitch a drum note checked.
+- **Two toms at once** (P3, put off 10 October 2026, again with the cascade): a drum note's sound a list of
+  articulations (`StateKinds.ArticulationIndex` now one, `TimelineEdits.Hit` replacing a hit at its place, the toms one
+  track), so that a fill's wide window or a cascade's accent strikes a far pair of toms together, a rack and the floor;
+  the cascade built without it, should listening ask for the weight.
 - **Filling the melody's gaps before a chord change within a phrase,** should they sound empty now that the solo part
   answers.
 - **The lift beyond the cues:** the chords' rhythm doubling, a part of the next section coming in early, should the
@@ -630,10 +622,10 @@ dynamics, as it has no drums.
      hits a beat at 0.37, 0.44 and 0.55 by its thirds, and the intensity grows over the solo, 0.53, 0.61, 0.64.
   5. Done October 2026: a pitched solo trading with the drums turn by turn, the band laying out for the drums' turns
      (`Solos.Trade`), Jazz's 30% to 60% of its solos, 112 trades in 64 Jazz songs.
-  6. Next, the hi-hat's pedal under Jazz's stickings heard as a drummer in 8 of 12 songs and never worse: a genre's
-     idioms as data, metal's double-kick runs and tom cascades, a timbales' abanico, funk's ghosted groove solo, an
-     IDM's drill of ratchets, each a vocabulary of its own over the feet's patterns and the stickings, which are a
-     genre's already.
+  6. Done October 2026: a tom cascade, both hands down the toms from the highest and the kick in triplets, a sticking,
+     Metal's (`Sticking.Cascade`). Left, each a gesture of its own rather than a sticking, by listening: a timbales'
+     abanico, the quote of the groove ghosted in Funk, and an IDM's drill of ratchets, which waits on IDM's drums
+     soloing at all.
   Measured by the solos' notes a beat over their arc, the limbs' share, the stickings drawn; `?listen=` questions.
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
   offset by its role in the song's groove (`Pocket.OffsetOf`), not a section's, which may move a ride to the time.

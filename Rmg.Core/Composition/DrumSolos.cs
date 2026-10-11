@@ -30,7 +30,10 @@ public enum Sticking
     SixStroke,
 
     /// <summary>Two hands and the kick, a triplet round the kit.</summary>
-    HandFoot
+    HandFoot,
+
+    /// <summary>Both hands down the toms and the kick, a triplet from the highest tom, a metal drummer's cascade.</summary>
+    Cascade
 }
 
 /// <summary>
@@ -102,12 +105,14 @@ internal static class DrumSolos
         (Sticking.Doubles, new ByConvention(0.4, 0.5, 0.6)),
         (Sticking.Paradiddle, new ByConvention(0.2, 0.4, 0.6)),
         (Sticking.SixStroke, new ByConvention(0, 0.2, 0.5)),
-        (Sticking.HandFoot, new ByConvention(0, 0.3, 0.6))
+        (Sticking.HandFoot, new ByConvention(0, 0.3, 0.6)),
+        (Sticking.Cascade, new ByConvention(0, 0.1, 0.3))
     ];
 
-    /// <summary>A sticking's limbs, R and L the hands, K the foot.</summary>
+    /// <summary>A sticking's limbs, R and L the hands, R round the toms and L on the snare, T the left on the toms, K the foot.</summary>
     public static string LimbsOf(Sticking sticking) => sticking switch
     {
+        Sticking.Cascade => "RTK",
         Sticking.Doubles => "RRLL",
         Sticking.Paradiddle => "RLRRLRLL",
         Sticking.SixStroke => "RLLRRL",
@@ -332,8 +337,8 @@ internal static class DrumSolos
                             // a sticking, the right hand round the toms, the left on the snare, the foot on the kick, but where the
                             // feet keep time on it
                             var kickFree = kick is not null && !feetTracks.Contains(kick.Track);
-                            // the hands' own where the feet keep time and a genre's pool names the hand and foot alone
-                            ImmutableArray<Weighted<Sticking>> handsOnly = [..stickingWeights.Where(x => x.Value != Sticking.HandFoot)];
+                            // the hands' own where the feet keep time and a genre's pool names those with the foot alone
+                            ImmutableArray<Weighted<Sticking>> handsOnly = [..stickingWeights.Where(x => !LimbsOf(x.Value).Contains('K'))];
                             var sticking = sticks.Pick(kickFree ? stickingWeights : handsOnly.IsEmpty ? [new Weighted<Sticking>(1, Sticking.Singles)] : handsOnly);
                             var snare = scale[0];
                             RunSound[] toms = [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)];
@@ -345,7 +350,7 @@ internal static class DrumSolos
                             if (player.Motif?.Phrase != phrase)
                             {
                                 var (answers, displaces) = (motifDraws.TestProbability(MotifChance), motifDraws.TestProbability(DisplaceChance));
-                                if (answers && player.Motif is { } motif && (motif.Sticking != Sticking.HandFoot || kickFree))
+                                if (answers && player.Motif is { } motif && (!LimbsOf(motif.Sticking).Contains('K') || kickFree))
                                 {
                                     (rhythm, speedOf, sticking, displaced) = (motif.Gesture, motif.Speed, motif.Sticking, displaces);
                                     at = toms.Length > 0 ? (motif.At + 1) % toms.Length : 0;
@@ -354,6 +359,10 @@ internal static class DrumSolos
 
                                 player.Motif = (phrase, rhythm, speedOf, sticking, at);
                             }
+
+                            // a cascade from the highest tom down
+                            if (sticking == Sticking.Cascade)
+                                at = 0;
 
                             var limbs = LimbsOf(sticking);
                             var positions = SoloLines.Positions(start, end, rhythm, speedOf).Select(x => x + (displaced ? 0.25 : 0)).Where(x => x < end - 1e-9).ToArray();
@@ -366,7 +375,7 @@ internal static class DrumSolos
                                 RunSound sound;
                                 if (limb == 'K' && kick is not null)
                                     sound = kick;
-                                else if (limb == 'R' && toms.Length > 0)
+                                else if (limb is 'R' or 'T' && toms.Length > 0)
                                 {
                                     sound = toms[gesture == SoloGesture.Lick ? Math.Clamp(at + rights % 2, 0, toms.Length - 1) : at];
                                     if (gesture == SoloGesture.Run)

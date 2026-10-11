@@ -860,7 +860,7 @@
       "pocket": { "laidBack": 10 },
       "riffIntro": { "songs": [30, 40, 50] },
       "breakdown": { "sections": [20, 30, 40] },
-      "sticking": { "singles": 100, "doubles": 50, "handFoot": 70, "sixStroke": [10, 30, 40] },
+      "sticking": { "singles": 100, "doubles": 50, "handFoot": 70, "sixStroke": [10, 30, 40], "cascade": [40, 60, 80] },
       "drumSoloFeet": { "doubleKick": 100, "groove": 50 },
       "cadenceRaise": { "sections": [20, 30, 30] },
       "cadenceDegree": { "fifth": 40, "sixth": 65, "seventh": 65 },

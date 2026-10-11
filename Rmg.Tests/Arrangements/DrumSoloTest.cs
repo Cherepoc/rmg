@@ -216,6 +216,29 @@ public sealed class DrumSoloTest
         await Assert.That(roundTheKit).IsGreaterThan(solos / 2);
     }
 
+    /// <summary>A cascade, Metal's: both hands down the toms from the highest and the kick, its runs and licks never on the snare.</summary>
+    [Test]
+    public async Task ACascade_GoesDownTheToms_AndTheKick_NeverTheSnare()
+    {
+        var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty.Add(GenreChoices.Stickings.Name,
+            ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(GenreChoices.Name(nameof(Sticking.Cascade)), new(1, 1, 1))));
+        var (tom, snare) = (DrumGroups.GetTrackNumber(DrumDefinitions.Tom), DrumGroups.GetTrackNumber(DrumDefinitions.AcousticSnare));
+        var (gestures, down) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
+        foreach (var (_, plan, _, _) in KitSolos(song).Where(x => !x.Feet && song.Song.Notes!.GetValueOrDefault(tom)?.Count > 0))
+        foreach (var segment in plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick))
+        {
+            gestures++;
+            await Assert.That(song.Song.Notes!.GetValueOrDefault(snare)?.Count(x => x.IsWithin(segment.Start, segment.End)) ?? 0).IsEqualTo(0).Because($"seed {song.Seed} at {segment.Start}");
+            var toms = song.Song.Notes![tom].Where(x => x.IsWithin(segment.Start, segment.End)).Select(x => x.Value.Pitches[0]).ToArray();
+            down += toms.Length < 2 || toms[1] <= toms[0] ? 1 : 0;
+        }
+
+        Console.WriteLine($"{gestures} cascading runs and licks, {down} going down from their first tom");
+        await Assert.That(gestures).IsGreaterThan(5);
+        await Assert.That(down).IsEqualTo(gestures);
+    }
+
     /// <summary>
     ///     A pitched solo trading with the drums, Jazz's: in the drums' turns the drums solo and no pitched part plays, the
     ///     band laid out; in the others the soloists play.
