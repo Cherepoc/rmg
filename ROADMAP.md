@@ -544,14 +544,6 @@ dynamics, as it has no drums.
 - **Breakdowns beyond Djent, the rest** (P3, Punk's done 11 October 2026, 20% of its songs, asked as
   `?listen=punk-breakdown`): more of Nu metal's, and a breakdown in a verse or before the last chorus beside the bridge,
   should listening want more.
-- **Quiet drums in calm genres** (P2, heard 8 October 2026 on `drum-marks`): the drums marking the form strike
-  too loud for a calm piece, and any drum in Ambient or Dungeon should stay soft. The marks' strikes and swells well
-  under the parts they colour (`DrumMarks`), and a genre's drums' loudness as its data, a level of the drum kit's
-  against the band's, Ambient's and Dungeon's low, set through the render's velocity curve (`Render.FromMidiVelocity`)
-  rather than by scaling a velocity's sum; measured by the drums' velocities as rendered against the pitched parts'.
-  And the kit that marks the form (suggested the same day): never the standard, room or power kit, a band's, but the
-  orchestral kit, its timpani and its bass drum, or the percussion, perhaps the brush or the electronic kit too; the
-  kit a drum job's choice (`DrumMarks.Jobs`, `GenreChoices` "kit"), Ambient's and Dungeon's marks on the orchestra.
 - **Ghost notes beyond the backbeat** (P3): Funk, Soul, Fusion, Blues, Hip hop, Rock, Disco, Drum and bass, Reggae and
   Ska ghost on a backbeat's snare (`Ghosts`, asked as *dnb-ghosts*); a jazz drummer's comping on the snare and Latin's
   timbales are idioms of their own, a snare off the backbeat role and a kit without one, which ghosts do not reach.

@@ -44,6 +44,12 @@ internal static class DrumMarks
     /// </summary>
     public static ImmutableArray<(double Chance, double Loudness)> Places { get; } = [(0.8, 1), (0.35, 0.85), (0.05, 0.7)];
 
+    /// <summary>
+    ///     The kits a song's drums mark its form on, whose drums colour rather than keep time, the orchestra's timpani and
+    ///     the brushes, never a band's; the orchestra's first, played where a genre's pool names neither.
+    /// </summary>
+    public static ImmutableArray<int> Kits { get; } = [48, 40];
+
     /// <summary>The chance a section is rolled into on the beat before it.</summary>
     public const double RollChance = 0.15;
 

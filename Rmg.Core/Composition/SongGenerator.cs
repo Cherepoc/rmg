@@ -74,8 +74,14 @@ public static class SongGenerator
         var staged = SongStages.Run(song, new SongDraft(form.Edits.ApplyTo(form.Blocks.Unroll()), null, [], [], ImmutableDictionary<int, ImmutableDictionary<FigurePlayer, string>>.Empty, []), skipped, observe, cancellation);
         var (songTrackNoteTimelineMap, notes) = (staged.Timeline, staged.Notes!);
 
-        // the drum kit's sound, the standard kit's, or one of a genre's pool of them, from a stream of its own
-        var kit = genre.Pool<int>(GenreChoices.Kit, GenreChoices.KitNameOf) is { } kits
+        // the drum kit's sound, the standard kit's, or one of a genre's pool of them, from a stream of its own; drums marking the
+        // form on a kit that colours, of the genre's pool, or the orchestra's where it has none (DrumMarks.Kits)
+        var pool = genre.Pool<int>(GenreChoices.Kit, GenreChoices.KitNameOf);
+        if (song.DrumJob == DrumJob.Marks)
+            pool = pool is { } named && DrumMarks.Kits.Any(x => named(x) is not null)
+                ? program => DrumMarks.Kits.Contains(program) ? named(program) : null
+                : program => program == DrumMarks.Kits[0] ? new ByConvention(1, 1, 1) : null;
+        var kit = pool is { } kits
             ? Stream(SongStream.Kit).Pick(ByConvention.Weigh(GenreChoices.Kits.Select(x => (x.Program, x.Program == 0 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Sound], kits))
             : 0;
         // and its reverb's room, one of a genre's pool of them, the player's own where it names none, from a stream of its own

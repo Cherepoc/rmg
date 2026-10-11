@@ -47,6 +47,18 @@ public sealed class DrumMarksTest
         await Assert.That(marked).IsGreaterThan(0);
     }
 
+    /// <summary>A song marking its form plays a kit that colours, the orchestra's where its genre names none, and of its genre's pool where it does.</summary>
+    [Test]
+    public async Task MarkingDrums_PlayAKitThatColours_NeverABands()
+    {
+        var withBrushes = new Genre(Marking().Choices.Add(GenreChoices.Kit.Name, ImmutableDictionary<string, ByConvention>.Empty
+            .Add("room", new ByConvention(1, 1, 1)).Add("brush", new ByConvention(1, 1, 1))));
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Marking()))))
+            await Assert.That(song.Song.Draws!.Kit).IsEqualTo(DrumMarks.Kits[0]).Because($"seed {song.Seed}");
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: withBrushes))))
+            await Assert.That(song.Song.Draws!.Kit).IsEqualTo(40).Because($"seed {song.Seed}");
+    }
+
     [Test]
     public async Task ASwell_QuickensAndGrowsToItsPeak_ThenSlowsAndFades()
     {
