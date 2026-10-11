@@ -668,6 +668,7 @@
       "drumSetup": { "kit": [100, 65, 81], "kitAndPercussion": [0, 100, 100] },
       "drumPieces": { "kick": [100, 100, 77], "acousticSnare": [100, 100, 77], "hiHat": [65, 65, 88], "ride": [30, 30, 45], "tambourine": [100, 100, 72], "cabasa": [45, 45, 32], "maracas": [80, 80, 57], "tom": [30, 30, 100], "cymbal": [45, 45, 95], "woodBlock": [25, 25, 18], "triangle": [30, 30, 21] },
       "grooveHold": { "held": 60 },
+      "feelValues": { "sixteenths": 0 },
       "ending": { "ringOut": 100, "button": [60, 60, 50], "fade": [20, 20, 30] },
       "rhythm": {
         "rhythm": { "speed": 69, "fullness": 82 }
@@ -1637,7 +1638,6 @@
     "name": "Fusion",
     "description": "Electric piano and a soprano sax over a fretless bass singing high, Lydian, Dorian and melodic minor, ninths to thirteenths and quartal chords, chords in scales of their own and planed, odd meters, long solos.",
     "choices": {
-      "form": { "vvbv": 100, "vvbvvvbv": 50, "vcvcbc": 40 },
       "rudiments": { "flams": [0, 30, 70], "drags": [0, 30, 70] },
       "ownMode": { "lydian": 100, "dorian": 100, "melodicMinor": 80, "mixolydian": 50, "phrygian": [0, 10, 20] },
       "ghosts": { "sections": [30, 50, 60] },

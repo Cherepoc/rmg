@@ -274,15 +274,15 @@ on, 10-20-40%, #464, 4 to 2); `techno-bass` (#398) tied 3 to 3, its offbeat 8ths
 mostly not, so Techno's bass plays the offbeat figure alone; and `bossa-root-fifth` (#463), split 2, 2 and 2 unsure and
 the least heard, taken out, Bossa nova's bass walking as before.
 
-Asked from 11 October 2026, the review's next ten: as the presets are, `folk-swing` (Folk's swung 16ths, the songs'
-own below 107 bpm, #408), `ska-brass-solo` (Ska's solos on its brass section, #448) and `orchestral-sus` (Orchestral's
-sus and add9 chords as often as each other, #465); and added to try, `punk-double` (Punk's double time, 10-15-20% of
-its sections, #450), `fusion-head` (Fusion in AABA, a head's form, beside verses and choruses, #454), `metal-tremolo`
-(Metal's riff tremolo-picked, 5-10-20%, #420), `soul-fade` (Soul's ending fading more often than ringing out, #460),
-`house-planing` (House's planed stabs, 10-25-40% of sections from 0-10-30%, #392), `dungeon-tape` (Dungeon synth's
-worn tape, 30-50-70%, #430) and `disco-open-hat` (Disco's off-beat hat open at its most, 100 from 85, asked against
-the songs' 50, #439, the least measured as an open hat replaces a closed one at its loudness). House's gliding bass
-(#391) left out: its offbeat bass leaves no note to glide from, so a glide is barely heard.
+Answered on 11 October 2026, the review's next ten. As the presets are: kept, `orchestral-sus` (Orchestral's sus and
+add9 chords as often as each other, #465, 4 of 4 sure); `ska-brass-solo` (Ska's solos on its brass section, #448) split
+3 to 2 and kept as it is; and `folk-swing` (Folk's swung 16ths below 107 bpm, #408) heard worse in 4 of 6 and taken
+out, Folk's swing on 8ths alone. Added to try: kept, `punk-double` (Punk's double time, 10-15-20%, #450, 6 of 6),
+`metal-tremolo` (Metal's tremolo riff, 5-10-20%, #420, 6 of 6), `soul-fade` (Soul fading more often than ringing out,
+#460, 6 of 6), `house-planing` (House's planed stabs, 10-25-40%, #392, 4 to 2), `dungeon-tape` (Dungeon synth's worn
+tape, 30-50-70%, #430, 5 of 5 sure) and `disco-open-hat` (Disco's off-beat hat open at its most, #439, 5 of 5 sure);
+`fusion-head` (Fusion in AABA, #454) heard worse 3 to 2 and taken out, Fusion's forms the songs' own. House's gliding
+bass (#391) left out: its offbeat bass leaves no note to glide from. Every question built so far answered.
 
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's

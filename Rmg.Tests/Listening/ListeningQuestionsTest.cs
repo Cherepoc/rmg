@@ -46,36 +46,6 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("folk-swing", "Folk swinging its 16ths, as hip-hop and soul shuffle, where it swings at all: a lilt, or the wrong groove for folk?",
-            "Folk's swung 16ths.", "folk", [], new() { ["feelValues"] = new() { ["sixteenths"] = 0 } },
-            x => ((Swing)x.Trace.Single(t => t.Point == TracePoints.Swing).Value!).Period == 0.5 ? 0 : null),
-        new("ska-brass-solo", "Ska's solo on its brass section, the whole section improvising as one: a horn break, or an ensemble patch running scales?",
-            "The riff part's share of Ska's solos.", "ska", [], new() { ["soloists"] = new() { ["riff"] = 0 } },
-            x => x.Soloists.ContainsKey(TrackRole.Riff) ? 0 : null),
-        new("orchestral-sus", "Orchestral's chords suspended or with an added ninth as often as each other, fewer than half of them plain triads: a film score's colour, or not classical?",
-            "The sus and add9 chords' weight in Orchestral.", "orchestral", [], new() { ["chordShape"] = new() { ["sus4"] = 0, ["sus2"] = 0, ["add9"] = 0 } },
-            _ => 0),
-        new("punk-double", "Punk's drums in double time now and then, the snare on every beat: the faster punk beat, or a gallop out of control?",
-            "Double time's chance in Punk.", "punk", [], new() { ["feelChances"] = new() { ["doubleTime"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == -1), 1)),
-        new("fusion-head", "Fusion in a jazz head's form, AABA, the theme coming back after a bridge, rather than verses and choruses: a fusion tune, or a song without a chorus?",
-            "Fusion's forms.", "fusion", [], new() { ["form"] = new() { ["vvbv"] = 0, ["vvbvvvbv"] = 0 } },
-            _ => 0),
-        new("metal-tremolo", "Metal's riff tremolo-picked now and then, one note struck fast and even, as a thrash band's: speed, or black metal in the wrong band?",
-            "The tremolo riff's weight in Metal.", "metal", [], new() { ["figure.riff"] = new() { ["tremolo"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Riff) == "tremolo"), 1)),
-        new("soul-fade", "Soul fading out over its last chorus as it vamps, as the classic soul single ends, rather than ringing out on a chord: the record's end, or a song that never finishes?",
-            "The fade's weight in Soul's endings.", "soul", [], new() { ["ending"] = new() { ["fade"] = 0 } },
-            x => x.Map.Ending.Kind == EndingKind.Fade ? Before(x, x.Map.Ending.Start, 8) : null),
-        new("house-planing", "House's chord stab moved in parallel, one minor-seventh shape slid up and down: deep house, or chords that lose the key?",
-            "Planing's chance in House.", "electronic", [], new() { ["planing"] = new() { ["sections"] = 0 } },
-            x => FirstSection(x, TracePoints.Planing, v => v is not null)),
-        new("dungeon-tape", "Dungeon synth worn like an old cassette, its pitch wavering and drifting: the style's lo-fi charm, or out of tune?",
-            "The tape's chance in Dungeon synth.", "dungeon", [], new() { ["effects"] = new() { ["tape"] = 0 } },
-            _ => 0),
-        new("disco-open-hat", "Disco's hi-hat opening on the off-beats, at its most, against as often as the songs' own: the disco sound, or a wash?",
-            "How often Disco's off-beat hat is open.", "disco", [], new() { ["drumSounds"] = new() { ["openHiHat"] = 50 } },
-            _ => 0)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>
