@@ -25,12 +25,13 @@ public sealed class SectionMeterTest
                 await Assert.That(Math.Abs(patterns - Math.Round(patterns))).IsLessThan(1e-9);
             }
 
-            // a time signature where the song starts, where a section changes the bar, whatever its phrases, and where a
-            // short last bar starts, the section after it signing its own again
+            // a time signature where the song starts, where a section's bar is not the bar before it, whatever its phrases,
+            // and where a short last bar starts, the section after it signing its own again where it is not the short one
+            Meter BarBefore(int i) => song.Map.Sections[i - 1] is var before && before.Cut > 0 ? ShortBars.Of(before.Meter) : before.Meter;
             var changes = song.Map.Sections.SelectMany((x, i) =>
-                (i > 0 && (song.Map.Sections[i - 1].Cut > 0 || !x.Meter.HasSameBar(song.Map.Sections[i - 1].Meter)) ? new[] { x.Start } : [])
+                (i > 0 && !x.Meter.HasSameBar(BarBefore(i)) ? new[] { x.Start } : [])
                 .Concat(x.Cut > 0 ? [x.End - x.Meter.BarDuration + x.Cut] : []));
-            await Assert.That(song.Rendered.Meters.Select(x => x.Position).ToArray()).IsEquivalentTo(new[] { 0.0 }.Concat(changes).ToArray(), CollectionOrdering.Matching);
+            await Assert.That(song.Rendered.Meters.Select(x => x.Position).ToArray()).IsEquivalentTo(new[] { 0.0 }.Concat(changes).ToArray(), CollectionOrdering.Matching).Because($"seed {song.Seed}");
             changing += song.Rendered.Meters.Length > 1 ? 1 : 0;
         }
 

@@ -20,9 +20,12 @@ public sealed record Meter(ImmutableArray<int> Groups)
     /// <summary>Two dotted quarters, each of three 8ths.</summary>
     public static Meter SixEight { get; } = new([6, 6]);
 
+    /// <summary>Four dotted quarters, each of three 8ths, a slow blues' or a ballad's triplets.</summary>
+    public static Meter TwelveEight { get; } = new([6, 6, 6, 6]);
+
     /// <summary>
     ///     The meters a song is in, each in its usual grouping, and how often, by the feel facet of its unconventionality:
-    ///     the plainest in four; at the middle mostly four, 3/4 and 6/8 now and then and odd
+    ///     the plainest in four; at the middle mostly four, 3/4, 6/8 and 12/8 now and then and odd
     ///     meters, 5/4, 7/8, 15/16 and the like, rarely; the wildest in any odd meter as likely, 3/4 and 6/8 less often,
     ///     never in four.
     /// </summary>
@@ -38,7 +41,8 @@ public sealed record Meter(ImmutableArray<int> Groups)
         (new Meter([8, 8, 12]), new ByConvention(0, 0.002, 1)),
         (new Meter([4, 6, 6, 6]), new ByConvention(0, 0.002, 1)),
         (new Meter([4, 3, 3, 3]), new ByConvention(0, 0.002, 1)),
-        (new Meter([4, 4, 4, 3]), new ByConvention(0, 0.002, 1))
+        (new Meter([4, 4, 4, 3]), new ByConvention(0, 0.002, 1)),
+        (TwelveEight, new ByConvention(0, 0.02, 0.15))
     ];
 
     /// <summary>

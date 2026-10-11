@@ -495,8 +495,8 @@ listening question and a deploy to test. In order:
    of the guitar, its melody an octave or more over it as far as the guitar reaches, 9.5 to 10 semitones on the average,
    single notes, no chugs; Djent's chugs drawn down to 50% of its sections and its drone 14%, asked as
    `?listen=djent-open`. Black metal's tremolo figure repeats a note, so its drone would not alternate; left to listening.
-5. **12/8** (P2): a meter of four groups of three 8ths (`Meter`), its broken chords in triplets, which swing cannot
-   give, as it only lengthens a pair's first note. For the power ballad, and Blues and Soul by listening.
+5. Done (11 October 2026): **12/8**, a meter of four groups of three 8ths (`Meter.TwelveEight`), the songs' own never
+   at 0, 2% at 0.5 and 15% at 1; Blues' 6/8 moved mostly to 12/8 and Soul's halved into it, asked as `?listen=blues-12-8`.
 6. **Power ballad** (P2, data over steps 1, 2, 3 and 5): a clean guitar's broken chords let ring with sweet held
    tones, an overdriven lead for the melody, a fingered bass, string pads; 60–85 BPM in 4/4 and 12/8; natural minor and
    major, sus2, add9 and major seventh chords; the texture building section by section, the chorus heavy (step 3), a
