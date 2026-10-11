@@ -329,61 +329,62 @@
     ]
   },
   {
-    "id": "classical",
-    "question": "Classical's cello on the chord's third now and then, the chord inverted, rather than always its root: a classical bass line, or a wandering one?",
-    "decides": "The bass's landings in Classical.",
-    "genre": "classical",
+    "id": "montuno",
+    "question": "Latin's piano breaking its chords as a montuno, the root on the beats and the chord's other notes on the off-beats: a salsa pianist, or a stutter?",
+    "decides": "The montuno's weight in Latin.",
+    "genre": "latin",
     "without": {
       "skip": [],
       "genre": {
-        "bassLanding": {
-          "root": 100,
-          "third": 0,
-          "fifth": 30
+        "arpeggio": {
+          "montuno": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "0",
-        "at": 64.7,
+        "seed": "8",
+        "at": 6.8,
         "listen": [
-          "Bass (Cello)"
+          "Chords (Acoustic Guitar (nylon))"
         ]
       },
       {
-        "seed": "1",
-        "at": 41,
+        "seed": "A",
+        "at": 42.5,
         "listen": [
-          "Bass (Cello)"
+          "Chords (Acoustic Grand Piano)",
+          "Rhythm part (Acoustic Guitar (nylon))"
         ]
       },
       {
-        "seed": "5",
-        "at": 20.1,
+        "seed": "B",
+        "at": 19.1,
         "listen": [
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 48.1,
-        "listen": [
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 112.3,
-        "listen": [
-          "Bass (Cello)"
+          "Chords (Bright Acoustic Piano)"
         ]
       },
       {
         "seed": "J",
-        "at": 117.9,
+        "at": 49.3,
         "listen": [
-          "Bass (Cello)"
+          "Chords (Acoustic Guitar (nylon))"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 192.2,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (nylon))",
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 110.1,
+        "listen": [
+          "Chords (Acoustic Guitar (nylon))",
+          "Rhythm part (Acoustic Guitar (steel))"
         ]
       }
     ]
@@ -512,64 +513,6 @@
           "Rhythm part (Overdriven Guitar)",
           "Hi-Hat",
           "Chords (Electric Guitar (clean))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "dnb-ghosts",
-    "question": "Drum and bass's break with ghost notes, soft 16ths on the snare around its backbeat: a rolling break, or clutter at this speed?",
-    "decides": "Ghost notes' chance in Drum and bass, Reggae and Ska.",
-    "genre": "dnb",
-    "without": {
-      "skip": [],
-      "genre": {
-        "ghosts": {
-          "sections": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "9",
-        "at": 267.2,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 41.9,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 42.6,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 0,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "H",
-        "at": 24.5,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 304.2,
-        "listen": [
-          "Acoustic Snare"
         ]
       }
     ]

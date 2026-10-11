@@ -539,6 +539,7 @@
       "drumPieces": { "kick": [100, 100, 76], "acousticSnare": [80, 80, 83], "hiHat": [65, 65, 88], "ride": [30, 30, 45], "cabasa": [40, 40, 14], "maracas": [65, 65, 23], "tom": [30, 30, 100], "cymbal": [45, 45, 95], "bongo": [100, 100, 36], "conga": [100, 100, 36], "timbale": [80, 80, 29], "agogo": [45, 45, 16], "cowbell": [80, 80, 29], "claves": [100, 100, 36], "woodBlock": [30, 30, 11], "guiro": [65, 65, 23] },
       "rhythm": {
         "bass": { "syncopation": 100, "repetition": 82 },
+        "chords": { "syncopation": 100 },
         "colour": { "fullness": 69 }
       },
       "grooveHold": { "held": 65 },
@@ -547,7 +548,7 @@
         "time": { "straight": [40, 15, 60], "grouped3": [100, 100, 60] }
       },
       "feelChances": { "swing": [0, 0, 10], "halfTime": 8, "doubleTime": 4 },
-      "arpeggio": { "none": 100, "upDown": [20, 30, 40], "pairs": [10, 20, 30], "random": [0, 0, 15] },
+      "arpeggio": { "none": 100, "upDown": [20, 30, 40], "pairs": [10, 20, 30], "random": [0, 0, 15], "montuno": [30, 40, 40] },
       "chordScales": { "applied": [20, 40, 40], "borrowed": [0, 10, 10], "own": [0, 0, 30], "mediant": 0 },
       "harmonyDevices": { "innerLine": [0, 15, 30], "pedal": [0, 6, 15], "reharmonised": 0 },
       "loop": { "sections": [40, 50, 40] },

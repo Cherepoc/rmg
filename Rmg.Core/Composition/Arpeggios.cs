@@ -38,7 +38,10 @@ public enum ArpeggioPattern
     UpTwoOctaves,
 
     /// <summary>The lowest note in turn with each of the others upwards, 1–3–1–5–1–8, a metal guitar's broken chord.</summary>
-    Pedal
+    Pedal,
+
+    /// <summary>The root on the beats and the chord's other notes up and down on the off-beats, a salsa pianist's montuno.</summary>
+    Montuno
 }
 
 /// <summary>A tone laid on a broken chord's notes for the part breaking it alone, which the band's chord leaves out.</summary>
@@ -80,7 +83,8 @@ internal static class Arpeggios
         (ArpeggioPattern.RootFifth, new ByConvention(0, 0.015, 1)),
         (ArpeggioPattern.Random, new ByConvention(0, 0.005, 1)),
         (ArpeggioPattern.UpTwoOctaves, new ByConvention(0, 0.005, 1)),
-        (ArpeggioPattern.Pedal, new ByConvention(0, 0.01, 1))
+        (ArpeggioPattern.Pedal, new ByConvention(0, 0.01, 1)),
+        (ArpeggioPattern.Montuno, new ByConvention(0, 0.005, 1))
     ];
 
     /// <summary>The colours a part breaking its chord lays on it, a genre's, which the songs never lay.</summary>
@@ -216,6 +220,10 @@ internal static class Arpeggios
             ArpeggioPattern.Random => notes[(int)(Probabilities.Seeds.Derive((ulong)order, Probabilities.Seeds.Key((long)Math.Round(position * 1000), place)) % (ulong)count)],
             ArpeggioPattern.UpTwoOctaves => notes[place % count] + 12 * (place / count % 2),
             ArpeggioPattern.Pedal => notes[place % 2 == 0 ? low : others[place / 2 % others.Length]],
+            // on the beat the root, off it the others up and down by its place
+            ArpeggioPattern.Montuno => Math.Abs(position - Math.Round(position)) < 1e-6
+                ? notes[low]
+                : notes[others[(place % Math.Max(1, 2 * others.Length - 2)) is var step && step < others.Length ? step : 2 * others.Length - 2 - step]],
             _ => throw new ArgumentOutOfRangeException(nameof(pattern), pattern, null)
         };
     }

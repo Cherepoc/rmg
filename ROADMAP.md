@@ -727,8 +727,8 @@ left:
   - The pump on the kick wherever it falls, should a pumping genre's kick leave the beat; it ducks on the beat now.
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a
     role free.
-  - The piano's montuno, a broken chord off the beat, an arpeggio's pattern of its own (`Arpeggios`) rather than a
-    figure, the figures striking a player's chord or note; a second time keeper playing straight under the tresillo.
+  - The montuno's own rhythm, a two-bar figure anticipating the chord, should the part's syncopated rhythm under
+    `ArpeggioPattern.Montuno` (root on the beats, the others off them, Latin's, asked as *montuno*) sound loose.
   - More figures (P3, by listening): a figure for the hi-hat or the snare, a figure of more than
     two bars; the double kick following the riff's accents alone, should every 16th sound a machine.
   - A hook of one or two bars sung through a whole section, its phrase ends let go of; a hooked melody's bars repeat

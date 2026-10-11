@@ -61,18 +61,15 @@ public sealed class ListeningQuestionsTest
         new("call-response", "Blues' verse calling and answered: the melody singing each phrase's first half, the riff answering it in the second. A band talking to its singer, or a melody cut in half?",
             "Call and response's chance by genre.", "blues", [], new() { ["callAndResponse"] = new() { ["sections"] = 0 } },
             x => FirstSection(x, TracePoints.CallAndResponse, v => (bool)v!)),
-        new("classical", "Classical's cello on the chord's third now and then, the chord inverted, rather than always its root: a classical bass line, or a wandering one?",
-            "The bass's landings in Classical.", "classical", [], new() { ["bassLanding"] = new() { ["root"] = 100, ["third"] = 0, ["fifth"] = 30 } },
-            _ => 0),
+        new("montuno", "Latin's piano breaking its chords as a montuno, the root on the beats and the chord's other notes on the off-beats: a salsa pianist, or a stutter?",
+            "The montuno's weight in Latin.", "latin", [], new() { ["arpeggio"] = new() { ["montuno"] = 0 } },
+            x => FirstSection(x, TracePoints.Arpeggio, v => (ArpeggioPattern)v! == ArpeggioPattern.Montuno)),
         new("ballad", "A Power ballad's clean broken chords turning driven where the band grows louder, its chorus heavy: the lift a ballad needs, or a jolt?",
             "The heavy form's chance in the Power ballad.", "ballad", [], new() { ["louderForms"] = new() { ["guitars"] = 0 } },
             x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Heavy), 1)),
         new("blues-12-8", "A Blues in 12/8, every beat three 8ths, the chords broken and the drums in triplets: a slow blues, or a waltz that limps?",
             "12/8 against 6/8 in Blues and Soul.", "blues", [], new() { ["meter"] = new() { ["12/8"] = 0 } },
             x => x.Song.Meter.Groups.SequenceEqual(Meter.TwelveEight.Groups) ? x.Origin : null),
-        new("dnb-ghosts", "Drum and bass's break with ghost notes, soft 16ths on the snare around its backbeat: a rolling break, or clutter at this speed?",
-            "Ghost notes' chance in Drum and bass, Reggae and Ska.", "dnb", [], new() { ["ghosts"] = new() { ["sections"] = 0 } },
-            x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!)),
         new("appoggiatura", "Pop's melody now and then leaning on a note off its chord on a strong beat and falling a step onto the chord: expressive, or a wrong note put right?",
             "The appoggiaturas' chance, the songs' own.", "pop", [], new() { ["appoggiatura"] = new() { ["melody"] = 0, ["counterMelody"] = 0 } },
             _ => 0),
@@ -230,6 +227,8 @@ public sealed class ListeningQuestionsTest
     [Test]
     public async Task EveryQuestion_LeavesOutStagesThatMayBe_AndHasSongs()
     {
+        // a round of ten at most, as a listener answers no more at a sitting
+        await Assert.That(Questions.Length).IsLessThanOrEqualTo(10);
         foreach (var question in Questions)
         {
             await Assert.That(question.Skip.All(SongGenerator.SkippableStages.Contains)).IsTrue().Because(question.Id);
