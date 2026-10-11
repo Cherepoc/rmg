@@ -565,11 +565,6 @@ dynamics, as it has no drums.
   And the kit that marks the form (suggested the same day): never the standard, room or power kit, a band's, but the
   orchestral kit, its timpani and its bass drum, or the percussion, perhaps the brush or the electronic kit too; the
   kit a drum job's choice (`DrumMarks.Jobs`, `GenreChoices` "kit"), Ambient's and Dungeon's marks on the orchestra.
-- **A double kick with a backbeat** (P2, heard 8 October 2026 on `double-kick`): a double kick under no snare
-  is heard as a drum machine where it goes on long; a section's double kick without a backbeat for a phrase at most,
-  the snare joining for its second half, on the backbeat or the riff's accents, as a thrash drummer brings it in; and
-  the snare's own sound there, never the cross-stick, as in a breakdown (*A breakdown's snare*): a heavy figure's
-  backbeat the snare's head (`DrumSounds`, `Figures`). Measured by the bars a double kick plays without a snare struck.
 - **Ghost notes in more genres** (P2, suggested 8 October 2026, the ghosts heard as great): Funk, Soul, Fusion, Blues,
   Hip hop, Rock and Disco ghost now (`GenreChoices.Ghosts`); Drum and bass's breaks, Reggae's one drop, Ska, R&B, a
   jazz drummer's comping on the snare and Latin's timbales would too, each its chance by listening to the preset.
@@ -578,10 +573,6 @@ dynamics, as it has no drums.
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
   melody with an open string, the string the key's own (its tonic or fifth, not every chord's root), in a pattern of
   the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it. Planned with wide leaps (*Planned: held tones, let ring, a section's form, and two genres*, step 4).
-- **A breakdown's snare** (P2, suggested 8 October 2026 after listening): Djent's breakdown plays its backbeat on the
-  cross-stick, where a breakdown wants the snare itself, struck on the riff's accents with the kick or on the song's
-  backbeat in half time, its 3 or its 2 and 4; the snare's sound in a breakdown the full one (`DrumSounds`), and its
-  hits a figure of the section's, either on the accents or the backbeat.
 - **A dance track's ending stripped back** (P3, from the review of 9 October 2026): House, Techno and Trance end
   by fading, opening or stopping; a DJ's ending drops the parts out one by one to the drums alone, an ending of its own
   beside the fade, the reverse of an intro of entries.

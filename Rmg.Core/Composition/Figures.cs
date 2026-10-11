@@ -206,6 +206,50 @@ internal static class Figures
             draft = draft with { Timeline = draft.Timeline.MapTrackEvents(edits) };
         }
 
-        return draft;
+        return HeavyBackbeat(song, draft, drawn);
+    }
+
+    /// <summary>The ground's figures heavy enough that the snare under them strikes its head: the double kick, the blast and a breakdown's kick with its riff.</summary>
+    private static readonly ImmutableHashSet<string> Heavy = ["doubleKick", "blast", "withRiff"];
+
+    /// <summary>
+    ///     A heavy figure's backbeat: the snare under it struck on its head, never its cross-stick, as a thrash or a
+    ///     breakdown's drummer hits it; and from a section's second phrase on, a bar the snare would leave empty under it
+    ///     given its backbeat, the meter's pulses after its first, so that a double kick runs a phrase at most without one,
+    ///     as a drummer brings the snare in, where the section's kit plays none too.
+    /// </summary>
+    private static SongDraft HeavyBackbeat(SongDecisions song, SongDraft draft, Dictionary<int, Dictionary<FigurePlayer, Figure?>> drawn)
+    {
+        var map = song.Form.Map;
+        var spans = map.Sections.Where(x => drawn[x.SectionId].GetValueOrDefault(FigurePlayer.Ground) is { } ground && Heavy.Contains(ground.Name)).ToArray();
+        var snares = DrumGroups.Snare.Tracks.Where(draft.Timeline.TrackTimelineMap.ContainsKey).ToArray();
+        if (spans.Length == 0 || snares.Length == 0)
+            return draft;
+
+        return draft with
+        {
+            Timeline = draft.Timeline.MapTrackEvents(snares.ToDictionary(x => x, track => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
+            {
+                var head = DrumStrokes.At(StateDepths.Note, 0);
+                var played = notes.Select(x => spans.Any(s => x.IsWithin(s.Start, s.End)) ? x.Value.MergeWith(head).ToTimelineItem(x.Position) : x).ToList();
+                foreach (var span in spans)
+                {
+                    // the section's own snare note, its state, which a backbeat added plays, or the nearest the snare plays in the
+                    // song where its kit there has none
+                    var own = played.FirstOrDefault(x => x.IsWithin(span.Start, span.End)).Value ?? played.MinBy(x => Math.Abs(x.Position - span.Start)).Value;
+                    if (own is null)
+                        continue;
+                    for (var bar = span.Meter.PhraseBars; bar < span.BarCount; bar++)
+                    {
+                        var (start, end) = span.Bar(bar);
+                        if (played.Any(x => x.IsWithin(start, end)))
+                            continue;
+                        played.AddRange(span.Meter.Pulses.Skip(1).Select(x => start + x).Where(x => x < end - 1e-9).Select(x => own.MergeWith(head).ToTimelineItem(x)));
+                    }
+                }
+
+                return EventTimeline.Create(notes.Duration, played.OrderBy(x => x.Position));
+            })))
+        };
     }
 }
