@@ -55,6 +55,9 @@ public sealed class ListeningQuestionsTest
         new("djent-open", "Djent's riff on an open string, its melody leaping an octave or more above it and back, in place of a chug: the band's sound, or less heavy?",
             "Djent's drone's and chugs' chances.", "djent", [], new() { ["riff"] = new() { ["drone"] = 0, ["chugs"] = 90 } },
             x => Before(x, FirstSection(x, TracePoints.Drone, v => (bool)v!), 1)),
+        new("djent-frame", "Djent's polymetric riff drifting against the bar for 8 or 16 bars before it snaps back on a downbeat, in place of every 4: the bar line lost and the return an arrival, or just lost?",
+            "Djent's polymeter's frames.", "djent", [], new() { ["polymeterFrame"] = new() { ["fourBars"] = 100, ["eightBars"] = 0, ["sixteenBars"] = 0, ["thirtyTwoBars"] = 0 } },
+            x => x.Map.Sections.Where(s => x.PolymeterPlans.TryGetValue(s.SectionId, out var plan) && plan.Patterns != 1).Select(s => (double?)s.Start).FirstOrDefault()),
         new("held", "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
             "The held tones' and the ringing's chances by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 }, ["articulation"] = new() { ["letRing"] = 0 } },
             x => FirstColoured(x, ChordColour.Held))

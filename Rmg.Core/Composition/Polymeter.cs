@@ -78,8 +78,23 @@ internal static class Polymeter
     /// </summary>
     public static ByConvention GrowChance { get; } = new(0, 0.1, 0.3);
 
-    /// <summary>The chance the cycle starts afresh every second pattern rather than every one, so that it drifts for 8 bars where a section has them.</summary>
-    public static ByConvention FrameChance { get; } = new(0, 0.3, 0.6);
+    /// <summary>
+    ///     How many patterns of four bars the cycle drifts over before it starts afresh on a downbeat, a power of two, and how
+    ///     likely: a pattern at the plain end, and the longer drifts, 8, 16 or 32 bars, the wilder, as a band built on such
+    ///     cycles lets its riff run against a steady bar until the bar line is lost and the return lands as an arrival.
+    /// </summary>
+    public static ImmutableArray<(int Patterns, ByConvention Weight)> Frames { get; } =
+        [(1, new ByConvention(1, 0.7, 0.3)), (2, new ByConvention(0, 0.3, 0.6)), (4, new ByConvention(0, 0.1, 0.4)), (8, new ByConvention(0, 0.05, 0.2))];
+
+    /// <summary>A frame as a genre names it, by its bars: "eightBars".</summary>
+    public static string NameOf(int patterns) => patterns switch
+    {
+        1 => "fourBars",
+        2 => "eightBars",
+        4 => "sixteenBars",
+        8 => "thirtyTwoBars",
+        _ => throw new ArgumentOutOfRangeException(nameof(patterns), patterns, "A frame is one, two, four or eight patterns.")
+    };
 
     /// <summary>The chance a cycle closes on a cell of another length, its first played once to three times before it.</summary>
     public static ByConvention TailChance { get; } = new(0, 0.3, 0.7);
@@ -145,7 +160,7 @@ internal static class Polymeter
             ImmutableArray<TrackRole> parts = hasRiff ? bassJoins ? [TrackRole.Riff, TrackRole.Bass] : [TrackRole.Riff] : [TrackRole.Bass];
             // drawn after the rest, so that it stays as it was: the frame, and a closing cell of another length, the cycle as
             // a whole dividing no bar
-            var frame = context.TestProbability(FrameChance.At(unconventionality)) ? 2 : 1;
+            var frame = context.Pick(ByConvention.Weigh(Frames, unconventionality, genre.Pool<int>(GenreChoices.PolymeterFrame, NameOf)));
             var tails = context.TestProbability(TailChance.At(unconventionality));
             var repeats = context.Pick(Repeats.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
             // the lengths the section's end allows, none at the plain end but the plainest

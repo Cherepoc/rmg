@@ -538,17 +538,10 @@ dynamics, as it has no drums.
 
 ### Form and sections
 
-- **A polymeter's frame, a power of two of bars** (P2, 10 October 2026, after `?listen=polymeter`): a cycle starts afresh
-  where its frame ends, every pattern (four bars) now, every second where a section draws it (`Polymeter.FrameChance`),
-  or at the section's end where it runs on (`RunsOnChance`); a band built on such cycles lets its riff drift over 8, 16
-  or 32 bars of a steady 4/4 before it snaps back on a downbeat, so that the bar line is lost and the return lands as
-  an arrival, where four bars cut an odd cycle before it is heard against the pulse. The frame drawn as a power of two
-  of bars, four to the section's length, in place of the second pattern's case, by the feel facet (four at the plain
-  end) and a genre's pool, Djent's leaned to 8 and 16; the last pass cut wherever the frame ends, as now. Then, should
-  it want it, the bar giving way to the riff rather than the riff to the bar: a section's last bar cut short or drawn
-  out by the cycle's leftover, so that the riff ends its cycle with the section and the next starts on it, the short
-  bar's own case (`ShortBars`) for a polymetric section, its cut the cycle's rather than half a bar. Measured by the
-  frames drawn by genre, and the bars a cycle runs before it starts afresh.
+- **A polymeter's bar giving way to its riff** (P3, the frame a power of two of bars done 11 October 2026,
+  `Polymeter.Frames`, 4 bars 43%, 8 23%, 16 8% and 32 7% of the polymeters, Djent's leaned to 8 and 16, asked as
+  `?listen=djent-frame`): a section's last bar cut short or drawn out by the cycle's leftover, so that the riff ends its
+  cycle with the section and the next starts on it, should listening ask.
 - **Breakdowns beyond Djent, the rest** (P3, Punk's done 11 October 2026, 20% of its songs, asked as
   `?listen=punk-breakdown`): more of Nu metal's, and a breakdown in a verse or before the last chorus beside the bridge,
   should listening want more.

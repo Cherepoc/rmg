@@ -111,11 +111,11 @@
       },
       {
         "seed": "1D",
-        "at": 127.4,
+        "at": 128.1,
         "listen": [
           "Chords (Overdriven Guitar)",
           "Bass (Electric Bass (pick))",
-          "Riff (Distortion Guitar)"
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
@@ -154,14 +154,6 @@
     },
     "seeds": [
       {
-        "seed": "0",
-        "at": 80.8,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
         "seed": "3",
         "at": 0,
         "listen": [
@@ -196,6 +188,81 @@
         "at": 86.8,
         "listen": [
           "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "f",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "djent-frame",
+    "question": "Djent's polymetric riff drifting against the bar for 8 or 16 bars before it snaps back on a downbeat, in place of every 4: the bar line lost and the return an arrival, or just lost?",
+    "decides": "Djent's polymeter's frames.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "polymeterFrame": {
+          "fourBars": 100,
+          "eightBars": 0,
+          "sixteenBars": 0,
+          "thirtyTwoBars": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 3.8,
+        "listen": [
+          "Chords (Pad 7 (halo))"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 4.4,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 56.8,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 98.3,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 12,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 56.8,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       }
     ]

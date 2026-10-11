@@ -126,9 +126,11 @@ public sealed class PolymeterTest
             for (var start = span.Start; start < span.End - 1e-9; start += frame)
             for (var (cell, at) = (0, start); at < Math.Min(start + frame, span.End) - 1e-9; at += plan.CellAt(cell++) * 0.25)
                 starts.Add(Math.Round(at, 6));
-            // but in the bar before a line, a phrase's end, which the fill takes
+            // but in the bar before a line, a phrase's end, which the fill takes, and on a phrase's first beat, where it lands
+            bool Landing(double position) => Math.Abs(Math.IEEERemainder(position - span.Start, span.Meter.PhraseDuration)) < 1e-6 && position > span.Start + 1e-9;
             var notes = song.Song.Notes!.Where(x => snares.Contains(x.Key)).SelectMany(x => x.Value)
-                .Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.LastBar - 1e-9 && (x.Position - span.Start) % span.Meter.PhraseDuration < (span.Meter.PhraseBars - 1) * span.Meter.BarDuration).ToArray();
+                .Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.LastBar - 1e-9 && (x.Position - span.Start) % span.Meter.PhraseDuration < (span.Meter.PhraseBars - 1) * span.Meter.BarDuration
+                            && !Landing(x.Position)).ToArray();
             await Assert.That(notes.All(x => starts.Contains(Math.Round(x.Position, 6)))).IsTrue().Because($"seed {song.Seed} at {span.Start}");
             checkedSections++;
         }
@@ -178,7 +180,7 @@ public sealed class PolymeterTest
         Console.WriteLine($"  lengths {string.Join(", ", plans.GroupBy(x => x.Sixteenths).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}"))}; " +
                           $"parts {string.Join(", ", plans.GroupBy(x => string.Join("+", x.Parts) + (x.Kick ? "+kick" : "")).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))}");
         Console.WriteLine($"  the chords with them {plans.Count(x => x.Parts.Contains(TrackRole.Chords)) / (double)plans.Length:P0}, of cells of 6 or more {plans.Count(x => x.Cells.Average() >= 6 && x.Parts.Contains(TrackRole.Chords)) / (double)Math.Max(1, plans.Count(x => x.Cells.Average() >= 6)):P0}, shorter {plans.Count(x => x.Cells.Average() < 6 && x.Parts.Contains(TrackRole.Chords)) / (double)Math.Max(1, plans.Count(x => x.Cells.Average() < 6)):P0}");
-        Console.WriteLine($"  {plans.Length} polymeters: the bass with the riff {plans.Count(x => x.Parts.Contains(TrackRole.Riff) && x.Parts.Contains(TrackRole.Bass)) / (double)Math.Max(1, plans.Count(x => x.Parts.Contains(TrackRole.Riff))):P0}, the snare {plans.Count(x => x.Snare) / (double)plans.Length:P0}, the kick with them {plans.Count(x => x.Kick) / (double)plans.Length:P0}, over 8 bars {plans.Count(x => x.Patterns == 2) / (double)plans.Length:P0}, " +
+        Console.WriteLine($"  {plans.Length} polymeters: the bass with the riff {plans.Count(x => x.Parts.Contains(TrackRole.Riff) && x.Parts.Contains(TrackRole.Bass)) / (double)Math.Max(1, plans.Count(x => x.Parts.Contains(TrackRole.Riff))):P0}, the snare {plans.Count(x => x.Snare) / (double)plans.Length:P0}, the kick with them {plans.Count(x => x.Kick) / (double)plans.Length:P0}, frames {string.Join(", ", plans.Where(x => x.Patterns != Polymeter.Plan.Section).GroupBy(x => x.Patterns * 4).OrderBy(x => x.Key).Select(x => $"{x.Key} bars {x.Count() / (double)plans.Length:P0}"))}, " +
                           $"running on {plans.Count(x => x.Patterns == Polymeter.Plan.Section) / (double)plans.Length:P0}, growing {plans.Count(x => x.Grows) / (double)plans.Length:P0}, composite {plans.Count(x => x.Cells.Length > 1) / (double)plans.Length:P0}: {string.Join(", ", plans.Where(x => x.Cells.Length > 1).Select(x => string.Join("+", x.Cells)).GroupBy(x => x).OrderByDescending(x => x.Count()).Take(12).Select(x => $"{x.Key} {x.Count()}"))}");
         await Task.CompletedTask;
     }
