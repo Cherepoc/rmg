@@ -209,32 +209,12 @@ groups and out of its chord's scale, a polymeter's copies in the wrong chord sha
 where a texture rests its source, a drop the band does not come back on, a stop's silence struck again, a quieter form
 recorded unplayed), the rest tests assuming what new songs break and calibrations given 128 songs.
 
-**The plan of 11 October 2026** (every open item ordered, reviewed the same day; each step through the implementation
-loop, a deploy to test after each):
-
-- **A. Clean-up first** (P1): the two fix loops, with analytics written off the request and the admin password's pause,
-  as they touch the same code (*From the review of 10 October*, *Analytics written off the request*); the third
-  corpus's 14 failures checked, bug or calibration, before any device meets them; the review's 44 unworked and 23 open
-  findings sorted into fix, test or let go, with *Tests that check less than their names* and the test of calibrations
-  under 64 songs.
-- **B. Held tones and a section's form** (P1): *Planned: held tones, let ring, a section's form, and two genres*, steps
-  1 to 3.
-- **C. Heavy music** (P2): a heavy figure's backbeat on the snare's head and a double kick without one a phrase at most,
-  as one change (*A breakdown's snare*, *A double kick with a backbeat*); breakdowns beyond Djent, after B, as Black
-  metal's slow passages may be calm sections; Djent's drone with leaps and its polymeter's frame of a power of two of
-  bars, one listening round; the bass with the riff by convention.
-- **D. Groove and lines** (P2): call and response; the songs' own appoggiaturas; ghost notes in more genres; quiet
-  drums in calm genres, measured first, as Ambient's drums are at 30 already and the marks may be what is loud, then the
-  marks' kit a drum job's; the drum solos' idioms by genre (step 6), two toms at once among them.
-- **E. A meter and two genres** (P2): 12/8, the power ballad, Classical.
-- **F. The product** (P2 to P3): any genre, its fourth step waiting on ratings; the ratings report once a version has a
-  few hundred, with the ratings in the history.
-- **G. By listening** (P3): one round of questions where a device can be heard on and off, ten at most a round, the
-  presets most played first; built only what is heard wanting. The montuno and a dance track's stripped ending built
-  outright, as gaps rather than tunings.
-- **H. Tooling** (P4): the server's figures read in full when the dashboard slows; the page's tests of sound, the MP3
-  export and the lock screen left; the choices grouped into families should the editor grow hard to use; a report of
-  thousands of songs when a report needs it; plainer prose in every commit rather than a step.
+**Done: the plan of 11 October 2026** (each step through the implementation loop, deployed to test): the clean-up;
+held tones, let ring and a section's form; a heavy band's backbeat, Punk's breakdown, Djent's drone and polymeter frame,
+the bass with the riff by convention; call and response, the songs' own appoggiaturas, ghost notes in three more genres,
+quiet marks on a colouring kit, the drum solo's tom cascade; 12/8, the Power ballad and Classical; the CLI's presets and
+the ratings in the history; the montuno and a dance track's stripped ending. Left of it: Any genre's server draw (put
+off) and its default by ratings, the ratings report, two toms at once, and Tooling's items, each when its need shows.
 
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
