@@ -44,6 +44,21 @@ internal sealed class LinePattern
     /// <summary>The stream a goal's draw of its root or its third derives from its key (<see cref="GoalRootShare" />).</summary>
     private const int GoalRootStream = 11;
 
+    /// <summary>The stream a strong beat's note's draw of an appoggiatura derives from its key (<see cref="Appoggiaturas" />).</summary>
+    private const int AppoggiaturaStream = 12;
+
+    /// <summary>
+    ///     The chance a line's note on a strong beat leans on a tension, an appoggiatura, that the next note, on a weaker beat
+    ///     over the same chord, resolves by step to one of the chord's, as a singer leans into a word and falls to the chord;
+    ///     by the part, the songs' own, never at the plain end and now and then elsewhere, unlike a genre's tension
+    ///     (<see cref="Tensions" />), which holds against its chord.
+    /// </summary>
+    public static ImmutableArray<(TrackRole Role, ByConvention Chance)> Appoggiaturas { get; } =
+    [
+        (TrackRole.Melody, new ByConvention(0, 0.05, 0.1)),
+        (TrackRole.CounterMelody, new ByConvention(0, 0.05, 0.1))
+    ];
+
     /// <summary>
     ///     The chance a line's run of echoes, a figure played again, plays it inverted, its steps mirrored about its first
     ///     note, as a motif is developed, by the part: the melody's never at the plain end, which repeats its figures as they
@@ -139,14 +154,18 @@ internal sealed class LinePattern
                 && !allNotes[i + 1].Classes.SetEquals(x.Classes)
             )
         ];
+        // a strong beat's note leaning on a tension, where the next note, on a weaker beat over the same chord, resolves it
+        var leans = lineNotes.Select((x, i) => i + 1 < lineNotes.Length && Chord(lineNotes[i + 1]) == Chord(x) && Leans(x, lineNotes[i + 1], profile)).ToArray();
         var notes = lineNotes
             .Select((x, i) =>
                 {
                     var isFirstOfChord = i == 0 || Chord(lineNotes[i - 1]) != Chord(x);
                     var rank = x.State.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : x.State.GetStateValue(CompositionStateKinds.BeatRank);
+                    if (i > 0 && leans[i - 1] && line.Resolve(x.Classes, x.State.GetStateValue(CompositionStateKinds.LineLift)) is { } resolved)
+                        return (Note: x, Rank: rank, Pitch: resolved);
                     var pitch = line.Place(
                         x.Chord,
-                        IsTense(x, rank, profile) ? TensionsOf(x) : x.Classes,
+                        IsTense(x, rank, profile) || leans[i] ? TensionsOf(x) : x.Classes,
                         rank,
                         x.State.GetStateValue(CompositionStateKinds.LineStep),
                         x.State.GetStateValue(CompositionStateKinds.LineTurn),
@@ -275,6 +294,13 @@ internal sealed class LinePattern
     /// <summary>Whether a note on a strong beat lands on a tension, by its own draw.</summary>
     private static bool IsTense(LineNote note, int rank, LineProfile profile) =>
         rank <= profile.StrongestWeakRank && TensionsOf(note).Count > 0 && Drawn(note, CompositionStateKinds.LineTension, TensionStream);
+
+    /// <summary>Whether a note on a strong beat, not a phrase's held last, leans on a tension the next note resolves, on a weaker beat, by its own draw.</summary>
+    private static bool Leans(LineNote note, LineNote next, LineProfile profile) =>
+        note.State.GetStateValue(StateKinds.HeldDuration) <= 0
+        && note.State.GetStateValue(CompositionStateKinds.BeatRank) is var rank && rank <= profile.StrongestWeakRank
+        && next.State.GetStateValue(StateKinds.HeldDuration) <= 0 && next.State.GetStateValue(CompositionStateKinds.BeatRank) > rank
+        && TensionsOf(note).Count > 0 && Drawn(note, CompositionStateKinds.LineAppoggiatura, AppoggiaturaStream);
 
     /// <summary>Whether a note plays a line's device, where it has the device's chance, by its own draw.</summary>
     private static bool Drawn(LineNote note, StateKind<double> kind, int stream) => note.State.GetStateValue(kind) is var chance and > 0 && Draw(note.State, stream) < chance;

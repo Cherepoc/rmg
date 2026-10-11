@@ -61,6 +61,9 @@ public sealed class ListeningQuestionsTest
         new("call-response", "Blues' verse calling and answered: the melody singing each phrase's first half, the riff answering it in the second. A band talking to its singer, or a melody cut in half?",
             "Call and response's chance by genre.", "blues", [], new() { ["callAndResponse"] = new() { ["sections"] = 0 } },
             x => FirstSection(x, TracePoints.CallAndResponse, v => (bool)v!)),
+        new("appoggiatura", "Pop's melody now and then leaning on a note off its chord on a strong beat and falling a step onto the chord: expressive, or a wrong note put right?",
+            "The appoggiaturas' chance, the songs' own.", "pop", [], new() { ["appoggiatura"] = new() { ["melody"] = 0, ["counterMelody"] = 0 } },
+            _ => 0),
         new("held", "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
             "The held tones' and the ringing's chances by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 }, ["articulation"] = new() { ["letRing"] = 0 } },
             x => FirstColoured(x, ChordColour.Held))

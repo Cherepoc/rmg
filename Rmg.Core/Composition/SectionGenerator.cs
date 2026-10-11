@@ -689,6 +689,8 @@ internal sealed class SectionGenerator
 
         // a line's strong beats on a tension now and then
         AddLine(CompositionStateKinds.LineTension, LinePattern.Tensions, GenreChoices.Tension);
+        // and on one that resolves
+        AddLine(CompositionStateKinds.LineAppoggiatura, LinePattern.Appoggiaturas, GenreChoices.Appoggiatura);
         // its figures played inverted where they come back now and then
         AddLine(CompositionStateKinds.LineInversion, LinePattern.Inversions, GenreChoices.Inversion);
         // its phrases ending on a goal, the genres' as the songs'

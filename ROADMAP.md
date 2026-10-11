@@ -248,8 +248,7 @@ genre first (see *Genres*).
 **Put off** until its uses ask for it: a tag (see *Parked*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
-*Architecture*: plainer prose); and the music's: the
-songs' own appoggiaturas (*Fills and lines*).
+*Architecture*: plainer prose);.
 
 **Done: the parked reviewed** (9 October 2026, each step through the implementation loop): the seven steps one rule, a
 scale of other than seven notes refused; Bossa nova's clave on the cross-stick (`?listen=bossa-clave`); the melody in
@@ -583,9 +582,6 @@ dynamics, as it has no drums.
   of 6 Pop songs, a device of development rather than one to be heard at once): a run of echoes plays its figure
   inverted now and then (`LinePattern.Inversions`, 15% in the middle, 40% at the wild end); a figure displaced by an 8th or its rhythm
   stretched, should the inverted ones be heard as development rather than wrong notes.
-- **The songs' own appoggiaturas** (P2): a line's note on a strong beat a tension
-  that resolves by step to the chord, the songs' chance 0 at the plain end and low in the middle (`LinePattern.Tensions`
-  is a genre's alone now, 0 for the songs); a genre's tension (`GenreChoices.Tension`) stays as it is.
 - **Two toms at once** (P3, reviewed 10 October 2026, put off: a rare accent, and the pair it would play the muddy one):
   a drum note's sound a list of articulations (`StateKinds.ArticulationIndex` now one, `TimelineEdits.Hit` taking
   one, `Realizer.RealizePercussionTrack` playing one), as an ornament and the articulation offset are lists, rather

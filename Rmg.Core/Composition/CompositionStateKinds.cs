@@ -49,6 +49,9 @@ internal static class CompositionStateKinds
     // one of the chord's (LinePattern.Tensions)
     public static StateKind<double> LineTension { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineTension", StateScope.Render);
 
+    // the chance a line's note on a strong beat leans on a tension that the next note resolves by step (LinePattern.Appoggiaturas)
+    public static StateKind<double> LineAppoggiatura { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineAppoggiatura", StateScope.Render);
+
     // the chance a line's phrase ends on a goal, its held last note on its chord's root or third (LinePattern.Goals)
     public static StateKind<double> LineGoal { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineGoal", StateScope.Render);
 

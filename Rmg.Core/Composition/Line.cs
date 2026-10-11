@@ -185,6 +185,26 @@ internal sealed class Line
         return note;
     }
 
+    /// <summary>
+    ///     The note an appoggiatura resolves to: the chord's note a step (one or two semitones) from the line's last, below it
+    ///     where one is, as a leaning note falls to its chord, and the nearer; none where no note of the chord in the range is
+    ///     a step away, or the line has no note before.
+    /// </summary>
+    /// <param name="chordToneClasses">The pitch classes of the chord's notes.</param>
+    /// <param name="lift">How far the note's range is lifted (<see cref="Place" />).</param>
+    public int? Resolve(IReadOnlyCollection<int> chordToneClasses, double lift)
+    {
+        Lift(lift);
+        if (_previous is not { } last
+            || new[] { -1, -2, 1, 2 }.Select(x => last + x).Where(x => x >= _low && x <= _high && chordToneClasses.Contains(x.Mod(OctaveNoteCount))).Select(x => (int?)x).FirstOrDefault() is not { } note)
+            return null;
+        _echoRun = null;
+        _previousMove = note - last;
+        _heading = Math.Sign(_previousMove);
+        _previous = note;
+        return note;
+    }
+
     /// <summary>The scale step, an octave's steps from the one given, whose note is nearest the note before.</summary>
     private int GetNearestOctave(ChordContext chord, int step)
     {

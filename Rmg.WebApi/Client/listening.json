@@ -329,6 +329,65 @@
     ]
   },
   {
+    "id": "appoggiatura",
+    "question": "Pop's melody now and then leaning on a note off its chord on a strong beat and falling a step onto the chord: expressive, or a wrong note put right?",
+    "decides": "The appoggiaturas' chance, the songs' own.",
+    "genre": "pop",
+    "without": {
+      "skip": [],
+      "genre": {
+        "appoggiatura": {
+          "melody": 0,
+          "counterMelody": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "4",
+        "at": 116,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 72.5,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 13.5,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 14.3,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 41.6,
+        "listen": [
+          "Melody (Lead 6 (voice))"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 208.2,
+        "listen": [
+          "Melody (Lead 1 (square))"
+        ]
+      }
+    ]
+  },
+  {
     "id": "held",
     "question": "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
     "decides": "The held tones' and the ringing's chances by genre.",
