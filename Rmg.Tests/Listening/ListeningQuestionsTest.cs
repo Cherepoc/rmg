@@ -46,6 +46,36 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
+        new("folk-room-kit", "Folk on its room kit at every end, the wildest song too, against a wild song's standard kit: folk's own sound, or a kit too small?",
+            "The kits' weights at Folk's wild end.", "folk", [], new() { ["kit"] = new() { ["standard"] = 100, ["room"] = 18, ["brush"] = 5 } },
+            x => x.Absent.Contains(TrackRole.Drum) ? null : 0),
+        new("punk-rhythm-8ths", "Punk's second guitar strumming the band's driving 8ths, rather than comping in a rhythm of its own: one wall of guitars, or two parts that lose each other?",
+            "The rhythm part's rhythm in Punk.", "punk", [], new() { ["rhythm.rhythm"] = new() { ["speed"] = 50, ["fullness"] = 50 } },
+            x => x.Absent.Contains(TrackRole.Rhythm) ? null : 0),
+        new("blackmetal-blast", "Black metal blasting most at its plainest, the blast beat its first habit: the style itself, or relentless?",
+            "The blast beat's weight in Black metal.", "blackMetal", [], new() { ["figure.ground"] = new() { ["blast"] = 50 } },
+            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Ground) == "blast"), 1)),
+        new("dnb-break", "Drum and bass on its breakbeat in half its sections, most at its plainest, rather than in under a third: the liquid break, or too busy?",
+            "The breakbeat's weight in Drum and bass.", "dnb", [], new() { ["figure.ground"] = new() { ["own"] = 100, ["breakbeat"] = 40 } },
+            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Ground) == "breakbeat"), 1)),
+        new("idm-space", "IDM's pads, chords and leads in a deeper reverb, as warm as its description: warm, or washed out?",
+            "IDM's space.", "idm", [], new() { ["space"] = new() { ["pad"] = 50, ["chords"] = 50, ["melody"] = 50, ["counterMelody"] = 50 } },
+            _ => 0),
+        new("house-tempo", "House kept near 120 to 128 at every end, rather than straying from 100 to 175: house, or every house song alike?",
+            "House's tempo at its wild end.", "electronic", [], new() { ["tempo"] = new() { ["from"] = 100, ["to"] = 175 } },
+            _ => 0),
+        new("latin-half-bar", "Latin's chords changing by the half bar, as a montuno's cycle does, more often than by the bar: the montuno's drive, or restless?",
+            "The chords' pace in Latin.", "latin", [], new() { ["harmonicRhythm"] = new() { ["oneBar"] = 100, ["halfBar"] = 40 } },
+            _ => 0),
+        new("blues-form", "Blues in verses, choruses and a bridge, without a pop song's pre-chorus: the blues, or too plain?",
+            "Blues' forms.", "blues", [], new() { ["form"] = new() { ["vpcvpcbc"] = 71, ["vpcvpc"] = 14, ["vpcvpcbcvpc"] = 6 } },
+            _ => 0),
+        new("ambient-sus", "Ambient's plainest chords suspended or with an added ninth more often than plain triads, as its description names: ambient's colour, or never at rest?",
+            "The triad's weight at Ambient's plain end.", "ambient", [], new() { ["chordShape"] = new() { ["triad"] = 100 } },
+            _ => 0),
+        new("orchestral-ternary", "Orchestral in a ternary form, ABA, or AABA, a theme coming back after a contrasting one, beside verses and choruses: a concert piece, or a song without its chorus?",
+            "Orchestral's forms.", "orchestral", [], new() { ["form"] = new() { ["vbv"] = 0, ["vvbv"] = 0 } },
+            _ => 0)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

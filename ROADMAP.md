@@ -284,6 +284,19 @@ tape, 30-50-70%, #430, 5 of 5 sure) and `disco-open-hat` (Disco's off-beat hat o
 `fusion-head` (Fusion in AABA, #454) heard worse 3 to 2 and taken out, Fusion's forms the songs' own. House's gliding
 bass (#391) left out: its offbeat bass leaves no note to glide from. Every question built so far answered.
 
+Asked from 12 October 2026, the review's third ten, each added to the preset to try: `folk-room-kit` (Folk's room kit
+at every end, its wild end's standard kit out, #409), `punk-rhythm-8ths` (Punk's second guitar on the band's driving
+8ths, #452), `blackmetal-blast` (Black metal's blast leaning plain, 100-80-60 from 40-50-60, #471, the least heard),
+`dnb-break` (Drum and bass on its breakbeat in about half its sections, most at the plain end, #445), `idm-space`
+(IDM's pads, chords and leads in a deeper reverb, #474), `house-tempo` (House near 120 to 128 at its wild end too,
+#393), `latin-half-bar` (Latin's chords by the half bar before the bar, a montuno's pace, #404), `blues-form` (Blues
+without a pre-chorus, #410), `ambient-sus` (Ambient's plain end with fewer triads than sus and add9 chords, #414) and
+`orchestral-ternary` (Orchestral in ABA and AABA beside verses and choruses, #469). The song without a change that
+moves one end alone (`house-tempo`, `folk-room-kit`) holds that end's amount at every end, its patch a single number.
+Left for later: Medieval's plain ornaments (#425) and Djent's rudiments (#431), the song without them barely
+different or no ornament at all; Dungeon synth's arpeggios on its sustained voices (#429), its harpsichord's
+ostinato played by the same arpeggio.
+
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's
 harmony static on purpose, its last hook's chords as they were. Kept, `funk-key`, `funk-pushes`, `numetal-half-time`,
