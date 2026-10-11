@@ -46,36 +46,15 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("calm", "Black metal's quieter sections turned calm: an acoustic or clean guitar breaking the chords slowly, their dark held tones ringing, the other guitars resting and the drums in half time. A calm between the storms, or a jump?",
-            "The calm sections' chance by genre, and whether a fill or a fade should lead into one.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1)),
-        new("punk-breakdown", "Punk's bridge as a hardcore band's breakdown, in half time, the guitars chugging and the kick with them: the song's peak, or a different band?",
-            "Punk's breakdowns' chance.", "punk", [], new() { ["breakdown"] = new() { ["sections"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Breakdown, v => (bool)v!), 1)),
-        new("djent-open", "Djent's riff on an open string, its melody leaping an octave or more above it and back, in place of a chug: the band's sound, or less heavy?",
-            "Djent's drone's and chugs' chances.", "djent", [], new() { ["riff"] = new() { ["drone"] = 0, ["chugs"] = 90 } },
-            x => Before(x, FirstSection(x, TracePoints.Drone, v => (bool)v!), 1)),
-        new("techno-strip", "Techno ending as a DJ's track does, its parts dropping out one by one to the drums alone: ready to mix, or falling apart?",
-            "The stripped ending's weight in House, Techno and Trance.", "techno", [], new() { ["ending"] = new() { ["strip"] = 0 } },
-            x => x.Map.Ending.Kind == EndingKind.Strip ? Before(x, x.Map.Ending.Start, 8) : null),
-        new("call-response", "Blues' verse calling and answered: the melody singing each phrase's first half, the riff answering it in the second. A band talking to its singer, or a melody cut in half?",
-            "Call and response's chance by genre.", "blues", [], new() { ["callAndResponse"] = new() { ["sections"] = 0 } },
-            x => FirstSection(x, TracePoints.CallAndResponse, v => (bool)v!)),
-        new("montuno", "Latin's piano breaking its chords as a montuno, the root on the beats and the chord's other notes on the off-beats: a salsa pianist, or a stutter?",
-            "The montuno's weight in Latin.", "latin", [], new() { ["arpeggio"] = new() { ["montuno"] = 0 } },
-            x => FirstSection(x, TracePoints.Arpeggio, v => (ArpeggioPattern)v! == ArpeggioPattern.Montuno)),
-        new("ballad", "A Power ballad's clean broken chords turning driven where the band grows louder, its chorus heavy: the lift a ballad needs, or a jolt?",
-            "The heavy form's chance in the Power ballad.", "ballad", [], new() { ["louderForms"] = new() { ["guitars"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Heavy), 1)),
-        new("blues-12-8", "A Blues in 12/8, every beat three 8ths, the chords broken and the drums in triplets: a slow blues, or a waltz that limps?",
-            "12/8 against 6/8 in Blues and Soul.", "blues", [], new() { ["meter"] = new() { ["12/8"] = 0 } },
-            x => x.Song.Meter.Groups.SequenceEqual(Meter.TwelveEight.Groups) ? x.Origin : null),
-        new("appoggiatura", "Pop's melody now and then leaning on a note off its chord on a strong beat and falling a step onto the chord: expressive, or a wrong note put right?",
-            "The appoggiaturas' chance, the songs' own.", "pop", [], new() { ["appoggiatura"] = new() { ["melody"] = 0, ["counterMelody"] = 0 } },
-            _ => 0),
-        new("held", "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
-            "The held tones' and the ringing's chances by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 }, ["articulation"] = new() { ["letRing"] = 0 } },
-            x => FirstColoured(x, ChordColour.Held))
+        new("djent-frame", "Djent's polymetric riff drifting against the bar for 8 or 16 bars before it snaps back on a downbeat, in place of every 4: the bar line lost and the return an arrival, or just lost?",
+            "Djent's polymeter's frames.", "djent", [], new() { ["polymeterFrame"] = new() { ["fourBars"] = 100, ["eightBars"] = 0, ["sixteenBars"] = 0, ["thirtyTwoBars"] = 0 } },
+            x => x.Map.Sections.Where(s => x.PolymeterPlans.TryGetValue(s.SectionId, out var plan) && plan.Patterns != 1).Select(s => (double?)s.Start).FirstOrDefault()),
+        new("dnb-ghosts", "Drum and bass's break with ghost notes, soft 16ths on the snare around its backbeat: a rolling break, or clutter at this speed?",
+            "Ghost notes' chance in Drum and bass, Reggae and Ska.", "dnb", [], new() { ["ghosts"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!)),
+        new("classical", "Classical's cello on the chord's third now and then, the chord inverted, rather than always its root: a classical bass line, or a wandering one?",
+            "The bass's landings in Classical.", "classical", [], new() { ["bassLanding"] = new() { ["root"] = 100, ["third"] = 0, ["fifth"] = 30 } },
+            _ => 0)
     ];
 
     /// <summary>Where the song's chords first break in the colour given, a bar before it.</summary>

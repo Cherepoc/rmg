@@ -253,6 +253,13 @@ channel of its own; `rudiments`, Jazz's flams and drags; `phrase-length`, Orches
 three; and `short-bar`, Djent's sections ending on a bar cut short, which the loops' genres play none of now (Trance,
 Drum and bass, Trap, Disco, Funk, Ambient and Chiptune beside the five that named none), their sections square.
 
+Answered on 11 October 2026, late, the round of the plan of 11 October, and kept: `calm`, Black metal's calm sections
+(6 of 6); `techno-strip`, the dance tracks' stripped ending (6 of 6); `montuno`, Latin's (6 of 6); `djent-open`,
+Djent's drone with leaps (5 of 6); `appoggiatura`, the songs' own (5 of 6); `ballad`, its heavy chorus (5 of 6);
+`call-response`, Blues' (5 better, 1 worse, 1 the same); `punk-breakdown` (4 of 6); `held`, Pop's held tones and let
+ring, tied 3 to 3 and kept as they are; and `blues-12-8`, heard once and kept. Asked next, the three the round of ten
+left out: `djent-frame`, `dnb-ghosts` and `classical`.
+
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's
 harmony static on purpose, its last hook's chords as they were. Kept, `funk-key`, `funk-pushes`, `numetal-half-time`,
@@ -460,26 +467,26 @@ Planned 11 October 2026 and revised the same day after two reviews; each step th
 listening question and a deploy to test. In order:
 
 1. Done (11 October 2026): **held tones**, a colour of a broken chord's (`ChordColour.Held`, `HeldDark`), the key's second
-   and third or its fifth and sixth held over every chord on a clean instrument that dies away; Pop's sweet ones asked
-   as `?listen=held`, Metal's dark ones (rare on its clean guitar) asked with step 3's calm sections.
+   and third or its fifth and sixth held over every chord on a clean instrument that dies away; Pop's sweet ones heard
+   and kept (`held`), Metal's dark ones (rare on its clean guitar) asked with step 3's calm sections.
 2. Done (11 October 2026): **let ring**, a part's articulation (`Articulations.LetRingChance`, "letRing"), a broken chord's
    notes sounding to its change, a bar at most, never over their own pitch struck again, on a clean instrument that dies
-   away and a figure of 8ths or slower; Pop's with its held tones, asked together as `?listen=held`.
+   away and a figure of 8ths or slower; Pop's with its held tones, heard with them and kept.
 3. Done (11 October 2026): **a section's form** (`SectionForm`), decided with the section in place of the instrument swap
    after assembly: a quieter section calm, its driven guitars acoustic or clean, one breaking the chords in 8ths or
    slower, let ring with the genre's held tones, the other guitars resting, a late entry waiting for the next appearance,
    no figure, the drums in half time or resting; a louder one heavy, its clean guitars driven, its chords struck. Black
-   metal's calm in 38% of its songs, with its dark held tones, asked as `?listen=calm` (`quieter-form` retired). Left,
+   metal's calm in 38% of its songs, with its dark held tones, heard and kept (`calm`, `quieter-form` retired). Left,
    by listening: a calm section's bass held on its roots; a fill or a fade into it; Metal's and Rock's calm.
 4. Done (11 October 2026): **a riff's drone, with leaps**: its weak notes on an open string, the key's own at the bottom
    of the guitar, its melody an octave or more over it as far as the guitar reaches, 9.5 to 10 semitones on the average,
-   single notes, no chugs; Djent's chugs drawn down to 50% of its sections and its drone 14%, asked as
-   `?listen=djent-open`. Black metal's tremolo figure repeats a note, so its drone would not alternate; left to listening.
+   single notes, no chugs; Djent's chugs drawn down to 50% of its sections and its drone 14%, heard and
+   kept (`djent-open`). Black metal's tremolo figure repeats a note, so its drone would not alternate; left to listening.
 5. Done (11 October 2026): **12/8**, a meter of four groups of three 8ths (`Meter.TwelveEight`), the songs' own never
-   at 0, 2% at 0.5 and 15% at 1; Blues' 6/8 moved mostly to 12/8 and Soul's halved into it, asked as `?listen=blues-12-8`.
+   at 0, 2% at 0.5 and 15% at 1; Blues' 6/8 moved mostly to 12/8 and Soul's halved into it, heard and kept (`blues-12-8`).
 6. Done (11 October 2026): **Power ballad** (`ballad`), data: a clean guitar's broken chords let ring with sweet held
    tones, an overdriven lead, strings, 60 to 85 in 4/4 and 12/8 (28% of its songs), 3.5 to 5 minutes, the chorus
-   heavy (57 of 263 sections), the last chorus up a step; its heavy chorus asked as `?listen=ballad`.
+   heavy (57 of 263 sections), the last chorus up a step; its heavy chorus heard and kept (`ballad`).
 7. Done (11 October 2026): **Classical** (`classical`), data: a melody on violin, flute or clarinet over a piano's
    Alberti figure and a cello, no drums, raised cadences and ornaments, AABA, ABA and a rondo (`SongForms`, forms of
    their own the songs never take), terraced dynamics, 80 to 140 in 4/4, 3/4 and 6/8, two to four and a half minutes;
@@ -518,8 +525,8 @@ dynamics, as it has no drums.
   `Polymeter.Frames`, 4 bars 43%, 8 23%, 16 8% and 32 7% of the polymeters, Djent's leaned to 8 and 16, asked as
   `?listen=djent-frame`): a section's last bar cut short or drawn out by the cycle's leftover, so that the riff ends its
   cycle with the section and the next starts on it, should listening ask.
-- **Breakdowns beyond Djent, the rest** (P3, Punk's done 11 October 2026, 20% of its songs, asked as
-  `?listen=punk-breakdown`): more of Nu metal's, and a breakdown in a verse or before the last chorus beside the bridge,
+- **Breakdowns beyond Djent, the rest** (P3, Punk's done 11 October 2026, 20% of its songs, heard
+  and kept, `punk-breakdown`): more of Nu metal's, and a breakdown in a verse or before the last chorus beside the bridge,
   should listening want more.
 - **Ghost notes beyond the backbeat** (P3): Funk, Soul, Fusion, Blues, Hip hop, Rock, Disco, Drum and bass, Reggae and
   Ska ghost on a backbeat's snare (`Ghosts`, asked as *dnb-ghosts*); a jazz drummer's comping on the snare and Latin's
@@ -530,7 +537,7 @@ dynamics, as it has no drums.
   the verse, higher in 61% of the songs.
 - **The band's devices, the rest** (P3, each an edit after assembly among the stages, as stop time and pushes are):
   stop time's hits added where a part rests on the downbeat; a backing figure that recurs through the song.
-- **Call and response, the rest** (P3, after listening to *call-response* again): the answer recurring as its bar
+- **Call and response, the rest** (P3, `call-response` heard and kept 11 October 2026, 5 of 7): the answer recurring as its bar
   patterns do by the scheme's letters, with the recurring backing figure. Built: a verse's melody singing each phrase's
   first half and the riff answering in the second, or the counter-melody's own line where no riff plays, a phrase none
   answers left whole (heard 11 October 2026: a cut melody with nothing answering it); the parts doubling a part cut
@@ -706,7 +713,7 @@ left:
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a
     role free.
   - The montuno's own rhythm, a two-bar figure anticipating the chord, should the part's syncopated rhythm under
-    `ArpeggioPattern.Montuno` (root on the beats, the others off them, Latin's, asked as *montuno*) sound loose.
+    `ArpeggioPattern.Montuno` (root on the beats, the others off them, Latin's, heard and kept as *montuno*) sound loose.
   - More figures (P3, by listening): a figure for the hi-hat or the snare, a figure of more than
     two bars; the double kick following the riff's accents alone, should every 16th sound a machine.
   - A hook of one or two bars sung through a whole section, its phrase ends let go of; a hooked melody's bars repeat

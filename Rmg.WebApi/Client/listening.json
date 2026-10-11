@@ -1,642 +1,185 @@
 [
   {
-    "id": "calm",
-    "question": "Black metal's quieter sections turned calm: an acoustic or clean guitar breaking the chords slowly, their dark held tones ringing, the other guitars resting and the drums in half time. A calm between the storms, or a jump?",
-    "decides": "The calm sections' chance by genre, and whether a fill or a fade should lead into one.",
-    "genre": "blackMetal",
-    "without": {
-      "skip": [],
-      "genre": {
-        "louderForms": {
-          "quieter": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "C",
-        "at": 118.1,
-        "listen": [
-          "Hi-Hat",
-          "Chords (Distortion Guitar)",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 167.1,
-        "listen": [
-          "Hi-Hat",
-          "Rhythm part (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 41.8,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Hi-Hat",
-          "Tom"
-        ]
-      },
-      {
-        "seed": "m",
-        "at": 0,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "r",
-        "at": 12.1,
-        "listen": [
-          "Bass (Electric Bass (pick))",
-          "Riff (Distortion Guitar)",
-          "Chords (Acoustic Guitar (steel))"
-        ]
-      },
-      {
-        "seed": "x",
-        "at": 0,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Kick"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "punk-breakdown",
-    "question": "Punk's bridge as a hardcore band's breakdown, in half time, the guitars chugging and the kick with them: the song's peak, or a different band?",
-    "decides": "Punk's breakdowns' chance.",
-    "genre": "punk",
-    "without": {
-      "skip": [],
-      "genre": {
-        "breakdown": {
-          "sections": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "M",
-        "at": 84.6,
-        "listen": [
-          "Hi-Hat",
-          "Rhythm part (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "b",
-        "at": 48.1,
-        "listen": [
-          "Chords (Overdriven Guitar)",
-          "Acoustic Snare",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "x",
-        "at": 98.9,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Hi-Hat",
-          "Solo (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "1D",
-        "at": 128.1,
-        "listen": [
-          "Chords (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "1H",
-        "at": 73.8,
-        "listen": [
-          "Hi-Hat",
-          "Chords (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "1L",
-        "at": 106.6,
-        "listen": [
-          "Chords (Distortion Guitar)",
-          "Melody (Electric Guitar (clean))",
-          "Bass (Electric Bass (pick))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "djent-open",
-    "question": "Djent's riff on an open string, its melody leaping an octave or more above it and back, in place of a chug: the band's sound, or less heavy?",
-    "decides": "Djent's drone's and chugs' chances.",
+    "id": "djent-frame",
+    "question": "Djent's polymetric riff drifting against the bar for 8 or 16 bars before it snaps back on a downbeat, in place of every 4: the bar line lost and the return an arrival, or just lost?",
+    "decides": "Djent's polymeter's frames.",
     "genre": "djent",
     "without": {
       "skip": [],
       "genre": {
-        "riff": {
-          "drone": 0,
-          "chugs": 90
+        "polymeterFrame": {
+          "fourBars": 100,
+          "eightBars": 0,
+          "sixteenBars": 0,
+          "thirtyTwoBars": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 0,
+        "seed": "1",
+        "at": 3.8,
         "listen": [
+          "Chords (Pad 7 (halo))"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 4.4,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 56.8,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 98.3,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 12,
+        "listen": [
+          "Bass (Electric Bass (finger))",
           "Riff (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "7",
-        "at": 0,
+        "seed": "L",
+        "at": 56.8,
         "listen": [
           "Riff (Distortion Guitar)",
           "Bass (Electric Bass (pick))"
         ]
-      },
-      {
-        "seed": "R",
-        "at": 99.7,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "T",
-        "at": 0,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "a",
-        "at": 86.8,
-        "listen": [
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "f",
-        "at": 0,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
       }
     ]
   },
   {
-    "id": "techno-strip",
-    "question": "Techno ending as a DJ's track does, its parts dropping out one by one to the drums alone: ready to mix, or falling apart?",
-    "decides": "The stripped ending's weight in House, Techno and Trance.",
-    "genre": "techno",
+    "id": "dnb-ghosts",
+    "question": "Drum and bass's break with ghost notes, soft 16ths on the snare around its backbeat: a rolling break, or clutter at this speed?",
+    "decides": "Ghost notes' chance in Drum and bass, Reggae and Ska.",
+    "genre": "dnb",
     "without": {
       "skip": [],
       "genre": {
-        "ending": {
-          "strip": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "2",
-        "at": 237.7,
-        "listen": [
-          "Melody (Lead 2 (sawtooth))",
-          "Pad (Pad 2 (warm))",
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
-        "seed": "4",
-        "at": 124,
-        "listen": [
-          "Bass (Synth Bass 2)",
-          "Riff (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 181.7,
-        "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Bass (Synth Bass 2)",
-          "Rhythm part (Clavinet)"
-        ]
-      },
-      {
-        "seed": "T",
-        "at": 538.6,
-        "listen": [
-          "Melody (Lead 1 (square))",
-          "Counter-melody (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "d",
-        "at": 737.8,
-        "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Rhythm part (Clavinet)",
-          "Melody (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "s",
-        "at": 339.8,
-        "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Bass (Synth Bass 1)",
-          "Riff (Lead 2 (sawtooth))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "call-response",
-    "question": "Blues' verse calling and answered: the melody singing each phrase's first half, the riff answering it in the second. A band talking to its singer, or a melody cut in half?",
-    "decides": "Call and response's chance by genre.",
-    "genre": "blues",
-    "without": {
-      "skip": [],
-      "genre": {
-        "callAndResponse": {
+        "ghosts": {
           "sections": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 69.3,
+        "seed": "9",
+        "at": 267.2,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Melody (Harmonica)"
-        ]
-      },
-      {
-        "seed": "h",
-        "at": 6.4,
-        "listen": [
-          "Counter-melody (Rock Organ)",
-          "Melody (Harmonica)"
-        ]
-      },
-      {
-        "seed": "s",
-        "at": 0,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "x",
-        "at": 0,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "y",
-        "at": 36.6,
-        "listen": [
-          "Rhythm part (Overdriven Guitar)",
-          "Chords (Drawbar Organ)",
-          "Riff (Percussive Organ)"
-        ]
-      },
-      {
-        "seed": "16",
-        "at": 82.4,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Melody (Harmonica)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "montuno",
-    "question": "Latin's piano breaking its chords as a montuno, the root on the beats and the chord's other notes on the off-beats: a salsa pianist, or a stutter?",
-    "decides": "The montuno's weight in Latin.",
-    "genre": "latin",
-    "without": {
-      "skip": [],
-      "genre": {
-        "arpeggio": {
-          "montuno": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "8",
-        "at": 6.8,
-        "listen": [
-          "Chords (Acoustic Guitar (nylon))"
+          "Acoustic Snare"
         ]
       },
       {
         "seed": "A",
-        "at": 90.1,
+        "at": 41.9,
         "listen": [
-          "Chords (Acoustic Grand Piano)",
-          "Rhythm part (Acoustic Guitar (nylon))"
+          "Acoustic Snare"
         ]
       },
       {
-        "seed": "B",
-        "at": 19.1,
+        "seed": "D",
+        "at": 42.6,
         "listen": [
-          "Chords (Bright Acoustic Piano)"
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 0,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 24.5,
+        "listen": [
+          "Acoustic Snare"
         ]
       },
       {
         "seed": "J",
-        "at": 49.3,
+        "at": 304.2,
         "listen": [
-          "Chords (Acoustic Guitar (nylon))"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 192.2,
-        "listen": [
-          "Rhythm part (Acoustic Guitar (nylon))",
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 110.1,
-        "listen": [
-          "Chords (Acoustic Guitar (nylon))",
-          "Rhythm part (Acoustic Guitar (steel))"
+          "Acoustic Snare"
         ]
       }
     ]
   },
   {
-    "id": "ballad",
-    "question": "A Power ballad's clean broken chords turning driven where the band grows louder, its chorus heavy: the lift a ballad needs, or a jolt?",
-    "decides": "The heavy form's chance in the Power ballad.",
-    "genre": "ballad",
+    "id": "classical",
+    "question": "Classical's cello on the chord's third now and then, the chord inverted, rather than always its root: a classical bass line, or a wandering one?",
+    "decides": "The bass's landings in Classical.",
+    "genre": "classical",
     "without": {
       "skip": [],
       "genre": {
-        "louderForms": {
-          "guitars": 0
+        "bassLanding": {
+          "root": 100,
+          "third": 0,
+          "fifth": 30
         }
       }
     },
     "seeds": [
+      {
+        "seed": "1",
+        "at": 41,
+        "listen": [
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 106.3,
+        "listen": [
+          "Bass (Cello)"
+        ]
+      },
       {
         "seed": "5",
-        "at": 151.3,
+        "at": 20.1,
         "listen": [
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "C",
-        "at": 133.1,
-        "listen": [
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "I",
-        "at": 32.9,
-        "listen": [
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 189.8,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))"
-        ]
-      },
-      {
-        "seed": "V",
-        "at": 36,
-        "listen": [
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "g",
-        "at": 303.3,
-        "listen": [
-          "Chords (Distortion Guitar)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "blues-12-8",
-    "question": "A Blues in 12/8, every beat three 8ths, the chords broken and the drums in triplets: a slow blues, or a waltz that limps?",
-    "decides": "12/8 against 6/8 in Blues and Soul.",
-    "genre": "blues",
-    "without": {
-      "skip": [],
-      "genre": {
-        "meter": {
-          "12/8": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "F",
-        "at": 109.8,
-        "listen": [
-          "Melody (Harmonica)",
-          "Chords (Electric Guitar (clean))",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "r",
-        "at": 0,
-        "listen": [
-          "Melody (Tenor Sax)",
-          "Chords (Rock Organ)",
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "17",
-        "at": 20.6,
-        "listen": [
-          "Melody (Electric Guitar (clean))",
-          "Chords (Rock Organ)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "1X",
-        "at": 60,
-        "listen": [
-          "Melody (Tenor Sax)",
-          "Chords (Drawbar Organ)",
-          "Rhythm part (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "1e",
-        "at": 0,
-        "listen": [
-          "Chords (Honky-tonk Piano)",
-          "Melody (Harmonica)",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "1g",
-        "at": 50.8,
-        "listen": [
-          "Rhythm part (Overdriven Guitar)",
-          "Hi-Hat",
-          "Chords (Electric Guitar (clean))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "appoggiatura",
-    "question": "Pop's melody now and then leaning on a note off its chord on a strong beat and falling a step onto the chord: expressive, or a wrong note put right?",
-    "decides": "The appoggiaturas' chance, the songs' own.",
-    "genre": "pop",
-    "without": {
-      "skip": [],
-      "genre": {
-        "appoggiatura": {
-          "melody": 0,
-          "counterMelody": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 17.6,
-        "listen": [
-          "Melody (Steel Drums)"
-        ]
-      },
-      {
-        "seed": "4",
-        "at": 116,
-        "listen": [
-          "Melody (Electric Guitar (clean))"
+          "Bass (Cello)"
         ]
       },
       {
         "seed": "6",
-        "at": 72.5,
+        "at": 48.1,
         "listen": [
-          "Melody (Acoustic Grand Piano)"
+          "Bass (Cello)"
         ]
       },
       {
-        "seed": "7",
-        "at": 13.5,
+        "seed": "G",
+        "at": 112.3,
         "listen": [
-          "Melody (Electric Guitar (clean))"
+          "Bass (Cello)"
         ]
       },
       {
-        "seed": "9",
-        "at": 14.3,
+        "seed": "J",
+        "at": 117.9,
         "listen": [
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 208.2,
-        "listen": [
-          "Melody (Lead 1 (square))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "held",
-    "question": "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
-    "decides": "The held tones' and the ringing's chances by genre.",
-    "genre": "pop",
-    "without": {
-      "skip": [],
-      "genre": {
-        "colour": {
-          "held": 0
-        },
-        "articulation": {
-          "letRing": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "L",
-        "at": 66.6,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "o",
-        "at": 204.8,
-        "listen": [
-          "Rhythm part (Acoustic Guitar (steel))"
-        ]
-      },
-      {
-        "seed": "v",
-        "at": 0,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "1i",
-        "at": 4.1,
-        "listen": [
-          "Chords (Pad 3 (polysynth))"
-        ]
-      },
-      {
-        "seed": "1w",
-        "at": 60.1,
-        "listen": [
-          "Chords (Electric Piano 1)"
-        ]
-      },
-      {
-        "seed": "1x",
-        "at": 11.7,
-        "listen": [
-          "Chords (Electric Guitar (clean))"
+          "Bass (Cello)"
         ]
       }
     ]
