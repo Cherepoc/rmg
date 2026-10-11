@@ -69,6 +69,76 @@
     ]
   },
   {
+    "id": "punk-breakdown",
+    "question": "Punk's bridge as a hardcore band's breakdown, in half time, the guitars chugging and the kick with them: the song's peak, or a different band?",
+    "decides": "Punk's breakdowns' chance.",
+    "genre": "punk",
+    "without": {
+      "skip": [],
+      "genre": {
+        "breakdown": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "M",
+        "at": 84.6,
+        "listen": [
+          "Hi-Hat",
+          "Rhythm part (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 48.1,
+        "listen": [
+          "Chords (Overdriven Guitar)",
+          "Acoustic Snare",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "x",
+        "at": 98.9,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Hi-Hat",
+          "Solo (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "1D",
+        "at": 127.4,
+        "listen": [
+          "Chords (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "1H",
+        "at": 73.8,
+        "listen": [
+          "Hi-Hat",
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "1L",
+        "at": 106.6,
+        "listen": [
+          "Chords (Distortion Guitar)",
+          "Melody (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))"
+        ]
+      }
+    ]
+  },
+  {
     "id": "held",
     "question": "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
     "decides": "The held tones' and the ringing's chances by genre.",

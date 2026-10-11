@@ -548,10 +548,9 @@ dynamics, as it has no drums.
   out by the cycle's leftover, so that the riff ends its cycle with the section and the next starts on it, the short
   bar's own case (`ShortBars`) for a polymetric section, its cut the cycle's rather than half a bar. Measured by the
   frames drawn by genre, and the bars a cycle runs before it starts afresh.
-- **Breakdowns beyond Djent** (P2, suggested 8 October 2026 after listening: Djent's bridge in half time, the kick
-  following the chugs, heard as great): Metal's and Nu metal's already break down (42% and 41% of their songs); more of
-  Nu metal's, and the other heavy genres', Punk's hardcore end and Black metal's slower passages, each a genre's
-  `breakdown` chance, and a breakdown in a verse or before the last chorus beside the bridge, should more be wanted.
+- **Breakdowns beyond Djent, the rest** (P3, Punk's done 11 October 2026, 20% of its songs, asked as
+  `?listen=punk-breakdown`): more of Nu metal's, and a breakdown in a verse or before the last chorus beside the bridge,
+  should listening want more.
 - **The bass with the riff, by convention** (P2, suggested 8 October 2026): the bass doubling the riff in 35% of
   sections whatever the song (`LineDoubling.RiffChance`, alike at every end, as neither plainer nor stranger); a plain
   band's bass plays the riff with it always and a wild one's goes its own way, so the chance from 1 at the plain end,

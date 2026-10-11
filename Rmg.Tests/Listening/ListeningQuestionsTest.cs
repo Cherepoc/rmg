@@ -49,6 +49,9 @@ public sealed class ListeningQuestionsTest
         new("calm", "Black metal's quieter sections turned calm: an acoustic or clean guitar breaking the chords slowly, their dark held tones ringing, the other guitars resting and the drums in half time. A calm between the storms, or a jump?",
             "The calm sections' chance by genre, and whether a fill or a fade should lead into one.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1)),
+        new("punk-breakdown", "Punk's bridge as a hardcore band's breakdown, in half time, the guitars chugging and the kick with them: the song's peak, or a different band?",
+            "Punk's breakdowns' chance.", "punk", [], new() { ["breakdown"] = new() { ["sections"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.Breakdown, v => (bool)v!), 1)),
         new("held", "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
             "The held tones' and the ringing's chances by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 }, ["articulation"] = new() { ["letRing"] = 0 } },
             x => FirstColoured(x, ChordColour.Held))

@@ -1560,6 +1560,7 @@
       "solos": { "sections": [0, 5, 15], "trades": 0 },
       "hook": { "choruses": [70, 70, 50] },
       "form": { "vcvcbc": 100, "vcvc": 80 },
+      "breakdown": { "sections": [0, 15, 35] },
       "ending": { "stop": 100, "button": 80 },
       "intro": { "countIn": 100, "cold": 60 },
       "keyChanges": {},

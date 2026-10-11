@@ -78,7 +78,7 @@ public sealed class BreakdownTest
     [Explicit]
     public async Task Report()
     {
-        foreach (var name in new[] { "metal", "djent", "nuMetal", "rock", "blackMetal" })
+        foreach (var name in new[] { "metal", "djent", "nuMetal", "punk", "rock", "blackMetal" })
         {
             var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name))));
             var always = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always(name))));
