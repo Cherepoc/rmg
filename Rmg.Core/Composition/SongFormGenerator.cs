@@ -342,6 +342,26 @@ internal sealed class SongFormGenerator
             description += $", fading from beat {fadeStart} to {end}";
         }
 
+        // a stripped song plays its last section once more and its pitched parts leave one by one over its last two patterns,
+        // each at a bar in an order drawn, a soloist too, every track of a part together, the drums alone in the last bars
+        if (plan.Ending == EndingKind.Strip)
+        {
+            var stripStart = Math.Max(spans[^1].Start, end - 2 * last.PatternDuration);
+            var bars = (int)Math.Round((end - stripStart) / last.BarDuration);
+            TrackRole[] parts = [.._roles.Values.Where(x => x != TrackRole.Drum).Distinct().OrderBy(x => x).OrderBy(_ => _context.GenerateDouble())];
+            for (var i = 0; i < parts.Length; i++)
+            {
+                var exit = stripStart + (i + 1) * bars / (parts.Length + 1) * last.BarDuration;
+                foreach (var track in _roles.Where(x => x.Value == parts[i]).Select(x => x.Key))
+                {
+                    edits.Clear(track, exit, end);
+                    edits.Silence(track, exit, end);
+                }
+
+                description += $", {parts[i]} out at {exit}";
+            }
+        }
+
         StateTrace.RecordSection(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], description, null);
         // a lift the drums announce built to and dropped at, now and then, a genre's: the band out for the bar before it, the
         // lines that walk into the section with it, but for the drums' fill into it, and the drums landing on it

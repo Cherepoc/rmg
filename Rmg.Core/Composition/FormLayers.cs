@@ -27,7 +27,10 @@ public enum EndingKind
     Stop,
 
     /// <summary>The last section plays once more, as it would again, and the band fades out over it.</summary>
-    Fade
+    Fade,
+
+    /// <summary>The last section plays once more, its parts leaving one by one, the drums alone at its end, as a DJ's track ends for the next to mix in.</summary>
+    Strip
 }
 
 /// <summary>How a song starts before its first section.</summary>
@@ -181,7 +184,9 @@ internal static class FormLayers
         new(0.34, EndingKind.RingOut),
         new(0.08, EndingKind.Open),
         new(0.13, EndingKind.Stop),
-        new(0.15, EndingKind.Fade)
+        new(0.15, EndingKind.Fade),
+        // a genre's, which the songs never play
+        new(0, EndingKind.Strip)
     ];
 
     /// <summary>Whether an ending lands on a final chord, which it holds, after the last section.</summary>
@@ -211,9 +216,9 @@ internal static class FormLayers
         return ByConvention.Weigh(EndingWeights, unconventionality, genre.Pool<EndingKind>(GenreChoices.Ending, x => GenreChoices.Name(x.ToString())));
     }
 
-    /// <summary>The endings' weights at the ends: the adventurous ones leaning unconventional.</summary>
+    /// <summary>The endings' weights at the ends: the adventurous ones leaning unconventional, a genre's alone never the songs'.</summary>
     public static ImmutableArray<(EndingKind Ending, ByConvention Weight)> EndingWeights { get; } =
-        [..Endings.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, AdventurousEndings.Contains(x.Value) ? 1 : 0)))];
+        [..Endings.Select(x => (x.Value, x.Weight == 0 ? new ByConvention(0, 0, 0) : RhythmicUnconventionality.WeightEnds(x.Weight, AdventurousEndings.Contains(x.Value) ? 1 : 0)))];
 
     /// <summary>An ending as a genre's page shows it.</summary>
     public static string LabelOf(EndingKind ending) => ending switch
@@ -223,6 +228,7 @@ internal static class FormLayers
         EndingKind.Open => "Open",
         EndingKind.Stop => "A stop",
         EndingKind.Fade => "A fade",
+        EndingKind.Strip => "Parts dropping out",
         _ => ending.ToString()
     };
 

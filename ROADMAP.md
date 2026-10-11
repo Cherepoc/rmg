@@ -544,9 +544,6 @@ dynamics, as it has no drums.
 - **Ghost notes beyond the backbeat** (P3): Funk, Soul, Fusion, Blues, Hip hop, Rock, Disco, Drum and bass, Reggae and
   Ska ghost on a backbeat's snare (`Ghosts`, asked as *dnb-ghosts*); a jazz drummer's comping on the snare and Latin's
   timbales are idioms of their own, a snare off the backbeat role and a kit without one, which ghosts do not reach.
-- **A dance track's ending stripped back** (P3, from the review of 9 October 2026): House, Techno and Trance end
-  by fading, opening or stopping; a DJ's ending drops the parts out one by one to the drums alone, an ending of its own
-  beside the fade, the reverse of an intro of entries.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a
   section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`), the chorus 2.6 semitones over

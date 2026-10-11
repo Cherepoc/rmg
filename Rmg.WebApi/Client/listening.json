@@ -201,68 +201,69 @@
     ]
   },
   {
-    "id": "djent-frame",
-    "question": "Djent's polymetric riff drifting against the bar for 8 or 16 bars before it snaps back on a downbeat, in place of every 4: the bar line lost and the return an arrival, or just lost?",
-    "decides": "Djent's polymeter's frames.",
-    "genre": "djent",
+    "id": "techno-strip",
+    "question": "Techno ending as a DJ's track does, its parts dropping out one by one to the drums alone: ready to mix, or falling apart?",
+    "decides": "The stripped ending's weight in House, Techno and Trance.",
+    "genre": "techno",
     "without": {
       "skip": [],
       "genre": {
-        "polymeterFrame": {
-          "fourBars": 100,
-          "eightBars": 0,
-          "sixteenBars": 0,
-          "thirtyTwoBars": 0
+        "ending": {
+          "strip": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "1",
-        "at": 3.8,
+        "seed": "2",
+        "at": 237.7,
         "listen": [
-          "Chords (Pad 7 (halo))"
+          "Melody (Lead 2 (sawtooth))",
+          "Pad (Pad 2 (warm))",
+          "Bass (Synth Bass 1)"
         ]
       },
       {
-        "seed": "6",
-        "at": 4.4,
+        "seed": "4",
+        "at": 124,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Kick"
+          "Bass (Synth Bass 2)",
+          "Riff (Lead 1 (square))"
         ]
       },
       {
-        "seed": "9",
-        "at": 56.8,
+        "seed": "R",
+        "at": 181.7,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Synth Bass 2)",
+          "Rhythm part (Clavinet)"
         ]
       },
       {
-        "seed": "A",
-        "at": 98.3,
+        "seed": "T",
+        "at": 538.6,
         "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (finger))"
+          "Melody (Lead 1 (square))",
+          "Counter-melody (Lead 1 (square))"
         ]
       },
       {
-        "seed": "B",
-        "at": 12,
+        "seed": "d",
+        "at": 737.8,
         "listen": [
-          "Bass (Electric Bass (finger))",
-          "Riff (Overdriven Guitar)"
+          "Chords (Pad 3 (polysynth))",
+          "Rhythm part (Clavinet)",
+          "Melody (Lead 1 (square))"
         ]
       },
       {
-        "seed": "L",
-        "at": 56.8,
+        "seed": "s",
+        "at": 339.8,
         "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Synth Bass 1)",
+          "Riff (Lead 2 (sawtooth))"
         ]
       }
     ]

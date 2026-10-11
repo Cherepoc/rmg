@@ -283,8 +283,8 @@ internal sealed record SongDecisions(
                 sectionIds.CountBy(x => x).ToDictionary(),
                 id => sectionGenerator.DrawDrums(id, structure.Roles[id], isPercussionOnly: false)
             );
-        // how many times more a song that fades plays its last section, by how often the section plays its pattern
-        static int Fading(EndingKind ending, int plays) => ending != EndingKind.Fade ? 0 : plays == 1 ? 2 : 1;
+        // how many times more a song that fades or strips plays its last section, by how often the section plays its pattern
+        static int Fading(EndingKind ending, int plays) => ending is not (EndingKind.Fade or EndingKind.Strip) ? 0 : plays == 1 ? 2 : 1;
         bool Repeats(bool drawn, int fades) =>
             drawn && fades == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]) && structure.Roles[sectionIds[^1]] != SectionRole.Outro;
         // a last section that came back before played once more now and then, drawn here, which the length takes in
