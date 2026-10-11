@@ -221,7 +221,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 130 to 145, the pads and bass pumping.",
     "choices": {
-      "figure": { "bass": { "own": [40, 30, 30], "rolling": 100, "offbeat": [60, 60, 40] } },
+      "figure": { "bass": { "own": [40, 30, 30], "offbeat": 100 } },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
@@ -1808,7 +1808,6 @@
     "name": "Bossa nova",
     "description": "A nylon guitar's syncopated chords, a flute or a sax, major sevenths and ninths moving by ii-V, the snare's cross-stick on a brush kit, a shaker, soft and straight, 100 to 140.",
     "choices": {
-      "alternatingBass": { "sections": [40, 50, 50] },
       "drumSoloFeet": { "bossa": 100, "groove": 30 },
       "tempo": { "from": [100, 100, 90], "to": [140, 140, 150] },
       "meter": { "4/4": 100 },

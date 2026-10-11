@@ -264,13 +264,15 @@ heard good where a song ghosts little, about 1.2 to 1.6 a ghosting bar, and not 
 genre's ghosts now as many as it says (`ghostNotes`, `Ghosts.GenreOdds`), Drum and bass's 20, 1.09 ghosts a bar of
 its songs to 0.66, heard better again (`dnb-few-ghosts`, 5 of 6) and kept. Every question built so far answered.
 
-Asked from 11 October 2026, ten of the review of 10 October's proposed questions (its findings queued for listening):
-as the presets are, `idm-key` (IDM's key changes, the songs' own, #472), `fusion-lift` (Fusion's last section lifted,
-#455), `techno-comp` (Techno's comping rhythm part, #397), `djent-colour` (Djent's colours on 84% of its broken chords,
-#432) and `metal-violin` (Metal's violin melody, #422); and added to try, each a device the engine has, `techno-bass`
-(Techno's rolling and offbeat bass, as Trance's, #398), `bossa-root-fifth` (Bossa nova's root and fifth, 40-50-50%,
-#463, the least heard of the round), `chiptune-octave` (Chiptune's octave bass, 30-40-40%, #476), `punk-riff-intro`
-(Punk opening on its riff, 20-30-30%, #453) and `orchestral-switch` (Orchestral's theme handed on, 10-20-40%, #464).
+Answered on 11 October 2026, the night, ten of the review of 10 October's proposed questions (its findings queued for
+listening). As the presets are, and kept: `idm-key` (IDM's key changes, the songs' own, #472, 6 of 6), `fusion-lift`
+(Fusion's last section lifted, #455, 5 of 5), `techno-comp` (Techno's comping rhythm part, #397, 6 of 6),
+`djent-colour` (Djent's colours on 84% of its broken chords, #432, 6 of 6) and `metal-violin` (Metal's violin melody,
+#422, 6 of 6). Added to try: kept, `chiptune-octave` (Chiptune's octave bass, 30-40-40%, #476, 6 of 6),
+`punk-riff-intro` (Punk opening on its riff, 20-30-30%, #453, 6 of 6) and `orchestral-switch` (Orchestral's theme handed
+on, 10-20-40%, #464, 4 to 2); `techno-bass` (#398) tied 3 to 3, its offbeat 8ths heard good and its rolling 16ths
+mostly not, so Techno's bass plays the offbeat figure alone; and `bossa-root-fifth` (#463), split 2, 2 and 2 unsure and
+the least heard, taken out, Bossa nova's bass walking as before.
 
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's

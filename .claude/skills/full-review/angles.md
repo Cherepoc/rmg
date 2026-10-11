@@ -28,7 +28,7 @@ You review one concern across the whole codebase rather than one slice.
    - Does a later stage silently undo or break an earlier one? For example, stop time removing a fill's notes, a push moving notes another stage placed, an expression stage reading state an earlier stage dropped.
    - Is any `CanSkip` stage read by a later stage (wrongly skippable)?
    - Is the order documented and right?
-   - The sections each stage keeps out of: solos, drum solos, stop time, a polymeter's sections (`SongDraft.Polymeters`), figures, breakdowns, a short last bar. Stages that edit the same notes should keep out of the same things; one that does not breaks what another keeps (a push moving a polymeter's cycle was such a bug).
+   - The sections each stage keeps out of: solos, drum solos, stop time, a polymeter's sections (`SongDraft.Polymeters`), figures, breakdowns, a short last bar, a calm or heavy section (`SectionForms`), a call and response's phrases (`CallAndResponse`), a hook intro quoting its chorus. Stages that edit the same notes should keep out of the same things; one that does not breaks what another keeps (a push moving a polymeter's cycle was such a bug).
    - What each stage leaves a later one: an edit made before the realizer that the realizer can undo (a note struck again in a cleared span), or one made after it that misses what the realizer adds.
 
 4. **duplicates.** Mechanisms implemented twice, or nearly twice:
@@ -141,7 +141,7 @@ choice and every stage of the family. The id is `device-<family>`. For every dev
   that plays where its own doc says it does not, is a finding.
 - **Against the others.** The family's devices in pairs, and each against the devices of other families that edit the
   same notes or the same bars (stop time, drops, solos, textures, polymeters, figures, short bars, doubling, late
-  entries): does each keep out of the other where it should, and is what they make together intended? Most of the
+  entries, a section's calm or heavy form, call and response, held tones and let ring, the hook intro): does each keep out of the other where it should, and is what they make together intended? Most of the
   bugs a second corpus found were two devices meeting: a push moving a polymeter's cycle, a doubling silencing its
   part where a texture rested the doubled one, a drop landing on a section that builds.
 - **As it sounds.** What the device does to the music, whether a player would do it so, and where its amounts would
