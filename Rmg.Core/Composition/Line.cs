@@ -95,6 +95,7 @@ internal sealed class Line
     /// </param>
     /// <param name="lift">How far the section moves the line's range and its aim up its instrument's, in semitones (<see cref="CompositionStateKinds.LineLift" />).</param>
     /// <param name="inverts">Whether a run of echoes starting on the note plays its figure inverted, its steps mirrored about its first.</param>
+    /// <param name="drones">Whether the line drones, its weak notes on an open string, the key's own at the bottom of its range, its melody an octave or more above it.</param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
@@ -108,11 +109,16 @@ internal sealed class Line
         LineScale lineScale = LineScale.Section,
         double lift = 0,
         double pedal = 1,
-        bool inverts = false
+        bool inverts = false,
+        bool drones = false
     )
     {
         Lift(lift);
         _classes = LineScales.Classes(lineScale, chord);
+        // a droning line's weak note on its open string, which leaves its melody where it was, so that the melody steps on
+        // from its own last note over the drone
+        if (drones && beatRank > 0)
+            return OpenString(chord);
         var aim = register * _profile.ContourShare;
         if (phraseStart == PhraseStart.Afresh)
             (_previous, _previousMove, _echoRun) = (null, 0, null);
@@ -161,6 +167,12 @@ internal sealed class Line
             note = pedal < 1 ? PlaceOnPedal(chord, beatRank, pedal) ?? PlaceByRule(chord, [], beatRank, step, turn, register)
                 : PlaceByRule(chord, chordToneClasses, beatRank, step, turn, register);
         }
+
+        // a droning line's melody an octave or more over its open string, as far as its instrument reaches, as a guitarist
+        // leaps from the string to the high frets and back
+        if (drones)
+            while (note < OpenString(chord) + OctaveNoteCount && note + OctaveNoteCount <= _instrument.High)
+                note += OctaveNoteCount;
 
         // the first time a note is heard it is remembered, as the step from its chord's root it has
         if (echo != 0)
@@ -295,6 +307,9 @@ internal sealed class Line
         var root = chord.Root.Mod(OctaveNoteCount);
         return Enumerable.Range(_low, _high - _low + 1).FirstOrDefault(x => x.Mod(OctaveNoteCount) == root, _low);
     }
+
+    /// <summary>A droning line's open string: the key's tonic, the scale's first note, the lowest its instrument plays, as a low string sits under a riff's frets.</summary>
+    private int OpenString(ChordContext chord) => _instrument.Low + (chord.Tonic - _instrument.Low).Mod(OctaveNoteCount);
 
     private int PlaceByRule(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step, double turn, double register)
     {

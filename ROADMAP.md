@@ -133,7 +133,7 @@ percent everywhere, and a listening question once deployed):
 7. Done: the kick and the crash pushing with the band, an eighth early; the drums playing a stop-time phrase's last
    half bar, a fill there as heavy as a section's, 1% to 21% of the phrases filled out of.
 8. Done: a riff's weak notes on an open string's drone, the chugging riff's pedal without its chugs, heard worse and
-   played by no preset now (*A riff's drone, reworked*); a driven guitar's quieter form, since a section's calm form
+   played by no preset then, since reworked with leaps for Djent; a driven guitar's quieter form, since a section's calm form
    (*Planned: held tones, let ring, a section's form, and two genres*, step 3). The montuno left, a pattern of its own (*What the genres cannot play yet*).
 9. Done already: the instruments by listening are in the presets, the timpani, the organ bass, the church organ, the
    music box and the kalimba, Chiptune's squares; their weights by listening (*Instruments by listening*).
@@ -492,9 +492,10 @@ listening question and a deploy to test. In order:
    no figure, the drums in half time or resting; a louder one heavy, its clean guitars driven, its chords struck. Black
    metal's calm in 38% of its songs, with its dark held tones, asked as `?listen=calm` (`quieter-form` retired). Left,
    by listening: a calm section's bass held on its roots; a fill or a fade into it; Metal's and Rock's calm.
-4. **A riff's drone, with leaps** (P2): *A riff's drone, reworked* (*Form and sections*), a riff alternating an open
-   string, the key's own, with fretted notes an octave or more above it, its melody on the strong notes; no chugs.
-   Djent's chugs drawn down to 40–60% of its riffs and the drone given 20–40%; asked as `?listen=djent-open`.
+4. Done (11 October 2026): **a riff's drone, with leaps**: its weak notes on an open string, the key's own at the bottom
+   of the guitar, its melody an octave or more over it as far as the guitar reaches, 9.5 to 10 semitones on the average,
+   single notes, no chugs; Djent's chugs drawn down to 50% of its sections and its drone 14%, asked as
+   `?listen=djent-open`. Black metal's tremolo figure repeats a note, so its drone would not alternate; left to listening.
 5. **12/8** (P2): a meter of four groups of three 8ths (`Meter`), its broken chords in triplets, which swing cannot
    give, as it only lengthens a pair's first note. For the power ballad, and Blues and Soul by listening.
 6. **Power ballad** (P2, data over steps 1, 2, 3 and 5): a clean guitar's broken chords let ring with sweet held
@@ -567,11 +568,6 @@ dynamics, as it has no drums.
 - **Ghost notes in more genres** (P2, suggested 8 October 2026, the ghosts heard as great): Funk, Soul, Fusion, Blues,
   Hip hop, Rock and Disco ghost now (`GenreChoices.Ghosts`); Drum and bass's breaks, Reggae's one drop, Ska, R&B, a
   jazz drummer's comping on the snare and Latin's timbales would too, each its chance by listening to the preset.
-- **A riff's drone, reworked** (P2, heard 8 October 2026: a good idea for metal, but the songs sounded better without
-  it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
-  bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
-  melody with an open string, the string the key's own (its tonic or fifth, not every chord's root), in a pattern of
-  the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it. Planned with wide leaps (*Planned: held tones, let ring, a section's form, and two genres*, step 4).
 - **A dance track's ending stripped back** (P3, from the review of 9 October 2026): House, Techno and Trance end
   by fading, opening or stopping; a DJ's ending drops the parts out one by one to the drums alone, an ending of its own
   beside the fade, the reverse of an intro of entries.

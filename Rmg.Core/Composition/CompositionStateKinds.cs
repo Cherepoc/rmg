@@ -121,6 +121,10 @@ internal static class CompositionStateKinds
     // free to take any note of its scale, as a chugging riff's (Chugs)
     public static StateKind<int> LinePedal { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePedal", StateScope.Render);
 
+    // 1 for a line droning, its weak notes on an open string, the key's own, the lowest its instrument plays, and its strong
+    // ones its melody an octave or more over it, as a black metal or a djent riff leaps between the string and the frets
+    public static StateKind<int> LineDrone { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineDrone", StateScope.Render);
+
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 

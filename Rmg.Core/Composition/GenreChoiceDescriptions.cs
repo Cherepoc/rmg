@@ -71,7 +71,7 @@ public static class GenreChoiceDescriptions
         ["push"] = "How often a section plays its chord changes an 8th early, an anticipation that pushes the groove forward.",
         ["keyChanges"] = "How often the last chorus lifts to a higher key, a section plays in a key of its own, or the key changes anywhere at all.",
         ["hook"] = "How often a chorus, or any other section, is built on a short repeating melodic hook.",
-        ["riff"] = "How often a section's riff plays in power chords, how often its guitars and picked bass chug, their repeated notes palm-muted, and how often its weak notes fall on an open string's drone, as a black metal or a folk riff's do.",
+        ["riff"] = "How often a section's riff plays in power chords, how often its guitars and picked bass chug, their repeated notes palm-muted, and how often it drones, its weak notes on an open string and its melody leaping an octave or more above it, as a black metal, a folk metal or a djent riff does.",
         ["solos"] = "How often a section that comes back is played as a solo instead, and how often a solo trades with the drums, turn by turn, the band laying out for theirs, and how often a solo is played by two parts together a third apart, a twin-guitar break.",
         ["soloists"] = "Which part takes the solos: the solo part, a lead such as a sax or a guitar, or another part, even the drums.",
         ["intro"] = "How the song starts: the whole band at once, a count-in, or the parts coming in one by one.",

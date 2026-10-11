@@ -1088,7 +1088,7 @@
       "harmonyDevices": { "pedal": [30, 40, 50], "reharmonised": 0, "innerLine": 0 },
       "loop": { "sections": [40, 50, 40] },
       "rootMotion": { "same": 75, "stepUp": 60 },
-      "riff": { "powerChords": [60, 60, 50], "chugs": [90, 90, 80] },
+      "riff": { "powerChords": [60, 60, 50], "chugs": [50, 50, 40], "drone": [40, 40, 50] },
       "register": { "riff": 0 },
       "parts": { "melody": [40, 40, 50], "chords": [60, 60, 60], "bass": 100, "pad": [50, 50, 60], "counterMelody": [40, 45, 55], "drum": 100, "riff": 100, "riffTwin": [0, 10, 20], "rhythm": [50, 50, 50], "solo": [20, 40, 60] },
       "instrument": {

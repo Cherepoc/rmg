@@ -52,6 +52,9 @@ public sealed class ListeningQuestionsTest
         new("punk-breakdown", "Punk's bridge as a hardcore band's breakdown, in half time, the guitars chugging and the kick with them: the song's peak, or a different band?",
             "Punk's breakdowns' chance.", "punk", [], new() { ["breakdown"] = new() { ["sections"] = 0 } },
             x => Before(x, FirstSection(x, TracePoints.Breakdown, v => (bool)v!), 1)),
+        new("djent-open", "Djent's riff on an open string, its melody leaping an octave or more above it and back, in place of a chug: the band's sound, or less heavy?",
+            "Djent's drone's and chugs' chances.", "djent", [], new() { ["riff"] = new() { ["drone"] = 0, ["chugs"] = 90 } },
+            x => Before(x, FirstSection(x, TracePoints.Drone, v => (bool)v!), 1)),
         new("held", "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
             "The held tones' and the ringing's chances by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 }, ["articulation"] = new() { ["letRing"] = 0 } },
             x => FirstColoured(x, ChordColour.Held))

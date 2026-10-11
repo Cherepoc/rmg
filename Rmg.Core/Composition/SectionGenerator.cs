@@ -95,8 +95,9 @@ internal sealed class SectionGenerator
     public static Probabilities.ByConvention AlternatingBassChance { get; } = new(0, 0, 0);
 
     /// <summary>
-    ///     The chance a section's riff plays its weak notes on an open string's drone, its chord's root at the bottom of its
-    ///     range, as a black metal or a folk riff does, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).
+    ///     The chance a section's riff drones, its weak notes on an open string, the key's own at the bottom of its range, and
+    ///     its melody an octave or more above it, as a black metal, a folk metal or a djent riff leaps between the string and
+    ///     the high frets; a genre's that the songs never play, and none where the riff chugs (<see cref="GenreChoices.Riff" />).
     /// </summary>
     public static Probabilities.ByConvention DroneChance { get; } = new(0, 0, 0);
 
@@ -228,11 +229,11 @@ internal sealed class SectionGenerator
         var alternatingBass = Stream(sectionId, SectionStream.AlternatingBass)
             .TestProbability(AlternatingBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.AlternatingBass, "sections")));
         StateTrace.RecordSection(TracePoints.AlternatingBass, SectionTrace, sectionId, $"{alternatingBass}", alternatingBass);
-        // its riff's weak notes on an open string's drone now and then, as a chugging riff's are, without its chugs, a
-        // genre's, from a sequence of its own
-        var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone")));
+        // its riff droning now and then, its weak notes on an open string and its melody above it, a genre's, from a sequence
+        // of its own, where it does not chug
+        var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone"))) && !chugs;
         StateTrace.RecordSection(TracePoints.Drone, SectionTrace, sectionId, $"{drone}", drone);
-        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs || drone, form).ToArray();
+        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs, drone, form).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
@@ -510,6 +511,7 @@ internal sealed class SectionGenerator
         bool hooks,
         bool powerChords,
         bool pedal,
+        bool drone,
         SectionForm form
     )
     {
@@ -530,7 +532,7 @@ internal sealed class SectionGenerator
 
             // each track from a sequence of its own
             var context = TrackStream(sectionId, SectionStream.PitchedTracks, trackNumber);
-            var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal, form);
+            var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal, drone, form);
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
             {
                 yield return (trackNumber, GeneratePad(trackNumber, trackStateMap, barStateTimelineMap, harmonicRhythm, meter), null);
@@ -646,7 +648,7 @@ internal sealed class SectionGenerator
     ///     busyness, the melody's and the riff's line scales, the riff in power chords, the chords broken now and then, and
     ///     its fullness by the section's energy, over the section's state.
     /// </summary>
-    private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords, bool pedal, SectionForm form)
+    private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords, bool pedal, bool drone, SectionForm form)
     {
         // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
         // and is as busy as the section has it
@@ -670,6 +672,9 @@ internal sealed class SectionGenerator
             // power chords throughout
             if (pedal && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
                 sectionTrackLayer.Add(CompositionStateKinds.LinePedal, 1);
+            // a riff that drones, on its open string and its melody an octave or more over it, in single notes
+            else if (drone && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
+                sectionTrackLayer.Add(CompositionStateKinds.LineDrone, 1);
             else if (powerChords && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
                 sectionTrackLayer.Add(CompositionStateKinds.PowerChord, 1);
         }

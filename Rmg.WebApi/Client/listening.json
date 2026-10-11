@@ -139,6 +139,68 @@
     ]
   },
   {
+    "id": "djent-open",
+    "question": "Djent's riff on an open string, its melody leaping an octave or more above it and back, in place of a chug: the band's sound, or less heavy?",
+    "decides": "Djent's drone's and chugs' chances.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "riff": {
+          "drone": 0,
+          "chugs": 90
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 80.8,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 0,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 99.7,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 86.8,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
     "id": "held",
     "question": "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
     "decides": "The held tones' and the ringing's chances by genre.",

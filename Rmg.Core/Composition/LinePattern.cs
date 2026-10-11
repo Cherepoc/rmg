@@ -161,7 +161,8 @@ internal sealed class LinePattern
                         x.State.GetStateValue(CompositionStateKinds.LineLift),
                         // a chugging riff's note's own draw of its pedal, by its key, which draws nothing else
                         x.State.GetStateValue(CompositionStateKinds.LinePedal) > 0 ? Draw(x.State, PedalStream) : 1,
-                        Inverts(x)
+                        Inverts(x),
+                        x.State.GetStateValue(CompositionStateKinds.LineDrone) > 0
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
                 }

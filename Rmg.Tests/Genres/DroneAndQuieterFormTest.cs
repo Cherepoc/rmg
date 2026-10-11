@@ -15,36 +15,46 @@ public sealed class DroneAndQuieterFormTest
         return genre with { Choices = genre.Choices.SetItem(choice.Name, own.SetItem(option, new ByConvention(1, 1, 1))) };
     }
 
-    /// <summary>The share of a riff's weak notes, those off its beats, on the lowest note of their chord's root it plays, in the sections given.</summary>
-    private static (int OnPedal, int Weak) Pedal(CorpusSong song, IReadOnlySet<int> sections)
+    /// <summary>
+    ///     A riff's weak notes, those off its beats, on its open string, the lowest of the key's tonic it plays, and its strong
+    ///     ones' leaps over it, in semitones, in the sections given.
+    /// </summary>
+    private static (int OnPedal, int Weak, int Above, int Strong) Pedal(CorpusSong song, IReadOnlySet<int> sections)
     {
-        var (onPedal, weak) = (0, 0);
+        var (onPedal, weak, above, strong) = (0, 0, 0, 0);
         foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Riff))
         foreach (var span in song.Map.Sections.Where(x => sections.Contains(x.SectionId) && !song.IsSolo(x)))
         {
             var inSpan = notes.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9 && x.Value.Pitches.Length == 1).ToArray();
-            foreach (var note in inSpan.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.BeatRank) > 0))
+            foreach (var note in inSpan)
             {
-                weak++;
-                var root = Rmg.Core.Composition.Realizer.GetChord(note.Value.State).Chord.GetPitch(0);
-                var lowest = inSpan.Select(x => x.Value.Pitches[0]).Where(x => ((x - root) % 12 + 12) % 12 == 0).DefaultIfEmpty(int.MinValue).Min();
-                onPedal += note.Value.Pitches[0] == lowest ? 1 : 0;
+                var tonic = Rmg.Core.Composition.Realizer.GetChord(note.Value.State).Chord.Tonic;
+                var open = inSpan.Select(x => x.Value.Pitches[0]).Where(x => ((x - tonic) % 12 + 12) % 12 == 0).DefaultIfEmpty(int.MinValue).Min();
+                if (note.Value.State.GetStateValue(CompositionStateKinds.BeatRank) > 0)
+                    (weak, onPedal) = (weak + 1, onPedal + (note.Value.Pitches[0] == open ? 1 : 0));
+                // a strong note's leap where the riff plays its string
+                else if (open > int.MinValue)
+                    (strong, above) = (strong + 1, above + note.Value.Pitches[0] - open);
             }
         }
 
-        return (onPedal, weak);
+        return (onPedal, weak, above, strong);
     }
 
-    /// <summary>A droning section's riff plays most of its weak notes on its chord's root at the bottom, far more than one that does not drone.</summary>
+    /// <summary>A droning section's riff plays its weak notes on its open string and its melody over it, leaping about an octave between them.</summary>
     [Test]
-    public async Task ADroningRiff_PlaysItsWeakNotesOnItsPedal()
+    public async Task ADroningRiff_PlaysItsWeakNotesOnItsOpenString_ItsMelodyLeapingOverIt()
     {
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("blackMetal", GenreChoices.Riff, "drone"))));
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("djent", GenreChoices.Riff, "drone"))));
         var drones = songs.Select(x => Pedal(x, x.Trace.Where(t => t.Point == TracePoints.Drone && (bool)t.Value!).Select(t => t.Section).ToHashSet())).ToArray();
-        var (onPedal, weak) = (drones.Sum(x => x.OnPedal), drones.Sum(x => x.Weak));
-        Console.WriteLine($"droning: {onPedal} of {weak} weak notes on the pedal");
+        var (onPedal, weak, above, strong) = (drones.Sum(x => x.OnPedal), drones.Sum(x => x.Weak), drones.Sum(x => x.Above), drones.Sum(x => x.Strong));
+        // the melody an octave or more over the string as far as the guitar reaches, the restated and led notes among the
+        // rest, against the mechanism breaking (measured: 99% on the string, 9.5 to 10 semitones over it, at offsets 0 and a
+        // million)
+        Console.WriteLine($"droning: {onPedal} of {weak} weak notes on the open string, the strong ones {above / (double)strong:F1} semitones over it on the average");
         await Assert.That(weak).IsGreaterThan(100);
-        await Assert.That(onPedal / (double)weak).IsGreaterThan(0.5);
+        await Assert.That(onPedal / (double)weak).IsGreaterThan(0.9);
+        await Assert.That(above / (double)strong).IsGreaterThan(7);
     }
 
     /// <summary>
@@ -122,13 +132,13 @@ public sealed class DroneAndQuieterFormTest
     [Explicit]
     public async Task Report()
     {
-        foreach (var name in new[] { "blackMetal", "folk" })
+        foreach (var name in new[] { "blackMetal", "djent", "folk" })
         {
             var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name))));
             var drones = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Drone)).Average(t => (bool)t.Value! ? 1.0 : 0);
             var pedal = songs.Select(x => Pedal(x, x.Trace.Where(t => t.Point == TracePoints.Drone && (bool)t.Value!).Select(t => t.Section).ToHashSet())).ToArray();
             var calm = songs.Average(x => x.Trace.Any(t => t.Point == TracePoints.SectionForm && (SectionFormKind)t.Value! == SectionFormKind.Calm) ? 1.0 : 0);
-            Console.WriteLine($"{name}: sections droning {drones:P0}, their riff's weak notes on the pedal {pedal.Sum(x => x.OnPedal) / (double)Math.Max(1, pedal.Sum(x => x.Weak)):P0}; songs with a calm section {calm:P0}");
+            Console.WriteLine($"{name}: sections droning {drones:P0}, their riff's weak notes on the open string {pedal.Sum(x => x.OnPedal) / (double)Math.Max(1, pedal.Sum(x => x.Weak)):P0}, its strong ones {pedal.Sum(x => x.Above) / (double)Math.Max(1, pedal.Sum(x => x.Strong)):F1} semitones over it; sections chugging {songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Chugs)).Average(t => (bool)t.Value! ? 1.0 : 0):P0}; songs with a calm section {calm:P0}");
         }
 
         await Task.CompletedTask;
