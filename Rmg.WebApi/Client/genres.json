@@ -161,7 +161,7 @@
       "articulation": { "legato": [0, 10, 20], "stabs": [40, 50, 50], "roll": 0 },
       "effects": { "chorus": [0, 40, 70], "swell": [0, 40, 70], "vibrato": [0, 15, 30], "tone": [20, 40, 60], "bends": 0, "tape": 0, "pinch": 0, "dive": 0 },
       "solos": { "sections": [0, 1, 5], "trades": 0 },
-      "planing": { "sections": [0, 10, 30], "modes": 50 },
+      "planing": { "sections": [10, 25, 40], "modes": 50 },
       "harmonyDevices": {},
       "chordScales": { "borrowed": [0, 8, 20], "applied": 0, "own": 0, "mediant": [0, 10, 20] },
       "push": {},
@@ -925,7 +925,7 @@
       "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": {
         "ground": { "own": 100, "withRiff": 40, "doubleKick": [10, 25, 30] },
-        "riff": { "own": 100, "gallop": [10, 15, 25] }
+        "riff": { "own": 100, "gallop": [10, 15, 25], "tremolo": [5, 10, 20] }
       },
       "drumSounds": { "china": 70 },
       "drumStrokes": { "china": 70, "openHiHat": 85 },
@@ -1084,7 +1084,7 @@
       "space": { "melody": 85, "chords": 85, "pad": 90, "counterMelody": 85, "drum": 85, "bass": 70 },
       "levels": { "drum": 40, "pad": 60 },
       "strongEffect": { "none": 60, "echo": 40, "sweep": [0, 20, 30] },
-      "effects": { "vibrato": [10, 30, 50], "chorus": [20, 30, 50], "swell": [40, 50, 70], "bends": [0, 0, 10], "tone": [30, 50, 60], "tape": 0, "pinch": 0, "dive": 0 },
+      "effects": { "vibrato": [10, 30, 50], "chorus": [20, 30, 50], "swell": [40, 50, 70], "bends": [0, 0, 10], "tone": [30, 50, 60], "tape": [30, 50, 70], "pinch": 0, "dive": 0 },
       "articulation": { "legato": [40, 50, 60], "roll": 0 },
       "dynamics": { "energy": 30, "contrast": 40 },
       "texture": { "steady": 100, "build": 70, "alone": [20, 30, 40] },
@@ -1295,7 +1295,7 @@
       "kit": { "standard": 100, "room": 40 },
       "drumSetup": { "kitAndPercussion": 100, "kit": 50 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "clap": 80, "hiHat": 100, "tambourine": 60, "conga": [20, 30, 40], "cymbal": 70, "tom": 30 },
-      "drumSounds": { "openHiHat": 85 },
+      "drumSounds": { "openHiHat": 100 },
       "pins": { "ground": 100, "backbeat": 90, "time": 80 },
       "rhythm": {
         "ground": { "speed": 100, "fineness": 0, "fullness": 100, "repetition": 100 },
@@ -1585,7 +1585,7 @@
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [160, 160, 150], "to": [200, 200, 230] },
       "meter": { "4/4": 100 },
-      "feelChances": {},
+      "feelChances": { "swing": 0, "halfTime": 0, "doubleTime": [10, 15, 20] },
       "length": { "from": [90, 90, 60], "to": [180, 180, 240] },
       "scale": { "major": 100, "mixolydian": 70, "naturalMinor": 60 },
       "chordShape": { "powerChord": 100, "triad": 40 },
@@ -1637,6 +1637,7 @@
     "name": "Fusion",
     "description": "Electric piano and a soprano sax over a fretless bass singing high, Lydian, Dorian and melodic minor, ninths to thirteenths and quartal chords, chords in scales of their own and planed, odd meters, long solos.",
     "choices": {
+      "form": { "vvbv": 100, "vvbvvvbv": 50, "vcvcbc": 40 },
       "rudiments": { "flams": [0, 30, 70], "drags": [0, 30, 70] },
       "ownMode": { "lydian": 100, "dorian": 100, "melodicMinor": 80, "mixolydian": 50, "phrygian": [0, 10, 20] },
       "ghosts": { "sections": [30, 50, 60] },
@@ -1739,7 +1740,7 @@
       "hook": { "choruses": [70, 70, 50] },
       "form": { "vcvcbc": 100, "vpcvpcbc": 80 },
       "formChances": { "forms": [100, 90, 60] },
-      "ending": { "ringOut": 100, "fade": 70, "button": 40 },
+      "ending": { "ringOut": 60, "fade": 100, "button": 40 },
       "solos": { "sections": [10, 15, 25], "trades": 0 },
       "soloAnswers": { "sections": [30, 40, 50] }
     }
