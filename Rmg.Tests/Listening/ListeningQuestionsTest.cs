@@ -51,8 +51,15 @@ public sealed class ListeningQuestionsTest
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?
                 .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min(),
             // tied 3 to 3 on 10 October 2026, asked again over other songs
-            [13, 17, 28, 37, 38, 45])
+            [13, 17, 28, 37, 38, 45]),
+        new("held", "Pop's broken chords with the key's second and third held over every chord, rubbing against it: sweet, or muddy?",
+            "The held tones' chance by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 } }, x => FirstColoured(x, ChordColour.Held))
     ];
+
+    /// <summary>Where the song's chords first break in the colour given, a bar before it.</summary>
+    private static double? FirstColoured(CorpusSong song, ChordColour colour) =>
+        Before(song, song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Chords))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Colour) == (int)colour)
+            .Select(x => (double?)x.Position).FirstOrDefault(), 1);
 
     /// <summary>Where the song first changes key.</summary>
     private static double? FirstKeyChange(CorpusSong song) =>

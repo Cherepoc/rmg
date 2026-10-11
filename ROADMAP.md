@@ -480,15 +480,9 @@ What it left, all in `reviews/2026-10-10.md`'s *Open*:
 Planned 11 October 2026 and revised the same day after two reviews; each step through the implementation loop, with a
 listening question and a deploy to test. In order:
 
-1. **Held tones** (P1): two of the key's steps held over every chord of a broken chord's part, so that over one chord
-   they are its tensions and over the next its own notes, as a guitar's open strings ring through a progression. A new
-   `ChordColour`, of the key's steps rather than the chord's intervals, each option a pair of steps as its data:
-   `held`, the 2nd and the 3rd, sweet, their rub between the chord's colours (a tone apart in a major key, a semitone
-   in a minor one); `heldDark`, the 5th and the 6th, or the 1st and the 2nd where the scale is Phrygian, menacing, their
-   rub against the tonic and its fifth. A step the chord's own scale alters left out of that chord rather than bent;
-   clean and decaying instruments only (a clean or acoustic guitar, a piano, a harp); the chord's name on the page
-   its state's (`SongHarmony`). Measured over the same songs, on and off: the semitones the held tones make against a
-   chord's notes, sweet against dark. Asked as `?listen=held`.
+1. Done (11 October 2026): **held tones**, a colour of a broken chord's (`ChordColour.Held`, `HeldDark`), the key's second
+   and third or its fifth and sixth held over every chord on a clean instrument that dies away; Pop's sweet ones asked
+   as `?listen=held`, Metal's dark ones (rare on its clean guitar) asked with step 3's calm sections.
 2. **Let ring** (P1): a broken chord's notes sounding on to the chord's change, a note cut where its own pitch is struck
    again; note lengths in the state, not a sustain pedal, which synthesizers honour unevenly. Figures of 8ths or slower
    on decaying instruments alone, by a genre's chance (`Arpeggios`). Asked with step 1 as one question, both against

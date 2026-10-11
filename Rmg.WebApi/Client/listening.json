@@ -56,5 +56,63 @@
         ]
       }
     ]
+  },
+  {
+    "id": "held",
+    "question": "Pop's broken chords with the key's second and third held over every chord, rubbing against it: sweet, or muddy?",
+    "decides": "The held tones' chance by genre.",
+    "genre": "pop",
+    "without": {
+      "skip": [],
+      "genre": {
+        "colour": {
+          "held": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "L",
+        "at": 66.6,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "v",
+        "at": 0,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "1i",
+        "at": 4.1,
+        "listen": [
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "1l",
+        "at": 110.2,
+        "listen": [
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "1w",
+        "at": 60.1,
+        "listen": [
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "1x",
+        "at": 11.7,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      }
+    ]
   }
 ]

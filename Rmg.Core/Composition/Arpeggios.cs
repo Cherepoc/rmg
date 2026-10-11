@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Events;
 
 namespace Rmg.Core.Composition;
 
@@ -47,7 +48,16 @@ public enum ChordColour
     Ninth,
     MajorSeventh,
     FlatSecond,
-    SharpFourth
+    SharpFourth,
+
+    /// <summary>
+    ///     The key's second and third held over every chord, as a guitar's open strings ring through a progression, its
+    ///     tensions over one chord and its own notes over the next: sweet, their rub between the chord's colours.
+    /// </summary>
+    Held,
+
+    /// <summary>The key's fifth and sixth held over every chord, or its first and second where they are a semitone apart: menacing, their rub against the tonic or its fifth.</summary>
+    HeldDark
 }
 
 /// <summary>
@@ -80,8 +90,13 @@ internal static class Arpeggios
         (ChordColour.Ninth, new ByConvention(0, 0, 0)),
         (ChordColour.MajorSeventh, new ByConvention(0, 0, 0)),
         (ChordColour.FlatSecond, new ByConvention(0, 0, 0)),
-        (ChordColour.SharpFourth, new ByConvention(0, 0, 0))
+        (ChordColour.SharpFourth, new ByConvention(0, 0, 0)),
+        (ChordColour.Held, new ByConvention(0, 0, 0)),
+        (ChordColour.HeldDark, new ByConvention(0, 0, 0))
     ];
+
+    /// <summary>Whether a colour holds the key's steps over every chord, rather than one tone over each chord's root.</summary>
+    private static bool Holds(ChordColour colour) => colour is ChordColour.Held or ChordColour.HeldDark;
 
     /// <summary>A colour as a genre's page shows it.</summary>
     public static string LabelOf(ChordColour colour) => colour switch
@@ -90,7 +105,9 @@ internal static class Arpeggios
         ChordColour.Ninth => "A ninth",
         ChordColour.MajorSeventh => "A major seventh",
         ChordColour.FlatSecond => "A flat second",
-        _ => "A sharp fourth"
+        ChordColour.SharpFourth => "A sharp fourth",
+        ChordColour.Held => "Held tones, sweet",
+        _ => "Held tones, dark"
     };
 
     /// <summary>A colour's semitones above the chord's root.</summary>
@@ -100,21 +117,44 @@ internal static class Arpeggios
         ChordColour.MajorSeventh => 11,
         ChordColour.FlatSecond => 1,
         ChordColour.SharpFourth => 6,
-        _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, "No colour has no semitones.")
+        _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, "No colour and the held tones have no semitones over a root.")
     };
 
-    /// <summary>A section's colour of a part breaking its chord, by the chords facet, among a genre's pool where it names one.</summary>
-    public static ChordColour DrawColour(IGenerationContext context, double unconventionality, Genre genre) =>
-        context.Pick(ByConvention.Weigh(Colours, unconventionality, genre.Pool<ChordColour>(GenreChoices.Colour, x => GenreChoices.Name(x.ToString()))));
+    /// <summary>
+    ///     A section's colour of a part breaking its chord, by the chords facet, among a genre's pool where it names one; its
+    ///     held tones only on a clean instrument whose notes die away, where seconds ring as a colour, not as mud.
+    /// </summary>
+    public static ChordColour DrawColour(IGenerationContext context, double unconventionality, Genre genre, int program)
+    {
+        var holds = InstrumentTraits.Has(program, InstrumentTrait.Decays) && !InstrumentTraits.Has(program, InstrumentTrait.Driven);
+        var pool = genre.Pool<ChordColour>(GenreChoices.Colour, x => GenreChoices.Name(x.ToString()));
+        // a genre's pool of held tones alone, on an instrument that holds none, the chord as it is
+        var allowed = Colours.Where(x => (holds || !Holds(x.Colour)) && (pool is null || pool(x.Colour) is not null)).ToArray();
+        return allowed.Length == 0 ? ChordColour.None : context.Pick(ByConvention.Weigh(allowed, unconventionality, pool));
+    }
 
-    /// <summary>A voiced chord with its colour laid on it, the colour's tone the nearest above its lowest note.</summary>
-    public static ImmutableArray<int> Coloured(ImmutableArray<int> voiced, int root, ChordColour colour)
+    /// <summary>
+    ///     A voiced chord with its colour laid on it, each tone the nearest above its lowest note: a tone over the chord's
+    ///     root, or the key's steps held, each but one the chord's own scale moves, which it leaves out rather than bend.
+    /// </summary>
+    /// <param name="state">The note's state, its chord's scale and the section's among it.</param>
+    public static ImmutableArray<int> Coloured(ImmutableArray<int> voiced, StateMap state, int root, ChordColour colour)
     {
         if (colour == ChordColour.None || voiced.IsEmpty)
             return voiced;
+        IEnumerable<int> tones;
+        if (!Holds(colour))
+            tones = [root + SemitonesOf(colour)];
+        else
+        {
+            var (chordScale, _, chord) = Realizer.GetChord(state);
+            var scale = state.GetStateValue(StateKinds.ScaleOffsets);
+            int[] steps = colour == ChordColour.Held ? [1, 2] : scale[5] - scale[4] == 1 || scale[1] - scale[0] != 1 ? [4, 5] : [0, 1];
+            tones = steps.Where(x => chordScale[x] == scale[x]).Select(x => chord.Tonic + scale[x]);
+        }
+
         var lowest = voiced.Min();
-        var tone = lowest + ((root + SemitonesOf(colour) - lowest) % 12 + 12) % 12;
-        return voiced.Contains(tone) ? voiced : [..voiced, tone];
+        return [..voiced, ..tones.Select(x => lowest + (x - lowest).Mod(12)).Distinct().Where(x => !voiced.Contains(x))];
     }
 
     /// <summary>An arpeggio as a genre's page shows it.</summary>

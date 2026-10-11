@@ -691,7 +691,8 @@ internal sealed class SectionGenerator
             if (arpeggio == ArpeggioPattern.Random)
                 sectionTrackLayer.Add(CompositionStateKinds.ArpeggioOrder, (long)TrackStream(sectionId, SectionStream.ArpeggioOrder, trackNumber).GenerateSeed());
             // and the colour it lays on its broken chord, from a sequence of its own
-            var colour = Arpeggios.DrawColour(new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Colour), trackNumber)), sectionRhythm.Facets[Facet.Chords], _genre);
+            var colour = Arpeggios.DrawColour(new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Colour), trackNumber)), sectionRhythm.Facets[Facet.Chords], _genre,
+                ((PitchInstrumentTrack)_tracks.Definitions[trackNumber]).InstrumentCode);
             if (arpeggio != ArpeggioPattern.None && colour != ChordColour.None)
                 sectionTrackLayer.Add(CompositionStateKinds.Colour, (int)colour);
         }

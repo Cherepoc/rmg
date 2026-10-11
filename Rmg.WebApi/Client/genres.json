@@ -842,6 +842,7 @@
       "dynamics": { "energy": 60, "contrast": 70, "lift": 70, "evenness": 75 },
       "phraseScheme": { "aaab": 100, "abab": [60, 60, 60], "aaaa": [40, 40, 30], "aaba": [40, 40, 40] },
       "arpeggio": { "none": 100, "up": [20, 20, 30], "upDown": [15, 15, 25], "alberti": [10, 10, 20], "upTwoOctaves": [0, 0, 15] },
+      "colour": { "none": 100, "held": [0, 20, 30] },
       "passingChords": { "chords": [0, 5, 5] }
     }
   },
@@ -916,7 +917,7 @@
         "rhythm": { "speed": 70 }
       },
       "arpeggio": { "none": 100, "pedal": [20, 25, 30], "up": [10, 15, 20], "upDown": [5, 10, 15], "upTwoOctaves": [0, 5, 25], "random": [0, 0, 15] },
-      "colour": { "none": 100, "ninth": [20, 30, 40], "majorSeventh": [5, 10, 20], "flatSecond": [5, 10, 20], "sharpFourth": [0, 5, 15] },
+      "colour": { "none": 100, "ninth": [20, 30, 40], "majorSeventh": [5, 10, 20], "flatSecond": [5, 10, 20], "sharpFourth": [0, 5, 15], "heldDark": [0, 25, 35] },
       "space": { "riff": 25, "rhythm": 25, "bass": 30, "drum": 40 }
     }
   },
