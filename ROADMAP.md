@@ -262,7 +262,8 @@ out: `classical`, its cello on a chord's third, kept (4 to 2); `djent-frame`, th
 not told apart (5 unsure of 5) and let go of, the frames as they are; and `dnb-ghosts` (3 better, 1 worse, 2 unsure),
 heard good where a song ghosts little, about 1.2 to 1.6 a ghosting bar, and not told apart where it ghosts 3 to 5: a
 genre's ghosts now as many as it says (`ghostNotes`, `Ghosts.GenreOdds`), Drum and bass's 20, 1.09 ghosts a bar of
-its songs to 0.66, asked again as `dnb-few-ghosts`.
+its songs to 0.66, heard better again (`dnb-few-ghosts`, 5 of 6) and kept. Every question built so far answered;
+the next round from the review of 10 October's proposed questions.
 
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's
@@ -533,7 +534,7 @@ dynamics, as it has no drums.
   and kept, `punk-breakdown`): more of Nu metal's, and a breakdown in a verse or before the last chorus beside the bridge,
   should listening want more.
 - **Ghost notes beyond the backbeat** (P3): Funk, Soul, Fusion, Blues, Hip hop, Rock, Disco, Drum and bass, Reggae and
-  Ska ghost on a backbeat's snare (`Ghosts`), Drum and bass fewer (`ghostNotes`, asked as *dnb-few-ghosts*); a jazz drummer's comping on the snare and Latin's
+  Ska ghost on a backbeat's snare (`Ghosts`), Drum and bass fewer (`ghostNotes`, heard and kept as *dnb-few-ghosts*); a jazz drummer's comping on the snare and Latin's
   timbales are idioms of their own, a snare off the backbeat role and a kit without one, which ghosts do not reach.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a

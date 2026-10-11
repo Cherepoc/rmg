@@ -44,12 +44,7 @@ public sealed class ListeningQuestionsTest
     /// <summary>Bars before a place, to hear what leads into it, never before the song's start.</summary>
     private static double? Before(CorpusSong song, double? at, int bars) => at is { } place ? Math.Max(0, place - bars * song.Song.MeterAt(place).BarDuration) : null;
 
-    private static readonly Question[] Questions =
-    [
-        new("dnb-few-ghosts", "Drum and bass's break with a few ghost notes, soft 16ths on the snare around its backbeat, fewer than a funk drummer's: a rolling break, or clutter at this speed?",
-            "How many ghost notes Drum and bass plays, and their chance.", "dnb", [], new() { ["ghosts"] = new() { ["sections"] = 0 } },
-            x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!))
-    ];
+    private static readonly Question[] Questions = [];
 
     /// <summary>Where the song's chords first break in the colour given, a bar before it.</summary>
     private static double? FirstColoured(CorpusSong song, ChordColour colour) =>
