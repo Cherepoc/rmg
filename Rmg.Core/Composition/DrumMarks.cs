@@ -39,7 +39,8 @@ internal static class DrumMarks
 
     /// <summary>
     ///     The chance a place is marked, by its strength, a section's start, a phrase's and a chord's change, and how loud the
-    ///     mark is against its drum's loudest note; a section's start the likeliest and the loudest, as the ending's is.
+    ///     mark is against its drum's typical note, the middle of its notes by loudness, so that a mark colours the parts rather than
+    ///     strikes over them; a section's start the likeliest and the loudest, as the ending's is.
     /// </summary>
     public static ImmutableArray<(double Chance, double Loudness)> Places { get; } = [(0.8, 1), (0.35, 0.85), (0.05, 0.7)];
 
@@ -49,7 +50,7 @@ internal static class DrumMarks
     /// <summary>How many notes a beat of a roll plays, and how likely: 16ths and 32nds.</summary>
     public static ImmutableArray<Weighted<int>> RollRates { get; } = [new(1, 4), new(1, 8)];
 
-    /// <summary>How loud a roll's first and last notes play against its peak, the drum's loudest note, and how fast, against its rate there.</summary>
+    /// <summary>How loud a roll's first and last notes play against its peak, the drum's typical note, and how fast, against its rate there.</summary>
     public const double RollFrom = 0.3;
 
     /// <summary>The chance a section's start or the ending, where it is marked, swells instead of being struck once.</summary>
@@ -79,8 +80,8 @@ internal static class DrumMarks
             return draft;
         var count = Math.Min(context.Pick(Counts), drums.Length);
         var marking = drums.OrderBy(_ => context.GenerateDouble()).Take(count).ToArray();
-        // every drum's loudest note, which its marks play as
-        var loudest = marking.ToDictionary(x => x, x => notes[x].MaxBy(n => n.Value.Velocity).Value);
+        // every drum's typical note, the middle of its notes by loudness, which its marks play as
+        var typical = marking.ToDictionary(x => x, x => notes[x].OrderBy(n => n.Value.Velocity).ElementAt(notes[x].Count / 2).Value);
 
         var map = song.Form.Map;
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
@@ -115,15 +116,15 @@ internal static class DrumMarks
                 var (hits, drum) = (striking.TestProbability(often.Chance(energy.Chance(chance, 1), 1)), marking[striking.GenerateInt(0, marking.Length)]);
                 var (swell, swellRate) = (swelling.TestProbability(swells.Chance(SwellChance, 1)), swelling.Pick(RollRates));
                 if (hits && plays && strength == 0 && swell && at >= SwellBeats)
-                    marks[drum].AddRange(Roll(loudest[drum], at, SwellBeats, SwellBeats, swellRate));
+                    marks[drum].AddRange(Roll(typical[drum], at, SwellBeats, SwellBeats, swellRate));
                 else if (hits && plays)
-                    marks[drum].Add((loudest[drum] with { Velocity = Render.ScaleLoudness(loudest[drum].Velocity, loudness) }).ToTimelineItem(at));
+                    marks[drum].Add((typical[drum] with { Velocity = Render.ScaleLoudness(typical[drum].Velocity, loudness) }).ToTimelineItem(at));
             }
 
             // a roll into the section on the beat before it, where the drums play the section
             var (rolls, rate, roller) = (rolling.TestProbability(often.Chance(energy.Chance(RollChance, 1), 1)), rolling.Pick(RollRates), marking[rolling.GenerateInt(0, marking.Length)]);
             if (rolls && plays && span.Start >= 1)
-                marks[roller].AddRange(Roll(loudest[roller], span.Start, 1, 0, rate));
+                marks[roller].AddRange(Roll(typical[roller], span.Start, 1, 0, rate));
         }
 
         var result = notes.ToBuilder();
