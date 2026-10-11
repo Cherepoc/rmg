@@ -329,6 +329,66 @@
     ]
   },
   {
+    "id": "classical",
+    "question": "Classical's cello on the chord's third now and then, the chord inverted, rather than always its root: a classical bass line, or a wandering one?",
+    "decides": "The bass's landings in Classical.",
+    "genre": "classical",
+    "without": {
+      "skip": [],
+      "genre": {
+        "bassLanding": {
+          "root": 100,
+          "third": 0,
+          "fifth": 30
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 64.7,
+        "listen": [
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "1",
+        "at": 41,
+        "listen": [
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 20.1,
+        "listen": [
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 48.1,
+        "listen": [
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 112.3,
+        "listen": [
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 117.9,
+        "listen": [
+          "Bass (Cello)"
+        ]
+      }
+    ]
+  },
+  {
     "id": "ballad",
     "question": "A Power ballad's clean broken chords turning driven where the band grows louder, its chorus heavy: the lift a ballad needs, or a jolt?",
     "decides": "The heavy form's chance in the Power ballad.",

@@ -500,13 +500,11 @@ listening question and a deploy to test. In order:
 6. Done (11 October 2026): **Power ballad** (`ballad`), data: a clean guitar's broken chords let ring with sweet held
    tones, an overdriven lead, strings, 60 to 85 in 4/4 and 12/8 (28% of its songs), 3.5 to 5 minutes, the chorus
    heavy (57 of 263 sections), the last chorus up a step; its heavy chorus asked as `?listen=ballad`.
-7. **Classical** (P2): chamber music, a few players unlike Orchestral's orchestra: a melody on violin, flute or
-   clarinet, the piano's Alberti figure under it, the cello's bass, no drums; raised cadences, ornaments, phrases of
-   four and four, AABA, ABA and a rondo; terraced dynamics; 80–140 BPM in 4/4, 3/4 and 6/8; the bass's inversions and
-   walks leaned up, as a bass on the roots alone sounds like pop on strings. Its key change to the dominant a genre's
-   pool of key steps (`keySteps`), the one piece of code it needs, built only if the songs' own steps do not serve; the
-   relative left out, a change of mode a key change keeps. Music for the piano alone left out, as no two parts share an
-   instrument.
+7. Done (11 October 2026): **Classical** (`classical`), data: a melody on violin, flute or clarinet over a piano's
+   Alberti figure and a cello, no drums, raised cadences and ornaments, AABA, ABA and a rondo (`SongForms`, forms of
+   their own the songs never take), terraced dynamics, 80 to 140 in 4/4, 3/4 and 6/8, two to four and a half minutes;
+   the cello on a chord's third in 32% of its notes, asked as `?listen=classical`. Its key change to the dominant, a
+   genre's pool of key steps, left until the songs' own steps are heard not to serve.
 
 Review: **overengineering**: held tones a colour and let ring a note's length, not new systems; a section's form one
 mechanism for both directions rather than a calm texture beside the louder form; the presets data, with 12/8 and
