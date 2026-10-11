@@ -268,6 +268,67 @@
     ]
   },
   {
+    "id": "call-response",
+    "question": "Blues' verse calling and answered: the melody singing each phrase's first half, the riff answering it in the second. A band talking to its singer, or a melody cut in half?",
+    "decides": "Call and response's chance by genre.",
+    "genre": "blues",
+    "without": {
+      "skip": [],
+      "genre": {
+        "callAndResponse": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 5.8,
+        "listen": [
+          "Melody (Harmonica)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 66.5,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "m",
+        "at": 9.1,
+        "listen": [
+          "Melody (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "s",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "x",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "y",
+        "at": 36.6,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)",
+          "Chords (Drawbar Organ)",
+          "Riff (Percussive Organ)"
+        ]
+      }
+    ]
+  },
+  {
     "id": "held",
     "question": "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
     "decides": "The held tones' and the ringing's chances by genre.",

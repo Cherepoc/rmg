@@ -93,6 +93,7 @@ public static class GenreChoiceDescriptions
         ["polymeter"] = "How often a section's riff, bass and kick run in a cycle of a different length across the bar, as djent and math rock do.",
         ["polymeterFrame"] = "How many bars a polymeter's cycle drifts against the steady bar before it starts afresh on a downbeat: four, eight, sixteen or thirty-two, the longer the more the bar line is lost and the more the return lands as an arrival.",
         ["soloAnswers"] = "How often the solo part answers the melody in its gaps, as a guitarist fills between a singer's lines.",
+        ["callAndResponse"] = "How often a verse calls and its band answers, as a blues or a soul band does: the melody singing the first half of every phrase and resting in the second, where the riff answers it.",
         ["lastRepeat"] = "How often the last chorus is played twice.",
         ["doubling"] = "How often a line is doubled: in octaves by its own part, the melody harmonised by the counter-melody, now and then in three voices, the bass playing the riff with it.",
         ["instrumentSwitches"] = "How often a section hands a part to another instrument, as a chorus's strings take over from a verse's piano.",

@@ -511,6 +511,7 @@
     "name": "Latin",
     "description": "The kit and percussion, congas, bongos, claves, cowbell, timbales and a guiro, a time keeper in the tresillo's 3+3+2, the bass anticipating the beat, nylon guitar, piano and trumpet, minor and Dorian, fast.",
     "choices": {
+      "callAndResponse": { "sections": [10, 30, 40] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50 },
       "figure": { "claves": { "own": 5, "clave32": 60, "clave23": 30 } },
       "louderForms": { "guitars": 0 },
@@ -567,6 +568,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "callAndResponse": { "sections": [10, 30, 40] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": [0, 20, 50], "drags": [0, 30, 70] },
@@ -680,6 +682,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "callAndResponse": { "sections": [20, 50, 60] },
       "dynamics": { "evenness": 40 },
       "loop": { "sections": [80, 80, 60] },
       "ghosts": { "sections": [20, 30, 40] },
@@ -1628,6 +1631,7 @@
     "name": "Soul",
     "description": "An organ, a piano and horns, sevenths and ninths passing through applied dominants, a laid-back backbeat, 4/4 or a swaying 6/8, a last chorus lifted, sax solos answering the tune.",
     "choices": {
+      "callAndResponse": { "sections": [15, 40, 50] },
       "rudiments": { "flams": [0, 20, 50], "drags": [0, 25, 60] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60 },
       "louderForms": { "guitars": 0, "quieter": 0 },
@@ -1687,6 +1691,7 @@
     "name": "Country",
     "description": "A fiddle, a steel-string guitar strummed, a banjo and a honky-tonk piano, plain triads moving by fourths and fifths, the bass on the root and the fifth, the snare on 2 and 4, major and Mixolydian.",
     "choices": {
+      "callAndResponse": { "sections": [10, 25, 35] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 25] },
       "alternatingBass": { "sections": [85, 75, 60] },
       "soloAnswers": { "sections": [20, 30, 40] },

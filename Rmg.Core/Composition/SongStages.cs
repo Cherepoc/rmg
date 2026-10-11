@@ -74,6 +74,7 @@ internal static class SongStages
         new("Lift cues", LiftCues, CanSkip: true),
         new("Drum solos", DrumSolos, CanSkip: true),
         new("Lines", Lines, CanSkip: false),
+        new("Call and response", Composition.CallAndResponse.Apply, CanSkip: true),
         new("Doubling", Doubling, CanSkip: true),
         new("Line chords", LineChordsStage, CanSkip: true),
         new("Chugs", Chugs.Apply, CanSkip: true),
