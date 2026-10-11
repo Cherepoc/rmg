@@ -46,6 +46,34 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
+        new("rock-rhythm-clean", "Rock's rhythm guitar clean or muted beside its driven chords and riff: a contrast, or wanted driven too?",
+            "The clean and muted guitars' weight in Rock's rhythm part.", "rock", [], new() { ["instrument.rhythm"] = new() { ["electricGuitarClean"] = 0, ["electricGuitarMuted"] = 0 } },
+            x => !x.Absent.Contains(TrackRole.Rhythm) && x.Song.TrackDefinitions[x.Track(TrackRole.Rhythm)] is PitchInstrumentTrack { InstrumentCode: 27 or 28 } ? 0 : null),
+        new("pop-double-time", "Pop's drums in double time for a section, the snare on every beat, as the songs' own chance has it: a lift, or a scramble?",
+            "Double time's chance in the songs.", "pop", [], new() { ["feelChances"] = new() { ["doubleTime"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == -1), 1)),
+        new("rock-section-tempo", "Rock with a section at a tempo of its own, eased in or taken at once: a change of gear, or the band losing time?",
+            "A section's own tempo's chance in the songs.", "rock", [], new() { ["sectionChanges"] = new() { ["tempo"] = 0, ["modulation"] = 0 } },
+            x => ((ImmutableArray<double>)x.Trace.Single(t => t.Point == TracePoints.SectionTempo).Value!).Select((v, i) => (v, i)).Where(p => Math.Abs(p.v - 1) > 1e-9 && p.i < x.Map.Sections.Length)
+                .Select(p => (double?)x.Map.Sections[p.i].Start).FirstOrDefault() is { } start ? Before(x, start, 2) : null),
+        new("pop-section-meter", "Pop with a section in a meter of its own, a bridge in 3/4 or 6/8 among 4/4: a turn, or a stumble?",
+            "A section's own meter's chance in the songs.", "pop", [], new() { ["sectionChanges"] = new() { ["meter"] = 0 } },
+            x => x.Map.Sections.FirstOrDefault(s => !s.Meter.Equals(x.Map.Sections[0].Meter)) is { } section ? Before(x, section.Start, 2) : null),
+        new("folk-key-sections", "Folk with a section in a key of its own, or a pattern starting in a new key, beyond the last chorus's lift: a journey, or lost?",
+            "A section's own key's chance in the songs.", "folk", [], new() { ["keyChanges"] = new() { ["sections"] = 0, ["patterns"] = 0 } },
+            x => ((ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!) is { Length: > 0 } changes ? Before(x, changes.Min(c => c.Position), 2) : null),
+        new("pop-switch", "Pop's part handed to another instrument of its family when its section returns, a piano's line on an electric piano: colour, or a part that changes its mind?",
+            "Instrument switches' chance in the songs.", "pop", [], new() { ["instrumentSwitches"] = new() { ["sections"] = 0 } },
+            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.InstrumentOverTime && x.Song.TrackDefinitions[t.Track] is PitchInstrumentTrack part
+                    && (((int, TrackRole, int, ArticulationMode, int))t.Value!).Item3 != part.InstrumentCode)
+                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 1)),
+        new("pop-off-scale", "Pop's chords leaving the key now and then, an applied dominant or a chord borrowed from the minor: colour, or wrong chords?",
+            "Applied and borrowed chords' chance in Pop.", "pop", [], new() { ["chordScales"] = new() { ["applied"] = 0, ["borrowed"] = 0 } },
+            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.ChordScales && ((ImmutableArray<ChordScale>)t.Value!).Any(c => c.Kind is ChordScaleKind.Applied or ChordScaleKind.Borrowed))
+                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 1)),
+        new("orchestral-alone", "Orchestral's section left to one part alone a while, the others resting, whichever part it is, the contrabass or the drums too: a solo passage, or parts gone missing?",
+            "The part alone's weight in Orchestral, and whether any part may be the one.", "orchestral", [], new() { ["texture"] = new() { ["alone"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.Texture, v => (((int, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>>))v!).Item2 == TextureKind.Alone), 1))
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

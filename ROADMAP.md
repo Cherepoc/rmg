@@ -295,6 +295,17 @@ so far answered. Left for later: Medieval's plain ornaments (#425) and Djent's r
 barely different or no ornament at all; Dungeon synth's arpeggios on its sustained voices (#429), its harpsichord's
 ostinato played by the same arpeggio.
 
+Asked from 12 October 2026, the plan's own questions below, each as the presets are, the song without leaving the
+device out: `rock-rhythm-clean` (Rock's rhythm guitar clean or muted beside its driven parts, *Sound*),
+`pop-double-time` (double time a lift or a scramble, *The song and its sections*), `rock-section-tempo` (a section's
+own tempo), `pop-section-meter` (a section's own meter), `folk-key-sections` (a section's or a pattern's own key beyond
+the last lift), `pop-switch` (instrument switches within the family, *Sound*), `pop-off-scale` (applied and borrowed
+chords, *Harmony and lines*) and `orchestral-alone` (a part alone, any part, the review's #468). Left out: Folk's
+mutating groove (#93), too few songs and barely heard (0.10); and Soul's horns before strings (#459), whose song
+without plays the same notes on another instrument, which the measure (`HeardDifference`) does not hear and so refuses,
+an instrument's change heard only where it changes the notes. The review's other findings to listen to need the code
+changed first (#138, #18, #43, #40, #79, #117, #119, #21), or were set aside (#425, #431, #429).
+
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's
 harmony static on purpose, its last hook's chords as they were. Kept, `funk-key`, `funk-pushes`, `numetal-half-time`,
