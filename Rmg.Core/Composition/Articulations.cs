@@ -16,6 +16,12 @@ internal static class Articulations
     /// <summary>The chance a part on a piano rolls its held chords, by the sound facet: never in the plainest songs.</summary>
     public static ByConvention RollChance { get; } = new(0, 0.3, 0.5);
 
+    /// <summary>The chance a part's broken chords are let ring to the chord's change, a genre's that the songs never play.</summary>
+    public static ByConvention LetRingChance { get; } = new(0, 0, 0);
+
+    /// <summary>The quickest a broken chord's notes follow each other and are let ring, in beats: an 8th, as faster ones would blur.</summary>
+    public const double RingsFrom = 0.5;
+
     /// <summary>How long a piano's rolled chord takes from its lowest note to its highest, in seconds: slower than a strum.</summary>
     public const double Roll = 0.06;
 
@@ -130,7 +136,36 @@ internal static class Articulations
                     .TestProbability(LegatoChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "legato"))))
                 result[track] = Slur(timeline);
 
+        // and a part's broken chords let ring where it lets them, its own sequence drawn for every part that holds chords
+        var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        foreach (var (track, timeline) in result.ToArray())
+            if (song.Tracks.Definitions[track] is PitchInstrumentTrack { } chords && chords.Role.PlaysChords()
+                && song.Stream(SongStream.LetRing, track).TestProbability(LetRingChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "letRing"))))
+                result[track] = LetRing(timeline, chords.InstrumentCode, changes, song.Form.Map);
+
         return draft with { Notes = result.ToImmutable() };
+    }
+
+    /// <summary>
+    ///     A part's broken chords let ring, as a guitar's strings or a piano's held keys ring: every note of one sounding to its
+    ///     chord's change, a bar at most, or to where its pitch is struck again, so that its seconds ring together; on a
+    ///     clean instrument that dies away, and a figure of 8ths or slower, as faster ones or held sounds would blur.
+    /// </summary>
+    private static EventTimeline<RealizedNote> LetRing(EventTimeline<RealizedNote> timeline, int own, double[] changes, SongMap map)
+    {
+        var notes = timeline.ToArray();
+        return EventTimeline.Create(timeline.Duration, notes.Select((note, i) =>
+        {
+            var program = InstrumentsOverTime.ProgramOf(note.Value.State, own);
+            if (note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 || note.Value.Pitches.Length != 1
+                || !InstrumentTraits.Has(program, InstrumentTrait.Decays) || InstrumentTraits.Has(program, InstrumentTrait.Driven)
+                || i + 1 < notes.Length && notes[i + 1].Position - note.Position < RingsFrom - 1e-9)
+                return note;
+            var change = changes.FirstOrDefault(x => x > note.Position + 1e-9, timeline.Duration);
+            var again = notes.Skip(i + 1).FirstOrDefault(x => x.Value.Pitches.Contains(note.Value.Pitches[0]), new TimelineItem<RealizedNote>(timeline.Duration, note.Value)).Position;
+            var end = Math.Min(Math.Min(change, again), note.Position + map.MeterAt(note.Position).BarDuration);
+            return end - note.Position > note.Value.Duration ? (note.Value with { Duration = end - note.Position }).ToTimelineItem(note.Position) : note;
+        }));
     }
 
     /// <summary>The chance a line's part slurs its steps, by the sound facet: never in the plainest songs, which play every note as struck.</summary>

@@ -59,14 +59,17 @@
   },
   {
     "id": "held",
-    "question": "Pop's broken chords with the key's second and third held over every chord, rubbing against it: sweet, or muddy?",
-    "decides": "The held tones' chance by genre.",
+    "question": "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
+    "decides": "The held tones' and the ringing's chances by genre.",
     "genre": "pop",
     "without": {
       "skip": [],
       "genre": {
         "colour": {
           "held": 0
+        },
+        "articulation": {
+          "letRing": 0
         }
       }
     },
@@ -76,6 +79,13 @@
         "at": 66.6,
         "listen": [
           "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "o",
+        "at": 204.8,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))"
         ]
       },
       {
@@ -90,13 +100,6 @@
         "at": 4.1,
         "listen": [
           "Chords (Pad 3 (polysynth))"
-        ]
-      },
-      {
-        "seed": "1l",
-        "at": 110.2,
-        "listen": [
-          "Chords (Electric Piano 1)"
         ]
       },
       {

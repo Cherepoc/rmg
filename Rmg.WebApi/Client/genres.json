@@ -843,6 +843,7 @@
       "phraseScheme": { "aaab": 100, "abab": [60, 60, 60], "aaaa": [40, 40, 30], "aaba": [40, 40, 40] },
       "arpeggio": { "none": 100, "up": [20, 20, 30], "upDown": [15, 15, 25], "alberti": [10, 10, 20], "upTwoOctaves": [0, 0, 15] },
       "colour": { "none": 100, "held": [0, 20, 30] },
+      "articulation": { "letRing": [0, 30, 40], "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0 },
       "passingChords": { "chords": [0, 5, 5] }
     }
   },

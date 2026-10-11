@@ -243,5 +243,6 @@ internal enum SongStream
     DrumOrnaments = 106,
     SectionPhraseBars = 107,
     ShortBars = 108,
-    DrumGroup = 109
+    DrumGroup = 109,
+    LetRing = 110
 }

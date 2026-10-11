@@ -52,8 +52,9 @@ public sealed class ListeningQuestionsTest
                 .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min(),
             // tied 3 to 3 on 10 October 2026, asked again over other songs
             [13, 17, 28, 37, 38, 45]),
-        new("held", "Pop's broken chords with the key's second and third held over every chord, rubbing against it: sweet, or muddy?",
-            "The held tones' chance by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 } }, x => FirstColoured(x, ChordColour.Held))
+        new("held", "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
+            "The held tones' and the ringing's chances by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 }, ["articulation"] = new() { ["letRing"] = 0 } },
+            x => FirstColoured(x, ChordColour.Held))
     ];
 
     /// <summary>Where the song's chords first break in the colour given, a bar before it.</summary>

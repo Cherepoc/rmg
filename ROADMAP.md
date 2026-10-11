@@ -483,10 +483,9 @@ listening question and a deploy to test. In order:
 1. Done (11 October 2026): **held tones**, a colour of a broken chord's (`ChordColour.Held`, `HeldDark`), the key's second
    and third or its fifth and sixth held over every chord on a clean instrument that dies away; Pop's sweet ones asked
    as `?listen=held`, Metal's dark ones (rare on its clean guitar) asked with step 3's calm sections.
-2. **Let ring** (P1): a broken chord's notes sounding on to the chord's change, a note cut where its own pitch is struck
-   again; note lengths in the state, not a sustain pedal, which synthesizers honour unevenly. Figures of 8ths or slower
-   on decaying instruments alone, by a genre's chance (`Arpeggios`). Asked with step 1 as one question, both against
-   neither, as together they are the sound asked for.
+2. Done (11 October 2026): **let ring**, a part's articulation (`Articulations.LetRingChance`, "letRing"), a broken chord's
+   notes sounding to its change, a bar at most, never over their own pitch struck again, on a clean instrument that dies
+   away and a figure of 8ths or slower; Pop's with its held tones, asked together as `?listen=held`.
 3. **A section's form** (P1, in place of the louder and quieter forms' instrument swap after assembly, which leaves an
    acoustic guitar tremolo-picking): a louder or quieter appearance turned heavy or calm as a whole, decided with the
    sections, before the parts play, a section's state. One mechanism both ways, the guitars always together:
