@@ -550,10 +550,11 @@ dynamics, as it has no drums.
   the verse, higher in 61% of the songs.
 - **The band's devices, the rest** (P3, each an edit after assembly among the stages, as stop time and pushes are):
   stop time's hits added where a part rests on the downbeat; a backing figure that recurs through the song.
-- **Call and response, the rest** (P3, after listening to *call-response*): the counter-melody answering where a song
-  has no riff, rather than the solo part's answers alone; the answer recurring as its bar patterns do by the scheme's
-  letters, with the recurring backing figure. Built: a verse's melody singing each phrase's first half and the riff
-  answering in the second (`CallAndResponse`), the riff answering in about a quarter of Blues' calling phrases.
+- **Call and response, the rest** (P3, after listening to *call-response* again): the answer recurring as its bar
+  patterns do by the scheme's letters, with the recurring backing figure. Built: a verse's melody singing each phrase's
+  first half and the riff answering in the second, or the counter-melody's own line where no riff plays, a phrase none
+  answers left whole (heard 11 October 2026: a cut melody with nothing answering it); the parts doubling a part cut
+  with it (`CallAndResponse`, after `Doubling`).
 - **Harmony's devices, the rest** (P3): a ii–V into a chord but the home, which a chord's own scale makes part of; the
   line cliché rising (the fifth, its sharp, the sixth) beside its falling one (`InnerLines`), should
   listening ask.

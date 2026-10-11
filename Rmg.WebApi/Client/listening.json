@@ -284,16 +284,18 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 5.8,
+        "at": 69.3,
         "listen": [
+          "Riff (Overdriven Guitar)",
           "Melody (Harmonica)"
         ]
       },
       {
-        "seed": "O",
-        "at": 66.5,
+        "seed": "h",
+        "at": 6.4,
         "listen": [
-          "Melody (Acoustic Grand Piano)"
+          "Counter-melody (Rock Organ)",
+          "Melody (Harmonica)"
         ]
       },
       {
@@ -321,10 +323,11 @@
         ]
       },
       {
-        "seed": "17",
-        "at": 46.8,
+        "seed": "16",
+        "at": 82.4,
         "listen": [
-          "Melody (Electric Guitar (clean))"
+          "Riff (Overdriven Guitar)",
+          "Melody (Harmonica)"
         ]
       }
     ]
@@ -352,7 +355,7 @@
       },
       {
         "seed": "A",
-        "at": 42.5,
+        "at": 90.1,
         "listen": [
           "Chords (Acoustic Grand Piano)",
           "Rhythm part (Acoustic Guitar (nylon))"
@@ -481,12 +484,12 @@
         ]
       },
       {
-        "seed": "15",
-        "at": 30.3,
+        "seed": "17",
+        "at": 20.6,
         "listen": [
-          "Hi-Hat",
-          "Melody (Harmonica)",
-          "Kick"
+          "Melody (Electric Guitar (clean))",
+          "Chords (Rock Organ)",
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
@@ -534,6 +537,13 @@
     },
     "seeds": [
       {
+        "seed": "0",
+        "at": 17.6,
+        "listen": [
+          "Melody (Steel Drums)"
+        ]
+      },
+      {
         "seed": "4",
         "at": 116,
         "listen": [
@@ -559,13 +569,6 @@
         "at": 14.3,
         "listen": [
           "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 41.6,
-        "listen": [
-          "Melody (Lead 6 (voice))"
         ]
       },
       {
