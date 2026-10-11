@@ -15,9 +15,10 @@ internal static class Progressions
 {
     /// <summary>
     ///     The chance a progression of four chords or more holds its home over its first two, a slower start, I for two bars
-    ///     before the rest move, as often in a plain song as a wild one, a little more in the wilder.
+    ///     before the rest move: a plain song's way to start, every time at the plain end, now and then in the middle and
+    ///     never at the wild end.
     /// </summary>
-    public static ByConvention HeldHome { get; } = new(0.1, 0.15, 0.25);
+    public static ByConvention HeldHome { get; } = new(1, 0.15, 0);
 
     /// <summary>How much a root that does not suit its bar weighs against one that does.</summary>
     private const double OutOfRoleWeight = 0.05;

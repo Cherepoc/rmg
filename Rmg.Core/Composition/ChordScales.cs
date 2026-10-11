@@ -111,7 +111,7 @@ public static class ChordScales
     /// <summary>
     ///     Every chord's scale, in the progression's order: the cadence's raised seventh where it has one, and the others'
     ///     drawn by the progression facet, the borrowed mode drawn once for the section among the scales on its home
-    ///     close to its own, as likely as a song is in them, the closer the likelier; a section of dominants every chord but
+    ///     close to its own, as likely as a song is in them, or the genre's where it names its scales, the closer the likelier; a section of dominants every chord but
     ///     the home Mixolydian, where its scale lets it; the chances a genre's where it names them.
     /// </summary>
     /// <param name="dominants">Whether the section plays every chord but its home as its own dominant (<see cref="Dominant" />).</param>
@@ -127,13 +127,15 @@ public static class ChordScales
         var applied = Applied.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "applied"));
         var borrowing = Borrowed.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "borrowed"));
         var onHome = Rotate(scale.Offsets, home);
-        var parallels = Scales.All
-            .Select(x => (Scale: x, Distance: x.Offsets.Zip(onHome).Count(y => y.First != y.Second)))
-            .Where(x => x.Distance is > 0 and <= BorrowedDistance)
-            .Select(x => (x.Scale, Weight: x.Scale.Weight.At(unconventionality) * Math.Pow(Scales.Closeness, x.Distance - 1)))
+        // the parallels a genre's scales allow, as it weighs them where it names them, the songs' weights otherwise
+        var pool = genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name));
+        int Distance(Scale x) => x.Offsets.Zip(onHome).Count(y => y.First != y.Second);
+        var near = Scales.All.Where(x => Distance(x) is > 0 and <= BorrowedDistance && (pool is null || pool(x) is not null)).Select(x => (x, x.Weight)).ToArray();
+        var parallels = (pool is null || near.Length == 0 ? [..near.Select(x => new Weighted<Scale>(x.Weight.At(unconventionality), x.x))] : ByConvention.Weigh(near, unconventionality, pool))
+            .Select(x => x with { Weight = x.Weight * Math.Pow(Scales.Closeness, Distance(x.Value) - 1) })
             .Where(x => x.Weight > 0)
             .ToArray();
-        var borrowed = parallels.Length > 0 ? context.Pick([..parallels.Select(x => new Weighted<Scale>(x.Weight, x.Scale))]) : null;
+        var borrowed = parallels.Length > 0 ? context.Pick([..parallels]) : null;
 
         // a mode on the chord's root that changes something but keeps its triad, the lines over it taking its colour
         ChordScale? OwnScale(int root)
@@ -144,30 +146,41 @@ public static class ChordScales
             return PickMode(ownContext, modes.Keys.ToHashSet(), unconventionality, genre) is { } mode ? modes[mode] : null;
         }
 
+        // whether the chord before was made this one's dominant, which a borrowed scale lowering this one's root would leave
+        // resolving a semitone off
+        var resolvesHere = false;
         return
         [
             ..progression.Select((root, chord) =>
             {
+                var resolving = resolvesHere;
+                resolvesHere = false;
                 // drawn for every chord, so that its draws are as many
                 var ownsScale = ownContext.TestProbability(own);
                 var ownScale = OwnScale(root);
                 var mediates = mediantContext.TestProbability(mediant);
                 if (Mod(root) == 0)
                     return ChordScale.Section;
-                if (dominants && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant), home + root) is { } dominant)
+                // but a minor home's chord a fourth above, a minor blues' iv7, which a dominant would make IV7
+                if (dominants && !(onHome[2] == 3 && Mod(root) == 3)
+                    && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant), home + root) is { } dominant)
                     return dominant;
                 if (chord == progression.Length - 1 && cadenceRaised is { } raised)
                     return new ChordScale(ChordScaleKind.Cadence, StepAlterations.Of([raised], []));
                 if (chord < progression.Length - 1 && Mod(progression[chord + 1] - root) == 3
                     && context.TestProbability(applied)
                     && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Applied), home + root) is { } dominantOfNext)
+                {
+                    resolvesHere = true;
                     return dominantOfNext;
+                }
                 // a minor chord a third from the home turned major, its third raised
                 if (mediates && Mod(root) is 2 or 5
                     && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Mediant) is { } major && major.Steps.Moves(Mod(home + root + 2)))
                     return major;
                 if (borrowed is not null && context.TestProbability(borrowing)
-                    && Heard(Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed), home + root) is { } lent)
+                    && Heard(Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed), home + root) is { } lent
+                    && !(resolving && lent.Steps.Moves(Mod(home + root))))
                     return lent;
                 return ownsScale && ownScale is not null ? ownScale : ChordScale.Section;
             })

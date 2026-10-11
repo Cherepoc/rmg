@@ -94,23 +94,24 @@ internal static class DrumKitGenerator
             );
 
         var doubles = ImmutableDictionary.CreateBuilder<PercussionInstrumentDefinition, PercussionInstrumentDefinition>();
-        // a lead that doubles itself, such as a shaker keeping time, is not doubled
-        foreach (var lead in leads.Values.Where(x => x.Doubling <= 0))
+        // a lead that doubles itself, such as a shaker keeping time, is not doubled; a lead doubled in the role it leads in
+        // the section, a hi-hat leading the backbeat by the drums at home there
+        foreach (var (role, lead) in leads.Where(x => x.Value.Doubling <= 0))
         {
             // any of the song's drums that doubles and has an affinity for the lead's role, the percussion too, likelier
             // the more it has, so that a clap mostly doubles the snare and now and then the kick
             var candidates = songDrums
-                .Where(x => x.Doubling > 0 && x.AffinityFor(lead.MainRole) > 0 && !kit.Contains(x) && !doubles.ContainsKey(x))
+                .Where(x => x.Doubling > 0 && x.AffinityFor(role) > 0 && !kit.Contains(x) && !doubles.ContainsKey(x))
                 .ToArray();
             // the likelier the more eager, and the more at home in the lead's role, the likeliest of them is, so that a
             // lead that only drums of another main role may double, as the kick, is seldom doubled
             if (candidates.Length == 0)
                 continue;
-            var eagerness = candidates.Max(x => x.DoublingOdds * x.AffinityFor(lead.MainRole));
+            var eagerness = candidates.Max(x => x.DoublingOdds * x.AffinityFor(role));
             if (!context.TestProbability(new Tilt(tilt.LogOdds + Math.Log(eagerness)).Chance(DoublingChance, 1)))
                 continue;
 
-            doubles[PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(x.Doubling * x.AffinityFor(lead.MainRole), x)), 1)[0]] = lead;
+            doubles[PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(x.Doubling * x.AffinityFor(role), x)), 1)[0]] = lead;
         }
 
         return new SectionKit([..kit, ..doubles.Keys], leads.ToImmutable(), sectionRoles, doubles.ToImmutable());

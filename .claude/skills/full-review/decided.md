@@ -67,3 +67,6 @@ rejected while fixing: the place, what was decided, why.
 - The thinning texture (Texture, TextureKind.Thin) may drop the melody among the parts, its order drawn: kept on listening (Synthwave IrBYcTV7F1B's second verse ending on four bars without it), a band's instrumental breath.
 - Medieval's raised cadence (cadenceRaise at the songs' own) kept on listening, 5 of 6: the leading tone raised at a cadence is medieval practice (musica ficta, the double leading-tone cadence); only its full major triad on the fifth is later.
 - Funk's key changes and pushes, Nu metal's half time, Techno's half and double time and Djent's polymeter kept on listening (10–11 October 2026).
+- Per-section chances that stop short of 1 at the wild end (a short bar, a metric modulation, a section's tempo, pushes): a share of a song's sections, which its many sections make near-certain in a wild song but not everywhere; not a song-level chance that must reach 1 (decided 11 October 2026).
+- A half count-in, an ending's ritardando and a tempo ramp drawn alike at every end: a song's style, neither plainer nor wilder, as the parts a song has are (decided 11 October 2026).
+- A chord soloist's approach asserted off the beat: not testable from the notes, as a stacked note's line may be another soloist's (decided 11 October 2026).

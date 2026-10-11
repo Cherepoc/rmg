@@ -715,6 +715,17 @@ public sealed class GenreEditorTest(Site site)
         await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "none.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "None", "choices": { "meter": {} } }""") });
         await page.Until(async () => await dialog.Locator("footer .warning").TextContentAsync() == "Meter keeps none of its options.", "the problem said");
         await Assert.That(await dialog.Locator("footer button", new() { HasTextString = "Play" }).IsDisabledAsync()).IsTrue();
+
+        // an option the server does not know, or an amount that is none, is no genre
+        foreach (var options in new[] { """{ "11/4": 100 }""", """{ "4/4": -5 }""", """{ "4/4": [1, 2] }""" })
+        {
+            await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "wrong.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes($$"""{ "name": "Wrong", "choices": { "meter": {{options}} } }""") });
+            await page.Until(async () => (await dialog.Locator("footer .warning").TextContentAsync())!.StartsWith("That file is not a genre"), $"{options} refused");
+        }
+
+        // a list of genres keeps none where one of them has a problem
+        await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "list.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""[{ "name": "Fine", "choices": {} }, { "name": "Empty", "choices": { "meter": { "4/4": 0 } } }]""") });
+        await page.Until(async () => await dialog.Locator("footer .warning").TextContentAsync() == "Empty: Meter keeps none of its options.", "the list's problem said");
         await Assert.That(page.Errors).IsEmpty();
     }
 

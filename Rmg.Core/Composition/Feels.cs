@@ -73,12 +73,13 @@ internal static class Feels
     }
 
     /// <summary>
-    ///     A layer's change of the feel it comes to, by its chance, another feel of the genre's pool; none for keeping it,
-    ///     as where the pool has no other.
+    ///     A layer's change of the feel it comes to, by its chance, another feel of the genre's pool, the song's or a part's
+    ///     own; none for keeping it, as where the pool has no other.
     /// </summary>
-    public static int? DrawChange(IGenerationContext context, int feel, ByConvention chance, double unconventionality, Genre genre)
+    /// <param name="feels">The genre's pool of feels the layer keeps to: the song's (<see cref="GenreChoices.Feel" />), or a part's (<see cref="GenreChoices.PartFeels" />).</param>
+    public static int? DrawChange(IGenerationContext context, int feel, ByConvention chance, double unconventionality, Genre genre, GenreChoice feels)
     {
-        var pool = genre.Pool<int>(GenreChoices.Feel, NameOf);
+        var pool = genre.Pool<int>(feels, NameOf);
         var others = Weights.Where(x => x.Feel != feel && (pool is null || pool(x.Feel) is not null)).ToArray();
         return context.TestProbability(chance.At(unconventionality)) && others.Length > 0
             ? context.Pick(ByConvention.Weigh(others, unconventionality, pool))

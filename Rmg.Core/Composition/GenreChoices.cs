@@ -353,7 +353,7 @@ public static class GenreChoices
     ///     (<see cref="VelocityLayers.GenreLevel" />): a beat's drums leading it, a dub's bass; the mix's volumes over them.
     /// </summary>
     public static GenreChoice Levels { get; } = Values("levels", "Levels",
-        PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum), Facet.Sound);
+        PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Drum), Facet.Sound);
 
     /// <summary>
     ///     How much reverb each part plays with, from 0, dry, through 50, as the songs have it, to 100, as wet as can be
@@ -477,6 +477,9 @@ public static class GenreChoices
     /// <summary>How many phrases of four bars a section's pattern may have, its progression's cycle: one, as every song's has, to four.</summary>
     public static ImmutableArray<int> PhraseCounts { get; } = [1, 2, 3, 4];
 
+    /// <summary>How many phrases a section's pattern has and how likely each is as the songs have it: one, four bars, alone, the longer a genre's.</summary>
+    public static ImmutableArray<(int Phrases, ByConvention Weight)> PhraseWeights { get; } = [..PhraseCounts.Select(x => (x, x == 1 ? new ByConvention(1, 1, 1) : default))];
+
     /// <summary>A count of phrases as a genre names it: by the bars they make, "eightBars".</summary>
     public static string PhrasesName(int phrases) => phrases switch
     {
@@ -492,7 +495,7 @@ public static class GenreChoices
     ///     eight, twelve, as the blues has, or sixteen (<see cref="Composition.Meter.Phrases" />).
     /// </summary>
     public static GenreChoice Phrases { get; } = Pool("phrases", "Section's pattern",
-        PhraseCounts.Select(x => (PhrasesName(x), $"{x * Composition.Meter.DefaultPhraseBars} bars", x == 1 ? new ByConvention(1, 1, 1) : default)));
+        PhraseWeights.Select(x => (PhrasesName(x.Phrases), $"{x.Phrases * Composition.Meter.DefaultPhraseBars} bars", x.Weight)));
 
     /// <summary>How many bars a section's phrase has: four, three, or four and two, its last two again (<see cref="PhraseLengths" />).</summary>
     public static GenreChoice PhraseBars { get; } = Pool("phraseBars", "Phrase length",
@@ -634,8 +637,9 @@ public static class GenreChoices
         DrumGroups.AllDrums.Select(x => (Composition.DrumPieces.NameOf(x), x.Name, Even(x.Weight)))));
 
     /// <summary>
-    ///     A choice of drums, every one tagged with its families, "kit" and "percussion", so that the page offers the setups
-    ///     the drums chosen make.
+    ///     A choice of drums, every one tagged by the setup that draws it (<see cref="DrumSetups.SelectSongDrums" />): "kit"
+    ///     for a kit's drum, a tambourine's or a shaker's among them, and "percussion" for the percussion group's, which a
+    ///     song of the kit and the percussion draws, so that the page offers the setups the drums chosen make.
     /// </summary>
     private static GenreChoice WithFamilies(GenreChoice choice) => choice with
     {
@@ -643,7 +647,7 @@ public static class GenreChoices
     };
 
     private static ImmutableArray<string> FamiliesOf(PercussionInstrumentDefinition drum) =>
-        [..new[] { (DrumFamily.Kit, "kit"), (DrumFamily.Percussion, "percussion") }.Where(x => drum.Family.HasFlag(x.Item1)).Select(x => x.Item2)];
+        [DrumGroups.Percussion.Drums.Contains(drum) ? "percussion" : "kit"];
 
     private static string Capitalised(string text) => char.ToUpperInvariant(text[0]) + text[1..];
 

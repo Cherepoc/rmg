@@ -143,10 +143,14 @@ internal static class Realizer
                     continue;
 
                 var (note, next) = (events[index].Value, events[index + 1]);
-                // the new root in the octave of the note it goes on from, a line's step counting whole octaves of the scale
+                // the new root in the octave nearest the note it goes on from, by how far the root moved, a line's step counting
+                // whole octaves of the scale
                 if (track.Role == TrackRole.Bass)
                 {
-                    var octave = (int)Math.Round(note.GetStateValue(StateKinds.ScaleStep) / (double)Scales.StepCount);
+                    int RootAt(double position) => commonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
+                    var moved = (RootAt(change) - RootAt(events[index].Position)).Mod(Scales.StepCount);
+                    moved -= moved > Scales.StepCount / 2 ? Scales.StepCount : 0;
+                    var octave = (int)Math.Round((note.GetStateValue(StateKinds.ScaleStep) - moved) / (double)Scales.StepCount);
                     struck.Add(note.With(StateKinds.ScaleStep, octave * Scales.StepCount).With(StateKinds.Alteration, 0).ToTimelineItem(change));
                 }
                 else if (next.Position < change + UntilChange(changes, change) - 1e-9)
@@ -386,7 +390,7 @@ internal static class Realizer
         // a chord moved by semitones, every note over it with it
         var basePitch = stateMap.GetStateValue(StateKinds.KeyOffset) + stateMap.GetStateValue(StateKinds.ChordShift)
                         + stateMap.GetStateValue(StateKinds.OctaveOffset) * OctaveNoteCount;
-        return (scaleOffsets, rootIndex, new ChordContext(step => basePitch + GetScalePitch(scaleOffsets, rootIndex + step)));
+        return (scaleOffsets, rootIndex, new ChordContext(step => basePitch + GetScalePitch(scaleOffsets, rootIndex + step), rootIndex));
     }
 
     /// <summary>

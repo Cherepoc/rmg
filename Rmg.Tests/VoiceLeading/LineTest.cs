@@ -17,7 +17,7 @@ public sealed class LineTest
     private static readonly ImmutableArray<int> Major = [0, 2, 4, 5, 7, 9, 11];
 
     private static ChordContext ChordOn(int rootStep) =>
-        new(step => 60 + Major[(rootStep + step).Mod(7)] + 12 * (int)Math.Floor((rootStep + step) / 7.0));
+        new(step => 60 + Major[(rootStep + step).Mod(7)] + 12 * (int)Math.Floor((rootStep + step) / 7.0), rootStep);
 
     private static readonly ChordContext C = ChordOn(0);
     private static readonly HashSet<int> CTones = [0, 4, 7];

@@ -49,24 +49,18 @@ public sealed class ChordVoicingTest
     }
 
     [Test]
-    public async Task ThePlainestTriads_AreCloseOrInverted_AndTheWildestNeverClose()
+    public async Task ThePlainestTriads_AreClose_TheVoiceLeaderInvertingThem_AndTheWildestOftenSpread()
     {
         var triad = ChordShapes.All.First(x => x.Name == "Triad");
         var context = new GenerationContext(0);
-        ImmutableArray<double>[] inversions =
-        [
-            triad.Targets,
-            [..triad.Targets.Skip(1), triad.Targets[0] + 12],
-            [..triad.Targets.Skip(2), triad.Targets[0] + 12, triad.Targets[1] + 12]
-        ];
-
+        var spread = 0;
         for (var i = 0; i < 500; i++)
         {
-            var plain = ChordVoicing.Apply(context, triad, 0);
-            var wild = ChordVoicing.Apply(context, triad, 1);
-
-            await Assert.That(inversions.Any(x => x.Order().SequenceEqual(plain))).IsTrue();
-            await Assert.That(wild.SequenceEqual(triad.Targets.Order())).IsFalse();
+            await Assert.That(ChordVoicing.Apply(context, triad, 0)).IsEquivalentTo(triad.Targets.Order(), CollectionOrdering.Matching);
+            spread += ChordVoicing.Apply(context, triad, 1).SequenceEqual(triad.Targets.Order()) ? 0 : 1;
         }
+
+        // the wild end's close a weight of 2 against drop 2's, open's and spread's 2.5 (ChordVoicing)
+        await Assert.That(spread).IsGreaterThan(150);
     }
 }

@@ -55,7 +55,8 @@ internal static class SongForms
     /// </summary>
     public static ByConvention IntroChance { get; } = new(0, 0.3, 0.3);
 
-    public static ByConvention OutroChance { get; } = new(0, 0.15, 0.25);
+    /// <summary>The chance a song closes on an outro of its own, by the form facet: never in a plain song, and no apter in a wild one than a middling one.</summary>
+    public static ByConvention OutroChance { get; } = new(0, 0.15, 0.15);
 
     /// <summary>The chance a song takes one of the forms, at a form facet of middling conventionality.</summary>
     public const double FormChance = 0.7;

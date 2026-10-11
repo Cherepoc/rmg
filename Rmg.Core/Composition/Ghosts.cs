@@ -24,7 +24,7 @@ internal static class Ghosts
     ///     A snare's ghost notes, a funk or soul drummer's: in a ghosting section, its snares keeping the backbeat play soft
     ///     16ths off the beat between their backbeats, the likelier next to one, each on the snare's head, as soft as heard
     ///     against its bar's loudest note. A section's decision, the 16ths it ghosts the same in each of its bars, as a
-    ///     drummer keeps a groove, from a sequence of its own; never in a bar a fill or stop time plays in, nor in a drum solo.
+    ///     drummer keeps a groove, from a sequence of its own; never in a bar a fill or stop time plays in, a tuplet's bar nor a drum solo.
     ///     The snares keeping the backbeat are the song's, as their roles are drawn for it, a wild section's redrawn roles
     ///     aside.
     /// </summary>
@@ -64,7 +64,8 @@ internal static class Ghosts
                 {
                     var end = Math.Min(span.End, start + bar);
                     var own = timeline.Where(x => x.IsWithin(start, end)).ToArray();
-                    if (own.Length == 0 || busy(start, end))
+                    // nor in a bar whose snare plays off the 16ths, a tuplet's, whose grid the ghosts would fall between
+                    if (own.Length == 0 || busy(start, end) || own.Any(x => Math.Abs((x.Position - start) / Length - Math.Round((x.Position - start) / Length)) > 1e-6))
                         continue;
                     var loudest = own.MaxBy(x => x.Value.Velocity);
                     // a ghost weaker than any beat of the bar

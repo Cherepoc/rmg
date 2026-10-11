@@ -115,8 +115,9 @@ export const NOT_A_GENRE = "That file is not a genre: a name and the choices the
 
 /**
  *     The genres a JSON file holds, a list of them or one, every one a name, choices the server knows (by `knows`, a
- *     choice's name) and a description if any, its choices in families or flat as an older export writes them; null for a
- *     file that is no genre nor a list of them.
+ *     choice's name and an option's of it) and a description if any, every option an amount or three, whole and not
+ *     below 0, its choices in families or flat as an older export writes them; null for a file that is no genre nor a
+ *     list of them.
  */
 export function readGenreFile(text, knows) {
     let read;
@@ -126,8 +127,11 @@ export function readGenreFile(text, knows) {
         return null;
     }
     const fromFile = (x) => (typeof x?.choices === "object" && x.choices !== null ? { ...x, choices: flatChoices(x.choices) } : x);
+    const isAmount = (x) => Number.isInteger(x) && x >= 0;
+    const isOptions = (choice, options) => typeof options === "object" && options !== null && !Array.isArray(options)
+        && Object.entries(options).every(([option, amount]) => knows(choice, option) && (isAmount(amount) || Array.isArray(amount) && amount.length === 3 && amount.every(isAmount)));
     const isGenre = (x) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null
-        && Object.keys(x.choices).every(knows) && (x.description === undefined || typeof x.description === "string");
+        && Object.entries(x.choices).every(([choice, options]) => knows(choice) && isOptions(choice, options)) && (x.description === undefined || typeof x.description === "string");
     const parsed = Array.isArray(read) ? read.map(fromFile) : fromFile(read);
     if (Array.isArray(parsed)) return parsed.length > 0 && parsed.every(isGenre) ? { genres: parsed } : null;
     return isGenre(parsed) ? { genre: parsed } : null;

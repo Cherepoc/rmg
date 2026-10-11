@@ -180,7 +180,7 @@ public sealed record KeyChange(double Position, int Semitones)
     ///     The key changes with every one prepared that draws to be: the last chords of the pattern before it, as many as its
     ///     chain has and it has, each a key change of one chord whose root its link puts it on, leading to the next, the
     ///     last to the new key's first chord; each change drawing from a sequence of its own. The chords keep their shapes,
-    ///     the scale making their quality, a cadence's raised step a minor scale's dominant major.
+    ///     a chain's scale making each lead as its link does whatever the mode (Leading).
     /// </summary>
     /// <param name="common">The song's common state, its chords and scales, before any key change.</param>
     /// <param name="streams">A key change's draws, by where it is (<see cref="SongMap.PlaceKey" />).</param>
@@ -203,9 +203,9 @@ public sealed record KeyChange(double Position, int Semitones)
         var scales = new List<TimelineItem<LayerValue<StepAlterations>>>();
         // and unmoved by semitones, as a chromatic passing chord was
         var shifts = new List<TimelineItem<int>>();
-        void Plain(double from, double to)
+        void Plain(double from, double to, StepAlterations steps)
         {
-            scales.Add(KeysOwnScale.ToTimelineItem(from));
+            scales.Add(new LayerValue<StepAlterations>(KeysOwnScale.Depth, steps).ToTimelineItem(from));
             scales.Add(LayerValue<StepAlterations>.Unset.ToTimelineItem(to));
             shifts.Add((-common.GetEffectiveStateMapAt(from).GetStateValue(StateKinds.ChordShift)).ToTimelineItem(from));
             shifts.Add(0.ToTimelineItem(to));
@@ -220,6 +220,20 @@ public sealed record KeyChange(double Position, int Semitones)
             shifts.Add((-common.GetEffectiveStateMapAt(before).GetStateValue(StateKinds.ChordShift)).ToTimelineItem(before));
             shifts.Add(0.ToTimelineItem(chord));
         }
+        // a chain chord's scale, which makes it lead as its link does whatever the section's mode: the dominant and its
+        // tritone substitute a dominant, Mixolydian on its root, and the leading tone's chord a half step below, its step
+        // raised where the mode has it a whole step below
+        StepAlterations Leading(double position, int step)
+        {
+            var offsets = common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ScaleOffsets);
+            return step switch
+            {
+                4 => ChordScales.Toward(offsets, 4, Scales.Mixolydian.Offsets, ChordScaleKind.Applied)?.Steps ?? StepAlterations.None,
+                6 when offsets[6] == Realizer.OctaveNoteCount - 2 => StepAlterations.Of([6], []),
+                _ => StepAlterations.None
+            };
+        }
+
         var chains = ImmutableArray.CreateBuilder<(double, ImmutableArray<double>, Device)>();
         // a chord's root as it plays: the progression's, which the common state holds, over its section's home
         int Root(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot) + home(position);
@@ -290,7 +304,7 @@ public sealed record KeyChange(double Position, int Semitones)
                 keys.Add(new KeyChange(chords[^1], target));
                 roots.Add((pivot - Root(chords[^1])).ToTimelineItem(chords[^1]));
                 roots.Add(0.ToTimelineItem(change));
-                Plain(chords[^1], change);
+                Plain(chords[^1], change, StepAlterations.None);
                 Unslide(chords[^1]);
                 chains.Add((change, [chords[^1]], Device.Pivot));
                 continue;
@@ -305,8 +319,8 @@ public sealed record KeyChange(double Position, int Semitones)
                 keys.Add(new KeyChange(chords[j], key));
                 roots.Add((rootStep - Root(chords[j])).ToTimelineItem(chords[j]));
                 roots.Add(0.ToTimelineItem(j + 1 < chords.Length ? chords[j + 1] : change));
-                Plain(chords[j], j + 1 < chords.Length ? chords[j + 1] : change);
-                next = RootPitch(Moved(chords[j]), key, rootStep);
+                Plain(chords[j], j + 1 < chords.Length ? chords[j + 1] : change, Leading(chords[j], rootStep));
+                next = RootPitch(Moved(chords[j]).With(StateKinds.ScaleAlterations, new LayerValue<StepAlterations>(KeysOwnScale.Depth, Leading(chords[j], rootStep))), key, rootStep);
             }
 
             Unslide(chords[0]);

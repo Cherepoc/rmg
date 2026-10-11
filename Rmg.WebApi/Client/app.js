@@ -1790,7 +1790,8 @@ const genreManager = createGenreManager({
         showGenre();
     },
     onKeepAll: keepAllGenres,
-    knows: (name) => genreChoices.some((x) => x.name === name),
+    // a choice the server knows, and an option of it
+    knows: (name, option) => genreChoices.some((x) => x.name === name && (option === undefined || x.options.some((y) => y.name === option))),
     asFile: (genre) => ({ ...genre, choices: nestedChoices(genre.choices, genreChoices.map((x) => x.name)) }),
 });
 document.body.append(genreManager.element);

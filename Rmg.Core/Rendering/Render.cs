@@ -46,6 +46,28 @@ public static class Render
     /// </summary>
     public static RenderedSong RenderSong(Song song) => RenderSong(song, SongMix.None);
 
+    /// <summary>The orchestra kit's program, whose notes from 41 to 53 are timpani, a semitone apart (<see cref="GenreChoices.Kits" />).</summary>
+    private const int OrchestraKit = 48;
+
+    /// <summary>
+    ///     A drum's note as the orchestra kit plays it: its cymbals on the kit's concert cymbals, the crash and the china
+    ///     the crash's, the ride and its bell the ride's; and any other in the timpani's range a timpani on the chord's root
+    ///     or fifth there, the nearest to the note, as a timpanist tunes to the key rather than to a drum's fixed note.
+    /// </summary>
+    private static int InOrchestra(int code, StateMap state)
+    {
+        const int lowest = 41, highest = 53, crash = 57, ride = 59;
+        if (code is 49 or 52)
+            return crash;
+        if (code is 51 or 53)
+            return ride;
+        if (code is < lowest or > highest)
+            return code;
+        var chord = Composition.Realizer.GetChord(state).Chord;
+        var tuned = new[] { chord.Root, chord.GetPitch(4) }.Select(x => x.Mod(12)).ToHashSet();
+        return Enumerable.Range(lowest, highest - lowest + 1).Where(x => tuned.Contains(x.Mod(12))).MinBy(x => (Math.Abs(x - code), x));
+    }
+
     /// <summary>
     ///     The song as MIDI plays it, heard as the mix asks (<see cref="SongMix" />): a drum group quieter or left out,
     ///     every part's instrument, volume and pan, and the parts left out not written. A track with no notes, such as a
@@ -81,6 +103,9 @@ public static class Render
                 : null;
             if (group is { IsOn: false } || trackNotes.Count == 0)
                 continue;
+            if (isPercussion && song.Draws?.Kit == OrchestraKit)
+                trackNotes = EventTimeline.Create(trackNotes.Duration, trackNotes.Select(x =>
+                    (x.Value with { Pitches = [..x.Value.Pitches.Select(p => InOrchestra(p, song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(x.Position)))] }).ToTimelineItem(x.Position)));
 
             var renderedNotes = trackNotes.SelectMany(note =>
                 {
@@ -130,15 +155,18 @@ public static class Render
             );
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
             {
+                // a driven guitar played twice, by the instrument it sounds, the drawn or the one given, all the way to the side it
+                // drew, its second take on the other
+                var doubles = DoubleTracking.Doubles(pitchInstrumentTrack.Role, mix.Of(pitchInstrumentTrack.Role)?.Instrument ?? pitchInstrumentTrack.InstrumentCode);
+                var pan = doubles ? Math.Sign(pitchInstrumentTrack.Pan) is 0 ? 1.0 : Math.Sign(pitchInstrumentTrack.Pan) : pitchInstrumentTrack.Pan;
                 // how the part is played beyond its notes, its send to the delay that echoes it among them
-                var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, mixClosed);
+                var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pan, mixClosed);
                 var played = EventTimeline.Create(trackNotes.Duration, renderedNotes);
                 var programChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing);
-                var doubles = DoubleTracking.Doubles(pitchInstrumentTrack.Role, mix.Of(pitchInstrumentTrack.Role)?.Instrument ?? pitchInstrumentTrack.InstrumentCode);
                 // a doubled part plays no sweep, its takes standing apart on either side
                 var controllers = doubles ? [..expression.Controllers.Where(x => x.Controller != 10)] : expression.Controllers;
                 renderedTracks.Add(
-                    new RenderedTrack(false, pitchInstrumentTrack.Role, pitchInstrumentTrack.InstrumentCode, played, pitchInstrumentTrack.Pan, doubles ? DoubleTracking.Level : 1)
+                    new RenderedTrack(false, pitchInstrumentTrack.Role, pitchInstrumentTrack.InstrumentCode, played, pan, doubles ? DoubleTracking.Level : 1)
                     {
                         ProgramChanges = programChanges,
                         PitchBends = expression.Bends,
@@ -155,15 +183,19 @@ public static class Render
                         Controllers = [..ExpressionRender.Render(EventTimeline.Create(allNotes.Duration, risers.Take(1)), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, [])
                             .Controllers.Where(x => x.Controller is ExpressionRender.ReverbController or ExpressionRender.ChorusController)]
                     });
-                // and its second take, on the other side and the other driven guitar, a little late
+                // and its second take, on the other side and the other driven guitar, a little late, where its part plays driven:
+                // an acoustic or clean form of it plays once, as a second take of the same sound 8 ms late would only phase
                 if (doubles)
                 {
                     var tempo = common.GetStateTimeline(StateKinds.Tempo);
                     TimelineItem<RenderedNote> Late(TimelineItem<RenderedNote> note) =>
                         (note.Value with { Shift = note.Value.Shift + DoubleTracking.Delay * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position)) }).ToTimelineItem(note.Position);
+                    var given = mix.Of(pitchInstrumentTrack.Role)?.Instrument;
+                    bool Driven(double position) => given is not null
+                        || InstrumentTraits.Has(programChanges.LastOrDefault(x => x.Position <= position + 1e-9, (0, pitchInstrumentTrack.InstrumentCode)).Item2, InstrumentTrait.Driven);
                     renderedTracks.Add(
-                        new RenderedTrack(false, pitchInstrumentTrack.Role, DoubleTracking.SecondTake(pitchInstrumentTrack.InstrumentCode), EventTimeline.Create(played.Duration, played.Select(Late)),
-                            -pitchInstrumentTrack.Pan, DoubleTracking.Level)
+                        new RenderedTrack(false, pitchInstrumentTrack.Role, DoubleTracking.SecondTake(pitchInstrumentTrack.InstrumentCode),
+                            EventTimeline.Create(played.Duration, played.Where(x => Driven(x.Position)).Select(Late)), -pan, DoubleTracking.Level)
                         {
                             IsDouble = true,
                             ProgramChanges = [..programChanges.Select(x => (x.Position, DoubleTracking.SecondTake(x.Program)))],

@@ -41,10 +41,10 @@ internal static class Panning
 
     /// <summary>
     ///     Every pitched track's pan, by its number, from -1, left, to 1, right: a half to all of its role's spread, as the
-    ///     genre moves it, the tracks that spread taking sides in turn, the widest first, from a side drawn, so that the
-    ///     widest stand apart.
+    ///     genre moves it, the tracks that spread and play taking sides in turn, the widest first, from a side drawn, so that
+    ///     the widest stand apart; a part the song leaves out drawn all the same, taking no side.
     /// </summary>
-    public static ImmutableDictionary<int, double> Draw(IGenerationContext context, IReadOnlyDictionary<int, TrackRole> roles, Genre genre)
+    public static ImmutableDictionary<int, double> Draw(IGenerationContext context, IReadOnlyDictionary<int, TrackRole> roles, ImmutableHashSet<TrackRole> absent, Genre genre)
     {
         var side = context.TestProbability(0.5) ? 1 : -1;
         var pans = ImmutableDictionary.CreateBuilder<int, double>();
@@ -59,7 +59,8 @@ internal static class Panning
             }
 
             pans[track] = side * spread * (0.5 + 0.5 * context.GenerateDouble());
-            side = -side;
+            if (!absent.Contains(role))
+                side = -side;
         }
 
         return pans.ToImmutable();

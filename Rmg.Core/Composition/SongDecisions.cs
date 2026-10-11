@@ -144,7 +144,7 @@ internal sealed record SongDecisions(
             Stream(SongStream.Drums),
             Stream(SongStream.Panning),
             role => SongGenerator.CreateStream(seed, SongStream.PartTracks, (int)role),
-            !absent.Contains(TrackRole.RiffTwin),
+            absent,
             rhythmicUnconventionality,
             track => SongGenerator.CreateStream(seed, SongStream.Drums, track),
             track => SongGenerator.CreateStream(seed, SongStream.DrumStrokes, track),
@@ -256,7 +256,7 @@ internal sealed record SongDecisions(
             sectionMeters = sectionMeters.ToImmutableDictionary(x => x.Key, x => x.Value with
             {
                 Phrases = SongGenerator.CreateStream(seed, SongStream.SectionPhrases, x.Key)
-                    .Pick(ByConvention.Weigh(GenreChoices.PhraseCounts.Select(p => (p, p == 1 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Form], phrasePool))
+                    .Pick(ByConvention.Weigh(GenreChoices.PhraseWeights, songUnconventionality[Facet.Form], phrasePool))
             });
         // a section's phrase of three bars or of four and two now and then, each from a stream of its own
         sectionMeters = sectionMeters.ToImmutableDictionary(x => x.Key, x => x.Value with

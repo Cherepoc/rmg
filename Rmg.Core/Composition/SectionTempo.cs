@@ -35,8 +35,11 @@ internal static class SectionTempo
         (1.5, new ByConvention(0.02, 0.02, 1))
     ];
 
-    /// <summary>The chance a section that played before keeps the tempo it played at, by the feel facet: a chorus at its tempo.</summary>
-    public static ByConvention KeepChance { get; } = new(1, 0.9, 0.5);
+    /// <summary>
+    ///     The chance a section that played before keeps the tempo it played at, by the feel facet: a chorus at its tempo,
+    ///     every time in a plain song and never in the wildest, which draws every appearance's tempo anew.
+    /// </summary>
+    public static ByConvention KeepChance { get; } = new(1, 0.9, 0);
 
     /// <summary>
     ///     The chance a section's tempo is the one before it by a metric ratio, a pulse of the one becoming the beat of the

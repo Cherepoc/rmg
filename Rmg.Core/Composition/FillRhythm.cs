@@ -39,13 +39,18 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Me
     public int Tuplet => Rhythm.Feel.ToTuplet();
 
     /// <summary>The fill's finest notes, in beats.</summary>
-    public double Fine => Period / Math.Pow(2, MaxRank);
+    public double Fine => NoteAt(MaxRank);
 
     /// <summary>
     ///     The note of the cycle's halvings nearest an 8th, finer or coarser than the fill's, by which a fill is moved off
-    ///     the beat or a landing is pushed early.
+    ///     the beat or a landing is pushed early; a grouped cycle's among its parts and their halves.
     /// </summary>
-    public double Push => Period / Math.Pow(2, Math.Max(0, Math.Round(Math.Log2(Period / 0.5))));
+    public double Push => ResolvedRhythm.IsGrouped(Period)
+        ? Enumerable.Range(0, ResolvedRhythm.MaxRankLimit + 1).Select(NoteAt).MinBy(x => Math.Abs(Math.Log2(x / 0.5)))
+        : Period / Math.Pow(2, Math.Max(0, Math.Round(Math.Log2(Period / 0.5))));
+
+    /// <summary>A note of a rank of the cycle, in beats: the cycle split first, in three for a grouped one (<see cref="ResolvedRhythm.SplitOf" />), then halved.</summary>
+    private double NoteAt(int rank) => rank == 0 ? Period : Period / ResolvedRhythm.SplitOf(Period) / Math.Pow(2, rank - 1);
 
     /// <param name="groove">The state of the groove's rhythm.</param>
     /// <param name="layer">The fill's layer over it.</param>

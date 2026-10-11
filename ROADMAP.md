@@ -471,9 +471,9 @@ Each item with its plan, and what it waits for.
 
 What it left, all in `reviews/2026-10-10.md`'s *Open*:
 
-- **The findings left open** (A3 of the plan of 11 October 2026): the docs and the tests worked, 47 of 67; left, the
-  code's (13, 17, 49, 54, 66, 86, 88, 100, 110, 195, 411, 12, 14, 30, 52, 57, 102, 108, 113, 143) and the page's (368, 382,
-  384, 467, 477), each in `reviews/2026-10-10.md`'s *Open*.
+- **The findings left open, the rest** (A3 of the plan of 11 October 2026 worked the 67 but these): the chance shapes'
+  per-section shares decided, the outro's and a kept tempo's shaped (110); a preset's copy of the songs' amounts written
+  as "own" rather than listed (467), should the copies drift.
 
 ### Planned: held tones, let ring, a section's form, and two genres
 

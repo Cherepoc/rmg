@@ -260,7 +260,7 @@ internal static class Expression
     private static bool Pinches(int program) => InstrumentTraits.Has(program, InstrumentTrait.Driven);
 
     /// <summary>How far a part's tone closes at its deepest, in its quietest section, in the brightness controller's steps, short of a filter's reach.</summary>
-    internal const int ToneReach = 24;
+    internal const int ToneReach = 16;
 
     /// <summary>The strong effect a song plays, if any, an echo the likeliest: none in a plain song, one in the wildest.</summary>
     public static ImmutableArray<(StrongEffect Effect, ByConvention Weight)> StrongEffects { get; } =

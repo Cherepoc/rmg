@@ -160,7 +160,7 @@ internal sealed class SectionGenerator
         var (scale, home, harmonicRhythm, progression, chordScales, shifts, _, _) = DrawHarmony(plan, facets, energy, tilt);
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
-        var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel], _genre);
+        var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel], _genre, GenreChoices.Feel);
         if (feelChange is { } feelOfSection)
             StateTrace.RecordSection(TracePoints.Feel, SectionTrace, sectionId, $"{feelOfSection}", feelOfSection);
         var sectionStateMap = CreateSectionStateMap(

@@ -327,7 +327,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         return new Set(all.filter((x) => pieces === null || pieces.has(x.name)).flatMap((x) => x.tags));
     }
 
-    /** Whether a setup is one the pieces chosen make: the kit's or percussion's with one of its family, both with one of each. */
+    /** Whether a setup is one the pieces chosen make, as the server tags them: the kit's or percussion's with one of its own, both with one of each. */
     function isSetupAllowed(option) {
         const families = familiesChosen();
         return option.name === "kitAndPercussion" ? families.has("kit") && families.has("percussion") : families.has(option.name);
@@ -453,9 +453,13 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     const exported = button("Export JSON", "Save this genre as a JSON file", () => downloadJson(`${draft.name.trim() || "genre"}.json`, asFile(finishedOrDraft())), "genre-export");
 
     const file = jsonFileInput((text) => {
-        const read = readGenreFile(text, (x) => choices.has(x));
-        // a list of genres, every one of them, kept among one's own; one genre opened as the draft
-        if (read?.genres) {
+        // a choice the server knows, and an option of it
+        const read = readGenreFile(text, (choice, option) => choices.has(choice) && (option === undefined || choices.get(choice).options.some((x) => x.name === option)));
+        // a list of genres, every one of them, kept among one's own, none where one is no genre the server plays; one genre
+        // opened as the draft, its problem said
+        const refused = read?.genres?.find((x) => problemOf(x) !== null);
+        if (refused) showProblem(`${refused.name}: ${problemOf(refused)}`);
+        else if (read?.genres) {
             told.textContent = `${onKeepAll(read.genres)} kept among yours.`;
             told.hidden = false;
         } else if (read?.genre) {

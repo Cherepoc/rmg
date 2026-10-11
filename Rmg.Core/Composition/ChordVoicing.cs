@@ -5,19 +5,16 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     Lays out a chord shape by moving some of its notes by octaves, which keeps the chord and changes how it is spread,
-///     by the chords facet of the unconventionality: the plainest songs close and inverted, as a triad sits under the
-///     hand, the wildest every layout but close, spread and dropped as much as inverted, and stretched over two octaves
-///     now and then. A shape whose layout is what it is keeps it.
+///     by the chords facet of the unconventionality: the plainest songs close, as a triad sits under the hand, the voice
+///     leader inverting it as it moves (<see cref="VoiceLeader" />), the wildest spread and dropped as much as close, and
+///     stretched over two octaves now and then. A shape whose layout is what it is keeps it.
 /// </summary>
 internal static class ChordVoicing
 {
     private static readonly ImmutableArray<Voicing> Voicings =
     [
-        new("Close", new ByConvention(0.5, 0.4, 0), 1, x => x),
-        // the lowest note an octave up
-        new("First inversion", new ByConvention(0.3, 0.2, 1), 2, x => [..x.Skip(1), x[0] + 12]),
-        // the two lowest notes an octave up
-        new("Second inversion", new ByConvention(0.2, 0.1, 1), 3, x => [..x.Skip(2), x[0] + 12, x[1] + 12]),
+        // its inversions the voice leader's, which lays out every chord it moves to in each of them
+        new("Close", new ByConvention(1, 0.7, 2), 1, x => x),
         // the second highest note an octave down
         new("Drop 2", new ByConvention(0, 0.15, 1), 3, x => [x[^2] - 12, ..x[..^2], x[^1]]),
         // the second lowest note an octave up

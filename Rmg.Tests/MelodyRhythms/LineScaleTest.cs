@@ -11,7 +11,7 @@ public sealed class LineScaleTest
     private static readonly int[] Major = [0, 2, 4, 5, 7, 9, 11];
 
     private static ChordContext On(int rootStep, int[] scale) =>
-        new(steps => scale[(rootStep + steps).Mod(7)] + 12 * (int)Math.Floor((rootStep + steps) / 7.0));
+        new(steps => scale[(rootStep + steps).Mod(7)] + 12 * (int)Math.Floor((rootStep + steps) / 7.0), rootStep);
 
     [Test]
     public async Task ALinesScale_TakesTheSectionsScale_ItsPentatonic_OrItsOwnOnTheChordsRoot()

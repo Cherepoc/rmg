@@ -93,6 +93,10 @@ export function createGenreTune() {
     const sharesBox = html("div", { class: "tune-shares-box" }, shares, pointed);
     const lists = html("div", { class: "tune-lists" });
     const grid = html("div", { class: "tune-grid" }, axis, plot, legend, fieldsRow, sharesHeading, sharesAxis, sharesBox, lists);
+    // the charts' heights the stylesheet sizes them by, and the legend beside every row of the middle column
+    grid.style.setProperty("--tune-height", `${HEIGHT}px`);
+    grid.style.setProperty("--tune-shares-height", `${SHARES_HEIGHT}px`);
+    legend.style.gridRow = `1 / span ${[plot, fieldsRow, sharesHeading, sharesBox, lists].length}`;
     const empty = html("p", { class: "tune-empty", text: "The genre keeps none of these: pick some under Options." });
     const main = html("div", { class: "tune-main" }, heading, grid, empty);
     const body = html("div", { class: "tune-body" }, list, main);

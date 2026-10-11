@@ -62,6 +62,9 @@ internal static class LineScales
 
     private const int OctaveNoteCount = 12;
 
+    /// <summary>The major and the minor pentatonic, in semitones above their tonic.</summary>
+    private static readonly ImmutableArray<int> MajorPentatonic = [0, 2, 4, 7, 9], MinorPentatonic = [0, 3, 5, 7, 10];
+
     private static readonly ImmutableDictionary<LineScale, ImmutableArray<int>> OffsetsFromRoot = new Dictionary<LineScale, ImmutableArray<int>>
     {
         [LineScale.Blues] = [0, 3, 5, 6, 7, 10],
@@ -80,9 +83,9 @@ internal static class LineScales
     }
 
     /// <summary>
-    ///     The pitch classes the line takes over the chord, or none for all of the section's scale: a pentatonic line's
-    ///     scale but for its tritone pair, all of it where it has more than one tritone, as harmonic minor, and any other's
-    ///     notes on the chord's root.
+    ///     The pitch classes the line takes over the chord, or none for all of the section's scale: a pentatonic line's the
+    ///     key's own pentatonic, major where the mode's third is and minor where it is not, kept to the scale's notes, all of
+    ///     the scale where it has more than one tritone, as harmonic minor; and any other's notes on the chord's root.
     /// </summary>
     public static IReadOnlySet<int>? Classes(LineScale scale, ChordContext chord)
     {
@@ -94,7 +97,11 @@ internal static class LineScales
             {
                 var classes = Enumerable.Range(0, Scales.StepCount).Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).Distinct().ToArray();
                 var pair = classes.Where(x => classes.Contains((x + 6) % OctaveNoteCount)).ToHashSet();
-                return pair.Count == 2 ? classes.Except(pair).ToHashSet() : null;
+                if (pair.Count != 2)
+                    return null;
+                var tonic = chord.Tonic;
+                var major = classes.Contains((tonic + 4).Mod(OctaveNoteCount));
+                return (major ? MajorPentatonic : MinorPentatonic).Select(x => (tonic + x).Mod(OctaveNoteCount)).Where(classes.Contains).ToHashSet();
             }
             default:
                 return OffsetsFromRoot[scale].Select(x => (chord.Root + x).Mod(OctaveNoteCount)).ToHashSet();

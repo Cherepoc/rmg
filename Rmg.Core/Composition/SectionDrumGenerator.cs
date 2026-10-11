@@ -81,7 +81,8 @@ internal sealed class SectionDrumGenerator
             x => DrumGroups.GetTrackNumber(x.Key),
             x => new Doubling(
                 DrumGroups.GetTrackNumber(x.Value),
-                DrumRoles.DoublingRanks[x.Value.MainRole],
+                // up to the rank of the role the lead leads in the section, not its main one's
+                DrumRoles.DoublingRanks[kit.Leads.First(l => l.Value == x.Value).Key],
                 _trackStream(sectionId, SectionStream.DrumBindings, DrumGroups.GetTrackNumber(x.Key)).Pick(ByConvention.Weigh(x.Key.Bindings.Select(b => (b.Value, RhythmicUnconventionality.WeightEnds(b.Weight, b.Value == DrumBinding.Figure ? 1 : 0))), rhythm.Value))
             )
         );

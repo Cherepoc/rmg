@@ -61,7 +61,7 @@ internal sealed class SongTracks
     /// <param name="drumSetup">What the song's drums are (<see cref="DrumSetups" />).</param>
     /// <param name="panningContext">The sequence the pitched tracks' places from left to right are drawn from (<see cref="Panning" />).</param>
     /// <param name="partStreams">The sequence a pitched part's instrument, register and state are drawn from, each part's its own.</param>
-    /// <param name="hasTwin">Whether the song's riff has a twin, which the two play apart, on either side.</param>
+    /// <param name="absent">The parts the song leaves out, which take no side of the band's, and its riff's twin among them or not, which the two play apart, on either side.</param>
     /// <param name="givenDrums">The drums given in place of those the song draws, which it still draws, so that the rest is as it was.</param>
     /// <param name="genre">The genre whose pools the instruments and the drums keep to, and whose rhythms and feels the parts play.</param>
     /// <param name="feelStreams">The sequence a part's own feel is drawn from, where the genre names one.</param>
@@ -71,7 +71,7 @@ internal sealed class SongTracks
         IGenerationContext context,
         IGenerationContext panningContext,
         Func<TrackRole, IGenerationContext> partStreams,
-        bool hasTwin,
+        ImmutableHashSet<TrackRole> absent,
         RhythmicUnconventionality rhythmicUnconventionality,
         Func<int, IGenerationContext> drumStreams,
         Func<int, IGenerationContext> strokeStreams,
@@ -86,8 +86,9 @@ internal sealed class SongTracks
         ImmutableHashSet<RhythmPart> pinned
     )
     {
-        // a part's level, louder or quieter by the genre's (GenreChoices.Levels)
-        double Level(TrackRole role) => VelocityLayers.GetLevel(role) + VelocityLayers.GenreLevel * genre.Shift(GenreChoices.Levels, GenreChoices.Name(role.ToString()));
+        // a part's level, louder or quieter by the genre's (GenreChoices.Levels), but the solo part's, which is lifted to be
+        // heard over the band whatever its level (Solos)
+        double Level(TrackRole role) => VelocityLayers.GetLevel(role) + (role == TrackRole.Solo ? 0 : VelocityLayers.GenreLevel * genre.Shift(GenreChoices.Levels, GenreChoices.Name(role.ToString())));
         // a part's own feel over the song's, drawn once from its own sequence where the genre names it
         var partFeels = new Dictionary<RhythmPart, StateMap>();
         StateMap FeelOf(RhythmPart part) => genre.Names(GenreChoices.PartFeels[part])
@@ -124,8 +125,10 @@ internal sealed class SongTracks
                 [CounterMelodyTrack] = TrackRole.CounterMelody, [RiffTrack] = TrackRole.Riff,
                 [RhythmTrack] = TrackRole.Rhythm
             },
+            absent,
             genre
         );
+        var hasTwin = !absent.Contains(TrackRole.RiffTwin);
         // a riff and its twin all the way to either side, the riff on the side it drew; the twin draws no pan, so that a
         // song without it pans as it would
         var riffSide = Math.Sign(pans[RiffTrack]) is 0 ? 1 : Math.Sign(pans[RiffTrack]);
@@ -143,11 +146,8 @@ internal sealed class SongTracks
         // and the solo part a lead of its own, apart from the melody's, which it takes over from
         var soloInstrument = InstrumentRoles.Solo.Pick(soloContext, sound, Pool(TrackRole.Solo), melodyInstrument.Program);
 
-        // a driven guitar played twice all the way to the side it drew, its second take on the other (DoubleTracking)
-        pans = pans.SetItems(new[] { (ChordsTrack, TrackRole.Chords, chordsInstrument.Program), (RiffTrack, TrackRole.Riff, riffInstrument.Program),
-                (RiffTwinTrack, TrackRole.RiffTwin, riffInstrument.Program), (RhythmTrack, TrackRole.Rhythm, rhythmInstrument.Program) }
-            .Where(x => DoubleTracking.Doubles(x.Item2, x.Item3))
-            .Select(x => KeyValuePair.Create(x.Item1, Math.Sign(pans[x.Item1]) is 0 ? 1.0 : Math.Sign(pans[x.Item1]))));
+        // a driven guitar played twice all the way to the side it drew, which the render decides by the instrument it sounds
+        // (DoubleTracking)
         StateTrace.RecordSong(TracePoints.Panning, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
         // a part's own state, how loud it plays and in what rhythm, with whatever more it has

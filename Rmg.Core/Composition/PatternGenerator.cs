@@ -229,8 +229,11 @@ internal sealed class PatternGenerator
             .ToStateMap(trackGenerationContext)
             .MergeWith(trackStateMap);
         // the bar's change of the feel it comes to, now and then, a passage in another feel, from a sequence of its own
-        // by the bar pattern's seed, so that a drum playing its lead's bar patterns changes as its lead does
-        if (Feels.DrawChange(new GenerationContext(Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality, _genre) is { } barFeel)
+        // by the bar pattern's seed, so that a drum playing its lead's bar patterns changes as its lead does; among the
+        // part's own feels where the genre names them, the song's otherwise
+        var part = _trackDefinitions[trackNumber].Role == TrackRole.Drum ? DrumRoles.PartOf(DrumRoles.Of(stateMap)) : GenreRhythm.PartOf(_trackDefinitions[trackNumber].Role);
+        var feelPool = part is { } own && _genre.Names(GenreChoices.PartFeels[own]) ? GenreChoices.PartFeels[own] : GenreChoices.Feel;
+        if (Feels.DrawChange(new GenerationContext(Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality, _genre, feelPool) is { } barFeel)
             stateMap = stateMap.MergeWith(Feels.At(StateDepths.BarPattern, barFeel));
         // a pinned drum plays its rhythm as its song gives it, every layer's moves of it let go of
         if (trackStateMap.GetStateValue(CompositionStateKinds.Pinned) > 0)
