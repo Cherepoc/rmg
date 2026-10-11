@@ -72,7 +72,8 @@ public sealed class GenreDevicesReportTest
             ["songs whose drums mark the form"] = ((System.Collections.ICollection)song.Trace.Single(x => x.Point == TracePoints.DrumMarks).Value!).Count > 0 ? 1 : 0,
             ["songs swung"] = song.Swing.Delay > 0 ? 1 : 0,
             ["songs swung in 16ths"] = song.Swing.Delay > 0 && song.Swing.Period < 1 ? 1 : 0,
-            ["songs with a guitar driven when loud"] = song.Trace.Any(x => x.Point == TracePoints.LouderForm) ? 1 : 0,
+            ["sections heavy, their clean guitars driven"] = Sections(TracePoints.SectionForm, x => (SectionFormKind)x! == SectionFormKind.Heavy),
+            ["sections calm, their driven guitars acoustic"] = Sections(TracePoints.SectionForm, x => (SectionFormKind)x! == SectionFormKind.Calm),
             ["line notes bent or slid"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Bend) > 0),
             ["bass's changes of pitch slid into"] = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass))?.ToArray() is { Length: > 1 } bass
                 && bass.Skip(1).Where((x, i) => x.Value.Pitches[0] != bass[i].Value.Pitches[0]).ToArray() is { Length: > 0 } changes

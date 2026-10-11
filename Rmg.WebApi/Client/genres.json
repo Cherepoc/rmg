@@ -1860,6 +1860,7 @@
       "space": { "riff": 70, "chords": 70, "pad": 80, "melody": 70, "drum": 60 },
       "mixFilter": {},
       "louderForms": { "quieter": [10, 15, 25], "guitars": 0 },
+      "colour": { "none": 100, "heldDark": [0, 70, 80] },
       "riffIntro": { "songs": [20, 30, 40] },
       "cadenceRaise": { "sections": [10, 20, 20] },
       "cadenceDegree": { "fifth": 25, "second": 75, "sixth": 70, "seventh": 65 },

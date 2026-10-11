@@ -291,9 +291,12 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice DrumStrokes { get; } = Values("drumStrokes", "Drum strokes", Composition.DrumSounds.Leaned.Select(x => (x.Name, x.Label)), Facet.Sound);
 
-    /// <summary>The chance a part's guitar turns driven in the song's louder appearances, a clean verse's guitar distorted in the chorus (<see cref="LouderForms" />).</summary>
+    /// <summary>
+    ///     The chances a louder section turns heavy, its clean guitars driven, as a band kicks in the distortion for the
+    ///     chorus, and a quieter one calm, its driven guitars acoustic or clean, breaking the chords (<see cref="SectionForm" />).
+    /// </summary>
     public static GenreChoice LouderForms { get; } = Chances("louderForms", "Louder forms",
-        [("guitars", "A guitar driven in the louder sections", Composition.LouderForms.Chance), ("quieter", "A driven guitar acoustic or clean in the quieter sections", Composition.LouderForms.QuieterChance)]);
+        [("guitars", "A louder section heavy, its guitars driven", SectionForm.HeavyChance), ("quieter", "A quieter section calm, its guitars acoustic or clean", SectionForm.CalmChance)]);
 
     /// <summary>
     ///     The interval a line harmonised plays apart from it, the melody's by the counter-melody and the riff's by its twin,

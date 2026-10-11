@@ -206,10 +206,16 @@ internal sealed class SectionGenerator
         var breakdown = Breakdowns.MayBreakDown(plan.Role, plan.KeepsSongScale)
                         && Stream(sectionId, SectionStream.Breakdown).TestProbability(Breakdowns.Chance.At(facets[Facet.Form], _genre.Chance(GenreChoices.Breakdown, "sections")));
         StateTrace.RecordSection(TracePoints.Breakdown, SectionTrace, sectionId, $"{breakdown}", breakdown);
+        // its form, calm or heavy, from a sequence of its own, by its energy against the song's
+        var form = SectionForm.Draw(Stream(sectionId, SectionStream.Form), _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy), facets[Facet.Sound], _genre,
+            _tracks.Definitions.Where(x => x.Value is PitchInstrumentTrack && !_absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => (x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode)),
+            breakdown);
+        StateTrace.RecordSection(TracePoints.SectionForm, SectionTrace, sectionId, $"{form.Kind}", form.Kind);
         // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its
         // own, drawn in a breakdown too, which plays in half time
         var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt, sectionRhythm.Facets[Facet.Groove], _genre);
-        if (breakdown)
+        // a breakdown's and a calm section's in half time
+        if (breakdown || form.Kind == SectionFormKind.Calm)
             timeFeel = 1;
         StateTrace.RecordSection(TracePoints.TimeFeel, SectionTrace, sectionId, $"{timeFeel}", timeFeel);
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
@@ -226,7 +232,7 @@ internal sealed class SectionGenerator
         // genre's, from a sequence of its own
         var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone")));
         StateTrace.RecordSection(TracePoints.Drone, SectionTrace, sectionId, $"{drone}", drone);
-        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs || drone).ToArray();
+        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs || drone, form).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
@@ -258,6 +264,7 @@ internal sealed class SectionGenerator
             octaveBass,
             alternatingBass,
             breakdown,
+            form,
             timeFeel,
             _drumJob,
             _genre
@@ -502,7 +509,8 @@ internal sealed class SectionGenerator
         Meter meter,
         bool hooks,
         bool powerChords,
-        bool pedal
+        bool pedal,
+        SectionForm form
     )
     {
         foreach (var trackNumber in _tracks.Definitions.Where(x => x.Value is PitchInstrumentTrack).Select(x => x.Key))
@@ -522,7 +530,7 @@ internal sealed class SectionGenerator
 
             // each track from a sequence of its own
             var context = TrackStream(sectionId, SectionStream.PitchedTracks, trackNumber);
-            var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal);
+            var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal, form);
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
             {
                 yield return (trackNumber, GeneratePad(trackNumber, trackStateMap, barStateTimelineMap, harmonicRhythm, meter), null);
@@ -638,7 +646,7 @@ internal sealed class SectionGenerator
     ///     busyness, the melody's and the riff's line scales, the riff in power chords, the chords broken now and then, and
     ///     its fullness by the section's energy, over the section's state.
     /// </summary>
-    private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords, bool pedal)
+    private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords, bool pedal, SectionForm form)
     {
         // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
         // and is as busy as the section has it
@@ -680,19 +688,32 @@ internal sealed class SectionGenerator
         AddLine(CompositionStateKinds.LineInversion, LinePattern.Inversions, GenreChoices.Inversion);
         // its phrases ending on a goal, the genres' as the songs'
         AddLine(CompositionStateKinds.LineGoal, LinePattern.Goals, null);
+        // a guitar the section's form turns, played on the form's program
+        if (form.Guitars.Contains(trackNumber))
+            sectionTrackLayer.Add(CompositionStateKinds.Program, form.Program + 1);
         // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
         if (_tracks.Definitions[trackNumber].Role.PlaysChords())
         {
             var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Chords ? SectionStream.Arpeggio : SectionStream.RhythmArpeggio;
             var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre);
+            // a heavy section's guitars striking their chords, and a calm one's breaking them, 8ths or slower, in a pattern of
+            // its own where the section's drew none
+            if (form.Kind == SectionFormKind.Heavy && form.Guitars.Contains(trackNumber))
+                arpeggio = ArpeggioPattern.None;
+            if (form.Breaker == trackNumber)
+            {
+                if (arpeggio == ArpeggioPattern.None)
+                    arpeggio = Arpeggios.DrawBroken(TrackStream(sectionId, SectionStream.CalmArpeggio, trackNumber), sectionRhythm.Facets[Facet.Chords], _genre);
+                sectionTrackLayer.Add(CompositionStateKinds.ShortestNote, SectionForm.CalmShortest);
+            }
             StateTrace.RecordSection(TracePoints.Arpeggio, trackNumber, sectionId, $"{arpeggio}", arpeggio);
             sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
             // and, broken in no pattern's order, the seed of its order, from a sequence of its own
             if (arpeggio == ArpeggioPattern.Random)
                 sectionTrackLayer.Add(CompositionStateKinds.ArpeggioOrder, (long)TrackStream(sectionId, SectionStream.ArpeggioOrder, trackNumber).GenerateSeed());
-            // and the colour it lays on its broken chord, from a sequence of its own
+            // and the colour it lays on its broken chord, from a sequence of its own, by the instrument it plays here
             var colour = Arpeggios.DrawColour(new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Colour), trackNumber)), sectionRhythm.Facets[Facet.Chords], _genre,
-                ((PitchInstrumentTrack)_tracks.Definitions[trackNumber]).InstrumentCode);
+                form.Guitars.Contains(trackNumber) ? form.Program : ((PitchInstrumentTrack)_tracks.Definitions[trackNumber]).InstrumentCode);
             if (arpeggio != ArpeggioPattern.None && colour != ChordColour.None)
                 sectionTrackLayer.Add(CompositionStateKinds.Colour, (int)colour);
         }
@@ -803,6 +824,7 @@ internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool 
 /// <param name="Meter">The meter the section's bars are in.</param>
 /// <param name="AlternatingBass">Whether its bass alternates the root and the fifth on its strong beats (<see cref="Articulations" />).</param>
 /// <param name="Breakdown">Whether the section is a heavy band's breakdown (<see cref="Breakdowns" />), which leaves its lines and pad out.</param>
+/// <param name="Form">What its guitars play as, calm or heavy, and the parts it leaves out wherever it plays (<see cref="SectionForm" />).</param>
 /// <param name="TimeFeel">How its drums keep time, 1 in half time, -1 in double time and 0 in the song's (<see cref="Groove.DrawTimeFeel" />).</param>
 /// <param name="DrumJob">What the song's drums do, which a part left alone must carry.</param>
 internal sealed record GeneratedSection(
@@ -827,6 +849,7 @@ internal sealed record GeneratedSection(
     bool OctaveBass,
     bool AlternatingBass,
     bool Breakdown,
+    SectionForm Form,
     int TimeFeel,
     DrumJob DrumJob,
     Genre Genre
@@ -877,8 +900,10 @@ internal sealed record GeneratedSection(
             ? Resting
             : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent, Genre, Facets[Facet.Form])
                 .Intersect(before);
-        // a breakdown's lines and pad out every time
-        var resting = drawn.Union(held).Union(Breakdown ? Breakdowns.Resting : []).Except(entering);
+        // a breakdown's lines and pad out every time; and a calm section's guitars but the one breaking its chords, a part
+        // coming in late coming in at the next appearance, and the guitar it keeps playing whatever it draws, but in the first
+        // section an intro of entries builds up itself
+        var resting = drawn.Union(held).Union(Breakdown ? Breakdowns.Resting : []).Except(entering).Union(keepsTexture ? [] : Form.Leaves).Except(Form.Plays);
         // a section keeps its harmony, as its rests alone do (Arrangement.DrawRests): the chords playing where the bass is
         // held back and the rests would leave both out
         if (resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords) && !Absent.Contains(TrackRole.Chords))
@@ -1029,5 +1054,7 @@ internal enum SectionStream
     PlaningModes = 58,
     Mediants = 59,
     SectionPool = 60,
-    ArpeggioOrder = 61
+    ArpeggioOrder = 61,
+    Form = 62,
+    CalmArpeggio = 63
 }

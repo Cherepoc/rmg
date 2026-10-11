@@ -57,8 +57,8 @@ internal static class TracePoints
     /// <summary>Whether a section pushes its chord changes (a <c>bool</c>).</summary>
     public const string Push = "Push";
 
-    /// <summary>The louder form a part plays in the song's louder appearances, its program, where it plays one (an <c>int</c>).</summary>
-    public const string LouderForm = "Louder form";
+    /// <summary>What a section's guitars play as, calm, heavy or their own (a <see cref="SectionFormKind" />; <see cref="Composition.SectionForm" />).</summary>
+    public const string SectionForm = "Section form";
 
     /// <summary>What the song's drums do, keep time or mark its form (a <see cref="Composition.DrumJob" />).</summary>
     public const string DrumJob = "Drum job";
@@ -335,9 +335,6 @@ internal static class TracePoints
 
     /// <summary>Whether a section's riff plays its weak notes on a drone (a <c>bool</c>; <see cref="Composition.SectionGenerator.DroneChance" />).</summary>
     public const string Drone = "Drone";
-
-    /// <summary>The program a part plays in the song's quieter appearances (an <c>int</c>; <see cref="Composition.LouderForms" />).</summary>
-    public const string QuieterForm = "Quieter form";
 
     /// <summary>Whether a section's snare plays ghost notes (a <c>bool</c>; <see cref="Composition.Ghosts" />).</summary>
     public const string Ghosts = "Ghosts";

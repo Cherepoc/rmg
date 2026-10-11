@@ -133,8 +133,8 @@ percent everywhere, and a listening question once deployed):
 7. Done: the kick and the crash pushing with the band, an eighth early; the drums playing a stop-time phrase's last
    half bar, a fill there as heavy as a section's, 1% to 21% of the phrases filled out of.
 8. Done: a riff's weak notes on an open string's drone, the chugging riff's pedal without its chugs, heard worse and
-   played by no preset now (*A riff's drone, reworked*); a driven guitar's quieter form, acoustic or clean in the quieter
-   appearances, Black metal's (`?listen=quieter-form`; *Acoustic sections, fitted*). The montuno left, a pattern of its own (*What the genres cannot play yet*).
+   played by no preset now (*A riff's drone, reworked*); a driven guitar's quieter form, since a section's calm form
+   (*Planned: held tones, let ring, a section's form, and two genres*, step 3). The montuno left, a pattern of its own (*What the genres cannot play yet*).
 9. Done already: the instruments by listening are in the presets, the timpani, the organ bass, the church organ, the
    music box and the kalimba, Chiptune's squares; their weights by listening (*Instruments by listening*).
 10. Done: a strum's up stroke missing a full chord's lowest string. Left: legato slides, by listening; a fill's toms by
@@ -486,17 +486,12 @@ listening question and a deploy to test. In order:
 2. Done (11 October 2026): **let ring**, a part's articulation (`Articulations.LetRingChance`, "letRing"), a broken chord's
    notes sounding to its change, a bar at most, never over their own pitch struck again, on a clean instrument that dies
    away and a figure of 8ths or slower; Pop's with its held tones, asked together as `?listen=held`.
-3. **A section's form** (P1, in place of the louder and quieter forms' instrument swap after assembly, which leaves an
-   acoustic guitar tremolo-picking): a louder or quieter appearance turned heavy or calm as a whole, decided with the
-   sections, before the parts play, a section's state. One mechanism both ways, the guitars always together:
-   - *Calm*: the driven guitars acoustic or clean; one breaks the chords, 8ths or slower, let ring, with the genre's
-     held tones, the others rest; no figure there, neither a riff's tremolo nor the drums' blast or double kick; the
-     drums in half time or resting, the bass held on its roots.
-   - *Heavy*: the clean guitars driven; broken chords given up for struck ones, power chords where the genre has them.
-   Black metal's calm as its quieter form's chance, Rock's heavy as its louder form's; Metal's calm by listening.
-   Measured over the same songs, on and off: no guitar note shorter than an 8th in a calm section, its guitars one
-   form, its drums' notes a bar halved or fewer; no broken chord in a heavy one. `?listen=quieter-form` retired now,
-   asked again of the calm sections once built.
+3. Done (11 October 2026): **a section's form** (`SectionForm`), decided with the section in place of the instrument swap
+   after assembly: a quieter section calm, its driven guitars acoustic or clean, one breaking the chords in 8ths or
+   slower, let ring with the genre's held tones, the other guitars resting, a late entry waiting for the next appearance,
+   no figure, the drums in half time or resting; a louder one heavy, its clean guitars driven, its chords struck. Black
+   metal's calm in 38% of its songs, with its dark held tones, asked as `?listen=calm` (`quieter-form` retired). Left,
+   by listening: a calm section's bass held on its roots; a fill or a fade into it; Metal's and Rock's calm.
 4. **A riff's drone, with leaps** (P2): *A riff's drone, reworked* (*Form and sections*), a riff alternating an open
    string, the key's own, with fretted notes an octave or more above it, its melody on the strong notes; no chugs.
    Djent's chugs drawn down to 40–60% of its riffs and the drone given 20–40%; asked as `?listen=djent-open`.
@@ -583,9 +578,6 @@ dynamics, as it has no drums.
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
   melody with an open string, the string the key's own (its tonic or fifth, not every chord's root), in a pattern of
   the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it. Planned with wide leaps (*Planned: held tones, let ring, a section's form, and two genres*, step 4).
-- **Acoustic sections, fitted** (P1, heard 8 and 9 October 2026, and 11 October: the instrument alone changes, an
-  acoustic guitar still tremolo-picking): planned as *A section's form* (*Planned: held tones, let ring, a section's form, and two genres*,
-  step 3).
 - **A breakdown's snare** (P2, suggested 8 October 2026 after listening): Djent's breakdown plays its backbeat on the
   cross-stick, where a breakdown wants the snare itself, struck on the riff's accents with the kick or on the song's
   backbeat in half time, its 3 or its 2 and 4; the snare's sound in a breakdown the full one (`DrumSounds`), and its

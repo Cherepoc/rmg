@@ -159,6 +159,10 @@ internal static class CompositionStateKinds
     // the General MIDI program a note plays, 1 more than its number, 0 for its track's own
     public static StateKind<int> Program { get; } = StateKinds.CreateAdditive<int>(Prefix + "Program", StateScope.Render);
 
+    // the shortest note a part's bar patterns play, in beats, as a calm section's broken chords keep to 8ths; 0 for as short
+    // as its rhythm has them
+    public static StateKind<double> ShortestNote { get; } = StateKinds.CreateAdditive<double>(Prefix + "ShortestNote");
+
     // how a section's chords are broken, an ArpeggioPattern, 0 for the whole chord at once
     public static StateKind<int> Arpeggio { get; } = StateKinds.CreateAdditive<int>(Prefix + "Arpeggio", StateScope.Render);
 

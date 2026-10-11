@@ -136,12 +136,16 @@ internal static class Articulations
                     .TestProbability(LegatoChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "legato"))))
                 result[track] = Slur(timeline);
 
-        // and a part's broken chords let ring where it lets them, its own sequence drawn for every part that holds chords
+        // and a part's broken chords let ring where it lets them, its own sequence drawn for every part that holds chords,
+        // and in a calm section always (SectionForm)
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        bool Calm(double position) => song.Form.Map.SectionAt(position) is { } span && song.SectionOf(span.SectionId).Form.Kind == SectionFormKind.Calm;
         foreach (var (track, timeline) in result.ToArray())
-            if (song.Tracks.Definitions[track] is PitchInstrumentTrack { } chords && chords.Role.PlaysChords()
-                && song.Stream(SongStream.LetRing, track).TestProbability(LetRingChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "letRing"))))
-                result[track] = LetRing(timeline, chords.InstrumentCode, changes, song.Form.Map);
+            if (song.Tracks.Definitions[track] is PitchInstrumentTrack { } chords && chords.Role.PlaysChords())
+            {
+                var rings = song.Stream(SongStream.LetRing, track).TestProbability(LetRingChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "letRing")));
+                result[track] = LetRing(timeline, chords.InstrumentCode, changes, song.Form.Map, position => rings || Calm(position));
+            }
 
         return draft with { Notes = result.ToImmutable() };
     }
@@ -151,13 +155,14 @@ internal static class Articulations
     ///     chord's change, a bar at most, or to where its pitch is struck again, so that its seconds ring together; on a
     ///     clean instrument that dies away, and a figure of 8ths or slower, as faster ones or held sounds would blur.
     /// </summary>
-    private static EventTimeline<RealizedNote> LetRing(EventTimeline<RealizedNote> timeline, int own, double[] changes, SongMap map)
+    /// <param name="rings">Whether the part lets its notes ring where they are.</param>
+    private static EventTimeline<RealizedNote> LetRing(EventTimeline<RealizedNote> timeline, int own, double[] changes, SongMap map, Func<double, bool> rings)
     {
         var notes = timeline.ToArray();
         return EventTimeline.Create(timeline.Duration, notes.Select((note, i) =>
         {
             var program = InstrumentsOverTime.ProgramOf(note.Value.State, own);
-            if (note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 || note.Value.Pitches.Length != 1
+            if (!rings(note.Position) || note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 || note.Value.Pitches.Length != 1
                 || !InstrumentTraits.Has(program, InstrumentTrait.Decays) || InstrumentTraits.Has(program, InstrumentTrait.Driven)
                 || i + 1 < notes.Length && notes[i + 1].Position - note.Position < RingsFrom - 1e-9)
                 return note;

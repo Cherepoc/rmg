@@ -87,7 +87,6 @@ internal static class SongStages
         new("Hat rolls", Composition.HatRolls.Apply, CanSkip: true),
         new("Ghosts", Composition.Ghosts.Apply, CanSkip: true),
         new("Drum ornaments", Composition.DrumOrnaments.Apply, CanSkip: true),
-        new("Louder forms", LouderForms.Apply, CanSkip: true),
         new("Instruments", Instruments, CanSkip: true),
         new("Ornaments", Composition.Ornaments.Apply, CanSkip: true),
         new("Articulation", Articulations.Apply, CanSkip: true),
@@ -266,6 +265,7 @@ internal static class SongStages
                 section => song.Stream(SongStream.TwinTimbres, section),
                 section => song.Stream(SongStream.BlockHarmony, section),
                 index => song.Sections[index].RiffPowerChords || song.Sections[index].Chugs,
+                index => song.Sections[index].Resting.Contains(TrackRole.RiffTwin),
                 song.Tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Any(x => x.Role == TrackRole.Riff && InstrumentTraits.Has(x.InstrumentCode, InstrumentTrait.Driven)),
                 song.Genre
             )

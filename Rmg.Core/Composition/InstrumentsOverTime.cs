@@ -191,7 +191,7 @@ internal static class InstrumentsOverTime
 
             result[track] = EventTimeline.Create(
                 notes[track].Duration,
-                // but a note in a louder or a quieter form (LouderForms), which keeps it
+                // but a note in a section's form, calm or heavy (SectionForm), which keeps it
                 notes[track].Select((x, i) => programs.TryGetValue(i, out var program) && program != pitched.InstrumentCode && x.Value.State.GetStateValue(CompositionStateKinds.Program) == 0
                     ? (x.Value with { State = x.Value.State.With(CompositionStateKinds.Program, program + 1) }).ToTimelineItem(x.Position)
                     : x)

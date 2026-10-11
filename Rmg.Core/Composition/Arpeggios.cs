@@ -147,10 +147,13 @@ internal static class Arpeggios
             tones = [root + SemitonesOf(colour)];
         else
         {
-            var (chordScale, _, chord) = Realizer.GetChord(state);
+            var (chordScale, _, _) = Realizer.GetChord(state);
             var scale = state.GetStateValue(StateKinds.ScaleOffsets);
             int[] steps = colour == ChordColour.Held ? [1, 2] : scale[5] - scale[4] == 1 || scale[1] - scale[0] != 1 ? [4, 5] : [0, 1];
-            tones = steps.Where(x => chordScale[x] == scale[x]).Select(x => chord.Tonic + scale[x]);
+            // the key's own, neither moved with a chord a chromatic passing chord shifts by semitones nor by a step its own
+            // scale moves
+            var tonic = state.GetStateValue(StateKinds.KeyOffset);
+            tones = steps.Where(x => chordScale[x] == scale[x]).Select(x => tonic + scale[x]);
         }
 
         var lowest = voiced.Min();
@@ -168,6 +171,14 @@ internal static class Arpeggios
         ArpeggioPattern.Pedal => "Pedal point",
         _ => pattern.ToString()
     };
+
+    /// <summary>A pattern that breaks the chord, any but the whole chord, among a genre's pool where it names one, up where it names none of them.</summary>
+    public static ArpeggioPattern DrawBroken(IGenerationContext context, double unconventionality, Genre genre)
+    {
+        var pool = genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio, x => GenreChoices.Name(x.ToString()));
+        var broken = Patterns.Where(x => x.Pattern != ArpeggioPattern.None && (pool is null || pool(x.Pattern) is not null)).ToArray();
+        return broken.Length == 0 ? ArpeggioPattern.Up : context.Pick(ByConvention.Weigh(broken, unconventionality, pool));
+    }
 
     /// <summary>A section's pattern, by the chords facet of its unconventionality, among a genre's pool where it names one.</summary>
     public static ArpeggioPattern Draw(IGenerationContext context, double unconventionality, Genre genre)

@@ -20,7 +20,7 @@ public sealed class HeldTonesTest
     private static (RealizedNote Note, IReadOnlySet<int> Chord)[] Broken(IEnumerable<CorpusSong> songs) =>
     [
         ..songs.SelectMany(song => song.Song.Notes![song.Song.Track(TrackRole.Chords)]
-            .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0 && x.Value.Pitches.Length == 1)
+            .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0 && x.Value.Pitches.Length == 1)
             .Select(x => (x.Value, Realizer.GetChordNotes(x.Value.State).Classes)))
     ];
 
@@ -39,13 +39,16 @@ public sealed class HeldTonesTest
         var clean = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(colour, "Electric Guitar (clean)"))));
         var driven = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(colour, "Distortion Guitar"))));
 
-        // every note the chord's or a held step of the key, the key's own as the section has it
+        // every note the chord's, a note of its own scale, or a held step of the key, the key's own as the section has it
         foreach (var song in clean)
-        foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0))
+        // but a solo's line, which the part may play
+        foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0
+                                                                                           && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
         {
-            var (_, _, chord) = Realizer.GetChord(note.Value.State);
+            var (own, root, chord) = Realizer.GetChord(note.Value.State);
             var scale = note.Value.State.GetStateValue(StateKinds.ScaleOffsets);
-            var key = Enumerable.Range(0, scale.Length).Select(x => (chord.Tonic + scale[x]).Mod(12)).ToHashSet();
+            var tonic = note.Value.State.GetStateValue(StateKinds.KeyOffset);
+            var key = scale.Select(x => (tonic + x).Mod(12)).Concat(Enumerable.Range(0, own.Length).Select(x => chord.GetPitch(x - root).Mod(12))).ToHashSet();
             var classes = Realizer.GetChordNotes(note.Value.State).Classes;
             foreach (var pitch in note.Value.Pitches)
                 await Assert.That(classes.Contains(pitch.Mod(12)) || key.Contains(pitch.Mod(12))).IsTrue().Because($"seed {song.Seed} at {note.Position}");

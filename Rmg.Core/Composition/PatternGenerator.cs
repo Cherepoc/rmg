@@ -620,6 +620,9 @@ internal readonly record struct ResolvedRhythm(
             : MaxRankLimit;
         if (IsGrouped(periodValue * Meter.ReferenceBar))
             maxRankLimit = Math.Min(maxRankLimit, GridRankLimit(periodValue * Meter.ReferenceBar));
+        // and no finer than the part's shortest note, where it keeps to one
+        if (stateMap.GetStateValue(CompositionStateKinds.ShortestNote) is > 0 and var shortest)
+            maxRankLimit = Math.Min(maxRankLimit, Math.Max(0, (int)Math.Floor(Math.Log2(periodValue * Meter.ReferenceBar / shortest) + 1e-9)));
         var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
             .BounceInBounds(0, maxRankLimit);
 

@@ -46,12 +46,9 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("quieter-form", "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
-            "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
-            x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?
-                .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) == (int)t.Value! + 1).Select(n => (double?)n.Position).FirstOrDefault()).Min(),
-            // tied 3 to 3 on 10 October 2026, asked again over other songs
-            [13, 17, 28, 37, 38, 45]),
+        new("calm", "Black metal's quieter sections turned calm: an acoustic or clean guitar breaking the chords slowly, their dark held tones ringing, the other guitars resting and the drums in half time. A calm between the storms, or a jump?",
+            "The calm sections' chance by genre, and whether a fill or a fade should lead into one.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1)),
         new("held", "Pop's broken chords with the key's second and third held over every chord and let ring, rubbing against it: sweet, or muddy?",
             "The held tones' and the ringing's chances by genre.", "pop", [], new() { ["colour"] = new() { ["held"] = 0 }, ["articulation"] = new() { ["letRing"] = 0 } },
             x => FirstColoured(x, ChordColour.Held))

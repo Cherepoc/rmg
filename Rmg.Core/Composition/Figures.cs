@@ -121,6 +121,9 @@ internal static class Figures
                 // a breakdown's kick with its riff, drawn all the same
                 if (player == FigurePlayer.Ground && section.Breakdown)
                     figures[player] = Of(player, "withRiff");
+                // and none in a calm section, neither a riff's tremolo nor the drums' blast, drawn all the same
+                if (section.Form.Kind == SectionFormKind.Calm)
+                    figures[player] = null;
             }
             return figures;
         });

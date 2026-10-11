@@ -107,6 +107,7 @@ internal static class LineDoubling
     /// <param name="sound">The song's sound facet, which the octaves lean by.</param>
     /// <param name="energies">Every appearance's energy, by its place, which the octaves lean by too.</param>
     /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords or chugs, which may make it power chords, by its place, which plays no twin.</param>
+    /// <param name="twinRests">Whether an appearance, by its place, leaves the riff's twin out, which then plays none of the riff.</param>
     /// <param name="drivenRiff">Whether the riff plays on a driven guitar, whose phrases the bass plays wherever it would rest in them.</param>
     /// <param name="blocks">A section's sequence of whether its harmonised melody plays in a block, by the section's place.</param>
     /// <param name="genre">The genre whose chances of the doublings a section draws (<see cref="GenreChoices.Doubling" />).</param>
@@ -121,6 +122,7 @@ internal static class LineDoubling
         Func<int, IGenerationContext> timbres,
         Func<int, IGenerationContext> blocks,
         Func<int, bool> riffPowerChords,
+        Func<int, bool> twinRests,
         bool drivenRiff,
         Genre genre
     )
@@ -153,8 +155,9 @@ internal static class LineDoubling
                 var step = context.Pick(ByConvention.Weigh(steps, melody, intervals));
                 var events = song.TrackTimelineMap;
                 bool Plays(int track) => events[track].EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
-                // a riff in power chords plays no twin, whose third over a distorted fifth is mud
-                if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && riffPowerChords(index))
+                // a riff in power chords plays no twin, whose third over a distorted fifth is mud, nor does an appearance that
+                // leaves the twin out, a calm section's
+                if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && (riffPowerChords(index) || twinRests(index)))
                     continue;
 
                 StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));

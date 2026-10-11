@@ -1,8 +1,8 @@
 [
   {
-    "id": "quieter-form",
-    "question": "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
-    "decides": "The quieter form's chances by genre.",
+    "id": "calm",
+    "question": "Black metal's quieter sections turned calm: an acoustic or clean guitar breaking the chords slowly, their dark held tones ringing, the other guitars resting and the drums in half time. A calm between the storms, or a jump?",
+    "decides": "The calm sections' chance by genre, and whether a fill or a fade should lead into one.",
     "genre": "blackMetal",
     "without": {
       "skip": [],
@@ -14,45 +14,56 @@
     },
     "seeds": [
       {
-        "seed": "d",
-        "at": 198.5,
+        "seed": "C",
+        "at": 118.1,
         "listen": [
-          "Chords (Acoustic Guitar (steel))"
+          "Hi-Hat",
+          "Chords (Distortion Guitar)",
+          "Kick"
         ]
       },
       {
-        "seed": "12",
-        "at": 94.1,
+        "seed": "N",
+        "at": 167.1,
         "listen": [
-          "Riff (Acoustic Guitar (steel))"
+          "Hi-Hat",
+          "Rhythm part (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
-        "seed": "13",
-        "at": 10,
+        "seed": "R",
+        "at": 41.8,
         "listen": [
-          "Riff (Electric Guitar (clean))"
+          "Riff (Distortion Guitar)",
+          "Hi-Hat",
+          "Tom"
         ]
       },
       {
-        "seed": "17",
-        "at": 14.2,
+        "seed": "m",
+        "at": 0,
         "listen": [
-          "Riff (Acoustic Guitar (steel))"
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Chords (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "1A",
-        "at": 146,
+        "seed": "r",
+        "at": 12.1,
         "listen": [
-          "Rhythm part (Acoustic Guitar (steel))"
+          "Riff (Distortion Guitar)",
+          "Chords (Acoustic Guitar (steel))",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
-        "seed": "1B",
-        "at": 1.3,
+        "seed": "x",
+        "at": 0,
         "listen": [
-          "Melody (Electric Guitar (clean))"
+          "Riff (Overdriven Guitar)",
+          "Kick"
         ]
       }
     ]
