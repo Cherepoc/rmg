@@ -1,75 +1,8 @@
 [
   {
-    "id": "djent-frame",
-    "question": "Djent's polymetric riff drifting against the bar for 8 or 16 bars before it snaps back on a downbeat, in place of every 4: the bar line lost and the return an arrival, or just lost?",
-    "decides": "Djent's polymeter's frames.",
-    "genre": "djent",
-    "without": {
-      "skip": [],
-      "genre": {
-        "polymeterFrame": {
-          "fourBars": 100,
-          "eightBars": 0,
-          "sixteenBars": 0,
-          "thirtyTwoBars": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 3.8,
-        "listen": [
-          "Chords (Pad 7 (halo))"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 4.4,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 56.8,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 98.3,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "B",
-        "at": 12,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 56.8,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "dnb-ghosts",
-    "question": "Drum and bass's break with ghost notes, soft 16ths on the snare around its backbeat: a rolling break, or clutter at this speed?",
-    "decides": "Ghost notes' chance in Drum and bass, Reggae and Ska.",
+    "id": "dnb-few-ghosts",
+    "question": "Drum and bass's break with a few ghost notes, soft 16ths on the snare around its backbeat, fewer than a funk drummer's: a rolling break, or clutter at this speed?",
+    "decides": "How many ghost notes Drum and bass plays, and their chance.",
     "genre": "dnb",
     "without": {
       "skip": [],
@@ -88,8 +21,8 @@
         ]
       },
       {
-        "seed": "A",
-        "at": 41.9,
+        "seed": "B",
+        "at": 134,
         "listen": [
           "Acoustic Snare"
         ]
@@ -109,77 +42,17 @@
         ]
       },
       {
-        "seed": "H",
-        "at": 24.5,
+        "seed": "K",
+        "at": 62.1,
         "listen": [
           "Acoustic Snare"
         ]
       },
       {
-        "seed": "J",
-        "at": 304.2,
+        "seed": "N",
+        "at": 0,
         "listen": [
           "Acoustic Snare"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "classical",
-    "question": "Classical's cello on the chord's third now and then, the chord inverted, rather than always its root: a classical bass line, or a wandering one?",
-    "decides": "The bass's landings in Classical.",
-    "genre": "classical",
-    "without": {
-      "skip": [],
-      "genre": {
-        "bassLanding": {
-          "root": 100,
-          "third": 0,
-          "fifth": 30
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 41,
-        "listen": [
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "3",
-        "at": 106.3,
-        "listen": [
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 20.1,
-        "listen": [
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 48.1,
-        "listen": [
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 112.3,
-        "listen": [
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 117.9,
-        "listen": [
-          "Bass (Cello)"
         ]
       }
     ]

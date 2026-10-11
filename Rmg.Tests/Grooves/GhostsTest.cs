@@ -71,7 +71,7 @@ public sealed class GhostsTest
     [Explicit]
     public async Task Report()
     {
-        foreach (var name in new[] { "funk", "soul", "rock", "blues", "hipHop", "disco" })
+        foreach (var name in new[] { "funk", "soul", "rock", "blues", "hipHop", "disco", "dnb", "reggae", "ska" })
         {
             var pairs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => (TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name))), TestCorpus.Get(seed, new SongOverrides(Genre: With(name, 0)))));
             var ghosting = pairs.Select(x => x.Item1.Trace.Where(t => t.Point == TracePoints.Ghosts).Average(t => (bool)t.Value! ? 1.0 : 0)).Average();

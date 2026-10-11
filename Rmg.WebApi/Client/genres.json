@@ -1455,6 +1455,7 @@
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
       "ghosts": { "sections": [30, 50, 60] },
+      "ghostNotes": { "many": 20 },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },

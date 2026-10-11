@@ -14,6 +14,9 @@ internal static class Ghosts
     /// <summary>How likely a 16th off the beat is ghosted next to a backbeat, before or after it, and elsewhere in the bar.</summary>
     public const double NearChance = 0.5, FarChance = 0.15;
 
+    /// <summary>How far a genre's ghost notes lean those chances at its fewest and its most, as odds (<see cref="GenreChoices.GhostNotes" />).</summary>
+    public const double GenreOdds = 4;
+
     /// <summary>How loud a ghost note is heard against the bar's loudest snare note, as a share of its velocity: well under it, felt more than heard.</summary>
     public const double Loudness = 0.4;
 
@@ -49,6 +52,8 @@ internal static class Ghosts
 
         // but where a fill plays, from its first note to its line, and in stop time
         var busy = draft.Busy(song);
+        var many = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.GhostNotes, "many"));
+        var (nearChance, farChance) = (many.Chance(NearChance, 1), many.Chance(FarChance, 1));
 
         var result = notes.ToBuilder();
         foreach (var track in snares)
@@ -77,7 +82,7 @@ internal static class Ghosts
                         if (at >= end - 1e-9 || span.Meter.Pulses.Any(x => Math.Abs(x - k * Length) < 1e-9) || own.Any(x => Math.Abs(x.Position - at) < Length - 1e-9))
                             continue;
                         var near = own.Any(x => Math.Abs(x.Position - at) < 2 * Length - 1e-9);
-                        if (draws[k] < (near ? NearChance : FarChance))
+                        if (draws[k] < (near ? nearChance : farChance))
                             played.Add((loudest.Value with
                             {
                                 Velocity = Render.ScaleLoudness(loudest.Value.Velocity, Loudness),

@@ -257,8 +257,12 @@ Answered on 11 October 2026, late, the round of the plan of 11 October, and kept
 (6 of 6); `techno-strip`, the dance tracks' stripped ending (6 of 6); `montuno`, Latin's (6 of 6); `djent-open`,
 Djent's drone with leaps (5 of 6); `appoggiatura`, the songs' own (5 of 6); `ballad`, its heavy chorus (5 of 6);
 `call-response`, Blues' (5 better, 1 worse, 1 the same); `punk-breakdown` (4 of 6); `held`, Pop's held tones and let
-ring, tied 3 to 3 and kept as they are; and `blues-12-8`, heard once and kept. Asked next, the three the round of ten
-left out: `djent-frame`, `dnb-ghosts` and `classical`.
+ring, tied 3 to 3 and kept as they are; and `blues-12-8`, heard once and kept. Then the three the round of ten had left
+out: `classical`, its cello on a chord's third, kept (4 to 2); `djent-frame`, the polymeter's frames of 8 and 16 bars,
+not told apart (5 unsure of 5) and let go of, the frames as they are; and `dnb-ghosts` (3 better, 1 worse, 2 unsure),
+heard good where a song ghosts little, about 1.2 to 1.6 a ghosting bar, and not told apart where it ghosts 3 to 5: a
+genre's ghosts now as many as it says (`ghostNotes`, `Ghosts.GenreOdds`), Drum and bass's 20, 1.09 ghosts a bar of
+its songs to 0.66, asked again as `dnb-few-ghosts`.
 
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's
@@ -490,7 +494,7 @@ listening question and a deploy to test. In order:
 7. Done (11 October 2026): **Classical** (`classical`), data: a melody on violin, flute or clarinet over a piano's
    Alberti figure and a cello, no drums, raised cadences and ornaments, AABA, ABA and a rondo (`SongForms`, forms of
    their own the songs never take), terraced dynamics, 80 to 140 in 4/4, 3/4 and 6/8, two to four and a half minutes;
-   the cello on a chord's third in 32% of its notes, asked as `?listen=classical`. Its key change to the dominant, a
+   the cello on a chord's third in 32% of its notes, heard and kept (`classical`). Its key change to the dominant, a
    genre's pool of key steps, left until the songs' own steps are heard not to serve.
 
 Review: **overengineering**: held tones a colour and let ring a note's length, not new systems; a section's form one
@@ -522,14 +526,14 @@ dynamics, as it has no drums.
 ### Form and sections
 
 - **A polymeter's bar giving way to its riff** (P3, the frame a power of two of bars done 11 October 2026,
-  `Polymeter.Frames`, 4 bars 43%, 8 23%, 16 8% and 32 7% of the polymeters, Djent's leaned to 8 and 16, asked as
-  `?listen=djent-frame`): a section's last bar cut short or drawn out by the cycle's leftover, so that the riff ends its
+  `Polymeter.Frames`, 4 bars 43%, 8 23%, 16 8% and 32 7% of the polymeters, Djent's leaned to 8 and 16, not told
+  apart by listening, `djent-frame`): a section's last bar cut short or drawn out by the cycle's leftover, so that the riff ends its
   cycle with the section and the next starts on it, should listening ask.
 - **Breakdowns beyond Djent, the rest** (P3, Punk's done 11 October 2026, 20% of its songs, heard
   and kept, `punk-breakdown`): more of Nu metal's, and a breakdown in a verse or before the last chorus beside the bridge,
   should listening want more.
 - **Ghost notes beyond the backbeat** (P3): Funk, Soul, Fusion, Blues, Hip hop, Rock, Disco, Drum and bass, Reggae and
-  Ska ghost on a backbeat's snare (`Ghosts`, asked as *dnb-ghosts*); a jazz drummer's comping on the snare and Latin's
+  Ska ghost on a backbeat's snare (`Ghosts`), Drum and bass fewer (`ghostNotes`, asked as *dnb-few-ghosts*); a jazz drummer's comping on the snare and Latin's
   timbales are idioms of their own, a snare off the backbeat role and a kit without one, which ghosts do not reach.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a

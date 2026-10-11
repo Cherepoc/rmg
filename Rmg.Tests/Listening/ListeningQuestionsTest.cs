@@ -46,15 +46,9 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("djent-frame", "Djent's polymetric riff drifting against the bar for 8 or 16 bars before it snaps back on a downbeat, in place of every 4: the bar line lost and the return an arrival, or just lost?",
-            "Djent's polymeter's frames.", "djent", [], new() { ["polymeterFrame"] = new() { ["fourBars"] = 100, ["eightBars"] = 0, ["sixteenBars"] = 0, ["thirtyTwoBars"] = 0 } },
-            x => x.Map.Sections.Where(s => x.PolymeterPlans.TryGetValue(s.SectionId, out var plan) && plan.Patterns != 1).Select(s => (double?)s.Start).FirstOrDefault()),
-        new("dnb-ghosts", "Drum and bass's break with ghost notes, soft 16ths on the snare around its backbeat: a rolling break, or clutter at this speed?",
-            "Ghost notes' chance in Drum and bass, Reggae and Ska.", "dnb", [], new() { ["ghosts"] = new() { ["sections"] = 0 } },
-            x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!)),
-        new("classical", "Classical's cello on the chord's third now and then, the chord inverted, rather than always its root: a classical bass line, or a wandering one?",
-            "The bass's landings in Classical.", "classical", [], new() { ["bassLanding"] = new() { ["root"] = 100, ["third"] = 0, ["fifth"] = 30 } },
-            _ => 0)
+        new("dnb-few-ghosts", "Drum and bass's break with a few ghost notes, soft 16ths on the snare around its backbeat, fewer than a funk drummer's: a rolling break, or clutter at this speed?",
+            "How many ghost notes Drum and bass plays, and their chance.", "dnb", [], new() { ["ghosts"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!))
     ];
 
     /// <summary>Where the song's chords first break in the colour given, a bar before it.</summary>
