@@ -545,11 +545,6 @@ dynamics, as it has no drums.
 - **Breakdowns beyond Djent, the rest** (P3, Punk's done 11 October 2026, 20% of its songs, asked as
   `?listen=punk-breakdown`): more of Nu metal's, and a breakdown in a verse or before the last chorus beside the bridge,
   should listening want more.
-- **The bass with the riff, by convention** (P2, suggested 8 October 2026): the bass doubling the riff in 35% of
-  sections whatever the song (`LineDoubling.RiffChance`, alike at every end, as neither plainer nor stranger); a plain
-  band's bass plays the riff with it always and a wild one's goes its own way, so the chance from 1 at the plain end,
-  through about 0.5, to near 0 at the wild, by the melody or the groove facet, a genre's `doubling` "riff" still above
-  it where named; measured by the sections with a riff whose bass doubles it, by fifths of conventionality.
 - **Quiet drums in calm genres** (P2, heard 8 October 2026 on `drum-marks`): the drums marking the form strike
   too loud for a calm piece, and any drum in Ambient or Dungeon should stay soft. The marks' strikes and swells well
   under the parts they colour (`DrumMarks`), and a genre's drums' loudness as its data, a level of the drum kit's

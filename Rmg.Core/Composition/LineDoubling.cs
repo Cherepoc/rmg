@@ -51,8 +51,12 @@ internal static class LineDoubling
     /// <summary>The notes a block's counter-melody stacks, its own and its chord's under it: with the melody's, three voices.</summary>
     private const int BlockVoices = 2;
 
-    /// <summary>The chance the bass plays the riff with it in a section, as a band plays a riff together.</summary>
-    public static ByConvention RiffChance { get; } = new(0.35, 0.35, 0.35);
+    /// <summary>
+    ///     The chance the bass plays the riff with it in a section, as a band plays a riff together, by the melody facet: a
+    ///     convention, every time in a plain band, half the time in a middling one, and never in the wildest, whose bass
+    ///     goes its own way.
+    /// </summary>
+    public static ByConvention RiffChance { get; } = new(1, 0.5, 0);
 
     /// <summary>
     ///     Who doubles whom, by how many scale steps, weighed by the song's melody facet, the chance of a section, alike at
