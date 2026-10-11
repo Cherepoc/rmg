@@ -497,10 +497,9 @@ listening question and a deploy to test. In order:
    `?listen=djent-open`. Black metal's tremolo figure repeats a note, so its drone would not alternate; left to listening.
 5. Done (11 October 2026): **12/8**, a meter of four groups of three 8ths (`Meter.TwelveEight`), the songs' own never
    at 0, 2% at 0.5 and 15% at 1; Blues' 6/8 moved mostly to 12/8 and Soul's halved into it, asked as `?listen=blues-12-8`.
-6. **Power ballad** (P2, data over steps 1, 2, 3 and 5): a clean guitar's broken chords let ring with sweet held
-   tones, an overdriven lead for the melody, a fingered bass, string pads; 60–85 BPM in 4/4 and 12/8; natural minor and
-   major, sus2, add9 and major seventh chords; the texture building section by section, the chorus heavy (step 3), a
-   guitar solo, the last chorus up a step (`KeyChange`, the plain end's already), ending by a fade or a ring-out.
+6. Done (11 October 2026): **Power ballad** (`ballad`), data: a clean guitar's broken chords let ring with sweet held
+   tones, an overdriven lead, strings, 60 to 85 in 4/4 and 12/8 (28% of its songs), 3.5 to 5 minutes, the chorus
+   heavy (57 of 263 sections), the last chorus up a step; its heavy chorus asked as `?listen=ballad`.
 7. **Classical** (P2): chamber music, a few players unlike Orchestral's orchestra: a melody on violin, flute or
    clarinet, the piano's Alberti figure under it, the cello's bass, no drums; raised cadences, ornaments, phrases of
    four and four, AABA, ABA and a rondo; terraced dynamics; 80–140 BPM in 4/4, 3/4 and 6/8; the bass's inversions and

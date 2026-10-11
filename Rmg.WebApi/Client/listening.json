@@ -329,6 +329,64 @@
     ]
   },
   {
+    "id": "ballad",
+    "question": "A Power ballad's clean broken chords turning driven where the band grows louder, its chorus heavy: the lift a ballad needs, or a jolt?",
+    "decides": "The heavy form's chance in the Power ballad.",
+    "genre": "ballad",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "guitars": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 151.3,
+        "listen": [
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 133.1,
+        "listen": [
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 32.9,
+        "listen": [
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 189.8,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "V",
+        "at": 36,
+        "listen": [
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "g",
+        "at": 303.3,
+        "listen": [
+          "Chords (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
     "id": "blues-12-8",
     "question": "A Blues in 12/8, every beat three 8ths, the chords broken and the drums in triplets: a slow blues, or a waltz that limps?",
     "decides": "12/8 against 6/8 in Blues and Soul.",
