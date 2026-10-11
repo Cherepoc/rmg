@@ -552,9 +552,9 @@ dynamics, as it has no drums.
   And the kit that marks the form (suggested the same day): never the standard, room or power kit, a band's, but the
   orchestral kit, its timpani and its bass drum, or the percussion, perhaps the brush or the electronic kit too; the
   kit a drum job's choice (`DrumMarks.Jobs`, `GenreChoices` "kit"), Ambient's and Dungeon's marks on the orchestra.
-- **Ghost notes in more genres** (P2, suggested 8 October 2026, the ghosts heard as great): Funk, Soul, Fusion, Blues,
-  Hip hop, Rock and Disco ghost now (`GenreChoices.Ghosts`); Drum and bass's breaks, Reggae's one drop, Ska, R&B, a
-  jazz drummer's comping on the snare and Latin's timbales would too, each its chance by listening to the preset.
+- **Ghost notes beyond the backbeat** (P3): Funk, Soul, Fusion, Blues, Hip hop, Rock, Disco, Drum and bass, Reggae and
+  Ska ghost on a backbeat's snare (`Ghosts`, asked as *dnb-ghosts*); a jazz drummer's comping on the snare and Latin's
+  timbales are idioms of their own, a snare off the backbeat role and a kit without one, which ghosts do not reach.
 - **A dance track's ending stripped back** (P3, from the review of 9 October 2026): House, Techno and Trance end
   by fading, opening or stopping; a DJ's ending drops the parts out one by one to the drums alone, an ending of its own
   beside the fade, the reverse of an intro of entries.

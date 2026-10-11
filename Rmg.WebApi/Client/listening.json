@@ -329,6 +329,64 @@
     ]
   },
   {
+    "id": "dnb-ghosts",
+    "question": "Drum and bass's break with ghost notes, soft 16ths on the snare around its backbeat: a rolling break, or clutter at this speed?",
+    "decides": "Ghost notes' chance in Drum and bass, Reggae and Ska.",
+    "genre": "dnb",
+    "without": {
+      "skip": [],
+      "genre": {
+        "ghosts": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "9",
+        "at": 267.2,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 41.9,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 42.6,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 0,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 24.5,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 304.2,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      }
+    ]
+  },
+  {
     "id": "appoggiatura",
     "question": "Pop's melody now and then leaning on a note off its chord on a strong beat and falling a step onto the chord: expressive, or a wrong note put right?",
     "decides": "The appoggiaturas' chance, the songs' own.",

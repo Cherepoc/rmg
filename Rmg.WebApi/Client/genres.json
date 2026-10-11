@@ -449,6 +449,7 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
+      "ghosts": { "sections": [15, 30, 40] },
       "cadenceRaise": { "sections": 0 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 40, "tom": 50, "cymbal": 60, "conga": [10, 20, 30] },
       "louderForms": { "guitars": 0 },
@@ -1401,6 +1402,7 @@
     "name": "Drum and bass",
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
+      "ghosts": { "sections": [30, 50, 60] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
@@ -1464,6 +1466,7 @@
     "name": "Ska",
     "description": "Fast, the guitar and the piano skanking on the offbeats, a walking bass, horns on a riff and in solos, trumpet and sax leads, major, Mixolydian or minor.",
     "choices": {
+      "ghosts": { "sections": [10, 20, 30] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50 },
       "louderForms": { "guitars": 0, "quieter": 0 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 50, "tom": 50, "cymbal": 70 },
