@@ -8,6 +8,7 @@ namespace Rmg.Tests.Page;
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class DoubledPartTest(Site site)
 {
+    // the seed of the song the level is measured on, any whose chords play
     private const string Seed = "1";
 
     [Test]
@@ -28,8 +29,6 @@ public sealed class DoubledPartTest(Site site)
         await page.Page.RouteAsync("**/api/songs/generate", async route =>
         {
             var body = JsonNode.Parse(route.Request.PostData ?? "{}")!.AsObject();
-            // a song whose twin plays, which a riff in power chords throughout would leave out
-            body["seed"] = Seed;
             var parts = body["parts"]!.AsObject();
             foreach (var part in new[] { "riff", "chords" })
             {
@@ -38,9 +37,20 @@ public sealed class DoubledPartTest(Site site)
             }
 
             parts["riffTwin"] = new JsonObject { ["plays"] = true, ["instrument"] = 30, ["volume"] = parts["riff"]!["volume"]!.DeepClone() };
-            var response = await route.FetchAsync(new RouteFetchOptions { PostData = System.Text.Encoding.UTF8.GetBytes(body.ToJsonString()) });
-            report = response.Headers["x-song-settings"];
-            await route.FulfillAsync(new RouteFulfillOptions { Response = response });
+            // a song whose twin plays, found, as a riff in power chords throughout leaves it out
+            for (var seed = 1; ; seed++)
+            {
+                body["seed"] = seed.ToString();
+                var response = await route.FetchAsync(new RouteFetchOptions { PostData = System.Text.Encoding.UTF8.GetBytes(body.ToJsonString()) });
+                var answered = response.Headers["x-song-settings"];
+                var made = JsonDocument.Parse(answered).RootElement.GetProperty("parts");
+                var twinPlays = made.TryGetProperty("riffTwin", out var twin) && twin.TryGetProperty("channel", out var channel) && channel.ValueKind == JsonValueKind.Number;
+                if (!twinPlays && seed < 16)
+                    continue;
+                report = answered;
+                await route.FulfillAsync(new RouteFulfillOptions { Response = response });
+                break;
+            }
         });
         await page.Page.ReloadAsync();
         await page.FirstSong();

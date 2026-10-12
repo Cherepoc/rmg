@@ -30,7 +30,7 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(asked.Body.GetProperty("tempo").GetInt32()).IsEqualTo(3);
         // a link carries no genre
         await Assert.That(asked.Body.TryGetProperty("genre", out _)).IsFalse();
-        // the mode given, the last scale but one, and the swing drawn
+        // the mode given, the last scale, and the swing drawn
         await Assert.That(asked.Body.GetProperty("mode").GetInt32()).IsEqualTo(12);
         await Assert.That(asked.Body.TryGetProperty("swing", out _)).IsFalse();
         // every third drum piece, from the first, and the last, in the server's order, which the page keeps the same

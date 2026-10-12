@@ -39,15 +39,15 @@ public sealed class GenreTest(Site site)
         var genre = page.Page.Locator("select[aria-label='Genre']");
         await page.Until(async () => await genre.IsEnabledAsync() && await genre.Locator("option").CountAsync() > 10, "the genres listed");
         var count = page.Requests.Count;
-        // as a hand would, wherever the settings' panel is folded away
-        await genre.EvaluateAsync("select => { select.value = 'preset:jazz'; select.dispatchEvent(new Event('change')); }");
+        // as a hand would, the list on the song's panel
+        await genre.SelectOptionAsync("preset:jazz");
         await page.Until(() => page.Requests.Count > count, "the song asked for in the genre");
         var asked = page.Requests[^1].Body.GetProperty("genre");
         await Assert.That(asked.GetProperty("kit").GetProperty("jazz").GetInt32()).IsEqualTo(100);
         await Assert.That(asked.GetProperty("drumRole.time").GetProperty("ride").GetInt32()).IsEqualTo(100);
         await page.Settled();
         await Assert.That(await page.Given()).IsEqualTo("All drawn");
-        // the list shows it chosen, and the next visit asks for it again, kept in this browser, not the link
+        // the list shows it chosen, the link names it, and the next visit asks for it again, kept in this browser
         await Assert.That(page.Page.Url).Contains("settings=B");
         // a preset named in the link by its id, which reads as it is
         await Assert.That(page.Page.Url).Contains("genre=jazz");
@@ -144,6 +144,8 @@ public sealed class GenreTest(Site site)
         await page.Settled();
         var genre = page.Page.Locator("select[aria-label='Genre']");
         await page.Until(() => genre.IsEnabledAsync(), "the genres listed");
+        // every draw the first of those it may draw, so that a draw of the song's own preset again would come every time
+        await page.Page.EvaluateAsync("() => { Math.random = () => 0; }");
 
         var count = page.Requests.Count;
         await genre.SelectOptionAsync("any");
@@ -154,7 +156,7 @@ public sealed class GenreTest(Site site)
         await Assert.That(await page.Page.Locator(".genre-about").TextContentAsync()).StartsWith("This song: ");
         await Assert.That(page.Page.Url).Contains("genre=");
 
-        // every new song a preset of its own, the one before never drawn again at once
+        // every new song a preset of its own, the one before never drawn again at once, the first two presets in turn
         var names = new List<string>();
         for (var i = 0; i < 3; i++)
         {

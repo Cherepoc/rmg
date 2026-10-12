@@ -140,8 +140,14 @@ public sealed class SongPage : IAsyncDisposable
         page.RequestFailed += (_, request) => songPage.End(request, "aborted", Stopwatch.GetTimestamp());
         page.RequestFinished += async (_, request) =>
         {
-            // when it finished, before the round trip that reads its status, which a request sent after it could pass
+            // when it finished, before the round trip that reads its status, which a request sent after it could pass; a
+            // song's request alone, the only ones recorded
             var at = Stopwatch.GetTimestamp();
+            bool recorded;
+            lock (songPage._requests)
+                recorded = songPage._byRequest.ContainsKey(request);
+            if (!recorded)
+                return;
             // a request that finishes as its test closes the page has no one left to read it, and an event handler's
             // exception would end every test's run rather than this one
             try

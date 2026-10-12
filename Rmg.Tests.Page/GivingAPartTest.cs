@@ -30,9 +30,7 @@ public sealed class GivingAPartTest(Site site)
         await slider.ScrollIntoViewIfNeededAsync();
         var before = (await slider.BoundingBoxAsync())!.Y;
 
-        var asked = page.Requests.Count;
-        await page.SetSetting("fills", 10);
-        await page.Until(() => page.Requests.Count > asked && page.Requests[^1].Ended == "200", "the song made again");
+        await Remade(page, () => page.SetSetting("fills", 10));
         await page.Until(async () => await page.IsGenerateEnabled(), "the song in place");
 
         // the slider where it was on the screen, rather than the page scrolled up to the songs so far
@@ -54,14 +52,18 @@ public sealed class GivingAPartTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
-    /// <summary>Clicks a control of the melody's row, wherever its panel is folded away, and waits for the song made again.</summary>
-    private static async Task<SongRequest> Click(SongPage page, string control)
+    /// <summary>Does what remakes the song, and waits for it made again, its request.</summary>
+    private static async Task<SongRequest> Remade(SongPage page, Func<Task> act)
     {
         var asked = page.Requests.Count;
-        await page.Page.EvaluateAsync("selector => document.querySelector(selector).click()", $"{Row} {control}");
+        await act();
         await page.Until(() => page.Requests.Count > asked && page.Requests[^1].Ended == "200", "the song made again");
         return page.Requests[^1];
     }
+
+    /// <summary>Clicks a control of the melody's row, wherever its panel is folded away, and waits for the song made again.</summary>
+    private static Task<SongRequest> Click(SongPage page, string control) =>
+        Remade(page, () => page.Page.EvaluateAsync("selector => document.querySelector(selector).click()", $"{Row} {control}"));
 
     private static Task<bool> IsDisabled(SongPage page, string control) =>
         page.Page.EvaluateAsync<bool>("selector => document.querySelector(selector).disabled", $"{Row} {control}");
@@ -74,18 +76,14 @@ public sealed class GivingAPartTest(Site site)
         await page.Until(() => page.Page.Locator(Chips).CountAsync().ContinueWith(x => x.Result > 0), "the drum pieces listed");
         await Assert.That(await page.Page.EvaluateAsync<bool>("selector => document.querySelector(selector).disabled", Chips)).IsTrue();
 
-        var asked = page.Requests.Count;
-        await page.Page.EvaluateAsync("selector => document.querySelector(selector).click()", $"{Drums} td:first-child input");
-        await page.Until(() => page.Requests.Count > asked && page.Requests[^1].Ended == "200", "the song made again");
-        var given = page.Requests[^1].Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString()!).ToArray();
+        var given = (await Remade(page, () => page.Page.EvaluateAsync("selector => document.querySelector(selector).click()", $"{Drums} td:first-child input")))
+            .Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString()!).ToArray();
         await Assert.That(given).IsNotEmpty();
 
         // a piece the song does not play put in
         var outside = await page.Page.EvaluateAsync<string>("selector => [...document.querySelectorAll(selector)].find(x => x.getAttribute('aria-pressed') === 'false').dataset.piece", Chips);
-        asked = page.Requests.Count;
-        await page.Page.EvaluateAsync("([selector, piece]) => document.querySelector(`${selector}[data-piece='${piece}']`).click()", new object[] { Chips, outside });
-        await page.Until(() => page.Requests.Count > asked && page.Requests[^1].Ended == "200", "the song made again");
-        await Assert.That(page.Requests[^1].Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).Contains(outside);
+        var withIt = await Remade(page, () => page.Page.EvaluateAsync("([selector, piece]) => document.querySelector(`${selector}[data-piece='${piece}']`).click()", new object[] { Chips, outside }));
+        await Assert.That(withIt.Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).Contains(outside);
         await Assert.That(page.Errors).IsEmpty();
     }
 

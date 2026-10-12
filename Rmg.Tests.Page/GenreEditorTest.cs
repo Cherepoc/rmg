@@ -101,7 +101,7 @@ public sealed class GenreEditorTest(Site site)
                 shown.UnionWith(await section.Locator(".genre-tile:visible").EvaluateAllAsync<string[]>("tiles => tiles.map(x => x.dataset.choice)"));
             }
         }
-        await Assert.That(names.Where(x => x.Contains('.') && !shown.Contains(x)).ToArray()).IsEmpty();
+        await Assert.That(names.Where(x => (x.Contains('.') || tabs.Contains(x)) && !shown.Contains(x)).ToArray()).IsEmpty();
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -719,6 +719,9 @@ public sealed class GenreEditorTest(Site site)
         // an option the server does not know, or an amount that is none, is no genre
         foreach (var options in new[] { """{ "11/4": 100 }""", """{ "4/4": -5 }""", """{ "4/4": [1, 2] }""" })
         {
+            // a fine file first, which clears the warning the file before left, so that each is refused on its own
+            await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "fine.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Fine", "choices": {} }""") });
+            await page.Until(async () => !((await dialog.Locator("footer .warning").TextContentAsync()) ?? "").StartsWith("That file is not a genre"), "the warning cleared");
             await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "wrong.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes($$"""{ "name": "Wrong", "choices": { "meter": {{options}} } }""") });
             await page.Until(async () => (await dialog.Locator("footer .warning").TextContentAsync())!.StartsWith("That file is not a genre"), $"{options} refused");
         }

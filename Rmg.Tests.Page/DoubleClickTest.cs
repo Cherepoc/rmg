@@ -96,7 +96,9 @@ public sealed class DoubleClickTest(Site site)
         var drawn = await Setting(page, "form").InputValueAsync();
         var asked = page.Requests.Count;
 
-        await Setting(page, "form").DblClickAsync(new LocatorDblClickOptions { Position = NearItsStart.Position, Force = true });
+        // dispatched to the disabled slider, as a browser may deliver no double click to a disabled control at all, so that
+        // the page's own guard is what keeps it
+        await Setting(page, "form").DispatchEventAsync("dblclick");
 
         await Assert.That(await Setting(page, "form").InputValueAsync()).IsEqualTo(drawn);
         await Assert.That(await Setting(page, "form").IsDisabledAsync()).IsTrue();

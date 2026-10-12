@@ -16,7 +16,7 @@ public sealed class HarmonyTest(Site site)
         // and where a seek puts it: the readout of every place the bar is dragged to, as the file marks them, changing
         // along the song
         var seen = new HashSet<string>();
-        foreach (var at in new[] { 0.2, 0.5, 0.8 })
+        foreach (var at in new[] { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 })
         {
             await page.Page.Locator("#seek").EvaluateAsync("(bar, at) => { bar.value = String(at); bar.dispatchEvent(new Event('input')); }", at);
             await page.Until(async () => System.Text.RegularExpressions.Regex.IsMatch(await harmony.TextContentAsync() ?? "", Shown), $"the key and chord at {at}");

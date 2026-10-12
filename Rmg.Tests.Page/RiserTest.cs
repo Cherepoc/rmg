@@ -24,6 +24,8 @@ public sealed class RiserTest(Site site)
         // a Techno song whose pad carries a riser, the first seed's that does, whichever it is as the songs are now
         string? report = null;
         string? seed = null;
+        // the songs the route has answered, which the page's own requests, routed past, do not show
+        var answered = 0;
         await page.Page.RouteAsync("**/api/songs/generate", async route =>
         {
             var body = JsonNode.Parse(route.Request.PostData ?? "{}")!.AsObject();
@@ -41,6 +43,7 @@ public sealed class RiserTest(Site site)
             }
 
             await route.FulfillAsync(new RouteFulfillOptions { Response = response });
+            Interlocked.Increment(ref answered);
         });
         await page.Page.ReloadAsync();
         await page.FirstSong();
@@ -61,6 +64,7 @@ public sealed class RiserTest(Site site)
 
         // the pad's instrument given: its own channel takes it, the riser keeps the reverse cymbal
         before = await page.Page.EvaluateAsync<int>("() => window.posted.length");
+        var answeredBefore = Volatile.Read(ref answered);
         var chosen = await page.Page.EvaluateAsync<int>("""
             () => {
                 const row = document.querySelector("#mixer tr.part button.listen[aria-label='Mute the pad']").closest("tr");
@@ -76,8 +80,11 @@ public sealed class RiserTest(Site site)
         // byte and the program; the riser's own, which a song made again sends it, no change to it
         bool ChangedTo(IEnumerable<string> posted, int channel) => posted.Any(x => x.Contains($"\"messageData\":{{\"0\":{0xC0 + channel},\"1\":{chosen}}}"));
         await page.Until(async () => ChangedTo(await page.Page.EvaluateAsync<string[]>("before => window.posted.slice(before)", before), own), "the pad's channel given the instrument");
-        // and a while for the song made again, whose messages the route in front of the page's own does not wait for
-        await Task.Delay(SongPage.PastRemake * 4);
+        // and the song made again, answered and loaded: its own program change of the pad's channel, after the one the change
+        // sent at once
+        await page.Until(() => Task.FromResult(Volatile.Read(ref answered) > answeredBefore), "the song made again");
+        await page.Until(async () => (await page.Page.EvaluateAsync<string[]>("before => window.posted.slice(before)", before))
+            .Count(x => x.Contains($"\"messageData\":{{\"0\":{0xC0 + own},\"1\":{chosen}}}")) >= 2, "the song made again loaded");
         var posted = await page.Page.EvaluateAsync<string[]>("before => window.posted.slice(before)", before);
         await Assert.That(ChangedTo(posted, riser)).IsFalse().Because(string.Join(" ", posted));
         await Assert.That(page.Errors).IsEmpty();
