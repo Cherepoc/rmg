@@ -223,7 +223,7 @@ internal sealed class SongTracks
                 if (drumSetup == DrumSetup.Percussion)
                     builder.Add(CompositionStateKinds.Rhythm.Variation, DrumSetups.PercussionVariation);
                 var drumStateMap = builder.ToStateMap(drumContext)
-                    .MergeWith(DrumStrokes.GenerateSong(strokeStreams(track), drum, DrumSounds.OddsOf(genre, GenreChoices.DrumStrokes)))
+                    .MergeWith(DrumStrokes.GenerateSong(strokeStreams(track), drum, DrumSounds.OddsOf(genre, GenreChoices.DrumStrokes), rhythmicUnconventionality.Value))
                     .MergeWith(DrumRoles.GenerateSong(roleStreams(track), drum, rhythmicUnconventionality.Value, genre));
                 drumStateMap = drumStateMap.MergeWith(FeelOf(DrumRoles.PartOf(DrumRoles.Of(drumStateMap))));
                 // a drum of a pinned role plays its figure as given, its own layer moving none of it (PatternGenerator)

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -27,11 +28,12 @@ internal static class DrumStrokes
         return StateMap.FromStates([StateKinds.DrumStroke.CreateState(new LayerValue<int>(depth, stroke))]);
     }
 
-    /// <summary>The song's stroke of a drum, by its sounds' weights; none for a drum without strokes.</summary>
+    /// <summary>The song's stroke of a drum, by its sounds' weights, a wild sound's never at the plain end; none for a drum without strokes.</summary>
     /// <param name="odds">How much likelier a genre has each sound, by its note number (<see cref="DrumSounds.OddsOf" />).</param>
-    public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum, Func<int, double> odds)
+    /// <param name="unconventionality">How far the song's rhythm strays, which a wild sound's weight leans by, as a fill's does (<see cref="FillSounds" />).</param>
+    public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum, Func<int, double> odds, double unconventionality)
     {
-        return drum.HasStrokes ? At(StateDepths.Song, Pick(context, drum, Tilt.None, -1, odds)) : StateMap.Default;
+        return drum.HasStrokes ? At(StateDepths.Song, Pick(context, drum, Tilt.None, -1, odds, unconventionality)) : StateMap.Default;
     }
 
     /// <summary>
@@ -50,19 +52,23 @@ internal static class DrumStrokes
         Func<int, double> odds
     )
     {
-        var candidate = Pick(context, drum, energy, current, odds);
+        var candidate = Pick(context, drum, energy, current, odds, unconventionality);
         var (to, from) = (drum.Sounds[candidate], drum.Sounds[current]);
         var lean = Math.Clamp(to.Loudness - from.Loudness, -1, 1);
         var weighed = new Tilt(Math.Log(to.Stroke * odds(to.Code) / (from.Stroke * odds(from.Code)))).Chance(chance, 1);
         return context.TestProbability(RhythmicUnconventionality.Ends(energy.Chance(weighed, lean), 1).At(unconventionality)) ? candidate : null;
     }
 
-    private static int Pick(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt energy, int except, Func<int, double> odds)
+    private static int Pick(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt energy, int except, Func<int, double> odds, double unconventionality)
     {
+        // a wild sound, the china's or the splash's, none at the plain end but where a genre has it likelier, and heavier at
+        // the wild end
+        double Stroke(DrumSound sound) =>
+            new ByConvention(sound.Wildness > 0 && odds(sound.Code) <= 1 ? 0 : sound.Stroke, sound.Stroke, sound.Stroke * (1 + sound.Wildness)).At(unconventionality);
         ImmutableArray<Weighted<int>> weights =
         [
             ..drum.Sounds
-                .Select((x, i) => new Weighted<int>(i == except ? 0 : energy.Weigh(x.Stroke * odds(x.Code), x.Loudness), i))
+                .Select((x, i) => new Weighted<int>(i == except ? 0 : energy.Weigh(Stroke(x) * odds(x.Code), x.Loudness), i))
                 .Where(x => x.Weight > 0)
         ];
         return context.Pick(weights);

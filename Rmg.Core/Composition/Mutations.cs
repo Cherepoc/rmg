@@ -104,19 +104,18 @@ internal static class Mutations
                 // the bar as long as it is, a short last bar's (ShortBars)
                 var length = Math.Min(barLength, span.End - start);
                 var count = context.TestProbability(chance) ? context.TestProbability(SecondEdit) ? 2 : 1 : 0;
-                // every edit drawn, those that find something to edit made
+                // the edits kept from the bars before laid first, and every new edit drawn on what they leave, those that find
+                // something to edit made
+                foreach (var mutation in edits)
+                    Lay(mutation, played, own, start, length, span.Meter, kicks, snares, anchored);
                 for (var edit = 0; edit < count; edit++)
                     if (Draw(context, played, own, start, length, span.Meter, kicks, snares, anchored) is { } mutation)
                     {
+                        Lay(mutation, played, own, start, length, span.Meter, kicks, snares, anchored);
                         edits.Add(mutation);
                         made++;
                     }
-                if (edits.Count > 0)
-                {
-                    foreach (var mutation in edits)
-                        Lay(mutation, played, own, start, length, span.Meter, kicks, snares, anchored);
-                    any = true;
-                }
+                any |= edits.Count > 0;
             }
 
             StateTrace.RecordSection(TracePoints.Mutations, FillGenerator.DrumsTrace, span.SectionId, $"{made} edits", (index, made));

@@ -52,8 +52,8 @@ internal sealed class FillGenerator
     private readonly Meter _meter;
     private readonly Genre _genre;
 
-    // the sequence a drum of the fills and landings that never sounded lands from (LandTheUnheard)
-    private readonly IGenerationContext _unheard;
+    // the sequence a drum of the fills and landings that never sounded lands from, by its track (LandTheUnheard)
+    private readonly Func<int, IGenerationContext> _unheard;
 
     // the drums the fills played, and the landings, as they are marked
     private readonly HashSet<int> _filled = [];
@@ -61,9 +61,9 @@ internal sealed class FillGenerator
 
     /// <param name="songRhythm">How far the song's rhythm strays, which makes a drummer's signature likelier.</param>
     /// <param name="meter">The meter the song's bars are in.</param>
-    /// <param name="unheard">The sequence a drum of the fills and landings that never sounded lands from (<see cref="LandTheUnheard" />).</param>
+    /// <param name="unheard">The sequence a drum of the fills and landings that never sounded lands from, by its track, so that another drum heard or not leaves it (<see cref="LandTheUnheard" />).</param>
     /// <param name="genre">The genre whose pool of the feels a fill's change keeps to.</param>
-    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter, IGenerationContext unheard, Genre genre)
+    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter, Func<int, IGenerationContext> unheard, Genre genre)
     {
         _meter = meter;
         _genre = genre;
@@ -143,7 +143,7 @@ internal sealed class FillGenerator
             if (landings.Length == 0)
                 continue;
 
-            var (position, sectionId, _, _) = landings[_unheard.GenerateInt(0, landings.Length)];
+            var (position, sectionId, _, _) = landings[_unheard(sound.Track).GenerateInt(0, landings.Length)];
             edits.Hit(sound.Track, position, FillLayers.LandingVelocity, sound.Articulation, sectionId, HitKind.Landing);
         }
     }
@@ -483,7 +483,7 @@ internal sealed class FillGenerator
             // tuplet's notes stay on it
             var coarser = rhythm.Step(-1);
             var (first, second) = run.Speed == FillSpeed.SpeedsUp ? (coarser, rhythm.MaxRank) : (rhythm.MaxRank, coarser);
-            var note = rhythm.Period / Math.Pow(2, Math.Min(first, second));
+            var note = rhythm.NoteAt(Math.Min(first, second));
             var middle = from + Math.Round((line - from) / 2 / note) * note;
             notes.AddRange(rhythm.Play(_line, seed, line, from, middle, first));
             notes.AddRange(rhythm.Play(_line, Seeds.Derive(seed, 1), line, middle, line, second));

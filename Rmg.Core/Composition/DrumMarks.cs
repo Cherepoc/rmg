@@ -116,6 +116,8 @@ internal static class DrumMarks
             var swelling = song.AppearanceStream(SongStream.DrumMarks, index);
             // and its strikes and its roll from sequences of its own, so that an earlier section's places leave them
             var (striking, rolling) = (song.AppearanceStream(SongStream.DrumMarks, index, 1), song.AppearanceStream(SongStream.DrumMarks, index, 2));
+            // the drum swelling into the section's start, which no roll on it doubles
+            int? swelled = null;
             foreach (var (at, strength) in places)
             {
                 // drawn for every place, so that the draws are as many
@@ -123,14 +125,17 @@ internal static class DrumMarks
                 var (hits, drum) = (striking.TestProbability(often.Chance(energy.Chance(chance, 1), 1)), marking[striking.GenerateInt(0, marking.Length)]);
                 var (swell, swellRate) = (swelling.TestProbability(swells.Chance(SwellChance, 1)), swelling.Pick(RollRates));
                 if (hits && plays && strength == 0 && swell && at >= SwellBeats)
+                {
                     marks[drum].AddRange(Roll(typical[drum], at, SwellBeats, SwellBeats, swellRate));
+                    swelled = Math.Abs(at - span.Start) < 1e-9 ? drum : swelled;
+                }
                 else if (hits && plays)
                     marks[drum].Add((typical[drum] with { Velocity = Render.ScaleLoudness(typical[drum].Velocity, loudness) }).ToTimelineItem(at));
             }
 
-            // a roll into the section on the beat before it, where the drums play the section
+            // a roll into the section on the beat before it, where the drums play the section, but on a drum swelling into it
             var (rolls, rate, roller) = (rolling.TestProbability(often.Chance(energy.Chance(RollChance, 1), 1)), rolling.Pick(RollRates), marking[rolling.GenerateInt(0, marking.Length)]);
-            if (rolls && plays && span.Start >= 1)
+            if (rolls && plays && span.Start >= 1 && swelled != roller)
                 marks[roller].AddRange(Roll(typical[roller], span.Start, 1, 0, rate));
         }
 

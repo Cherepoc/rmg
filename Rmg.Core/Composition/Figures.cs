@@ -260,13 +260,14 @@ internal static class Figures
             {
                 var head = DrumStrokes.At(StateDepths.Note, 0);
                 var played = notes.Select(x => spans.Any(s => x.IsWithin(s.Start, s.End)) ? x.Value.MergeWith(head).ToTimelineItem(x.Position) : x).ToList();
+                // a snare the song never plays, which has no note to add
+                if (played.Count == 0)
+                    return notes;
                 foreach (var span in spans)
                 {
                     // the section's own snare note, its state, which a backbeat added plays, or the nearest the snare plays in the
                     // song where its kit there has none
                     var own = played.FirstOrDefault(x => x.IsWithin(span.Start, span.End)).Value ?? played.MinBy(x => Math.Abs(x.Position - span.Start)).Value;
-                    if (own is null)
-                        continue;
                     for (var bar = span.Meter.PhraseBars; bar < span.BarCount; bar++)
                     {
                         var (start, end) = span.Bar(bar);

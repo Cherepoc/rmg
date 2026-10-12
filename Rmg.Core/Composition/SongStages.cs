@@ -240,7 +240,7 @@ internal static class SongStages
     /// <summary>The drums marking the lines, now that the song is put together, and the runs they play, which the lines walk with.</summary>
     internal static SongDraft Fills(SongDecisions song, SongDraft draft)
     {
-        var fills = new FillGenerator(song.Stream(SongStream.Fills), song.Tracks, song.Of(Facet.Fills), song.Meter, song.Stream(SongStream.UnheardLandings), song.Genre);
+        var fills = new FillGenerator(song.Stream(SongStream.Fills), song.Tracks, song.Of(Facet.Fills), song.Meter, track => song.Stream(SongStream.UnheardLandings, track), song.Genre);
         // a stop-time phrase's end as heavy as a section's, the drums filling the band back in as often
         var stops = song.StopTime;
         var lines = song.Form.Lines.Select(x => stops.Any(p => Math.Abs(p.End - x.Position) < 1e-6) ? x with { Weight = Math.Max(x.Weight, 0) } : x).ToImmutableArray();

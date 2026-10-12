@@ -307,11 +307,15 @@ internal static class DrumSolos
                 // every drum cleared but the feet's where they replay the groove's kick
                 foreach (var track in tracks.Where(x => !feetTracks.Contains(x) || feetPattern != SoloFeet.Groove))
                     edits.Clear(track, start, end);
-                // the feet and the players keeping time, softer, their accents kept under it, the feet by their pattern where it
-                // is not the groove's
+                // the feet and the players keeping time, softer, their accents kept under it as the section's dynamics scale
+                // them, the strongest at the time's loudness, the feet by their pattern where it is not the groove's
                 foreach (var track in (feetPattern == SoloFeet.Groove ? feetTracks : []).Concat(keepers.SelectMany(x => x.Tracks)))
                 foreach (var note in song.TrackTimelineMap[track].EventTimeline.Where(IsIn))
-                    edits.Replay(track, note, note.Value.GetStateValue(StateKinds.Velocity) - BeatAccent.StrongestAccent + TimeLoudness);
+                {
+                    var dynamics = song.CommonStateTimelineMap.GetEffectiveStateMapAt(note.Position)
+                        .MergeWith(song.TrackTimelineMap[track].StateTimelineMap.GetEffectiveStateMapAt(note.Position)).GetStateValue(CompositionStateKinds.NoteDynamics);
+                    edits.Replay(track, note, note.Value.GetStateValue(StateKinds.Velocity) - VelocityLayers.Note * dynamics * BeatAccent.StrongestAccent + TimeLoudness);
+                }
                 if (feetPattern != SoloFeet.Groove && feetTracks.Count > 0)
                 {
                     var (footTrack, footSound) = feetPattern == SoloFeet.HatFoot

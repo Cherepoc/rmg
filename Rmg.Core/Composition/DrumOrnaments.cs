@@ -61,10 +61,10 @@ internal static class DrumOrnaments
                 // the drummer's own
                 if (note.Value.Pitches is not [var code] || code != head || map.SectionAt(position) is not { } section || holds.At(KeepsOutOf, position, track))
                     return note;
-                // in a fill on an 8th, its accents, and elsewhere on a pulse of its bar, its backbeat
+                // in a fill on an 8th, its accents, and elsewhere on its bar's backbeat
                 var inFill = holds.At(Hold.Fill, position);
                 var beat = map.BeatInBar(position);
-                if (inFill ? Math.Abs(beat * 2 - Math.Round(beat * 2)) > 1e-6 : !map.MeterAt(position).Pulses.Any(x => Math.Abs(x - beat) < 1e-6))
+                if (inFill ? Math.Abs(beat * 2 - Math.Round(beat * 2)) > 1e-6 : !map.MeterAt(position).Backbeats.Any(x => Math.Abs(x - beat) < 1e-6))
                     return note;
                 var (plays, share, strokes) = inFill ? (flams, FlamShare, FlamStrokes) : (drags, DragShare, DragStrokes);
                 // drawn by the note's place, so that a song made again plays it alike

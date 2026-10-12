@@ -49,9 +49,12 @@ public static class Render
     /// <summary>The orchestra kit's program, whose notes from 41 to 53 are timpani, a semitone apart (<see cref="GenreChoices.Kits" />).</summary>
     private const int OrchestraKit = 48;
 
+    /// <summary>The orchestra kit's hi-hats, closed, pedalled and open, by the standard kit's notes for them.</summary>
+    private static readonly IReadOnlyDictionary<int, int> OrchestraHiHats = new Dictionary<int, int> { [42] = 27, [44] = 28, [46] = 29 };
+
     /// <summary>
     ///     A drum's note as the orchestra kit plays it: its cymbals on the kit's concert cymbals, the crash and the china
-    ///     the crash's, the ride and its bell the ride's; and any other in the timpani's range a timpani on the chord's root
+    ///     the crash's, the ride and its bell the ride's; its hi-hats the kit's own; and any other in the timpani's range a timpani on the chord's root
     ///     or fifth there, the nearest to the note, as a timpanist tunes to the key rather than to a drum's fixed note.
     /// </summary>
     private static int InOrchestra(int code, StateMap state)
@@ -61,6 +64,9 @@ public static class Render
             return crash;
         if (code is 51 or 53)
             return ride;
+        // the hi-hat the orchestra set's own, closed, pedalled and open, a timekeeper rather than a timpani
+        if (code is 42 or 44 or 46)
+            return OrchestraHiHats[code];
         if (code is < lowest or > highest)
             return code;
         var chord = Composition.Realizer.GetChord(state).Chord;
@@ -103,7 +109,8 @@ public static class Render
                 : null;
             if (trackNotes.Count == 0)
                 continue;
-            if (isPercussion && song.Draws?.Kit == OrchestraKit)
+            // as the kit that plays is, a kit the mix gives in place of the drawn
+            if (isPercussion && (mix.Of(TrackRole.Drum)?.Instrument ?? song.Draws?.Kit) == OrchestraKit)
                 trackNotes = EventTimeline.Create(trackNotes.Duration, trackNotes.Select(x =>
                     (x.Value with { Pitches = [..x.Value.Pitches.Select(p => InOrchestra(p, song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(x.Position)))] }).ToTimelineItem(x.Position)));
 
