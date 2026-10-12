@@ -87,8 +87,11 @@ public sealed class OctaveTest
         var appearances = TestCorpus.Measure(256, song => Appearances(song).ToArray()).SelectMany(x => x).OrderBy(x => x.Energy).ToArray();
         var third = appearances.Length / 3;
         double Share(IEnumerable<(TrackRole, bool InOctaves, double)> some) => some.Count(x => x.InOctaves) / (double)some.Count();
+        var (loud, quiet) = (Share(appearances.TakeLast(third)), Share(appearances.Take(third)));
+        Console.WriteLine($"in octaves: the loudest third {loud:P1}, the quietest {quiet:P1}");
 
-        await Assert.That(Share(appearances.TakeLast(third))).IsGreaterThan(Share(appearances.Take(third)) * 1.3);
+        // measured 25.8% to 28.1% in the loudest third against 7.6% to 8.3% in the quietest, at offsets 0 and a million
+        await Assert.That(loud).IsGreaterThan(quiet * 1.3);
     }
 
     /// <summary>

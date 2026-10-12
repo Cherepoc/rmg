@@ -316,11 +316,13 @@ public sealed class GenreTest
     {
         Genre Leaning(double lean) => new(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty.Add(GenreChoices.Tempo.Name,
             ImmutableDictionary<string, ByConvention>.Empty.Add("from", Alike(TempoAmount(80))).Add("to", Alike(TempoAmount(160))).Add("lean", Alike(lean))));
-        double Average(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Bpm(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).Average();
+        double Average(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Bpm(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).Average();
 
-        var middle = Average(Leaning(0.5));
-        await Assert.That(Average(Leaning(1))).IsGreaterThan(middle + 10);
-        await Assert.That(Average(Leaning(0))).IsLessThan(middle - 10);
+        var (middle, fast, slow) = (Average(Leaning(0.5)), Average(Leaning(1)), Average(Leaning(0)));
+        Console.WriteLine($"leaning slow {slow:F1} bpm, middle {middle:F1}, fast {fast:F1}");
+        // measured 94 to 98 bpm leaning slow, 115 to 119 in the middle, 136 to 138 fast, at offsets 0 and a million
+        await Assert.That(fast).IsGreaterThan(middle + 10);
+        await Assert.That(slow).IsLessThan(middle - 10);
     }
 
     [Test]
@@ -340,13 +342,16 @@ public sealed class GenreTest
     {
         // a genre of songs from a minute and a half to two and a half, and one from six minutes to nine
         Genre Lasting(double from, double to) => Of((GenreChoices.Length, [("from", GenreChoices.AmountOfLength(from)), ("to", GenreChoices.AmountOfLength(to))]));
-        double[] Seconds(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)).Rendered.Seconds);
+        double[] Seconds(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)).Rendered.Seconds);
 
         var short_ = Seconds(Lasting(90, 150));
         var long_ = Seconds(Lasting(360, 540));
         // as near as a length given comes, within 15% of the range, most of them
-        await Assert.That(short_.Count(x => x is >= 90 * 0.85 and <= 150 * 1.15)).IsGreaterThanOrEqualTo(24);
-        await Assert.That(long_.Count(x => x is >= 360 * 0.85 and <= 540 * 1.15)).IsGreaterThanOrEqualTo(24);
+        var (shortNear, longNear) = (short_.Count(x => x is >= 90 * 0.85 and <= 150 * 1.15), long_.Count(x => x is >= 360 * 0.85 and <= 540 * 1.15));
+        Console.WriteLine($"within 15% of their range: {shortNear} of 64 short songs, {longNear} of 64 long");
+        // measured 61 to 64 of 64 each, at offsets 0 and a million
+        await Assert.That(shortNear).IsGreaterThanOrEqualTo(48);
+        await Assert.That(longNear).IsGreaterThanOrEqualTo(48);
         // and a length given beats the genre's
         await Assert.That(TestCorpus.Get(0, new SongOverrides(Genre: Lasting(360, 540), Length: 120)).Rendered.Seconds).IsLessThan(200);
     }

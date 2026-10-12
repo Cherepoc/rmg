@@ -43,12 +43,15 @@ public sealed class ExpressionTest
     [Test]
     public async Task TheWildestSongs_PlayAStrongEffect_OthersBesideItNowAndThen_AndTheGentleOnesTogether()
     {
-        var wild = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => PartEffects(TestCorpus.Get(seed, Sound(1))));
+        var wild = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => PartEffects(TestCorpus.Get(seed, Sound(1))));
         var strong = Effects.Select((e, i) => (e, i)).Where(x => x.e.IsStrong).Select(x => x.i).ToArray();
         var gentle = Effects.Select((e, i) => (e, i)).Where(x => !x.e.IsStrong).Select(x => x.i).ToArray();
 
         // most wildest songs playing a strong effect, every one drawing one but where no part of it may carry it
-        await Assert.That(wild.Count(song => strong.Any(i => song.Any(p => p[i])))).IsGreaterThan(wild.Length * 3 / 4);
+        var (striking, two) = (wild.Count(song => strong.Any(i => song.Any(p => p[i]))), wild.Count(song => strong.Count(i => song.Any(p => p[i])) >= 2));
+        Console.WriteLine($"of 64 wildest songs, {striking} play a strong effect, {two} two or more");
+        // measured 57 to 60 of 64, 32 to 34 two or more, at offsets 0 and a million
+        await Assert.That(striking).IsGreaterThan(wild.Length * 3 / 4);
         await Assert.That(wild.Any(song => strong.Count(i => song.Any(p => p[i])) >= 2)).IsTrue();
         await Assert.That(wild.SelectMany(x => x).Any(p => gentle.Count(i => p[i]) >= 2)).IsTrue();
     }

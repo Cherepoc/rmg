@@ -36,8 +36,8 @@ public sealed class HeldTonesTest
     [Arguments(ChordColour.HeldDark)]
     public async Task HeldTones_RingOverTheBrokenChords_OnACleanGuitar_NeverADrivenOne(ChordColour colour)
     {
-        var clean = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(colour, "Electric Guitar (clean)"))));
-        var driven = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(colour, "Distortion Guitar"))));
+        var clean = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(colour, "Electric Guitar (clean)"))));
+        var driven = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(colour, "Distortion Guitar"))));
 
         // every note the chord's, a note of its own scale, or a held step of the key, the key's own as the section has it
         foreach (var song in clean)
@@ -55,12 +55,15 @@ public sealed class HeldTonesTest
         }
 
         // the notes off the chord against the same songs with no colour, which other devices play a few of
-        var plain = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(ChordColour.None, "Electric Guitar (clean)"))));
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(ChordColour.None, "Electric Guitar (clean)"))));
         var (held, rubbing) = Measure(Broken(clean));
-        Console.WriteLine($"{colour}: {held} notes off the chord, {rubbing} a semitone from a chord's note, against {Measure(Broken(plain)).Held} with no colour");
-        await Assert.That(held).IsGreaterThan(Measure(Broken(plain)).Held + 50);
+        var (broken, plainBroken) = (Broken(clean).Length, Broken(plain).Length);
+        var (share, plainShare) = (held / (double)broken, Measure(Broken(plain)).Held / (double)plainBroken);
+        Console.WriteLine($"{colour}: {share:P1} of {broken} broken notes off the chord, {rubbing} a semitone from a chord's note, against {plainShare:P1} with no colour");
+        // measured 16% to 18.5% off the chord against none with no colour, at offsets 0 and a million
+        await Assert.That(share).IsGreaterThan(plainShare + 0.08);
         // a driven guitar holds none, its notes off the chord as with no colour
-        var drivenPlain = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(ChordColour.None, "Distortion Guitar"))));
+        var drivenPlain = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Holding(ChordColour.None, "Distortion Guitar"))));
         await Assert.That(Measure(Broken(driven)).Held).IsEqualTo(Measure(Broken(drivenPlain)).Held);
     }
 }

@@ -31,7 +31,8 @@ public sealed class RiffTwinTest
             await Assert.That(twinPan).IsEqualTo(-riffPan);
             // every note where the riff plays one, but where the riff solos, which the twin keeps the riff under: its scale
             // step one of a twin's apart from the riff's, the same in a section
-            var riff = song.Song.Notes![song.Song.Track(TrackRole.Riff)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State);
+            // a riff that plays no note has no twin to measure
+        var riff = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff))?.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State) ?? [];
             foreach (var span in song.Map.Sections)
             {
                 var apart = twin.Where(x => x.Position >= span.Start && x.Position < span.End && riff.TryGetValue(Math.Round(x.Position, 6), out var r) && r.GetStateValue(CompositionStateKinds.LineSolo) == 0)
@@ -64,16 +65,19 @@ public sealed class RiffTwinTest
     [Test]
     public async Task AWildSong_HarmonisesItsRiff_ByWiderIntervalsToo()
     {
-        var given = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Melody(1, true)));
+        var given = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Melody(1, true)));
         var intervals = given.SelectMany(Intervals).ToArray();
+        Console.WriteLine($"of {intervals.Length} twinned sections, {intervals.Count(x => x is not (2 or -5)) / (double)intervals.Length:P1} wider than a third");
 
+        // measured 59% to 62% of 411 to 433 twinned sections, at offsets 0 and a million
         await Assert.That(intervals.Count(x => x is not (2 or -5))).IsGreaterThan(intervals.Length / 3);
     }
 
     /// <summary>The steps a twin plays apart from the riff in each section it plays, where the riff does not solo.</summary>
     private static IEnumerable<int> Intervals(CorpusSong song)
     {
-        var riff = song.Song.Notes![song.Song.Track(TrackRole.Riff)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State);
+        // a riff that plays no note has no twin to measure
+        var riff = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff))?.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State) ?? [];
         var twin = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.RiffTwin))?.ToArray() ?? [];
         return song.Map.Sections.SelectMany(span => twin
             .Where(x => x.Position >= span.Start && x.Position < span.End && riff.TryGetValue(Math.Round(x.Position, 6), out var r) && r.GetStateValue(CompositionStateKinds.LineSolo) == 0)

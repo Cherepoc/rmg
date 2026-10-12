@@ -76,6 +76,8 @@ public sealed class SongGeneratorScaleTest
 
         Console.WriteLine($"{changes.Count} of {sections} sections change scale; by notes changed: " +
                           string.Join(", ", changes.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key}: {x.Count()}")));
+        Console.WriteLine($"{plainChanges.Count(x => x == 1)} of {plainChanges.Count} plain sections' changes a note");
+        // measured 15% to 17% of the sections changing scale, 56% to 76% of the plain ones' changes a note, at offsets 0 and a million
         await Assert.That(changes.Count / (double)sections).IsBetween(0.05, 0.3);
         await Assert.That(plainChanges.Count(x => x == 1)).IsGreaterThan(plainChanges.Count / 2);
     }

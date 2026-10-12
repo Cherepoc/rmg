@@ -13,7 +13,7 @@ public sealed class SectionPedalTest
     public async Task APedalledPhrase_HoldsOneNoteInTheBass_UnderChangingChords()
     {
         int phrases = 0, held = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed,
                      new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0.9))))))
         {
             var pedalling = song.Trace.Where(x => x.Point == TracePoints.SectionPedal && x.Value is not null).ToDictionary(x => x.Section, x => (int)x.Value!);
@@ -37,6 +37,8 @@ public sealed class SectionPedalTest
         }
 
         await Assert.That(phrases).IsGreaterThan(5);
+        Console.WriteLine($"{held} of {phrases} pedalled phrases holding one note");
+        // measured 94% to 100% of 49 to 50 phrases, at offsets 0 and a million
         await Assert.That(held / (double)phrases).IsGreaterThan(0.9);
     }
 

@@ -69,6 +69,7 @@ public sealed class PlaningTest
 
         Console.WriteLine($"of {planed} planed sections, {inModes / (double)planed:P1} in modes, their chords' modes changing {changed / (double)chords:P1} of the moves");
         await Assert.That(planed).IsGreaterThan(20);
+        // measured 73% to 74% in modes, 76% to 79% of the moves changing, at offsets 0 and a million
         await Assert.That(inModes / (double)planed).IsBetween(0.4, 0.95);
         await Assert.That(changed / (double)chords).IsGreaterThan(0.4);
     }

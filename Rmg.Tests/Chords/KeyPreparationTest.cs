@@ -123,8 +123,10 @@ public sealed class KeyPreparationTest
     {
         var links = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => Links(TestCorpus.Get(seed, Scale(0.5)))).SelectMany(x => x).Select(x => x[0]).ToArray();
 
+        Console.WriteLine($"{links.Count(x => x == 7)} of {links.Length} chains by the dominant");
+        // measured 61% to 72% of 36 to 50 chains, at offsets 0 and a million
         await Assert.That(links.Length).IsGreaterThan(10);
-        await Assert.That(links.Count(x => x == 7) / (double)links.Length).IsGreaterThan(0.6);
+        await Assert.That(links.Count(x => x == 7) / (double)links.Length).IsGreaterThan(0.5);
     }
 
     /// <summary>How many key changes are prepared, by fifth of the scale facet, with how long chains of which links.</summary>

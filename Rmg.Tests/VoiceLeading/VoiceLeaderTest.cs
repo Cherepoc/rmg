@@ -177,6 +177,7 @@ public sealed class VoiceLeaderTest
         }
 
         Console.WriteLine($"smoothness by instrument: {string.Join(", ", byInstrument.OrderBy(x => x.Key).Select(x => $"{x.Key}: {x.Value.Average():F2} of {x.Value.Count}"))}; {songsVaryingBySection} songs varying by section");
+        // measured a sustained chord's 0.79 to 0.81 against a guitar's 0.30 to 0.31, and 64 of 64 songs varying, at offsets 0 and a million
         await Assert.That(byInstrument[VoiceLeadingLayers.Sustained].Average()).IsGreaterThan(byInstrument[VoiceLeadingLayers.Guitar].Average() + 0.3);
         await Assert.That(songsVaryingBySection).IsGreaterThan(50);
     }

@@ -65,8 +65,8 @@ public sealed class DroneAndQuieterFormTest
     [Test]
     public async Task ACalmSection_PlaysItsGuitarsAcousticOrClean_ItsChordsBrokenSlowly_TheDrumsSparser()
     {
-        var calm = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("blackMetal", GenreChoices.LouderForms, "quieter"))));
-        var storm = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without("blackMetal", GenreChoices.LouderForms.Name))));
+        var calm = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("blackMetal", GenreChoices.LouderForms, "quieter"))));
+        var storm = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without("blackMetal", GenreChoices.LouderForms.Name))));
         var (sections, guitarNotes, drumsCalm, drumsOwn, gapsSlow, gapsAll) = (0, 0, 0.0, 0.0, 0, 0);
         foreach (var (song, own) in calm.Zip(storm))
         {
@@ -101,6 +101,7 @@ public sealed class DroneAndQuieterFormTest
 
         // the drums in half time and without a figure, against the mechanism breaking (measured: the drums 27% to 36% of the storm's, 90% to 96% of the guitar's notes an 8th or more apart, at offsets 0, a million and three million)
         Console.WriteLine($"{sections} calm sections, {guitarNotes} guitar notes, {gapsSlow / (double)Math.Max(1, gapsAll):P0} of them an 8th or more from the next; the drums {drumsCalm / Math.Max(1, drumsOwn):P0} of the storm's");
+        // measured 197 to 221 calm sections, 92% to 93% of the gaps slow, the drums 34% to 36% of the storm's, at offsets 0 and a million
         await Assert.That(sections).IsGreaterThan(5);
         await Assert.That(gapsSlow / (double)gapsAll).IsGreaterThan(0.85);
         await Assert.That(drumsCalm).IsLessThan(drumsOwn * 0.75);
