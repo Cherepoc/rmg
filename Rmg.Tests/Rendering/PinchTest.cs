@@ -14,7 +14,7 @@ public sealed class PinchTest
     [Arguments("blackMetal")]
     public async Task APinch_IsAHeldSingleNotesHighlight_NeverAChordOrInARun_OneAPartAPhrase_AlwaysWavering(string genre)
     {
-        var (pinches, length, squeals) = (0, 0.0, 0);
+        var (pinches, length) = (0, 0.0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         foreach (var (track, notes) in song.Song.Notes!)
         {
@@ -27,7 +27,8 @@ public sealed class PinchTest
                 await Assert.That(note.Value.Pitches.Length).IsEqualTo(1).Because(because);
                 await Assert.That(note.Value.Duration * seconds).IsGreaterThanOrEqualTo(Expression.PinchShortest - 1e-9).Because(because);
                 length += note.Value.Duration * seconds;
-                squeals += note.Value.State.GetStateValue(CompositionStateKinds.Program) == 0 ? 1 : 0;
+                // on General MIDI's guitar harmonics
+                await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Program)).IsEqualTo(Expression.GuitarHarmonics + 1).Because(because);
                 await Assert.That(notes.Count(x => Math.Abs(x.Position - note.Position) < 1 - 1e-9) / 2.0).IsLessThanOrEqualTo(Expression.PinchBusiest).Because(because);
                 await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Vibrato)).IsGreaterThan(0).Because(because);
                 await Assert.That(song.Song.TrackDefinitions[track].Role).IsNotEqualTo(TrackRole.Chords).Because(because);
@@ -37,7 +38,7 @@ public sealed class PinchTest
             }
         }
 
-        Console.WriteLine($"{genre}: {pinches} pinches in 64 songs, {length / Math.Max(1, pinches):F2} s long on the average, {squeals} squealing");
+        Console.WriteLine($"{genre}: {pinches} pinches in 64 songs, {length / Math.Max(1, pinches):F2} s long on the average");
         // some, against a pinch never made: a tremolo-picked genre holds few notes to pinch
         await Assert.That(pinches).IsGreaterThan(0);
     }

@@ -425,10 +425,6 @@ public static class GenreChoices
         ("dive", "A riff's dive into a louder section", Expression.SongDiveChance)
     ]);
 
-    /// <summary>How a pinch harmonic sounds: General MIDI's guitar harmonics, or the driven guitar at the harmonic's pitch (<see cref="Expression.PinchSounds" />).</summary>
-    public static GenreChoice PinchSound { get; } = Pool("pinchSound", "A pinch harmonic's sound",
-        Expression.PinchSounds.Select(x => (Name(x.Sound.ToString()), x.Sound == Composition.PinchSound.Harmonics ? "General MIDI's guitar harmonics" : "The guitar's squeal, at the harmonic", x.Weight)));
-
     /// <summary>A section's own tempo, one by a metric ratio, its own meter beside the song's and its last bar cut short (<see cref="Composition.SectionTempo" />, <see cref="Composition.SectionMeter" />, <see cref="Composition.ShortBars" />).</summary>
     public static GenreChoice SectionChanges { get; } = Chances("sectionChanges", "A section's own time",
         [
@@ -668,7 +664,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

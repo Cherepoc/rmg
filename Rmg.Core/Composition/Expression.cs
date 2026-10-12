@@ -59,16 +59,6 @@ public enum StrongEffect
     Gate
 }
 
-/// <summary>How a pinch harmonic sounds (<see cref="Expression.Pinches" />).</summary>
-public enum PinchSound
-{
-    /// <summary>General MIDI's guitar harmonics, a clean bell, at the note's pitch.</summary>
-    Harmonics,
-
-    /// <summary>The driven guitar itself at the harmonic's pitch, an octave and a fifth or two octaves up, a squeal.</summary>
-    Squeal
-}
-
 /// <summary>
 ///     How the parts are played, beyond their notes: a line's vibrato and bends, as pitch bend, where its instrument can
 ///     bend, a single line at a time; a held chord's swell and an instrument's tremolo, as its expression; a pad's sweep
@@ -204,7 +194,7 @@ internal static class Expression
     ///     the counter-melody's or a solo's but its release, which bends its own way, held a while by the clock and the
     ///     longest of its bar, never within a run, one a
     ///     part a phrase at most; a riff's the likelier after palm-muted chugs, its contrast, and at its phrase's end, a
-    ///     solo's the more intense it is. Its sound a genre's (<see cref="PinchSounds" />), and always wavering, often bent.
+    ///     solo's the more intense it is. Its sound General MIDI's guitar harmonics, always wavering, often bent.
     /// </summary>
     public const double PinchChance = 0.18;
 
@@ -224,16 +214,6 @@ internal static class Expression
     public const int PinchVibrato = 40;
 
     public const double PinchBendChance = 0.5;
-
-    /// <summary>A pinch's sound, as the songs have it: General MIDI's harmonics, which listening preferred; the driven guitar's squeal a genre's alone.</summary>
-    public static ImmutableArray<(PinchSound Sound, ByConvention Weight)> PinchSounds { get; } =
-    [
-        (PinchSound.Harmonics, new ByConvention(1, 1, 1)),
-        (PinchSound.Squeal, new ByConvention(0, 0, 0))
-    ];
-
-    /// <summary>The semitones above its note a squealing pinch sounds at, an octave and a fifth or two octaves.</summary>
-    private static readonly int[] PinchIntervals = [19, 24];
 
     /// <summary>
     ///     The chance a song's riff dives on the whammy bar into a louder section, its last held note there falling away,
@@ -552,7 +532,7 @@ internal static class Expression
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
     /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them, and each part's derived from it by its track.</param>
-    /// <param name="pinchStream">The song's sequence of whether its guitars pinch and how it sounds.</param>
+    /// <param name="pinchStream">The song's sequence of whether its guitars pinch and dive.</param>
     /// <param name="pinchStreams">A part's sequence of its pinches, by its track.</param>
     /// <param name="beatSeconds">How long a beat lasts at a position, in seconds, which a pinched note's length is held to.</param>
     /// <param name="tapeStream">The song's sequence of its tape's wow, whether it plays one, how deep, and each part's detune derived from it by its track.</param>
@@ -601,9 +581,8 @@ internal static class Expression
         var (toneSeed, tapeSeed) = (toneStream.GenerateSeed(), tapeStream.GenerateSeed());
         // and whether its riff dives into a louder section
         var songDives = pinchStream.TestProbability(SongDiveChance.At(songSound, genre.Chance(GenreChoices.Effects, "dive")));
-        // and whether its guitars pinch, and how a pinch sounds
+        // and whether its guitars pinch, on General MIDI's guitar harmonics, which listening preferred to the driven guitar's squeal
         var songPinches = pinchStream.TestProbability(SongPinchChance.At(songSound, genre.Chance(GenreChoices.Effects, "pinch")));
-        var pinchSound = pinchStream.Pick(ByConvention.Weigh(PinchSounds, songSound, genre.Pool<PinchSound>(GenreChoices.PinchSound, x => GenreChoices.Name(x.ToString()))));
 
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
@@ -612,7 +591,6 @@ internal static class Expression
             var role = definition.Role;
             var program = definition is PitchInstrumentTrack pitched ? pitched.InstrumentCode : -1;
             var states = new StateMap?[timeline.Count];
-            var raised = new int[timeline.Count];
             // a pinched note's accent
             var accents = new double[timeline.Count];
             // a dived note's length, held to the section it dives into, and the notes it lets go of after it
@@ -816,7 +794,6 @@ internal static class Expression
                         var pinching = Pinching(note.Position, 0);
                         var pinched = pinching.TestProbability(new Tilt(pinchLean).Chance(PinchChance, 1));
                         var bent = pinching.TestProbability(PinchBendChance);
-                        var interval = PinchIntervals[pinching.GenerateInt(0, PinchIntervals.Length)];
                         if (pinched)
                         {
                             pinchedPhrases.Add(phrase);
@@ -825,10 +802,7 @@ internal static class Expression
                             state = bent
                                 ? state.With(CompositionStateKinds.Bend, (int)BendKind.BendAndRelease).With(CompositionStateKinds.BendDepth, ScaleDistance(note.Value, 1))
                                 : state.With(CompositionStateKinds.Bend, (int)BendKind.None).With(CompositionStateKinds.BendDepth, 0);
-                            if (pinchSound == PinchSound.Harmonics)
-                                state = state.With(CompositionStateKinds.Program, GuitarHarmonics + 1);
-                            else if (note.Value.Pitches[0] + interval <= 127)
-                                raised[i] = interval;
+                            state = state.With(CompositionStateKinds.Program, GuitarHarmonics + 1);
                         }
                     }
 
@@ -874,7 +848,6 @@ internal static class Expression
                     ? (x.Value with
                     {
                         State = state,
-                        Pitches = raised[i] == 0 ? x.Value.Pitches : [..x.Value.Pitches.Select(p => p + raised[i])],
                         Duration = held[i] ?? x.Value.Duration,
                         Velocity = x.Value.Velocity + accents[i]
                     }).ToTimelineItem(x.Position)
