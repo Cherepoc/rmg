@@ -639,9 +639,12 @@ keeps together. Each step through the implementation loop, with a listening ques
    a tuning below E2 (Nu metal's and Djent's riffs already reach C2, 36, the octave's floor; A1 would ask a guitar's
    sample stretched into mud). Queued for the next round of listening, as today's ten are unanswered: `numetal-vamp`
    (without, `vamp.sections` 0) and `metal-low-riff` (without, `register.riff` 50).
-2. **The bass with the riff throughout** on a driven guitar, not only where it would rest (`LineDoubling`), in unison
-   where the riff sits under the bass's floor; Nu metal's kick with its riff more often, its slap bass the quiet
-   sections' and a picked bass doubling.
+2. Done (12 October 2026, data): **the band with the riff**, the bass doubling it by the genre's `doubling.riff` as
+   Djent's did: Nu metal's at 90-90-80, its sections with the bass on the riff 38% → 65%, its riff's onsets with the
+   bass 72% → 87%; Metal's at 90-90-80, 53% → 68%; Nu metal's kick with its riff 47% → 55% of its sections (the
+   figure's weight 100 over its own 60), and its bass picked first, a slap bass in 56% of its songs from 75%. No code:
+   the doubling a genre's chance already. Left to listening: a slap bass in the quiet sections alone, an instrument by
+   section; queued, `numetal-lock` (without, `doubling.riff` 50 and `figure.ground.withRiff` 70).
 3. **A riff's accent tone** (`riff.accent`: the chord's, the ♭2, the ♭5, the ♭3), the strong notes off the chord where
    its harmony holds still, with rests between; Nu metal, Thrash, Djent, Doom and Blues. Only with step 1's four bars,
    as a ♭2 over a clean triad sounds a mistake.

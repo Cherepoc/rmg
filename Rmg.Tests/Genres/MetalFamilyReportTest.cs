@@ -79,6 +79,12 @@ public sealed class MetalFamilyReportTest
                 }
             }
 
+            var doubled = songs.Sum(x => x.Trace.Count(t => t.Point == TracePoints.LineDoubling && ((int, TrackRole, TrackRole, int))t.Value! is (_, TrackRole.Riff, TrackRole.Bass, _)));
+            var withRiff = songs.Where(x => !x.Absent.Contains(TrackRole.Riff) && !x.Absent.Contains(TrackRole.Bass)).ToArray();
+            var sections = withRiff.Sum(x => x.Map.Sections.Length);
+            // the songs' bass a slap bass, General MIDI's 36 and 37
+            var slapped = withRiff.Count(x => x.Song.TrackDefinitions[x.Track(TrackRole.Bass)] is PitchInstrumentTrack { InstrumentCode: 36 or 37 });
+            Console.WriteLine($"{name}: the bass doubling the riff in {doubled / (double)Math.Max(1, sections):P0} of the sections both play, a slap bass in {slapped / (double)Math.Max(1, withRiff.Length):P0} of the songs");
             var figures = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Figures).Select(t => (ImmutableDictionary<FigurePlayer, string>)t.Value!)).ToArray();
             Console.WriteLine($"{name}: {longest.Count} sections; spans half {Span(0.5)}, one {Span(1)}, two {Span(2)}; a section's longest root {longest.Average():0.0} bars, " +
                               $"its bars under a root of four or more {stillBars / allBars:P0}");
