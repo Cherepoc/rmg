@@ -98,9 +98,13 @@ internal static class Articulations
                 var pitches = note.Value.Pitches;
                 var leads = i + 1 < timeline.Count && timeline[i + 1].Value.State.GetStateValue(StateKinds.ChordChange) != note.Value.State.GetStateValue(StateKinds.ChordChange);
                 // a weak note after one played an octave away turning back to the note it was taken from, so that a run
-                // alternates; but a note the bass plays doubling another's line, which plays the line's
+                // alternates; but a note the bass plays doubling another's line, which plays the line's, a walk's, which moves
+                // to the next chord, and one after a note of another chord, whose octave is not this chord's
                 var doubled = state.GetStateValue(CompositionStateKinds.Doubled) > 0;
-                if (part.Role == TrackRole.Bass && ownLine && !doubled && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
+                var walks = state.GetStateValue(CompositionStateKinds.Walk) > 0;
+                var sameChordBefore = i > 0 && timeline[i - 1].Value.State.GetStateValue(StateKinds.ChordChange) == state.GetStateValue(StateKinds.ChordChange)
+                                      && song.Form.Map.PlayAt(timeline[i - 1].Position)?.Index == section;
+                if (part.Role == TrackRole.Bass && ownLine && !doubled && !walks && sameChordBefore && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && weak && !leads
                     && played[i - 1] is var before && (octaved[i - 1] || before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
                 {
                     pitches = octaved[i - 1] ? played[i - 2 < 0 ? 0 : i - 2] : [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];

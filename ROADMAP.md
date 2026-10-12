@@ -559,6 +559,10 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
 - Found while fixing it: **12/8's backbeat** is the meter's half-cycle-late cycle (`Meter.Backbeats`), dotted quarters
   2, 3 and 4, where a 12/8 backbeat is 2 and 4; the snare's own in 12/8 to be measured before the cycle's node changes.
   **Latin's clave** plays in 78 of its 299 sections (64 songs), the claves resting in the rest, though 187 draw it.
+  **Two pitched parts on different chord shapes at once** (#296): at corpus offset 816000000, seed 5, beat 173.5,
+  the chords play a triad's shape and the riff a five-note one, each on its own note as the section made it, in a
+  section taking an inner line; neither the inner line, the polymeter, the mutations nor the figures write a shape,
+  so the riff's bar as an appearance redraws it is the next place to look.
 - Later: **the tape stop** (#358), every pitched part bending down an octave over a slowing tempo into a drop or as
   the ending, a change of the tempo map and every channel's bends together; and **imitation** (#388), the
   counter-melody taking the melody's phrase a bar later, its clashes across chord changes new work.

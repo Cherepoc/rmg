@@ -89,6 +89,9 @@ internal static class Ornaments
         return draft with { Notes = result.ToImmutable() };
     }
 
+    /// <summary>The widest step to an ornament's neighbour, in semitones.</summary>
+    private const int MajorThird = 4;
+
     /// <summary>A note with its ornament, its quick notes a step each from its start, the note held for the rest.</summary>
     /// <param name="below">A grace note's neighbour below rather than above.</param>
     internal static TimelineItem<RealizedNote> Ornamented(TimelineItem<RealizedNote> note, Ornament ornament, double step, bool below)
@@ -100,11 +103,18 @@ internal static class Ornaments
             _ => Enumerable.Range(0, Math.Max(2, (int)Math.Min(note.Value.Duration * TrillShare / step, TrillSeconds * Rate) / 2 * 2)).Select(x => x % 2).ToArray()
         };
         var pitch = note.Value.Pitches[0];
-        // the neighbours in the line's scale, or the section's where the line keeps to it
+        // the neighbours in the line's scale, or the section's where the line keeps to it, or where the line's leaves a gap
+        // wider than a major third, as a kept pentatonic may
         var (_, _, chord) = Realizer.GetChord(note.Value.State);
-        var classes = LineScales.Classes((LineScale)note.Value.State.GetStateValue(CompositionStateKinds.LineScale), chord)
-                      ?? Enumerable.Range(0, Scales.StepCount).Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).ToHashSet();
-        int Neighbour(int direction) => Enumerable.Range(1, OctaveNoteCount).Select(x => direction * x).First(x => classes.Contains((pitch + x).Mod(OctaveNoteCount)));
+        var section = Enumerable.Range(0, Scales.StepCount).Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).ToHashSet();
+        var classes = LineScales.Classes((LineScale)note.Value.State.GetStateValue(CompositionStateKinds.LineScale), chord) ?? section;
+        int Neighbour(int direction)
+        {
+            var near = Enumerable.Range(1, MajorThird).Select(x => direction * x).ToArray();
+            // the line's within a major third, else the section's, which always has one
+            return near.Where(x => classes.Contains((pitch + x).Mod(OctaveNoteCount))).Concat(near.Where(x => section.Contains((pitch + x).Mod(OctaveNoteCount)))).First();
+        }
+
         var state = note.Value.State.With(CompositionStateKinds.Ornament, [..steps.Select(x => x == 0 ? 0 : Neighbour(x))]).With(CompositionStateKinds.OrnamentStep, step);
         return (note.Value with { State = state }).ToTimelineItem(note.Position);
     }

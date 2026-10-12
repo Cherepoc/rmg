@@ -9,7 +9,10 @@ public enum LineScale
     /// <summary>The section's scale, all of it.</summary>
     Section,
 
-    /// <summary>The section's scale but for its tritone pair, the two notes that make its only tritone.</summary>
+    /// <summary>
+    ///     The key's major or minor pentatonic, as the mode's third is, kept to the section's scale; all of the scale where it
+    ///     has more than one tritone (<see cref="LineScales.Classes" />).
+    /// </summary>
     Pentatonic,
 
     /// <summary>The blues scale on the chord's root: its minor third, fourth, flat fifth, fifth and minor seventh.</summary>
