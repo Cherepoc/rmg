@@ -220,14 +220,16 @@ public sealed record KeyChange(double Position, int Semitones)
             shifts.Add(0.ToTimelineItem(chord));
         }
         // a chain chord's scale, which makes it lead as its link does whatever the section's mode: the dominant and its
-        // tritone substitute a dominant, Mixolydian on its root, and the leading tone's chord a half step below, its step
-        // raised where the mode has it a whole step below
+        // tritone substitute a dominant, Mixolydian on its root, a fifth above, raised where the mode has it diminished, as
+        // Locrian does, and the leading tone's chord a half step below, its step raised where the mode has it a whole step below
         StepAlterations Leading(double position, int step)
         {
             var offsets = common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ScaleOffsets);
+            StepAlterations Dominant(ImmutableArray<int> on) => ChordScales.Toward(on, 4, Scales.Mixolydian.Offsets, ChordScaleKind.Applied)?.Steps ?? StepAlterations.None;
             return step switch
             {
-                4 => ChordScales.Toward(offsets, 4, Scales.Mixolydian.Offsets, ChordScaleKind.Applied)?.Steps ?? StepAlterations.None,
+                4 when offsets[4] == 6 => Dominant(offsets.SetItem(4, 7)).Raise(4),
+                4 => Dominant(offsets),
                 6 when offsets[6] == Realizer.OctaveNoteCount - 2 => StepAlterations.Of([6], []),
                 _ => StepAlterations.None
             };
@@ -250,7 +252,6 @@ public sealed record KeyChange(double Position, int Semitones)
             var length = context.Pick(ByConvention.Weigh(ChainLengths, unconventionality));
             var (keyFromNext, rootStep) = context.Pick(ByConvention.Weigh(Links, unconventionality));
             var device = context.Pick(ByConvention.Weigh(Devices, unconventionality));
-            var pivotDraw = context.GenerateDouble();
             var (change, target) = (changes[i].Position, changes[i].Semitones);
             // the section the change ends, and its last pattern, counted from its start in its own meter, a short last bar's
             // cut among it
@@ -291,15 +292,7 @@ public sealed record KeyChange(double Position, int Semitones)
 
             if (device == Device.Pivot && !pivots.IsEmpty)
             {
-                // the step the draw falls on among the pivots' weights, drawn whatever the device, so that the draws stay as they are
-                var (at, pivot) = (pivotDraw * pivots.Sum(x => x.Weight), pivots[^1].Value);
-                foreach (var option in pivots)
-                    if ((at -= option.Weight) < 0)
-                    {
-                        pivot = option.Value;
-                        break;
-                    }
-
+                var pivot = context.Pick(pivots);
                 keys.Add(new KeyChange(chords[^1], target));
                 roots.Add((pivot - Root(chords[^1])).ToTimelineItem(chords[^1]));
                 roots.Add(0.ToTimelineItem(change));

@@ -44,7 +44,7 @@ public sealed class KeyPreparationTest
 
         await Assert.That(chains.Length).IsGreaterThan(20);
         // one link a chain, its intervals as its section's scale has them: the leading tone's a whole step in a minor
-        // scale, the subtonic, and the dominant's a diminished fifth in Locrian
+        // scale, the subtonic; the dominant's a fifth in every mode, Locrian's raised
         foreach (var links in chains)
             await Assert.That(links.Distinct().Count()).IsEqualTo(1).Because(string.Join(" ", links));
         await Assert.That(chains.Count(x => x[0] is 7 or 1 or 11 or 4) / (double)chains.Length).IsGreaterThan(0.8);

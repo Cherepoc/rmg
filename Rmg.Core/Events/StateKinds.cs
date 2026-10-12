@@ -207,6 +207,9 @@ public readonly record struct StepAlterations(int Raised, int Lowered)
 
     /// <summary>How many semitones a step moves: 1 raised, -1 lowered, 0 as it is.</summary>
     public int By(int step) => (Raised >> step & 1) - (Lowered >> step & 1);
+
+    /// <summary>These with a step raised, lowered no longer.</summary>
+    public StepAlterations Raise(int step) => new(Raised | 1 << step, Lowered & ~(1 << step));
 }
 
 /// <summary>A value as a layer sets it, with the layer's depth (<see cref="StateDepths" />); unset below 0.</summary>
