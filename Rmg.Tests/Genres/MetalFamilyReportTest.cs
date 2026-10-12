@@ -101,6 +101,10 @@ public sealed class MetalFamilyReportTest
             Console.WriteLine($"{name}: the riff over its root off them where it chugs, {intervals.Count(x => x.Chugs) / (double)Math.Max(1, intervals.Length):P0} of its notes: {Intervals(false, true)}");
             var scales = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.LineScale && !x.Absent.Contains(TrackRole.Riff) && t.Track == x.Track(TrackRole.Riff)).Select(t => (LineScale)t.Value!)).ToArray();
             Console.WriteLine($"{name}: the riff's scales {string.Join(", ", scales.GroupBy(x => x).OrderBy(x => x.Key).Select(g => $"{g.Key} {g.Count() / (double)scales.Length:P0}"))}");
+            var riffNotes = songs.Where(x => !x.Absent.Contains(TrackRole.Riff)).SelectMany(x => x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Riff))?.Select(n => n.Value) ?? []).ToArray();
+            var blues = riffNotes.Where(n => (LineScale)n.State.GetStateValue(CompositionStateKinds.LineScale) == LineScale.Blues).ToArray();
+            Console.WriteLine($"{name}: the riff's notes in power chords {riffNotes.Count(n => n.Pitches.Length > 1) / (double)Math.Max(1, riffNotes.Length):P0}, " +
+                              $"on the blues scale {blues.Length / (double)Math.Max(1, riffNotes.Length):P0}, of those in power chords {blues.Count(n => n.Pitches.Length > 1) / (double)Math.Max(1, blues.Length):P0}");
             var figures = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Figures).Select(t => (ImmutableDictionary<FigurePlayer, string>)t.Value!)).ToArray();
             Console.WriteLine($"{name}: {longest.Count} sections; spans half {Span(0.5)}, one {Span(1)}, two {Span(2)}; a section's longest root {longest.Average():0.0} bars, " +
                               $"its bars under a root of four or more {stillBars / allBars:P0}");

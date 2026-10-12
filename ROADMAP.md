@@ -686,7 +686,14 @@ keeps together. Each step through the implementation loop, with a listening ques
    riff's beats). Groove metal left to Thrash, Nu metal and Djent between them. Ratings under `metal` from before the
    split not used to tune its presets. Left to listening: each new genre heard against its sound; Symphonic's choir
    and violin over distorted guitars, a wall or mud.
-5. Left to listening: **a melody spoken rather than sung** (Nu metal, Hip-hop, Trap, Punk, Thrash), a narrow range and
+5. **Doom's blues scale reduced** (data, from `doom-blues`, 1 to 4 against, 13 October 2026): its riff's `riffScale.blues`
+   30-40-50 → 0-10-25, the plainest Doom the funeral and death-doom kind on natural minor, Phrygian and the chromatic
+   creep, the blues colour of traditional and stoner doom kept to the wilder songs. Its riff in power chords was weighed
+   as the fix instead and measured unneeded: 80% of its blues notes, 76% of all its riff's, are power chords already
+   (`MetalFamilyReportTest`), so the blues band heard is in the line's ♭3–4–♭5 motion, not its single notes. Left to
+   listening: whether that motion, slow and stepwise, is the blues lick heard, and a held or bent ♭5 the doom way to
+   play the scale; the question itself faint (0.12 to 0.18), so asked again over louder songs once reduced.
+6. Left to listening: **a melody spoken rather than sung** (Nu metal, Hip-hop, Trap, Punk, Thrash), a narrow range and
    repeated notes, with *A melody sung rather than played* (*Genres*).
 
 Review: **overengineering**: the tuning one drawn floor, no strings or retuning per section; the accent tone an option
