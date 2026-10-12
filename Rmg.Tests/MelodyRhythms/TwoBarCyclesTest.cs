@@ -49,10 +49,8 @@ public sealed class TwoBarCyclesTest
             var notes = song.Song.Notes!.GetValueOrDefault(track)?.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).ToArray() ?? [];
             if (notes.Length == 0)
                 continue;
-            var bars = (int)Math.Round(span.Duration / span.Meter.BarDuration);
-            for (var bar = 0; bar < bars; bar++)
+            foreach (var (bar, start, end) in span.Bars)
             {
-                var (start, end) = (span.Start + bar * span.Meter.BarDuration, span.Start + (bar + 1) * span.Meter.BarDuration);
                 var key = (role, bar % 2);
                 var (b, struck, sounding, downbeats) = counts.GetValueOrDefault(key);
                 counts[key] = (b + 1, struck + (notes.Any(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9) ? 1 : 0),

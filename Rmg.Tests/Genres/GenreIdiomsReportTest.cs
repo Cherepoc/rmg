@@ -68,7 +68,7 @@ public sealed class GenreIdiomsReportTest
         // a bar of the melody as the one before it, its notes where they fall in it and their pitches
         string BarOf(double start, double length) =>
             string.Join(" ", melody.Where(x => x.Position >= start - 1e-9 && x.Position < start + length - 1e-9).Select(x => $"{Math.Round(x.Position - start, 3)}:{x.Value.Pitches[0]}"));
-        var melodyBars = map.Sections.SelectMany(x => Enumerable.Range(1, (int)Math.Round(x.Duration / x.Meter.BarDuration) - 1).Select(b => (Start: x.Start + b * x.Meter.BarDuration, x.Meter.BarDuration))).ToArray();
+        var melodyBars = map.Sections.SelectMany(x => x.Bars.Skip(1).Select(b => (b.Start, BarDuration: b.End - b.Start))).ToArray();
         var played = melodyBars.Where(x => BarOf(x.Start, x.BarDuration).Length > 0).ToArray();
         var lineScales = song.Trace.Where(x => x.Point == TracePoints.LineScale && x.Track == song.Track(TrackRole.Melody)).Select(x => (LineScale)x.Value!).ToArray();
         // the bass where a chord changes: its note there on the chord's root, and the one before a step or a half step from it

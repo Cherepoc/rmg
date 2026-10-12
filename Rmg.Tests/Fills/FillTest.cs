@@ -167,7 +167,7 @@ public sealed class FillTest
             // the bars of the sections in their meters, after the first, up to the ending's, which lands every time, but the
             // ending's two
             var bars = corpusSong.Map.Sections
-                .SelectMany(span => Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.BarDuration)).Select(bar => span.Start + bar * span.Meter.BarDuration))
+                .SelectMany(span => span.Bars.Select(x => x.Start))
                 .Skip(1)
                 .Where(x => x < song.Duration - 2 * corpusSong.Map.MeterAt(x).BarDuration);
             foreach (var position in bars)

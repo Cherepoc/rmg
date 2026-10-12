@@ -89,7 +89,7 @@ public sealed class MutationsTest
             foreach (var span in song.Map.Sections)
             {
                 var first = Bar(song, span, 0);
-                var bars = (int)Math.Round(span.Duration / span.Meter.BarDuration);
+                var bars = span.BarCount;
                 foreach (var bar in new[] { 1, 2, 5, 9, 13 }.Where(x => x < bars))
                 {
                     var hits = Bar(song, span, bar);
