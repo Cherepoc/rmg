@@ -213,7 +213,8 @@ internal static class Polymeter
         TimelineItem<StateMap> PlayedAt(StateMap note, double position) =>
             (ShapeAt(position) is { } shape && !note.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty ? note.Except(ShapeKinds).MergeWith(shape) : note).ToTimelineItem(position);
 
-        foreach (var span in map.Sections)
+        // the sections, and an intro's window before the first, its cycle from the window's start
+        foreach (var span in map.PlayedSections)
         {
             if (!plans.TryGetValue(span.SectionId, out var plan))
                 continue;

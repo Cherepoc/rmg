@@ -63,7 +63,7 @@ internal static class Ghosts
         {
             var timeline = notes[track];
             var played = timeline.ToList();
-            foreach (var span in song.Form.Map.Sections)
+            foreach (var span in song.Form.Map.PlayedSections)
             {
                 if (ghosting[span.SectionId] is not { } draws)
                     continue;

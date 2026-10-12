@@ -41,6 +41,17 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     }
 
     /// <summary>
+    ///     An intro's window of entries before the first section, its first bars played before it, as the first section's
+    ///     span moved there; none for another intro (<see cref="IntroKind.Entries" />).
+    /// </summary>
+    public SectionSpan? Window => Intro is { Kind: IntroKind.Entries, Window.IsBefore: true } && Origin > 1e-9 && !Sections.IsEmpty
+        ? Sections[0] with { Start = 0, Duration = Origin, Cut = 0 }
+        : null;
+
+    /// <summary>The sections where the song plays them, an intro's window before the first among them, which plays as it (<see cref="Window" />).</summary>
+    public IEnumerable<SectionSpan> PlayedSections => Window is { } window ? Sections.Prepend(window) : Sections;
+
+    /// <summary>
     ///     The appearance a position plays as: its section's, an intro's the section it is made of, its first bars or a hook's
     ///     chorus, and the ending's the last section's, its bars counted on; none for a song of no sections.
     /// </summary>

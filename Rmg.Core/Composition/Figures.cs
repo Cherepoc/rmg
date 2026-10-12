@@ -156,7 +156,7 @@ internal static class Figures
 
         // a two-bar figure's side counted from the song's first bar, so that a clave runs on across the sections
         var barsBefore = new Dictionary<SectionSpan, int>();
-        foreach (var span in song.Form.Map.Sections)
+        foreach (var span in song.Form.Map.PlayedSections)
             barsBefore[span] = barsBefore.Count == 0 ? 0 : barsBefore.Last().Value + barsBefore.Last().Key.BarCount;
 
         int? TrackOf(TrackRole role) => song.Playing.Where(x => x.Value == role).Select(x => (int?)x.Key).FirstOrDefault(x => draft.Timeline.TrackTimelineMap.ContainsKey(x!.Value));
@@ -184,7 +184,8 @@ internal static class Figures
                 edits[track] = notes =>
                 {
                     var played = notes.ToList();
-                    foreach (var span in song.Form.Map.Sections)
+                    // the sections, and an intro's window before the first, which plays its first bars
+                    foreach (var span in song.Form.Map.PlayedSections)
                     {
                         if (drawn[span.SectionId][player] is not { } figure)
                             continue;
@@ -248,7 +249,7 @@ internal static class Figures
     private static SongDraft HeavyBackbeat(SongDecisions song, SongDraft draft)
     {
         var map = song.Form.Map;
-        var spans = map.Sections.Where(x => draft.Figures.GetValueOrDefault(x.SectionId)?.GetValueOrDefault(FigurePlayer.Ground) is { } ground && Heavy.Contains(ground)).ToArray();
+        var spans = map.PlayedSections.Where(x => draft.Figures.GetValueOrDefault(x.SectionId)?.GetValueOrDefault(FigurePlayer.Ground) is { } ground && Heavy.Contains(ground)).ToArray();
         var snares = DrumGroups.Snare.Tracks.Where(draft.Timeline.TrackTimelineMap.ContainsKey).ToArray();
         if (spans.Length == 0 || snares.Length == 0)
             return draft;
