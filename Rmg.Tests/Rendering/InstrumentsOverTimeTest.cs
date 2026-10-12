@@ -74,7 +74,10 @@ public sealed class InstrumentsOverTimeTest
         var (middleKept, middle) = Share(0.6);
         var (wildKept, wild) = Share(1);
 
+        Console.WriteLine($"switches keeping to the family: {middleKept / (double)middle:P1} of {middle} at 0.6, {wildKept / (double)wild:P1} of {wild} at the wild end");
         await Assert.That(middle).IsGreaterThan(20);
+        await Assert.That(wild).IsGreaterThan(0);
+        // measured 57% to 60% at 0.6 against 31% to 33% at the wild end, at offsets 0 and a million
         await Assert.That(middleKept / (double)middle).IsGreaterThan(wildKept / (double)wild + 0.15);
     }
 

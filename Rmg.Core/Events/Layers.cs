@@ -1,7 +1,7 @@
 namespace Rmg.Core.Events;
 
 /// <summary>
-///     The names of the layers of state a trace explains a value by (<see cref="StateMap.Explain{T}" />), those the tests
+///     The names of the layers of state a trace explains a value by (<see cref="StateMap.Explain" />), those the tests
 ///     read: the layers that make it, from the song's down to a bar pattern's, by these names wherever they are made.
 /// </summary>
 public static class Layers

@@ -48,6 +48,8 @@ public sealed class GateTest
                 await Assert.That(chopped[0].Expression.Last(x => x.Position <= song.Swing.Apply(bar) + 1e-6).Value).IsGreaterThan(0).Because($"seed {song.Seed} at {bar}");
         }
 
+        // measured 16 of 16, at offsets 0 and a million
+        Console.WriteLine($"{gated} of 16 songs gated");
         await Assert.That(gated).IsGreaterThan(10);
     }
 

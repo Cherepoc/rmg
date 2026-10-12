@@ -15,7 +15,7 @@ public sealed class FilterTest
         .Add(GenreChoices.Effects.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("tone", new ByConvention(0, 0, 0)))
         .Add(GenreChoices.MixFilter.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("opening", new ByConvention(0, 0, 0))));
 
-    private static CorpusSong[] Songs(StrongEffect effect) => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Playing(effect))));
+    private static CorpusSong[] Songs(StrongEffect effect) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Playing(effect))));
 
     [Test]
     [Arguments(StrongEffect.Wobble)]
@@ -40,7 +40,9 @@ public sealed class FilterTest
             closing += values.Min() < 52 ? 1 : 0;
         }
 
-        await Assert.That(filtered).IsGreaterThan(8);
+        Console.WriteLine($"{effect}: {filtered} of 64 songs filtered, {closing} closing");
+        // measured 48 of 64 filtered, 35 to 36 closing, at offsets 0 and a million
+        await Assert.That(filtered).IsGreaterThan(32);
         await Assert.That(closing).IsGreaterThan(filtered / 2);
     }
 

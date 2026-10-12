@@ -10,7 +10,7 @@ public static class StateKinds
     public static readonly StateKind<double> QuarterNoteDurationPower = CreateAdditive<double>("QuarterNoteDurationPower", StateScope.Render);
     public static readonly StateKind<double> NextNoteDurationFactor = CreateAdditive<double>("NextNoteDurationFactor", StateScope.Render);
     // which of a drum's sounds its walk picks, as every layer's step of it, a fraction of the sounds the drum has, which
-    // Render rounds to whole sounds each and adds, so that a layer moves every note under it alike (README)
+    // Render rounds to whole sounds each and adds, so that a layer moves every note under it alike
     public static readonly StateKind<ImmutableArray<double>> ArticulationOffset = CreateCollection<double>("ArticulationOffset", StateScope.Render);
     public static readonly StateKind<int> KeyOffset = CreateAdditive<int>("KeyOffset", StateScope.Render, isShared: true);
     public static readonly StateKind<int> OctaveOffset = CreateAdditive<int>("OctaveOffset", StateScope.Render);

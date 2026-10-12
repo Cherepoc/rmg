@@ -20,6 +20,26 @@ public sealed class ExpressionTest
         }
     }
 
+    /// <summary>
+    ///     The plainest sound plays no part's tone, no tape, no pump and no roll; the plainest form no heavy or calm section
+    ///     and no mix filtered.
+    /// </summary>
+    [Test]
+    public async Task ThePlainestSoundAndForm_PlayNoneOfTheirDevices()
+    {
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Sound, 0), (Facet.Form, 0))))))
+        {
+            var notes = song.Song.Notes!.SelectMany(x => x.Value.Select(n => (Track: x.Key, Note: n.Value))).ToArray();
+            await Assert.That(notes.All(x => x.Note.State.GetStateValue(CompositionStateKinds.Tone) == 0 && x.Note.State.GetStateValue(CompositionStateKinds.Wow) == 0
+                                             && x.Note.State.GetStateValue(CompositionStateKinds.Detune) == 0 && x.Note.State.GetStateValue(CompositionStateKinds.Pump) == 0)).IsTrue().Because($"seed {song.Seed}");
+            // a roll, a chord that a piano spreads, as a strum is a guitar's own
+            await Assert.That(notes.Where(x => song.Song.TrackDefinitions[x.Track] is PitchInstrumentTrack { InstrumentCode: var program } && !InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(x.Note.State, program), InstrumentTrait.Strums))
+                .All(x => x.Note.State.GetStateValue(CompositionStateKinds.Strum) == 0)).IsTrue().Because($"seed {song.Seed}");
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.SectionForm).All(x => (SectionFormKind)x.Value! == SectionFormKind.Own)).IsTrue().Because($"seed {song.Seed}");
+            await Assert.That(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(CompositionStateKinds.MixClosed).All(x => x.Value == 0)).IsTrue().Because($"seed {song.Seed}");
+        }
+    }
+
     [Test]
     public async Task TheWildestSongs_PlayAStrongEffect_OthersBesideItNowAndThen_AndTheGentleOnesTogether()
     {
@@ -281,6 +301,7 @@ public sealed class ExpressionTest
     [Test]
     public async Task OnlyALineOfAnInstrumentThatBends_Bends_InOctavesToo()
     {
+        var bent = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var (track, notes) in song.Song.Notes!)
         foreach (var note in notes.Where(x => Has(CompositionStateKinds.Bend, CompositionStateKinds.Vibrato, CompositionStateKinds.WideVibrato)(x.Value.State)))
@@ -290,7 +311,10 @@ public sealed class ExpressionTest
             // a line's note, in octaves too, or a riff's dive, which takes its power chord down with it
             await Assert.That(note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0
                               || (BendKind)note.Value.State.GetStateValue(CompositionStateKinds.Bend) == BendKind.Dive).IsTrue();
+            bent++;
         }
+
+        await Assert.That(bent).IsGreaterThan(0);
     }
 
     private static Func<Core.Events.StateMap, bool> Has(params Core.Events.StateKind<int>[] kinds) => state => kinds.Any(x => state.GetStateValue(x) != 0);

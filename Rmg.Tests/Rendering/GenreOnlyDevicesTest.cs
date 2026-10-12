@@ -32,6 +32,15 @@ public sealed class GenreOnlyDevicesTest
         }
 
         await Assert.That(stabbed).IsGreaterThan(100);
+
+        // and the pad as the same songs play it without stabs
+        foreach (var seed in Enumerable.Range(0, 16))
+        {
+            var (with, without) = (TestCorpus.Get(seed, new SongOverrides(Genre: With("reggae", GenreChoices.Articulation, Only("stabs")))), TestCorpus.Get(seed, new SongOverrides(Genre: With("reggae", GenreChoices.Articulation, Only("stabs", 0)))));
+            if (with.Song.Notes!.GetValueOrDefault(with.Song.Track(TrackRole.Pad)) is { } pad)
+                await Assert.That(pad.Select(x => (x.Position, x.Value.Duration))).IsEquivalentTo(without.Song.Notes![without.Song.Track(TrackRole.Pad)].Select(x => (x.Position, x.Value.Duration)), CollectionOrdering.Matching)
+                    .Because($"seed {seed}");
+        }
     }
 
     /// <summary>A part leveled up plays louder than as the songs have it, over the same songs.</summary>

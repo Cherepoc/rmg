@@ -75,4 +75,21 @@ public sealed class StrumTest
     }
 
     private static Swing Swing(Song song) => Rmg.Core.Rendering.Render.GetSwing(song);
+
+    /// <summary>A piano's roll on a chord held a beat or more, in Disco's songs too, which roll and stab, a stab never rolled.</summary>
+    [Test]
+    public async Task APianosRoll_IsOnAChordHeldABeat_NeverOnAStab()
+    {
+        var rolled = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("disco")))))
+        foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack))
+        foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Strum) != 0
+                                              && !InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(x.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode), InstrumentTrait.Strums)))
+        {
+            rolled++;
+            await Assert.That(note.Value.Duration).IsGreaterThanOrEqualTo(1 - 1e-9).Because($"seed {song.Seed}, track {track} at {note.Position}");
+        }
+
+        await Assert.That(rolled).IsGreaterThan(0);
+    }
 }
