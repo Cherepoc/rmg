@@ -21,7 +21,7 @@ public sealed class InnerLineReportTest
         var chords = notes.GetValueOrDefault(song.Track(TrackRole.Chords))?.ToArray() ?? [];
         var melody = notes.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
         (int, int) moved = (0, 0), other = (0, 0);
-        foreach (var note in melody.Where(x => Math.Abs(x.Position - Math.Round(x.Position)) < 1e-6))
+        foreach (var note in melody.Where(x => song.Map.PlaceOf(x.Position) is var at && at.Meter.Pulses.Any(p => Math.Abs(at.Beat - p) < 1e-6)))
         {
             var held = chords.Where(x => x.Position <= note.Position + 1e-6 && x.Position + x.Value.Duration > note.Position + 1e-6).ToArray();
             if (held.Length == 0)

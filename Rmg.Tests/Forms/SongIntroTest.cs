@@ -9,9 +9,6 @@ namespace Rmg.Tests.Forms;
 
 public sealed class SongIntroTest
 {
-    // the longest fill before the line where the drums come in, an odd span of a bar less a note
-    private const double LongestFill = 4.5;
-
     private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(64).ToArray();
 
     private static CorpusSong[] Of(IntroKind intro) => Songs.Where(x => x.Map.Intro.Kind == intro).ToArray();
@@ -79,8 +76,8 @@ public sealed class SongIntroTest
                 if (!song.Song.Notes!.TryGetValue(track, out var notes) || notes.Count == 0)
                     continue;
 
-                // a fill leads the drums in where the band lands
-                var from = WindowStart(song) + entry.Entry - (entry.Part.Role == TrackRole.Drum && entry.Entry == window ? LongestFill : 0);
+                // a fill leads the drums in where the band lands, a bar at most
+                var from = WindowStart(song) + entry.Entry - (entry.Part.Role == TrackRole.Drum && entry.Entry == window ? song.Map.Meter.BarDuration : 0);
                 await Assert.That(notes.Min(x => x.Position)).IsGreaterThanOrEqualTo(from - 1e-9)
                     .Because($"seed {song.Seed}, {entry.Part} at {entry.Entry}");
             }

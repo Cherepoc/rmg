@@ -34,7 +34,8 @@ public sealed class StopTimeTest
                 // the drums' fill out of the section, in its last bar, which goes on as a drummer fills into the next, and the
                 // drums and the bass in every phrase's last half bar, leading the band back in (StopTime)
                 var section = song.Song.Map!.Sections.Last(x => x.Start <= at + 1e-9);
-                var fill = section.End - bar;
+                // its last bar, a short one's
+                var fill = section.LastBar;
                 bool Leads(int track, double position) => song.Song.TrackDefinitions[track].Role switch
                 {
                     TrackRole.Drum => position >= fill - 1e-9 || position >= end - bar / 2 - 1e-9,

@@ -147,7 +147,7 @@ public sealed class SectionDynamicsTest
         var inBar = notes.ToDictionary(x => x.Key, x => x.Value.Where(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9).ToArray());
         // the notes on the beat, which every track accents alike, so that a busier bar is not a quieter one
         var velocities = inBar.Values.SelectMany(x => x)
-            .Where(x => Math.Abs(x.Position - Math.Round(x.Position)) < 1e-6)
+            .Where(x => song.PlaceOf(x.Position) is var at && at.Meter.Pulses.Any(p => Math.Abs(at.Beat - p) < 1e-6))
             .Select(x => x.Value.Velocity)
             .ToArray();
         var drums = inBar.Where(x => song.IsDrum(x.Key)).ToArray();

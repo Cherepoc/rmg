@@ -4,7 +4,7 @@ namespace Rmg.Tests.Grooves;
 
 /// <summary>
 ///     How a song's drums play in tuplets, by the feel facet of its unconventionality, in fifths: the share of its drum bars in a tuplet, and
-///     whether one tuplet holds the song or its bars change between straight time and tuplets, a pattern's last bar, where a
+///     whether one tuplet holds the song or its bars change between straight time and tuplets, every phrase's last bar, where a
 ///     fill may play, left out.
 /// </summary>
 public sealed class TupletFeelReportTest

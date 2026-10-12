@@ -6,7 +6,7 @@ namespace Rmg.Tests.SongGenerators;
 
 /// <summary>
 ///     How busy the rhythm is by how far a section strays from convention, its groove facet as the trace has it: the notes a bar of the drums and of the pitched tracks play in
-///     the groove, the pattern's last bar, where fills play, left out; how many of the drums' fall off the 8ths, as
+///     the groove, each phrase's last bar, where fills play, left out; how many of the drums' fall off the 8ths, as
 ///     syncopation, and off the 16ths, as tuplets; and how many notes a beat the fills play.
 /// </summary>
 public sealed class RhythmBusynessReportTest

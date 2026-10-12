@@ -74,7 +74,7 @@ internal static class ExpressionRender
     {
         if (map is null)
             return at - Math.Floor(at);
-        var (beat, meter) = (map.BeatInBar(at), map.MeterAt(at));
+        var (_, _, beat, meter) = map.PlaceOf(at);
         var last = meter.Pulses.Where(x => x <= beat + 1e-9).DefaultIfEmpty(0).Max();
         var next = meter.Pulses.Where(x => x > beat + 1e-9).DefaultIfEmpty(meter.BarDuration).Min();
         return (beat - last) / (next - last);

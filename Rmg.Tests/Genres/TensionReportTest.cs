@@ -21,7 +21,8 @@ public sealed class TensionReportTest
         var changes = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         int Change(double position) => Array.FindLastIndex(changes, x => x <= position + 1e-9);
         var classes = chordNotes.GroupBy(x => Change(x.Position)).ToDictionary(x => x.Key, x => x.SelectMany(n => n.Value.Pitches).Select(p => p % 12).ToHashSet());
-        var onBeat = song.Song.Notes[part].Where(x => Math.Abs(x.Position - Math.Round(x.Position)) < 1e-9 && classes.ContainsKey(Change(x.Position))).ToArray();
+        // on a beat of its bar, the note's own rank
+        var onBeat = song.Song.Notes[part].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.BeatRank) == 0 && classes.ContainsKey(Change(x.Position))).ToArray();
         return (onBeat.Count(x => !x.Value.Pitches.All(p => classes[Change(x.Position)].Contains(p % 12))), onBeat.Length);
     }
 

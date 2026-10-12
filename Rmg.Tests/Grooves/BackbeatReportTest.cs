@@ -5,7 +5,7 @@ namespace Rmg.Tests.Grooves;
 
 /// <summary>
 ///     How often the backbeat's drum plays the backbeat, by how conventional the song's rhythm is and how much energy the
-///     section has: every bar of its, but a pattern's last, where a fill may play, by the rhythm settings it was made
+///     section has: every bar of its, but every phrase's last, where a fill may play, by the rhythm settings it was made
 ///     with against the section's time feel: on the backbeat, faster (double time), slower (half time), in a tuplet, or
 ///     shifted; and how often a bar of each strikes both of the bar's backbeats in four.
 /// </summary>

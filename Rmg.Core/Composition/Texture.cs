@@ -21,8 +21,8 @@ public enum TextureKind
 }
 
 /// <summary>
-///     The texture of an appearance of a section: which of the parts that play play in each of its phrases, its
-///     patterns, so that a section can build up as an intro does, thin out, or play one instrument alone; by the form
+///     The texture of an appearance of a section: which of the parts that play play in each play of its pattern,
+///     a phrase or several, so that a section can build up as an intro does, thin out, or play one instrument alone; by the form
 ///     facet: the plainest songs play every part through each section, their textures changing only where a section
 ///     does, the wildest take every texture as likely; those of fewer parts leaned to the quieter sections, as a band
 ///     thins out in a verse rather than in a chorus. The drums play through a phrase or rest the whole appearance, but

@@ -20,7 +20,8 @@ public sealed class SectionPedalTest
             foreach (var span in song.Song.Map!.Sections.Where(x => pedalling.ContainsKey(x.SectionId)))
             {
                 var phrase = span.Meter.PhraseDuration;
-                var (start, end) = pedalling[span.SectionId] == 0 ? (span.Start, Math.Min(span.End, span.Start + phrase)) : (Math.Max(span.Start, span.End - phrase), span.End);
+                // the first phrase, or the last, counted from the section's start, as the stage takes them
+                var (start, end) = pedalling[span.SectionId] == 0 ? (span.Start, Math.Min(span.End, span.Start + phrase)) : (span.Phrases.Last().Start, span.End);
                 var classes = bass.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).Select(x => x.Value.Pitches[0].Mod(12)).ToArray();
                 if (classes.Length == 0)
                     continue;

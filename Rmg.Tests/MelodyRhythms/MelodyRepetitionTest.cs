@@ -48,7 +48,7 @@ public sealed class MelodyRepetitionTest
                 .ToArray();
             notes += melody.Length;
             // every pattern's start in its section, the third and fourth of a long section's too
-            var patternStarts = song.Map.Sections.SelectMany(x => Enumerable.Range(0, (int)Math.Ceiling(x.Duration / x.Meter.PatternDuration - 1e-9)).Select(p => x.Start + p * x.Meter.PatternDuration)).ToArray();
+            var patternStarts = song.Map.Sections.SelectMany(x => x.Patterns.Select(p => p.Start)).ToArray();
             for (var i = 1; i < melody.Length; i++)
             {
                 var move = Math.Abs(melody[i].Value.Pitches[0] - melody[i - 1].Value.Pitches[0]);
@@ -64,7 +64,8 @@ public sealed class MelodyRepetitionTest
                 restedJoinLeaps += isLeap && rest >= 0.5 ? 1 : 0;
             }
 
-            foreach (var note in melody.Where(x => Math.Abs(x.Position - Math.Round(x.Position)) < 1e-9))
+            // on a pulse of its bar
+            foreach (var note in melody.Where(x => song.Map.PlaceOf(x.Position) is var at && at.Meter.Pulses.Any(p => Math.Abs(at.Beat - p) < 1e-9)))
             {
                 var chord = chords.LastOrDefault(x => x.Position <= note.Position);
                 if (chord.Classes is null)

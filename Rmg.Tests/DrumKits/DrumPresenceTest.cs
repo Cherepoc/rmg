@@ -54,12 +54,11 @@ public sealed class DrumPresenceTest
                 var code = DrumGroups.GetDrum(track).Sounds[stroke].Code;
                 // every phrase's bars of its letter, as every phrase plays its scheme
                 var letters = schemes[entry.Section];
-                foreach (var bar in Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.BarDuration)).Where(x => letters[x % letters.Length] == letter))
+                foreach (var (_, start, barEnd) in span.Bars.Where(x => letters[x.Index % letters.Length] == letter))
                 {
-                    var start = span.Start + bar * span.Meter.BarDuration;
                     // but a fill's notes, which name their sounds, and an accent's, a note's own stroke
                     var notes = song.Song.Notes![track]
-                        .Where(x => x.Position >= start && x.Position < start + span.Meter.BarDuration &&
+                        .Where(x => x.Position >= start && x.Position < barEnd &&
                                     x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0 &&
                                     x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.DrumStroke).Depth < Rmg.Core.Events.StateDepths.Note)
                         .ToArray();

@@ -19,8 +19,10 @@ public sealed class PumpTest
         foreach (var track in song.Rendered.Tracks.Where(x => x.Role is TrackRole.Pad or TrackRole.Chords or TrackRole.Bass))
         foreach (var (position, value) in track.Expression)
         {
-            // just after a beat ducked, just before the next swelled back
-            var inBeat = position % 1;
+            // just after a pulse of the bar ducked, just before the next swelled back
+            var at = song.Map.PlaceOf(position);
+            var (last, next) = (at.Meter.Pulses.Where(x => x <= at.Beat + 1e-9).DefaultIfEmpty(0).Max(), at.Meter.Pulses.Where(x => x > at.Beat + 1e-9).DefaultIfEmpty(at.Meter.BarDuration).Min());
+            var inBeat = (at.Beat - last) / (next - last);
             if (inBeat < 0.1) { onBeat++; ducked += value < 0.6 ? 1 : 0; }
             else if (inBeat > 0.85) { offBeat++; full += value > 0.9 ? 1 : 0; }
         }

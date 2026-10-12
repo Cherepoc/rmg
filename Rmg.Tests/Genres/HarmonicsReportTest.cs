@@ -32,7 +32,8 @@ public sealed class HarmonicsReportTest
             double Around((CorpusSong Song, TrackRole Role, EventTimeline<RealizedNote> Notes, int Index, TimelineItem<RealizedNote> Note) x) =>
                 x.Notes.Count(n => Math.Abs(n.Position - x.Note.Position) < 1) / 2.0;
             var seconds = harmonics.Select(x => x.Note.Value.Duration * Seconds(x)).ToArray();
-            var phrases = harmonics.GroupBy(x => (x.Song.Seed, x.Role, Phrase: Math.Floor(x.Note.Position / 16))).Select(x => x.Count()).ToArray();
+            var phrases = harmonics.GroupBy(x => (x.Song.Seed, x.Role, Section: x.Song.Map.SectionAt(x.Note.Position)?.Start, Phrase: x.Song.Map.SectionAt(x.Note.Position)?.PhraseOf(x.Note.Position)))
+                .Select(x => x.Count()).ToArray();
             Console.WriteLine($"{name}: {harmonics.Length} harmonics in {songs.Count(s => harmonics.Any(h => h.Song == s))} songs; parts {string.Join(", ", harmonics.GroupBy(x => x.Role).Select(x => $"{x.Key} {x.Count()}"))}; " +
                               $"chords {harmonics.Count(x => x.Note.Value.Pitches.Length > 1) / (double)harmonics.Length:P0}");
             Console.WriteLine($"{name}: shorter than 0.25 s {seconds.Count(x => x < 0.25) / (double)seconds.Length:P0}, than 0.5 s {seconds.Count(x => x < 0.5) / (double)seconds.Length:P0}; " +

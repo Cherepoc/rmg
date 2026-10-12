@@ -68,7 +68,7 @@ public sealed class PinchTest
                 var at = song.Map.Sections.IndexOf(song.Map.Sections.Last(x => x.Start <= note.Position + 1e-9));
                 await Assert.That(at + 1).IsLessThan(song.Map.Sections.Length).Because(because);
                 await Assert.That(i + 1 >= notes.Count || notes[i + 1].Position >= song.Map.Sections[at].End - 1e-9).IsTrue().Because(because);
-                await Assert.That(note.Position).IsGreaterThanOrEqualTo(song.Map.Sections[at].End - song.Map.Sections[at].Meter.BarDuration - 1e-9).Because(because);
+                await Assert.That(note.Position).IsGreaterThanOrEqualTo(song.Map.Sections[at].LastBar - 1e-9).Because(because);
                 // held into the section it dives into, but where the band stops before it
                 reaching += note.Position + note.Value.Duration >= song.Map.Sections[at].End - 1e-9 ? 1 : 0;
             }
