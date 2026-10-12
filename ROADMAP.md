@@ -512,6 +512,52 @@ What it left, all in `reviews/2026-10-10.md`'s *Open*:
   per-section shares decided, the outro's and a kept tempo's shaped (110); a preset's copy of the songs' amounts written
   as "own" rather than listed (467), should the copies drift.
 
+### From the review of 11 October
+
+Its 402 findings in 21 packages, worked in order through the implementation loop (the plan kept outside the
+repository). Its three architecture proposals accepted, each a package of its own:
+
+- **Bars from the map** (#168): `SectionSpan.Bars/Phrases/Patterns`, one `Span.Within` tolerance and `SongMap.PlaceOf`,
+  every hand-written bar walk and count asked of them, so the short last bar, the section's origin and its meter are
+  right in one place.
+- **Keep-outs as data** (#138): `SongDraft.Holds`, one list of held spans (fill, stop, cut, solo, drum solo,
+  polymeter, call, answer) written by the stages that make them, each reading stage naming the kinds it keeps out of.
+- **The intro and the ending play as their source** (#126): `SongDecisions.Plays` and `PlayAt`, an intro made from a
+  section and the ending's final chord taking their source's decisions by one rule; the hook intro an option of a
+  genre's intro pool.
+
+Its idiom gaps accepted, each a plan to build after the packages, one mechanism over a case each:
+
+- **The big ending and the false ending** (#348, #372, #374), one entry: an `ending` option holding the final chord
+  while the drums roll a stretched fill over the toms and cymbals, cut off together on a button's hit (Rock, Metal,
+  Punk, Blues, Soul, Funk, Country, Ska, Power ballad, Nu metal, Black metal); and a `dropKind` option before the last
+  repeat playing that ending's chord, a beat or two of silence, the drums counting back in (Rock, Metal, Punk, Blues,
+  Soul, Funk, Ska). The songs' own 0; a genre's alone.
+- **Bass on the kick** (#379): the kick's `withRiff` following generalised to a player following another, the bass's
+  figure `withKick` striking the kick's onsets (Trap and Hip-hop leaning plain, Rock, Punk, Metal, Nu metal, Funk,
+  Country and Drum and bass lower).
+- **The kick-out** (#353): a fill's rest, the kick (and a bass on the kick) out for a line's last beat to bar while the
+  hats and clap play on, landing on the downbeat; a fills option of the club genres (House, Techno, Trance, Drum and
+  bass, Trap, Hip-hop, Disco, Synthwave, Pop), a held span of `Holds`.
+- **Ensemble hits** (#361): stop time's one hit a bar generalised to a figure of hits from the figures' onsets, the
+  band striking it together in a section's last bar before a louder one (Funk, Disco, Latin, Ska, Soul, Fusion, Jazz,
+  Rock, Metal, Punk).
+- **The ostinato** (#354): a riff option beside the drone, the riff held at its pitches over the chords, a clash on a
+  strong beat moved to a chord tone at the plain end, kept at the wild (Techno, Trance, House; Synthwave, IDM,
+  Chiptune, Ambient, Dungeon synth, Orchestral lower); the scale rule checked against it first.
+- **Latin bass figures** (#360): the tumbao and bossa's bass as bass figures, data.
+- **The boogie** (#366): the alternating bass generalised to a cycle of the chord's degrees, root and fifth or
+  1–3–5–6–♭7–6–5–3 (Blues, Rock, Country), after the pedal's keep-out.
+- **The alternating thumb** (#362): an arpeggio pattern, the thumb alternating root and fifth on the beats (Folk,
+  Country, Power ballad, Blues, Bossa nova, Medieval).
+- **The jazz ride** (#349): a time drum's figure, the swing ride's skip note after 2 and 4, measured first against
+  what Jazz's time already plays.
+- **The breakdown chorus** (#369): a `lastRepeat` option, the first pass at the thinnest texture, the second the full
+  band (Pop, Power ballad, Soul, Country, Rock, Disco, Folk).
+- Later: **the tape stop** (#358), every pitched part bending down an octave over a slowing tempo into a drop or as
+  the ending, a change of the tempo map and every channel's bends together; and **imitation** (#388), the
+  counter-melody taking the melody's phrase a bar later, its clashes across chord changes new work.
+
 ### Planned: held tones, let ring, a section's form, and two genres
 
 Planned 11 October 2026 and revised the same day after two reviews; each step through the implementation loop, with a
