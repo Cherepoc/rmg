@@ -919,14 +919,14 @@ internal sealed record GeneratedSection(
             ? Resting
             : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent, Genre, Facets[Facet.Form])
                 .Intersect(before);
-        // a breakdown's lines and pad out every time; and a calm section's guitars but the one breaking its chords, a part
-        // coming in late coming in at the next appearance, and the guitar it keeps playing whatever it draws, but in the first
-        // section an intro of entries builds up itself
+        // a breakdown's lines and pad out every time; and a calm section's guitars but the one breaking its chords, the first
+        // section's too, which an intro of entries builds up, a part coming in late coming in at the next appearance, and the
+        // guitar it keeps playing whatever it draws
         // a held part resting through a calm section before its entry too, and a part entering here resting through a
         // breakdown, which leaves its lines out, to come in at the next appearance, its riff, bass and drums carrying it
         var (breakdownRests, breakdownPlays) = Breakdown ? (Breakdowns.Resting, Breakdowns.Playing) : ([], []);
         var resting = drawn.Union(held).Union(breakdownRests).Except(entering.Except(breakdownRests)).Except(breakdownPlays.Except(held))
-            .Union(keepsTexture ? [] : Form.Leaves).Except(Form.Plays.Except(held));
+            .Union(Form.Leaves).Except(Form.Plays.Except(held));
         // a section keeps its harmony, as its rests alone do
         resting = Arrangement.KeepingHarmony(resting, Absent);
         // never silent: the parts held back playing where nothing else would, and every part the song has where its rests

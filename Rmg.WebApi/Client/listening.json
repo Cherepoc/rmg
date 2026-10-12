@@ -186,7 +186,7 @@
   {
     "id": "metal-calm",
     "question": "Heavy metal's quieter section turned calm, a clean guitar breaking the chords and letting them ring between the heavy ones: the style's contrast, or the band gone soft?",
-    "decides": "Heavy metal's calm sections, 5-10-20 now; tied 3 to 3 as Metal's, asked again over other songs.",
+    "decides": "Heavy metal's calm sections, 5-10-20 now, every guitar but the one breaking the chords resting, no solo over them; tied 3 to 3 twice, the losers a riff's tremolo or chugs under the broken chords.",
     "genre": "metal",
     "without": {
       "skip": [],
@@ -198,56 +198,54 @@
     },
     "seeds": [
       {
-        "seed": "6",
-        "at": 74,
+        "seed": "W",
+        "at": 51.4,
         "listen": [
-          "Bass (Electric Bass (finger))",
-          "Riff (Overdriven Guitar)",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 45.1,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Riff (Overdriven Guitar)",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "1A",
-        "at": 2.1,
-        "listen": [
-          "Kick",
-          "Riff (Electric Guitar (clean))",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "1b",
-        "at": 62.2,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "1k",
-        "at": 63.2,
-        "listen": [
-          "Kick",
-          "Bass (Electric Bass (pick))",
+          "Rhythm part (Overdriven Guitar)",
+          "Chords (Electric Guitar (clean))",
           "Riff (Distortion Guitar)"
         ]
       },
       {
-        "seed": "1w",
-        "at": 54.9,
+        "seed": "1L",
+        "at": 38.9,
         "listen": [
-          "Chords (Overdriven Guitar)",
-          "Riff (Distortion Guitar)"
+          "Chords (Distortion Guitar)",
+          "Kick",
+          "Ride"
+        ]
+      },
+      {
+        "seed": "1g",
+        "at": 2.6,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Melody (Lead 5 (charang))",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1m",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "1r",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "23",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))",
+          "Riff (Overdriven Guitar)"
         ]
       }
     ]
@@ -337,6 +335,14 @@
     },
     "seeds": [
       {
+        "seed": "5",
+        "at": 110.5,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
         "seed": "6",
         "at": 314.3,
         "listen": [
@@ -374,14 +380,6 @@
         "listen": [
           "Riff (Distortion Guitar)",
           "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "W",
-        "at": 316.7,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (finger))"
         ]
       }
     ]

@@ -12,8 +12,8 @@ public enum SectionFormKind
 
     /// <summary>
     ///     A quieter section turned calm, a heavy band's acoustic passage between the storms: its driven guitars acoustic or
-    ///     clean together, one breaking the chords slowly and letting them ring, the others resting, no figure played and
-    ///     the drums in half time or resting.
+    ///     clean together, one breaking the chords slowly and letting them ring, every other guitar resting, no figure
+    ///     played and the drums in half time or resting.
     /// </summary>
     Calm,
 
@@ -28,9 +28,9 @@ public enum SectionFormKind
 /// </summary>
 /// <param name="Program">The program the section's guitars play: an acoustic or clean one in a calm section, a driven one in a heavy one.</param>
 /// <param name="Guitars">The parts the form turns, by their tracks: the driven guitars for a calm section, the clean ones for a heavy one.</param>
-/// <param name="Breaker">The calm section's part that breaks its chords, the chords' or the rhythm part's that a driven guitar plays; none where neither does.</param>
-/// <param name="Leaves">The parts the section leaves out wherever it plays: a calm section's guitars but the one breaking its chords, or but the riff where none breaks them.</param>
-/// <param name="Plays">The part a calm section keeps playing whatever its appearance draws, its guitar breaking the chords, or its riff.</param>
+/// <param name="Breaker">The calm section's part that breaks its chords, the chords' or the rhythm part's that a guitar plays; none but in a calm section.</param>
+/// <param name="Leaves">The parts the section leaves out wherever it plays: a calm section's guitars but the one breaking its chords.</param>
+/// <param name="Plays">The part a calm section keeps playing whatever its appearance draws, its guitar breaking the chords.</param>
 internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableHashSet<int> Guitars, int? Breaker, ImmutableHashSet<TrackRole> Leaves, ImmutableHashSet<TrackRole> Plays)
 {
     public static SectionForm Own { get; } = new(SectionFormKind.Own, 0, [], null, [], []);
@@ -46,6 +46,9 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
 
     /// <summary>The programs a heavy section's clean, jazz or muted guitars play, the driven guitars.</summary>
     public static ImmutableArray<int> HeavyPrograms { get; } = [..Enumerable.Range(0, 128).Where(x => InstrumentTraits.Has(x, InstrumentTrait.Driven))];
+
+    /// <summary>The guitars' programs, the nylon guitar's to the harmonics', which a calm section rests but the one breaking its chords.</summary>
+    private const int FirstGuitar = 24, LastGuitar = 31;
 
     /// <summary>The guitars a heavy section turns: the clean, the jazz and the muted guitar.</summary>
     private static readonly ImmutableHashSet<int> Clean = [26, 27, 28];
@@ -74,15 +77,13 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
         var guitars = parts.Where(x => GuitarParts.Contains(x.Value.Role)).ToArray();
         var driven = guitars.Where(x => InstrumentTraits.Has(x.Value.Program, InstrumentTrait.Driven)).ToArray();
         var clean = guitars.Where(x => Clean.Contains(x.Value.Program)).ToArray();
-        if (!breakdown && energy < -1e-9 && calms && driven.Length > 0)
-        {
-            // one breaking the chords, the chords' guitar or the rhythm part's, the rest resting; where neither is a guitar, the
-            // riff playing on alone, its twin resting
-            var breaker = driven.Where(x => x.Value.Role is TrackRole.Chords or TrackRole.Rhythm).OrderBy(x => x.Value.Role != TrackRole.Chords).Select(x => (int?)x.Key).FirstOrDefault();
-            var plays = breaker is { } broken ? parts[broken].Role : driven.Any(x => x.Value.Role == TrackRole.Riff) ? TrackRole.Riff : driven[0].Value.Role;
-            return new SectionForm(SectionFormKind.Calm, CalmPrograms[(int)(programDraw * CalmPrograms.Length)], [..driven.Select(x => x.Key)], breaker,
-                [..driven.Where(x => x.Value.Role != plays).Select(x => x.Value.Role), ..drumsRest ? [TrackRole.Drum] : Array.Empty<TrackRole>()], [plays]);
-        }
+        // the guitar breaking the chords, the chords' or the rhythm part's, clean or driven, and every other guitar resting, so
+        // that nothing plays a riff's tremolo or chugs under the broken chords; none calm where no guitar plays the chords
+        var strung = guitars.Where(x => x.Value.Program is >= FirstGuitar and <= LastGuitar).ToArray();
+        var breaker = strung.Where(x => x.Value.Role is TrackRole.Chords or TrackRole.Rhythm).OrderBy(x => x.Value.Role != TrackRole.Chords).Select(x => (int?)x.Key).FirstOrDefault();
+        if (!breakdown && energy < -1e-9 && calms && driven.Length > 0 && breaker is { } broken)
+            return new SectionForm(SectionFormKind.Calm, CalmPrograms[(int)(programDraw * CalmPrograms.Length)], [..driven.Select(x => x.Key)], broken,
+                [..strung.Where(x => x.Key != broken).Select(x => x.Value.Role), ..drumsRest ? [TrackRole.Drum] : Array.Empty<TrackRole>()], [parts[broken].Role]);
 
         return energy > 1e-9 && heavies && clean.Length > 0
             ? new SectionForm(SectionFormKind.Heavy, HeavyPrograms[(int)(programDraw * HeavyPrograms.Length)], [..clean.Select(x => x.Key)], null, [], [])

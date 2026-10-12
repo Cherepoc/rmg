@@ -307,6 +307,18 @@ with it (Rock, Latin, Ambient, Disco, Ska, Fusion, Soul, Country and Chiptune); 
 declared as the songs draw them, never at the plain end (the review of 11 October's #56), the presets' flat amounts
 still to follow (#378).
 
+Answered on 13 October 2026, the metal family's round: kept, `numetal-vamp` and `metal-low-riff` (6 of 6 each),
+`thrash-vamp` (5 to 1), `numetal-bass-riff` and `doom-half-time` (4 to 2 each), `symphonic-choir` (4 of 6, 2 unsure:
+a wall, not mud) and `symphonic-raise` (4 to 1); against, `doom-blues` (1 to 4, Doom's riff on the blues scale heard as
+a blues band slowed down; its blues scale to go, the flat fifth then the chromatic scale's and Locrian's alone, as the
+riff stabs of the metal family's step 3 must weigh). `metal-calm` tied 3 to 3 again and was explained: the calm
+sections liked were slow, the others played a tremolo or a chugging riff under the broken chords, a clean riff or
+rhythm guitar the calm section neither turned nor rested, the riff playing on alone where no driven guitar broke the
+chords, the first section after an intro of entries keeping its parts, and a solo over the calm section. Now every
+guitar but the one breaking the chords rests, clean or driven, a section is calm only where a guitar plays the chords,
+the first section too, and no solo plays over it (`CalmTest`: Heavy metal's calm sections with a rhythm guitar under
+them 14 of 22 → 2, with the riff 6 → 0); asked again over other songs.
+
 Asked from 13 October 2026, the metal family's first, Metal now Heavy metal and three new genres beside it, as the
 presets are: `numetal-vamp` (Nu metal's sections on one chord), `numetal-bass-riff` (its bass doubling the riff),
 `metal-low-riff` (Heavy metal's riff an octave down), `metal-calm` (Heavy metal's calm sections, asked again over other

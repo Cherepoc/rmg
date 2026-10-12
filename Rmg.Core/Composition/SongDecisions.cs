@@ -353,8 +353,9 @@ internal sealed record SongDecisions(
             [..SongParts.All.Except(absent)],
             [..played.Select(id => generateSection(id).Breakdown)]
         );
-        // and no solo over a breakdown, whose band rests to its chugs, the appearance played as it is, its draws made all the same
-        drawnSolos = [..drawnSolos.Select((x, index) => generateSection(played[index]).Breakdown ? null : x)];
+        // and no solo over a breakdown, whose band rests to its chugs, nor over a calm section, whose guitars rest to its broken
+        // chords, the appearance played as it is, its draws made all the same
+        drawnSolos = [..drawnSolos.Select((x, index) => generateSection(played[index]) is { Breakdown: true } or { Form.Kind: SectionFormKind.Calm } ? null : x)];
         // a pitched solo trading with the drums now and then, each from a sequence of its own
         drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTrade(SongGenerator.CreateStream(seed, SongStream.SoloTrades, AppearanceKey(played, index)), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
