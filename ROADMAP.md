@@ -571,6 +571,15 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   tonic pedal at beat 276.25 sounding D in F Phrygian, its A♭ right in the state at the pedal's start, and on seed 25's
   bass at 142.5, and the shape rule on seed 46 at 126 (as #296). Seeds 4 and 14 were the test's own (a planed stack, a
   line's approach read from the bar), fixed.
+  **The held-out corpus** (offset 716000000) after the packages: 12 of 1581 tests fail, against 13 at the review's
+  commit; four of those fixed by the packages, a dive's (the twin diving with its riff) the test's own. Two more were
+  older behaviour the packages' tests now see: a djent breakdown at seed 48, section 7, in 15/16 (4+4+3+4), whose kick
+  pattern (period 2 beats, rank offset 2 of 2) plays no note, so the kick with the riff has nothing to lay on (seen
+  once the figures were traced as laid); and a polymeter of 6-16th cells at seed 26, beat 248, whose chords play 1.5,
+  1.75, 2 and 2.25 beats apart rather than the first cell's motif (seen once the rule ran on songs that always play one).
+  Nine fail at the review's commit too: a chromatic passing chord (seed 4 at 2), a section's own key (seed 50), a
+  pushed change (seed 58 at 192), a guitar's strum (seed 15 at 148), the inner line, a chord-playing soloist's stacks,
+  the family switch's share, every chord note in its scale, and a song's notes as render decides them.
 - Later: **the tape stop** (#358), every pitched part bending down an octave over a slowing tempo into a drop or as
   the ending, a change of the tempo map and every channel's bends together; and **imitation** (#388), the
   counter-melody taking the melody's phrase a bar later, its clashes across chord changes new work.

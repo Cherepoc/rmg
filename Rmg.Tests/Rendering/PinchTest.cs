@@ -63,7 +63,8 @@ public sealed class PinchTest
                 any = true;
                 beats += note.Value.Duration;
                 var because = $"seed {song.Seed}, track {track} at {note.Position}";
-                await Assert.That(song.Song.TrackDefinitions[track].Role).IsEqualTo(TrackRole.Riff).Because(because);
+                // the riff's, or its twin's, which dives with it
+                await Assert.That(song.Song.TrackDefinitions[track].Role.Source()).IsEqualTo(TrackRole.Riff).Because(because);
                 await Assert.That(note.Value.Duration).IsGreaterThanOrEqualTo(1).Because(because);
                 await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.BendDepth)).IsEqualTo(-Expression.DiveDepth).Because(because);
                 var at = song.Map.Sections.IndexOf(song.Map.Sections.Last(x => x.Start <= note.Position + 1e-9));
