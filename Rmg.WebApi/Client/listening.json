@@ -335,6 +335,14 @@
     },
     "seeds": [
       {
+        "seed": "2",
+        "at": 186.1,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
         "seed": "5",
         "at": 110.5,
         "listen": [
@@ -343,27 +351,11 @@
         ]
       },
       {
-        "seed": "6",
-        "at": 314.3,
+        "seed": "Q",
+        "at": 287.7,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "B",
-        "at": 247.5,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 154.4,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
         ]
       },
       {
@@ -375,11 +367,18 @@
         ]
       },
       {
-        "seed": "V",
-        "at": 280.8,
+        "seed": "o",
+        "at": 344.5,
         "listen": [
           "Riff (Distortion Guitar)",
           "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "r",
+        "at": 232,
+        "listen": [
+          "Riff (Distortion Guitar)"
         ]
       }
     ]

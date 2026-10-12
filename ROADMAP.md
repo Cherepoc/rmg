@@ -542,16 +542,8 @@ What it left, all in `reviews/2026-10-10.md`'s *Open*:
 ### From the review of 11 October
 
 Its 402 findings in 21 packages, worked in order through the implementation loop (the plan kept outside the
-repository). Its three architecture proposals accepted, each a package of its own:
-
-- **Bars from the map** (#168): `SectionSpan.Bars/Phrases/Patterns`, one `Span.Within` tolerance and `SongMap.PlaceOf`,
-  every hand-written bar walk and count asked of them, so the short last bar, the section's origin and its meter are
-  right in one place.
-- **Keep-outs as data** (#138): `SongDraft.Holds`, one list of held spans (fill, stop, cut, solo, drum solo,
-  polymeter, call, answer) written by the stages that make them, each reading stage naming the kinds it keeps out of.
-- **The intro and the ending play as their source** (#126): `SongDecisions.Plays` and `PlayAt`, an intro made from a
-  section and the ending's final chord taking their source's decisions by one rule; the hook intro an option of a
-  genre's intro pool.
+repository), its three architecture proposals among them (#168 bars from the map, #138 keep-outs as data, #126 the
+intro and the ending as their source, packages 7a, 8a, 8b and 9a).
 
 Its idiom gaps accepted, each a plan to build after the packages, one mechanism over a case each:
 
@@ -686,8 +678,9 @@ keeps together. Each step through the implementation loop, with a listening ques
    riff's beats). Groove metal left to Thrash, Nu metal and Djent between them. Ratings under `metal` from before the
    split not used to tune its presets. Left to listening: each new genre heard against its sound; Symphonic's choir
    and violin over distorted guitars, a wall or mud.
-5. **Doom's blues scale reduced** (data, from `doom-blues`, 1 to 4 against, 13 October 2026): its riff's `riffScale.blues`
-   30-40-50 → 0-10-25, the plainest Doom the funeral and death-doom kind on natural minor, Phrygian and the chromatic
+5. Done (13 October 2026, data, from `doom-blues`, 1 to 4 against): **Doom's blues scale reduced**, its riff's
+   `riffScale.blues` 30-40-50 → 0-10-25, its sections on it 26% → 8%, the ♭5 on its riff's beats 10% still, its
+   harmony's; the plainest Doom the funeral and death-doom kind on natural minor, Phrygian and the chromatic
    creep, the blues colour of traditional and stoner doom kept to the wilder songs. Its riff in power chords was weighed
    as the fix instead and measured unneeded: 80% of its blues notes, 76% of all its riff's, are power chords already
    (`MetalFamilyReportTest`), so the blues band heard is in the line's ♭3–4–♭5 motion, not its single notes. Left to
@@ -702,6 +695,39 @@ metal, Doom without the tuning a slow one; no sub-styles within a genre, a prese
 **Musicality**: a stretched guitar sample muddy below E2 by soundfont, so heard before tuned; dissonant accents only
 over still harmony; a slap bass doubling a distorted riff turning it to funk metal, so picked where it doubles; a
 narrow melody on a guitar possibly only dull, so asked before built.
+
+### Planned: band devices and the metal leftovers
+
+Planned 13 October 2026 from the roadmap's priorities, reviewed the same day; each step through the implementation loop.
+The architecture's three proposals (#168, #138, #126) and the drum solos' plan were found built and are not in it. In
+order:
+
+- **A.** Done (13 October 2026): the roadmap's stale entries out; Doom's blues scale reduced (the metal family's item 5).
+- **B. Bass on the kick** (#379): a figure's `FollowsRiff` generalised to the player it follows, the kick's `withRiff`
+  the riff's and a bass figure `withKick` the kick's, the bass's turn after the kick's already; Trap and Hip-hop leaning
+  on it at the plain end, Rock, Punk, Country and Funk lower, Drum and bass lower still; never a heavy band's, whose kick
+  doubles. Measured by the bass's onsets on the kick's, by genre.
+- **C. Ensemble hits** (#361): stop time generalised, its hit on a bar's first beat the band's hits on the kick's
+  onsets in a section's last bar before a louder one, resting between, the lines going on and the drums' fill kept,
+  out of a drop's bar; the songs' 0-3-3 as stop time's, Funk, Disco, Latin, Ska, Soul, Fusion, Jazz, Rock, Heavy metal,
+  Thrash and Punk raising it. Measured by the sections hitting and their hits a bar, a rule that a hit bar's band
+  notes fall on its hits.
+- **D1. The big ending** (#348, #374): an ending of its own, the ring-out's held home chord, the drums' fill stretched
+  over it on the toms and cymbals, the button's hit; Rock, the metals, Punk, Blues, Soul, Funk, Country, Ska and Power
+  ballad, the songs' 0.
+- **D2. The false ending** (#372), put off until the big ending is heard: a drop's kind before the last repeat, the
+  band hitting the home chord, a beat or two of silence, the drums counting back in; its hit a harmony edit before
+  `Realizer`, new work, and a gimmick worn thin quickly.
+- **E.** The metal leftovers as questions: Nu metal's, Thrash's, Punk's and Trap's `melodyRange` about 20, as Hip-hop's,
+  asked as `numetal-narrow`; and `numetal-chromatic` (without, `riffScale.chromatic` 0), whether the chromatic colour
+  is what Nu metal lacks before a stab palette is built.
+
+Review: **overengineering**: a field generalised and one figure, not a player following any other; ensemble hits one
+stage with stop time, not a second, its growth in conditions watched; the false ending split off; the leftovers asked
+before built. **Musicality**: an 808 on the kick Trap's sound, a rock bass on it idiomatic but static, so under its own
+rhythm; no bass on a double kick at 200; hits on a four-on-the-floor kick only stop time, so heard; the drums striking
+the hits with the band, a crash and the kick, the fill around them; the big ending the clearest rock gesture, its long
+roll on General MIDI toms heard before its weight raised; a narrow line on a guitar possibly only dull.
 
 ### Conventionality
 
@@ -790,25 +816,9 @@ narrow melody on a guitar possibly only dull, so asked before built.
 - **A filter drawn over time** (P3, if a wobble's restart on every note is heard): a part's brightness drawn through
   its rests rather than while its notes sound, and the filter's shapes a vocabulary as data anchored where they mean
   something; the part's one curve now adds its tone and a filter's closing note by note (`ExpressionRender`).
-- **Drum solos rethought, the rest** (P2, planned October 2026; `drum-solo` heard better): a solo now plays the pitched solos' gestures with the kit as a
-  scale, a run round the toms, a lick, a crash held, a pause, a quote of the groove, the kick keeping time under it.
-  A drummer thinks otherwise; in order of what it would add:
-  1. Done October 2026: its feet a genre's ostinato, the groove's kick, the hi-hat's pedal on 2 and 4, a double kick, a
-     bossa's kick (`DrumSolos.Feet`); a samba's or a baião's kick and a timbales player's cascara left, by listening.
-  2. Done October 2026: its runs and licks in stickings, singles, doubles, paradiddles, six-stroke rolls, hands and foot
-     in triplets, the right hand round the toms, the left on the snare (`DrumSolos.Stickings`); its drags the song's (`DrumOrnaments`), its flams left.
-  3. Done October 2026: a phrase's first run or lick restating the phrase before's, its sticking and speed, a drum
-     round the kit, displaced by a 16th now and then, 38% of the kit's phrases (`DrumSolos.MotifChance`); augmented or
-     diminished left, by listening.
-  4. Done October 2026, measured: its runs' and licks' hits a beat and loudness follow the intensity, 3.6, 6.2 and 8.1
-     hits a beat at 0.37, 0.44 and 0.55 by its thirds, and the intensity grows over the solo, 0.53, 0.61, 0.64.
-  5. Done October 2026: a pitched solo trading with the drums turn by turn, the band laying out for the drums' turns
-     (`Solos.Trade`), Jazz's 30% to 60% of its solos, 112 trades in 64 Jazz songs.
-  6. Done October 2026: a tom cascade, both hands down the toms from the highest and the kick in triplets, a sticking,
-     Metal's (`Sticking.Cascade`). Left, each a gesture of its own rather than a sticking, by listening: a timbales'
-     abanico, the quote of the groove ghosted in Funk, and an IDM's drill of ratchets, which waits on IDM's drums
-     soloing at all.
-  Measured by the solos' notes a beat over their arc, the limbs' share, the stickings drawn; `?listen=` questions.
+- **Drum solos, the rest** (P3, by listening; the plan of October 2026 built, `drum-solo` heard better): a samba's or
+  a baião's kick and a timbales player's cascara as its feet; its flams; a motif augmented or diminished; a timbales'
+  abanico, the quote of the groove ghosted in Funk, and an IDM's drill of ratchets, each a gesture of its own.
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
   offset by its role in the song's groove (`Pocket.OffsetOf`), not a section's, which may move a ride to the time.
 
