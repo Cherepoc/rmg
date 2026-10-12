@@ -90,6 +90,9 @@ internal static class TracePoints
     /// <summary>Whether a section plays its appearances' first phrase in stop time (a <c>bool</c>).</summary>
     public const string StopTime = "Stop time";
 
+    /// <summary>Where a section strikes its last bar before a louder one in ensemble hits, the bars' starts, none for none (an <c>ImmutableArray&lt;double&gt;</c>).</summary>
+    public const string EnsembleHits = "Ensemble hits";
+
     /// <summary>A line a section builds to and drops at, the band out for the bar before it (a <c>double</c>, the line's place).</summary>
     public const string Drop = "Drop";
 

@@ -588,6 +588,8 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   tonic pedal at beat 276.25 sounding D in F Phrygian, its A♭ right in the state at the pedal's start, and on seed 25's
   bass at 142.5, and the shape rule on seed 46 at 126 (as #296). Seeds 4 and 14 were the test's own (a planed stack, a
   line's approach read from the bar), fixed.
+  **A squelch at a million** (offset 1000000): `ASquelch_OpensOnEveryNote_AndAWobble_ClosesAndOpensWithinACycle` fails
+  there at the committed code of 13 October 2026, before ensemble hits; to bisect.
   **The held-out corpus** (offset 716000000) after the packages: 12 of 1581 tests fail, against 13 at the review's
   commit; four of those fixed by the packages, a dive's (the twin diving with its riff) the test's own. Two more were
   older behaviour the packages' tests now see: a djent breakdown at seed 48, section 7, in 15/16 (4+4+3+4), whose kick
@@ -709,11 +711,15 @@ order:
   47% → 65%, Rock's 52% → 59%, Country's 40% → 46%, Drum and bass's 45% → 55%, Punk's and Funk's a few points; in a
   bar on the figure 83% to 96% of the bass's notes with the kick, the rest its walks and fills. No heavy band's. Left to
   listening: `trap-bass-kick`, the 808 on the kick against its own line.
-- **C. Ensemble hits** (#361): stop time generalised, its hit on a bar's first beat the band's hits on the kick's
-  onsets in a section's last bar before a louder one, resting between, the lines going on and the drums' fill kept,
-  out of a drop's bar; the songs' 0-3-3 as stop time's, Funk, Disco, Latin, Ska, Soul, Fusion, Jazz, Rock, Heavy metal,
-  Thrash and Punk raising it. Measured by the sections hitting and their hits a bar, a rule that a hit bar's band
-  notes fall on its hits.
+- **C.** Done (13 October 2026, `EnsembleHitsTest`): **ensemble hits** (#361), stop time's stage striking a section's
+  last bar before a louder one too, its band on the kick's notes there, each part its note sounding at each, a chord
+  held into the bar ended at its line, the drums whatever falls on a hit and their fill; never where a drop, stop
+  time, a solo or a polymeter is, nor a bar of more hits than half its 8ths, which leave no rests (a double kick's), and
+  a short last bar's hits before the next section's first beat. The songs' 0-3-3, as stop time's; Funk 20-30-40, Latin,
+  Ska, Soul, Fusion, Jazz, Rock, Heavy metal, Thrash and Punk raised, Disco not (its kick on every beat would chop the
+  quarters), the genres without a band's stops at 0. Songs struck in 26 of 64 (Funk), 24 (Ska), 21 (Soul), 20 (Fusion),
+  18 (Heavy metal), 17 (Rock), 16 (Punk), 14 (Latin, Thrash), 6 (Jazz), 5 (Pop, the songs' own); 1.5 to 2.7 hits a bar.
+  Left to listening: `funk-hits`, and the crash the band's hits want, not added.
 - **D1. The big ending** (#348, #374): an ending of its own, the ring-out's held home chord, the drums' fill stretched
   over it on the toms and cymbals, the button's hit; Rock, the metals, Punk, Blues, Soul, Funk, Country, Ska and Power
   ballad, the songs' 0.

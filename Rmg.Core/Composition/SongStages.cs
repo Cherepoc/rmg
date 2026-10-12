@@ -243,11 +243,12 @@ internal static class SongStages
         var fills = new FillGenerator(song.Stream(SongStream.Fills), song.Tracks, song.Of(Facet.Fills), song.Meter, track => song.Stream(SongStream.UnheardLandings, track), song.Genre);
         // a stop-time phrase's end as heavy as a section's, the drums filling the band back in as often
         var stops = song.StopTime;
+        var hits = song.EnsembleHits;
         var lines = song.Form.Lines.Select(x => stops.Any(p => Math.Abs(p.End - x.Position) < 1e-6) ? x with { Weight = Math.Max(x.Weight, 0) } : x).ToImmutableArray();
         // the runs handed on to the lines' walks and the drums' touches, none where the drums mark the form, which plays none
         // a drum heard only where the groove is taken out, in stop time or a drum solo, which clears it, landed elsewhere
         var drumSolos = song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key]).Select(x => (x.Start, x.End, x.Meter.BarDuration));
-        return draft with { Timeline = fills.Generate(draft.Timeline, lines, song.Form.Map, [..stops, ..drumSolos]), Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs };
+        return draft with { Timeline = fills.Generate(draft.Timeline, lines, song.Form.Map, [..stops, ..hits, ..drumSolos]), Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs };
     }
 
     /// <summary>A bigger section announced, the hi-hat opening and the snare on its head before it.</summary>

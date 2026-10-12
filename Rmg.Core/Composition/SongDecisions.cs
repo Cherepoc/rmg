@@ -58,6 +58,12 @@ internal sealed record SongDecisions(
     private ImmutableArray<(double Start, double End, double BarDuration)>? _stopTime;
 
     /// <summary>
+    ///     Where the band strikes ensemble hits, each bar's start, end and length, as drawn, decided once for the stages before
+    ///     stop time that keep to it, as its own phrases (<see cref="Composition.StopTime.HitBars" />).
+    /// </summary>
+    public ImmutableArray<(double Start, double End, double BarDuration)> EnsembleHits => field.IsDefault ? field = StopTimeSkipped ? [] : [..Composition.StopTime.HitBars(this)] : field;
+
+    /// <summary>
     ///     The song's first chorus where it plays and its place among the sections, which a hook intro quotes (<see
     ///     cref="IntroKind.Hook" />); none for a song without a chorus.
     /// </summary>

@@ -251,5 +251,6 @@ internal enum SongStream
     LetRing = 110,
     CallAndResponse = 111,
     SoloAnswerVoicings = 112,
-    SoloAnswerMotifs = 113
+    SoloAnswerMotifs = 113,
+    EnsembleHits = 114
 }
