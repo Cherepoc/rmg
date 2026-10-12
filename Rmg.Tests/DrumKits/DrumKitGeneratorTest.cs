@@ -72,6 +72,8 @@ public sealed class DrumKitGeneratorTest
         double ShareWith(DrumGroup group) => kits.Count(kit => kit.Any(group.Drums.Contains)) / (double)kits.Length;
 
         // they play mostly in fills and landings
+        Console.WriteLine($"toms in {ShareWith(DrumGroups.Toms):P1} of the kits, accent cymbals in {ShareWith(DrumGroups.Accents):P1}");
+        // measured 7.0% and 1.8%
         await Assert.That(ShareWith(DrumGroups.Toms)).IsBetween(0.03, 0.25);
         await Assert.That(ShareWith(DrumGroups.Accents)).IsBetween(0.01, 0.15);
     }

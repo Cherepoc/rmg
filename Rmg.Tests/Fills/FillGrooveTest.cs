@@ -99,26 +99,26 @@ public sealed class FillGrooveTest
                + $"velocity {all.Average(x => x.FillVelocity):F3} vs {all.Average(x => x.GrooveVelocity):F3}";
     }
 
+    /// <summary>The fills against their grooves, by kind and in all.</summary>
     [Test]
-    public async Task Measurement()
+    [Explicit]
+    public async Task Report()
     {
         var fills = Fills.Value;
-        if (Environment.GetEnvironmentVariable("RMG_MEASURE") is { } path)
-            await File.WriteAllLinesAsync(
-                path,
-                [..fills.GroupBy(x => x.Kind).Select(x => $"{x.Key}: {Describe(x)}"), $"all: {Describe(fills)}"]
-            );
-
-        await Assert.That(fills.Length).IsGreaterThan(1000);
+        foreach (var line in fills.GroupBy(x => x.Kind).Select(x => $"{x.Key}: {Describe(x)}").Append($"all: {Describe(fills)}"))
+            Console.WriteLine(line);
+        await Task.CompletedTask;
     }
 
     [Test]
     public async Task Fills_PlayNearTheGroovesGrid()
     {
+        await Assert.That(Fills.Value.Length).IsGreaterThan(1000);
         var fills = Fills.Value.Where(x => !double.IsNaN(x.FillGrid) && !double.IsNaN(x.GrooveGrid)).ToArray();
+        Console.WriteLine($"{fills.Count(x => x.FillGrid <= x.GrooveGrid / 4 + 1e-6) / (double)fills.Length:P1} of the fills 4x finer than their groove");
 
         // finer than the snare's backbeat, which the groove's other drums often are already, or sparser where it folds;
-        // before the fills played the groove's rhythm, a third were
+        // before the fills played the groove's rhythm, a third were (measured 5.9% to 6.4%, at offsets 0 and a million)
         await Assert.That(fills.Count(x => x.FillGrid <= x.GrooveGrid / 4 + 1e-6)).IsLessThan(fills.Length / 8);
     }
 
@@ -128,7 +128,8 @@ public sealed class FillGrooveTest
         // a fill in a tuplet leaves it on purpose, where the twist plays one over a straight groove
         var fills = Fills.Value.Where(x => !x.Kind.EndsWith("in a tuplet")).ToArray();
 
-        // off it where the snare's feel is not the other drums'
+        Console.WriteLine($"{fills.Count(x => x.IsOffTheGroove) / (double)fills.Length:P1} of the straight fills off their groove's grid");
+        // off it where the snare's feel is not the other drums' (measured 6.1% to 7.3%, at offsets 0 and a million)
         await Assert.That(fills.Count(x => x.IsOffTheGroove)).IsLessThan(fills.Length / 8);
     }
 
@@ -136,6 +137,8 @@ public sealed class FillGrooveTest
     public async Task Fills_PlayAboutAsLoudAsTheGroove()
     {
         var fills = Fills.Value;
+        Console.WriteLine($"fills' velocity {fills.Average(x => x.FillVelocity):F3}, their grooves' {fills.Average(x => x.GrooveVelocity):F3}");
+        // measured 0.027 to 0.031 louder, at offsets 0 and a million
 
         await Assert.That(fills.Average(x => x.FillVelocity)).IsEqualTo(fills.Average(x => x.GrooveVelocity)).Within(0.1);
     }

@@ -116,8 +116,9 @@ public sealed class DrumPresenceTest
                 .Average(_ => DrumPresence.Draw(_ => context, tracks, scheme, new HashSet<int>(), _ => 0, unconventionality, Tilt.None, DrumSounds.OddsOf(Genre.None, GenreChoices.DrumStrokes)).Resting.Count / 2.0);
         }
 
-        await Assert.That(Share(0)).IsLessThan(0.15);
+        // an unconventional thing, never at the plain end and every time at the wild
+        await Assert.That(Share(0)).IsEqualTo(0);
         await Assert.That(Share(0.5)).IsEqualTo(DrumPresence.SitOutChance).Within(0.03);
-        await Assert.That(Share(1)).IsGreaterThan(0.5);
+        await Assert.That(Share(1)).IsEqualTo(1);
     }
 }

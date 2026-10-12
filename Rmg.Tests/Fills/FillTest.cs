@@ -193,6 +193,8 @@ public sealed class FillTest
             }
         }
 
+        Console.WriteLine($"changes on a crash {crashes / (double)changes:P1}, on a kick {kicks / (double)changes:P1}; other downbeats on a crash {otherCrashes / (double)downbeats:P1}");
+        // measured 66% to 68% on a crash, 95% to 96% on a kick, 8% to 10% of the other downbeats on a crash, at offsets 0 and a million
         await Assert.That(crashes / (double)changes).IsBetween(0.5, 0.8);
         // the wildest songs' changes into a meter of their own land on a kick a little less often
         await Assert.That(kicks / (double)changes).IsGreaterThan(0.88);

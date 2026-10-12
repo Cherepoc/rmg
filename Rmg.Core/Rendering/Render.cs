@@ -49,6 +49,12 @@ public static class Render
     /// <summary>The orchestra kit's program, whose notes from 41 to 53 are timpani, a semitone apart (<see cref="GenreChoices.Kits" />).</summary>
     private const int OrchestraKit = 48;
 
+    /// <summary>The controllers that name a non-registered parameter, its high byte and its low, and set its value.</summary>
+    public const int NrpnHigh = 99, NrpnLow = 98, DataEntry = 6;
+
+    /// <summary>A Roland GS drum's delay send, by its parameter's high byte, the drum's note its low, and a send in full.</summary>
+    public const int DrumDelayNrpn = 31, FullSend = 127;
+
     /// <summary>The orchestra kit's hi-hats, closed, pedalled and open, by the standard kit's notes for them.</summary>
     private static readonly IReadOnlyDictionary<int, int> OrchestraHiHats = new Dictionary<int, int> { [42] = 27, [44] = 28, [46] = 29 };
 
@@ -235,7 +241,7 @@ public static class Render
             // and to the delay, the channel's send and every echoing drum's of its own, as a Roland GS drum's (NRPN 31)
             (int, int)[] delaySends = echoingDrums.Count == 0
                 ? []
-                : [(ExpressionRender.DelayController, ExpressionRender.DelaySend), ..echoingDrums.Order().SelectMany(key => new[] { (99, 31), (98, key), (6, 127) })];
+                : [(ExpressionRender.DelayController, ExpressionRender.DelaySend), ..echoingDrums.Order().SelectMany(key => new[] { (NrpnHigh, DrumDelayNrpn), (NrpnLow, key), (DataEntry, FullSend) })];
             var percussionTrack = new RenderedTrack(true, TrackRole.Drum, song.Draws?.Kit ?? 0, percussionEventTimeline, 0)
                 { Controllers = [..percussionSends.Select(x => (0.0, x.Controller, x.Value)), ..delaySends.Select(x => (0.0, x.Item1, x.Item2)), ..ExpressionRender.MixBrightness(mixClosed)] };
             renderedTracks.Add(percussionTrack);

@@ -30,4 +30,34 @@ public sealed class PocketTest
 
         await Assert.That(compared).IsGreaterThan(0);
     }
+
+    /// <summary>The plainest feel keeps to the click, no note off its place.</summary>
+    [Test]
+    public async Task ThePlainestFeel_PlaysNoNoteOffItsPlace()
+    {
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Feel, 0))))))
+            await Assert.That(song.Song.Notes!.Values.SelectMany(x => x).All(x => x.Value.State.GetStateValue(CompositionStateKinds.TimingOffset) == 0)).IsTrue().Because($"seed {song.Seed}");
+    }
+
+    /// <summary>A drum off its place the way its role in the groove has it: the backbeat behind, the time ahead or on it.</summary>
+    [Test]
+    public async Task ADrumsPocket_IsItsRolesWay()
+    {
+        var offset = 0;
+        foreach (var song in TestCorpus.Range(16))
+        foreach (var (track, notes) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
+        {
+            var role = DrumRoles.Of(song.Song.TrackDefinitions[track].StateMap);
+            var shifts = notes.Select(x => x.Value.State.GetStateValue(CompositionStateKinds.TimingOffset)).ToArray();
+            offset += shifts.Count(x => x != 0);
+            await Assert.That(role switch
+            {
+                DrumRole.Backbeat => shifts.All(x => x >= 0),
+                DrumRole.Time => shifts.All(x => x <= 0),
+                _ => true
+            }).IsTrue().Because($"seed {song.Seed}, {role}");
+        }
+
+        await Assert.That(offset).IsGreaterThan(0);
+    }
 }

@@ -54,6 +54,7 @@ public sealed class HatRollTest
         // seen: Hip-hop's 64 songs add about 290 rolls, nearly all louder, the songs' own none
         await Assert.That(hipHop.Sum(x => x.Rolls)).IsGreaterThan(80);
         await Assert.That(hipHop.Sum(x => x.Louder)).IsGreaterThan(hipHop.Sum(x => x.Rolls) * 3 / 4);
-        await Assert.That(songs.Sum(x => x.Rolls)).IsLessThan(hipHop.Sum(x => x.Rolls) / 5);
+        // the songs' own none, as their chance is none
+        await Assert.That(songs.Sum(x => x.Rolls)).IsEqualTo(0);
     }
 }

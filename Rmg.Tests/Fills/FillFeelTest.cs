@@ -42,5 +42,7 @@ public sealed class FillFeelTest
         // triplet 8ths and sextuplets, a sixth of a beat apart at the finest
         await Assert.That(hits.Length).IsGreaterThan(0);
         await Assert.That(hits.All(x => Math.Abs(x.Position * 6 - Math.Round(x.Position * 6)) < 1e-6)).IsTrue();
+        // and off the straight 8ths' grid, which a straight fill keeps to
+        await Assert.That(hits.Any(x => Math.Abs(x.Position * 2 - Math.Round(x.Position * 2)) > 1e-6)).IsTrue();
     }
 }

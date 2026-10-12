@@ -33,7 +33,14 @@ public sealed class DelayTest
             if (snareEchoes && drums is not null)
             {
                 await Assert.That(drums.Controllers.Any(c => c.Controller == ExpressionRender.DelayController && c.Value > 0)).IsTrue();
-                await Assert.That(drums.Controllers.Any(c => c.Controller == 99 && c.Value == 31)).IsTrue();
+                // every echoing snare's note sent on its own, its parameter named and set in full
+                var sent = drums.Controllers.Select(c => (c.Controller, c.Value)).ToArray();
+                var keys = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber)
+                    .SelectMany(x => song.Song.Notes!.GetValueOrDefault(x)?.Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0).Select(n => n.Value.Pitches[0]) ?? [])
+                    .Distinct().ToArray();
+                foreach (var key in keys)
+                    await Assert.That(Enumerable.Range(0, sent.Length - 2).Any(i => sent[i] == (Render.NrpnHigh, Render.DrumDelayNrpn) && sent[i + 1] == (Render.NrpnLow, key) && sent[i + 2] == (Render.DataEntry, Render.FullSend)))
+                        .IsTrue().Because($"seed {song.Seed}, note {key}");
             }
         }
 

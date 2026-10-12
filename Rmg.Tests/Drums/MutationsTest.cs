@@ -38,7 +38,7 @@ public sealed class MutationsTest
     [Test]
     public async Task AMutatingGroove_LeavesAPolymeter_AndKeepsItsAnchorsBelowTheWildEnd()
     {
-        var (mutated, kept) = (0, 0);
+        var (mutated, kept, polymeters) = (0, 0, 0);
         var kicks = DrumGroups.Kick.Tracks.ToHashSet();
         foreach (var seed in Enumerable.Range(0, 32))
         {
@@ -48,15 +48,22 @@ public sealed class MutationsTest
             var edits = with.Trace.Where(x => x.Point == TracePoints.Mutations).Select(x => (((int Index, int Made))x.Value!)).ToDictionary(x => x.Index, x => x.Made);
             var figured = with.Trace.Where(x => x.Point == TracePoints.Figures && ((System.Collections.ICollection)x.Value!).Count > 0).Select(x => x.Section).ToHashSet();
             var polymetric = ((System.Collections.IDictionary)with.Trace.Single(x => x.Point == TracePoints.Polymeter).Value!).Keys.Cast<int>().ToHashSet();
-            foreach (var (span, index) in with.Map.Sections.Select((x, i) => (x, i)).Where(x => edits.GetValueOrDefault(x.i) > 0))
+            foreach (var (span, index) in with.Map.Sections.Select((x, i) => (x, i)))
             {
-                mutated++;
                 // the drums' notes in the section's bars after its first, as the stage edits them, with and without it
                 (int, double)[] Drums(Song song, Func<int, bool> which) => [..song.Notes!.Where(x => song.TrackDefinitions[x.Key].Role == TrackRole.Drum && which(x.Key))
                     .SelectMany(x => x.Value.Where(n => n.Position >= span.Start + span.Meter.BarDuration - 1e-9 && n.Position < span.End - 1e-9).Select(n => (x.Key, Math.Round(n.Position, 6))))
                     .Order()];
+                // a polymeter's drums as they were, whatever the section's edits
                 if (polymetric.Contains(span.SectionId))
+                {
+                    polymeters++;
                     await Assert.That(Drums(with.Song, _ => true)).IsEquivalentTo(Drums(without, _ => true), CollectionOrdering.Matching).Because($"seed {seed} at {span.Start}");
+                }
+
+                if (edits.GetValueOrDefault(index) == 0)
+                    continue;
+                mutated++;
                 // a downbeat kick of the song without kept, where the section keeps its anchors every time, its groove at the
                 // middle or plainer (Mutations.KeepsAnchors)
                 var groove = ((Unconventionality)with.Trace.First(x => x.Point == TracePoints.SectionUnconventionality && x.Section == span.SectionId).Value!).Facets[Facet.Groove];
@@ -71,8 +78,10 @@ public sealed class MutationsTest
             }
         }
 
+        Console.WriteLine($"{mutated} sections mutated, {polymeters} polymetric");
         await Assert.That(mutated).IsGreaterThan(10);
         await Assert.That(kept).IsGreaterThan(0);
+        await Assert.That(polymeters).IsGreaterThan(0);
     }
 
     [Test]

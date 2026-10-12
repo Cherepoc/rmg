@@ -298,11 +298,12 @@ public sealed class FillArchetypeTest
         {
             var setup = Create(seed);
             var (_, _, snare) = setup;
+            // a stop of two beats, silent over both, the groove playing on before it
             var filled = Apply(setup, new FillPlay(2, GrooveTreatment.Stop, FillRun.Rest, FillRhythm.PlainLayer));
-            var silent = new[] { Kick, snare, HiHat }.Select(x => Events(filled, x, Line - 1, Line).Length).Sum();
+            var silent = new[] { Kick, snare, HiHat }.Select(x => Events(filled, x, Line - 2, Line).Length).Sum();
 
             await Assert.That(silent).IsEqualTo(0);
-            await Assert.That(Events(filled, Kick, 0, 4).Length).IsEqualTo(4);
+            await Assert.That(Events(filled, Kick, 0, Line - 2).Length).IsEqualTo((int)(Line - 2));
             await Assert.That(Events(filled, Kick, Line, 12).Length).IsEqualTo(4);
         }
     }
