@@ -159,6 +159,8 @@ public static class ChordScales
                 var ownsScale = ownContext.TestProbability(own);
                 var ownScale = OwnScale(root);
                 var mediates = mediantContext.TestProbability(mediant);
+                var applies = context.TestProbability(applied);
+                var borrows = context.TestProbability(borrowing);
                 if (Mod(root) == 0)
                     return ChordScale.Section;
                 // but a minor home's chord a fourth above, a minor blues' iv7, which a dominant would make IV7
@@ -167,8 +169,9 @@ public static class ChordScales
                     return dominant;
                 if (chord == progression.Length - 1 && cadenceRaised is { } raised)
                     return new ChordScale(ChordScaleKind.Cadence, StepAlterations.Of([raised], []));
-                if (chord < progression.Length - 1 && Mod(progression[chord + 1] - root) == 3
-                    && context.TestProbability(applied)
+                // the next chord's dominant, where it has a fifth to resolve to
+                if (chord < progression.Length - 1 && Mod(progression[chord + 1] - root) == 3 && !IsDiminished(scale, home, progression[chord + 1], ChordScale.Section)
+                    && applies
                     && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Applied), home + root) is { } dominantOfNext)
                 {
                     resolvesHere = true;
@@ -178,7 +181,7 @@ public static class ChordScales
                 if (mediates && Mod(root) is 2 or 5
                     && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Mediant) is { } major && major.Steps.Moves(Mod(home + root + 2)))
                     return major;
-                if (borrowed is not null && context.TestProbability(borrowing)
+                if (borrowed is not null && borrows
                     && Heard(Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed), home + root) is { } lent
                     && !(resolving && lent.Steps.Moves(Mod(home + root))))
                     return lent;
@@ -250,4 +253,15 @@ public static class ChordScales
         [..Enumerable.Range(0, offsets.Length).Select(i => Mod(offsets[Mod(step + i, offsets.Length)] - offsets[Mod(step, offsets.Length)], Realizer.OctaveNoteCount))];
 
     private static int Mod(int value, int by = Scales.StepCount) => value.Mod(by);
+
+    /// <summary>A step's pitch above the scale's tonic, in semitones, in its chord's scale, a step above the octave an octave higher.</summary>
+    internal static int PitchOf(Scale scale, int step, ChordScale chordScale) =>
+        scale.Offsets[Mod(step)] + chordScale.Steps.By(Mod(step)) + 12 * (int)Math.Floor(step / (double)Scales.StepCount);
+
+    /// <summary>
+    ///     Whether the chord on a step above the home is diminished in its scale, its fifth a tritone, which no dominant leads
+    ///     into, as it has no fifth to resolve to.
+    /// </summary>
+    internal static bool IsDiminished(Scale scale, int home, int root, ChordScale chordScale) =>
+        (PitchOf(scale, home + root + 4, chordScale) - PitchOf(scale, home + root, chordScale)).Mod(12) == 6;
 }

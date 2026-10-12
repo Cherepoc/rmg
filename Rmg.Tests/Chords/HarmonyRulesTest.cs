@@ -1,3 +1,4 @@
+using Rmg.Core;
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -5,7 +6,7 @@ using Rmg.Core.Probabilities;
 
 namespace Rmg.Tests.Chords;
 
-/// <summary>The harmony's devices kept where they belong: out of the plainest songs, a vamp on its one chord, a section's home in its genre's pool.</summary>
+/// <summary>The harmony's devices kept where they belong: out of the plainest songs, a vamp on its one chord, a section's home in its genre's pool, a dominant before a chord it resolves to.</summary>
 public sealed class HarmonyRulesTest
 {
     private static Genre With(GenreChoice choice, string option) => TestCorpus.Always(choice, option);
@@ -55,5 +56,37 @@ public sealed class HarmonyRulesTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With(GenreChoices.SectionHome, "tonic")))))
         foreach (var home in song.Trace.Where(x => x.Point == TracePoints.SectionHome))
             await Assert.That((int)home.Value!).IsEqualTo(0).Because($"seed {song.Seed}, section {home.Section}");
+    }
+
+    /// <summary>
+    ///     A dominant made of a chord, the next chord's applied dominant, a passing dominant or its tritone substitute, never
+    ///     leads into a diminished chord, which has no fifth to resolve to.
+    /// </summary>
+    [Test]
+    [Arguments("chordScales", "applied")]
+    [Arguments("passingChords", "chords")]
+    public async Task ADominant_NeverLeadsIntoADiminishedChord(string choice, string option)
+    {
+        var dominants = 0;
+        var genre = TestCorpus.Always(GenreChoices.All.Single(x => x.Name == choice), option);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            T Last<T>(string point, int section) => (T)song.Trace.Last(x => x.Point == point && x.Section == section).Value!;
+            foreach (var section in song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => x.Section).Distinct())
+            {
+                var (scale, home) = (Last<Scale>(TracePoints.SectionScale, section), Last<int>(TracePoints.SectionHome, section));
+                var (roots, scales) = (Last<ImmutableArray<int>>(TracePoints.Progression, section), Last<ImmutableArray<ChordScale>>(TracePoints.ChordScales, section));
+                int Interval(int chord, int step) => (ChordScales.PitchOf(scale, home + roots[chord] + step, scales[chord]) - ChordScales.PitchOf(scale, home + roots[chord], scales[chord])).Mod(12);
+                for (var chord = 0; chord + 1 < roots.Length; chord++)
+                {
+                    if (scales[chord].Kind != ChordScaleKind.Applied || Interval(chord, 2) != 4 || Interval(chord, 4) != 7)
+                        continue;
+                    dominants++;
+                    await Assert.That(ChordScales.IsDiminished(scale, home, roots[chord + 1], scales[chord + 1])).IsFalse().Because($"seed {song.Seed}, section {section}, chord {chord}");
+                }
+            }
+        }
+
+        await Assert.That(dominants).IsGreaterThan(20);
     }
 }

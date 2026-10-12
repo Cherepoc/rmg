@@ -27,8 +27,8 @@
         "at": 2.6,
         "listen": [
           "Chords (Pizzicato Strings)",
-          "Bass (Timpani)",
-          "Melody (Oboe)"
+          "Melody (Oboe)",
+          "Bass (Timpani)"
         ]
       },
       {
@@ -145,6 +145,24 @@
     },
     "seeds": [
       {
+        "seed": "I",
+        "at": 176.1,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))",
+          "Melody (Harmonica)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 210.7,
+        "listen": [
+          "Melody (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))",
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
         "seed": "R",
         "at": 143.2,
         "listen": [
@@ -152,20 +170,11 @@
         ]
       },
       {
-        "seed": "T",
-        "at": 109.5,
-        "listen": [
-          "Melody (Electric Piano 1)",
-          "Riff (Overdriven Guitar)",
-          "Rhythm part (Distortion Guitar)"
-        ]
-      },
-      {
         "seed": "z",
-        "at": 98.9,
+        "at": 97,
         "listen": [
-          "Melody (Lead 2 (sawtooth))",
           "Counter-melody (String Ensemble 1)",
+          "Melody (Lead 2 (sawtooth))",
           "Chords (Overdriven Guitar)"
         ]
       },
@@ -180,20 +189,11 @@
       },
       {
         "seed": "1G",
-        "at": 142.7,
+        "at": 138.8,
         "listen": [
           "Melody (Harmonica)",
           "Riff (Distortion Guitar)",
           "Counter-melody (Harmonica)"
-        ]
-      },
-      {
-        "seed": "1N",
-        "at": 206.7,
-        "listen": [
-          "Melody (Electric Piano 1)",
-          "Rhythm part (Overdriven Guitar)",
-          "Chords (Distortion Guitar)"
         ]
       }
     ]
@@ -473,17 +473,29 @@
         ]
       },
       {
+        "seed": "Y",
+        "at": 78.3,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))",
+          "Bass (Synth Bass 2)",
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
         "seed": "m",
         "at": 148.8,
         "listen": [
-          "Riff (Lead 1 (square))"
+          "Riff (Lead 1 (square))",
+          "Melody (Lead 2 (sawtooth))"
         ]
       },
       {
         "seed": "u",
-        "at": 218.5,
+        "at": 122.1,
         "listen": [
-          "Chords (Pad 3 (polysynth))"
+          "Riff's twin (Lead 2 (sawtooth))",
+          "Riff (Lead 2 (sawtooth))",
+          "Melody (Lead 1 (square))"
         ]
       },
       {
@@ -493,14 +505,6 @@
           "Chords (Pad 3 (polysynth))",
           "Bass (Synth Bass 2)",
           "Riff (Lead 2 (sawtooth))"
-        ]
-      },
-      {
-        "seed": "1l",
-        "at": 214.2,
-        "listen": [
-          "Chords (Synth Strings 1)",
-          "Bass (Synth Bass 2)"
         ]
       },
       {

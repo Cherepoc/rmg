@@ -54,8 +54,9 @@ internal static class PassingChords
     };
 
     /// <summary>
-    ///     The chance a chord a bar long or longer passes into the next by its dominant, by the progression facet: never at
-    ///     the plain end, which is never reharmonised, and as often at the wild end as in the middle.
+    ///     The chance a chord a bar long or longer passes into the next, its kind drawn apart among <see cref="Kinds" />, by
+    ///     the progression facet: never at the plain end, which is never reharmonised, and as often at the wild end as in the
+    ///     middle.
     /// </summary>
     public static ByConvention Chance { get; } = new(0, 0.1, 0.1);
 
@@ -98,6 +99,9 @@ internal static class PassingChords
             // up to the next
             if (kind is PassingKind.Tritone or PassingKind.Diminished or PassingKind.Dominant && chordScales[chord + 1].Steps.Moves(Mod(home + next)))
                 continue;
+            // nor a dominant or its substitute into a diminished chord, which has no fifth to resolve to
+            if (kind is PassingKind.Tritone or PassingKind.Dominant && ChordScales.IsDiminished(scale, home, next, chordScales[chord + 1]))
+                continue;
             if (kind == PassingKind.Diminished && (RootOf(scale, home, next, chordScales[chord + 1]) - RootOf(scale, home, progression[chord], chordScales[chord])).Mod(12) != 2)
                 continue;
 
@@ -126,7 +130,7 @@ internal static class PassingChords
     private static int Mod(int step) => step.Mod(Scales.StepCount);
 
     /// <summary>A chord's root in semitones above the scale's first note, as its own scale has it.</summary>
-    private static int RootOf(Scale scale, int home, int root, ChordScale chordScale) => scale.Offsets[Mod(home + root)] + chordScale.Steps.By(Mod(home + root));
+    private static int RootOf(Scale scale, int home, int root, ChordScale chordScale) => ChordScales.PitchOf(scale, Mod(home + root), chordScale);
 
     private static int Normalize(int step) => Progressions.Normalize(step);
 }

@@ -73,7 +73,9 @@ public sealed class RoleChordTest
         foreach (var song in TestCorpus.Range(8))
         {
             var rhythms = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).ToDictionary(x => x.Section, x => (HarmonicRhythm)x.Value!);
-            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Chord))
+            // a planed section's chords all the home's (PlaningTest)
+            var planed = song.Trace.Where(x => x.Point == TracePoints.Planing && x.Value is not null).Select(x => x.Section).ToHashSet();
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Chord && !planed.Contains(x.Section)))
             {
                 entries++;
                 // the note's place in the pattern: its bar's start and its place in the bar

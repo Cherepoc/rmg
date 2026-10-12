@@ -158,7 +158,7 @@ internal sealed class SectionGenerator
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);
         var tilt = SectionEnergy.Tilt(energy, rhythm.Coupling);
 
-        var (scale, home, harmonicRhythm, progression, chordScales, shifts, _, _) = DrawHarmony(plan, facets, energy, tilt);
+        var (scale, home, harmonicRhythm, progression, chordScales, shifts, _, _, planes) = DrawHarmony(plan, facets, energy, tilt);
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
         var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel], _genre, GenreChoices.Feel);
@@ -192,7 +192,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _generators(meter).Bars.Generate(Stream(sectionId, SectionStream.BarStates), scale, progression, harmonicRhythm, chordScales, shifts, unconventionality, bassLeading, facets);
+        var barStateTimelineMap = _generators(meter).Bars.Generate(Stream(sectionId, SectionStream.BarStates), scale, progression, harmonicRhythm, chordScales, shifts, planes, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.RecordSection(TracePoints.MelodyContour, SectionTrace, sectionId, string.Join(", ", contour), contour);
 
@@ -356,19 +356,20 @@ internal sealed class SectionGenerator
         var modesContext = Stream(sectionId, SectionStream.PlaningModes);
         var inModes = modesContext.TestProbability(Planing.ModesChance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "modes")));
         var modes = ChordScales.Planed(modesContext, scale, home, progression.Length, plan.HasTonicHome, facets[Facet.Progression], _genre);
+        // its chords' scales replaced, the cadence's raise with them
         if (planes)
-            (progression, chordScales, shifts) = ([..progression.Select(_ => 0)], inModes ? modes : [..chordScales.Select(_ => ChordScale.Section)], planed);
+            (progression, chordScales, shifts, raisable, raisedStep) = ([..progression.Select(_ => 0)], inModes ? modes : [..chordScales.Select(_ => ChordScale.Section)], planed, null, null);
         StateTrace.RecordSection(TracePoints.Planing, SectionTrace, sectionId, planes ? string.Join(" ", planed) : "none", planes ? planed : null);
         // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
         // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
         var loops = Stream(sectionId, SectionStream.Loop).TestProbability(Loop.At(facets[Facet.Form], _genre.Chance(GenreChoices.Loop, "sections")));
-        var harmony = new SectionHarmony(scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep);
+        var harmony = new SectionHarmony(scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, planes);
         if (plan.KeepsSongScale)
             _firstHarmony = (harmony, meter);
         else if (loops && (_firstHarmony ?? throw new InvalidOperationException("A section loops before the song's first is made.")).Meter.Equals(meter))
             // the song's last on its tonic as it must be, to land the ending home
             harmony = plan.HasTonicHome ? _firstHarmony.Value.Harmony with { Home = 0 } : _firstHarmony.Value.Harmony;
-        (scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep) = harmony;
+        (scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, _) = harmony;
         StateTrace.RecordSection(TracePoints.SectionScale, SectionTrace, sectionId, scale.Name, scale);
         StateTrace.RecordSection(TracePoints.HarmonicRhythm, SectionTrace, sectionId, $"{harmonicRhythm.Span}", harmonicRhythm);
         StateTrace.RecordSection(TracePoints.Progression, SectionTrace, sectionId, string.Join(" ", progression), progression);
@@ -792,7 +793,8 @@ internal sealed class SectionGenerator
 
 /// <summary>
 ///     A section's harmony (<see cref="SectionGenerator" />): its scale, its home, how often its chords change, its progression,
-///     every chord's scale and its move by semitones, and the step its cadence may raise and raises.
+///     every chord's scale and its move by semitones, the step its cadence may raise and raises, and whether it planes,
+///     every chord the home's shape.
 /// </summary>
 internal sealed record SectionHarmony(
     Scale Scale,
@@ -802,7 +804,8 @@ internal sealed record SectionHarmony(
     ImmutableArray<ChordScale> ChordScales,
     ImmutableArray<int> Shifts,
     int? Raisable,
-    int? Raised
+    int? Raised,
+    bool Planes
 );
 
 /// <summary>A section's place in the song's form, which some of its draws keep to.</summary>

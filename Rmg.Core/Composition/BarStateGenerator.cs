@@ -77,6 +77,7 @@ internal sealed class BarStateGenerator
     /// <param name="harmonicRhythm">Where the chords change.</param>
     /// <param name="chordScales">Every chord's own scale, the section's with steps raised or lowered (<see cref="ChordScales" />).</param>
     /// <param name="shifts">Every chord moved by semitones, a chromatic passing chord's (<see cref="PassingChords" />), most none.</param>
+    /// <param name="planes">Whether the section planes (<see cref="Planing" />), every chord the home's shape.</param>
     /// <param name="unconventionality">The chords facet, which the home's and the cadence's chord shapes are drawn by.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
     /// <param name="context">The section's random sequence.</param>
@@ -88,6 +89,7 @@ internal sealed class BarStateGenerator
         HarmonicRhythm harmonicRhythm,
         ImmutableArray<ChordScale> chordScales,
         ImmutableArray<int> shifts,
+        bool planes,
         HarmonicUnconventionality unconventionality,
         double bassLeading,
         Unconventionality facets
@@ -126,13 +128,16 @@ internal sealed class BarStateGenerator
             )
             .WithLayer(Layers.Progression);
 
-        // the home chord plays a plain chord and the cadence one with pull; the chords between pick from the pool
+        // the home chord plays a plain chord and the cadence one with pull; the chords between pick from the pool; a planed
+        // section's every chord the home's, its shape moved
         var homeChord = ImmutableArray.Create(unconventionality.GenerateHomeChord(context.CreateContext(Seeds.Derive(seed, HomeChordStream)))).ToTimelineItem(0.0);
         var cadenceChord = ImmutableArray.Create(unconventionality.GenerateCadenceChord(context.CreateContext(Seeds.Derive(seed, CadenceChordStream)))).ToTimelineItem(cadencePosition);
         var roleChordTimeline = StateTimeline.Create(
                 _meter.PatternDuration,
                 CompositionStateKinds.RoleChord,
-                changes.Length > 2 ? [homeChord, ImmutableArray<Chord>.Empty.ToTimelineItem(changes[1]), cadenceChord] : [homeChord, cadenceChord]
+                planes ? [homeChord]
+                : changes.Length > 2 ? [homeChord, ImmutableArray<Chord>.Empty.ToTimelineItem(changes[1]), cadenceChord]
+                : [homeChord, cadenceChord]
             )
             .WithLayer(Layers.Progression);
 

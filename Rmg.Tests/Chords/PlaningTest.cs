@@ -6,7 +6,7 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Chords;
 
-/// <summary>A section planing: every chord the home's shape moved by semitones, each by a small move or a fourth, a wild song's alone.</summary>
+/// <summary>A section planing: every chord the home's shape moved, its cadence raising nothing by semitones, each by a small move or a fourth, a wild song's alone.</summary>
 public sealed class PlaningTest
 {
     private static SongOverrides Progression(double value) => new(Facets: TestCorpus.FacetsOf((Facet.Progression, value)));
@@ -26,6 +26,11 @@ public sealed class PlaningTest
                 await Assert.That(shifts.All(x => Math.Abs(x) <= Planing.Reach)).IsTrue();
                 await Assert.That(shifts.Zip(shifts.Skip(1), (a, b) => Math.Abs(b - a)).All(x => x is 1 or 2 or 3 or 5)).IsTrue();
                 await Assert.That(progressions.Last(x => x.Section == entry.Section).Roots.All(x => x == 0)).IsTrue();
+                // every chord the home's shape, and no cadence's raise
+                var shapes = song.Trace.Where(x => x.Point == TracePoints.Chord && x.Section == entry.Section).Select(x => x.StateMap.GetStateValue(CompositionStateKinds.RoleChord)).ToArray();
+                await Assert.That(shapes.Length).IsGreaterThan(0);
+                await Assert.That(shapes.All(x => !x.IsEmpty && x.SequenceEqual(shapes[0]))).IsTrue().Because($"seed {song.Seed}");
+                await Assert.That(((int? Raisable, bool Raised))song.Trace.Last(x => x.Point == TracePoints.CadenceRaise && x.Section == entry.Section).Value!).IsEqualTo((null, false)).Because($"seed {song.Seed}");
                 // the song's last section, which ends the song, sliding home at its end
                 if (entry.Section == song.Map.Sections[^1].SectionId)
                 {
