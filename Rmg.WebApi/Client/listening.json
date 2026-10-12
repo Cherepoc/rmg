@@ -224,7 +224,7 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 203.2,
+        "at": 198.1,
         "listen": [
           "Bass (Acoustic Bass)"
         ]
@@ -246,7 +246,7 @@
       },
       {
         "seed": "1E",
-        "at": 76.1,
+        "at": 88.3,
         "listen": [
           "Chords (Honky-tonk Piano)",
           "Bass (Acoustic Bass)"
@@ -261,7 +261,7 @@
       },
       {
         "seed": "1u",
-        "at": 98.3,
+        "at": 80.5,
         "listen": [
           "Solo (Overdriven Guitar)",
           "Bass (Electric Bass (finger))"

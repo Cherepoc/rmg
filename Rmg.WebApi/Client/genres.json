@@ -139,7 +139,7 @@
   {
     "id": "electronic",
     "name": "House",
-    "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 120 to 128, minor, sus and add9 chords, a drop into the chorus.",
+    "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight or its 16ths lightly swung, 120 to 128, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
@@ -405,7 +405,7 @@
       "meter": { "4/4": 100 },
       "feelChances": { "swing": [60, 75, 45], "halfTime": [0, 8, 8], "doubleTime": [0, 5, 5] },
       "feelValues": { "swing": 19 },
-      "scale": { "naturalMinor": [100, 100, 60], "dorian": [50, 60, 50], "phrygian": [30, 40, 50], "harmonicMinor": [10, 20, 30] },
+      "scale": { "naturalMinor": [100, 100, 60], "dorian": [50, 60, 50], "phrygian": [10, 20, 30], "harmonicMinor": [10, 20, 30] },
       "chordShape": { "seventh": [100, 100, 60], "ninth": [60, 65, 60], "triad": [60, 45, 40], "add9": [30, 30, 20], "shell": [20, 25, 25], "minorMajorSeventh": [0, 0, 25] },
       "harmonicRhythm": { "twoBars": 100, "oneBar": [15, 20, 40] },
       "loop": { "sections": [90, 90, 70] },
@@ -686,6 +686,8 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "polymeter": { "sections": 0 },
+      "sectionChanges": {},
       "form": { "vcvcbc": 100, "vcvcbvc": 43, "vcvc": 29, "cvcvbc": 29 },
       "callAndResponse": { "sections": [20, 50, 60] },
       "dynamics": { "evenness": 40 },
@@ -860,6 +862,7 @@
     "name": "Power ballad",
     "description": "Slow, 60 to 85 in 4/4 or 12/8: a clean guitar's broken chords let ring with sweet held tones, an overdriven lead singing the melody, a fingered bass and strings, sus2 and add9 chords, the band building section by section, a heavy chorus, a guitar solo and the last chorus up a step, fading or ringing out.",
     "choices": {
+      "feelChances": { "swing": 0, "halfTime": [0, 8, 8], "doubleTime": [0, 2, 2] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 5, 20] },
       "chordScales": { "applied": [0, 35, 35], "borrowed": [0, 12, 12], "own": [0, 0, 30], "mediant": [10, 20, 20] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 40, "tom": 80, "cymbal": 100, "tambourine": [10, 20, 30] },
@@ -1392,6 +1395,8 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "stopTime": { "sections": 0 },
+      "push": { "sections": 0 },
       "sectionChanges": {},
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
@@ -1578,6 +1583,7 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major, Mixolydian or minor, a count-in and a stop.",
     "choices": {
+      "polymeter": { "sections": 0 },
       "riffIntro": { "songs": [20, 30, 30] },
       "rudiments": { "flams": [0, 30, 60], "drags": [0, 0, 20] },
       "drumStrokes": { "openHiHat": 85 },
@@ -1810,6 +1816,7 @@
     "name": "Bossa nova",
     "description": "A nylon guitar's syncopated chords, a flute or a sax, major sevenths and ninths moving by ii-V, the snare's cross-stick on a brush kit, a shaker, soft and straight, 100 to 140.",
     "choices": {
+      "arpeggio": { "none": 100 },
       "drumSoloFeet": { "bossa": 100, "groove": 30 },
       "tempo": { "from": [100, 100, 90], "to": [140, 140, 150] },
       "meter": { "4/4": 100 },
@@ -1925,6 +1932,8 @@
     "name": "Classical",
     "description": "Chamber music: a melody on violin, flute or clarinet over a piano's Alberti figure and a cello's bass, no drums, raised cadences and ornaments, phrases of four bars, AABA, ABA and a rondo, terraced dynamics, 80 to 140 in 4/4, 3/4 and 6/8.",
     "choices": {
+      "stopTime": { "sections": 0 },
+      "push": { "sections": 0 },
       "tempo": { "from": [80, 80, 70], "to": [140, 140, 160] },
       "length": { "from": [120, 120, 90], "to": [240, 240, 300] },
       "sectionLength": { "bars8": [10, 10, 20], "bars16": 100, "bars32": [60, 60, 60] },
@@ -1972,6 +1981,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "turnaround": { "sections": 0 },
       "pocket": { "laidBack": 10 },
       "space": { "riff": 70, "chords": 70, "pad": 80, "melody": 70, "drum": 60 },
       "mixFilter": {},
