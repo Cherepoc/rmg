@@ -49,6 +49,16 @@ internal static class Figures
     /// <summary>The players in the turns they play their figures in, each turn after what it follows.</summary>
     private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves, FigurePlayer.Chords], [FigurePlayer.Ground], [FigurePlayer.Bass]];
 
+    /// <summary>The part a player is, the drums' for the drums' players.</summary>
+    public static TrackRole RoleOf(FigurePlayer player) => player switch
+    {
+        FigurePlayer.Riff => TrackRole.Riff,
+        FigurePlayer.Chords => TrackRole.Chords,
+        FigurePlayer.Bass => TrackRole.Bass,
+        FigurePlayer.Ground or FigurePlayer.Backbeat or FigurePlayer.Time or FigurePlayer.Claves => TrackRole.Drum,
+        _ => throw new ArgumentOutOfRangeException(nameof(player), player, null)
+    };
+
     /// <summary>A player's own rhythm, as its pool names it.</summary>
     public const string Own = "own";
 

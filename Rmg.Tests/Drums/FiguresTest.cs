@@ -188,4 +188,25 @@ public sealed class FiguresTest
 
         await Assert.That(polymeters).IsGreaterThan(3);
     }
+
+    /// <summary>A bass playing a figure keeps it: the riff is not doubled into it there (Techno's offbeat bass, listening's).</summary>
+    [Test]
+    public async Task ABassPlayingAFigure_IsNotDoubledWithTheRiff()
+    {
+        var (figured, doubled) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno")))))
+        {
+            var withRiff = song.Trace.Where(t => t.Point == TracePoints.LineDoubling && ((int, TrackRole, TrackRole, int))t.Value! is (_, TrackRole.Riff, TrackRole.Bass, _))
+                .Select(t => t.Section).ToHashSet();
+            doubled += withRiff.Count;
+            foreach (var section in song.Trace.Where(t => t.Point == TracePoints.Figures && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).ContainsKey(FigurePlayer.Bass)).Select(t => t.Section))
+            {
+                figured++;
+                await Assert.That(withRiff.Contains(section)).IsFalse().Because($"seed {song.Seed} section {section}");
+            }
+        }
+
+        Console.WriteLine($"Techno: {figured} sections whose bass plays a figure, {doubled} whose bass doubles the riff");
+        await Assert.That(figured).IsGreaterThan(30);
+    }
 }

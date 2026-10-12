@@ -473,14 +473,6 @@
         ]
       },
       {
-        "seed": "Y",
-        "at": 53.8,
-        "listen": [
-          "Bass (Synth Bass 2)",
-          "Riff (Lead 1 (square))"
-        ]
-      },
-      {
         "seed": "m",
         "at": 148.8,
         "listen": [
@@ -489,10 +481,9 @@
       },
       {
         "seed": "u",
-        "at": 6.5,
+        "at": 223.7,
         "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Melody (Lead 1 (square))"
+          "Chords (Pad 3 (polysynth))"
         ]
       },
       {
@@ -502,6 +493,14 @@
           "Chords (Pad 3 (polysynth))",
           "Bass (Synth Bass 2)",
           "Riff (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "1l",
+        "at": 214.2,
+        "listen": [
+          "Chords (Synth Strings 1)",
+          "Bass (Synth Bass 2)"
         ]
       },
       {

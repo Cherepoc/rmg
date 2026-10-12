@@ -12,7 +12,7 @@ namespace Rmg.Core.Composition;
 /// <param name="Notes">The notes, once realized (<see cref="SongStages.RealizeNotes" />); none before.</param>
 /// <param name="Runs">The drums' runs, which the fills play, the lines walk with and the stages that play around a fill keep out of (<see cref="FillSpans" />).</param>
 /// <param name="Chains">How each key change is led into, which the bass's pedal holds under (<see cref="SongStages.KeyChanges" />).</param>
-/// <param name="Figures">Every section's figures, by its id and the player, which a mutating groove leaves as they are (<see cref="Composition.Figures" />).</param>
+/// <param name="Figures">Every section's figures, by its id and the player, which a mutating groove leaves as they are and a doubling does not replace (<see cref="Composition.Figures" />).</param>
 /// <param name="Polymeters">The sections a figure runs across the bar lines in, which the figures, the pushes and a mutating groove keep to (<see cref="SongStages.Polymeter" />).</param>
 internal sealed record SongDraft(
     TrackEventStateTimelineMap<StateMap> Timeline,
@@ -267,6 +267,7 @@ internal static class SongStages
                 section => song.Stream(SongStream.BlockHarmony, section),
                 index => song.Sections[index].RiffPowerChords || song.Sections[index].Chugs,
                 index => song.Sections[index].Resting.Contains(TrackRole.RiffTwin),
+                (index, role) => draft.Figures.GetValueOrDefault(song.Form.Map.Sections[index].SectionId)?.Keys.Any(x => Figures.RoleOf(x) == role) == true,
                 song.Tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Any(x => x.Role == TrackRole.Riff && InstrumentTraits.Has(x.InstrumentCode, InstrumentTrait.Driven)),
                 song.Genre
             )
