@@ -269,6 +269,7 @@ public sealed class DrumSoloTest
 
         Console.WriteLine($"{trades} solos of 64 Jazz songs trading with the drums, {drumTurns} drums' turns, {pitchedTurns} soloists' turns played");
         await Assert.That(trades).IsGreaterThan(3);
+        await Assert.That(drumTurns).IsGreaterThan(3);
         await Assert.That(pitchedTurns).IsGreaterThan(0);
     }
 

@@ -25,6 +25,19 @@ public sealed class SoloTest
         await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 0, SectionRole.Free, wild, Band, Genre.None) is null)).IsTrue();
     }
 
+    /// <summary>A pitched solo never trading with the drums at the melody facet's plain end, as often as Trade has it at the wild; the songs' own never twinned.</summary>
+    [Test]
+    public async Task APitchedSolo_TradesOnlyAwayFromThePlainEnd_AndTheSongsNeverTwin()
+    {
+        var context = new GenerationContext(3);
+        var solo = new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, true);
+        TrackRole[] parts = [..Band, TrackRole.Solo, TrackRole.Riff];
+        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.WithTrade(context, solo, 0, parts, Genre.None) == solo)).IsTrue();
+        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.WithTwin(context, solo, 0, parts, Genre.None) == solo && Solos.WithTwin(context, solo, 1, parts, Genre.None) == solo)).IsTrue();
+        var trades = Enumerable.Range(0, 4000).Count(_ => Solos.WithTrade(context, solo, 1, parts, Genre.None)!.TradesWithDrums) / 4000.0;
+        await Assert.That(trades).IsEqualTo(Solos.Trade.Wild).Within(0.03);
+    }
+
     [Test]
     public async Task ABridge_SolosTheOftenest_AndAPreChorus_TheLeast()
     {
@@ -355,18 +368,23 @@ public sealed class SoloTest
     [Test]
     public async Task TheCounterMelodyAndThePad_MakeRoomForASolo()
     {
-        var checkedSolos = 0;
+        var checkedSolos = new Dictionary<TrackRole, int> { [TrackRole.CounterMelody] = 0, [TrackRole.Pad] = 0 };
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 0.5))))
         foreach (var (index, solo) in song.Solos.Where(x => !x.Value.IsDrumSolo))
         {
             var span = song.Map.Sections[index];
-            foreach (var role in new[] { TrackRole.CounterMelody, TrackRole.Pad }.Where(x => !solo.Soloists.Contains(x)))
-                await Assert.That(song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role)
-                    .Sum(x => x.Value.Count(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9))).IsEqualTo(0).Because($"seed {song.Seed}, {role} in a solo");
-            checkedSolos++;
+            int NotesOf(TrackRole role, Func<double, bool> where) => song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role).Sum(x => x.Value.Count(n => where(n.Position)));
+            bool In(double position) => position >= span.Start - 1e-9 && position < span.End - 1e-9;
+            // a part the song plays elsewhere, which rests in the solo
+            foreach (var role in checkedSolos.Keys.ToArray().Where(x => !solo.Soloists.Contains(x) && NotesOf(x, p => !In(p)) > 0))
+            {
+                await Assert.That(NotesOf(role, In)).IsEqualTo(0).Because($"seed {song.Seed}, {role} in a solo");
+                checkedSolos[role]++;
+            }
         }
 
-        await Assert.That(checkedSolos).IsGreaterThan(10);
+        Console.WriteLine($"solos checked: {string.Join(", ", checkedSolos.Select(x => $"{x.Key} {x.Value}"))}");
+        await Assert.That(checkedSolos.Values.All(x => x > 5)).IsTrue();
     }
 
     /// <summary>How a solo's notes are played by its intensity, in thirds: how many bend, how far, how many sing a wide vibrato, and how many slide.</summary>
@@ -743,17 +761,16 @@ public sealed class SoloTest
     }
 
     [Test]
-    public async Task AChordSoloistsApproach_IsAStackedNoteOffTheBeat_PlanedIntoTheChange_NeverAPlainSoloists()
+    public async Task AChordSoloistsApproach_IsAPlanedStackedNote_NeverAPlainSoloists()
     {
         var notes = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0.5)))).SelectMany(x => x).ToArray();
         var plain = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0)))).SelectMany(x => x).ToArray();
 
-        // a plain soloist neither approaches nor planes; a middling one that does not plane planes its approaches alone, off
-        // the beat (a note's line may be another soloist's, so the notes are counted, not their players)
+        // a plain soloist neither approaches nor planes; a middling one that does not plane planes its approaches alone (a
+        // note's line may be another soloist's, so the notes are counted, not their players)
         await Assert.That(plain.All(x => !x.Soloist.Approaches && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) == 0)).IsTrue();
         var approaches = notes.Where(x => !x.Soloist.Planes && IsStacked(x.Note) && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) > 0).ToArray();
         await Assert.That(approaches.Length).IsGreaterThan(10);
-
     }
 
     /// <summary>How a solo stacks its notes, by its facets: the soloists that can and that plane, and the share of their notes stacked by gesture and by voices.</summary>
