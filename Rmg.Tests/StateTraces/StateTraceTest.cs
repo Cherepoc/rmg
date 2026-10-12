@@ -24,7 +24,7 @@ public sealed class StateTraceTest
         using var trace = StateTrace.Start();
         var song = SongGenerator.GenerateSong(TestCorpus.SongSeed(1));
 
-        var tracks = trace.Entries.Select(x => x.Track).ToHashSet();
+        var tracks = trace.Entries.Where(x => x.Point == TracePoints.BarPattern).Select(x => x.Track).ToHashSet();
 
         await Assert.That(trace.Entries.Count).IsGreaterThan(0);
         // a pad's chords come of the chord changes, not of bar patterns, a riff's twin plays the riff's and the solo part a solo's
@@ -83,7 +83,8 @@ public sealed class StateTraceTest
     public async Task SnareBackbeat_IsExplainedByItsLayers()
     {
         var kind = CompositionStateKinds.Rhythm.Phase.Rank;
-        var snareEntries = SnareBarPatterns();
+        // a snare-group drum playing the backbeat there, as a clap may play the ground or a colour
+        var snareEntries = SnareBarPatterns().Where(x => (DrumRole)x.StateMap.GetStateValue(CompositionStateKinds.DrumRole).Value == DrumRole.Backbeat).ToArray();
 
         await Assert.That(snareEntries.Length).IsGreaterThan(0);
         // a value the layers add up to 0 is the default, which a map does not keep, nor its parts

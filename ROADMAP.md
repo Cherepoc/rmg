@@ -566,6 +566,11 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   **A long lift moving notes outside its swell** (#224): a genre's long lift moves about a hundred notes of 64 songs
   outside the swell's bars by more than 0.01 of the velocity, through a stage that sets a part by the song as heard;
   `LiftTest` counts them.
+  **The central rules over 64 songs** (#287), postponed: the scale rule (`ScalesTest`) and the parts sharing a chord's
+  shape (`SongGeneratorChordProgressionTest`) run on 3 and 8 songs; over 64 the scale rule fails on seed 19, a section's
+  tonic pedal at beat 276.25 sounding D in F Phrygian, its A♭ right in the state at the pedal's start, and on seed 25's
+  bass at 142.5, and the shape rule on seed 46 at 126 (as #296). Seeds 4 and 14 were the test's own (a planed stack, a
+  line's approach read from the bar), fixed.
 - Later: **the tape stop** (#358), every pitched part bending down an octave over a slowing tempo into a drop or as
   the ending, a change of the tempo map and every channel's bends together; and **imitation** (#388), the
   counter-melody taking the melody's phrase a bar later, its clashes across chord changes new work.

@@ -106,10 +106,6 @@ internal static class TestCorpus
     /// <summary>The seed the song of a corpus's seed is made from, moved by the offset, for a test that makes the song itself.</summary>
     public static ulong SongSeed(int seed) => unchecked((ulong)seed + Offset);
 
-    /// <summary>The song of a seed as the page writes it, such as one heard on the site, with what the overrides set; its <see cref="CorpusSong.Seed" /> the seed's low bits.</summary>
-    public static CorpusSong Get(string seed, SongOverrides overrides) =>
-        Generate(Rmg.Core.Base62.ToSeed(seed) ?? throw new ArgumentException($"{seed} is no seed.", nameof(seed)), overrides);
-
     private static CorpusSong Generate(ulong seed, SongOverrides overrides)
     {
         return Isolated(() =>
@@ -203,7 +199,7 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
         .Where(x => x.Index == index).Select(x => x.PhraseSilent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max()).DefaultIfEmpty(0).First();
 
     /// <summary>
-    ///     Where the drums mark a line, as the song puts them: at every pattern from the first section on, the first after
+    ///     Where the drums mark a line, as the song puts them: at every phrase from the first section on, the first after
     ///     the intro only if it has one, and the last before the ending only if it has one; but for a line into a section
     ///     whose drums rest, or in one, where an intro's window into the first section ends on its own line, and within a
     ///     drum solo, which plays its own.

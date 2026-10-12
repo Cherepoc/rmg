@@ -116,11 +116,15 @@ public sealed class ScalesTest
         await Assert.That(Rmg.Core.Composition.Scales.HarmonicMinor.Distance(Rmg.Core.Composition.Scales.NaturalMinor)).IsEqualTo(1);
     }
 
+    /// <summary>The central rule, over three songs; over 64 it fails on a few, which ROADMAP.md lists.</summary>
     [Test]
-    [Arguments(1)]
-    [Arguments(2)]
-    [Arguments(3)]
-    public async Task EveryPitchedNote_IsInItsSectionsScaleAndTheKey_WithTheStepsRaisedWhereTheyAre(int seed)
+    public async Task EveryPitchedNote_IsInItsSectionsScaleAndTheKey_WithTheStepsRaisedWhereTheyAre()
+    {
+        foreach (var seed in Enumerable.Range(1, 3))
+            await InItsScale(seed);
+    }
+
+    private static async Task InItsScale(int seed)
     {
         var song = TestCorpus.Get(seed).Song;
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
@@ -147,6 +151,8 @@ public sealed class ScalesTest
         // a pinch harmonic, which sounds its string's overtone, the note's octave and fifth, wherever the scale is, as played
         var swing = Render.GetSwing(song);
         var pinched = song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Pinch) > 0).Select(x => swing.Apply(x.Position)).ToArray();
+        // and a planed stack, a chord's shape moved whole by a soloist or a planing section, leaving the scale on purpose
+        var planed = song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LinePlanes) > 0).Select(x => swing.Apply(x.Position)).ToArray();
 
         await Assert.That(tracks.Sum(x => x.NoteTimeline.Count)).IsGreaterThan(0);
         // a note struck again while it sounds, judged where it started
@@ -158,14 +164,15 @@ public sealed class ScalesTest
                            && swing.Apply(x.Position) < rendered.Position - 1e-3 && swing.Apply(x.Position + x.Value.Duration) > rendered.Position + 1e-3)
                        .Select(x => (TimelineItem<RenderedNote>?)rendered.Value.ToTimelineItem(swing.Apply(x.Position))).LastOrDefault() ?? rendered;
             // a bass note leading into the next chord by a semitone leaves the scale on purpose: the last before the change,
-            // wherever it falls
-            var approach = (ChordApproach)approaches.GetEffectiveValueAt(note.Position);
+            // wherever it falls, by how its line leads there, the note's own, the bar's where it has none
+            var sounding = realized.GetValueOrDefault(track.Role)?.LastOrDefault(x => swing.Apply(x.Position) <= note.Position + 1e-3);
+            var approach = (ChordApproach)(sounding?.Value.State.GetStateValue(CompositionStateKinds.LineApproach) is > 0 and var own ? own : approaches.GetEffectiveValueAt(note.Position));
             var nextChange = changes.Where(x => x > note.Position + 1e-9).DefaultIfEmpty(double.MaxValue).Min();
             var isChromaticApproach = track.Role == TrackRole.Bass
                 && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9)
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
             var isPedal = track.Role == TrackRole.Bass && pedals.Any(x => note.Position >= x.From - 0.2 && note.Position < x.To);
-            if (isChromaticApproach || isPedal || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End) || pinched.Any(x => Math.Abs(x - note.Position) < 1e-3))
+            if (isChromaticApproach || isPedal || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End) || pinched.Any(x => Math.Abs(x - note.Position) < 1e-3) || planed.Any(x => Math.Abs(x - note.Position) < 1e-3))
                 continue;
 
             var scale = Rmg.Core.Composition.Realizer.AlterScaleSteps(offsets.GetEffectiveValueAt(note.Position), AlteredAt(note.Position));
@@ -177,7 +184,7 @@ public sealed class ScalesTest
                 var nextScale = Rmg.Core.Composition.Realizer.AlterScaleSteps(offsets.GetEffectiveValueAt(nextChange), AlteredAt(nextChange));
                 pitchClasses.UnionWith(nextScale.Select(x => ((x + KeyAt(nextChange)) % 12 + 12) % 12));
             }
-            await Assert.That(pitchClasses).Contains(note.Value.Offset % 12).Because($"position {note.Position}");
+            await Assert.That(pitchClasses).Contains(note.Value.Offset % 12).Because($"seed {seed}, {track.Role} at {note.Position}");
         }
     }
 }

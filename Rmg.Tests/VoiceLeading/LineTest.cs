@@ -193,16 +193,23 @@ public sealed class LineTest
     public async Task AnEchoOnAStrongBeatThatMissesTheChord_MovesToTheChordCloseBy()
     {
         var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
-        foreach (var (rank, step, echo) in new[] { (Strong, 0, 1), (Weak, 1, 2), (Strong, 1, 3) })
-            Place(line, C, CTones, rank, step, -6, echo);
+        // heard over C, echo 3 a passing step off the chord on a weak beat
+        var heard = new[] { (Strong, 0, 1), (Weak, 1, 2), (Weak, 2, 3) }
+            .Select(x => Place(line, C, CTones, x.Item1, x.Item2, -6, x.Item3)).ToArray();
         var d = ChordOn(1);
         HashSet<int> dTones = [2, 5, 9];
 
+        // replayed over D minor on a strong beat: its step as heard, a scale step higher over D's root, misses the chord,
+        // and moves to the chord's note nearest it
         var notes = new[] { (Strong, 0, 1), (Weak, 0, 2), (Strong, 0, 3) }
             .Select(x => Place(line, d, dTones, x.Item1, x.Item2, -6, x.Item3))
             .ToArray();
+        var unsnapped = heard[2] + 2;
 
+        await Assert.That(CTones).DoesNotContain(heard[2] % 12);
+        await Assert.That(dTones).DoesNotContain(unsnapped % 12);
         await Assert.That(dTones).Contains(notes[2] % 12);
+        await Assert.That(Math.Abs(notes[2] - unsnapped)).IsLessThanOrEqualTo(2);
     }
 
     [Test]

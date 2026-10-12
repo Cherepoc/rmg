@@ -137,9 +137,9 @@ public sealed class FillTest
                 if (entry.Value is FillDecision { IsEarly: true } decision && landings.Count > 0)
                 {
                     early++;
-                    // in the last bar before the line, where the fill is, the bar there is, a short last bar's: its length the
-                    // fill's start in it and the fill's span
-                    var bar = decision.Span > 0 ? entry.Position + decision.Span : song.Map.Sections.First(s => s.SectionId == entry.Section).Meter.BarDuration;
+                    // in the last bar before the line, where the fill is, an early landing drawn only for a fill with a span: its
+                    // length the fill's start in it and the span
+                    var bar = entry.Position + decision.Span;
                     await Assert.That(landings.All(x => x.Bar == entry.Bar && x.Position > bar - 1)).IsTrue().Because($"seed {seed}");
                 }
 

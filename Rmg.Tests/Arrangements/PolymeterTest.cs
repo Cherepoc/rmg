@@ -7,6 +7,10 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class PolymeterTest
 {
+    /// <summary>Songs of a genre playing a polymeter in every section it may, for the rules that look at polymeters alone.</summary>
+    private static CorpusSong[] Polymetric() =>
+        TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.Always(GenreChoices.Polymeter, "sections"))));
+
     [Test]
     public async Task APolymetricPart_PlaysItsCycleCellByCellAcrossTheBars_FromEveryFramesStart_EachCellItsFirstsMotifCut()
     {
@@ -68,7 +72,7 @@ public sealed class PolymeterTest
     public async Task ThePolymetersChords_JoinItsCycle_ByTheirRhythm_TheLongerItsCellsTheOftener()
     {
         var (joined, plans, longJoined, longPlans) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.Range(512).Where(x => !x.PolymeterPlans.IsEmpty))
+        foreach (var song in Polymetric().Where(x => !x.PolymeterPlans.IsEmpty))
         foreach (var span in song.Map.Sections)
         {
             if (!song.PolymeterPlans.TryGetValue(span.SectionId, out var plan) || song.IsSolo(span))
@@ -115,7 +119,7 @@ public sealed class PolymeterTest
     {
         var checkedSections = 0;
         var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
-        foreach (var song in TestCorpus.Range(512).Where(x => !x.PolymeterPlans.IsEmpty))
+        foreach (var song in Polymetric().Where(x => !x.PolymeterPlans.IsEmpty))
         foreach (var span in song.Map.Sections)
         {
             if (!song.PolymeterPlans.TryGetValue(span.SectionId, out var plan) || !plan.Snare || song.IsSolo(span))

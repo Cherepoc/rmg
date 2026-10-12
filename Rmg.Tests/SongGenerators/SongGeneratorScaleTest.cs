@@ -65,7 +65,9 @@ public sealed class SongGeneratorScaleTest
                 changes.Add(scale.Distance(scales[first]));
                 if (facets[id][Facet.Scale] <= 0.5)
                     plainChanges.Add(scale.Distance(scales[first]));
-                (scale.Brightness > scales[first].Brightness ? brighter : darker).Add(energies[id]);
+                // a tie leaning neither way
+                if (scale.Brightness != scales[first].Brightness)
+                    (scale.Brightness > scales[first].Brightness ? brighter : darker).Add(energies[id]);
             }
         }
 

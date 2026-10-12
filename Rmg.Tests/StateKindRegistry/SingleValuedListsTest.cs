@@ -14,7 +14,6 @@ public sealed class SingleValuedListsTest
     [Test]
     public async Task EveryNote_HasOneScale_AndOneChordShape()
     {
-        var scaleSizes = Core.Composition.Scales.All.Select(x => x.Offsets.Length).ToHashSet();
         var maxChordSize = ChordShapes.All.Max(x => x.Targets.Length);
         var checkedNotes = 0;
         foreach (var song in TestCorpus.Range(16))
@@ -27,7 +26,7 @@ public sealed class SingleValuedListsTest
 
             checkedNotes++;
             if (!scale.IsEmpty)
-                await Assert.That(scaleSizes).Contains(scale.Length).Because($"seed {song.Seed} at {note.Position}");
+                await Assert.That(scale.Length).IsEqualTo(Core.Composition.Scales.StepCount).Because($"seed {song.Seed} at {note.Position}");
             await Assert.That(chord.Length).IsLessThanOrEqualTo(maxChordSize).Because($"seed {song.Seed} at {note.Position}");
             // a voicing moves a shape's notes by octaves, and keeps them apart, where two shapes joined share their root
             await Assert.That(chord.Distinct().Count()).IsEqualTo(chord.Length).Because($"seed {song.Seed} at {note.Position}");

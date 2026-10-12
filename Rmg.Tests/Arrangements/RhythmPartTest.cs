@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Rendering;
@@ -20,12 +21,17 @@ public sealed class RhythmPartTest
             var chords = (PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Chords)];
             await Assert.That(rhythm.InstrumentCode).IsNotEqualTo(chords.InstrumentCode);
 
-            // whole chords, but where broken or soloing
+            // whole chords, but where broken or soloing, of the chord's notes, a power chord's fifth too
             var whole = song.Song.Notes![song.Song.Track(TrackRole.Rhythm)]
                 .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
-                .Select(x => x.Value.Pitches.Distinct().Count())
                 .ToArray();
-            await Assert.That(whole.All(x => x >= 2)).IsTrue().Because($"seed {song.Seed}");
+            await Assert.That(whole.All(x => x.Value.Pitches.Distinct().Count() >= 2)).IsTrue().Because($"seed {song.Seed}");
+            foreach (var note in whole)
+            {
+                var (sounding, _, classes) = Realizer.GetChordNotes(note.Value.State);
+                await Assert.That(note.Value.Pitches.All(x => classes.Contains(x.Mod(12)) || (x - sounding.Root).Mod(12) == 7)).IsTrue()
+                    .Because($"seed {song.Seed} at {note.Position}: {string.Join(",", note.Value.Pitches)} of {string.Join(",", classes)}");
+            }
             checkedChords += whole.Length;
         }
 

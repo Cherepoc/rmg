@@ -5,7 +5,7 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Genres;
 
-/// <summary>Black metal's riff on an open string's drone, and its driven guitar acoustic or clean between the storms.</summary>
+/// <summary>Djent's riff on an open string's drone, and Black metal's driven guitar acoustic or clean in its calm sections between the storms.</summary>
 public sealed class DroneAndQuieterFormTest
 {
     private static Genre With(string preset, GenreChoice choice, string option)

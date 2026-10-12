@@ -377,6 +377,15 @@ public sealed class StateMapTest
     }
 
     [Test]
+    public async Task AState_WithEqualCollectionContent_IsEqual_WithTheSameHashCode()
+    {
+        var (a, b) = (ScaleOffsets.CreateState([1, 2]), ScaleOffsets.CreateState([1, 2]));
+
+        await Assert.That(a.Equals(b)).IsTrue();
+        await Assert.That(a.GetHashCode()).IsEqualTo(b.GetHashCode());
+    }
+
+    [Test]
     public async Task EqualMaps_HaveEqualHashCodes()
     {
         var first = Map(KeyOffset.CreateState(1), ScaleOffsets.CreateState([0, 2]));

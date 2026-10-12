@@ -109,7 +109,9 @@ public sealed class RiffTwinTest
     public async Task TheTwin_RestsInASectionThatChugs()
     {
         var checkedSections = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("metal")))))
+        // Metal's songs given the riff and its twin, so that every chugging section has a twin to rest
+        var withTwin = new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("metal"), Parts: ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true).Add(TrackRole.RiffTwin, true));
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, withTwin)))
         {
             var chugs = song.Trace.Where(x => x.Point == TracePoints.Chugs && (bool)x.Value!).Select(x => x.Section).ToHashSet();
             var twin = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.RiffTwin).SelectMany(x => x.Value).ToArray();

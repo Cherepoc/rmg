@@ -55,10 +55,7 @@ public sealed class SongGeneratorChordProgressionTest
             var corpusSong = TestCorpus.Get(seed);
             var song = corpusSong.Song;
             var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-            var notes = song.TrackEventStateTimelineMap.TrackTimelineMap[song.Track(TrackRole.Chords)]
-                .MergeStateMap(song.TrackDefinitions[song.Track(TrackRole.Chords)].StateMap)
-                .MergeStateTimelineMap(commonStateTimelineMap)
-                .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
+            var notes = Realizer.GetNoteStates(song.TrackEventStateTimelineMap.TrackTimelineMap[song.Track(TrackRole.Chords)], song.TrackDefinitions[song.Track(TrackRole.Chords)], commonStateTimelineMap);
 
             foreach (var section in notes.GroupBy(x => corpusSong.Map.Sections.LastOrDefault(s => s.Start <= x.Position + 1e-9)?.Start))
             {
@@ -108,11 +105,7 @@ public sealed class SongGeneratorChordProgressionTest
             if (song.TrackDefinitions[trackNumber] is not PitchInstrumentTrack)
                 continue;
 
-            // the same merge as Render does
-            var notes = trackTimelineMap
-                .MergeStateMap(song.TrackDefinitions[trackNumber].StateMap)
-                .MergeStateTimelineMap(commonStateTimelineMap)
-                .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
+            var notes = Realizer.GetNoteStates(trackTimelineMap, song.TrackDefinitions[trackNumber], commonStateTimelineMap);
             foreach (var note in notes)
             {
                 // but a solo's, whose stacked notes the soloist voices as it stacks them, an octave on a power chord

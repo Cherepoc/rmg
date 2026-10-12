@@ -112,33 +112,26 @@ public sealed class SectionDynamicsTest
     internal static SectionMeasures[] MeasureSections(CorpusSong song)
     {
         var notes = song.Song.Notes!;
-        var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy)
-            .ToDictionary(
-                x => x.Section,
-                x =>
-                {
-                    var (energy, pull) = (SectionEnergyTrace)x.Value!;
-                    return (Energy: energy, Unconventionality: energy == 0 ? 0.5 : (1 - pull / energy) / RhythmicUnconventionality.MaxDecoupling);
-                }
-            );
+        // every section's energy and its groove facet, as the trace records them
+        var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
+        var grooves = song.Trace.Where(x => x.Point == TracePoints.SectionUnconventionality).ToDictionary(x => x.Section, x => ((Unconventionality)x.Value!).Facets[Facet.Groove]);
         return song.Map.Sections
             .GroupBy(x => x.SectionId)
             .Select(x => x.Last())
             .Select(span =>
                 {
-                    var (energy, unconventionality) = energies.GetValueOrDefault(span.SectionId, (0, 0.5));
-                    return new SectionMeasures(span.SectionId, [..Bars(span, span.Meter).Select(bar => MeasureBar(song.Song, notes, bar, span.Meter))], energy, unconventionality);
+                    return new SectionMeasures(span.SectionId, [..Bars(span).Select(bar => MeasureBar(song.Song, notes, bar, span.Meter))], energies[span.SectionId], grooves[span.SectionId]);
                 }
             )
             .ToArray();
     }
 
     /// <summary>The bars of a section where it plays, but the last of each phrase.</summary>
-    private static IEnumerable<double> Bars(SectionSpan span, Meter meter)
+    private static IEnumerable<double> Bars(SectionSpan span)
     {
-        for (var bar = 0; bar * meter.BarDuration < span.Duration; bar++)
+        for (var bar = 0; bar * span.Meter.BarDuration < span.Duration; bar++)
             if (bar % span.Meter.PhraseBars != span.Meter.PhraseBars - 1)
-                yield return span.Start + bar * meter.BarDuration;
+                yield return span.Start + bar * span.Meter.BarDuration;
     }
 
     private static double[] MeasureBar(Song song, IReadOnlyDictionary<int, Core.Events.EventTimeline<RealizedNote>> notes, double start, Meter meter)

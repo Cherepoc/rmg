@@ -89,10 +89,11 @@ public sealed class PhraseSchemesTest
         }
 
         await Assert.That(riffs).IsGreaterThan(0);
-        foreach (var section in TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track != TestCorpus.Get(1).Track(TrackRole.Riff)).GroupBy(x => x.Section))
+        foreach (var corpusSong in TestCorpus.Range(16))
+        foreach (var section in corpusSong.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Track != corpusSong.Track(TrackRole.Riff)).GroupBy(x => x.Section))
         {
             var phrases = section.Select(x => (PhraseScheme)x.Value!).DistinctBy(x => string.Join(",", x.Letters)).ToArray();
-            await Assert.That(phrases.Length).IsEqualTo(1).Because("every track follows the section's scheme");
+            await Assert.That(phrases.Length).IsEqualTo(1).Because($"seed {corpusSong.Seed}: every track follows the section's scheme");
             var letters = phrases[0].Letters;
 
             foreach (var track in section.GroupBy(x => x.Track))
@@ -101,7 +102,7 @@ public sealed class PhraseSchemesTest
                 var seeds = track.GroupBy(x => x.Bar).OrderBy(x => x.Key).Select(x => x.First().StateMap.GetStateValue(CompositionStateKinds.ValueSeed)).ToArray();
                 for (var a = 0; a < letters.Length; a++)
                 for (var b = 0; b < letters.Length; b++)
-                    await Assert.That(seeds[a] == seeds[b]).IsEqualTo(letters[a] == letters[b]).Because($"{string.Join(",", letters)}, bars {a} and {b}");
+                    await Assert.That(seeds[a] == seeds[b]).IsEqualTo(letters[a] == letters[b]).Because($"seed {corpusSong.Seed}: {string.Join(",", letters)}, bars {a} and {b}");
             }
         }
     }

@@ -19,13 +19,15 @@ public sealed class SongGeneratorNoteDurationTest
         var maxBars = Enumerable.Range(0, 16)
             .Select(seed => TestCorpus.Get(seed))
             .Select(song => (song.Rendered, song.Map,
-                Silence: song.Map.Ending.Kind == Rmg.Core.Composition.EndingKind.Stop ? song.Map.Ending.Start - song.Map.Ending.Stop : double.NaN))
+                Silence: song.Map.Ending.Kind == Rmg.Core.Composition.EndingKind.Stop ? song.Map.Ending.Start - song.Map.Ending.Stop : double.NaN,
+                // a silent start, its holder's note alone at the song's start
+                SilentStart: song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument).SelectMany(x => x.NoteTimeline).Count(x => x.Position <= 1e-9) == 1))
             .SelectMany(song => song.Rendered.Tracks
                 .Where(x => !x.IsPercussionInstrument && x.Role != TrackRole.Pad)
                 .SelectMany(x => x.NoteTimeline)
                 // and the note a silent start holds from the song's start into where it was, as long as the silence it fills
                 // (SilentStart)
-                .Where(x => x.Position > 1e-9)
+                .Where(x => !song.SilentStart || x.Position > 1e-9)
                 .Where(x => x.Position + x.Value.Duration < song.Rendered.Duration - 1e-9 && (double.IsNaN(song.Silence) || Math.Abs(x.Position + x.Value.Duration - song.Silence) > 1e-6))
                 .Select(x => x.Value.Duration / song.Map.MeterAt(x.Position).BarDuration)
             )
