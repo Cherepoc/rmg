@@ -1,5 +1,6 @@
 using Rmg.Core.Composition;
 using Rmg.Core.Probabilities;
+using System.Collections.Immutable;
 
 namespace Rmg.Tests.Chords;
 
@@ -33,6 +34,17 @@ public sealed class ArpeggioTest
 
         await Assert.That(plain.SetEquals([ArpeggioPattern.None, ArpeggioPattern.Up, ArpeggioPattern.UpDown, ArpeggioPattern.Alberti])).IsTrue();
         await Assert.That(Enumerable.Range(0, 4000).Select(_ => Arpeggios.Draw(context, 1, Genre.None)).Distinct().Count()).IsEqualTo(Enum.GetValues<ArpeggioPattern>().Length);
+    }
+
+    /// <summary>A genre that keeps its chords whole never breaks them, a calm section's breaker too.</summary>
+    [Test]
+    public async Task AGenreOfWholeChords_NeverBreaksThem()
+    {
+        // and a quieter section always calm, its breaker breaking the chords where the genre lets it
+        var genre = new Genre(TestCorpus.Always(GenreChoices.Arpeggio, GenreChoices.Name(nameof(ArpeggioPattern.None))).Choices
+            .AddRange(TestCorpus.Always(GenreChoices.LouderForms, "quieter").Choices));
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.Arpeggio).All(x => (ArpeggioPattern)x.Value! == ArpeggioPattern.None)).IsTrue().Because($"seed {song.Seed}");
     }
 
     [Test]

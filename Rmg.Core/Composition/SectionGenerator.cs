@@ -714,7 +714,7 @@ internal sealed class SectionGenerator
             var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Chords ? SectionStream.Arpeggio : SectionStream.RhythmArpeggio;
             var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre);
             // a heavy section's guitars striking their chords, and a calm one's breaking them, 8ths or slower, in a pattern of
-            // its own where the section's drew none
+            // its own where the section's drew none, as its genre allows
             if (form.Kind == SectionFormKind.Heavy && form.Guitars.Contains(trackNumber))
                 arpeggio = ArpeggioPattern.None;
             if (form.Breaker == trackNumber)

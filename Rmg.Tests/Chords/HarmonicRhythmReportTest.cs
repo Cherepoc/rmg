@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
+using Rmg.Core.Events;
 
 namespace Rmg.Tests.Chords;
 
@@ -23,6 +24,19 @@ public sealed class HarmonicRhythmReportTest
 
             var gaps = changes.Zip(changes.Skip(1), (a, b) => b - a).ToArray();
             await Assert.That(gaps.All(x => x > 0)).IsTrue();
+
+            // and its pattern's chord at every span drawn from each of its patterns' starts, passing chords between, the
+            // chord's number from its pattern's first, 1; a section's first chord going on from an intro made of it, as one
+            var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            var rhythms = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => (HarmonicRhythm)x.Last().Value!);
+            foreach (var span in song.Map.Sections)
+            {
+                var rhythm = rhythms[span.SectionId];
+                foreach (var pattern in span.Patterns)
+                foreach (var change in rhythm.Changes.Where(x => pattern.Start + x < pattern.End - 1e-9))
+                    await Assert.That(common.GetEffectiveStateMapAt(pattern.Start + change).GetStateValue(StateKinds.ChordChange)).IsEqualTo(rhythm.Changes.IndexOf(change) + 1)
+                        .Because($"seed {song.Seed} at {pattern.Start + change}");
+            }
         }
     }
 

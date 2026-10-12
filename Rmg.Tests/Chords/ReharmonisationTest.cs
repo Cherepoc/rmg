@@ -32,7 +32,10 @@ public sealed class ReharmonisationTest
                 continue;
             reharmonised++;
             int Root(Song song, double position) => song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
-            var changes = with.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+            // a chord's changes, but an inner line's steps inside a chord (InnerLines), which move with the chord they are in
+            var common = with.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)
+                .Where(x => common.GetEffectiveStateMapAt(x).GetStateValue(CompositionStateKinds.InnerLine) == 0).ToArray();
             foreach (var change in changes)
             {
                 var moved = Root(with, change) - Root(without, change);

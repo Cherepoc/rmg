@@ -40,7 +40,10 @@ public sealed class TurnaroundTest
     {
         var genre = Genre.Read(new Dictionary<string, IReadOnlyDictionary<string, ByConvention>> { ["turnaround"] = new Dictionary<string, ByConvention> { ["sections"] = new(1, 1, 1) } }, out _)!;
 
-        await Assert.That(genre.Chance(GenreChoices.Turnaround, "sections")!.Value.Plain).IsEqualTo(1);
         await Assert.That(Rmg.Core.Composition.Progressions.Turnaround.At(0)).IsEqualTo(0);
+        // the plainest songs of a genre that turns around at its plain end turning every section around
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre))))
+        foreach (var turn in song.Trace.Where(x => x.Point == TracePoints.Turnaround))
+            await Assert.That((((bool Turns, bool))turn.Value!).Turns).IsTrue().Because($"seed {song.Seed}, section {turn.Section}");
     }
 }

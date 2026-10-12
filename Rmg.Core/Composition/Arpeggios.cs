@@ -176,12 +176,12 @@ internal static class Arpeggios
         _ => pattern.ToString()
     };
 
-    /// <summary>A pattern that breaks the chord, any but the whole chord, among a genre's pool where it names one, up where it names none of them.</summary>
+    /// <summary>A pattern that breaks the chord, any but the whole chord, among a genre's pool where it names one; the whole chord where it names none of them, as the genre keeps its chords whole.</summary>
     public static ArpeggioPattern DrawBroken(IGenerationContext context, double unconventionality, Genre genre)
     {
         var pool = genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio);
         var broken = Patterns.Where(x => x.Pattern != ArpeggioPattern.None && (pool is null || pool(x.Pattern) is not null)).ToArray();
-        return broken.Length == 0 ? ArpeggioPattern.Up : context.Pick(ByConvention.Weigh(broken, unconventionality, pool));
+        return broken.Length == 0 ? ArpeggioPattern.None : context.Pick(ByConvention.Weigh(broken, unconventionality, pool));
     }
 
     /// <summary>A section's pattern, by the chords facet of its unconventionality, among a genre's pool where it names one.</summary>

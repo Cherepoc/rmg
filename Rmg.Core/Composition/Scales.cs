@@ -17,7 +17,7 @@ public sealed record Scale(string Name, ImmutableArray<int> Offsets, ByConventio
     /// <summary>How it sounds, in a sentence, which the page shows over its name.</summary>
     public required string Description { get; init; }
 
-    /// <summary>How bright the scale sounds: the sum of its offsets, lydian's the highest and phrygian's the lowest.</summary>
+    /// <summary>How bright the scale sounds: the sum of its offsets, lydian's the highest and locrian's the lowest.</summary>
     public int Brightness => Offsets.Sum();
 
     /// <summary>How many of its notes differ from another scale of as many notes, on the same first note.</summary>

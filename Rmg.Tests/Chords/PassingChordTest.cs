@@ -20,7 +20,7 @@ public sealed class PassingChordTest
     }
 
     [Test]
-    public async Task APassingChord_IsTheNextsDominant_OrTheNextASemitoneAbove_HalfwayThroughAChordABarLong()
+    public async Task APassingChord_IsTheNextsDominant_OrTheNextASemitoneAway_HalfwayThroughAChordABarLong()
     {
         var passing = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz")))))
@@ -32,7 +32,10 @@ public sealed class PassingChordTest
                 passing++;
                 var chord = rhythm.Changes.IndexOf(at);
                 await Assert.That(((progression[chord] - progression[chord + 1] - 4) % 7 + 7) % 7 == 0 || progression[chord] == progression[chord + 1]).IsTrue();
-                await Assert.That(rhythm.LengthOf(chord - 1) + rhythm.LengthOf(chord)).IsGreaterThanOrEqualTo(rhythm.Meter.BarDuration - 1e-9);
+                var length = rhythm.LengthOf(chord - 1) + rhythm.LengthOf(chord);
+                await Assert.That(length).IsGreaterThanOrEqualTo(rhythm.Meter.BarDuration - 1e-9);
+                // on the group's start nearest the chord's middle
+                await Assert.That(at).IsEqualTo(rhythm.Meter.NearestGroupStart(rhythm.Changes[chord - 1] + length / 2)).Within(1e-9);
             }
         }
 
@@ -57,7 +60,8 @@ public sealed class PassingChordTest
             for (var i = 0; i + 1 < changes.Length; i++)
             {
                 var shift = common.GetEffectiveStateMapAt(changes[i]).GetStateValue(Rmg.Core.Events.StateKinds.ChordShift);
-                if (shift is not (1 or -1) || planing.Contains(song.Song.Map!.SectionAt(changes[i])?.SectionId ?? -1))
+                // an intro planing as the section it plays as does
+                if (shift is not (1 or -1) || song.Map.PlayAt(changes[i]) is { } play && planing.Contains(play.Span.SectionId))
                     continue;
                 if (Chord(changes[i]) is not { } chord || Chord(changes[i + 1]) is not { } next)
                     continue;

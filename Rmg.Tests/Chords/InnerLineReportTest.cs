@@ -6,8 +6,8 @@ using Rmg.Core.Songs;
 namespace Rmg.Tests.Chords;
 
 /// <summary>
-///     Whether the melody clashes with a chromatic inner line (<see cref="InnerLines.Apply" />), which moves the chords'
-///     root voice after the notes are decided, where the melody does not see it.
+///     Whether the melody, placed over a chromatic inner line's chords (<see cref="InnerLines.Apply" />), which move their
+///     root voice before the lines are placed, still clashes with the line on the beat.
 /// </summary>
 public sealed class InnerLineReportTest
 {
