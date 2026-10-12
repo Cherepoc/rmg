@@ -83,7 +83,7 @@ internal sealed class FillGenerator
     /// <param name="song">The song's sections and its intro and ending, put one after another.</param>
     /// <param name="lines">Every line the drums mark, in the song's order.</param>
     /// <param name="map">Where the song's parts are; none for a song that starts with its first section.</param>
-    /// <param name="stops">Where the song plays in stop time, which takes the drums' groove out, so that a drum heard only there is not.</param>
+    /// <param name="stops">Where the song takes the drums' groove out, its stop time and its drum solos, so that a drum heard only there is not.</param>
     public TrackEventStateTimelineMap<StateMap> Generate(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyList<FillLine> lines,

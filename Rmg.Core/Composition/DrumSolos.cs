@@ -343,8 +343,8 @@ internal static class DrumSolos
                         case SoloGesture.Run or SoloGesture.Lick when player.IsKit:
                         {
                             // a sticking, the right hand round the toms, the left on the snare, the foot on the kick, but where the
-                            // feet keep time on it
-                            var kickFree = kick is not null && !feetTracks.Contains(kick.Track);
+                            // feet keep time on it; a section without a kick plays the foot's strokes as rests
+                            var kickFree = kick is null || !feetTracks.Contains(kick.Track);
                             // the hands' own where the feet keep time and a genre's pool names those with the foot alone
                             ImmutableArray<Weighted<Sticking>> handsOnly = [..stickingWeights.Where(x => !LimbsOf(x.Value).Contains('K'))];
                             var sticking = sticks.Pick(kickFree ? stickingWeights : handsOnly.IsEmpty ? [new Weighted<Sticking>(1, Sticking.Singles)] : handsOnly);
@@ -381,8 +381,10 @@ internal static class DrumSolos
                             {
                                 var limb = limbs[i % limbs.Length];
                                 RunSound sound;
-                                if (limb == 'K' && kick is not null)
-                                    sound = kick;
+                                if (limb == 'K' && kick is null)
+                                    continue;
+                                if (limb == 'K')
+                                    sound = kick!;
                                 else if (limb is 'R' or 'T' && toms.Length > 0)
                                 {
                                     sound = toms[gesture == SoloGesture.Lick ? Math.Clamp(at + rights % 2, 0, toms.Length - 1) : at];

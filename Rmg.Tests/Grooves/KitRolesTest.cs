@@ -21,7 +21,7 @@ public sealed class KitRolesTest
     }
 
     [Test]
-    public async Task ASection_LeadsEveryRoleItsDrumsCanPlay_WithADrumPlayingIt()
+    public async Task ASection_LeadsEveryRoleItsFreeDrumsCanPlay_WithADrumPlayingIt()
     {
         var sections = 0;
         foreach (var song in TestCorpus.Range(Count))
@@ -30,7 +30,9 @@ public sealed class KitRolesTest
             var kit = (SectionKit)entry.Value!;
             var family = (bool)song.Trace.First(x => x.Point == TracePoints.PercussionOnly && x.Section == entry.Section).Value! ? DrumFamily.Percussion : DrumFamily.Kit;
             var grooving = kit.Roles.Keys.Where(x => x.Family.HasFlag(family) && DrumGroups.GroupOf(x).GrooveChance >= 1).ToArray();
-            foreach (var role in DrumKitGenerator.LeadRoles.Where(r => grooving.Any(x => x.MainRole == r || kit.Roles[x] == r)))
+            // a role a grooving drum can play, one that leads no other role, as a section of percussion alone may draw its clap
+            // to the ground
+            foreach (var role in DrumKitGenerator.LeadRoles.Where(r => grooving.Any(x => (x.MainRole == r || kit.Roles[x] == r) && !kit.Leads.Any(l => l.Key != r && l.Value == x))))
             {
                 await Assert.That(kit.Leads.ContainsKey(role)).IsTrue().Because($"seed {song.Seed}, section {entry.Section}, {role}");
                 await Assert.That(kit.Roles[kit.Leads[role]]).IsEqualTo(role);

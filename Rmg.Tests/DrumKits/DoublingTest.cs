@@ -9,6 +9,9 @@ public sealed class DoublingTest
     /// <summary>The bars before a line a fill may play in, in beats: the bar before it, a fill a span of that bar at the most.</summary>
     private static double FillBars(Meter meter) => meter.BarDuration;
 
+    /// <summary>Whether a section plays in stop time (<see cref="StopTime" />).</summary>
+    private static bool InStopTime(CorpusSong song, int section) => song.Trace.Any(x => x.Point == TracePoints.StopTime && x.Section == section && (bool)x.Value!);
+
     [Test]
     public async Task ADrumThatDoublesOrAccentsALead_PlaysOnlyBeatsTheLeadPlays_AnAccentFewerOfThem()
     {
@@ -17,7 +20,8 @@ public sealed class DoublingTest
         foreach (var song in TestCorpus.Range(128))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Doubles))
         foreach (var (track, doubling) in ((ImmutableDictionary<int, Doubling>)entry.Value!).Where(x => x.Value.Binding != DrumBinding.Figure))
-        foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
+        // but a section in stop time, whose drums keeping time play on through the stops where the lead is left out
+        foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section && !InStopTime(song, x.SectionId)))
         {
             // the groove's notes, but in the last bar of a phrase, where a fill may take the lead's notes into its run, as an
             // intro's window ends on a phrase, and at a phrase's first beat, where a call may land with the band, pushed an
@@ -58,7 +62,9 @@ public sealed class DoublingTest
         foreach (var song in TestCorpus.Range(128))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Doubles))
         foreach (var (track, doubling) in ((ImmutableDictionary<int, Doubling>)entry.Value!).Where(x => x.Value.Binding == DrumBinding.Accent))
-        foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
+        // nor an appearance of a drum solo, whose strokes are the drummer's own
+        foreach (var span in song.Map.Sections.Where((x, i) => x.SectionId == entry.Section && !InStopTime(song, x.SectionId)
+                                                               && !song.Trace.Any(t => t.Point == TracePoints.DrumSolo && ((DrumSolo)t.Value!).Index == i)))
         {
             var notes = song.Song.Notes!;
             // the bars the drum sits out, by their letter in the section's scheme (DrumPresence)

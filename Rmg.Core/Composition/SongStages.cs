@@ -245,7 +245,9 @@ internal static class SongStages
         var stops = song.StopTime;
         var lines = song.Form.Lines.Select(x => stops.Any(p => Math.Abs(p.End - x.Position) < 1e-6) ? x with { Weight = Math.Max(x.Weight, 0) } : x).ToImmutableArray();
         // the runs handed on to the lines' walks and the drums' touches, none where the drums mark the form, which plays none
-        return draft with { Timeline = fills.Generate(draft.Timeline, lines, song.Form.Map, stops), Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs };
+        // a drum heard only where the groove is taken out, in stop time or a drum solo, which clears it, landed elsewhere
+        var drumSolos = song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key]).Select(x => (x.Start, x.End, x.Meter.BarDuration));
+        return draft with { Timeline = fills.Generate(draft.Timeline, lines, song.Form.Map, [..stops, ..drumSolos]), Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs };
     }
 
     /// <summary>A bigger section announced, the hi-hat opening and the snare on its head before it.</summary>
