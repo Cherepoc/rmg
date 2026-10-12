@@ -14,7 +14,7 @@ public sealed class MetalFamilyReportTest
 {
     private const int Count = 64;
 
-    private static readonly string[] Genres = ["nuMetal", "djent", "metal", "blackMetal", "rock", "techno", "funk"];
+    private static readonly string[] Genres = ["nuMetal", "djent", "metal", "thrash", "symphonic", "doom", "blackMetal", "rock", "techno", "funk"];
 
     [Test]
     [Explicit]

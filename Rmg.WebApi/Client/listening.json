@@ -600,30 +600,23 @@
         "at": 0,
         "listen": [
           "Riff (Electric Guitar (clean))",
-          "Chords (Overdriven Guitar)"
+          "Chords (Distortion Guitar)"
         ]
       },
       {
         "seed": "f",
         "at": 0,
         "listen": [
-          "Chords (Distortion Guitar)",
           "Riff (Acoustic Guitar (steel))",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "l",
-        "at": 0,
-        "listen": [
-          "Riff (Distortion Guitar)"
+          "Bass (Electric Bass (pick))",
+          "Chords (Distortion Guitar)"
         ]
       },
       {
         "seed": "v",
-        "at": 1.5,
+        "at": 1.9,
         "listen": [
-          "Riff (Overdriven Guitar)",
+          "Riff (Distortion Guitar)",
           "Bass (Electric Bass (pick))",
           "Kick"
         ]
@@ -633,16 +626,24 @@
         "at": 0,
         "listen": [
           "Riff (Overdriven Guitar)",
-          "Ride",
-          "Kick"
+          "Ride"
         ]
       },
       {
         "seed": "1I",
-        "at": 50.1,
+        "at": 54.1,
         "listen": [
           "Hi-Hat",
           "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1b",
+        "at": 62.2,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
         ]
       }
     ]

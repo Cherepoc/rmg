@@ -652,11 +652,16 @@ keeps together. Each step through the implementation loop, with a listening ques
    (31% of its sections) and Phrygian, still 3%, the stab one of three to six notes of its scale. Left: a stab palette
    leaning to the ♭2 and ♭5 over the scale's other notes, the scale rule against a chromatic stab in a diatonic riff
    scale to be weighed; first a listening question, the stabs heard as what Nu metal lacks.
-4. **Metal split** into Heavy metal (keeping `metal`: the gallop, twin solos, harmonic minor, 110 to 170), Thrash
-   (fast, the double kick, tremolo and 16th chugs, Phrygian, the kick with the riff, the accent tone), Symphonic metal
-   (the choir, strings, violin and organ, a soaring melody) and Doom (new: 50 to 80, B1 to C2, the ♭5, four bars a
-   chord, held chords). Groove metal left to Thrash, Nu metal and Djent between them. Ratings under `metal` from before
-   the split not used to tune its presets.
+4. Done (12 October 2026, data, `MetalFamilyReportTest`): **Metal split** into Heavy metal (keeping `metal`: the
+   gallop at 20-30-40%, twin solos at 40-50-60%, harmonic minor, 110 to 170, the choir, violin and organ out, chugs
+   60-60-50), Thrash metal (`thrash`: 160 to 220, Phrygian, a vamp in 30-40-50%, its bars under a held root 44%, 90% of
+   its riff's notes chugging, the kick with the riff and the double kick, whammy dives), Symphonic metal (`symphonic`:
+   the choir, strings and organ, a violin or a voice-like lead, harmonic minor's raised cadence, power chords first and
+   triads at 40-50-60, the last section lifted) and Doom metal (`doom`: 60 to 80 with half time, five to eight
+   minutes, power chords held, 22% of its riff's notes chugging, its bars under a held root 40%, the ♭5 on 10% of its
+   riff's beats). Groove metal left to Thrash, Nu metal and Djent between them. Ratings under `metal` from before the
+   split not used to tune its presets. Left to listening: each new genre heard against its sound; Symphonic's choir
+   and violin over distorted guitars, a wall or mud.
 5. Left to listening: **a melody spoken rather than sung** (Nu metal, Hip-hop, Trap, Punk, Thrash), a narrow range and
    repeated notes, with *A melody sung rather than played* (*Genres*).
 
