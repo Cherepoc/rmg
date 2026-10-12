@@ -308,7 +308,8 @@ public static class GenreChoices
     /// <summary>
     ///     The interval a line harmonised plays apart from it, the melody's by the counter-melody and the riff's by its twin,
     ///     with its inversion: thirds and sixths, the songs', fourths and fifths, an organum's or a riff's in parallel, and
-    ///     seconds and sevenths, the wildest twins' (<see cref="LineDoubling.IntervalOf" />).
+    ///     seconds and sevenths, the wildest twins' (<see cref="LineDoubling.IntervalOf" />); the songs' amounts across the
+    ///     pairs, which a genre's lean each pair's own steps by (<see cref="Genre.Lean{T}" />).
     /// </summary>
     public static GenreChoice HarmonyInterval { get; } = Pool("harmonyInterval", "Harmony's interval",
     [

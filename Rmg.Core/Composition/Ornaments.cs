@@ -71,7 +71,9 @@ internal static class Ornaments
             {
                 // drawn by the note of its figure, so that a figure played again, or doubled, is ornamented alike
                 var key = note.Value.State.GetStateValue(CompositionStateKinds.NoteKey);
-                if (note.Value.Pitches.Length != 1 || key == 0)
+                // a note of one pitch, or a line's in octaves, not a block of voices
+                var octaves = note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0 && note.Value.State.GetStateValue(CompositionStateKinds.LineVoices) <= 1;
+                if (note.Value.Pitches.Length != 1 && !octaves || key == 0)
                     return note;
                 var draw = song.Stream(SongStream.Ornaments, key).GenerateDouble();
                 // a quick note's length in beats at the tempo there

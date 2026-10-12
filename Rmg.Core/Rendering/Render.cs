@@ -141,8 +141,10 @@ public static class Render
                         var step = note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep);
                         double At(int i) => swing.Apply(note.Position + i * step);
                         var start = At(ornament.Length);
-                        return ornament.Select((x, i) => new RenderedNote(note.Value.Pitches[0] + x, velocity * OrnamentVelocity, At(i + 1) - At(i), shift).ToTimelineItem(At(i)))
-                            .Append(new RenderedNote(note.Value.Pitches[0], velocity, position + duration - start, shift).ToTimelineItem(start));
+                        // on every pitch of the note, a line doubled in octaves ornamented in both
+                        return note.Value.Pitches.SelectMany(pitch =>
+                            ornament.Select((x, i) => new RenderedNote(pitch + x, velocity * OrnamentVelocity, At(i + 1) - At(i), shift).ToTimelineItem(At(i)))
+                                .Append(new RenderedNote(pitch, velocity, position + duration - start, shift).ToTimelineItem(start)));
                     }
 
                     return order.Select(pitch =>

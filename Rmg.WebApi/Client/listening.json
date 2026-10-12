@@ -191,8 +191,8 @@
         "seed": "1G",
         "at": 138.8,
         "listen": [
-          "Melody (Harmonica)",
           "Riff (Distortion Guitar)",
+          "Melody (Harmonica)",
           "Counter-melody (Harmonica)"
         ]
       }
@@ -243,9 +243,9 @@
       },
       {
         "seed": "1E",
-        "at": 50.3,
+        "at": 76.1,
         "listen": [
-          "Solo (Harmonica)",
+          "Chords (Honky-tonk Piano)",
           "Bass (Acoustic Bass)"
         ]
       },
@@ -299,7 +299,7 @@
       },
       {
         "seed": "1D",
-        "at": 13,
+        "at": 64.3,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
@@ -313,7 +313,7 @@
       },
       {
         "seed": "1S",
-        "at": 264.1,
+        "at": 226,
         "listen": [
           "Melody (Lead 2 (sawtooth))"
         ]
@@ -443,8 +443,8 @@
         "at": 0,
         "listen": [
           "Chords (Drawbar Organ)",
-          "Melody (Alto Sax)",
-          "Rhythm part (Electric Guitar (clean))"
+          "Rhythm part (Electric Guitar (clean))",
+          "Melody (Alto Sax)"
         ]
       }
     ]
@@ -485,8 +485,7 @@
         "at": 122.1,
         "listen": [
           "Riff's twin (Lead 2 (sawtooth))",
-          "Riff (Lead 2 (sawtooth))",
-          "Melody (Lead 1 (square))"
+          "Riff (Lead 2 (sawtooth))"
         ]
       },
       {

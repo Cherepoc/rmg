@@ -174,8 +174,10 @@ internal sealed class LinePattern
                 }
             )
             .ToArray();
-        // a note that lands on its chord, as the bass's first of a chord on its root, or a phrase's goal, landing as it does
+        // a note that lands on its chord, as the bass's first of a chord on its root, or a phrase's goal, landing as it does,
+        // or resolves a lean, which it keeps resolving
         bool Lands(int i) => GoalOf(lineNotes[i]) is not null
+                             || i > 0 && leans[i - 1]
                              || (i == 0 || Chord(lineNotes[i - 1]) != Chord(lineNotes[i]))
                              && (ChordArrival)lineNotes[i].State.GetStateValue(CompositionStateKinds.LineLanding) != ChordArrival.Free;
         Restate(notes, map, profile, Lands);
@@ -184,13 +186,13 @@ internal sealed class LinePattern
         for (var i = 0; i + 1 < notes.Length; i++)
         {
             // a change of chord, its first note one of the new chord's, led into as the chord before has it, but from a
-            // held note, a phrase's cadence, which rests where it is
+            // held note, a phrase's cadence, which rests where it is, and from a lean's resolution
             var (last, next) = (notes[i], notes[i + 1]);
             var nextChord = Chord(next.Note);
             var isChange = IsOnChange(next.Note, nextChord) && Chord(last.Note) < nextChord;
             var approach = (ChordApproach)last.Note.State.GetStateValue(CompositionStateKinds.LineApproach);
             var isHeld = last.Note.State.GetStateValue(StateKinds.HeldDuration) > 0;
-            if (!isChange || isHeld || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
+            if (!isChange || isHeld || i > 0 && leans[i - 1] || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
                 continue;
 
             notes[i] = last with { Pitch = line.Approach(approach, last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Note.Chord, next.Pitch,

@@ -90,7 +90,7 @@ internal static class LineDoubling
         2 or 5 => "thirds",
         3 or 4 => "fourths",
         1 or 6 => "seconds",
-        _ => "unison"
+        _ => throw new ArgumentOutOfRangeException(nameof(step), step, "A unison has no interval to harmonise in.")
     };
 
     /// <summary>The parts that play their line in octaves now and then.</summary>
@@ -113,7 +113,7 @@ internal static class LineDoubling
     /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords or chugs, which may make it power chords, by its place, which plays no twin.</param>
     /// <param name="twinRests">Whether an appearance, by its place, leaves the riff's twin out, which then plays none of the riff.</param>
     /// <param name="playsAFigure">Whether a part plays a figure in an appearance, by its place, which no doubling into it replaces (<see cref="Figures" />).</param>
-    /// <param name="drivenRiff">Whether the riff plays on a driven guitar, whose phrases the bass plays wherever it would rest in them.</param>
+    /// <param name="drivenRiff">Whether the riff plays on a driven guitar in a section, by its place among the song's sections, whose phrases the bass plays wherever it would rest in them.</param>
     /// <param name="blocks">A section's sequence of whether its harmonised melody plays in a block, by the section's place.</param>
     /// <param name="genre">The genre whose chances of the doublings a section draws (<see cref="GenreChoices.Doubling" />).</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
@@ -129,7 +129,7 @@ internal static class LineDoubling
         Func<int, bool> riffPowerChords,
         Func<int, bool> twinRests,
         Func<int, TrackRole, bool> playsAFigure,
-        bool drivenRiff,
+        Func<int, bool> drivenRiff,
         Genre genre
     )
     {
@@ -138,7 +138,9 @@ internal static class LineDoubling
         var doubling = new HashSet<(int Track, int Section)>();
         foreach (var ((source, target, steps, chance, option, isTwin), pair) in Pairs.Select((x, i) => (x, i)))
         {
-            var intervals = steps.Any(x => x.Step != 0) ? genre.Pool<int>(GenreChoices.HarmonyInterval, IntervalOf) : null;
+            // the pair's own steps leaned by a genre's intervals over the songs', so that a genre naming the songs' amounts
+            // plays as they do
+            var intervals = steps.Any(x => x.Step != 0) ? genre.Lean<int>(GenreChoices.HarmonyInterval, IntervalOf) : null;
             // a genre whose intervals keep none of the pair's never doubles it
             var allowed = intervals is null || steps.Any(x => intervals(x.Step) is not null);
             if (!trackOf.TryGetValue(source, out var sourceTrack) || !trackOf.TryGetValue(target, out var targetTrack))
@@ -158,7 +160,7 @@ internal static class LineDoubling
                 // the bass with the riff in unison, which no interval of a genre's moves
                 if (!allowed)
                     continue;
-                var step = context.Pick(ByConvention.Weigh(steps, melody, intervals));
+                var step = context.Pick(ByConvention.Lean(steps, melody, intervals));
                 var events = song.TrackTimelineMap;
                 bool Plays(int track) => events[track].EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
                 // a riff in power chords plays no twin, whose third over a distorted fifth is mud, nor does an appearance that
@@ -210,8 +212,8 @@ internal static class LineDoubling
         // and the bass under a driven riff, as a band's plays under its guitars: in a section it plays in, every phrase the
         // riff plays without it it plays with it, in unison, as the pair does; but in the song's opening, which a riff may
         // start alone, and in a section it sits out whole, left to the guitars
-        if (drivenRiff && trackOf.TryGetValue(TrackRole.Riff, out var riffTrack) && trackOf.TryGetValue(TrackRole.Bass, out var bassTrack))
-            foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)).Skip(1))
+        if (trackOf.TryGetValue(TrackRole.Riff, out var riffTrack) && trackOf.TryGetValue(TrackRole.Bass, out var bassTrack))
+            foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)).Skip(1).Where(x => drivenRiff(x.i)))
             {
                 var events = song.TrackTimelineMap;
                 TimelineItem<StateMap>[] In(int track, double start, double end) => [..events[track].EventTimeline.Where(x => x.IsWithin(start, end))];

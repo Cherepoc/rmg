@@ -30,9 +30,12 @@ public sealed class MelodyFillTest
                 var target = melody.FirstOrDefault(x => x.Position >= line - 1e-9);
                 await Assert.That(walked.Select(x => Math.Round(x.Position, 6))).IsEquivalentTo(positions.Select(x => Math.Round(x, 6)), CollectionOrdering.Matching);
                 await Assert.That(positions.Length).IsLessThanOrEqualTo(3);
-                // a step, two semitones at most, three for an augmented second
-                if (target.Value is not null && walked.Length > 0 && Math.Abs(target.Value.Pitches[0] - walked[^1].Value.Pitches[0]) <= 3)
+                // a step, two semitones at most, three for an augmented second, not the note itself again
+                if (target.Value is not null && walked.Length > 0 && Math.Abs(target.Value.Pitches[0] - walked[^1].Value.Pitches[0]) is > 0 and <= 3)
                     stepping++;
+                // each a note of its own, on the weakest beat, going on in its phrase
+                await Assert.That(walked.Select(x => x.Value.State.GetStateValue(CompositionStateKinds.NoteKey)).Distinct().Count()).IsEqualTo(walked.Length).Because($"seed {song.Seed} at {line}");
+                await Assert.That(walked.All(x => x.Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) == 0)).IsTrue().Because($"seed {song.Seed} at {line}");
                 walks++;
             }
         }

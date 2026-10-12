@@ -24,9 +24,9 @@ public sealed class OrnamentsTest
     }
 
     [Test]
-    public async Task AnOrnamentsNotes_AreTheNotesNeighbours_WithinItsLength_OnTheLinesAlone()
+    public async Task AnOrnamentsNotes_AreTheNotesNeighbours_WithinItsLength_OnTheLinesAlone_InOctavesToo()
     {
-        var ornaments = 0;
+        var (ornaments, octaves) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ornamenting))))
         {
             await Assert.That(Played(song).Length).IsEqualTo(Ornaments.All.Length);
@@ -39,11 +39,15 @@ public sealed class OrnamentsTest
                 await Assert.That(song.Song.TrackDefinitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody).IsTrue().Because(because);
                 await Assert.That(ornament.All(x => Math.Abs(x) <= 4) && ornament.Any(x => x != 0)).IsTrue().Because(because);
                 await Assert.That(ornament.Length * note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep)).IsLessThan(note.Value.Duration).Because(because);
+                // a note of one pitch, or a line's in octaves, never a block of voices
+                await Assert.That(note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.LineVoices) <= 1).IsTrue().Because(because);
                 ornaments++;
+                octaves += note.Value.Pitches.Length > 1 ? 1 : 0;
             }
         }
 
         await Assert.That(ornaments).IsGreaterThan(0);
+        await Assert.That(octaves).IsGreaterThan(0);
     }
 
     /// <summary>How often the songs ornament their lines, each ornament's share of the songs and the share of the lines' notes ornamented, by genre.</summary>

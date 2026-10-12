@@ -218,11 +218,14 @@ internal static class SoloLines
         TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false)
         {
             marks.Add((placing, pitch));
-            var melodyNote = MelodyAt(position).Value;
-            // in octaves as the soloist plays them, not as the melody it takes over did
-            var state = melodyNote.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed, CompositionStateKinds.Octave,
+            var sung = MelodyAt(position);
+            // in octaves as the soloist plays them, not as the melody it takes over did; a note of its own, the melody's
+            // beat where it starts with the melody's note, the weakest elsewhere, its own key from that note's and its place
+            var state = sung.Value.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed, CompositionStateKinds.Octave,
                     CompositionStateKinds.LineVoices, CompositionStateKinds.LinePlanes])
-                .With(CompositionStateKinds.Octave, octave && soloist.Octaves ? 1 : 0);
+                .With(CompositionStateKinds.Octave, octave && soloist.Octaves ? 1 : 0)
+                .With(CompositionStateKinds.BeatRank, Math.Abs(sung.Position - position) < 1e-9 ? sung.Value.GetStateValue(CompositionStateKinds.BeatRank) : DyadicRankDistribution.MaxRank)
+                .With(CompositionStateKinds.NoteKey, Seeds.Key(sung.Value.GetStateValue(CompositionStateKinds.NoteKey), marks.Count));
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0));
             state = state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(Chord(state, position), pitch))
                 .With(StateKinds.Alteration, 0)

@@ -325,7 +325,11 @@ internal static class SongStages
                 index => song.Sections[index].RiffPowerChords || song.Sections[index].Chugs,
                 index => song.Sections[index].Resting.Contains(TrackRole.RiffTwin),
                 (index, role) => draft.Figures.GetValueOrDefault(song.Form.Map.Sections[index].SectionId)?.Keys.Any(x => Figures.RoleOf(x) == role) == true,
-                song.Tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Any(x => x.Role == TrackRole.Riff && InstrumentTraits.Has(x.InstrumentCode, InstrumentTrait.Driven)),
+                // as the section's form plays it, a heavy section's guitars driven and a calm one's clean
+                index => song.Tracks.Definitions.Any(x => x.Value is PitchInstrumentTrack { Role: TrackRole.Riff } riff
+                                                          && (song.Sections[index].Form.Guitars.Contains(x.Key)
+                                                              ? song.Sections[index].Form.Kind == SectionFormKind.Heavy
+                                                              : InstrumentTraits.Has(riff.InstrumentCode, InstrumentTrait.Driven))),
                 song.Genre
             )
         };

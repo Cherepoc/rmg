@@ -13,8 +13,9 @@ namespace Rmg.Core.Composition;
 internal sealed class PatternGenerator
 {
 
-    // the key an answer's bar derives its fresh rhythm's seed from its bar pattern's by
-    private const int AnswerRhythmKey = 1;
+    // the key an answer's bar derives its fresh rhythm's seed from its bar pattern's by, apart from the appearances' numbers,
+    // which a later appearance redraws its bars by
+    private const int AnswerRhythmKey = -1;
 
     private static readonly Func<IGenerationContext, double> ArticulationOffset = Generators.SplineValue();
 

@@ -73,9 +73,9 @@ internal static class LineFills
             var target = Pitch(events[after]);
             var scale = ScaleNotes(events[before], low, high);
             var walk = Walk(scale, start, target, positions.Length);
-            var walked = positions.Zip(walk, (position, pitch) => Place(events[before].Value, position, pitch)).ToArray();
+            var walked = positions.Zip(walk, (position, pitch) => (position, pitch)).Select((x, i) => Place(events[before], x.position, x.pitch, i)).ToArray();
             walkedInto.Add(run.Line);
-            StateTrace.RecordSection(TracePoints.LineFill, lineTrack, 0, $"{positions.Length} notes into {run.Line}", (run.Line, positions));
+            StateTrace.RecordSection(TracePoints.LineFill, lineTrack, map.SectionAt(run.Line)?.SectionId ?? 0, $"{positions.Length} notes into {run.Line}", (run.Line, positions));
             // a note held into the rest let go where the walk starts, a line singing one note at a time
             var held = events[before].Value.GetStateValue(StateKinds.HeldDuration);
             if (held > from - events[before].Position)
@@ -102,10 +102,21 @@ internal static class LineFills
         }
 
         // a note of the walk at its place, as a line's note: the step above the chord there nearest the walk's pitch, on the
-        // scale there, as a raised step may have changed it; a bass's note plays its step, not the chord's shape
-        TimelineItem<StateMap> Place(StateMap before, double position, int pitch)
+        // scale there, as a raised step may have changed it; a bass's note plays its step, not the chord's shape; a note of
+        // its own, as a lead-in's is, on the weakest beat and as loud as the note it walked from would be there, its own key
+        // from that note's and its place in the walk, going on in that note's phrase
+        TimelineItem<StateMap> Place(TimelineItem<StateMap> before, double position, int pitch, int index)
         {
-            var state = before.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed]);
+            var section = common.GetEffectiveStateMapAt(position).MergeWith(track.StateTimelineMap.GetEffectiveStateMapAt(position));
+            var maxRank = section.GetStateValue(CompositionStateKinds.Rhythm.MaxRank);
+            var rank = before.Value.GetStateValue(CompositionStateKinds.BeatRank);
+            var velocity = before.Value.GetStateValue(StateKinds.Velocity)
+                           + VelocityLayers.Note * BeatAccent.GetShift(Math.Min(rank, maxRank), maxRank, maxRank, section.GetStateValue(CompositionStateKinds.NoteDynamics));
+            var state = before.Value.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed])
+                .With(CompositionStateKinds.BeatRank, maxRank)
+                .With(StateKinds.Velocity, velocity)
+                .With(CompositionStateKinds.NoteKey, Seeds.Key(before.Value.GetStateValue(CompositionStateKinds.NoteKey), index + 1))
+                .With(CompositionStateKinds.LinePhraseStart, (int)PhraseStart.None);
             var chord = Chord(state.ToTimelineItem(position));
             return state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(chord, pitch)).With(StateKinds.Alteration, 0).With(CompositionStateKinds.Walk, 1).ToTimelineItem(position);
         }
