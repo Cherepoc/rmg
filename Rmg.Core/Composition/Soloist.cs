@@ -209,7 +209,10 @@ internal sealed record Soloist(
     /// <summary>How far an instrument leans to bending: a guitar's and a synth lead's the most, as their players do.</summary>
     private static double BendSuit(int program) => InstrumentTraits.Has(program, InstrumentTrait.SoloBends) ? 1 : 0;
 
-    /// <param name="program">The instrument the soloing part plays, which leans whether it bends.</param>
+    /// <summary>The program of a soloing drummer, none, which neither bends nor plays chords.</summary>
+    public const int DrumsProgram = -1;
+
+    /// <param name="program">The instrument the soloing part plays, which leans whether it bends; <see cref="DrumsProgram" /> for the drums.</param>
     public static Soloist Generate(IGenerationContext context, double melody, double sound, int program)
     {
         // every draw made in this order, whatever the instrument

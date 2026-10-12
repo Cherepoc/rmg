@@ -475,12 +475,12 @@ internal static class Expression
         var songChorus = songStream.TestProbability(Chance(SongChorusChance, "chorus"));
         var songSwell = songStream.TestProbability(Chance(SongSwellChance, "swell"));
         var songBends = songStream.TestProbability(Chance(SongBendChance, "bends"));
-        var weights = ByConvention.Weigh(StrongEffects, songSound, genre.Pool<StrongEffect>(GenreChoices.StrongEffect, x => GenreChoices.Name(x.ToString())));
+        var weights = ByConvention.Weigh(StrongEffects, songSound, genre.Pool<StrongEffect>(GenreChoices.StrongEffect));
         var strong = songStream.Pick(weights);
 
         // the parts that may play an effect, the likelier one it suits, but one that plays another filter's already; a gate
         // the parts the genre has it chop
-        var gates = ByConvention.Weigh(GateParts, songSound, genre.Pool<TrackRole>(GenreChoices.GateParts, x => GenreChoices.Name(x.ToString())))
+        var gates = ByConvention.Weigh(GateParts, songSound, genre.Pool<TrackRole>(GenreChoices.GateParts))
             .Where(x => x.Weight > 0).Select(x => x.Value).ToHashSet();
         bool Fits(StrongEffect effect, TrackRole role, int program) => effect == StrongEffect.Gate ? gates.Contains(role) : Suits(effect, role, program);
         var carriers = ImmutableDictionary.CreateBuilder<StrongEffect, int>();
@@ -779,7 +779,7 @@ internal static class Expression
                     // a pinch, a held note's harmonic, where the song pinches
                     var phrase = (index, span.PhraseOf(note.Position));
                     if (songPinches && Pinches(noteProgram) && note.Value.Pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.Octave) == 0
-                        && role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo
+                        && role.PlaysLine() && role != TrackRole.Bass
                         && state.GetStateValue(CompositionStateKinds.PalmMute) == 0 && !pinchedPhrases.Contains(phrase) && !isRelease
                         && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
                         && timeline.Count(x => Math.Abs(x.Position - note.Position) < 1 - 1e-9) / 2.0 <= PinchBusiest

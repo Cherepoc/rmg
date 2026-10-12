@@ -9,11 +9,7 @@ namespace Rmg.Tests.Forms;
 /// <summary>The riff opening the song alone, the band coming in part by part after it.</summary>
 public sealed class RiffIntroTest
 {
-    private static Genre Always(string preset)
-    {
-        var genre = GenrePresets.Genre(preset);
-        return genre with { Choices = genre.Choices.SetItem(GenreChoices.RiffIntro.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("songs", new ByConvention(1, 1, 1))) };
-    }
+    private static Genre Always(string preset) => GenrePresets.With(preset, GenreChoices.RiffIntro, ("songs", 1));
 
     private static bool OpensOnTheRiff(CorpusSong song) => song.Map.Intro is { Kind: IntroKind.Entries, Entries: [{ Part.Role: TrackRole.Riff, Entry: 0 }, ..] };
 

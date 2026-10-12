@@ -21,7 +21,7 @@ public sealed class BassWithTheRiffTest
     {
         double Share(double melody)
         {
-            var overrides = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Melody, melody), Parts: ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true));
+            var overrides = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Melody, melody)), Parts: ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true));
             var measured = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Measure(TestCorpus.Get(seed, overrides))).ToArray();
             return measured.Sum(x => x.Doubled) / (double)measured.Sum(x => x.Riffs);
         }

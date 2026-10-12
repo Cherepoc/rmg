@@ -77,7 +77,7 @@ internal static class StopTime
         }
 
         var notes = SongStages.NotesOf(draft);
-        var lines = notes.Where(x => song.Tracks.Definitions[x.Key].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo).SelectMany(x => x.Value).ToArray();
+        var lines = notes.Where(x => song.Tracks.Definitions[x.Key].Role.Sings()).SelectMany(x => x.Value).ToArray();
         var times = notes.Keys.Where(x => song.Tracks.Definitions[x] is PercussionInstrumentTrack definition && DrumRoles.Of(definition.StateMap) == DrumRole.Time).ToHashSet();
         // every stopped bar's carrier: the lines, or the drums keeping time; a phrase with a bar neither carries played as it
         // was, stop time being the phrase's device
@@ -128,7 +128,7 @@ internal static class StopTime
         foreach (var (track, timeline) in notes)
         {
             var role = song.Tracks.Definitions[track].Role;
-            if (role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo)
+            if (role.Sings())
                 continue;
             bool Fills(double position) => role is TrackRole.Drum or TrackRole.Bass && InAFill(position);
             result[track] = EventTimeline.Create(timeline.Duration, timeline

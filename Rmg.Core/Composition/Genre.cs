@@ -100,6 +100,9 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
     ///     The pool of a choice, every option's weights at its ends by the option's name, none for one it leaves out; none
     ///     where the genre does not name the choice, which is then as the songs have it.
     /// </summary>
+    /// <summary>The pool of a choice of an enum's members, each option named as the member is (<see cref="GenreChoices.Name" />).</summary>
+    public Func<T, ByConvention?>? Pool<T>(GenreChoice choice) where T : struct, Enum => Pool<T>(choice, x => GenreChoices.Name(x.ToString()));
+
     /// <param name="name">An option's name, as the choice gives it.</param>
     public Func<T, ByConvention?>? Pool<T>(GenreChoice choice, Func<T, string> name)
     {
@@ -151,7 +154,6 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
         return (range["from"].At(conventionality), range["to"].At(conventionality), lean);
     }
 
-    /// <summary>A value's shift, from -1, its least, through 0, as it is, to 1, its most.</summary>
     /// <summary>
     ///     The genre as a song takes it: every value read at the song's facet its choice follows, so that its plain and
     ///     wild ends lean a plain and a wild song, alike at every end after.
@@ -163,6 +165,7 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
             : x.Value)
     };
 
+    /// <summary>A value's shift, from -1, its least, through 0, as it is, to 1, its most.</summary>
     public double Shift(GenreChoice choice, string option)
     {
         Check(choice, GenreChoiceKind.Values, option);

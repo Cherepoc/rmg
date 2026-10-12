@@ -12,7 +12,7 @@ public sealed class SongGeneratorSilentBarTest
 {
     private const double BarDuration = 4;
 
-    private static readonly StateMap BarStateMap = new StateMapBuilder("Test")
+    private static readonly StateMap BarStateMap = new StateMapBuilder("Test", perTrack: false)
         .Add(StateKinds.Velocity, 0.5)
         .ToStateMap(new GenerationContext(0));
 

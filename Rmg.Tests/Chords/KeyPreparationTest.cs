@@ -32,7 +32,7 @@ public sealed class KeyPreparationTest
             .Select(places => places.Zip(places.Skip(1), (chord, next) => (Root(song, chord) - Root(song, next)).Mod(12)).ToArray())
     ];
 
-    private static SongOverrides Scale(double scale) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Scale, scale).Add(Facet.Form, 0.5));
+    private static SongOverrides Scale(double scale) => new(Facets: TestCorpus.FacetsOf((Facet.Scale, scale), (Facet.Form, 0.5)));
 
     [Test]
     [Arguments(1)]

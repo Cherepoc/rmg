@@ -112,7 +112,7 @@ public sealed class DrumsHeardReportTest
         {
             Describe(string.Join("+", pieces), [..Enumerable.Range(0, 64).Select(seed => TestCorpus.Get(seed, new SongOverrides(DrumPieces: [..pieces])))]);
             Describe(string.Join("+", pieces) + ", groove at 1", [..Enumerable.Range(0, 64).Select(seed =>
-                TestCorpus.Get(seed, new SongOverrides(DrumPieces: [..pieces], Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Groove, 1))))]);
+                TestCorpus.Get(seed, new SongOverrides(DrumPieces: [..pieces], Facets: TestCorpus.FacetsOf((Facet.Groove, 1)))))]);
         }
 
         await Task.CompletedTask;

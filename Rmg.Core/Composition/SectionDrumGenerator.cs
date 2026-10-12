@@ -14,8 +14,7 @@ internal sealed class SectionDrumGenerator
 {
     private readonly SongTracks _tracks;
     private readonly Genre _genre;
-    private readonly StateMap _songStateMap;
-    private readonly ImmutableDictionary<int, StateMap> _sectionEnergies;
+    private readonly Func<int, double> _energy;
     private readonly Tilt _songPercussion;
     private readonly Func<int, SectionStream, IGenerationContext> _stream;
     private readonly Func<int, SectionStream, int, IGenerationContext> _trackStream;
@@ -24,6 +23,7 @@ internal sealed class SectionDrumGenerator
     private readonly Func<IGenerationContext, int, SectionRhythm, Tilt, DrumRole?, StateMap> _trackLayer;
     private readonly Func<Meter, PatternGenerator> _patterns;
 
+    /// <param name="energy">A section's energy, the song's with the section's layers of it, as the section has it.</param>
     /// <param name="stream">A decision's sequence in a section, by the section and the decision.</param>
     /// <param name="trackStream">A track's own sequence of a decision in a section, by the section, the decision and the track.</param>
     /// <param name="firstRests">The parts a section leaves out the first time it plays, by its role and its energy's tilt.</param>
@@ -33,8 +33,7 @@ internal sealed class SectionDrumGenerator
     public SectionDrumGenerator(
         SongTracks tracks,
         Genre genre,
-        StateMap songStateMap,
-        ImmutableDictionary<int, StateMap> sectionEnergies,
+        Func<int, double> energy,
         Tilt songPercussion,
         Func<int, SectionStream, IGenerationContext> stream,
         Func<int, SectionStream, int, IGenerationContext> trackStream,
@@ -44,7 +43,7 @@ internal sealed class SectionDrumGenerator
         Func<Meter, PatternGenerator> patterns
     )
     {
-        (_tracks, _genre, _songStateMap, _sectionEnergies, _songPercussion) = (tracks, genre, songStateMap, sectionEnergies, songPercussion);
+        (_tracks, _genre, _energy, _songPercussion) = (tracks, genre, energy, songPercussion);
         (_stream, _trackStream, _firstRests, _facets, _trackLayer, _patterns) = (stream, trackStream, firstRests, facets, trackLayer, patterns);
     }
 
@@ -136,7 +135,7 @@ internal sealed class SectionDrumGenerator
     public SectionDrums DrawDrums(int sectionId, SectionRole role, bool? isPercussionOnly = null)
     {
         var rhythm = new RhythmicUnconventionality(_facets(sectionId)[Facet.Groove]);
-        var tilt = SectionEnergy.Tilt(_songStateMap.MergeWith(_sectionEnergies[sectionId]).GetStateValue(CompositionStateKinds.Energy), rhythm.Coupling);
+        var tilt = SectionEnergy.Tilt(_energy(sectionId), rhythm.Coupling);
         // the drums a percussion section draws its kit from (DrumKitGenerator.SelectKit)
         var songPercussion = _tracks.SongDrums.Count(x => x.Family.HasFlag(DrumFamily.Percussion));
         var percussionOnly = isPercussionOnly ?? (_tracks.DrumSetup == DrumSetup.Percussion ||
@@ -202,8 +201,8 @@ internal sealed class SectionDrumGenerator
             .AddNoteWalkLayer()
             .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup * VelocityLayers.SpreadOf(_genre)))
             .AddNoteDurationLayer()
+            .Add(CompositionStateKinds.TimeStep, timeFeel)
             .ToStateMap(context)
-            .MergeWith(new StateMapBuilder("Section time").Add(CompositionStateKinds.TimeStep, timeFeel).ToStateMap(context))
             .MergeWith(_tracks.DrumStateMap)
             .MergeWith(sectionStateMap);
         var songDrums = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order().ToArray();

@@ -8,7 +8,7 @@ namespace Rmg.Tests.Chords;
 public sealed class ChordOwnScaleTest
 {
     private static ChordScale[] Scales(double progression) => TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
-            new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, progression))))
+            new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, progression)))))
         .SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.ChordScales).SelectMany(t => (ImmutableArray<ChordScale>)t.Value!)).ToArray();
 
     [Test]

@@ -34,7 +34,7 @@ public sealed class SongFormReportTest
     public async Task AnIntroAndAnOutroOfTheirOwn_PlayOnce_FirstAndLast_NeverInAPlainSong()
     {
         var (intros, outros) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Facets: System.Collections.Immutable.ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 0.5)))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 0.5))))))
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var roles = structure.SectionIds.Select(x => structure.Roles[x]).ToArray();

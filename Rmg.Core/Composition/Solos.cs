@@ -200,7 +200,7 @@ internal static class Solos
     public static SoloPlan? Draw(IGenerationContext context, int index, SectionRole role, Unconventionality facets, IReadOnlyCollection<TrackRole> parts, Genre genre)
     {
         var isSolo = context.TestProbability(Tilt.Of(RoleOdds, RoleLeans[role]).Chance(Chance.At(facets[Facet.Form], genre.Chance(GenreChoices.Solos, "sections")), 1));
-        var pool = genre.Pool<TrackRole>(GenreChoices.Soloists, x => GenreChoices.Name(x.ToString()));
+        var pool = genre.Pool<TrackRole>(GenreChoices.Soloists);
         var melody = facets[Facet.Melody];
         var count = context.Pick(ByConvention.Weigh(Counts, melody));
         var mode = context.Pick(ByConvention.Weigh(Modes, melody));

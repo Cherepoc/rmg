@@ -40,7 +40,7 @@ public sealed class InstrumentRolesTest
     public async Task APlainSoundsSong_PlaysNoInstrumentWithCharacter()
     {
         // the plainest sound, its instruments those its plain end weighs, a switch's too
-        var plain = new SongOverrides(Facets: System.Collections.Immutable.ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, 0));
+        var plain = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Sound, 0)));
         var checkedPrograms = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, plain)))
         foreach (var (track, definition) in song.Song.TrackDefinitions)

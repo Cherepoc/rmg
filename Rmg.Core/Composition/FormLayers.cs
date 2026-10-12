@@ -213,7 +213,7 @@ internal static class FormLayers
     /// </summary>
     public static ImmutableArray<Weighted<EndingKind>> WeighEndings(double unconventionality, Genre genre)
     {
-        return ByConvention.Weigh(EndingWeights, unconventionality, genre.Pool<EndingKind>(GenreChoices.Ending, x => GenreChoices.Name(x.ToString())));
+        return ByConvention.Weigh(EndingWeights, unconventionality, genre.Pool<EndingKind>(GenreChoices.Ending));
     }
 
     /// <summary>The endings' weights at the ends: the adventurous ones leaning unconventional, a genre's alone never the songs'.</summary>
@@ -238,7 +238,7 @@ internal static class FormLayers
     /// </summary>
     public static ImmutableArray<Weighted<IntroKind>> WeighIntros(double unconventionality, Genre genre)
     {
-        return ByConvention.Weigh(IntroWeights, unconventionality, genre.Pool<IntroKind>(GenreChoices.Intro, x => GenreChoices.Name(x.ToString())));
+        return ByConvention.Weigh(IntroWeights, unconventionality, genre.Pool<IntroKind>(GenreChoices.Intro));
     }
 
     /// <summary>The intros' weights at the ends, the songs' alike at every end.</summary>

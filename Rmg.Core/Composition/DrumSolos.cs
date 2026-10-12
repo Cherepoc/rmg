@@ -215,7 +215,7 @@ internal static class DrumSolos
             var feetKeepTime = feet(index).TestProbability(FeetKeepTime) && kick is not null && hands.Length > 0;
             // and what they keep it with, a genre's pattern in a bar of four, the hi-hat's pedal where the song has the hi-hat
             var hat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
-            var feetPattern = ostinatos(index).Pick(ByConvention.Weigh(Feet, groove(index), genre.Pool<SoloFeet>(GenreChoices.DrumSoloFeet, x => GenreChoices.Name(x.ToString()))));
+            var feetPattern = ostinatos(index).Pick(ByConvention.Weigh(Feet, groove(index), genre.Pool<SoloFeet>(GenreChoices.DrumSoloFeet)));
             if (whole.Meter.Sixteenths != 16 || feetPattern == SoloFeet.HatFoot && !song.TrackTimelineMap.ContainsKey(hat))
                 feetPattern = SoloFeet.Groove;
             var tracks = song.TrackTimelineMap.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
@@ -259,7 +259,7 @@ internal static class DrumSolos
             var sticks = stickings(index);
             var motifDraws = motifs(index);
             var answered = new List<int>();
-            var stickingWeights = ByConvention.Weigh(Stickings, groove(index), genre.Pool<Sticking>(GenreChoices.Stickings, x => GenreChoices.Name(x.ToString())));
+            var stickingWeights = ByConvention.Weigh(Stickings, groove(index), genre.Pool<Sticking>(GenreChoices.Stickings));
             var common = song.CommonStateTimelineMap;
             var plan = SoloLines.Plan(
                 context,

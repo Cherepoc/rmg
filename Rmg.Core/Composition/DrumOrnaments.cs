@@ -44,7 +44,7 @@ internal static class DrumOrnaments
             return draft;
 
         var notes = SongStages.NotesOf(draft);
-        var snares = notes.Keys.Where(x => x == DrumGroups.GetTrackNumber(DrumDefinitions.AcousticSnare) || x == DrumGroups.GetTrackNumber(DrumDefinitions.ElectricSnare)).ToArray();
+        var snares = notes.Keys.Where(DrumGroups.SnareHeads.Contains).ToArray();
         var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var (fills, stops, map) = (draft.FillSpans, draft.Stopped, song.Form.Map);
         var solos = SongDraft.DrumSoloSpans(song);

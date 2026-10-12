@@ -163,14 +163,6 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         return new EventTimeline<T>(Duration, [.._items.Where(x => x.Position < from || x.Position >= to)]);
     }
 
-    public EventTimeline<T> FilterValues(Func<T, bool> filterFunc)
-    {
-        if (_items.Length == 0)
-            return this;
-
-        return new EventTimeline<T>(Duration, _items.FilterValues(filterFunc));
-    }
-
     public EventTimeline<T> PhaseShift(double phase)
     {
         if (_items.Length == 0)

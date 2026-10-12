@@ -10,14 +10,7 @@ namespace Rmg.Tests.Bass;
 /// <summary>A bass alternating its chord's root and fifth on its strong beats, a country bass's.</summary>
 public sealed class AlternatingBassTest
 {
-    private static Genre With(string preset, double chance)
-    {
-        var genre = GenrePresets.Genre(preset);
-        return genre with
-        {
-            Choices = genre.Choices.SetItem(GenreChoices.AlternatingBass.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("sections", new ByConvention(chance, chance, chance)))
-        };
-    }
+    private static Genre With(string preset, double chance) => GenrePresets.With(preset, GenreChoices.AlternatingBass, ("sections", chance));
 
     /// <summary>
     ///     The share of the bass's strong notes, but the first of each chord, that sound their chord's fifth, in the

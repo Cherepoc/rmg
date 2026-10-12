@@ -44,8 +44,8 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
     /// <summary>The programs a calm section's driven guitars play, an acoustic or a clean one.</summary>
     public static ImmutableArray<int> CalmPrograms { get; } = [25, 27];
 
-    /// <summary>The programs a heavy section's clean, jazz or muted guitars play, the two driven ones.</summary>
-    public static ImmutableArray<int> HeavyPrograms { get; } = [29, 30];
+    /// <summary>The programs a heavy section's clean, jazz or muted guitars play, the driven guitars.</summary>
+    public static ImmutableArray<int> HeavyPrograms { get; } = [..Enumerable.Range(0, 128).Where(x => InstrumentTraits.Has(x, InstrumentTrait.Driven))];
 
     /// <summary>The guitars a heavy section turns: the clean, the jazz and the muted guitar.</summary>
     private static readonly ImmutableHashSet<int> Clean = [26, 27, 28];

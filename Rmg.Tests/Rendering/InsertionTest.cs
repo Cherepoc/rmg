@@ -56,7 +56,7 @@ public sealed class InsertionTest
         Console.WriteLine($"Funk's wah in {played} of 128 songs");
         await Assert.That(played).IsGreaterThan(32);
         // and a song in the middle of the sound plays none, its type unset and no part assigned, as every kind weighs 0 there
-        var middling = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, 0.5));
+        var middling = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Sound, 0.5)));
         foreach (var seed in Enumerable.Range(0, 8))
             await Assert.That(GsMessages(TestCorpus.Get(seed, middling).Rendered).Where(x => x is [0x40, 0x03, 0x00, ..] or [0x40, _, 0x22, ..])).IsEmpty();
     }

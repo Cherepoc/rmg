@@ -9,7 +9,7 @@ namespace Rmg.Tests.Chords;
 /// <summary>A section planing: every chord the home's shape moved by semitones, each by a small move or a fourth, a wild song's alone.</summary>
 public sealed class PlaningTest
 {
-    private static SongOverrides Progression(double value) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, value));
+    private static SongOverrides Progression(double value) => new(Facets: TestCorpus.FacetsOf((Facet.Progression, value)));
 
     [Test]
     public async Task APlanedSectionsChords_AreItsHomesShape_MovedBySmallStepsOrAFourth_NeverFarFromHome_TheLastEndingHome()

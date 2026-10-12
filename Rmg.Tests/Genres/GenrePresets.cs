@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using System.Text.Json;
 using Rmg.Core.Composition;
+using Rmg.Core.Probabilities;
 
 namespace Rmg.Tests.Genres;
 
@@ -17,6 +19,13 @@ internal static class GenrePresets
         Rmg.WebApi.Genres.GenrePresetFile.Genre(new Rmg.WebApi.Genres.GenrePreset(preset.Id, preset.Name, preset.Description, preset.Choices));
 
     public static Genre Genre(string id) => Genre(All.Single(x => x.Id == id));
+
+    /// <summary>A preset with one of its choices set to the options given, each at its chance at every end, the choice's others not played.</summary>
+    public static Genre With(string id, GenreChoice choice, params (string Option, double Chance)[] options)
+    {
+        var genre = Genre(id);
+        return genre with { Choices = genre.Choices.SetItem(choice.Name, options.ToImmutableDictionary(x => x.Option, x => new ByConvention(x.Chance, x.Chance, x.Chance))) };
+    }
 
     /// <summary>A preset without one of its choices, which its songs then take at the songs' own amounts: the same songs with its device as the songs have it.</summary>
     public static Genre Without(string id, string choice)

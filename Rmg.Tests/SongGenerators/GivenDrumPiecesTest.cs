@@ -70,7 +70,7 @@ public sealed class GivenDrumPiecesTest
         var heard = 0;
         foreach (var seed in Enumerable.Range(0, 16))
         {
-            var song = TestCorpus.Get(seed, new SongOverrides(DrumPieces: ["kick", "bongo", "conga"], Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Groove, groove)));
+            var song = TestCorpus.Get(seed, new SongOverrides(DrumPieces: ["kick", "bongo", "conga"], Facets: TestCorpus.FacetsOf((Facet.Groove, groove))));
             // the pieces given, not the drums: a song that draws none has none to hear
             if (!song.PlaysDrums)
                 continue;

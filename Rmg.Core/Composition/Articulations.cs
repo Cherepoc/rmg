@@ -163,7 +163,7 @@ internal static class Articulations
         {
             var program = InstrumentsOverTime.ProgramOf(note.Value.State, own);
             if (!rings(note.Position) || note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 || note.Value.Pitches.Length != 1
-                || !InstrumentTraits.Has(program, InstrumentTrait.Decays) || InstrumentTraits.Has(program, InstrumentTrait.Driven)
+                || !InstrumentTraits.Rings(program)
                 || i + 1 < notes.Length && notes[i + 1].Position - note.Position < RingsFrom - 1e-9)
                 return note;
             var change = changes.FirstOrDefault(x => x > note.Position + 1e-9, timeline.Duration);

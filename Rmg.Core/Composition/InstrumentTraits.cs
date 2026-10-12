@@ -146,4 +146,7 @@ public static class InstrumentTraits
 
     /// <summary>Whether an instrument has a trait.</summary>
     public static bool Has(int program, InstrumentTrait trait) => (Of(program) & trait) == trait;
+
+    /// <summary>Whether an instrument is a clean one that dies away, which a held note or a broken chord lets ring.</summary>
+    public static bool Rings(int program) => Has(program, InstrumentTrait.Decays) && !Has(program, InstrumentTrait.Driven);
 }

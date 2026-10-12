@@ -51,7 +51,7 @@ public sealed class RhythmicUnconventionalityTest
         // spread
         double Tuplets(double feel) => TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
             {
-                var song = TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Feel, feel)));
+                var song = TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Feel, feel))));
                 var hits = song.Song.TrackEventStateTimelineMap.TrackTimelineMap
                     .Where(x => song.IsDrum(x.Key))
                     .SelectMany(x => x.Value.EventTimeline.Select(e => e.Position))

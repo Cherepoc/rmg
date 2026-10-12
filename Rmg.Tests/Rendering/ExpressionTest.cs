@@ -8,7 +8,7 @@ namespace Rmg.Tests.Rendering;
 
 public sealed class ExpressionTest
 {
-    private static SongOverrides Sound(double sound) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, sound));
+    private static SongOverrides Sound(double sound) => new(Facets: TestCorpus.FacetsOf((Facet.Sound, sound)));
 
     [Test]
     public async Task ThePlainestSongs_PlayAReverbAlone()

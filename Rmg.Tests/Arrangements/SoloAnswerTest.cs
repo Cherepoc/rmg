@@ -8,7 +8,7 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class SoloAnswerTest
 {
-    private static SongOverrides Melody(double melody) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Melody, melody));
+    private static SongOverrides Melody(double melody) => new(Facets: TestCorpus.FacetsOf((Facet.Melody, melody)));
 
     /// <summary>The solo part's notes outside its solos, and the melody's, of a song.</summary>
     private static (TimelineItem<RealizedNote>[] Answers, TimelineItem<RealizedNote>[] Melody) Notes(CorpusSong song)

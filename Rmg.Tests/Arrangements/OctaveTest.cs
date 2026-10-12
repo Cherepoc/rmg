@@ -12,7 +12,7 @@ namespace Rmg.Tests.Arrangements;
 /// </summary>
 public sealed class OctaveTest
 {
-    private static SongOverrides Sound(double sound) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, sound));
+    private static SongOverrides Sound(double sound) => new(Facets: TestCorpus.FacetsOf((Facet.Sound, sound)));
 
     /// <summary>Every appearance of a section in which a part that may play octaves plays: whether it does, and its energy.</summary>
     private static IEnumerable<(TrackRole Role, bool InOctaves, double Energy)> Appearances(CorpusSong song) => song.Trace

@@ -74,6 +74,9 @@ internal static class DrumGroups
     // the timekeepers, of which a section has one keep time (DrumKitGenerator.SelectKit): a song has its hi-hat,
     // mostly a ride, and a tambourine or a shaker or two, which a quieter section leans to, as a drummer brings a few, so
     // that the song plays what it has
+    /// <summary>The snares with a head, which ghost and are ornamented, the snare group's but the clap (<see cref="Snare" />).</summary>
+    public static ImmutableArray<int> SnareHeads => [GetTrackNumber(DrumDefinitions.AcousticSnare), GetTrackNumber(DrumDefinitions.ElectricSnare)];
+
     public static DrumGroup Timekeepers { get; } = new(
         nameof(Timekeepers),
         [

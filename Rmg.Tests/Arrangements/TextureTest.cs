@@ -95,7 +95,7 @@ public sealed class TextureTest
     public async Task DrumsABuildBringsInLate_PlayNothingBefore_ButTheFillTheyComeInOn()
     {
         var late = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 1)))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
         foreach (var (span, index) in song.Map.Sections.Select((x, i) => (x, i)))
         {
             var from = song.DrumsFrom(index);

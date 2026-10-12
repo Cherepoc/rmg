@@ -20,7 +20,7 @@ public sealed class KeyChangeTest
     public async Task ALastSectionPlayedTwice_IsLiftedAtItsRepeat_NowAndThen()
     {
         var (repeated, lifted) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 0.5).Add(Facet.Scale, 0.6)))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 0.5), (Facet.Scale, 0.6))))))
         {
             if (!(bool)song.Trace.Single(x => x.Point == TracePoints.LastRepeat).Value!)
                 continue;
@@ -72,7 +72,7 @@ public sealed class KeyChangeTest
     [Test]
     public async Task AMiddlingSong_ChangesKeyOnlyWhereASectionStarts_ALastSectionThatCameBackGoingUpAWholeOrAHalfStep()
     {
-        var middling = new SongOverrides(Base: 0.5, Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Scale, 0.5));
+        var middling = new SongOverrides(Base: 0.5, Facets: TestCorpus.FacetsOf((Facet.Scale, 0.5)));
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, middling));
         var lifts = 0;
         foreach (var song in songs)

@@ -74,7 +74,7 @@ internal static class Texture
     {
         var leans = Kinds.ToDictionary(x => x.Kind, x => x.EnergyLean);
         var kind = context.Pick(energy.Weigh(
-            ByConvention.Weigh(Kinds.Select(x => (x.Kind, x.Weight)), form, genre.Pool<TextureKind>(GenreChoices.Texture, x => GenreChoices.Name(x.ToString()))),
+            ByConvention.Weigh(Kinds.Select(x => (x.Kind, x.Weight)), form, genre.Pool<TextureKind>(GenreChoices.Texture)),
             x => leans[x]));
         TrackRole[] pitched = [..playing.Where(x => x != TrackRole.Drum).Order()];
         // the order the pitched parts come in, drawn whatever the texture, so that the draws stay as they are
@@ -83,7 +83,7 @@ internal static class Texture
         // alone, the drums only where they keep time, as likely each, or as a genre weighs them (GenreChoices.Alone), a
         // metal's clean arpeggio, an ambient piece's pad
         TrackRole[] carrying = [..playing.Where(x => x != TrackRole.Drum || !drumsMark).Order()];
-        var pool = genre.Pool<TrackRole>(GenreChoices.Alone, x => GenreChoices.Name(x.ToString()));
+        var pool = genre.Pool<TrackRole>(GenreChoices.Alone);
         ImmutableArray<Weighted<TrackRole>> weighed = pool is not null
             ? [..carrying.Select(x => new Weighted<TrackRole>(pool(x)?.At(form) ?? 0, x)).Where(x => x.Weight > 0)]
             : [];

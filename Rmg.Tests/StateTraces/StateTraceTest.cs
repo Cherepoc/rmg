@@ -149,7 +149,7 @@ public sealed class StateTraceTest
     [Test]
     public async Task WithoutTrace_StatesKeepNoContributions()
     {
-        var map = new StateMapBuilder("Song")
+        var map = new StateMapBuilder("Song", perTrack: false)
             .Add(StateKinds.KeyOffset, 2)
             .ToStateMap(new Rmg.Core.Probabilities.GenerationContext(0))
             .MergeWith(StateMap.FromStates([StateKinds.KeyOffset.CreateState(3)]));

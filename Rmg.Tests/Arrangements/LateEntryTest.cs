@@ -9,7 +9,7 @@ public sealed class LateEntryTest
     private static ImmutableDictionary<TrackRole, int> Entries(CorpusSong song) =>
         (ImmutableDictionary<TrackRole, int>)song.Trace.Single(x => x.Point == TracePoints.LateEntries).Value!;
 
-    private static SongOverrides Form(double form) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, form));
+    private static SongOverrides Form(double form) => new(Facets: TestCorpus.FacetsOf((Facet.Form, form)));
 
     [Test]
     public async Task AHeldPart_PlaysNothingBeforeItsEntry_AndComesInThere()

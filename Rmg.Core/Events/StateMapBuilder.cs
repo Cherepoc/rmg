@@ -18,7 +18,7 @@ public sealed class StateMapBuilder
     ///     Whether only some tracks see the layer, such as a single track's or the drums', so that it may not set what
     ///     every track must see the same, such as the scale; every map it makes is checked for that.
     /// </param>
-    public StateMapBuilder(string layer, bool perTrack = false)
+    public StateMapBuilder(string layer, bool perTrack)
     {
         _layer = layer;
         _isPerTrack = perTrack;

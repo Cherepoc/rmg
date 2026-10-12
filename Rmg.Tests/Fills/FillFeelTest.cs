@@ -21,9 +21,6 @@ public sealed class FillFeelTest
         await Assert.That(IndexOf(5.0 / 4).ToTuplet()).IsEqualTo(1);
     }
 
-    private static StateMap Rhythm(int tuplet) =>
-        FillArchetypeTest.Groove(-2, 0, 2, Enumerable.Range(-RhythmPeriod.MaxPrimeIndex, 2 * RhythmPeriod.MaxPrimeIndex + 1).First(x => x.ToTuplet() == tuplet));
-
     [Test]
     public async Task TupletSections_PlayTheirFillsInTheirTuplet()
     {
@@ -33,7 +30,7 @@ public sealed class FillFeelTest
         // a feel as plain as it comes, which a fill never changes, so that every fill is in the section's tuplet
         var unconventionality = Unconventionality.Generate(0.5, _ => new GenerationContext(0));
         unconventionality = unconventionality with { Facets = unconventionality.Facets.SetItem(Facet.Feel, 0) };
-        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), unconventionality, FillGrooves.FromSource(Rhythm(3)), 0, false, true, false, Meter.FourFour, 0)).ToArray();
+        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), unconventionality, FillGrooves.FromSource(FillArchetypeTest.Groove(-2, 0, 2, FillArchetypeTest.TripletIndex)), 0, false, true, false, Meter.FourFour, 0)).ToArray();
         using var trace = StateTrace.Start();
 
         new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5), Meter.FourFour, context, Genre.None).Generate(song, FillGenerator.GetSectionLines(sections));

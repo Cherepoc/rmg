@@ -49,7 +49,7 @@ public sealed class UnconventionalityTest
         [
             new(Base: 0),
             new(Base: 1),
-            ..Enum.GetValues<Facet>().Select(facet => new SongOverrides(Base: 0, Facets: ImmutableDictionary<Facet, double>.Empty.Add(facet, 1)))
+            ..Enum.GetValues<Facet>().Select(facet => new SongOverrides(Base: 0, Facets: TestCorpus.FacetsOf((facet, 1))))
         ];
         var songs = TestCorpus.InParallel(Enumerable.Range(0, overrides.Length * 2), x => TestCorpus.Get(x / 2, overrides[x % overrides.Length]));
 

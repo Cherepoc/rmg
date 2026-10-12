@@ -43,6 +43,9 @@ public static class TrackRoles
     /// <summary>Whether the part plays lines, single notes one after another, rather than chords, a pad or drums.</summary>
     public static bool PlaysLine(this TrackRole role) => role is TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody or TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Solo;
 
+    /// <summary>Whether the part sings over the band, a voice's lines: the melody, the counter-melody and the solo part.</summary>
+    public static bool Sings(this TrackRole role) => role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo;
+
     /// <summary>The part a part plays as: the riff for its twin, which plays the riff's line, and any other itself.</summary>
     public static TrackRole Source(this TrackRole role) => role == TrackRole.RiffTwin ? TrackRole.Riff : role;
 

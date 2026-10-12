@@ -78,7 +78,7 @@ internal sealed class SectionGenerator
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
         _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
-        _drums = new SectionDrumGenerator(tracks, genre, songStateMap, sectionEnergies, songPercussion, Stream, TrackStream, FirstRests, Facets, CreateSectionTrackLayer,
+        _drums = new SectionDrumGenerator(tracks, genre, id => SongStateMapOf(id).GetStateValue(CompositionStateKinds.Energy), songPercussion, Stream, Stream, FirstRests, Facets, CreateSectionTrackLayer,
             meter => _generators(meter).Patterns);
     }
 
@@ -122,8 +122,8 @@ internal sealed class SectionGenerator
         return _context.CreateContext(StreamSeed(sectionId, stream));
     }
 
-    /// <summary>A track's own sequence of a section's decision, so that a change to one track leaves the others as they are.</summary>
-    private IGenerationContext TrackStream(int sectionId, SectionStream stream, int track) => new GenerationContext(Seeds.Derive(StreamSeed(sectionId, stream), track));
+    /// <summary>A sequence of a section's decision of its own by a place, a track or a facet, so that a change to one leaves the others as they are.</summary>
+    private IGenerationContext Stream(int sectionId, SectionStream stream, int place) => _context.CreateContext(Seeds.Derive(StreamSeed(sectionId, stream), place));
 
     /// <summary>The seed of <see cref="Stream" />, for a decision that derives its own sequences from it.</summary>
     private ulong StreamSeed(int sectionId, SectionStream stream)
@@ -136,7 +136,7 @@ internal sealed class SectionGenerator
     ///     has, which its drums are drawn by before it is made; a later appearance draws them again (<see cref="GeneratedSection.Appear(int, double)" />).
     /// </summary>
     private ImmutableHashSet<TrackRole> FirstRests(int sectionId, SectionRole role, Tilt tilt) =>
-        Arrangement.DrawRests(new GenerationContext(StreamSeed(sectionId, SectionStream.Arrangement)), tilt, role, _absent, _genre, Facets(sectionId)[Facet.Form]);
+        Arrangement.DrawRests(Stream(sectionId, SectionStream.Arrangement), tilt, role, _absent, _genre, Facets(sectionId)[Facet.Form]);
 
     /// <summary>The section: its pattern played as many times as it plays it, with what the fills need to know of its rhythm.</summary>
     /// <param name="plan">The section's place in the song's form, which some of its draws keep to.</param>
@@ -166,7 +166,7 @@ internal sealed class SectionGenerator
             StateTrace.RecordSection(TracePoints.Feel, SectionTrace, sectionId, $"{feelOfSection}", feelOfSection);
         var sectionStateMap = CreateSectionStateMap(
             songStateMap,
-            new StateMapBuilder(Layers.Section)
+            new StateMapBuilder(Layers.Section, perTrack: false)
                 .AddRhythmLayer(rhythm.Lean(RhythmLayers.Section))
                 .AddNoteWalkLayer()
                 .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
@@ -175,7 +175,7 @@ internal sealed class SectionGenerator
                 .AddNoteDurationLayer()
                 .ToStateMap(Stream(sectionId, SectionStream.SectionState))
                 .MergeWith(feelChange is { } changed ? Feels.At(StateDepths.Section, changed) : StateMap.Default),
-            new StateMapBuilder(Layers.Section)
+            new StateMapBuilder(Layers.Section, perTrack: false)
                 .Add(CompositionStateKinds.ChordPool.Collection, chords)
                 .Add(StateKinds.ChordRoot, home)
                 // the melody higher the more energy the section has than the song, a chorus over its verse
@@ -421,8 +421,11 @@ internal sealed class SectionGenerator
     /// <summary>How far a section strays from convention, facet by facet, each from a sequence of its own.</summary>
     private Unconventionality Facets(int sectionId)
     {
-        return _songFacets.GenerateSection(facet => _context.CreateContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Unconventionality), (int)facet)));
+        return _songFacets.GenerateSection(facet => Stream(sectionId, SectionStream.Unconventionality, (int)facet));
     }
+
+    /// <summary>The song's state with a section's layers of the energy, which its draws lean by.</summary>
+    private StateMap SongStateMapOf(int sectionId) => _songStateMap.MergeWith(_sectionEnergies[sectionId]);
 
     /// <summary>
     ///     How loud and busy the section is meant to be: the song's state with the section's layers of the energy, and
@@ -430,7 +433,7 @@ internal sealed class SectionGenerator
     /// </summary>
     private (StateMap SongStateMap, double Energy) GetEnergy(int sectionId, RhythmicUnconventionality rhythm)
     {
-        var songStateMap = _songStateMap.MergeWith(_sectionEnergies[sectionId]);
+        var songStateMap = SongStateMapOf(sectionId);
         var energy = songStateMap.GetStateValue(CompositionStateKinds.Energy);
         StateTrace.Record(
             TracePoints.SectionEnergy,
@@ -533,7 +536,7 @@ internal sealed class SectionGenerator
             }
 
             // each track from a sequence of its own
-            var context = TrackStream(sectionId, SectionStream.PitchedTracks, trackNumber);
+            var context = Stream(sectionId, SectionStream.PitchedTracks, trackNumber);
             var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal, drone, form);
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
             {
@@ -710,16 +713,16 @@ internal sealed class SectionGenerator
             if (form.Breaker == trackNumber)
             {
                 if (arpeggio == ArpeggioPattern.None)
-                    arpeggio = Arpeggios.DrawBroken(TrackStream(sectionId, SectionStream.CalmArpeggio, trackNumber), sectionRhythm.Facets[Facet.Chords], _genre);
+                    arpeggio = Arpeggios.DrawBroken(Stream(sectionId, SectionStream.CalmArpeggio, trackNumber), sectionRhythm.Facets[Facet.Chords], _genre);
                 sectionTrackLayer.Add(CompositionStateKinds.ShortestNote, SectionForm.CalmShortest);
             }
             StateTrace.RecordSection(TracePoints.Arpeggio, trackNumber, sectionId, $"{arpeggio}", arpeggio);
             sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
             // and, broken in no pattern's order, the seed of its order, from a sequence of its own
             if (arpeggio == ArpeggioPattern.Random)
-                sectionTrackLayer.Add(CompositionStateKinds.ArpeggioOrder, (long)TrackStream(sectionId, SectionStream.ArpeggioOrder, trackNumber).GenerateSeed());
+                sectionTrackLayer.Add(CompositionStateKinds.ArpeggioOrder, (long)Stream(sectionId, SectionStream.ArpeggioOrder, trackNumber).GenerateSeed());
             // and the colour it lays on its broken chord, from a sequence of its own, by the instrument it plays here
-            var colour = Arpeggios.DrawColour(new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Colour), trackNumber)), sectionRhythm.Facets[Facet.Chords], _genre,
+            var colour = Arpeggios.DrawColour(Stream(sectionId, SectionStream.Colour, trackNumber), sectionRhythm.Facets[Facet.Chords], _genre,
                 form.Guitars.Contains(trackNumber) ? form.Program : ((PitchInstrumentTrack)_tracks.Definitions[trackNumber]).InstrumentCode);
             if (arpeggio != ArpeggioPattern.None && colour != ChordColour.None)
                 sectionTrackLayer.Add(CompositionStateKinds.Colour, (int)colour);

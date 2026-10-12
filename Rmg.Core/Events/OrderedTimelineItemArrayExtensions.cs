@@ -222,22 +222,4 @@ internal static class OrderedTimelineItemArrayExtensions
         return newItems.ToImmutable();
     }
 
-    public static ImmutableArray<TimelineItem<T>> FilterValues<T>(
-        this ImmutableArray<TimelineItem<T>> items,
-        Func<T, bool> filterFunc
-    )
-        where T : notnull
-    {
-        if (items.Length == 0)
-            return [];
-
-        var newItems = ImmutableArray.CreateBuilder<TimelineItem<T>>(items.Length);
-        foreach (var item in items)
-        {
-            if (filterFunc(item.Value))
-                newItems.Add(item);
-        }
-
-        return [..newItems];
-    }
 }

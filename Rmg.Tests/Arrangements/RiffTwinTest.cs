@@ -46,7 +46,7 @@ public sealed class RiffTwinTest
     }
 
     private static SongOverrides Melody(double melody, bool? twin) => new(
-        Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Melody, melody),
+        Facets: TestCorpus.FacetsOf((Facet.Melody, melody)),
         Parts: twin is null
             ? ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true)
             : ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true).Add(TrackRole.RiffTwin, twin.Value));

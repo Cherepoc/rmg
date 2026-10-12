@@ -34,7 +34,7 @@ public sealed class SectionTempoTest
     public async Task AChangeOfTempo_IsEasedIntoHalfTheTime_OverTheBarBefore_ButAMetricOne()
     {
         var (changes, eased) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Feel, 1)))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Feel, 1))))))
         {
             var tempos = Tempos(song);
             var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);

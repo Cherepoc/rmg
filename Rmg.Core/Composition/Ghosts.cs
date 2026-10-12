@@ -35,7 +35,7 @@ internal static class Ghosts
     {
         var notes = SongStages.NotesOf(draft);
         var snares = notes.Keys.Where(x => song.Tracks.Definitions[x] is PercussionInstrumentTrack definition && DrumRoles.Of(definition.StateMap) == DrumRole.Backbeat
-                                           && (x == DrumGroups.GetTrackNumber(DrumDefinitions.AcousticSnare) || x == DrumGroups.GetTrackNumber(DrumDefinitions.ElectricSnare))).ToArray();
+                                           && DrumGroups.SnareHeads.Contains(x)).ToArray();
         // every section's draw of each 16th of its bar, none where it does not ghost, drawn for every section so that the
         // draws are as many
         var ghosting = song.SectionIds.Distinct().ToDictionary(id => id, id =>
@@ -50,7 +50,7 @@ internal static class Ghosts
         if (snares.Length == 0 || ghosting.Values.All(x => x is null))
             return draft;
 
-        // but where a fill plays, from its first note to its line, and in stop time
+        // but where a fill plays, from its first note to its line, in stop time and in a drum solo
         var busy = draft.Busy(song);
         var many = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.GhostNotes, "many"));
         var (nearChance, farChance) = (many.Chance(NearChance, 1), many.Chance(FarChance, 1));
@@ -60,9 +60,9 @@ internal static class Ghosts
         {
             var timeline = notes[track];
             var played = timeline.ToList();
-            foreach (var (span, index) in song.Form.Map.Sections.Select((x, i) => (x, i)))
+            foreach (var span in song.Form.Map.Sections)
             {
-                if (ghosting[span.SectionId] is not { } draws || song.Solos.TryGetValue(index, out var solo) && solo.IsDrumSolo)
+                if (ghosting[span.SectionId] is not { } draws)
                     continue;
                 var bar = span.Meter.BarDuration;
                 for (var start = span.Start; start < span.End - 1e-9; start += bar)

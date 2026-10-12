@@ -6,7 +6,7 @@ namespace Rmg.Tests.MelodyRhythms;
 /// <summary>A section's melody on a hook (<see cref="MelodyLayers.HookChanceOf" />): a chorus's convention, every time in the plainest songs and never in the wildest, another section's never but by a genre's.</summary>
 public sealed class MelodyHookTest
 {
-    private static SongOverrides Melody(double melody) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Melody, melody));
+    private static SongOverrides Melody(double melody) => new(Facets: TestCorpus.FacetsOf((Facet.Melody, melody)));
 
     private static (bool IsChorus, bool Hooks)[] Hooks(CorpusSong song)
     {

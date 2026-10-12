@@ -371,7 +371,7 @@ internal sealed class SongFormGenerator
         var snare = FormLayers.BuildRollDrums.Select(DrumGroups.GetTrackNumber).FirstOrDefault(tracks.Contains, -1);
         var drops = new HashSet<double>();
         var filtered = new HashSet<double>();
-        var kinds = ByConvention.Weigh(FormLayers.DropKinds, _songRhythm.Value, _genre.Pool<DropKind>(GenreChoices.DropKind, x => GenreChoices.Name(x.ToString())));
+        var kinds = ByConvention.Weigh(FormLayers.DropKinds, _songRhythm.Value, _genre.Pool<DropKind>(GenreChoices.DropKind));
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];

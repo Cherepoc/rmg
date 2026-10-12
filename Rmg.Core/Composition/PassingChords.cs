@@ -75,7 +75,7 @@ internal static class PassingChords
         Scale scale, int home, Genre genre)
     {
         var changes = rhythm.Changes;
-        var kinds = ByConvention.Weigh(Kinds, unconventionality, genre.Pool<PassingKind>(GenreChoices.PassingKinds, x => GenreChoices.Name(x.ToString())));
+        var kinds = ByConvention.Weigh(Kinds, unconventionality, genre.Pool<PassingKind>(GenreChoices.PassingKinds));
         var passing = ImmutableArray.CreateBuilder<double>();
         var (roots, scales, shifts) = (new List<int>(), new List<ChordScale>(), new List<int>());
         for (var chord = 0; chord < progression.Length; chord++)

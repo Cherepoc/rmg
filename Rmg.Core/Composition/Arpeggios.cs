@@ -130,8 +130,8 @@ internal static class Arpeggios
     /// </summary>
     public static ChordColour DrawColour(IGenerationContext context, double unconventionality, Genre genre, int program)
     {
-        var holds = InstrumentTraits.Has(program, InstrumentTrait.Decays) && !InstrumentTraits.Has(program, InstrumentTrait.Driven);
-        var pool = genre.Pool<ChordColour>(GenreChoices.Colour, x => GenreChoices.Name(x.ToString()));
+        var holds = InstrumentTraits.Rings(program);
+        var pool = genre.Pool<ChordColour>(GenreChoices.Colour);
         // a genre's pool of held tones alone, on an instrument that holds none, the chord as it is
         var allowed = Colours.Where(x => (holds || !Holds(x.Colour)) && (pool is null || pool(x.Colour) is not null)).ToArray();
         return allowed.Length == 0 ? ChordColour.None : context.Pick(ByConvention.Weigh(allowed, unconventionality, pool));
@@ -179,7 +179,7 @@ internal static class Arpeggios
     /// <summary>A pattern that breaks the chord, any but the whole chord, among a genre's pool where it names one, up where it names none of them.</summary>
     public static ArpeggioPattern DrawBroken(IGenerationContext context, double unconventionality, Genre genre)
     {
-        var pool = genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio, x => GenreChoices.Name(x.ToString()));
+        var pool = genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio);
         var broken = Patterns.Where(x => x.Pattern != ArpeggioPattern.None && (pool is null || pool(x.Pattern) is not null)).ToArray();
         return broken.Length == 0 ? ArpeggioPattern.Up : context.Pick(ByConvention.Weigh(broken, unconventionality, pool));
     }
@@ -187,7 +187,7 @@ internal static class Arpeggios
     /// <summary>A section's pattern, by the chords facet of its unconventionality, among a genre's pool where it names one.</summary>
     public static ArpeggioPattern Draw(IGenerationContext context, double unconventionality, Genre genre)
     {
-        return context.Pick(ByConvention.Weigh(Patterns, unconventionality, genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio, x => GenreChoices.Name(x.ToString()))));
+        return context.Pick(ByConvention.Weigh(Patterns, unconventionality, genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio)));
     }
 
     /// <summary>The note of a voiced chord, low to high, that its note of the given place since the chord came in plays.</summary>

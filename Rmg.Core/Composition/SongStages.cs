@@ -305,8 +305,8 @@ internal static class SongStages
     /// </summary>
     internal static SongDraft SoloAnswers(SongDecisions song, SongDraft draft)
     {
-        var solo = song.Tracks.Definitions.Values.OfType<PitchInstrumentTrack>().FirstOrDefault(x => x.Role == TrackRole.Solo);
-        if (solo is null || song.Absent.Contains(TrackRole.Solo))
+        // a song with the solo part, whose soloist its decisions drew
+        if (!song.Soloists.ContainsKey(TrackRole.Solo))
             return draft;
         return draft with
         {
@@ -316,8 +316,7 @@ internal static class SongStages
                 song.Tracks.Definitions,
                 song.Form.Map,
                 song.Solos,
-                song.Soloists.GetValueOrDefault(TrackRole.Solo)
-                ?? Soloist.Generate(song.Stream(SongStream.Soloist, (int)TrackRole.Solo), song.Facets[Facet.Melody], song.Facets[Facet.Sound], solo.InstrumentCode),
+                song.Soloists[TrackRole.Solo],
                 index => song.Sections[index].Facets[Facet.Melody],
                 index => song.AppearanceStream(SongStream.SoloAnswers, index),
                 song.Genre

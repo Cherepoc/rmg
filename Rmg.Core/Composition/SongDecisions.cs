@@ -12,7 +12,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 /// <param name="SectionOf">A section as generated, by its id, made once where it first plays.</param>
 /// <param name="Sections">Every appearance, in the song's order.</param>
-/// <param name="Energies">How loud and busy each appearance is meant to be.</param>
 /// <param name="Solos">The appearances played as solos, by their places.</param>
 /// <param name="Pinned">The parts the song pins to their figures, a genre's (<see cref="DrumRoles.DrawPinned" />).</param>
 /// <param name="Repeats">Whether the last section plays once more, as a last chorus.</param>
@@ -32,7 +31,6 @@ internal sealed record SongDecisions(
     IReadOnlyDictionary<int, Meter> SectionMeters,
     Func<int, GeneratedSection> SectionOf,
     IReadOnlyList<GeneratedSection> Sections,
-    IReadOnlyList<double> Energies,
     IReadOnlyDictionary<int, SoloPlan> Solos,
     IReadOnlyDictionary<TrackRole, Soloist> Soloists,
     ImmutableHashSet<RhythmPart> Pinned,
@@ -45,6 +43,9 @@ internal sealed record SongDecisions(
     SongSound Sound
 )
 {
+    /// <summary>How loud and busy each appearance is meant to be, its section's own as it appears.</summary>
+    public IReadOnlyList<double> Energies => field ??= [..Sections.Select(x => x.Energy)];
+
     /// <summary>
     ///     Where the song plays in stop time, its phrases' start, end and bar, as drawn, decided once for the stages before
     ///     stop time that keep to it (<see cref="Composition.StopTime" />); those after keep to what it played (<see cref="SongDraft.Stopped" />).
@@ -397,15 +398,19 @@ internal sealed record SongDecisions(
             sections.Add(section);
         }
 
-        // every part that solos a soloist of its own, whose solos sound like one player's, each from a sequence of its own,
-        // by the melody facet, and the drummer by the fills facet
-        var soloists = solos.Values.SelectMany(x => x.Soloists).Distinct().ToDictionary(
+        // every part that solos a soloist of its own, whose solos sound like one player's, and the solo part wherever it plays,
+        // whose answers are in its solos' vocabulary, each from a sequence of its own, by the melody facet, and the drummer by
+        // the fills facet
+        var soloing = solos.Values.SelectMany(x => x.Soloists);
+        if (!absent.Contains(TrackRole.Solo) && tracks.Definitions.Values.Any(x => x.Role == TrackRole.Solo))
+            soloing = soloing.Append(TrackRole.Solo);
+        var soloists = soloing.Distinct().ToDictionary(
             role => role,
             role => Soloist.Generate(
                 SongGenerator.CreateStream(seed, SongStream.Soloist, (int)role),
                 songUnconventionality[role == TrackRole.Drum ? Facet.Fills : Facet.Melody],
                 songUnconventionality[Facet.Sound],
-                tracks.Definitions.Values.OfType<PitchInstrumentTrack>().FirstOrDefault(x => x.Role == role)?.InstrumentCode ?? -1));
+                role == TrackRole.Drum ? Soloist.DrumsProgram : tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Single(x => x.Role == role).InstrumentCode));
         foreach (var (role, soloist) in soloists)
             StateTrace.RecordSong(TracePoints.Soloist, $"{role}", (role, soloist));
 
@@ -416,7 +421,7 @@ internal sealed record SongDecisions(
         StateTrace.RecordSong(TracePoints.ShortBars, string.Join(", ", shortBars.Order()), shortBars);
         var form = formGenerator.Assemble(plan, played, sections, shortBars);
         return new SongDecisions(
-            seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections, energies,
+            seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections,
             solos, soloists, pinned, form, repeats, commonStateMap, swing, scale, drumJob,
             // the song's effects, decided before its notes, the part playing its strong one among those it plays
             Expression.DrawSound(Stream(SongStream.Effects), songUnconventionality[Facet.Sound], genre, tracks.Definitions,
@@ -434,7 +439,7 @@ internal sealed record SongDecisions(
         RhythmicUnconventionality rhythmicUnconventionality
     )
     {
-        return new StateMapBuilder(Layers.Song)
+        return new StateMapBuilder(Layers.Song, perTrack: false)
             .AddRhythmLayer(rhythmicUnconventionality.Lean(RhythmLayers.Song))
             .Add(CompositionStateKinds.Rhythm.MaxRank, 2)
             .Add(CompositionStateKinds.Rhythm.Fullness, RhythmSettings.Fullness)
@@ -449,7 +454,7 @@ internal sealed record SongDecisions(
     /// <param name="feel">The feel facet of the song's unconventionality, by which a genre's range of tempos is eased between its ends.</param>
     private static StateMap CreateCommonStateMap(IGenerationContext context, double feel, SongOverrides overrides, Genre genre)
     {
-        var drawn = new StateMapBuilder(Layers.Song)
+        var drawn = new StateMapBuilder(Layers.Song, perTrack: false)
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
             // the dyadic draw of the tempo, or, where a genre gives a range of it, a tempo in the range at the song's feel,
             // leaning to its middle, or to an end as the genre has it

@@ -8,7 +8,7 @@ namespace Rmg.Tests.MelodyRhythms;
 /// <summary>A melody's phrase ending on a goal (<see cref="LinePattern.Goals" />): its held last note on its chord's root or third.</summary>
 public sealed class MelodyGoalTest
 {
-    private static SongOverrides Melody(double melody) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Melody, melody));
+    private static SongOverrides Melody(double melody) => new(Facets: TestCorpus.FacetsOf((Facet.Melody, melody)));
 
     /// <summary>A melody's phrase ends, its held notes but a solo's, in the songs given: how many, and how many on the chord's root, its third and another note.</summary>
     private static (int Ends, int Roots, int Thirds, int ChordTones) Ends(IEnumerable<CorpusSong> songs)

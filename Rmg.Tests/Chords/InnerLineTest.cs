@@ -13,7 +13,7 @@ public sealed class InnerLineTest
     {
         var lined = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
-                     new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Chords, 0.8)))))
+                     new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Chords, 0.8))))))
         foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0))
         {
             lined++;
@@ -35,7 +35,7 @@ public sealed class InnerLineTest
     public async Task APlainSong_MovesNoLine()
     {
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed,
-                     new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Chords, 0)))))
+                     new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Chords, 0))))))
             await Assert.That(song.Song.Notes!.Values.SelectMany(x => x).All(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) == 0)).IsTrue();
     }
 }

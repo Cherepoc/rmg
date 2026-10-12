@@ -42,7 +42,7 @@ public sealed class PassingChordTest
     [Test]
     public async Task AChromaticPassingChord_SoundsTheNextASemitoneAboveOrBelow_AHalfDiminishedOneOnlyBelow()
     {
-        var wild = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, 0.9), Genre: GenrePresets.Genre("jazz"));
+        var wild = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0.9)), Genre: GenrePresets.Genre("jazz"));
         var (above, below) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, wild)))
         {
@@ -79,7 +79,7 @@ public sealed class PassingChordTest
     [Test]
     public async Task ThePlainestSongs_PassNoChord()
     {
-        var plain = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, 0), Genre: GenrePresets.Genre("jazz"));
+        var plain = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0)), Genre: GenrePresets.Genre("jazz"));
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, plain)))
             await Assert.That(Sections(song).All(x => x.Rhythm.Passing.IsEmpty)).IsTrue();
     }

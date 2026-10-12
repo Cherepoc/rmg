@@ -13,7 +13,7 @@ public sealed class SectionPedalTest
     {
         int phrases = 0, held = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
-                     new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, 0.9)))))
+                     new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0.9))))))
         {
             var pedalling = song.Trace.Where(x => x.Point == TracePoints.SectionPedal && x.Value is not null).ToDictionary(x => x.Section, x => (int)x.Value!);
             var bass = song.Song.Notes![song.Song.Track(TrackRole.Bass)];

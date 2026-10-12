@@ -17,12 +17,13 @@ public sealed class StateTimelineGeneratorTest
     [Arguments(2)]
     public async Task Values_ChangeOnlyAtStepStarts(double stepDuration)
     {
-        var generator = StateTimelineGenerator.Create(StateKind, stepDuration, ValueGenerator);
+        var generator = StateTimelineGenerator.Create(StateKind, stepDuration, ValueGenerator, 4, "Bar");
 
         var result = generator.Generate(new GenerationContext(1), 16);
 
         await Assert.That(result.Duration).IsEqualTo(16);
-        await Assert.That(result.Count).IsEqualTo((int)(16 / stepDuration));
+        // a value from its pool every step, two steps alike one change
+        await Assert.That(result.Count).IsLessThanOrEqualTo((int)(16 / stepDuration));
         foreach (var item in result)
             await Assert.That(item.Position % stepDuration).IsEqualTo(0);
     }
@@ -30,7 +31,7 @@ public sealed class StateTimelineGeneratorTest
     [Test]
     public async Task PoolOfOne_ResultsIn_OneValueAllAlong()
     {
-        var generator = StateTimelineGenerator.Create(StateKind, 4, ValueGenerator, poolSize: 1);
+        var generator = StateTimelineGenerator.Create(StateKind, 4, ValueGenerator, 1, "Bar");
 
         var result = generator.Generate(new GenerationContext(1), 16);
 
@@ -40,7 +41,7 @@ public sealed class StateTimelineGeneratorTest
     [Test]
     public async Task Pool_ResultsIn_ValuesFromThePool()
     {
-        var generator = StateTimelineGenerator.Create(StateKind, 1, ValueGenerator, poolSize: 2);
+        var generator = StateTimelineGenerator.Create(StateKind, 1, ValueGenerator, 2, "Bar");
 
         var result = generator.Generate(new GenerationContext(1), 64);
 
@@ -50,7 +51,7 @@ public sealed class StateTimelineGeneratorTest
     [Test]
     public async Task SameContextSeed_ResultsIn_SameTimeline()
     {
-        var generator = StateTimelineGenerator.Create(StateKind, 4, ValueGenerator, poolSize: 4);
+        var generator = StateTimelineGenerator.Create(StateKind, 4, ValueGenerator, 4, "Bar");
 
         var result1 = generator.Generate(new GenerationContext(7), 16);
         var result2 = generator.Generate(new GenerationContext(7), 16);
@@ -63,7 +64,7 @@ public sealed class StateTimelineGeneratorTest
     [Arguments(-1)]
     public async Task NonPositiveStep_ResultsIn_ThrownException(double stepDuration)
     {
-        await Assert.That(() => StateTimelineGenerator.Create(StateKind, stepDuration, ValueGenerator))
+        await Assert.That(() => StateTimelineGenerator.Create(StateKind, stepDuration, ValueGenerator, 4, "Bar"))
             .Throws<ArgumentOutOfRangeException>();
     }
 }

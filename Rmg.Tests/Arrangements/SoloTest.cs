@@ -42,7 +42,7 @@ public sealed class SoloTest
     public async Task ASolo_IsPlayedByItsSoloists_TheMelodyResting_AndADrumSolo_ByTheDrumsAlone()
     {
         var checkedSolos = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 1)))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
         foreach (var (index, solo) in song.Solos)
         {
             // a melody with no notes there leaves nothing to solo on
@@ -71,7 +71,7 @@ public sealed class SoloTest
     }
 
     private static SongOverrides Facets(double form, double melody) =>
-        new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, form).Add(Facet.Melody, melody));
+        new(Facets: TestCorpus.FacetsOf((Facet.Form, form), (Facet.Melody, melody)));
 
     /// <summary>Every pitched solo's segments, as the trace records them: whether it is its own, and each segment's start, end, intensity and gesture.</summary>
     private static (int Index, bool IsOwn, (double Start, double End, double Intensity, SoloGesture Gesture)[] Segments)[] Gestures(CorpusSong song) =>
@@ -249,7 +249,7 @@ public sealed class SoloTest
     }
 
     /// <summary>A song of solos played as wild as can be, its form, its melody and its sound.</summary>
-    private static SongOverrides Wild => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 1).Add(Facet.Melody, 1).Add(Facet.Sound, 1));
+    private static SongOverrides Wild => new(Facets: TestCorpus.FacetsOf((Facet.Form, 1), (Facet.Melody, 1), (Facet.Sound, 1)));
 
     /// <summary>Every note of a song's solos, by the intensity there, from 0 to 1.</summary>
     private static (double Intensity, RealizedNote Note)[] SoloNotes(CorpusSong song) =>
@@ -575,7 +575,7 @@ public sealed class SoloTest
     {
         foreach (var value in new[] { 0.25, 0.5, 0.75, 1.0 })
         {
-            var overrides = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, value).Add(Facet.Melody, value).Add(Facet.Sound, value));
+            var overrides = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, value), (Facet.Melody, value), (Facet.Sound, value)));
             var songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, overrides));
             var soloists = songs.SelectMany(s => s.Soloists.Values).ToArray();
             var plans = songs.SelectMany(Plans).ToArray();

@@ -230,7 +230,7 @@ internal sealed class BarStateGenerator
             )
             .WithLayer("Bar");
 
-        var arrivalWeights = ByConvention.Weigh(BassLeadingLayers.ArrivalWeights, unconventionality, _genre.Pool<ChordArrival>(GenreChoices.BassLanding, x => GenreChoices.Name(x.ToString())));
+        var arrivalWeights = ByConvention.Weigh(BassLeadingLayers.ArrivalWeights, unconventionality, _genre.Pool<ChordArrival>(GenreChoices.BassLanding));
         var arrivalGenerator = Generators.WeightedIndex(arrivalWeights);
         var arrivals = StateTimeline.Create(
                 _meter.PatternDuration,

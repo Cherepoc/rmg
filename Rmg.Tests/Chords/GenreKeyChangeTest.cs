@@ -9,7 +9,7 @@ namespace Rmg.Tests.Chords;
 public sealed class GenreKeyChangeTest
 {
     private static double Changing(Genre genre, double scale) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(
-            Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Scale, scale), Genre: genre)))
+            Facets: TestCorpus.FacetsOf((Facet.Scale, scale)), Genre: genre)))
         .Average(x => ((ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).IsEmpty ? 0.0 : 1);
 
     private static Genre Without(string id, string choice) => GenrePresets.Without(id, choice);

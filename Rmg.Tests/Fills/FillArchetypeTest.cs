@@ -83,7 +83,7 @@ public sealed class FillArchetypeTest
     /// <summary>A fill's layer of the given ranks finer.</summary>
     private static StateMap Layer(int ranks) => StateMap.FromStates([CompositionStateKinds.Rhythm.MaxRank.CreateState(ranks)]);
 
-    private static int TripletIndex { get; } =
+    internal static int TripletIndex { get; } =
         Enumerable.Range(-RhythmPeriod.MaxPrimeIndex, 2 * RhythmPeriod.MaxPrimeIndex + 1).First(x => x.ToTuplet() == 3);
 
     private static FillRun Run(IEnumerable<RunSound> sounds, FillPath path = FillPath.OneWay, int width = 1, FillSpeed speed = FillSpeed.Steady) =>

@@ -57,6 +57,14 @@ internal static class TestCorpus
     /// <summary>The song of the seed with what the overrides set in place of its own draws, made afresh every time.</summary>
     public static CorpusSong Get(int seed, SongOverrides overrides) => Generate(seed, overrides);
 
+    /// <summary>Facets given a song, as <see cref="SongOverrides.Facets" /> takes them.</summary>
+    public static ImmutableDictionary<Facet, double> FacetsOf(params (Facet Facet, double Value)[] facets) => facets.ToImmutableDictionary(x => x.Facet, x => x.Value);
+
+    /// <summary>A genre naming one choice alone, its options given played always, at every end, the songs' own everywhere else.</summary>
+    public static Genre Always(GenreChoice choice, params string[] options) =>
+        new(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty.Add(choice.Name,
+            options.ToImmutableDictionary(x => x, _ => new Rmg.Core.Probabilities.ByConvention(1, 1, 1))));
+
     /// <summary>A genre of every section's pattern so many phrases long, and nothing else, as a long pattern's test asks songs in.</summary>
     public static Genre PhrasesOnly(int phrases) => new(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
         .Add(GenreChoices.Phrases.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(GenreChoices.PhrasesName(phrases), new(1, 1, 1))));

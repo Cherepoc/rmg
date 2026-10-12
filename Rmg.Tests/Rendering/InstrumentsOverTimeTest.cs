@@ -8,7 +8,7 @@ namespace Rmg.Tests.Rendering;
 
 public sealed class InstrumentsOverTimeTest
 {
-    private static SongOverrides Sound(double sound) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, sound));
+    private static SongOverrides Sound(double sound) => new(Facets: TestCorpus.FacetsOf((Facet.Sound, sound)));
 
     private static (int Index, TrackRole Role, int Program, ArticulationMode Mode, int Variant)[] Changes(CorpusSong song) =>
         [..song.Trace.Where(x => x.Point == TracePoints.InstrumentOverTime).Select(x => ((int, TrackRole, int, ArticulationMode, int))x.Value!)];

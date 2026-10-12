@@ -94,7 +94,7 @@ public sealed class DrummerTest
     public async Task RunChances_AreTheGroups_TheUnconventionalOnesByTheFillsFacet()
     {
         StateMap Drum(PercussionInstrumentDefinition drum) =>
-            DrumGroups.All.Single(x => x.Drums.Contains(drum)).ConfigureStateMap(new StateMapBuilder("Test")).ToStateMap(new GenerationContext(1));
+            DrumGroups.All.Single(x => x.Drums.Contains(drum)).ConfigureStateMap(new StateMapBuilder("Test", perTrack: false)).ToStateMap(new GenerationContext(1));
 
         // the snare as likely in any section, the kick never at the plain end and always at the wild
         await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.AcousticSnare), 0)).IsEqualTo(FillGenerator.GetRunChance(Drum(DrumDefinitions.AcousticSnare), 1));

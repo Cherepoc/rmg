@@ -10,14 +10,7 @@ namespace Rmg.Tests.Forms;
 public sealed class BreakdownTest
 {
     /// <summary>A preset with every section that may break down broken down.</summary>
-    private static Genre Always(string preset)
-    {
-        var genre = GenrePresets.Genre(preset);
-        return genre with
-        {
-            Choices = genre.Choices.SetItem(GenreChoices.Breakdown.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("sections", new ByConvention(1, 1, 1)))
-        };
-    }
+    private static Genre Always(string preset) => GenrePresets.With(preset, GenreChoices.Breakdown, ("sections", 1));
 
     private static bool[] Breakdowns(CorpusSong song) =>
         [..song.Map.Sections.Select(x => song.Trace.Any(t => t.Point == TracePoints.Breakdown && t.Section == x.SectionId && (bool)t.Value!))];

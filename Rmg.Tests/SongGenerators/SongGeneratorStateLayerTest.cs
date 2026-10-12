@@ -52,7 +52,7 @@ public sealed class SongGeneratorStateLayerTest
     {
         // Render applies the track definition's state to every note of the track, so generation must not bake it in
         var trackDefinition = new PitchInstrumentTrack(
-            new StateMapBuilder("Test")
+            new StateMapBuilder("Test", perTrack: false)
                 .Add(StateKinds.Velocity, 0.5)
                 .Add(CompositionStateKinds.Rhythm.Period.Power, -1)
                 .ToStateMap(new FakeGenerationContext()),

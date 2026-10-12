@@ -8,7 +8,7 @@ namespace Rmg.Tests.Arrangements;
 public sealed class DrumSoloTest
 {
     /// <summary>Songs of wild solos, their form, melody and fills, where the drums solo as often as any part.</summary>
-    private static SongOverrides Wild => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 1).Add(Facet.Melody, 1).Add(Facet.Fills, 1));
+    private static SongOverrides Wild => new(Facets: TestCorpus.FacetsOf((Facet.Form, 1), (Facet.Melody, 1), (Facet.Fills, 1)));
 
     /// <summary>Every drum solo of a song, as the trace records it, with the section it plays in.</summary>
     private static (SectionSpan Span, SoloLines.Segment[] Plan, bool Feet, DrumSolo Solo)[] DrumSolos(CorpusSong song) =>

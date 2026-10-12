@@ -9,12 +9,7 @@ namespace Rmg.Tests.Arrangements;
 /// <summary>A twin-guitar break: a pitched solo played by two parts together a third apart.</summary>
 public sealed class SoloTwinTest
 {
-    private static Genre Always(string preset)
-    {
-        var genre = GenrePresets.Genre(preset);
-        var chances = ImmutableDictionary<string, ByConvention>.Empty.Add("sections", new ByConvention(1, 1, 1)).Add("twins", new ByConvention(1, 1, 1));
-        return genre with { Choices = genre.Choices.SetItem(GenreChoices.Solos.Name, chances) };
-    }
+    private static Genre Always(string preset) => GenrePresets.With(preset, GenreChoices.Solos, ("sections", 1), ("twins", 1));
 
     /// <summary>
     ///     A twinned solo is two parts or more together, the others a third apart, playing none of the first's notes that

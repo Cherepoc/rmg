@@ -79,7 +79,7 @@ internal static class LineScales
     public static LineScale Draw(IGenerationContext context, double unconventionality, Genre genre, bool riff)
     {
         var choice = riff && genre.Names(GenreChoices.RiffScale) ? GenreChoices.RiffScale : GenreChoices.LineScale;
-        return context.Pick(ByConvention.Weigh(Weights, unconventionality, genre.Pool<LineScale>(choice, x => GenreChoices.Name(x.ToString()))));
+        return context.Pick(ByConvention.Weigh(Weights, unconventionality, genre.Pool<LineScale>(choice)));
     }
 
     /// <summary>

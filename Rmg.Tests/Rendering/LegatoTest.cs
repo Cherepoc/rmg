@@ -7,7 +7,7 @@ namespace Rmg.Tests.Rendering;
 /// <summary>Legato: a line's step slurred, the note before held into it, never in the plainest songs.</summary>
 public sealed class LegatoTest
 {
-    private static SongOverrides Sound(double value) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, value));
+    private static SongOverrides Sound(double value) => new(Facets: TestCorpus.FacetsOf((Facet.Sound, value)));
 
     [Test]
     public async Task ASlurredNote_StepsFromTheNoteBefore_WhichReachesIt_AndAPlainSongSlursNone()

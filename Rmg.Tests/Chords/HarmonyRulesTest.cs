@@ -8,9 +8,7 @@ namespace Rmg.Tests.Chords;
 /// <summary>The harmony's devices kept where they belong: out of the plainest songs, a vamp on its one chord, a section's home in its genre's pool.</summary>
 public sealed class HarmonyRulesTest
 {
-    private static Genre With(GenreChoice choice, string option) =>
-        new(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty.Add(choice.Name,
-            ImmutableDictionary<string, ByConvention>.Empty.Add(option, new ByConvention(1, 1, 1))));
+    private static Genre With(GenreChoice choice, string option) => TestCorpus.Always(choice, option);
 
     /// <summary>The plainest songs never reharmonise an appearance nor hold a section over a pedal.</summary>
     [Test]

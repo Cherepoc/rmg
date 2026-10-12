@@ -13,7 +13,7 @@ public sealed class SpreadVoicingTest
     /// </summary>
     private static (double Share, int Songs) TwoOctaves(double chords)
     {
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Chords, chords))))
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Chords, chords)))))
             .Select(x => x.Song.Notes![x.Song.Track(TrackRole.Chords)].Where(n => n.Value.Pitches.Length >= 3).Select(n => n.Value.Pitches.Max() - n.Value.Pitches.Min() >= 24).ToArray())
             .ToArray();
         return (songs.SelectMany(x => x).Average(x => x ? 1.0 : 0), songs.Count(x => x.Any(y => y)));

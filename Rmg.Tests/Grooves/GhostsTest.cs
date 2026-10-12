@@ -9,11 +9,7 @@ namespace Rmg.Tests.Grooves;
 /// <summary>A snare's ghost notes: soft 16ths off the beat around its backbeat.</summary>
 public sealed class GhostsTest
 {
-    private static Genre With(string preset, double chance)
-    {
-        var genre = GenrePresets.Genre(preset);
-        return genre with { Choices = genre.Choices.SetItem(GenreChoices.Ghosts.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("sections", new ByConvention(chance, chance, chance))) };
-    }
+    private static Genre With(string preset, double chance) => GenrePresets.With(preset, GenreChoices.Ghosts, ("sections", chance));
 
     /// <summary>The snare's notes a song ghosting adds to the song as it is without, which they leave as it was.</summary>
     private static (double Position, double Velocity, double Loudest)[] Added(CorpusSong with, CorpusSong without)
