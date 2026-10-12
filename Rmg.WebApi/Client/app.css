@@ -289,8 +289,7 @@ button:disabled,
 }
 
 /* a filled button's border is already the accent, so under the pointer its fill moves toward the text colour */
-.primary:hover:not(:disabled),
-#play:hover:not(:disabled) {
+.primary:hover:not(:disabled) {
     --accent-hover: color-mix(in srgb, var(--accent) 82%, var(--text));
     background: var(--accent-hover);
     border-color: var(--accent-hover);
@@ -592,13 +591,6 @@ button.icon[aria-pressed="true"],
 
 .history-panel .clear:disabled {
     visibility: hidden;
-}
-
-/* the one control used more than any other once there is a song, so it carries the accent too */
-#play {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-text);
 }
 
 .transport {
@@ -1568,8 +1560,9 @@ canvas.pulse {
 
     /*
      * the song panel's controls flow as one: the song's own buttons and its seed on a line, the seed's name read out
-     * rather than shown to leave it room; the playing buttons, the rating and Share on the next; where the song is, its
-     * times either side of it and the volume after them, on the next; and the downloads and the seed to play under them
+     * rather than shown to leave it room; the playing buttons, the rating and Share on the next; the harmony and the
+     * volume on the next; the seek bar, its times either side of it, on a line of its own under them; and the genre's row,
+     * the downloads and the seed to play under them
      */
     .song-panel {
         display: flex;
@@ -1839,8 +1832,9 @@ canvas.pulse {
 }
 
 /*
- * a finger needs more to aim at than a mouse does: the small controls grow to a size that can be hit,
- * whatever the width of the screen they are on
+ * a finger needs more to aim at than a mouse does: the history's buttons and the mixer's switches, used most, grow
+ * to a size that can be hit, whatever the width of the screen they are on; the settings' switches, lists and drum
+ * pieces stay as they are
  */
 /* on a wide touch screen, the given switches' column as wide as the switch a finger gets, and the song volume stepped in
    by it */

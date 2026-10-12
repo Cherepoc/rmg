@@ -15,7 +15,8 @@ export function downloadJson(name, value) {
     link.href = URL.createObjectURL(new Blob([JSON.stringify(value, null, 1)], { type: "application/json" }));
     link.download = name;
     link.click();
-    setTimeout(() => URL.revokeObjectURL(link.href));
+    // let go of once the download has surely taken it, as a browser may cancel one whose address goes at once
+    setTimeout(() => URL.revokeObjectURL(link.href), 60_000);
 }
 
 /** A hidden input of a genre's JSON file, which hands the text of a file chosen on; its click() asks for one. */

@@ -6,6 +6,8 @@
  *     of its genre. They are served beside the page, `listening.json`, and fetched only where the page listens.
  */
 
+import { minutesAndSeconds } from "./text.js";
+
 /** The questions, as the server serves them beside the page. */
 export async function loadQuestions() {
     const response = await fetch(new URL("listening.json", location.href));
@@ -70,7 +72,7 @@ export function createListeningIndex(questions, verdicts, genreName) {
 const LEAD_SECONDS = 2;
 
 /** Seconds as minutes and seconds, 1:05. */
-const clock = (seconds) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+const clock = minutesAndSeconds;
 
 /** What a verdict says, as the server keeps it, by the button's choice. */
 const CHOICES = [

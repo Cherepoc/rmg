@@ -6,17 +6,14 @@ import { DRUM_GROUPS, FACETS, LAST_STEP, MIDDLE_STEP, PARTS } from "./settings.j
  *     of the server; what changes only how it sounds is heard at once.
  */
 
+/** The values given or drawn whole, each by its value before the song is made: the middle of its steps, or the first. */
+const SCALARS = { unconventionality: MIDDLE_STEP, tempo: MIDDLE_STEP, key: 0, meter: 0, mode: 0, swing: 0, length: MIDDLE_STEP };
+
 /** Nothing given, every value in the middle and every part and drum group at its fullest, as a first visit starts. */
 export function defaultSettings() {
     return {
-        unconventionality: { isGiven: false, value: MIDDLE_STEP },
+        ...Object.fromEntries(Object.entries(SCALARS).map(([name, value]) => [name, { isGiven: false, value }])),
         facets: Object.fromEntries(FACETS.map((facet) => [facet, { isGiven: false, value: MIDDLE_STEP }])),
-        tempo: { isGiven: false, value: MIDDLE_STEP },
-        key: { isGiven: false, value: 0 },
-        meter: { isGiven: false, value: 0 },
-        mode: { isGiven: false, value: 0 },
-        swing: { isGiven: false, value: 0 },
-        length: { isGiven: false, value: MIDDLE_STEP },
         parts: Object.fromEntries(PARTS.map((part) => [part, {
             plays: "random",
             instrument: { isGiven: false, value: 0 },
@@ -40,14 +37,8 @@ export function givenOnly(settings) {
     const fresh = defaultSettings();
     const keep = (given, drawn) => (given.isGiven ? { ...given } : drawn);
     return {
-        unconventionality: keep(settings.unconventionality, fresh.unconventionality),
+        ...Object.fromEntries(Object.keys(SCALARS).map((name) => [name, keep(settings[name], fresh[name])])),
         facets: Object.fromEntries(FACETS.map((facet) => [facet, keep(settings.facets[facet], fresh.facets[facet])])),
-        tempo: keep(settings.tempo, fresh.tempo),
-        key: keep(settings.key, fresh.key),
-        meter: keep(settings.meter, fresh.meter),
-        mode: keep(settings.mode, fresh.mode),
-        swing: keep(settings.swing, fresh.swing),
-        length: keep(settings.length, fresh.length),
         parts: Object.fromEntries(PARTS.map((part) => {
             const given = settings.parts[part];
             return [part, { ...given, instrument: keep(given.instrument, fresh.parts[part].instrument), pan: keep(given.pan, fresh.parts[part].pan) }];
@@ -64,7 +55,7 @@ export function requestFor(seed, settings) {
     const given = (setting) => (setting.isGiven ? setting.value : undefined);
     return {
         seed,
-        unconventionality: given(settings.unconventionality),
+        ...Object.fromEntries(Object.keys(SCALARS).map((name) => [name, given(settings[name])])),
         facets: Object.fromEntries(FACETS.filter((facet) => settings.facets[facet].isGiven).map((facet) => [facet, settings.facets[facet].value])),
         volume: settings.volume,
         parts: Object.fromEntries(PARTS.map((part) => {
@@ -77,12 +68,6 @@ export function requestFor(seed, settings) {
             }];
         })),
         drumPieces: given(settings.drumPieces),
-        tempo: given(settings.tempo),
-        key: given(settings.key),
-        meter: given(settings.meter),
-        mode: given(settings.mode),
-        swing: given(settings.swing),
-        length: given(settings.length),
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { ...settings.drumGroups[group] }])),
         genre: Object.keys(settings.genre.choices).length > 0 ? settings.genre.choices : undefined,
         genreName: Object.keys(settings.genre.choices).length > 0 ? settings.genre.name : undefined,
@@ -100,14 +85,8 @@ const RISER_PROGRAM = 119;
 export function applyReport(settings, report) {
     const next = structuredClone(settings);
     const drawn = (setting, reported) => (setting.isGiven ? setting : { isGiven: false, value: reported.value });
-    next.unconventionality = drawn(settings.unconventionality, report.unconventionality);
+    for (const name of Object.keys(SCALARS)) next[name] = drawn(settings[name], report[name]);
     for (const facet of FACETS) next.facets[facet] = drawn(settings.facets[facet], report.facets[facet]);
-    next.tempo = drawn(settings.tempo, report.tempo);
-    next.key = drawn(settings.key, report.key);
-    next.meter = drawn(settings.meter, report.meter);
-    next.mode = drawn(settings.mode, report.mode);
-    next.swing = drawn(settings.swing, report.swing);
-    next.length = drawn(settings.length, report.length);
     next.drumPieces = drawn(settings.drumPieces, report.drumPieces);
 
     const channels = {};

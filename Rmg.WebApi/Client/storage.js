@@ -60,11 +60,16 @@ export function recallSettings() {
     }
 }
 
+/** Whether a value read back is a genre: a name and what it says of the choices. */
+function isGenre(x) {
+    return typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null;
+}
+
 /** The genres made in this browser (genres.js), each a name and what it says of the choices; none for none. */
 export function recallGenres() {
     try {
         const kept = JSON.parse(localStorage.getItem(GENRES) ?? "[]");
-        return Array.isArray(kept) ? kept.filter((x) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null) : [];
+        return Array.isArray(kept) ? kept.filter(isGenre) : [];
     } catch {
         return [];
     }
@@ -95,7 +100,7 @@ export function recallGenre() {
     try {
         const kept = JSON.parse(localStorage.getItem(GENRE) ?? "null");
         if (typeof kept?.preset === "string") return { preset: kept.preset };
-        return typeof kept?.name === "string" && typeof kept?.choices === "object" && kept.choices !== null ? kept : null;
+        return isGenre(kept) ? kept : null;
     } catch {
         return null;
     }
@@ -107,7 +112,7 @@ export function recallGenreCopies() {
         const kept = JSON.parse(localStorage.getItem(GENRE_COPIES) ?? "{}");
         if (kept === null || typeof kept !== "object" || Array.isArray(kept)) return {};
         // every copy a genre, as the others are read, one of another shape left out
-        return Object.fromEntries(Object.entries(kept).filter(([, x]) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null));
+        return Object.fromEntries(Object.entries(kept).filter(([, x]) => isGenre(x)));
     } catch {
         return {};
     }

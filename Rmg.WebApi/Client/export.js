@@ -24,18 +24,20 @@ export async function renderSong(song, soundFont, onProgress) {
     // nothing may come between building the synthesizer and starting the render: Chromium drops
     // worklet messages sent to an offline context, so the render is what carries the song and the bank
     const synth = new WorkletSynthesizer(context, { eventsEnabled: false });
-    synth.connect(createLimiter(context)).connect(context.destination);
-    await synth.startOfflineRender({
-        soundBankList: [{ bankOffset: 0, soundBankBuffer: soundFont }],
-        midiSequence: midi,
-        loopCount: 0,
-    });
-
-    // a compressed bank still has to be decoded before a note of it can be rendered
-    await synth.isReady;
-
-    const reporting = setInterval(() => onProgress(Math.min(1, synth.currentTime / midi.duration)), 200);
+    let reporting = null;
+    // let go of whatever fails, a bank that cannot be decoded among it
     try {
+        synth.connect(createLimiter(context)).connect(context.destination);
+        await synth.startOfflineRender({
+            soundBankList: [{ bankOffset: 0, soundBankBuffer: soundFont }],
+            midiSequence: midi,
+            loopCount: 0,
+        });
+
+        // a compressed bank still has to be decoded before a note of it can be rendered
+        await synth.isReady;
+
+        reporting = setInterval(() => onProgress(Math.min(1, synth.currentTime / midi.duration)), 200);
         return await context.startRendering();
     } finally {
         clearInterval(reporting);

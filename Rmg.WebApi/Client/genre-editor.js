@@ -3,7 +3,7 @@ import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
 import { endsOf, isPresetName, nestedChoices, NOT_A_GENRE, ownOf, readGenreFile, sameName } from "./genres.js";
 import { ADDED_WEIGHT, createGenreTune } from "./genre-tune.js";
-import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelOf, svg } from "./genre-charts.js";
+import { byMiddle, COLOURS, drawBand, drawLines, drawShares, ENDS, endsInWords, labelOf, svg } from "./genre-charts.js";
 
 /**
  *     The genre editor, a popup over the page: a draft genre, a name and what it says of the choices the songs draw
@@ -202,7 +202,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
             // the most of each end alone, on one line
             const words = endsInWords(choice, preview, 1);
             // the words cut short where the three do not fit, the number never
-            ends.append(...["Plainest", "Middling", "Experimental"].map((end, i) => {
+            ends.append(...ENDS.map((end, i) => {
                 const told = words[i][0] ?? { words: choice.kind === "values" ? "default" : "none", number: "" };
                 const span = html("span", "");
                 span.append(html("span", "genre-end-words", `${end}: ${told.words}`), html("span", "genre-end-number", told.number === "" ? "" : ` ${told.number}`));
@@ -433,8 +433,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
 
     const body = document.createElement("div");
     body.className = "genre-body";
+    // those the server has, as a soloist has an instrument alone
     const partNames = [...PITCHED.flatMap(([part]) => [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`]), ...Object.values(PART_CHOICES).flat(), "kit", "drumPieces", "drumSetup",
-        ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])];
+        ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])].filter((name) => choices.has(name));
     body.append(
         description,
         principles,
@@ -461,7 +462,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         // a list of genres, every one of them, kept among one's own, none where one is no genre the server plays; one genre
         // opened as the draft, its problem said
         const refused = read?.genres?.find((x) => problemOf(x) !== null);
-        if (refused) showProblem(`${refused.name}: ${problemOf(refused)}`);
+        if (refused) showProblem(`${refused.name}: ${problemOf(refused)}`, false);
         else if (read?.genres) {
             told.textContent = `${onKeepAll(read.genres)} kept among yours.`;
             told.hidden = false;
@@ -470,7 +471,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
             origin = null;
             load(read.genre);
         }
-        else showProblem(NOT_A_GENRE);
+        else showProblem(NOT_A_GENRE, false);
     });
     const imported = button("Import JSON", "Open a genre saved as a JSON file, or keep every one of a list of them", () => file.click());
 
@@ -595,13 +596,19 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         return empty ? `${poolName(empty[0])} keeps none of its options.` : null;
     }
 
-    function showProblem(text = problemOf(draft)) {
+    /**
+     * Says the draft's problem, or another, a file refused, which leaves the draft as it was: the buttons as the draft's
+     * own problem has them where the text is not the draft's.
+     */
+    function showProblem(text = problemOf(draft), isTheDrafts = true) {
+        const drafts = isTheDrafts ? text : problemOf(draft);
         // a preset's name kept for the preset, the draft played under it but saved under another
-        const said = text ?? (isPresetName(draft.name) ? `${draft.name.trim()} is a preset's name: save yours under another.` : null);
+        const named = isPresetName(draft.name) ? `${draft.name.trim()} is a preset's name: save yours under another.` : null;
+        const said = text ?? named;
         problem.textContent = said ?? "";
         problem.hidden = said === null;
-        play.disabled = saveAs.disabled = text !== null;
-        save.disabled = said !== null || draft.name.trim() === "";
+        play.disabled = saveAs.disabled = drafts !== null;
+        save.disabled = (drafts ?? named) !== null || draft.name.trim() === "";
         remove.disabled = origin === null;
     }
 

@@ -27,7 +27,7 @@ const isRefused = (() => {
 
 const opened = performance.now();
 
-/** How long the page has been open, in whole milliseconds, which is what every `ms` here means. */
+/** How long the page has been open, in whole milliseconds, which most events' `ms` is; a load's `ms` is how long it took. */
 export function since() {
     return Math.round(performance.now() - opened);
 }

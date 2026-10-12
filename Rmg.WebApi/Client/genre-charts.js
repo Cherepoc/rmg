@@ -5,6 +5,8 @@
  *     and what each end of the songs draws, in words.
  */
 
+import { minutesAndSeconds } from "./text.js";
+
 const SVG = "http://www.w3.org/2000/svg";
 
 /** The options' fills and lines, greys told apart by their lightness, the accent kept for the one chosen. */
@@ -31,7 +33,7 @@ export function rangeInWords(choice, from, to) {
 }
 
 /** Seconds as minutes and seconds, "3:30". */
-const time = (seconds) => `${Math.floor(Math.round(seconds) / 60)}:${String(Math.round(seconds) % 60).padStart(2, "0")}`;
+const time = (seconds) => minutesAndSeconds(Math.round(seconds));
 
 /** Whether an option's numbers are times, a length's ends, shown and given as minutes and seconds. */
 export const isTime = (choice, option) => choice.kind === "range" && option !== "lean" && choice.scale.unit === "seconds";

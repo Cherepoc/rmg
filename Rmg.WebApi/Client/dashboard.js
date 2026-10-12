@@ -1,9 +1,9 @@
-
 /**
  *     The analytics dashboard. It asks the server for one summary and draws it; nothing here talks to
- *     anything else, and the charts are plain SVG rather than a library, for the same reason the rest of
- *     this page has no build step.
+ *     anything else, and the charts are plain SVG rather than a library, a page this small needing none.
  */
+
+import { showStatus } from "./text.js";
 
 const elements = {
     controls: document.getElementById("controls"),
@@ -62,8 +62,7 @@ elements.refresh.addEventListener("click", () => load());
 elements.range.addEventListener("change", () => load());
 
 function setStatus(message, isError = false) {
-    elements.status.textContent = message;
-    elements.status.classList.toggle("error", isError);
+    showStatus(elements.status, message, isError);
 }
 
 function showPanels(isShown) {
@@ -436,7 +435,8 @@ function dayLabels(days) {
 elements.dailyTableToggle.addEventListener("click", () => {
     const isShown = elements.dailyTable.hidden;
     elements.dailyTable.hidden = !isShown;
-    elements.dailyFigure.hidden = isShown;
+    // the chart where the table is not shown, but where there are no days, whose empty chart stays hidden
+    elements.dailyFigure.hidden = isShown || summary.daily.length === 0;
     elements.dailyTableToggle.setAttribute("aria-expanded", String(isShown));
     elements.dailyTableToggle.textContent = isShown ? "Chart" : "Table";
 });

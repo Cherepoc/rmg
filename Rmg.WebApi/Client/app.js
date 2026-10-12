@@ -1,3 +1,4 @@
+import { minutesAndSeconds, showStatus } from "./text.js";
 import {
     DRUM_KITS,
     INSTRUMENT_FAMILIES,
@@ -218,8 +219,7 @@ let statusTimer = null;
 
 function setStatus(message, isError = false) {
     clearTimeout(statusTimer);
-    elements.status.textContent = message;
-    elements.status.classList.toggle("error", isError);
+    showStatus(elements.status, message, isError);
 }
 
 /**
@@ -250,11 +250,6 @@ function showSoundFontWork(name, fraction) {
 function hideSoundFontWork() {
     hideWork(elements.soundFontSummary);
     hideWork(elements.play);
-}
-
-function formatTime(seconds) {
-    const whole = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
-    return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 }
 
 function updateTransport() {
@@ -1705,14 +1700,14 @@ elements.seek.addEventListener("pointercancel", () => {
 // sequencer is moved once, when the bar is let go of
 elements.seek.addEventListener("input", async () => {
     // where it would go, whether or not the player has the song yet
-    elements.elapsed.textContent = formatTime(timeAt(Number(elements.seek.value)));
+    elements.elapsed.textContent = minutesAndSeconds(timeAt(Number(elements.seek.value)));
     showHarmony(timeAt(Number(elements.seek.value)));
 });
 
 elements.seek.addEventListener("change", async () => {
     // shown at once, the ticks leaving it until the player is there
     settlesAt = performance.now() + SETTLE_MS;
-    elements.elapsed.textContent = formatTime(timeAt(Number(elements.seek.value)));
+    elements.elapsed.textContent = minutesAndSeconds(timeAt(Number(elements.seek.value)));
     showHarmony(timeAt(Number(elements.seek.value)));
     await withPlayer((player) => {
         // where the bar was let go of, or where the song starts once the player has it, whenever that is
@@ -1838,11 +1833,8 @@ const choiceRows = new Map();
 let tempos = [];
 let lengths = [];
 
-/** A length in seconds as minutes and seconds, "2:49". */
-function formatLength(seconds) {
-    const whole = Math.round(seconds);
-    return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
-}
+/** A length in seconds as minutes and seconds, "2:49", rounded. */
+const formatLength = (seconds) => minutesAndSeconds(Math.round(seconds));
 
 /** What a setting's step shows: its tempo in beats a minute, its length in minutes, or its share. */
 function settingText(key, step) {
@@ -2718,7 +2710,7 @@ async function refreshDownload() {
 function sectionName(section) {
     const role = section.role.replace(/[A-Z]/g, (x) => `-${x.toLowerCase()}`);
     const solo = section.soloists.length > 0 ? `, a ${section.soloists.includes("drum") ? "drum " : ""}solo` : "";
-    return `${role[0].toUpperCase()}${role.slice(1)}${solo}, ${formatTime(section.start)}`;
+    return `${role[0].toUpperCase()}${role.slice(1)}${solo}, ${minutesAndSeconds(section.start)}`;
 }
 
 /** The song's sections marked on the seek bar where each starts but the first, and its length shown before it plays, which playing keeps. */
@@ -2731,7 +2723,7 @@ function showSections(report) {
         mark.dataset.name = sectionName(section);
         return mark;
     }));
-    elements.total.textContent = formatTime(songSeconds);
+    elements.total.textContent = minutesAndSeconds(songSeconds);
 }
 
 // how far in from the bar's ends its thumb's middle travels, in pixels, as the marks are set in (app.css)
@@ -2754,14 +2746,14 @@ elements.seek.addEventListener("pointermove", (event) => {
 function render(player, given = null) {
     const duration = player.duration;
     if (duration > 0) playedSeconds = duration;
-    elements.total.textContent = formatTime(duration > 0 ? duration : songSeconds);
+    elements.total.textContent = minutesAndSeconds(duration > 0 ? duration : songSeconds);
     const time = given ?? player.currentTime;
 
     // the bar and the time under it are the seek's own while it lasts, and a moment after, while the player gets there,
     // but a position given, which is the player's now
     if (!isSeeking && (given !== null || performance.now() >= settlesAt)) {
         if (duration > 0) elements.seek.value = String(time / duration);
-        elements.elapsed.textContent = formatTime(time);
+        elements.elapsed.textContent = minutesAndSeconds(time);
         showHarmony(time);
     }
 

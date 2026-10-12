@@ -215,6 +215,8 @@ export function createGenreTune() {
     }
 
     function changed() {
+        // the last preview's lines no longer the amounts', the handles' straight ones drawn until the next comes
+        if (preview !== null) preview = { ...preview, curves: null };
         render();
         clearTimeout(waiting);
         waiting = setTimeout(askPreview, PREVIEW_WAIT_MS);
@@ -286,9 +288,18 @@ export function createGenreTune() {
         return drawBand(svg("g"), choice, curves, width, HEIGHT);
     }
 
-    /** The options' tabs, each its numbers and, but a range's, a button removing it; made again as the options kept change. */
+    /**
+     * The options' tabs, each its numbers and, but a range's, a button removing it; made again as the options kept change,
+     * the focus kept where it was, on the next tab's where its own went.
+     */
     function renderList() {
         const isLast = isPool() && kept().length === 1;
+        const focused = list.contains(document.activeElement) ? document.activeElement : null;
+        const was = focused === null ? null : {
+            option: focused.closest(".tune-row")?.dataset.option,
+            isRemove: focused.classList.contains("tune-remove"),
+            index: [...list.children].indexOf(focused.closest(".tune-row")),
+        };
         list.replaceChildren(...kept().map((x) => {
             const option = html("button", { type: "button", class: "tune-option", "data-option": x.name }, html("span", { text: x.label }), html("span", { class: "tune-values" }));
             option.addEventListener("click", () => {
@@ -306,12 +317,19 @@ export function createGenreTune() {
             }
             return row;
         }));
+        if (was !== null) {
+            const rows = [...list.children];
+            const row = rows.find((x) => x.dataset.option === was.option) ?? rows[Math.min(was.index, rows.length - 1)];
+            (row?.querySelector(was.isRemove ? ".tune-remove:not(:disabled)" : ".tune-option") ?? row?.querySelector(".tune-option") ?? pickOpen).focus();
+        }
     }
 
     /** The options to pick from, those the genre may keep, a twin while its partner is out and a pool's last disabled. */
     function renderPicks() {
         const options = choice.options.filter((x) => allowed(x) || x.name in amounts);
         pickOpen.textContent = `Options: ${kept().length} of ${options.length}`;
+        // the option focused is focused again once the list is made anew
+        const focused = picks.contains(document.activeElement) ? document.activeElement.closest("label")?.dataset.option : null;
         picks.replaceChildren(...options.map((x) => {
             const input = html("input", { type: "checkbox" });
             input.checked = x.name in amounts;
@@ -322,6 +340,7 @@ export function createGenreTune() {
             if (x.description) label.title = x.description;
             return label;
         }));
+        if (focused) [...picks.children].find((x) => x.dataset.option === focused)?.querySelector("input").focus();
         filterPicks();
     }
 
@@ -393,7 +412,6 @@ export function createGenreTune() {
         if (charts) renderCharts();
     }
 
-    /** The chart of the amounts, its handles, a pool's chances and the legend, the handle focused kept so. */
     // whether the charts are to be drawn again once a drag ends, which a redraw would cut short by taking its handle away
     let isRedrawWaiting = false;
 
@@ -403,6 +421,7 @@ export function createGenreTune() {
         if (!isRedrawWaiting) renderCharts();
     }
 
+    /** The chart of the amounts, its handles, a pool's chances and the legend, the handle focused kept so. */
     function renderCharts() {
         if (selected === null) return;
         const width = plot.clientWidth;

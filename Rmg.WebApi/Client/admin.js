@@ -3,6 +3,7 @@
  *     agent to name the song by.
  */
 
+import { showStatus } from "./text.js";
 import { parseSettings, readLinkedSeed } from "./settings.js";
 
 const elements = {
@@ -14,8 +15,7 @@ const elements = {
 };
 
 function setStatus(message, isError = false) {
-    elements.status.textContent = message;
-    elements.status.classList.toggle("error", isError);
+    showStatus(elements.status, message, isError);
 }
 
 /**

@@ -454,6 +454,32 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>An option left out or picked by the keys keeps the focus where it was, the next tab's button for one left out.</summary>
+    [Test]
+    public async Task AnOptionLeftOutOrPicked_ByTheKeys_KeepsTheFocus()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var time = await Section(dialog, "Time and feel");
+        var tune = await Change(time, "meter");
+        const string focused = "() => document.activeElement.closest('[data-option]')?.dataset.option ?? null";
+
+        var kept = await Kept(tune);
+        await Assert.That(kept.Length).IsGreaterThan(2);
+        await tune.Locator($".tune-row[data-option='{kept[0]}'] .tune-remove").FocusAsync();
+        await page.Page.Keyboard.PressAsync("Enter");
+        await Assert.That(await page.Page.EvaluateAsync<string?>(focused)).IsEqualTo(kept[1]);
+        await Assert.That(await page.Page.EvaluateAsync<bool>("() => document.activeElement.classList.contains('tune-remove')")).IsTrue();
+
+        var pick = await Pick(tune, kept[0]);
+        await pick.FocusAsync();
+        await page.Page.Keyboard.PressAsync("Space");
+        await Assert.That(await pick.IsCheckedAsync()).IsTrue();
+        await Assert.That(await page.Page.EvaluateAsync<string?>(focused)).IsEqualTo(kept[0]);
+        await Assert.That(await page.Page.EvaluateAsync<bool>("() => document.activeElement.type === 'checkbox'")).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     /// <summary>A handle clicked without a move changes nothing, and overrides nothing.</summary>
     [Test]
     public async Task AHandleClicked_WithoutAMove_OverridesNothing()
@@ -724,6 +750,8 @@ public sealed class GenreEditorTest(Site site)
             await page.Until(async () => !((await dialog.Locator("footer .warning").TextContentAsync()) ?? "").StartsWith("That file is not a genre"), "the warning cleared");
             await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "wrong.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes($$"""{ "name": "Wrong", "choices": { "meter": {{options}} } }""") });
             await page.Until(async () => (await dialog.Locator("footer .warning").TextContentAsync())!.StartsWith("That file is not a genre"), $"{options} refused");
+            // the draft, still a genre, played as it is
+            await Assert.That(await dialog.Locator("footer button", new() { HasTextString = "Play" }).IsDisabledAsync()).IsFalse().Because(options);
         }
 
         // a list of genres keeps none where one of them has a problem
