@@ -38,9 +38,6 @@ internal sealed class LinePattern
         (TrackRole.Melody, new ByConvention(1, 0.7, 0))
     ];
 
-    /// <summary>The stream an echo's draw of whether its run plays the figure inverted derives from its key (<see cref="Inversions" />).</summary>
-    private const int InversionStream = 10;
-
     /// <summary>The stream a goal's draw of its root or its third derives from its key (<see cref="GoalRootShare" />).</summary>
     private const int GoalRootStream = 11;
 
@@ -59,15 +56,6 @@ internal sealed class LinePattern
         (TrackRole.CounterMelody, new ByConvention(0, 0.05, 0.1))
     ];
 
-    /// <summary>
-    ///     The chance a line's run of echoes, a figure played again, plays it inverted, its steps mirrored about its first
-    ///     note, as a motif is developed, by the part: the melody's never at the plain end, which repeats its figures as they
-    ///     were, now and then in the middle and more at the wild end.
-    /// </summary>
-    public static ImmutableArray<(TrackRole Role, ByConvention Chance)> Inversions { get; } =
-    [
-        (TrackRole.Melody, new ByConvention(0, 0.15, 0.4))
-    ];
 
     /// <summary>How likely a goal is its chord's root rather than its third.</summary>
     public const double GoalRootShare = 0.6;
@@ -180,7 +168,6 @@ internal sealed class LinePattern
                         x.State.GetStateValue(CompositionStateKinds.LineLift),
                         // a chugging riff's note's own draw of its pedal, by its key, which draws nothing else
                         x.State.GetStateValue(CompositionStateKinds.LinePedal) > 0 ? Draw(x.State, PedalStream) : 1,
-                        Inverts(x),
                         x.State.GetStateValue(CompositionStateKinds.LineDrone) > 0
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
@@ -287,9 +274,6 @@ internal sealed class LinePattern
         // its third where its chord has one, a suspended chord's root
         return Draw(note.State, GoalRootStream) < GoalRootShare || !note.Classes.Contains(note.Chord.GetPitch(2).Mod(12)) ? ChordArrival.Root : ChordArrival.Third;
     }
-
-    /// <summary>Whether a run of echoes starting on a note plays its figure inverted, by the note's own draw.</summary>
-    private static bool Inverts(LineNote note) => Drawn(note, CompositionStateKinds.LineInversion, InversionStream);
 
     /// <summary>Whether a note on a strong beat lands on a tension, by its own draw.</summary>
     private static bool IsTense(LineNote note, int rank, LineProfile profile) =>

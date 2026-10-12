@@ -106,7 +106,6 @@ public sealed class GenreDevicesReportTest
             ["songs ornamenting their lines"] = ((ImmutableArray<Ornament>)song.Trace.Single(x => x.Point == TracePoints.Ornaments).Value!).IsEmpty ? 0 : 1,
             ["parts' sections in a scale of their own"] = Sections(TracePoints.LineScale, x => (LineScale)x! != LineScale.Section),
             ["sections harmonising in three voices"] = sections.Length == 0 ? double.NaN : song.Trace.Count(x => x.Point == TracePoints.BlockHarmony) / (double)sections.Length,
-            ["line notes inverted"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.LineInversion) > 0),
             ["line notes leaning"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.LineAppoggiatura) > 0),
             ["line notes on a tension"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.LineTension) > 0),
             ["melody notes stacked"] = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Melody))?.ToArray() is { Length: > 0 } melody
@@ -166,7 +165,7 @@ public sealed class GenreDevicesReportTest
         ["sections with the riff in power chords"] = "riff", ["sections whose riff chugs"] = "riff", ["sections whose riff drones"] = "riff",
         ["sections with an octave bass"] = "octaveBass", ["sections with an alternating bass"] = "alternatingBass", ["sections with a melody hook"] = "hook",
         ["sections calling and answered"] = "callAndResponse", ["songs ornamenting their lines"] = "ornaments", ["parts' sections in a scale of their own"] = "lineScale",
-        ["sections harmonising in three voices"] = "doubling", ["line notes inverted"] = "inversion", ["line notes leaning"] = "appoggiatura",
+        ["sections harmonising in three voices"] = "doubling", ["line notes leaning"] = "appoggiatura",
         ["line notes on a tension"] = "tension", ["sections vamping"] = "vamp", ["sections raising the cadence"] = "cadenceRaise",
         ["sections at home off the tonic"] = "sectionHome", ["sections changing chords every two bars"] = "harmonicRhythm",
         ["songs opening on the hook"] = "intro", ["songs opening on the riff"] = "riffIntro", ["songs counted in"] = "intro",

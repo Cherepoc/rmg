@@ -43,11 +43,10 @@ public sealed class BreakdownTest
                 await Assert.That(song.Trace.Single(t => t.Point == TracePoints.TimeFeel && t.Section == span.SectionId).Value).IsEqualTo(1).Because(because);
                 if (song.Solos.ContainsKey(index))
                     continue;
-                // its kick with the riff, as laid where its kick and its riff (or its bass, where it has none) play
+                // its kick with the riff, as laid where its drums keep time and its riff (or its bass, where it has none) plays
                 var figures = (ImmutableDictionary<FigurePlayer, string>)song.Trace.Single(t => t.Point == TracePoints.Figures && t.Section == span.SectionId).Value!;
-                bool Plays(int track) => song.Song.Notes!.GetValueOrDefault(track)?.Any(n => n.IsWithin(span.Start, span.End)) == true;
                 var leader = song.Song.TrackDefinitions.Any(x => x.Value.Role == TrackRole.Riff) ? song.Track(TrackRole.Riff) : song.Track(TrackRole.Bass);
-                if (DrumGroups.Kick.Tracks.Any(Plays) && Plays(leader))
+                if (!song.Resting(span).Contains(TrackRole.Drum) && song.Song.Notes!.GetValueOrDefault(leader)?.Any(n => n.IsWithin(span.Start, span.End)) == true)
                     await Assert.That(figures.GetValueOrDefault(FigurePlayer.Ground)).IsEqualTo("withRiff").Because(because);
                 // its riff chugging, and its kick on the riff's notes in the bars the riff plays, but a phrase's last, where a fill
                 // plays, and the landing on a phrase's first beat

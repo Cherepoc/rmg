@@ -693,8 +693,6 @@ internal sealed class SectionGenerator
         AddLine(CompositionStateKinds.LineTension, LinePattern.Tensions, GenreChoices.Tension);
         // and on one that resolves
         AddLine(CompositionStateKinds.LineAppoggiatura, LinePattern.Appoggiaturas, GenreChoices.Appoggiatura);
-        // its figures played inverted where they come back now and then
-        AddLine(CompositionStateKinds.LineInversion, LinePattern.Inversions, GenreChoices.Inversion);
         // its phrases ending on a goal, the genres' as the songs'
         AddLine(CompositionStateKinds.LineGoal, LinePattern.Goals, null);
         // a guitar the section's form turns, played on the form's program

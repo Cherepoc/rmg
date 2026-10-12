@@ -653,10 +653,9 @@ dynamics, as it has no drums.
 
 ### Fills and lines
 
-- **The melody's motif developed, the rest** (P3; the inversion kept, heard 8 October 2026 as hard to notice, worse in 5
-  of 6 Pop songs, a device of development rather than one to be heard at once): a run of echoes plays its figure
-  inverted now and then (`LinePattern.Inversions`, 15% in the middle, 40% at the wild end); a figure displaced by an 8th or its rhythm
-  stretched, should the inverted ones be heard as development rather than wrong notes.
+- **The melody's motif developed, the rest** (P3): the inversion cut in the review of 11 October 2026, heard on 8 October
+  as hard to notice and worse in 5 of 6 Pop songs; a figure displaced by an 8th or its rhythm stretched, development a
+  listener can follow, to try in its place and be heard.
 - **Two toms at once** (P3, put off 10 October 2026, again with the cascade): a drum note's sound a list of
   articulations (`StateKinds.ArticulationIndex` now one, `TimelineEdits.Hit` replacing a hit at its place, the toms one
   track), so that a fill's wide window or a cascade's accent strikes a far pair of toms together, a rack and the floor;
