@@ -144,7 +144,7 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     ///     as the span its chorus would be there.
     /// </summary>
     public SectionSpan[] PlayedSpans => field ??= Map.Intro.Kind == IntroKind.Hook && Map.Origin > 0
-        ? [new SectionSpan(Map.Sections[0].SectionId, 0, Map.Origin, Map.Meter, 0), ..Map.Sections]
+        ? [Map.PlayAt(0)!.Value.Played with { Duration = Map.Origin }, ..Map.Sections]
         : [..Map.Sections];
 
     /// <summary>The span a position plays in, a hook intro's among them (<see cref="PlayedSpans" />); none for an intro of another kind or the ending.</summary>

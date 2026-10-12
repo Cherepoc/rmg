@@ -41,6 +41,20 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     }
 
     /// <summary>
+    ///     The appearance a position plays as: its section's, an intro's the section it is made of, its first bars or a hook's
+    ///     chorus, and the ending's the last section's, its bars counted on; none for a song of no sections.
+    /// </summary>
+    public Play? PlayAt(double position)
+    {
+        if (Sections.IsEmpty)
+            return null;
+        if (position < Origin - 1e-9)
+            return new Play(Intro.Source, Sections[Intro.Source], Sections[Intro.Source].Start);
+        var index = IndexAt(position + 1e-9);
+        return new Play(Math.Max(0, index), Sections[Math.Max(0, index)], 0);
+    }
+
+    /// <summary>
     ///     A place's key, by the section it is in or after, the intro's for none, and how far into it, in places a beat:
     ///     a stream keyed by it stays as it was where something before the section moves, such as an intro's length or a
     ///     short bar.
@@ -118,7 +132,18 @@ public readonly record struct Span(int Index, double Start, double End)
 /// <summary>How a song starts: its intro's kind, and how long it plays before the first section, 0 for none.</summary>
 /// <param name="Window">Where the band comes in part by part, for an intro of entries.</param>
 /// <param name="Entries">When every part comes in, for an intro of entries, in the order drawn; none otherwise.</param>
-public sealed record IntroSpan(IntroKind Kind, double Duration, IntroWindow Window = default, ImmutableArray<IntroEntry> Entries = default);
+/// <param name="Source">The section the intro plays as, by its place: the chorus a hook intro quotes, the first section otherwise.</param>
+public sealed record IntroSpan(IntroKind Kind, double Duration, IntroWindow Window = default, ImmutableArray<IntroEntry> Entries = default, int Source = 0);
+
+/// <summary>
+///     The appearance a stretch of the song plays as (<see cref="SongMap.PlayAt" />): its place among the sections, its
+///     section's span, and how far the stretch is from it, which a position adds to reach the same place in it.
+/// </summary>
+public readonly record struct Play(int Index, SectionSpan Span, double Offset)
+{
+    /// <summary>The section's span moved to where the stretch plays it, whose bars count from there.</summary>
+    public SectionSpan Played => Span with { Start = Span.Start - Offset };
+}
 
 /// <summary>A part of the band coming in, in an intro of entries.</summary>
 /// <param name="Tracks">The part's tracks.</param>

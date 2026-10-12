@@ -239,7 +239,7 @@ internal sealed class SongFormGenerator
         };
         var map = new SongMap(
             meter,
-            new IntroSpan(plan.Intro, origin, plan.Window, entries),
+            new IntroSpan(plan.Intro, origin, plan.Window, entries, plan.Intro == IntroKind.Hook ? hook.Index : 0),
             spans.ToImmutable(),
             new EndingSpan(plan.Ending, end, endingDuration, held, plan.Stop, plan.SlowsDown)
         );

@@ -62,12 +62,12 @@ internal static class ExpressionRender
     /// <summary>How long a squelch takes to close most of the way, in beats.</summary>
     private const double SquelchDecay = 0.25;
 
-    /// <summary>The section a note plays in, which a gate's bars and a filter's opening count from; a note outside every section is a mistake.</summary>
+    /// <summary>
+    ///     The section a note plays as, where it plays it, which a gate's bars and a filter's opening count from: an intro's
+    ///     its source's, a hook's its chorus's, in the chorus's meter (<see cref="SongMap.PlayAt" />); a song of no sections is a mistake.
+    /// </summary>
     private static SectionSpan SectionAt(SongMap? map, double position) =>
-        // an intro's notes, a hook's quoting its chorus, counted from the song's start in the first section's meter
-        map is { Sections.Length: > 0 } && position < map.Origin - 1e-9 ? new SectionSpan(map.Sections[0].SectionId, 0, map.Origin, map.Meter, 0)
-        : map?.SectionAt(position + 1e-9) ?? (map is { Sections.Length: > 0 } && position >= map.Sections[^1].End - 1e-9 ? map.Sections[^1] : null)
-        ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
+        map?.PlayAt(position)?.Played ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
 
     /// <summary>How far a time is from its bar's pulse before to the next, from 0 to 1: the beats of 4/4, the dotted quarters of 6/8, the groups of 7/8.</summary>
     private static double SincePulse(SongMap? map, double at)

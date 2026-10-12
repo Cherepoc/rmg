@@ -18,7 +18,7 @@ public sealed class PinchTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         foreach (var (track, notes) in song.Song.Notes!)
         {
-            var phrases = new HashSet<(int, int)>();
+            var phrases = new HashSet<(double, int)>();
             foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Pinch) == 1))
             {
                 pinches++;
@@ -32,8 +32,9 @@ public sealed class PinchTest
                 await Assert.That(notes.Count(x => Math.Abs(x.Position - note.Position) < 1 - 1e-9) / 2.0).IsLessThanOrEqualTo(Expression.PinchBusiest).Because(because);
                 await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Vibrato)).IsGreaterThan(0).Because(because);
                 await Assert.That(song.Song.TrackDefinitions[track].Role).IsNotEqualTo(TrackRole.Chords).Because(because);
-                var span = song.Map.Sections.Last(x => x.Start <= note.Position + 1e-9);
-                await Assert.That(phrases.Add((song.Map.Sections.IndexOf(span), (int)Math.Floor((note.Position - span.Start) / span.Meter.PhraseDuration + 1e-9))))
+                // its phrase where it plays, a hook intro's quote its own
+                var span = song.Map.PlayAt(note.Position)!.Value.Played;
+                await Assert.That(phrases.Add((span.Start, span.PhraseOf(note.Position))))
                     .IsTrue().Because($"{because}: one a phrase");
             }
         }

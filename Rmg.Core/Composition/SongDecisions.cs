@@ -68,7 +68,7 @@ internal sealed record SongDecisions(
     ///     The section an intro before the first is made of, whose sound it plays in: the chorus a hook intro quotes, or the
     ///     first section, which an intro's entries, a count-in or a cold start lead into.
     /// </summary>
-    public SectionSpan IntroSource => Form.Map.Intro.Kind == IntroKind.Hook && FirstChorus is { } chorus ? chorus.Span : Form.Map.Sections[0];
+    public SectionSpan IntroSource => Form.Map.Sections[Form.Map.Intro.Source];
 
     /// <summary>A stage's own stream.</summary>
     public IGenerationContext Stream(SongStream stream) => SongGenerator.CreateStream(Seed, stream);

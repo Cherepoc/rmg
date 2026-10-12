@@ -28,6 +28,22 @@ public sealed class SongMapTest
         await Assert.That(Map.BeatInBar(21.5)).IsEqualTo(1.5);
     }
 
+    /// <summary>A position plays as its section, an intro as the section it is made of, a hook's its chorus, and the ending as the last section.</summary>
+    [Test]
+    public async Task APosition_PlaysAsItsSection_AnIntroAsItsSource_TheEndingAsTheLast()
+    {
+        // an entries intro the first section's first bars, its place in it the position moved by the section's start
+        await Assert.That(Map.PlayAt(4)).IsEqualTo(new Play(0, Map.Sections[0], 8));
+        await Assert.That(Map.PlayAt(4)!.Value.Played.Start).IsEqualTo(0);
+        await Assert.That(Map.PlayAt(40)).IsEqualTo(new Play(1, Map.Sections[1], 0));
+        await Assert.That(Map.PlayAt(73)).IsEqualTo(new Play(1, Map.Sections[1], 0));
+
+        // a hook intro its chorus's, the second section here
+        var hooked = Map with { Intro = new IntroSpan(IntroKind.Hook, 8, Source: 1) };
+        await Assert.That(hooked.PlayAt(4)).IsEqualTo(new Play(1, Map.Sections[1], 40));
+        await Assert.That(hooked.PlayAt(4)!.Value.Played.SectionId).IsEqualTo(1);
+    }
+
     [Test]
     public async Task ASectionInAMeterOfItsOwn_CountsItsBarsInIt_FromItsStart()
     {
