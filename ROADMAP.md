@@ -16,7 +16,8 @@ fixed; the review and the plan are kept outside the repository):
    hi-hat rolls growing from 60% of the hat as heard, drum marks' rolls, swells and strengths, gated chords' restrikes;
    a drum solo's time keeping keeping its accents.
 3. Done: genre data and validation. A preset names every option of a chances choice the songs play (209 written,
-   16 given back: half and double time in Rock, Country, Disco, Fusion, Ska and Soul, Soul's legato and key changes,
+   16 given back: half and double time in Rock, Country, Disco, Fusion, Ska and Soul (since the review of 11 October as
+   the songs draw them, never at the plain end), Soul's legato and key changes,
    Country's key changes, Fusion's trades); a value read at the song's facet it follows, its plain and wild ends
    heard; a pool weighing nothing refused; Funk's stale chugs out and a kit in; Latin's claves on the clave, one
    direction a song; the blues looping one 12-bar chorus; Drum and bass's breakbeat; Djent's kick with its riff;

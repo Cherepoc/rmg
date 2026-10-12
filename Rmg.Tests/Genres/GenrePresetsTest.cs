@@ -83,14 +83,27 @@ public sealed class GenrePresetsTest
             await Assert.That(preset.Id.All(char.IsAsciiLetter) && preset.Id.Length < Rmg.WebApi.Genres.GenreStore.KeyLength).IsTrue().Because(preset.Id);
     }
 
-    /// <summary>Every preset makes its songs at both ends, 64 at the plain and 32 at the wild, where a choice an end leaves empty would fail (as Punk's length and Techno's intro did).</summary>
+    /// <summary>
+    ///     Every preset makes its songs at both ends, 64 at the plain and 32 at the wild, where a choice an end leaves empty
+    ///     would fail (as Punk's length and Techno's intro did); and its plainest songs keep their time, no section's drums
+    ///     in half or double time, but where the preset names them at its plain end.
+    /// </summary>
     [Test]
-    public async Task APreset_MakesSongs_AtBothEnds()
+    public async Task APreset_MakesSongs_AtBothEnds_ThePlainestInTheirTime()
     {
         var cases = (from preset in GenrePresets.All from @base in new[] { 0.0, 1.0 } from seed in Enumerable.Range(0, @base == 0 ? 64 : 32) select (Preset: preset, Base: @base, Seed: seed)).ToArray();
         var made = TestCorpus.InParallel(Enumerable.Range(0, cases.Length), i =>
-            (cases[i].Preset.Name, cases[i].Base, cases[i].Seed, Notes: TestCorpus.Get(cases[i].Seed, new SongOverrides(Base: cases[i].Base, Genre: GenrePresets.Genre(cases[i].Preset))).Song.Notes!.Values.Sum(n => n.Count)));
-        await Assert.That(made.Where(x => x.Notes == 0).Select(x => $"{x.Name} {x.Base} {x.Seed}")).IsEmpty();
+        {
+            var song = TestCorpus.Get(cases[i].Seed, new SongOverrides(Base: cases[i].Base, Genre: GenrePresets.Genre(cases[i].Preset)));
+            return (cases[i].Preset, cases[i].Base, cases[i].Seed, Notes: song.Song.Notes!.Values.Sum(n => n.Count),
+                TimeFeels: song.Trace.Count(x => x.Point == TracePoints.TimeFeel && (int)x.Value! != 0));
+        });
+        await Assert.That(made.Where(x => x.Notes == 0).Select(x => $"{x.Preset.Name} {x.Base} {x.Seed}")).IsEmpty();
+
+        // a preset's plain end of half or double time, which a flat amount names at every end
+        bool NamesAtThePlainEnd(GenrePresets.Preset preset) => preset.Choices.TryGetValue(GenreChoices.FeelChances.Name, out var chances)
+            && new[] { "halfTime", "doubleTime" }.Any(x => chances.TryGetValue(x, out var amount) && (amount.ValueKind == System.Text.Json.JsonValueKind.Array ? amount[0] : amount).GetInt32() > 0);
+        await Assert.That(made.Where(x => x.Base == 0 && x.TimeFeels > 0 && !NamesAtThePlainEnd(x.Preset)).Select(x => $"{x.Preset.Name} {x.Seed}")).IsEmpty();
     }
 
     /// <summary>Every setup a preset allows at an end is one its drum pieces kept there can make: kit and percussion a drum of the percussion group among them, percussion a drum outside the kit's family.</summary>
