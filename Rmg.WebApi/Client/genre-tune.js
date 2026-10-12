@@ -21,7 +21,7 @@ const MARGIN = 12;
 const PREVIEW_WAIT_MS = 150;
 
 /** A pool's weight where an option is added that the songs never play. */
-const ADDED_WEIGHT = 50;
+export const ADDED_WEIGHT = 50;
 
 function html(name, attributes = {}, ...children) {
     const element = document.createElement(name);

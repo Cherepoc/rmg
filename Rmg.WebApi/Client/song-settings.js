@@ -125,16 +125,20 @@ export function applyReport(settings, report) {
 
     // a part's other channels, mixed as it is: its second take, a doubled driven guitar's, on the other side, its riser,
     // and the riff's twin, on the other side too, with its own second take back on the riff's
+    // each at its track's own level, as the file writes it, a doubled part's takes under the others' (a riser whole)
+    const level = (part) => report.parts[part].level;
     const seconds = (part) => (report.parts[part]?.double == null ? [] : [report.parts[part].double - 1]);
-    const riser = (part) => (report.parts[part]?.riser == null ? [] : [{ channel: report.parts[part].riser - 1, mirrored: false, program: RISER_PROGRAM }]);
-    const others = Object.fromEntries(PARTS.map((part) => [part, [...seconds(part).map((channel) => ({ channel, mirrored: true })), ...riser(part)]]));
+    const riser = (part) => (report.parts[part]?.riser == null ? [] : [{ channel: report.parts[part].riser - 1, mirrored: false, program: RISER_PROGRAM, level: 1 }]);
+    const others = Object.fromEntries(PARTS.map((part) => [part, [...seconds(part).map((channel) => ({ channel, mirrored: true, level: level(part) })), ...riser(part)]]));
     const twin = report.parts.riffTwin?.channel;
     if (twin != null)
-        others.riff.push({ channel: twin - 1, mirrored: true }, ...seconds("riffTwin").map((channel) => ({ channel, mirrored: false })));
+        others.riff.push({ channel: twin - 1, mirrored: true, level: level("riffTwin") }, ...seconds("riffTwin").map((channel) => ({ channel, mirrored: false, level: level("riffTwin") })));
+    const levels = Object.fromEntries(PARTS.map((part) => [part, level(part)]));
 
     return {
         settings: next,
         channels,
+        levels,
         others,
         plays,
         own,

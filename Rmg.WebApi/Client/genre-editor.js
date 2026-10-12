@@ -2,7 +2,7 @@ import { button, downloadJson, jsonFileInput } from "./dialog-parts.js";
 import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
 import { endsOf, isPresetName, nestedChoices, NOT_A_GENRE, ownOf, readGenreFile, sameName } from "./genres.js";
-import { createGenreTune } from "./genre-tune.js";
+import { ADDED_WEIGHT, createGenreTune } from "./genre-tune.js";
 import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelOf, svg } from "./genre-charts.js";
 
 /**
@@ -129,7 +129,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         return (choice) => {
             if (choice.kind !== "pool") return asTheyAre(choice);
             const common = choice.name.startsWith("instrument.") ? (x) => endsOf(ownOf(x))[1] >= COMMON_WEIGHT : (x) => x.own.some((y) => y > 0);
-            return Object.fromEntries(choice.options.filter((x) => allowed(x) && common(x)).map((x) => [x.name, ownOf(x)]));
+            const kept = choice.options.filter((x) => allowed(x) && common(x));
+            // a pool the songs play none of, a genre's room, starts from every option it allows, as one added is kept
+            if (kept.length === 0) return Object.fromEntries(choice.options.filter(allowed).map((x) => [x.name, ADDED_WEIGHT]));
+            return Object.fromEntries(kept.map((x) => [x.name, ownOf(x)]));
         };
     }
 

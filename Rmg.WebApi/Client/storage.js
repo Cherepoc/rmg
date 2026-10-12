@@ -45,10 +45,11 @@ function writeFlag(key, isOn) {
 
 /**
  *     A song of the list as the page keeps it: its seed and the settings it was asked for with, in letters and digits,
- *     and the key of the genre it was made in, where it was, "12Ab:6…:Xy3…", which is what asking for it again takes; whether its settings are of a format the page reads is the
+ *     and the genre it was made in, where it was, the server's key of it or a preset's id, "12Ab:6…:Xy3…" or
+ *     "12Ab:6…:rock", which is what asking for it again takes; whether its settings are of a format the page reads is the
  *     page's to say (settings.js), as the format changes.
  */
-export const IS_SONG = /^[0-9A-Za-z_-]{1,11}:[0-9A-Za-z_-]+(:[0-9A-Za-z_-]{11})?$/;
+export const IS_SONG = /^[0-9A-Za-z_-]{1,11}:[0-9A-Za-z_-]+(:[0-9A-Za-z_-]{1,32})?$/;
 
 /** The settings the next songs are asked for with (settings.js), as this browser last left them; null for none yet. */
 export function recallSettings() {

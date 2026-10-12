@@ -435,6 +435,15 @@ public static class Midi
         return song.Tracks.ToChannels().Zip(song.Tracks).Where(x => !x.Second.IsDouble && !x.Second.IsRiser).ToImmutableSortedDictionary(x => x.Second.Role, x => x.First);
     }
 
+    /// <summary>
+    ///     The level every part's own track plays at under the mix's faders, by its role: a doubled part's two takes each
+    ///     at <see cref="Composition.DoubleTracking.Level" />, the others whole.
+    /// </summary>
+    public static ImmutableSortedDictionary<TrackRole, double> GetPartLevels(this RenderedSong song)
+    {
+        return song.Tracks.Where(x => !x.IsDouble && !x.IsRiser).ToImmutableSortedDictionary(x => x.Role, x => x.Volume);
+    }
+
     /// <summary>The channel a doubled part's second take is written to, by its role (<see cref="Composition.DoubleTracking" />).</summary>
     public static ImmutableSortedDictionary<TrackRole, byte> GetDoubleChannels(this RenderedSong song)
     {

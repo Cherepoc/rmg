@@ -126,6 +126,8 @@ let songGenreKey = null;
 // what the song on the page is made of, as the server said: the channel every part plays on in the file the player
 // has, null where it is not written, whether each part is in the song, the drum groups it plays and its drum pieces
 let channels = {};
+/** The level each part's own channel plays at under the faders, as the file writes it (a doubled part's under 1). */
+let levels = {};
 // a part's other channels, its second take's and the riff's twin's, which follow its mix, each on its side
 let others = {};
 let partsInSong = {};
@@ -204,6 +206,8 @@ let playRequest = 0;
 let isListening = false;
 // whether the page asks a listening question, whose songs, A and B and the next, keep the mutes and solos pressed
 let asksQuestion = false;
+/** The settings the song playing was made with, where a new one's asked for replaced them before its listening was told; null otherwise. */
+let heardSettings = null;
 let downloadUrl = null;
 let exportUrl = null;
 let frame = null;
@@ -262,8 +266,10 @@ function updateTransport() {
     // an export is the song rendered through the soundfont, so it wants both of them as much as playing does
     elements.exportMp3.disabled = !isReady || isExporting;
 
-    // sharing is only a seed, which the server has already answered with: no sound is needed to pass it on
-    elements.share.disabled = !hasSong;
+    // sharing is only a seed, which the server has already answered with: no sound is needed to pass it on, but a song
+    // no link names would be passed on as another (isNamed)
+    elements.share.disabled = !hasSong || !isNamed();
+    elements.share.title = hasSong && !isNamed() ? "No link names this song: its genre was not kept, or a stage was left out" : "";
 
     // nor is rating it, though it is mostly done while it plays
     elements.like.disabled = !hasSong || songVersion === null || !isNamed();
@@ -865,7 +871,12 @@ function rememberSong(wasRolled = history.state?.rolled === true) {
  *     carry: not one with stages left out, a listening question's without, nor one in a genre the server did not keep.
  */
 function isNamed() {
-    return songSkipped.length === 0 && (songGenreKey !== null || !hasAGenre(settings.genre));
+    return songSkipped.length === 0 && (songGenreKey !== null || !sendsAGenre(settings.genre));
+}
+
+/** Whether settings send a genre with the song: one naming a choice, as a genre of a name alone is sent as none. */
+function sendsAGenre(genre) {
+    return Object.keys(genre.choices).length > 0;
 }
 
 /** The link to the song on the page, which is this address with its seed and its settings as they are now. */
@@ -963,6 +974,8 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         arrival = ask;
         signal = ask.controller.signal;
         if (asked !== settings) {
+            // the song playing was heard with the settings it was made with, which its listening reports at the next one's arrival
+            if (startedListening !== null && heardSettings === null) heardSettings = formatSettings(settings);
             settings = asked;
             keepCurrentSettings();
             showSettings();
@@ -1001,7 +1014,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
 
         // only once the whole song is here: a body that fails halfway leaves the old song as it was
         const made = applyReport(settings, report);
-        ({ settings, channels, others, own } = made);
+        ({ settings, channels, levels, others, own } = made);
         partsInSong = made.plays;
         drumGroupsPresent = made.drumGroups;
         drumPiecesPlayed = made.drumPieces;
@@ -1025,7 +1038,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         showSettings();
         showRating(recallRating(songVersion, currentSong()));
         // a song no link, list or rating could name is heard here alone (isNamed)
-        if (isNamed()) {
+        if (isNamed() && !asksQuestion) {
             rememberSong(isRemade ? undefined : isRolled);
             addToHistory(isRemade, keepsPlace);
         }
@@ -1188,10 +1201,13 @@ function keptGenre(kept) {
 
 /** Keeps the settings for the next visit, and says how many of them change the song. */
 function keepCurrentSettings() {
-    keepSettings(formatSettings(givenOnly(settings)));
-    // a preset by its id, so that the next visit hears it as it is then, another genre whole
-    const preset = presetOf(settings.genre);
-    keepGenre(!hasAGenre(settings.genre) ? null : preset !== null ? { preset: preset.id } : settings.genre);
+    // a listening question's songs leave the page's own settings and genre as they were
+    if (!asksQuestion) {
+        keepSettings(formatSettings(givenOnly(settings)));
+        // a preset by its id, so that the next visit hears it as it is then, another genre whole
+        const preset = presetOf(settings.genre);
+        keepGenre(!sendsAGenre(settings.genre) ? null : preset !== null ? { preset: preset.id } : settings.genre);
+    }
     showGiven();
 }
 
@@ -1348,10 +1364,11 @@ function keepGenreCopy(key, genre) {
  *     null where none has it.
  */
 async function genreOf(key) {
-    const copy = recallGenreCopies()[key];
-    if (copy !== undefined) return copy;
+    // a preset's id the preset as it is now, never an older copy of it
     const preset = presetById(key);
     if (preset !== null) return asGenre(preset);
+    const copy = recallGenreCopies()[key];
+    if (copy !== undefined) return copy;
     try {
         const response = await fetch(new URL(`api/genres/${encodeURIComponent(key)}`, location.href));
         if (!response.ok) return null;
@@ -1643,7 +1660,9 @@ function reportListening() {
     const seconds = (performance.now() - startedListening) / 1000;
     startedListening = null;
 
-    if (seconds >= 1) track("listened", aboutSong({ seconds }));
+    const about = heardSettings === null ? aboutSong({ seconds }) : { ...aboutSong({ seconds }), settings: heardSettings };
+    heardSettings = null;
+    if (seconds >= 1) track("listened", about);
 }
 
 elements.stop.addEventListener("click", async () => {
@@ -1807,8 +1826,7 @@ const genreManager = createGenreManager({
         showGenre();
     },
     onKeepAll: keepAllGenres,
-    // a choice the server knows, and an option of it
-    knows: (name, option) => genreChoices.some((x) => x.name === name && (option === undefined || x.options.some((y) => y.name === option))),
+    knows: knowsChoice,
     asFile: (genre) => ({ ...genre, choices: nestedChoices(genre.choices, genreChoices.map((x) => x.name)) }),
 });
 document.body.append(genreManager.element);
@@ -2095,9 +2113,12 @@ async function listChoices() {
     }
 }
 
-/** A part's channels, its own and its others', whether each sits on the other side of the part's pan, and the program of one that keeps its own. */
+/**
+ *     A part's channels, its own and its others', whether each sits on the other side of the part's pan, the program of
+ *     one that keeps its own, and the level it plays at under the faders.
+ */
 function channelsOf(part) {
-    return [...(channels[part] == null ? [] : [{ channel: channels[part], mirrored: false }]), ...(others[part] ?? [])];
+    return [...(channels[part] == null ? [] : [{ channel: channels[part], mirrored: false, level: levels[part] }]), ...(others[part] ?? [])];
 }
 
 /** A pan step on the other side of the middle, as far from it. */
@@ -2583,8 +2604,8 @@ function setPartPan(part, pan) {
 /** A part's volume under the song's, on the player. */
 function applyVolume(part) {
     const volume = fromStep(settings.volume) * fromStep(settings.parts[part].volume);
-    for (const { channel } of channelsOf(part))
-        withPlayer((player) => player.setChannelVolume(channel, volume), "Could not set the volume");
+    for (const { channel, level } of channelsOf(part))
+        withPlayer((player) => player.setChannelVolume(channel, volume * level), "Could not set the volume");
 }
 
 function formatPercent(volume) {
@@ -2626,11 +2647,11 @@ function createOption(value, name) {
  */
 function applyMix(player) {
     for (const part of PARTS)
-        for (const { channel, mirrored, program } of channelsOf(part)) {
+        for (const { channel, mirrored, program, level } of channelsOf(part)) {
             const mix = settings.parts[part];
             if (part === "drum") player.setChannelDrums(channel, true);
             player.setChannelInstrument(channel, program ?? mix.instrument.value, program == null && mix.instrument.isGiven);
-            player.setChannelVolume(channel, fromStep(settings.volume) * fromStep(mix.volume));
+            player.setChannelVolume(channel, fromStep(settings.volume) * fromStep(mix.volume) * level);
             player.setChannelPan(channel, toMidiPan(mirrored ? mirrorPan(mix.pan.value) : mix.pan.value));
         }
 }
@@ -2842,7 +2863,7 @@ start();
 function startListening() {
     const asked = new URL(location.href).searchParams.get("listen");
     if (asked === null) return false;
-    loadQuestions().then((questions) => askQuestion(questions, asked));
+    loadQuestions().then((questions) => askQuestion(questions, asked)).catch(() => setStatus("Could not load the listening questions", true));
     return true;
 }
 
@@ -2877,6 +2898,21 @@ function askQuestion(questions, asked) {
         verdict: (seed, choice) => tell("verdict", { seed, version: songSeed === seed && songVersion !== null ? songVersion : serverVersion, detail: `${question.id}:${choice}` }),
     });
     document.querySelector("main").prepend(strip);
+    sayWhereVerdictsGo(strip);
+}
+
+/** Says on the strip where the server keeps no verdicts, as only the test instance's listens. */
+async function sayWhereVerdictsGo(strip) {
+    let keeps = false;
+    try {
+        keeps = (await fetch(new URL("api/listening/verdicts", location.href))).ok;
+    } catch {
+        // a server out of reach keeps none either
+    }
+    if (keeps) return;
+    const note = document.createElement("p");
+    note.textContent = "This server keeps no verdicts: answer on the test instance.";
+    strip.append(note);
 }
 
 /** The index of the questions, with their verdicts as the server that listens counts them, none where it does not. */
@@ -2897,8 +2933,9 @@ async function showListeningIndex(questions) {
  *     gesture, and pressing play is one.
  */
 async function start() {
-    // the choices a genre may name, which its editor needs and nothing else waits for
-    listGenreChoices();
+    // the choices a genre may name, which its editor needs, and a kept genre's first song waits for, so that one naming a
+    // choice since taken out is asked for without it
+    const choicesListed = listGenreChoices();
     // the listening mode asks for its own songs, none rolled as the page opens
     const isListening = startListening();
 
@@ -2913,6 +2950,8 @@ async function start() {
         keepCurrentSettings();
         showSettings();
     }
+
+    if (sendsAGenre(settings.genre)) await choicesListed;
 
     // said afterwards, since the generating itself has the status line until it is done with it, and
     // only once a song has arrived: a failure has the status line to itself
@@ -2959,10 +2998,39 @@ async function listGenreChoices() {
         const choices = await response.json();
         genreChoices = choices;
         genreSelect.disabled = genreManage.disabled = false;
+        pruneKeptGenres();
         return choices;
     } catch {
         return null;
     }
+}
+
+/** Whether the server knows a choice, and an option of it where one is named. */
+function knowsChoice(name, option) {
+    return genreChoices.some((x) => x.name === name && (option === undefined || x.options.some((y) => y.name === option)));
+}
+
+/** A genre without the choices and options the server no longer knows, renamed or taken out since it was kept. */
+function pruned(genre) {
+    const choices = Object.fromEntries(Object.entries(genre.choices).filter(([choice]) => knowsChoice(choice))
+        .map(([choice, options]) => [choice, Object.fromEntries(Object.entries(options).filter(([option]) => knowsChoice(choice, option)))]));
+    return { ...genre, choices };
+}
+
+/**
+ *     Drops from the genres this browser kept, its own, the list's copies and the one it asks in, the choices and options
+ *     the server no longer knows, which it would refuse every song of, and says so once.
+ */
+function pruneKeptGenres() {
+    const changed = (genre) => JSON.stringify(pruned(genre).choices) !== JSON.stringify(genre.choices);
+    const copies = recallGenreCopies();
+    const isAnyChanged = recallGenres().some(changed) || Object.values(copies).some(changed) || changed(settings.genre);
+    if (!isAnyChanged) return;
+    keepGenres(recallGenres().map(pruned));
+    keepGenreCopies(Object.fromEntries(Object.entries(copies).map(([key, genre]) => [key, pruned(genre)])));
+    settings = { ...settings, genre: pruned(settings.genre) };
+    keepCurrentSettings();
+    setStatus("A genre kept here named choices this version no longer has; they were left out.");
 }
 
 /** Points the dropdown at a soundfont by name, and at nothing when the server offers no such thing. */

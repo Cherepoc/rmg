@@ -133,9 +133,9 @@ class Player {
     }
 
     /**
-     *     Sets how loud a channel plays, as a part of the volume it plays at unasked, which is the same
-     *     channel volume the written song carries. Locked for the same reason the instrument is: starting
-     *     the song over resets every controller that is not.
+     *     Sets how loud a channel plays, as a part of the volume a channel plays at unasked; the written song's
+     *     own level for the channel, a doubled part's takes under it, is the caller's to multiply in. Locked for
+     *     the same reason the instrument is: starting the song over resets every controller that is not.
      */
     setChannelVolume(channel, volume) {
         const midiChannel = this.#synth.midiChannels[channel];

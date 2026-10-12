@@ -20,10 +20,24 @@ public static class GenreEndpoints
         routes.MapPost("/api/genres/previews", (IReadOnlyDictionary<string, IReadOnlyDictionary<string, JsonElement>> genre) =>
             GenrePreview.OfGenre(genre, out var error) is { } previews ? Results.Ok(previews) : Results.BadRequest(new ErrorResponse(error!)));
 
-        // a genre a link names by its key (GenreStore), as it was asked for
+        // a genre a link names by its key (GenreStore), as it was asked for, but the choices and options taken out since,
+        // which every song of it would be refused for
         routes.MapGet("/api/genres/{key}", (string key, GenreStore store) => store.Find(key) is { } body
-            ? Results.Content(body, "application/json")
+            ? Results.Content(Known(body), "application/json")
             : Results.NotFound(new ErrorResponse($"'{key}' is no genre kept here.")));
+    }
+
+    /// <summary>A kept genre's canonical form without the choices and the options <see cref="GenreChoices" /> no longer has.</summary>
+    public static string Known(string body)
+    {
+        using var document = JsonDocument.Parse(body);
+        var root = document.RootElement;
+        var choices = root.GetProperty("choices").EnumerateObject()
+            .Select(x => (Choice: GenreChoices.All.FirstOrDefault(c => c.Name == x.Name), x.Value))
+            .Where(x => x.Choice is not null)
+            .ToDictionary(x => x.Choice!.Name, x => (IReadOnlyDictionary<string, JsonElement>)x.Value.EnumerateObject()
+                .Where(o => x.Choice!.Options.Any(c => c.Name == o.Name)).ToDictionary(o => o.Name, o => o.Value.Clone()));
+        return GenreStore.Canonical(root.GetProperty("name").GetString()!, choices);
     }
 
     /// <summary>How many numbers a range's scale is told by, evenly along its amounts, which the page draws it on.</summary>

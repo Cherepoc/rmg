@@ -81,7 +81,9 @@ export function isSameGenre(first, second) {
 function sameChoices(first, second) {
     const choices = new Set([...Object.keys(first), ...Object.keys(second)]);
     for (const choice of choices) {
-        const [a, b] = [first[choice] ?? {}, second[choice] ?? {}];
+        // a choice named, even as {} (every option never), is another genre than one leaving it to the songs
+        if ((choice in first) !== (choice in second)) return false;
+        const [a, b] = [first[choice], second[choice]];
         const options = new Set([...Object.keys(a), ...Object.keys(b)]);
         for (const option of options) if (!sameAmount(a[option], b[option])) return false;
     }
@@ -127,9 +129,11 @@ export function readGenreFile(text, knows) {
         return null;
     }
     const fromFile = (x) => (typeof x?.choices === "object" && x.choices !== null ? { ...x, choices: flatChoices(x.choices) } : x);
-    const isAmount = (x) => Number.isInteger(x) && x >= 0;
+    // an amount a whole number from 0, a range's lean from -100 to 100 (GenreAmounts.RangeOf), the server checking the rest
+    const isAmount = (option) => (x) => Number.isInteger(x) && (option === "lean" ? x >= -100 && x <= 100 : x >= 0);
     const isOptions = (choice, options) => typeof options === "object" && options !== null && !Array.isArray(options)
-        && Object.entries(options).every(([option, amount]) => knows(choice, option) && (isAmount(amount) || Array.isArray(amount) && amount.length === 3 && amount.every(isAmount)));
+        && Object.entries(options).every(([option, amount]) => knows(choice, option)
+            && (isAmount(option)(amount) || Array.isArray(amount) && amount.length === 3 && amount.every(isAmount(option))));
     const isGenre = (x) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null
         && Object.entries(x.choices).every(([choice, options]) => knows(choice) && isOptions(choice, options)) && (x.description === undefined || typeof x.description === "string");
     const parsed = Array.isArray(read) ? read.map(fromFile) : fromFile(read);

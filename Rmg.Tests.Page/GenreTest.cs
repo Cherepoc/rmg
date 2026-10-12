@@ -116,6 +116,26 @@ public sealed class GenreTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A genre kept here naming a choice since taken out is asked for without it, rather than every song refused.</summary>
+    [Test]
+    public async Task AKeptGenre_NamingAChoiceTakenOut_PlaysWithoutIt()
+    {
+        await using var page = await SongPage.Open(site, script: """
+            if (!sessionStorage.getItem("seeded")) {
+                sessionStorage.setItem("seeded", "1");
+                localStorage.setItem("rmg.genre", JSON.stringify({ name: "Mine", choices: { kickLock: { sections: 50 }, push: { sections: 50, never: 10 } } }));
+            }
+            """);
+        await page.FirstSong();
+        await page.Settled();
+        var asked = page.Requests[0].Body.GetProperty("genre");
+        await Assert.That(asked.TryGetProperty("kickLock", out _)).IsFalse();
+        await Assert.That(asked.GetProperty("push").TryGetProperty("never", out _)).IsFalse();
+        await Assert.That(asked.GetProperty("push").GetProperty("sections").GetInt32()).IsEqualTo(50);
+        await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task AnyGenre_DrawsAPresetForEveryNewSong_NamedInItsLink_AndIsKept()
     {

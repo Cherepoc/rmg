@@ -57,4 +57,11 @@ public sealed class GenreStoreTest
             directory.Delete(true);
         }
     }
+
+    [Test]
+    public async Task AKeptGenre_IsServedWithoutTheChoicesAndOptionsTakenOut()
+    {
+        var body = """{"format":1,"name":"Mine","choices":{"kickLock":{"sections":50},"push":{"never":10,"sections":50}}}""";
+        await Assert.That(Rmg.WebApi.Genres.GenreEndpoints.Known(body)).IsEqualTo("""{"format":1,"name":"Mine","choices":{"push":{"sections":50}}}""");
+    }
 }

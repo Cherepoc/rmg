@@ -1,3 +1,5 @@
+using Microsoft.Playwright;
+
 namespace Rmg.Tests.Page;
 
 /// <summary>
@@ -7,6 +9,29 @@ namespace Rmg.Tests.Page;
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class WalkingTheListTest(Site site)
 {
+    /// <summary>A song made in a preset is still on the list on the next visit, as one in no genre is.</summary>
+    [Test]
+    public async Task ASongInAPreset_IsStillListed_AfterAReload()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Settled();
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        await page.Until(() => genre.IsEnabledAsync(), "the genres listed");
+        var count = page.Requests.Count;
+        await genre.SelectOptionAsync(new SelectOptionValue { Label = "Rock" });
+        await page.Until(() => page.Requests.Count > count, "the song asked for in Rock");
+        await page.Settled();
+        var heard = await page.History();
+        await Assert.That(await page.Page.Locator("button[data-entry]").First.GetAttributeAsync("data-entry")).EndsWith(":rock");
+
+        await page.Page.ReloadAsync();
+        await page.FirstSong();
+        await page.Settled();
+        await Assert.That((await page.History()).Intersect(heard).Count()).IsEqualTo(heard.Count);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task Previous_WalksDownTheList_KeepingItsOrder()
     {

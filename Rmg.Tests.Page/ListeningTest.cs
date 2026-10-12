@@ -12,6 +12,33 @@ namespace Rmg.Tests.Page;
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class ListeningTest(Site site)
 {
+    /// <summary>A question's songs leave the page's own settings, genre and list as they were for the next ordinary visit.</summary>
+    [Test]
+    public async Task AQuestionsSongs_LeaveThePagesSettingsAndList_AsTheyWere()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Settled();
+        await page.SetSetting("tempo", 40);
+        await page.Settled();
+        var (heard, given) = (await page.History(), await page.Given());
+
+        await page.Page.GotoAsync("/?listen=quieter-form");
+        var strip = page.Page.Locator("section.listening");
+        await page.Until(() => strip.IsVisibleAsync(), "the question asked");
+        var count = page.Requests.Count;
+        await strip.GetByRole(AriaRole.Button, new() { Name = "Play A" }).ClickAsync();
+        await page.Until(() => page.Requests.Count > count, "A asked for");
+        await page.Settled();
+
+        await page.Page.GotoAsync("/");
+        await page.FirstSong();
+        await page.Settled();
+        await Assert.That(await page.Given()).IsEqualTo(given);
+        await Assert.That((await page.History()).Skip(1)).IsEquivalentTo(heard, CollectionOrdering.Matching);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task AQuestion_PlaysASongWithAndWithout_AndKeepsTheVerdict()
     {

@@ -48,6 +48,7 @@ public sealed record SongReport(
         var channels = rendered.GetPartChannels();
         var doubles = rendered.GetDoubleChannels();
         var risers = rendered.GetRiserChannels();
+        var levels = rendered.GetPartLevels();
         // the song's own instrument and pan, whatever the mix plays, and the drums' kit, in the middle
         var own = song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().ToDictionary(x => x.Role, x => (x.InstrumentCode, x.Pan));
         own[TrackRole.Drum] = (draws.Kit, 0);
@@ -66,6 +67,7 @@ public sealed record SongReport(
                     channels.TryGetValue(role, out var channel) ? channel + 1 : null,
                     doubles.TryGetValue(role, out var second) ? second + 1 : null,
                     risers.TryGetValue(role, out var riser) ? riser + 1 : null,
+                    levels.GetValueOrDefault(role, 1),
                     own[role].InstrumentCode,
                     GenerateSongRequest.ToPanStep(own[role].Pan)
                 )
@@ -107,6 +109,10 @@ public sealed record Drawn<T>(T Value, bool IsGiven);
 /// <param name="Channel">The channel it plays on, from 1; none where it is not written.</param>
 /// <param name="Double">The channel its second take plays on, from 1, a doubled driven guitar's; none for a part played once.</param>
 /// <param name="Riser">The channel its riser into a drop plays on, from 1, mixed as the part is; none for a part that carries none.</param>
+/// <param name="Level">
+///     The level its channels play at under the mix's faders, as the file writes them: a doubled part's two takes each
+///     about 0.84, so that the pair sounds as one part; 1 for the others.
+/// </param>
 /// <param name="Instrument">The General MIDI program the song gives it, the drums' kit, whatever the mix plays.</param>
 /// <param name="Pan">Where the song sits it, from 0, left, through 31, the middle, to 61, right, whatever the mix does.</param>
-public sealed record PartReport(Drawn<bool> Plays, int? Channel, int? Double, int? Riser, int Instrument, int Pan);
+public sealed record PartReport(Drawn<bool> Plays, int? Channel, int? Double, int? Riser, double Level, int Instrument, int Pan);
