@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Songs;
@@ -85,6 +86,21 @@ public sealed class MetalFamilyReportTest
             // the songs' bass a slap bass, General MIDI's 36 and 37
             var slapped = withRiff.Count(x => x.Song.TrackDefinitions[x.Track(TrackRole.Bass)] is PitchInstrumentTrack { InstrumentCode: 36 or 37 });
             Console.WriteLine($"{name}: the bass doubling the riff in {doubled / (double)Math.Max(1, sections):P0} of the sections both play, a slap bass in {slapped / (double)Math.Max(1, withRiff.Length):P0} of the songs");
+            // the riff's lowest notes over their chord's root, on its beats and off them
+            var intervals = songs.Where(x => !x.Absent.Contains(TrackRole.Riff)).SelectMany(x => x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Riff))?.Select(n => n.Value) ?? [])
+                .Select(n => (Beat: n.State.GetStateValue(CompositionStateKinds.BeatRank) == 0, Chugs: n.State.GetStateValue(CompositionStateKinds.LinePedal) > 0, Interval: (n.Pitches.Min() - Realizer.GetChord(n.State).Chord.GetPitch(0)).Mod(12))).ToArray();
+            string Intervals(bool beat, bool chugs = false)
+            {
+                var these = intervals.Where(x => x.Beat == beat && (!chugs || x.Chugs)).Select(x => x.Interval).ToArray();
+                string Of(string label, params int[] classes) => $"{label} {these.Count(classes.Contains) / (double)Math.Max(1, these.Length):P0}";
+                return string.Join(", ", Of("root", 0), Of("♭2", 1), Of("♭3", 3), Of("4", 5), Of("♭5", 6), Of("5", 7), Of("♭7", 10), Of("other", 2, 4, 8, 9, 11));
+            }
+
+            Console.WriteLine($"{name}: the riff over its root on the beats: {Intervals(true)}");
+            Console.WriteLine($"{name}: the riff over its root off them: {Intervals(false)}");
+            Console.WriteLine($"{name}: the riff over its root off them where it chugs, {intervals.Count(x => x.Chugs) / (double)Math.Max(1, intervals.Length):P0} of its notes: {Intervals(false, true)}");
+            var scales = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.LineScale && !x.Absent.Contains(TrackRole.Riff) && t.Track == x.Track(TrackRole.Riff)).Select(t => (LineScale)t.Value!)).ToArray();
+            Console.WriteLine($"{name}: the riff's scales {string.Join(", ", scales.GroupBy(x => x).OrderBy(x => x.Key).Select(g => $"{g.Key} {g.Count() / (double)scales.Length:P0}"))}");
             var figures = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Figures).Select(t => (ImmutableDictionary<FigurePlayer, string>)t.Value!)).ToArray();
             Console.WriteLine($"{name}: {longest.Count} sections; spans half {Span(0.5)}, one {Span(1)}, two {Span(2)}; a section's longest root {longest.Average():0.0} bars, " +
                               $"its bars under a root of four or more {stillBars / allBars:P0}");

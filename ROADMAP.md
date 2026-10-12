@@ -645,9 +645,13 @@ keeps together. Each step through the implementation loop, with a listening ques
    figure's weight 100 over its own 60), and its bass picked first, a slap bass in 56% of its songs from 75%. No code:
    the doubling a genre's chance already. Left to listening: a slap bass in the quiet sections alone, an instrument by
    section; queued, `numetal-lock` (without, `doubling.riff` 50 and `figure.ground.withRiff` 70).
-3. **A riff's accent tone** (`riff.accent`: the chord's, the ♭2, the ♭5, the ♭3), the strong notes off the chord where
-   its harmony holds still, with rests between; Nu metal, Thrash, Djent, Doom and Blues. Only with step 1's four bars,
-   as a ♭2 over a clean triad sounds a mistake.
+3. Put off (12 October 2026, measured twice): **a riff's dissonant stabs**. A chugging riff's notes off its pedal
+   already step up from it by its riff scale, so its ♭2 and ♭5 are 3% of its chugging notes off the beat (Nu metal's,
+   `MetalFamilyReportTest`; Djent's 8%), and its beats stay on the root and fifth, as a band's downbeat does. Tried:
+   every note off the pedal a stab within a tritone over it, 3% → 3%; with Nu metal's riff leaning to the blues scale
+   (31% of its sections) and Phrygian, still 3%, the stab one of three to six notes of its scale. Left: a stab palette
+   leaning to the ♭2 and ♭5 over the scale's other notes, the scale rule against a chromatic stab in a diatonic riff
+   scale to be weighed; first a listening question, the stabs heard as what Nu metal lacks.
 4. **Metal split** into Heavy metal (keeping `metal`: the gallop, twin solos, harmonic minor, 110 to 170), Thrash
    (fast, the double kick, tremolo and 16th chugs, Phrygian, the kick with the riff, the accent tone), Symphonic metal
    (the choir, strings, violin and organ, a soaring melody) and Doom (new: 50 to 80, B1 to C2, the ♭5, four bars a
