@@ -340,7 +340,8 @@ harmonised in three voices, 0.15.
 
 Answered on 8 October 2026, late, and let go of: the clave, stop time and the ghost notes, heard as great; the tape and
 the tone, barely heard, so a tape's wow now drifts by the sound facet, 5 cents at the plain end to 26 at the wild, and a
-part's tone closes 24 steps at its deepest rather than 16; the rolling bass, whose sections were heard without a kick,
+part's tone closed 24 steps at its deepest rather than 16, set back to 16 on 11 October to stay short of the filter's floor at
+40, below which instruments fall nearly silent, and asked again as a cut (the review of 11 October's #28); the rolling bass, whose sections were heard without a kick,
 so a figure around the kick plays only in a bar the kick plays in; Black metal's endings, kept as they are; and a wah
 heard in Black metal, its mix filtered by the songs' chances, which it names none of now.
 

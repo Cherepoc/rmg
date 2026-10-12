@@ -75,5 +75,5 @@ rejected while fixing: the place, what was decided, why.
 
 - The tension (`tension`, a line's strong beat held on a tension) kept to Djent (and Metal's and Nu metal's counter-melody as named): its question heard 3 better, 4 worse and 5 not told apart of 12 (8 October); Black metal's taken out. Not a cut candidate again unless Djent's is heard worse.
 - The polymeter's frame (`polymeterFrame`), the melody's inversion (`inversion`) and the pinch's squeal (`pinchSound`) cut on listening: not told apart, heard worse in 5 of 6, and General MIDI's harmonics preferred. Not proposed again.
-- A part's tone closes 24 steps at its deepest, as listening on 8 October asked: not a stale number to set back to 16.
+- A part's tone closes 16 steps at its deepest (`Expression.ToneReach`), short of the filter's reach of 24, as the brightness's floor at 40 is where instruments fall nearly silent: not raised to 24, though listening on 8 October asked for more, which would leave a deep tone no room for a filter; whether the tone earns its place is a listening question (#28).
 - 12/8's backbeat is the meter's half-cycle-late cycle (`Meter.Backbeats`), dotted quarters 2, 3 and 4; the heavy figure's added backbeat follows it, as the snare's own backbeat does, until the cycle is measured (roadmap).
