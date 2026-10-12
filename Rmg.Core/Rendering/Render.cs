@@ -81,7 +81,7 @@ public static class Render
     /// </summary>
     public static RenderedSong RenderSong(Song song, SongMix mix, CancellationToken cancellation)
     {
-        var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap, song.MeterAt);
+        var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap, song.PlaceOf);
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
         var swing = GetSwing(song);
         // how closed the whole mix is, wherever it changes, every part's brightness under it

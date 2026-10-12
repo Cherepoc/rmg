@@ -326,7 +326,7 @@ internal static class SongStages
 
     /// <summary>The notes, decided from the state of the whole song, in its order, none sounding into a stop.</summary>
     internal static SongDraft RealizeNotes(SongDecisions song, SongDraft draft) =>
-        draft with { Notes = song.Form.Edits.CutNotes(Realizer.Realize(song.Tracks.Definitions, draft.Timeline, song.Form.Map.MeterAt), song.Roles) };
+        draft with { Notes = song.Form.Edits.CutNotes(Realizer.Realize(song.Tracks.Definitions, draft.Timeline, song.Form.Map.PlaceOf), song.Roles) };
 
     /// <summary>The parts' instruments over the song, switched and articulated by every section's sound facet.</summary>
     internal static SongDraft Instruments(SongDecisions song, SongDraft draft) =>

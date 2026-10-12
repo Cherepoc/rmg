@@ -27,11 +27,11 @@ internal static class Realizer
     private static readonly ImmutableArray<int> ChromaticScaleOffsets = [..Enumerable.Range(0, OctaveNoteCount)];
 
     /// <summary>The notes of every track that plays, by its number, from the song's state.</summary>
-    /// <param name="meterAt">The meter the song's bar at a position is in.</param>
+    /// <param name="placeOf">Where a position is in the song's bars, its bar's meter and its beat in it.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Realize(
         ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions,
         TrackEventStateTimelineMap<StateMap> song,
-        Func<double, Meter> meterAt
+        Func<double, Place> placeOf
     )
     {
         // a note reads only the state Render would; a track's definition also holds what its generation used
@@ -47,7 +47,7 @@ internal static class Realizer
 
             tracks[trackNumber] = track switch
             {
-                PitchInstrumentTrack pitchInstrumentTrack => RealizeStruck(pitchInstrumentTrack, trackEventStateTimelineMap, commonStateTimelineMap, changes, meterAt),
+                PitchInstrumentTrack pitchInstrumentTrack => RealizeStruck(pitchInstrumentTrack, trackEventStateTimelineMap, commonStateTimelineMap, changes, placeOf),
                 PercussionInstrumentTrack percussionInstrumentTrack => RealizePercussionTrack(percussionInstrumentTrack, GetNoteStates(trackEventStateTimelineMap, track, commonStateTimelineMap)),
                 _ => throw new ArgumentException($"Track {trackNumber} is of no kind that plays.", nameof(trackDefinitions))
             };
@@ -119,14 +119,14 @@ internal static class Realizer
         EventStateTimelineMap<StateMap> raw,
         StateTimelineMap commonStateTimelineMap,
         ImmutableArray<double> changes,
-        Func<double, Meter> meterAt
+        Func<double, Place> placeOf
     )
     {
         // the track's state over the song's merged once, as a pass strikes notes again but changes no state
         var merged = Merged(raw, track, commonStateTimelineMap);
         while (true)
         {
-            var realized = RealizePitchTrack(track, NoteStates(merged.WithEvents(raw.EventTimeline)), changes, meterAt, out var crossings);
+            var realized = RealizePitchTrack(track, NoteStates(merged.WithEvents(raw.EventTimeline)), changes, placeOf, out var crossings);
             if (crossings.Count == 0 || !(track.Role.PlaysChords() || track.Role == TrackRole.Bass))
                 return realized;
 
@@ -136,7 +136,7 @@ internal static class Realizer
             {
                 // where the track plays on within a bar, as it played, not a solo's line, which holds its note as a line does,
                 // nor into one
-                if (index + 1 >= events.Count || events[index + 1].Position >= change + meterAt(change).BarDuration - 1e-9
+                if (index + 1 >= events.Count || events[index + 1].Position >= change + placeOf(change).Meter.BarDuration - 1e-9
                     || events[index].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1 || events[index + 1].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1
                     // nor a pedal, which holds its note across the chords
                     || events[index].Value.GetStateValue(CompositionStateKinds.BassPedal) == 1)
@@ -176,7 +176,7 @@ internal static class Realizer
         PitchInstrumentTrack track,
         EventTimeline<StateMap> eventStateTimelineMap,
         ImmutableArray<double> changes,
-        Func<double, Meter> meterAt,
+        Func<double, Place> placeOf,
         out List<(int Index, double Change)> crossings
     )
     {
@@ -194,7 +194,7 @@ internal static class Realizer
         for (var i = 0; i < items.Length; i++)
         {
             place = i > 0 && UntilChange(changes, items[i - 1].Position) > items[i].Position - items[i - 1].Position + 1e-9 ? place + 1 : 0;
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, range, meterAt(items[i].Position).BarDuration, changes, place, out var unclipped);
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, range, placeOf(items[i].Position), changes, place, out var unclipped);
             var change = items[i].Position + UntilChange(changes, items[i].Position);
             var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;
             if (items[i].Position + unclipped > change + 1e-9 && next > change + 1e-9)
@@ -247,13 +247,14 @@ internal static class Realizer
         VoiceLeader voiceLeader,
         TrackRole role,
         (int Low, int High) range,
-        double bar,
+        Place at,
         ImmutableArray<double> changes,
         int place,
         out double unclipped
     )
     {
         var position = timelineItemWithDuration.Position;
+        var bar = at.Meter.BarDuration;
         // a note is held towards the next note of its track, but a gap longer than a bar is silence, such as a bar in
         // which the track does not play, and the note is not held through it
         var nextNoteDuration = Math.Min(timelineItemWithDuration.Value.Duration, bar);
@@ -335,7 +336,8 @@ internal static class Realizer
         // lays on it among them
         var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio);
         if (role.PlaysChords() && !isLine && arpeggio != ArpeggioPattern.None)
-            notes = [Arpeggios.Pick(arpeggio, Arpeggios.Coloured(notes, stateMap, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour)), place, position, ToNote(0), stateMap.GetStateValue(CompositionStateKinds.ArpeggioOrder))];
+            notes = [Arpeggios.Pick(arpeggio, Arpeggios.Coloured(notes, stateMap, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour)), place, position,
+                at.Meter.Pulses.Any(x => Math.Abs(at.Beat - x) < 1e-6), ToNote(0), stateMap.GetStateValue(CompositionStateKinds.ArpeggioOrder))];
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
     }

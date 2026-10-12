@@ -68,7 +68,11 @@ public readonly record struct IntroPart(TrackRole Role, DrumRole? DrumRole = nul
 /// <summary>Where an intro's parts come in: over bars of their own before the first section, or over its first phrase.</summary>
 /// <param name="Bars">How many bars the parts come in over.</param>
 /// <param name="IsBefore">Whether they are bars of their own before the first section, rather than its first phrase.</param>
-public readonly record struct IntroWindow(int Bars, bool IsBefore);
+public readonly record struct IntroWindow(int Bars, bool IsBefore)
+{
+    /// <summary>The window over the first section's phrase at most, as the bars of four it is drawn in may be more than a phrase of three.</summary>
+    public IntroWindow FittedTo(Meter first) => this with { Bars = Math.Min(Bars, first.PhraseBars) };
+}
 
 /// <summary>
 ///     How a song starts and ends around its sections. It starts with the whole band, with a count-in, or with the band

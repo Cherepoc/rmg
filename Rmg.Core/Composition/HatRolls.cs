@@ -39,8 +39,8 @@ internal static class HatRolls
         {
             var context = song.AppearanceStream(SongStream.HatRolls, index);
             var chance = Chance.At(song.SectionOf(span.SectionId).Facets[Facet.Groove], song.Genre.Chance(GenreChoices.HatRolls, "bars"));
-            var bar = span.Meter.BarDuration;
-            for (var end = span.Start + bar; end <= span.End + 1e-9; end += bar)
+            // every bar, a short last one's too, the bar before the next section where a roll is most at home
+            foreach (var (_, _, end) in span.Bars)
             {
                 // drawn for every bar, so that the draws are as many
                 var (rolls1, rate, length) = (context.TestProbability(chance), context.Pick(Rates), context.Pick(Lengths));

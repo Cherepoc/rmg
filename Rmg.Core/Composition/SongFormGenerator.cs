@@ -148,7 +148,7 @@ internal sealed class SongFormGenerator
     /// <param name="hook">The meter of the chorus a hook intro quotes; none for another intro.</param>
     internal static double IntroDuration(FormPlan plan, Meter first, Meter? hook) => plan.Intro switch
     {
-        IntroKind.Entries when plan.Window.IsBefore => plan.Window.Bars * first.BarDuration,
+        IntroKind.Entries when plan.Window.IsBefore => plan.Window.FittedTo(first).Bars * first.BarDuration,
         IntroKind.CountIn => first.BarDuration,
         IntroKind.Hook => (hook ?? throw new ArgumentNullException(nameof(hook))).PhraseDuration,
         _ => 0
@@ -194,6 +194,7 @@ internal sealed class SongFormGenerator
         var meter = sections[0].Meter;
         var last = sections[^1].Meter;
         var first = sections[0];
+        plan = plan with { Window = plan.Window.FittedTo(first.Meter) };
         // the chorus a hook intro quotes, its first appearance (HookOf)
         var hook = sections.Select((x, i) => (Section: x, Index: i)).FirstOrDefault(x => x.Section.Role == SectionRole.Chorus);
         if (plan.Intro == IntroKind.Hook && hook.Section is null)

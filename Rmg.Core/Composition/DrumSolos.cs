@@ -197,7 +197,7 @@ internal static class DrumSolos
             // all but its last bar, a short one's, the fill's into the section after, and the bars a build rolls over into a
             // drop after it
             var until = drops.Any(x => Math.Abs(x - whole.End) < 1e-9) ? whole.LastBar - FormLayers.BuildRollBars * whole.Meter.BarDuration : whole.LastBar;
-            var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, until - whole.Start) };
+            var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, until - whole.Start), Cut = 0 };
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
                                           track.EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
             RunSound[] Of(FillDrumRole role) => sounds.TryGetValue(role, out var all) ? [..all.Where(Plays).DistinctBy(x => x.Track)] : [];

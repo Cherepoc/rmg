@@ -16,11 +16,11 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
 
     public double Duration => Ending.Start + Ending.Duration;
 
-    /// <summary>The section a position is in; none before the first or after the last.</summary>
+    /// <summary>The section a position is in, a hair early counting as at its start (<see cref="Span.Within" />); none before the first or after the last.</summary>
     public SectionSpan? SectionAt(double position)
     {
-        var index = IndexAt(position);
-        return index >= 0 && position < Sections[index].End ? Sections[index] : null;
+        var index = IndexAt(position + 1e-9);
+        return index >= 0 && Sections[index].IsWithin(position) ? Sections[index] : null;
     }
 
     /// <summary>The last section starting at or before a position, by its index; -1 before the first.</summary>

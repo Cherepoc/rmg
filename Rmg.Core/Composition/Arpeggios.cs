@@ -191,9 +191,10 @@ internal static class Arpeggios
     }
 
     /// <summary>The note of a voiced chord, low to high, that its note of the given place since the chord came in plays.</summary>
+    /// <param name="onBeat">Whether the note falls on a beat of its bar, its meter's pulses counted from the bar's start, where a montuno plays the root.</param>
     /// <param name="root">The chord's root, any octave of it, which the root and fifth and the pedal play on, as the voicing may put another note lowest.</param>
     /// <param name="order">The seed a chord broken in no pattern's order draws its notes by (<see cref="CompositionStateKinds.ArpeggioOrder" />).</param>
-    public static int Pick(ArpeggioPattern pattern, ImmutableArray<int> voiced, int place, double position, int root, long order)
+    public static int Pick(ArpeggioPattern pattern, ImmutableArray<int> voiced, int place, double position, bool onBeat, int root, long order)
     {
         var notes = voiced.Order().ToArray();
         var count = notes.Length;
@@ -221,7 +222,7 @@ internal static class Arpeggios
             ArpeggioPattern.UpTwoOctaves => notes[place % count] + 12 * (place / count % 2),
             ArpeggioPattern.Pedal => notes[place % 2 == 0 ? low : others[place / 2 % others.Length]],
             // on the beat the root, off it the others up and down by its place
-            ArpeggioPattern.Montuno => Math.Abs(position - Math.Round(position)) < 1e-6
+            ArpeggioPattern.Montuno => onBeat
                 ? notes[low]
                 : notes[others[(place % Math.Max(1, 2 * others.Length - 2)) is var step && step < others.Length ? step : 2 * others.Length - 2 - step]],
             _ => throw new ArgumentOutOfRangeException(nameof(pattern), pattern, null)

@@ -16,7 +16,8 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
 {
     private const double Epsilon = 1e-6;
 
-    private Meter MeterAt(double position) => map?.MeterAt(position) ?? meter;
+    /// <summary>How long the bar ending at a position is, a short last bar's before a section's start, the song's meter's where there is no map.</summary>
+    private double BarBefore(double position) => map?.BarBefore(position) ?? meter.BarDuration;
 
     private readonly Dictionary<int, List<(double From, double To)>> _cleared = [];
     private readonly Dictionary<int, List<TimelineItem<StateMap>>> _hits = [];
@@ -69,11 +70,9 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         if (articulation > 0)
             builder.Add(StateKinds.ArticulationIndex, articulation);
         var stateMap = builder.ToStateMap(context);
-        // sections are made of whole patterns, so the bar of the pattern and the beat in it follow from the song's
-        var bar = (int)Math.Floor(position / meter.BarDuration);
-        var (patternBar, beat) = map is null
-            ? (bar.Mod(meter.PatternBarCount), position - bar * meter.BarDuration)
-            : (map.PatternBarAt(position), map.BeatInBar(position));
+        // the bar of the pattern and the beat in it counted from the section's start, or from the song's where there is no map
+        var place = map?.PlaceOf(position) ?? new Place((int)Math.Floor(position / meter.BarDuration), 0, 0, meter);
+        var (patternBar, beat) = map is null ? (place.Bar.Mod(meter.PatternBarCount), position - place.Bar * meter.BarDuration) : (place.PatternBar, place.Beat);
         StateTrace.Record(TracePoints.Fill, track, sectionId, patternBar, stateMap, beat, $"{kind}", kind);
 
         Clear(track, position, position + Epsilon);
@@ -133,7 +132,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
                 if (roles[track] != TrackRole.Drum)
                     for (var i = 0; i < timeline.Count && timeline[i].Position < cut - Epsilon; i++)
                         last = i;
-                if (last >= 0 && timeline[last].Position + timeline[last].Value.Duration < cut - MeterAt(cut).BarDuration - Epsilon)
+                if (last >= 0 && timeline[last].Position + timeline[last].Value.Duration < cut - BarBefore(cut) - Epsilon)
                     last = -1;
 
                 timeline = EventTimeline.Create(timeline.Duration, timeline.Select((x, i) => EndBy(x, cut, i == last)));

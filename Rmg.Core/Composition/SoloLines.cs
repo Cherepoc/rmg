@@ -371,9 +371,9 @@ internal static class SoloLines
         double turn)
     {
         var bar = span.Meter.BarDuration;
-        // a bar's strong beats: its groups' starts in a bar of four beats or more, as an odd meter's 3+2 are, and its downbeat
-        // alone in a shorter one
-        double[] strong = bar >= 4 ? [..span.Meter.Levels[1].Select(x => x.Start / 4.0)] : [0];
+        // a bar's strong beats, its groups' starts, as an odd meter's 3+2 are, 3/4's three beats and 6/8's two, so that a
+        // one-bar phrase in a short bar releases on a beat after its first
+        double[] strong = [..span.Meter.Levels[1].Select(x => x.Start / 4.0)];
         // the last strong beat at or before a position, counted in bars from a phrase's start
         double LastStrong(double from, double limit)
         {

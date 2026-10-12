@@ -455,8 +455,8 @@ public sealed class SoloTest
         foreach (var (index, _, plan) in Plans(song))
         {
             var span = song.Map.Sections[index];
-            // a bar's strong beats: its groups' starts in a bar of four beats or more, its downbeat in a shorter one
-            double[] strong = span.Meter.BarDuration >= 4 ? [..span.Meter.Levels[1].Select(x => x.Start / 4.0)] : [0];
+            // a bar's strong beats, its groups' starts at every length of bar
+            double[] strong = [..span.Meter.Levels[1].Select(x => x.Start / 4.0)];
             foreach (var phrase in plan.GroupBy(x => x.Phrase))
             {
                 var release = phrase.Last(x => x.Gesture != SoloGesture.Pause);

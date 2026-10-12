@@ -15,7 +15,7 @@
     "seeds": [
       {
         "seed": "0",
-        "at": 54.3,
+        "at": 54.5,
         "listen": [
           "Chords (Orchestral Harp)",
           "Melody (Flute)",
@@ -152,12 +152,12 @@
         ]
       },
       {
-        "seed": "r",
-        "at": 107.1,
+        "seed": "T",
+        "at": 109.5,
         "listen": [
-          "Riff (Distortion Guitar)",
-          "Chords (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
+          "Melody (Electric Piano 1)",
+          "Riff (Overdriven Guitar)",
+          "Rhythm part (Distortion Guitar)"
         ]
       },
       {

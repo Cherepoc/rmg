@@ -24,7 +24,9 @@ public sealed class MontunoTest
         {
             // the root of the note's own chord, a pushed note's the chord it anticipates
             var isRoot = note.Value.Pitches[0].Mod(12) == Realizer.GetChordNotes(note.Value.State).Chord.Root.Mod(12);
-            if (Math.Abs(note.Position - Math.Round(note.Position)) < 1e-6)
+            // on a beat of its bar, its meter's pulses counted from the bar's start
+            var at = song.Map.PlaceOf(note.Position);
+            if (at.Meter.Pulses.Any(x => Math.Abs(at.Beat - x) < 1e-6))
                 (beats, beatRoots) = (beats + 1, beatRoots + (isRoot ? 1 : 0));
             else
                 (offs, offRoots) = (offs + 1, offRoots + (isRoot ? 1 : 0));

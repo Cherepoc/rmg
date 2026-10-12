@@ -81,7 +81,8 @@ internal static class SoloAnswers
             for (var i = 0; i + 1 < onsets.Length; i++)
             {
                 var answered = context.TestProbability(GapChance);
-                var start = Math.Ceiling(2 * (onsets[i] + After) - 1e-9) / 2;
+                // on a half beat of the section's bars, counted from its start, as a short bar before it moves the song's grid
+                var start = span.Start + Math.Ceiling(2 * (onsets[i] + After - span.Start) - 1e-9) / 2;
                 // a short line, a bar or two at most, however long the gap
                 var end = Math.Min(onsets[i + 1] - Before, start + LongestBars * span.Meter.BarDuration);
                 if (!answered || end - start < 1 - 1e-9)
