@@ -23,6 +23,15 @@
         ]
       },
       {
+        "seed": "1",
+        "at": 2.5,
+        "listen": [
+          "Bass (Timpani)",
+          "Melody (Oboe)",
+          "Pad (Voice Oohs)"
+        ]
+      },
+      {
         "seed": "3",
         "at": 233.6,
         "listen": [
@@ -46,15 +55,6 @@
         "listen": [
           "Bass (Bassoon)",
           "Chords (Choir Aahs)"
-        ]
-      },
-      {
-        "seed": "V",
-        "at": 31.5,
-        "listen": [
-          "Melody (Oboe)",
-          "Chords (Tremolo Strings)",
-          "Bass (Timpani)"
         ]
       },
       {
@@ -151,14 +151,14 @@
         "seed": "L",
         "at": 210.7,
         "listen": [
-          "Melody (Electric Guitar (clean))",
           "Bass (Electric Bass (pick))",
+          "Melody (Electric Guitar (clean))",
           "Riff (Distortion Guitar)"
         ]
       },
       {
         "seed": "R",
-        "at": 141.5,
+        "at": 143.2,
         "listen": [
           "Solo (Distortion Guitar)"
         ]
@@ -173,17 +173,17 @@
         ]
       },
       {
-        "seed": "z",
-        "at": 97,
+        "seed": "s",
+        "at": 143.4,
         "listen": [
-          "Counter-melody (String Ensemble 1)",
-          "Melody (Lead 2 (sawtooth))",
-          "Chords (Overdriven Guitar)"
+          "Rhythm part (Distortion Guitar)",
+          "Riff (Overdriven Guitar)",
+          "Melody (Electric Piano 1)"
         ]
       },
       {
         "seed": "11",
-        "at": 200.2,
+        "at": 202.1,
         "listen": [
           "Melody (Acoustic Grand Piano)",
           "Riff (Distortion Guitar)",
@@ -246,10 +246,16 @@
       },
       {
         "seed": "1E",
-        "at": 88.3,
+        "at": 0,
         "listen": [
-          "Chords (Honky-tonk Piano)",
           "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 65,
+        "listen": [
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
@@ -257,14 +263,6 @@
         "at": 0,
         "listen": [
           "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "1u",
-        "at": 80.5,
-        "listen": [
-          "Solo (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
         ]
       }
     ]
@@ -481,13 +479,6 @@
         ]
       },
       {
-        "seed": "1E",
-        "at": 171.7,
-        "listen": [
-          "Riff (Lead 2 (sawtooth))"
-        ]
-      },
-      {
         "seed": "1G",
         "at": 188.9,
         "listen": [
@@ -505,8 +496,16 @@
         ]
       },
       {
+        "seed": "1l",
+        "at": 215.6,
+        "listen": [
+          "Riff (Lead 2 (sawtooth))",
+          "Pad (Choir Aahs)"
+        ]
+      },
+      {
         "seed": "1p",
-        "at": 86,
+        "at": 87.8,
         "listen": [
           "Bass (Synth Bass 2)",
           "Riff (Lead 1 (square))",
@@ -536,22 +535,6 @@
     },
     "seeds": [
       {
-        "seed": "2",
-        "at": 2.7,
-        "listen": [
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "E",
-        "at": 19.9,
-        "listen": [
-          "Ride",
-          "Solo (Electric Guitar (clean))",
-          "Acoustic Snare"
-        ]
-      },
-      {
         "seed": "F",
         "at": 26,
         "listen": [
@@ -578,6 +561,20 @@
       {
         "seed": "N",
         "at": 26.7,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 147.7,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 44.4,
         "listen": [
           "Hi-Hat"
         ]
@@ -619,8 +616,7 @@
         "seed": "l",
         "at": 0,
         "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
+          "Riff (Distortion Guitar)"
         ]
       },
       {

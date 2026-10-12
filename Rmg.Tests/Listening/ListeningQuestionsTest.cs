@@ -255,5 +255,15 @@ public sealed class ListeningQuestionsTest
         await Assert.That(ids.SetEquals(Questions.Select(x => x.Id))).IsTrue().Because("listening.json is written again by Write");
         foreach (var question in file.RootElement.EnumerateArray())
             await Assert.That(question.GetProperty("seeds").GetArrayLength()).IsGreaterThan(0).Because(question.GetProperty("id").GetString()!);
+        // and every question asking as the code has it: its genre, the stages it leaves out and its patch, which a change
+        // to the code makes Write written again for
+        foreach (var asked in Questions)
+        {
+            var entry = file.RootElement.EnumerateArray().Single(x => x.GetProperty("id").GetString() == asked.Id);
+            string Json(object? value) => JsonSerializer.Serialize(value);
+            await Assert.That(entry.GetProperty("genre").ValueKind == JsonValueKind.Null ? null : entry.GetProperty("genre").GetString()).IsEqualTo(asked.Genre).Because(asked.Id);
+            await Assert.That(Json(entry.GetProperty("without").GetProperty("skip"))).IsEqualTo(Json(asked.Skip)).Because(asked.Id);
+            await Assert.That(Json(entry.GetProperty("without").GetProperty("genre"))).IsEqualTo(Json(PatchOf(asked) ?? new Dictionary<string, Dictionary<string, object>>())).Because(asked.Id);
+        }
     }
 }

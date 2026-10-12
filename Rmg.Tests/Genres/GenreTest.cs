@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
@@ -305,7 +306,8 @@ public sealed class GenreTest
             // a middling song's range at its feel, which strays around its base
             var middling = TestCorpus.Get(seed, new SongOverrides(Base: 0.5, Genre: genre));
             var feel = middling.Unconventionality.Facets[Facet.Feel];
-            await Assert.That(Bpm(middling)).IsBetween(GenreChoices.TempoOf(from.At(feel)) * Meter.BaseTempo - 1e-6, GenreChoices.TempoOf(to.At(feel)) * Meter.BaseTempo + 1e-6)
+            // within half a beat a minute, as a tempo drawn is rounded
+            await Assert.That(Bpm(middling)).IsBetween(GenreChoices.TempoOf(from.At(feel)) * Meter.BaseTempo - 0.5, GenreChoices.TempoOf(to.At(feel)) * Meter.BaseTempo + 0.5)
                 .Because($"seed {seed} at a feel of {feel}");
             await Assert.That(Bpm(TestCorpus.Get(seed, new SongOverrides(Base: 1, Genre: genre)))).IsBetween(100, 130);
         }
@@ -484,5 +486,76 @@ public sealed class GenreTest
         var pool = new Dictionary<string, IReadOnlyDictionary<string, ByConvention>> { ["meter"] = new Dictionary<string, ByConvention> { ["4/4"] = new(0, 0, 0) } };
         await Assert.That(Genre.Read(pool, out var error)).IsNull();
         await Assert.That(error).Contains("keeps none");
+    }
+
+    /// <summary>The same songs at a value choice's least and its most, measured, and the averages at each.</summary>
+    private static (double Least, double Most) AtTheEnds(Func<double, Genre> genre, Func<CorpusSong, double> measure, int songs = 32)
+    {
+        double Average(double amount) => TestCorpus.InParallel(Enumerable.Range(0, songs), seed => measure(TestCorpus.Get(seed, new SongOverrides(Genre: genre(amount))))).Average();
+        return (Average(0), Average(1));
+    }
+
+    /// <summary>A genre's ghost notes at their most ghost more notes on the snare than at their fewest, the same songs ghosting.</summary>
+    [Test]
+    public async Task GhostNotes_AtTheirMost_GhostMore()
+    {
+        var snares = DrumGroups.Snare.Tracks.ToHashSet();
+        var (least, most) = AtTheEnds(a => Of((GenreChoices.Ghosts, [("sections", 1)]), (GenreChoices.GhostNotes, [("many", a)])),
+            song => song.Song.Notes!.Where(x => snares.Contains(x.Key)).Sum(x => x.Value.Count));
+        Console.WriteLine($"snare notes a song: {least:F0} at the fewest ghosts, {most:F0} at the most");
+        await Assert.That(most).IsGreaterThan(least);
+    }
+
+    /// <summary>A groove held at its most moves its drums' speeds and phases less than at its least: fewer of them a song.</summary>
+    [Test]
+    public async Task AGrooveHeld_MovesItsDrumsLess()
+    {
+        var r = CompositionStateKinds.Rhythm;
+        var (least, most) = AtTheEnds(a => Of((GenreChoices.GrooveHold, [("held", a)])),
+            song => song.Trace.Where(x => x.Point == TracePoints.BarPattern && song.IsDrum(x.Track))
+                .Select(x => (x.StateMap.GetStateValue(r.Period.Power), x.StateMap.GetStateValue(r.Phase.Rank))).Distinct().Count());
+        Console.WriteLine($"the drums' speeds and phases a song: {least:F1} held least, {most:F1} held most");
+        await Assert.That(most).IsLessThan(least);
+    }
+
+    /// <summary>A part's space at its most sends it further to the reverb than at its least.</summary>
+    [Test]
+    public async Task APartsSpace_AtItsMost_IsDeeper()
+    {
+        var (least, most) = AtTheEnds(a => Of((GenreChoices.Space, [("melody", a)])),
+            song => song.Rendered.Tracks.Where(x => x.Role == TrackRole.Melody && !x.IsDouble).SelectMany(x => x.Controllers.Where(c => c.Controller == Rmg.Core.Rendering.ExpressionRender.ReverbController))
+                .Select(c => (double)c.Value).DefaultIfEmpty(0).Average());
+        Console.WriteLine($"the melody's reverb: {least:F1} at the least space, {most:F1} at the most");
+        await Assert.That(most).IsGreaterThan(least);
+    }
+
+    /// <summary>A part's pan at its most spreads it further to a side than at its least.</summary>
+    [Test]
+    public async Task APartsPan_AtItsMost_IsWider()
+    {
+        var (least, most) = AtTheEnds(a => Of((GenreChoices.Pan, [("chords", a)])),
+            song => song.Rendered.Tracks.Where(x => x.Role == TrackRole.Chords && !x.IsDouble).Select(x => Math.Abs(x.Pan)).DefaultIfEmpty(0).Average());
+        Console.WriteLine($"the chords' pan: {least:F2} at the least, {most:F2} at the most");
+        await Assert.That(most).IsGreaterThan(least);
+    }
+
+    /// <summary>A genre's swing at its most swings further than at its least, every song swinging.</summary>
+    [Test]
+    public async Task ASwing_AtItsMost_SwingsFurther()
+    {
+        var (least, most) = AtTheEnds(a => Of((GenreChoices.FeelChances, [("swing", 1)]), (GenreChoices.FeelValues, [("swing", a)])),
+            song => Rmg.Core.Rendering.Render.GetSwing(song.Song).Delay);
+        Console.WriteLine($"the swing's delay: {least:F3} at the least, {most:F3} at the most");
+        await Assert.That(most).IsGreaterThan(least);
+    }
+
+    /// <summary>A cadence's degree at its most leads home from it oftener than at its least.</summary>
+    [Test]
+    public async Task ACadencesDegree_AtItsMost_LeadsHomeOftener()
+    {
+        var (least, most) = AtTheEnds(a => Of((GenreChoices.CadenceDegrees, [("fifth", a)])),
+            song => song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => (ImmutableArray<int>)x.Value!).Average(x => x[^1].Mod(7) == 4 ? 1.0 : 0));
+        Console.WriteLine($"cadences from the fifth: {least:P1} at the least, {most:P1} at the most");
+        await Assert.That(most).IsGreaterThan(least);
     }
 }

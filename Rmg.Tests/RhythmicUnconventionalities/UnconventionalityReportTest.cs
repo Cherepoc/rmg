@@ -5,7 +5,7 @@ namespace Rmg.Tests.RhythmicUnconventionalities;
 /// <summary>
 ///     How the songs' unconventionality spreads: the base, every facet's range and how far it strays from the base, how
 ///     closely the facets go together, and how often a generated song is near an end, below 0.1 or above 0.9: as a whole,
-///     its facets' mean, its base, a facet, any facet, or any facet of five sections of it.
+///     its facets' mean, its base, a facet, any facet, or any facet of any of its sections, as the songs drew them.
 /// </summary>
 public sealed class UnconventionalityReportTest
 {
@@ -15,11 +15,11 @@ public sealed class UnconventionalityReportTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, SongCount), seed => Unconventionality.Generate(
-            Unconventionality.DrawBase(SongGenerator.CreateStream((ulong)seed, SongStream.Rhythm)),
-            // the songs' own facets, as the generator draws them
-            facet => SongGenerator.CreateStream((ulong)seed, SongStream.Unconventionality, (int)facet)
-        ));
+        // the songs' own, and their sections', as the songs drew them
+        var measured = TestCorpus.Measure(SongCount, song => (Song: song.Unconventionality,
+            Sections: song.Trace.Where(x => x.Point == TracePoints.SectionUnconventionality).Select(x => (Unconventionality)x.Value!).ToArray()));
+        var songs = measured.Select(x => x.Song).ToArray();
+        var sectionsOf = songs.Zip(measured, (song, x) => (song, x.Sections)).ToDictionary(x => x.song, x => x.Sections, ReferenceEqualityComparer.Instance);
 
         string Spread(double[] values) => $"10% {Percentile(values, 0.1):F2}, median {Percentile(values, 0.5):F2}, 90% {Percentile(values, 0.9):F2}";
         Console.WriteLine($"base: {Spread([..songs.Select(x => x.Base)])}");
@@ -34,7 +34,7 @@ public sealed class UnconventionalityReportTest
         static bool Near(double value) => value < 0.1 || value > 0.9;
         string Share(Func<Unconventionality, bool> of) => $"{songs.Count(of) / (double)songs.Length:P1}";
         Console.WriteLine($"near an end: the song as a whole, its facets' mean, {Share(x => Near(x.Facets.Values.Average()))}, the base {Share(x => Near(x.Base))}, any facet {Share(x => x.Facets.Values.Any(Near))}, " +
-                          $"any facet of a section {Share(x => Enumerable.Range(0, 5).Any(section => x.GenerateSection(facet => new Rmg.Core.Probabilities.GenerationContext((ulong)Rmg.Core.Probabilities.Seeds.Key(Rmg.Core.Probabilities.Seeds.Key(BitConverter.DoubleToInt64Bits(x.Base), section), (long)facet))).Facets.Values.Any(Near)))}; " +
+                          $"any facet of a section {Share(x => sectionsOf[x].Any(section => section.Facets.Values.Any(Near)))}; " +
                           $"by facet {string.Join(", ", Enum.GetValues<Facet>().Select(f => $"{f} {Share(x => Near(x[f]))}"))}");
         Console.WriteLine($"chords with groove {Correlation([..songs.Select(x => x[Facet.Chords])], [..songs.Select(x => x[Facet.Groove])]):F2}, " +
                           $"chords with the base {Correlation([..songs.Select(x => x[Facet.Chords])], [..songs.Select(x => x.Base)]):F2}");

@@ -27,6 +27,9 @@ internal sealed class HeardDifference
     /// </summary>
     public const double TimingDifference = 0.03;
 
+    /// <summary>How much louder or quieter a note may play and still be the same note, a few MIDI steps, in the velocity's share.</summary>
+    public const double LoudnessDifference = 3 / 127.0;
+
     private readonly Rendering _with;
     private readonly Rendering _without;
 
@@ -97,8 +100,8 @@ internal sealed class HeardDifference
     }
 
     /// <summary>
-    ///     The notes of either that the other has none of alike, its track, pitch, loudness and instrument, within
-    ///     <see cref="TimingDifference" /> of it; each note matched once, in order.
+    ///     The notes of either that the other has none of alike, its track, pitch and instrument, within
+    ///     <see cref="TimingDifference" /> of it and <see cref="LoudnessDifference" /> as loud; each note matched once, in order.
     /// </summary>
     private static IEnumerable<(string Key, string Part, double Loudness, double Seconds)> Unmatched(
         IReadOnlyList<(string Key, string Part, double Loudness, double Seconds)> with, IReadOnlyList<(string Key, string Part, double Loudness, double Seconds)> without)
@@ -108,7 +111,8 @@ internal sealed class HeardDifference
         foreach (var note in with)
         {
             var match = free.TryGetValue(note.Key, out var candidates)
-                ? candidates.Where(i => Math.Abs(without[i].Seconds - note.Seconds) <= TimingDifference).DefaultIfEmpty(-1).MinBy(i => i < 0 ? double.MaxValue : Math.Abs(without[i].Seconds - note.Seconds))
+                ? candidates.Where(i => Math.Abs(without[i].Seconds - note.Seconds) <= TimingDifference && Math.Abs(without[i].Loudness - note.Loudness) <= LoudnessDifference)
+                    .DefaultIfEmpty(-1).MinBy(i => i < 0 ? double.MaxValue : Math.Abs(without[i].Seconds - note.Seconds))
                 : -1;
             if (match < 0)
                 yield return note;
@@ -138,7 +142,7 @@ internal sealed class HeardDifference
     /// <summary>A rendering in seconds: its notes as heard, and every track's effects over time.</summary>
     private sealed class Rendering
     {
-        // every note by its track, its pitch, its loudness and its instrument, with its part's name, its second and its loudness
+        // every note by its track, its pitch and its instrument, with its part's name, its second and its loudness
         private readonly (string Key, string Part, double Seconds, double Loudness)[] _notes;
 
         public Dictionary<string, Track> Tracks { get; }
@@ -157,7 +161,7 @@ internal sealed class HeardDifference
                     // where it is heard, its part's pocket moving it off its place, and on which instrument
                     var seconds = song.SecondsAt(note.Position + note.Value.Shift);
                     var program = track.ProgramChanges.LastOrDefault(x => x.Position <= note.Position + 1e-9, (0, track.PitchInstrumentCode)).Program;
-                    notes.Add(($"{name} {note.Value.Offset} {Math.Round(note.Value.Velocity, 2)} {program}",
+                    notes.Add(($"{name} {note.Value.Offset} {program}",
                         NameOf(track.Role, track.IsPercussionInstrument, track.IsPercussionInstrument ? note.Value.Offset : program), seconds, note.Value.Velocity * track.Volume));
                     sounding.Add((seconds, song.SecondsAt(note.Position + note.Value.Shift + note.Value.Duration)));
                 }
