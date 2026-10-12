@@ -9,8 +9,8 @@ namespace Rmg.Core.Composition;
 /// <summary>Hi-hat rolls, a stage of the song after it is put together (<see cref="SongStages" />).</summary>
 internal static class HatRolls
 {
-    /// <summary>What a hat roll keeps out of: a fill, stop time and a drum solo.</summary>
-    private const Hold KeepsOutOf = Hold.Fill | Hold.Stop | Hold.DrumSolo;
+    /// <summary>What a hat roll keeps out of: a fill, stop time, a drum solo and the hats stopped by the form.</summary>
+    private const Hold KeepsOutOf = Hold.Fill | Hold.Stop | Hold.DrumSolo | Hold.Cut;
 
     /// <summary>The chance a bar's time drum rolls its last beat, a genre's that the songs never play (<see cref="GenreChoices.HatRolls" />).</summary>
     public static ByConvention Chance { get; } = new(0, 0, 0);
@@ -54,7 +54,7 @@ internal static class HatRolls
 
         // but where a fill plays, from its first note to its line, and in stop time, after the draws so that they are as many
         var holds = draft.Holds(song);
-        rolls.RemoveAll(r => holds.Meets(KeepsOutOf, r.From, r.To));
+        rolls.RemoveAll(r => times.Any(track => holds.Meets(KeepsOutOf, r.From, r.To, track)));
 
         var result = notes.ToBuilder();
         foreach (var track in times)

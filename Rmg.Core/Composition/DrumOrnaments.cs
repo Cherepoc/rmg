@@ -8,8 +8,8 @@ namespace Rmg.Core.Composition;
 /// <summary>The snare's flams and drags, a stage of the song after its notes are made (<see cref="SongStages" />).</summary>
 internal static class DrumOrnaments
 {
-    /// <summary>What a flam or a drag keeps out of: stop time and a drum solo, whose strokes are the drummer's own.</summary>
-    private const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo;
+    /// <summary>What a flam or a drag keeps out of: stop time, a drum solo, whose strokes are the drummer's own, and the snare stopped by the form.</summary>
+    private const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo | Hold.Cut;
 
     /// <summary>The chance a song's snare flams its beats in a fill, by its fills facet: never at the plain end, every song at the wild.</summary>
     public static ByConvention FlamChance { get; } = new(0, 0.25, 1);
@@ -59,7 +59,7 @@ internal static class DrumOrnaments
                 var position = note.Position;
                 // the snare's head in a section, a count-in's clicks aside, out of stop time and of a drum solo, whose strokes are
                 // the drummer's own
-                if (note.Value.Pitches is not [var code] || code != head || map.SectionAt(position) is not { } section || holds.At(KeepsOutOf, position))
+                if (note.Value.Pitches is not [var code] || code != head || map.SectionAt(position) is not { } section || holds.At(KeepsOutOf, position, track))
                     return note;
                 // in a fill on an 8th, its accents, and elsewhere on a pulse of its bar, its backbeat
                 var inFill = holds.At(Hold.Fill, position);

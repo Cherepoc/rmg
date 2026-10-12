@@ -260,7 +260,8 @@ internal sealed class SectionGenerator
             arrangementSeed,
             _tracks.Definitions.ToImmutableDictionary(x => x.Key, x => x.Value.Role),
             meter,
-            powerChords,
+            // the power chords its riff plays, a drone's single notes none
+            powerChords && !drone,
             chugs,
             octaveBass,
             alternatingBass,
@@ -913,7 +914,11 @@ internal sealed record GeneratedSection(
         // a breakdown's lines and pad out every time; and a calm section's guitars but the one breaking its chords, a part
         // coming in late coming in at the next appearance, and the guitar it keeps playing whatever it draws, but in the first
         // section an intro of entries builds up itself
-        var resting = drawn.Union(held).Union(Breakdown ? Breakdowns.Resting : []).Except(entering).Union(keepsTexture ? [] : Form.Leaves).Except(Form.Plays);
+        // a held part resting through a calm section before its entry too, and a part entering here resting through a
+        // breakdown, which leaves its lines out, to come in at the next appearance, its riff, bass and drums carrying it
+        var (breakdownRests, breakdownPlays) = Breakdown ? (Breakdowns.Resting, Breakdowns.Playing) : ([], []);
+        var resting = drawn.Union(held).Union(breakdownRests).Except(entering.Except(breakdownRests)).Except(breakdownPlays.Except(held))
+            .Union(keepsTexture ? [] : Form.Leaves).Except(Form.Plays.Except(held));
         // a section keeps its harmony, as its rests alone do (Arrangement.DrawRests): the chords playing where the bass is
         // held back and the rests would leave both out
         if (resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords) && !Absent.Contains(TrackRole.Chords))
@@ -940,9 +945,10 @@ internal sealed record GeneratedSection(
         // improvised through
         if (solo is { IsDrumSolo: true })
             return (this with { Resting = [..Roles.Values.Distinct().Where(x => x != TrackRole.Drum)], PhraseSilent = steady, TextureKind = TextureKind.Alone, Solo = solo }).Appear(appearance, improvisation);
-        // and the counter-melody and the pad make room for it, unless they solo
+        // and the counter-melody and the pad make room for it, unless they solo, and the riff's twin where the riff solos,
+        // whose line it would harmonise as it was
         if (solo is not null)
-            return (this with { Resting = resting.Union([TrackRole.CounterMelody, TrackRole.Pad]).Except(solo.Soloists).Remove(TrackRole.Melody), PhraseSilent = steady, TextureKind = TextureKind.Steady, Solo = solo }).Appear(appearance, 1);
+            return (this with { Resting = resting.Union([TrackRole.CounterMelody, TrackRole.Pad]).Union(solo.Soloists.Contains(TrackRole.Riff) ? [TrackRole.RiffTwin] : []).Except(solo.Soloists).Remove(TrackRole.Melody), PhraseSilent = steady, TextureKind = TextureKind.Steady, Solo = solo }).Appear(appearance, 1);
         return (this with { Resting = resting.Union(texture.Resting), PhraseSilent = texture.PhraseSilent, TextureKind = texture.Kind }).Appear(appearance, improvisation);
     }
 

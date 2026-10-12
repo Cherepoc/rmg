@@ -8,6 +8,9 @@ namespace Rmg.Core.Composition;
 /// <summary>Stop time, a stage of the song after it is put together (<see cref="SongStages" />).</summary>
 internal static class StopTime
 {
+    /// <summary>What stop time keeps out of: a calling verse, its call and its answer.</summary>
+    private const Hold KeepsOutOf = Hold.Call | Hold.Answer;
+
     /// <summary>
     ///     The chance a section plays its appearances' first phrase in stop time, by its form facet: never in the plainest
     ///     songs, now and then past them; a genre's where it names it, the blues' and rock's.
@@ -58,7 +61,9 @@ internal static class StopTime
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
-        var phrases = song.StopTime;
+        // but in a calling verse, whose answer stop time would cut to a hit a bar
+        var holds = draft.Holds(song);
+        var phrases = song.StopTime.Where(x => !holds.Meets(KeepsOutOf, x.Start, x.End)).ToImmutableArray();
         // whether a section is stopped wherever it plays, as it is played: a phrase drawn that nothing carries is not
         void Record(Func<(double Start, double End, double BarDuration), bool> played)
         {

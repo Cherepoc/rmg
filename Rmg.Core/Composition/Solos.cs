@@ -179,13 +179,14 @@ internal static class Solos
     /// <param name="roles">Every appearance's role in the song's form.</param>
     /// <param name="melody">Every appearance's melody facet.</param>
     /// <param name="parts">The parts the song has.</param>
+    /// <param name="breaksDown">Whether each appearance breaks down, which no solo plays over (<see cref="Breakdowns" />).</param>
     public static ImmutableArray<SoloPlan?> WithSoloist(IGenerationContext context, IReadOnlyList<SoloPlan?> solos, IReadOnlyList<SectionRole> roles, IReadOnlyList<double> melody,
-        IReadOnlyCollection<TrackRole> parts)
+        IReadOnlyCollection<TrackRole> parts, IReadOnlyList<bool> breaksDown)
     {
         var own = context.GenerateDouble();
-        var place = solos.Count > 1
-            ? context.Pick([..Enumerable.Range(1, solos.Count - 1).Select(i => new Weighted<int>(Math.Pow(RoleOdds, RoleLeans[roles[i]]), i))])
-            : 0;
+        // a later appearance by its role's lean, never one that breaks down
+        Weighted<int>[] places = [..Enumerable.Range(1, Math.Max(0, solos.Count - 1)).Where(i => !breaksDown[i]).Select(i => new Weighted<int>(Math.Pow(RoleOdds, RoleLeans[roles[i]]), i))];
+        var place = places.Length > 0 ? context.Pick([..places]) : 0;
         if (place == 0 || !parts.Contains(TrackRole.Solo) || !parts.Contains(TrackRole.Melody) || solos[place]?.IsDrumSolo == true)
             return [..solos];
 

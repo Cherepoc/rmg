@@ -8,8 +8,8 @@ namespace Rmg.Core.Composition;
 /// <summary>A snare's ghost notes, a stage of the song after its notes are made (<see cref="SongStages" />).</summary>
 internal static class Ghosts
 {
-    /// <summary>What a ghost keeps out of: a fill, stop time and a drum solo.</summary>
-    private const Hold KeepsOutOf = Hold.Fill | Hold.Stop | Hold.DrumSolo;
+    /// <summary>What a ghost keeps out of: a fill, stop time, a drum solo and the snare stopped by the form.</summary>
+    private const Hold KeepsOutOf = Hold.Fill | Hold.Stop | Hold.DrumSolo | Hold.Cut;
 
     /// <summary>The chance a section's snare plays ghost notes around its backbeat, by its groove facet: the songs' never; a genre's where it names it.</summary>
     public static ByConvention Chance { get; } = new(0, 0, 0);
@@ -71,7 +71,7 @@ internal static class Ghosts
                 {
                     var own = timeline.Where(x => x.IsWithin(start, end)).ToArray();
                     // nor in a bar whose snare plays off the 16ths, a tuplet's, whose grid the ghosts would fall between
-                    if (own.Length == 0 || holds.Meets(KeepsOutOf, start, end) || own.Any(x => Math.Abs((x.Position - start) / Length - Math.Round((x.Position - start) / Length)) > 1e-6))
+                    if (own.Length == 0 || holds.Meets(KeepsOutOf, start, end, track) || own.Any(x => Math.Abs((x.Position - start) / Length - Math.Round((x.Position - start) / Length)) > 1e-6))
                         continue;
                     var loudest = own.MaxBy(x => x.Value.Velocity);
                     // a ghost weaker than any beat of the bar

@@ -19,6 +19,9 @@ internal static class Articulations
     /// <summary>The chance a part's broken chords are let ring to the chord's change, a genre's that the songs never play.</summary>
     public static ByConvention LetRingChance { get; } = new(0, 0, 0);
 
+    /// <summary>What a ringing note keeps out of: stop time and a part stopped by the form, whose silence it would fill.</summary>
+    private const Hold RingsOutOf = Hold.Stop | Hold.Cut;
+
     /// <summary>The quickest a broken chord's notes follow each other and are let ring, in beats: an 8th, as faster ones would blur.</summary>
     public const double RingsFrom = 0.5;
 
@@ -83,17 +86,17 @@ internal static class Articulations
                 var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
                 // by the instrument playing the note, a switched one's
                 var program = InstrumentsOverTime.ProgramOf(state, part.InstrumentCode);
-                // a riff chugging on its pedal muting every note off its accents, another part its repeats
+                // a riff chugging on its pedal muting every note off its accents, another part its repeats, its own line's
+                // alone, a lead line it solos playing as it is
                 var onPedal = state.GetStateValue(CompositionStateKinds.LinePedal) > 0;
-                if (Chugs(part.Role, program) && section >= 0 && song.Sections[section].Chugs && (repeats || onPedal) && weak)
+                var ownLine = state.GetStateValue(CompositionStateKinds.LineSolo) == 0;
+                if (Chugs(part.Role, program) && ownLine && section >= 0 && song.Sections[section].Chugs && (repeats || onPedal) && weak)
                     state = state.With(CompositionStateKinds.PalmMute, 1);
                 // a bass in octaves, a note off the beat the note before it an octave away, up where its range has it and down
                 // where not, as a disco or a funk bass alternates them; but one leading into the next chord, and a section that
                 // chugs, which mutes its repeats instead
                 var pitches = note.Value.Pitches;
                 var leads = i + 1 < timeline.Count && timeline[i + 1].Value.State.GetStateValue(StateKinds.ChordChange) != note.Value.State.GetStateValue(StateKinds.ChordChange);
-                // a bass's own line, never a solo's
-                var ownLine = state.GetStateValue(CompositionStateKinds.LineSolo) == 0;
                 // a weak note after one played an octave away turning back to the note it was taken from, so that a run
                 // alternates; but a note the bass plays doubling another's line, which plays the line's
                 var doubled = state.GetStateValue(CompositionStateKinds.Doubled) > 0;
@@ -104,8 +107,9 @@ internal static class Articulations
                     octaved[i] = !octaved[i - 1];
                 }
                 // a bass alternating the root and the fifth, every other strong note of a chord its fifth, below the note
-                // before where its range has it and above where not, as a country bass plays
-                if (part.Role == TrackRole.Bass && ownLine && !doubled && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1)
+                // before where its range has it and above where not, as a country bass plays; but where it holds a pedal
+                if (part.Role == TrackRole.Bass && ownLine && !doubled && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1
+                    && state.GetStateValue(CompositionStateKinds.BassPedal) == 0)
                 {
                     var fifth = Realizer.GetChord(note.Value.State).Chord.GetPitch(4);
                     var below = timeline[Array.LastIndexOf(strongPlaces, strongPlaces[i] - 1, i)].Value.Pitches.Min() - 1;
@@ -140,11 +144,14 @@ internal static class Articulations
         // and in a calm section always (SectionForm)
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         bool Calm(double position) => song.Form.Map.SectionAt(position) is { } span && song.SectionOf(span.SectionId).Form.Kind == SectionFormKind.Calm;
+        // but never into the silence of stop time or a stop the form makes, which a ringing note would fill
+        var holds = draft.Holds(song);
         foreach (var (track, timeline) in result.ToArray())
             if (song.Tracks.Definitions[track] is PitchInstrumentTrack { } chords && chords.Role.PlaysChords())
             {
                 var rings = song.Stream(SongStream.LetRing, track).TestProbability(LetRingChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "letRing")));
-                result[track] = LetRing(timeline, chords.InstrumentCode, changes, song.Form.Map, position => rings || Calm(position));
+                result[track] = LetRing(timeline, chords.InstrumentCode, changes, song.Form.Map, position => (rings || Calm(position)) && !holds.At(RingsOutOf, position, track),
+                    position => holds.NextAfter(RingsOutOf, position, track));
             }
 
         return draft with { Notes = result.ToImmutable() };
@@ -156,7 +163,8 @@ internal static class Articulations
     ///     clean instrument that dies away, and a figure of 8ths or slower, as faster ones or held sounds would blur.
     /// </summary>
     /// <param name="rings">Whether the part lets its notes ring where they are.</param>
-    private static EventTimeline<RealizedNote> LetRing(EventTimeline<RealizedNote> timeline, int own, double[] changes, SongMap map, Func<double, bool> rings)
+    /// <param name="heldFrom">Where the part is next held silent after a position, which a ringing note stops at.</param>
+    private static EventTimeline<RealizedNote> LetRing(EventTimeline<RealizedNote> timeline, int own, double[] changes, SongMap map, Func<double, bool> rings, Func<double, double> heldFrom)
     {
         var notes = timeline.ToArray();
         return EventTimeline.Create(timeline.Duration, notes.Select((note, i) =>
@@ -168,7 +176,7 @@ internal static class Articulations
                 return note;
             var change = changes.FirstOrDefault(x => x > note.Position + 1e-9, timeline.Duration);
             var again = notes.Skip(i + 1).FirstOrDefault(x => x.Value.Pitches.Contains(note.Value.Pitches[0]), new TimelineItem<RealizedNote>(timeline.Duration, note.Value)).Position;
-            var end = Math.Min(Math.Min(change, again), note.Position + map.MeterAt(note.Position).BarDuration);
+            var end = Math.Min(Math.Min(Math.Min(change, again), note.Position + map.MeterAt(note.Position).BarDuration), heldFrom(note.Position));
             return end - note.Position > note.Value.Duration ? (note.Value with { Duration = end - note.Position }).ToTimelineItem(note.Position) : note;
         }));
     }

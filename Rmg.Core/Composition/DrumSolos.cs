@@ -164,6 +164,7 @@ internal static class DrumSolos
     /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
     /// <param name="drops">Where the song drops, whose build a solo before it leaves to roll.</param>
+    /// <param name="stopsAfter">Where the form next stops the drums after a position, a stop ending's silence, which a solo keeps out of.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IEnumerable<PercussionInstrumentDefinition> songDrums,
@@ -179,6 +180,7 @@ internal static class DrumSolos
         Func<int, IGenerationContext> motifs,
         Func<int, double> groove,
         IReadOnlyCollection<double> drops,
+        Func<double, double> stopsAfter,
         Genre genre,
         Meter meter,
         Func<int, double> odds
@@ -196,7 +198,9 @@ internal static class DrumSolos
             bool IsDrumsTurn(double position) => !solo.TradesWithDrums || solo.TurnAt(whole, position) == drumsTurn;
             // all but its last bar, a short one's, the fill's into the section after, and the bars a build rolls over into a
             // drop after it
-            var until = drops.Any(x => Math.Abs(x - whole.End) < 1e-9) ? whole.LastBar - FormLayers.BuildRollBars * whole.Meter.BarDuration : whole.LastBar;
+            // nor where the form stops the drums, a stop ending's silence
+            var until = Math.Min(drops.Any(x => Math.Abs(x - whole.End) < 1e-9) ? whole.LastBar - FormLayers.BuildRollBars * whole.Meter.BarDuration : whole.LastBar,
+                stopsAfter(whole.Start));
             var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, until - whole.Start), Cut = 0 };
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
                                           track.EventTimeline.Any(x => x.IsWithin(span.Start, span.End));

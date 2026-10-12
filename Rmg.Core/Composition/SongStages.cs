@@ -29,6 +29,9 @@ internal sealed record SongDraft(
     /// </summary>
     public ImmutableArray<(double Start, double End, double BarDuration)> Stopped { get; init; } = [];
 
+    /// <summary>A calling verse's halves, the melody's call and a part's answer, which the stages after keep out of (<see cref="Composition.CallAndResponse" />).</summary>
+    public ImmutableArray<HeldSpan> Calls { get; init; } = [];
+
     /// <summary>Where the drums fill, from a run's first note to its line, which the stages that play around a fill keep out of.</summary>
     public (double From, double To)[] FillSpans => [..Runs.Where(x => !x.Positions.IsEmpty).Select(x => (x.Positions.Min(), x.Line))];
 
@@ -42,7 +45,8 @@ internal sealed record SongDraft(
         ..Stopped.Select(x => new HeldSpan(Hold.Stop, x.Start, x.End, null)),
         ..song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key])
             .Select(x => new HeldSpan(Hold.DrumSolo, x.Start, x.End, null)),
-        ..song.Tracks.Definitions.Keys.SelectMany(track => song.Form.Edits.StopsOf(track).Select(x => new HeldSpan(Hold.Cut, x.From, x.To, track)))
+        ..song.Tracks.Definitions.Keys.SelectMany(track => song.Form.Edits.StopsOf(track).Select(x => new HeldSpan(Hold.Cut, x.From, x.To, track))),
+        ..Calls
     ]);
 }
 
@@ -60,7 +64,13 @@ internal enum Hold
     DrumSolo = 4,
 
     /// <summary>A part stopped by the form: a stop ending, a stripped ending's exits, a silent drop.</summary>
-    Cut = 8
+    Cut = 8,
+
+    /// <summary>A calling verse's first half, the melody's call.</summary>
+    Call = 16,
+
+    /// <summary>A calling verse's second half, a part's answer.</summary>
+    Answer = 32
 }
 
 /// <summary>A stretch the song holds, of a kind, a part's own or the whole band's.</summary>
@@ -70,13 +80,19 @@ internal readonly record struct HeldSpan(Hold Kind, double Start, double End, in
 /// <summary>Every stretch the song holds, asked by the kinds a stage keeps out of.</summary>
 internal sealed class Holds(ImmutableArray<HeldSpan> spans)
 {
-    /// <summary>Whether a stretch of a kind given meets [from, to), a track's own among them where one is asked of.</summary>
+    /// <summary>Whether a stretch of a kind given meets [from, to): the band's, and a track's own where one is asked of, any part's where none is.</summary>
     public bool Meets(Hold kinds, double from, double to, int? track = null) =>
-        spans.Any(x => (x.Kind & kinds) != 0 && (x.Track is null || x.Track == track) && x.Start < to - 1e-9 && x.End > from + 1e-9);
+        spans.Any(x => Matches(x, kinds, track) && x.Start < to - 1e-9 && x.End > from + 1e-9);
 
     /// <summary>Whether a position lies in a stretch of a kind given, a hair early counting as at its start.</summary>
     public bool At(Hold kinds, double position, int? track = null) =>
-        spans.Any(x => (x.Kind & kinds) != 0 && (x.Track is null || x.Track == track) && Span.Within(position, x.Start, x.End));
+        spans.Any(x => Matches(x, kinds, track) && Span.Within(position, x.Start, x.End));
+
+    /// <summary>Where the next stretch of a kind given starts after a position, which a note lengthened stops at; none for none after it.</summary>
+    public double NextAfter(Hold kinds, double position, int? track = null) =>
+        spans.Where(x => Matches(x, kinds, track) && x.Start > position + 1e-9).Select(x => x.Start).DefaultIfEmpty(double.PositiveInfinity).Min();
+
+    private static bool Matches(HeldSpan span, Hold kinds, int? track) => (span.Kind & kinds) != 0 && (span.Track is null || track is null || span.Track == track);
 }
 
 /// <summary>A stage of the song after it is put together: its name, what it does, and whether a test may leave it out.</summary>
@@ -203,6 +219,7 @@ internal static class SongStages
         // but a breakdown, its kick locked to the riff, and a section in stop time, whose band hits the bar's first beat,
         // drawn all the same
         StateTrace.RecordSong(TracePoints.Polymeter, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
+        var holds = draft.Holds(song);
         return draft with
         {
             Polymeters = [..polymeters.Keys],
@@ -213,7 +230,9 @@ internal static class SongStages
                 DrumGroups.Snare.Tracks,
                 song.Form.Map,
                 polymeters,
-                id => song.SectionOf(id).Bindings
+                id => song.SectionOf(id).Bindings,
+                // never into a stop the form makes, a stop ending's silence
+                (track, position) => holds.At(Hold.Cut, position, track)
             )
         };
     }
@@ -234,8 +253,10 @@ internal static class SongStages
         draft with { Timeline = Composition.LiftCues.Apply(draft.Timeline, song.Form.Lines, song.Form.Map) };
 
     /// <summary>The drum solos, the drummer's own, over the groove they quote.</summary>
-    internal static SongDraft DrumSolos(SongDecisions song, SongDraft draft) =>
-        draft with
+    internal static SongDraft DrumSolos(SongDecisions song, SongDraft draft)
+    {
+        var holds = draft.Holds(song);
+        return draft with
         {
             Timeline = Composition.DrumSolos.Apply(
                 draft.Timeline,
@@ -252,11 +273,14 @@ internal static class SongStages
                 index => song.AppearanceStream(SongStream.DrumSoloMotifs, index),
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
                 song.Form.Drops,
+                // where the form next stops the drums, which a drum solo keeps out of as every drum stage does
+                position => song.Tracks.Definitions.Where(x => x.Value is PercussionInstrumentTrack).Select(x => holds.NextAfter(Hold.Cut, position, x.Key)).DefaultIfEmpty(double.PositiveInfinity).Min(),
                 song.Genre,
                 song.Meter,
                 DrumSounds.OddsOf(song.Genre, GenreChoices.DrumSounds)
             )
         };
+    }
 
     /// <summary>
     ///     The lines placed over the whole song, as they go on from section to section and lead into the next, a hook
@@ -352,7 +376,8 @@ internal static class SongStages
                 song.Soloists[TrackRole.Solo],
                 index => song.Sections[index].Facets[Facet.Melody],
                 index => song.AppearanceStream(SongStream.SoloAnswers, index),
-                song.Genre
+                song.Genre,
+                draft.Holds(song)
             )
         };
     }
@@ -424,18 +449,19 @@ internal static class SongStages
                 [..song.Sections.Select(x => x.Facets[Facet.Sound])],
                 song.Energies,
                 song.Soloists,
-                track => song.Stream(SongStream.PartSound, track),
-                (section, track) => song.Stream(SongStream.Expression, section, track),
+                track => song.Stream(SongStream.PartSound, song.DrawsAs(track)),
+                (section, track) => song.Stream(SongStream.Expression, section, song.DrawsAs(track)),
                 song.Stream(SongStream.Tone),
                 song.Stream(SongStream.Tape),
                 song.Stream(SongStream.Pinch),
-                track => song.Stream(SongStream.Pinch, track),
+                track => song.Stream(SongStream.Pinch, song.DrawsAs(track)),
                 position => Meter.SecondsPerBeat(draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(position)),
                 song.Genre,
                 [..draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)],
                 song.Form.Edits.CutsOf,
                 [..draft.Stopped.Select(x => (x.Start, x.End))],
-                song.IntroSource
+                song.IntroSource,
+                song.DrawsAs
             )
         };
 

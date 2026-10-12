@@ -18,6 +18,9 @@ internal static class Breakdowns
     /// <summary>The parts a breakdown leaves out, so that the riff, the bass and the drums carry it.</summary>
     public static ImmutableHashSet<TrackRole> Resting { get; } = [TrackRole.Melody, TrackRole.CounterMelody, TrackRole.Pad];
 
+    /// <summary>The parts that carry a breakdown, which play through it whatever the section drew.</summary>
+    public static ImmutableHashSet<TrackRole> Playing { get; } = [TrackRole.Riff, TrackRole.Bass, TrackRole.Drum];
+
     /// <summary>Whether a section may break down: a bridge, or a section of a free form, but the song's first.</summary>
     public static bool MayBreakDown(SectionRole role, bool isFirst) => role is SectionRole.Bridge or SectionRole.Free && !isFirst;
 }

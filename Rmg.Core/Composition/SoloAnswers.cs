@@ -16,6 +16,9 @@ internal static class SoloAnswers
     /// <summary>The chance a section answers the melody, where the counter-melody rests, by the melody facet.</summary>
     public static ByConvention Chance { get; } = new(0, 0.3, 0.3);
 
+    /// <summary>What an answer keeps out of: another part's answer to a calling verse.</summary>
+    private const Hold KeepsOutOf = Hold.Answer;
+
     /// <summary>The chance a gap of an answering section is answered, so that the answers stay sparse.</summary>
     public const double GapChance = 0.5;
 
@@ -38,6 +41,7 @@ internal static class SoloAnswers
     /// <param name="melodyFacet">Every section's melody facet, by its place among the song's sections.</param>
     /// <param name="streams">A section's sequence, by its place.</param>
     /// <param name="genre">The genre whose chance of answering a section draws (<see cref="GenreChoices.SoloAnswers" />).</param>
+    /// <param name="holds">What the song holds, a calling verse's answer among it, which the answers keep out of.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -47,7 +51,8 @@ internal static class SoloAnswers
         Soloist answerer,
         Func<int, double> melodyFacet,
         Func<int, IGenerationContext> streams,
-        Genre genre
+        Genre genre,
+        Holds holds
     )
     {
         var trackOf = roles.TrackOf();
@@ -66,9 +71,12 @@ internal static class SoloAnswers
             bool IsIn(TimelineItem<StateMap> note) => note.IsWithin(span.Start, span.End);
             var counterRests = !trackOf.TryGetValue(TrackRole.CounterMelody, out var counter) || !song.TrackTimelineMap.TryGetValue(counter, out var counterTrack) || !counterTrack.EventTimeline.Any(IsIn);
             var melody = melodyTrack.EventTimeline.Where(IsIn).ToArray();
+            // the chords, which an answer's stacked notes stack on
             var band = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
-            // an answer over the band, none where the melody plays alone
-            if (solos.ContainsKey(index) || !counterRests || melody.Length == 0 || band.Length == 0)
+            // an answer over the band, any part of it but the lines, none where the melody plays alone
+            var accompanied = song.TrackTimelineMap.Any(x => roles[x.Key] is not (TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Drum)
+                                                             && x.Value.EventTimeline.Any(IsIn));
+            if (solos.ContainsKey(index) || !counterRests || melody.Length == 0 || !accompanied)
                 continue;
             StateTrace.RecordSection(TracePoints.SoloAnswers, soloTrack, span.SectionId, $"{answering}", (index, answering));
             if (!answering)
@@ -85,7 +93,8 @@ internal static class SoloAnswers
                 var start = span.Start + Math.Ceiling(2 * (onsets[i] + After - span.Start) - 1e-9) / 2;
                 // a short line, a bar or two at most, however long the gap
                 var end = Math.Min(onsets[i + 1] - Before, start + LongestBars * span.Meter.BarDuration);
-                if (!answered || end - start < 1 - 1e-9)
+                // nor over another part's answer to a call
+                if (!answered || end - start < 1 - 1e-9 || holds.Meets(KeepsOutOf, start, end))
                     continue;
 
                 var gap = span with { Start = start, Duration = end - start };

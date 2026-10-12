@@ -24,16 +24,12 @@ internal static class Chugs
 
         var spans = song.Form.Map.Sections.Select((span, index) => (span, song.Sections[index])).Where(x => x.Item2.Chugs).ToArray();
         var notes = track.EventTimeline;
-        // how many notes a beat the riff plays in each span, over the patterns it plays in, a texture or a late entry
-        // resting it in the others
+        // how many notes a beat the riff plays in each span, over the bars it plays in, a texture, a late entry or a call
+        // and response resting it in the others
         var density = spans.ToDictionary(x => x.span, x =>
         {
-            var patterns = Enumerable.Range(0, (int)Math.Ceiling(x.span.Duration / x.span.Meter.PatternDuration - 1e-9))
-                .Select(p => (Start: x.span.Start + p * x.span.Meter.PatternDuration, End: Math.Min(x.span.Start + (p + 1) * x.span.Meter.PatternDuration, x.span.End)))
-                .Select(p => (Length: p.End - p.Start, Count: notes.Count(n => n.IsWithin(p.Start, p.End))))
-                .Where(p => p.Count > 0)
-                .ToArray();
-            return patterns.Length == 0 ? 0 : patterns.Sum(p => p.Count) / patterns.Sum(p => p.Length);
+            var bars = x.span.Bars.Select(b => (Length: b.End - b.Start, Count: notes.Count(n => n.IsWithin(b.Start, b.End)))).Where(b => b.Count > 0).ToArray();
+            return bars.Length == 0 ? 0 : bars.Sum(b => b.Count) / bars.Sum(b => b.Length);
         });
         var chorded = notes.Select(note =>
         {

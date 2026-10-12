@@ -54,7 +54,11 @@ internal static class Pushes
         var crash = DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal);
         foreach (var group in song.DrumJob == DrumJob.Groove ? new[] { withKicks, notes.ContainsKey(crash) ? [crash] : Array.Empty<int>() } : [])
         {
-            var own = pushes.Where(x => group.Any(t => notes[t].Any(n => n.IsWithin(x.At - x.BarDuration, x.At)))).Select(x => x.At).ToArray();
+            // the kicks where they played the bar before, the crash wherever it strikes the change, a fill's landing too, so
+            // that the landing goes with the band
+            var lands = group.Contains(crash);
+            var own = pushes.Where(x => group.Any(t => lands ? notes[t].Any(n => Math.Abs(n.Position - x.At) < 1e-6) : notes[t].Any(n => n.IsWithin(x.At - x.BarDuration, x.At))))
+                .Select(x => x.At).ToArray();
             bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);
             bool Early(double position) => group.Any(t => notes[t].Any(n => Math.Abs(n.Position - (position - Pushes.Early)) < 1e-6));
             foreach (var track in group)

@@ -92,13 +92,14 @@ public sealed class SongEndingTest
         {
             var from = Ending(song).Start - Ending(song).Stop;
             var sounding = song.Rendered.Tracks
-                .SelectMany(x => x.NoteTimeline)
+                .SelectMany(x => x.NoteTimeline.Select(n => (x.Role, Note: n)))
                 // struck in the silence, its first beat too, or a long note ringing into it
-                .Where(x => x.Position >= from - 1e-9 && x.Position < Ending(song).Start - 1e-9
-                            || x.Position < from - 1e-9 && x.Value.Duration > 0.25 && x.Position + x.Value.Duration > from + 1e-9)
+                .Where(x => x.Note.Position >= from - 1e-9 && x.Note.Position < Ending(song).Start - 1e-9
+                            || x.Note.Position < from - 1e-9 && x.Note.Value.Duration > 0.25 && x.Note.Position + x.Note.Value.Duration > from + 1e-9)
+                .Select(x => $"{x.Role} at {x.Note.Position:F3} for {x.Note.Value.Duration:F3}")
                 .ToArray();
 
-            await Assert.That(sounding).IsEmpty();
+            await Assert.That(sounding).IsEmpty().Because($"seed {song.Seed}, the stop from {from}");
         }
 
         await Assert.That(stops.Length).IsGreaterThan(0);

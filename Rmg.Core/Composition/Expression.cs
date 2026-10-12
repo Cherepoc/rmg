@@ -540,6 +540,7 @@ internal static class Expression
     /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
     /// <param name="cuts">Where a part's notes end as the band stops, by its track, which a gated part's held chords end by.</param>
     /// <param name="stopTime">The spans played in stop time, whose hits a gated part plays as they are.</param>
+    /// <param name="drawsAs">The track a part draws as, the riff's for its twin, whose bends, vibrato, pinches, tone and dive are the riff's as it plays the riff's line.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
         ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
@@ -560,7 +561,8 @@ internal static class Expression
         IReadOnlyList<double> changes,
         Func<int, IReadOnlyList<double>> cuts,
         IReadOnlyList<(double Start, double End)> stopTime,
-        SectionSpan introSource
+        SectionSpan introSource,
+        Func<int, int> drawsAs
     )
     {
         var ((songVibrato, songChorus, songSwell, songBends, _, _), carriers) = songEffects;
@@ -662,11 +664,11 @@ internal static class Expression
             var steps = Enumerable.Range(0, 16).Select(_ => part.TestProbability(GateStepChance)).ToArray();
             var gate = Carries(StrongEffect.Gate) ? steps.Select((x, i) => i == 0 || !patterned || x ? 1 << i : 0).Sum() : 0;
             // and its tone, from a sequence of its own
-            var partTone = new GenerationContext(Seeds.Derive(toneSeed, track));
+            var partTone = new GenerationContext(Seeds.Derive(toneSeed, drawsAs(track)));
             var toned = partTone.TestProbability(ToneChance.At(songSound)) & songTone && role != TrackRole.Drum;
             var toneDepth = 0.3 + 0.7 * partTone.GenerateDouble();
             // and its detune, either way, from a sequence of its own; a drum's kit and a part holding chords left in tune
-            var partTape = new GenerationContext(Seeds.Derive(tapeSeed, track));
+            var partTape = new GenerationContext(Seeds.Derive(tapeSeed, drawsAs(track)));
             var detuned = partTape.TestProbability(DetuneChance) && tape && role is not (TrackRole.Drum or TrackRole.Pad) && !role.PlaysChords();
             var detune = (partTape.TestProbability(0.5) ? 1 : -1) * partTape.GenerateInt(2, DetuneMost + 1);
             // and its pinches and its dive, from a sequence of its own, each note's by its place, so that a note let pass
@@ -808,7 +810,7 @@ internal static class Expression
 
                     // the riff's longest note of its last bar before a louder section diving into it, where the song dives, the
                     // riff letting go of its notes after it, as a guitarist leaves the riff for the bar
-                    if (songDives && role is TrackRole.Riff && !isSolo && Pinches(noteProgram) && note.Value.Pitches.Length <= 2
+                    if (songDives && role.Source() is TrackRole.Riff && !isSolo && Pinches(noteProgram) && note.Value.Pitches.Length <= 2
                         && note.Position >= span.LastBar - 1e-9 && LongestOfBar(timeline, i, span)
                         && index + 1 < energies.Count && energies[index + 1] > energies[index]
                         && note.Value.Duration >= 1 && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest

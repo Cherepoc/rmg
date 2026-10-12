@@ -250,10 +250,10 @@
         ]
       },
       {
-        "seed": "1G",
-        "at": 68,
+        "seed": "1j",
+        "at": 0,
         "listen": [
-          "Bass (Electric Bass (finger))"
+          "Bass (Acoustic Bass)"
         ]
       },
       {
@@ -645,7 +645,7 @@
         "at": 50.1,
         "listen": [
           "Hi-Hat",
-          "Riff (Overdriven Guitar)"
+          "Riff (Electric Guitar (clean))"
         ]
       }
     ]

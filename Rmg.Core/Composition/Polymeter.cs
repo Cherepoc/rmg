@@ -183,6 +183,7 @@ internal static class Polymeter
     ///     given up, in the bars it plays; the drums bound to the kick, doubling or accenting it, with it.
     /// </summary>
     /// <param name="bindings">The drums bound to a lead in a section, by its id: their tracks and their leads'.</param>
+    /// <param name="stopped">Whether the form stops a track at a position, which no cycle plays into.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -190,7 +191,8 @@ internal static class Polymeter
         IEnumerable<int> snareTracks,
         SongMap map,
         ImmutableDictionary<int, Plan> plans,
-        Func<int, IReadOnlyDictionary<int, int>> bindings
+        Func<int, IReadOnlyDictionary<int, int>> bindings,
+        Func<int, double, bool> stopped
     )
     {
         var trackOf = roles.TrackOf();
@@ -238,7 +240,7 @@ internal static class Polymeter
             EventTimeline<StateMap> Within(EventTimeline<StateMap> notes, IEnumerable<TimelineItem<StateMap>> played) =>
                 EventTimeline.Create(notes.Duration, notes.Where(x => !x.IsWithin(span.Start, span.End)).Concat(played).OrderBy(x => x.Position));
 
-            song = song.MapTrackEvents(tracks.ToDictionary(x => x, x => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
+            song = song.MapTrackEvents(tracks.ToDictionary(x => x, track => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
             {
                 // in the bars the part plays, none where it sits out
                 var plays = notes.Where(x => x.IsWithin(span.Start, span.End)).Select(x => Bar(x.Position)).ToHashSet();
@@ -253,7 +255,8 @@ internal static class Polymeter
                     if (first.Length == 0)
                         first = [..notes.Where(x => x.IsWithin(start, end)).Take(1).Select(x => x.Value.ToTimelineItem(start))];
                     foreach (var (_, _, at, length) in frameCells)
-                        played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => PlayedAt(x.Value, x.Position - start + at)).Where(x => x.Position < end - 1e-9 && plays.Contains(Bar(x.Position))));
+                        played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => PlayedAt(x.Value, x.Position - start + at))
+                            .Where(x => x.Position < end - 1e-9 && plays.Contains(Bar(x.Position)) && !stopped(track, x.Position)));
                 }
 
                 return Within(notes, played);
@@ -263,14 +266,14 @@ internal static class Polymeter
             // with it
             var onSnare = bindings(span.SectionId).Where(x => snares.Contains(x.Value)).Select(x => x.Key);
             if (plan.Snare)
-                song = song.MapTrackEvents(snares.Concat(onSnare).Distinct().Where(song.TrackTimelineMap.ContainsKey).ToDictionary(x => x, _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
+                song = song.MapTrackEvents(snares.Concat(onSnare).Distinct().Where(song.TrackTimelineMap.ContainsKey).ToDictionary(x => x, track => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
                 {
                     var inSpan = notes.Where(x => x.IsWithin(span.Start, span.End)).ToArray();
                     if (inSpan.Length == 0)
                         return notes;
 
                     var plays = inSpan.Select(x => Bar(x.Position)).ToHashSet();
-                    return Within(notes, Cells().Where(c => plays.Contains(Bar(c.At))).Select(c => PlayedAt(inSpan[0].Value, c.At)));
+                    return Within(notes, Cells().Where(c => plays.Contains(Bar(c.At)) && !stopped(track, c.At)).Select(c => PlayedAt(inSpan[0].Value, c.At)));
                 })));
         }
 

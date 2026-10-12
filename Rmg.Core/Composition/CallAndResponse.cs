@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
@@ -30,16 +31,20 @@ internal static class CallAndResponse
         // doubling another's line no answer of its own
         int[] answerers = [..new[] { TrackRole.Riff, TrackRole.CounterMelody }.Where(song.Playing.Values.Contains).Select(x => song.Track(x).Key)];
         static bool IsOwn(TimelineItem<StateMap> note) => note.Value.GetStateValue(CompositionStateKinds.Doubled) == 0;
+        // its own line, a walk into the next section none
         bool Plays(int track, double from, double to) =>
-            draft.Timeline.TrackTimelineMap.TryGetValue(track, out var timeline) && timeline.EventTimeline.Any(x => IsOwn(x) && x.IsWithin(from, to));
+            draft.Timeline.TrackTimelineMap.TryGetValue(track, out var timeline)
+            && timeline.EventTimeline.Any(x => IsOwn(x) && x.Value.GetStateValue(CompositionStateKinds.Walk) == 0 && x.IsWithin(from, to));
+        var melodyTrack = song.Track(TrackRole.Melody).Key;
         // every calling appearance's phrases, each split at its half, but in a solo, and answered by the first part that
-        // plays its own line in its second half; a phrase none answers left whole, as the melody cut there would leave a gap
+        // plays its own line in its second half; a phrase none answers, or whose melody does not call, left whole, as the
+        // melody cut there would leave a gap
         var halves = song.Form.Map.Sections.Where((x, i) => calling[x.SectionId] && !song.Solos.ContainsKey(i))
             .SelectMany(span => Enumerable.Range(0, (int)Math.Ceiling(span.Duration / span.Meter.PhraseDuration - 1e-9))
                 .Select(p => span.Start + p * span.Meter.PhraseDuration)
                 .Select(start => (Start: start, Half: start + span.Meter.PhraseBars / 2 * span.Meter.BarDuration, End: Math.Min(start + span.Meter.PhraseDuration, span.End))))
             .Select(x => (x.Start, x.Half, x.End, Answerer: answerers.Where(track => Plays(track, x.Half, x.End)).Select(track => (int?)track).FirstOrDefault()))
-            .Where(x => x.Answerer is not null)
+            .Where(x => x.Answerer is not null && Plays(melodyTrack, x.Start, x.Half))
             .ToArray();
         if (halves.Length == 0)
             return draft;
@@ -55,15 +60,24 @@ internal static class CallAndResponse
                 Edit(target, notes => EventTimeline.Create(notes.Duration, notes.Where(x => IsOwn(x) || !rests(x.Position))));
         }
 
-        // the melody's first half, its last note held to the half, and its walk into the next section
+        // the melody's first half, its last note held to the half, and its walk into the next section; a part doubling it
+        // holding its copy of that note as long
+        var melody = draft.Timeline.TrackTimelineMap[melodyTrack].EventTimeline;
+        var held = melody.Where(x => IsOwn(x) && halves.FirstOrDefault(h => x.IsWithin(h.Start, h.Half)) is { End: > 0 } phrase
+                                     && !melody.Any(n => n.Position > x.Position + 1e-9 && n.IsWithin(phrase.Start, phrase.Half)))
+            .ToDictionary(x => Math.Round(x.Position, 6), x => halves.First(h => x.IsWithin(h.Start, h.Half)).Half - x.Position);
+        TimelineItem<StateMap> Held(TimelineItem<StateMap> note) =>
+            held.TryGetValue(Math.Round(note.Position, 6), out var length) ? note.Value.With(StateKinds.HeldDuration, length).ToTimelineItem(note.Position) : note;
         Rest(TrackRole.Melody, at => halves.Any(h => at >= h.Half - 1e-9 && at < h.End - 1e-9), notes => EventTimeline.Create(notes.Duration, notes
             .Where(x => x.Value.GetStateValue(CompositionStateKinds.Walk) != 0 || !halves.Any(h => x.IsWithin(h.Half, h.End)))
-            .Select(x => halves.FirstOrDefault(h => x.IsWithin(h.Start, h.Half)) is { End: > 0 } phrase && !notes.Any(n => n.Position > x.Position + 1e-9 && n.IsWithin(phrase.Start, phrase.Half))
-                ? x.Value.With(StateKinds.HeldDuration, phrase.Half - x.Position).ToTimelineItem(x.Position)
-                : x)));
+            .Select(x => IsOwn(x) ? Held(x) : x)));
+        foreach (var target in LineDoubling.Pairs.Where(x => x.Source == TrackRole.Melody && song.Playing.Values.Contains(x.Target)).Select(x => song.Track(x.Target).Key))
+            Edit(target, notes => EventTimeline.Create(notes.Duration, notes.Select(x => IsOwn(x) ? x : Held(x))));
         // the answer, its second half, the answering part resting in the first
         foreach (var answering in halves.Select(x => x.Answerer!.Value).Distinct())
             Rest(song.Tracks.Definitions[answering].Role, at => halves.Any(h => h.Answerer == answering && at >= h.Start - 1e-9 && at < h.Half - 1e-9));
-        return draft with { Timeline = draft.Timeline.MapTrackEvents(edits) };
+        // the halves handed on, which the stages after keep out of: stop time out of the answer, the solo part's answers too
+        ImmutableArray<HeldSpan> calls = [..halves.SelectMany(x => new[] { new HeldSpan(Hold.Call, x.Start, x.Half, melodyTrack), new HeldSpan(Hold.Answer, x.Half, x.End, x.Answerer) })];
+        return draft with { Timeline = draft.Timeline.MapTrackEvents(edits), Calls = calls };
     }
 }
