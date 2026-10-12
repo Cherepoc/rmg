@@ -179,10 +179,7 @@ public static class Generators
     public static Func<IGenerationContext, int> Int(int min, int max)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);
-
-        if (min == max - 1)
-            return _ => min;
-
+        // a draw spent on a range of one value too, as GenerateInt spends it, so that the draws are as many whatever the range
         return context => context.GenerateInt(min, max);
     }
 

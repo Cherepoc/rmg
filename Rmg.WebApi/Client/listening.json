@@ -14,6 +14,15 @@
     },
     "seeds": [
       {
+        "seed": "0",
+        "at": 54.3,
+        "listen": [
+          "Chords (Orchestral Harp)",
+          "Melody (Flute)",
+          "Bass (Bassoon)"
+        ]
+      },
+      {
         "seed": "1",
         "at": 2.6,
         "listen": [
@@ -24,11 +33,10 @@
       },
       {
         "seed": "3",
-        "at": 233.6,
+        "at": 239.7,
         "listen": [
           "Melody (Violin)",
-          "Kick",
-          "Bass (Contrabass)"
+          "Kick"
         ]
       },
       {
@@ -40,17 +48,10 @@
       },
       {
         "seed": "F",
-        "at": 121.7,
+        "at": 27.8,
         "listen": [
-          "Chords (Choir Aahs)",
-          "Bass (Bassoon)"
-        ]
-      },
-      {
-        "seed": "O",
-        "at": 107,
-        "listen": [
-          "Bass (Tuba)"
+          "Bass (Bassoon)",
+          "Chords (Choir Aahs)"
         ]
       },
       {

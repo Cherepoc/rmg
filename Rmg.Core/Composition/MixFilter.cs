@@ -55,7 +55,7 @@ internal static class MixFilter
         for (var i = 0; i + 1 < map.Sections.Length; i++)
         {
             var (span, next) = (map.Sections[i], map.Sections[i + 1]);
-            var dipStream = song.Stream(SongStream.MixFilter, span.SectionId, map.Sections.Take(i).Count(x => x.SectionId == span.SectionId));
+            var dipStream = song.AppearanceStream(SongStream.MixFilter, i);
             var dipsHere = dipStream.TestProbability(Tilt.Of(DipOdds, song.Energies[i + 1] - song.Energies[i]).Chance(Chance(DipChance, "dips"), 1));
             var bars = 1 + dipStream.GenerateInt(0, 2);
             var depth = 0.5 + 0.5 * dipStream.GenerateDouble();
