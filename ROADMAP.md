@@ -307,6 +307,19 @@ with it (Rock, Latin, Ambient, Disco, Ska, Fusion, Soul, Country and Chiptune); 
 declared as the songs draw them, never at the plain end (the review of 11 October's #56), the presets' flat amounts
 still to follow (#378).
 
+Asked from 13 October 2026, the metal family's first, Metal now Heavy metal and three new genres beside it, as the
+presets are: `numetal-vamp` (Nu metal's sections on one chord), `numetal-bass-riff` (its bass doubling the riff),
+`metal-low-riff` (Heavy metal's riff an octave down), `metal-calm` (Heavy metal's calm sections, asked again over other
+songs), `thrash-vamp`, `doom-blues` (Doom's flat fifth), `doom-half-time`, `symphonic-choir` (the choir and strings
+over distorted guitars, a wall or mud) and `symphonic-raise`. Nu metal's kick with its riff left unasked, a figure's
+weight being past what a question's patch reaches.
+
+Answered on 13 October 2026, the round of 12 October, every one kept as the presets are: `rock-reharm`, `pop-ornaments`
+(6 of 6 each), `synthwave-octave` (5 to 1, its raised octave bass kept), `reggae-half-double` (5 to 1),
+`blues-call-bass`, `soul-sixteenths` (4 to 2 each) and `orchestral-metric` (3 to 2, its cut put off); `pop-melody-chords`
+not told apart (4 of 6 unsure, 1 to 1), kept, the least heard; tied 3 to 3, `trance-raise`, kept as the songs have it
+(asked again it would differ by 0.08 against 0.22, too faint to hear), and `metal-calm`, asked again in Heavy metal.
+
 Asked from 12 October 2026, ten of the review of 11 October's proposed questions. As the presets are:
 `orchestral-metric` (Orchestral's metric modulation, a cut candidate, #113), `pop-melody-chords` (the melody's double
 stops on every downbeat, #72, the least heard, 0.12; its song without loses the riff's landing chords too), `rock-reharm`
@@ -637,14 +650,13 @@ keeps together. Each step through the implementation loop, with a listening ques
    Funk's 46%, Techno's 78%); **Metal's riff an octave down** as Nu metal's and Djent's already were, its lowest note
    50.3 → 38.3. Dropped, measured unneeded: a span of four bars (the vamp and the same root hold a chord as long), and
    a tuning below E2 (Nu metal's and Djent's riffs already reach C2, 36, the octave's floor; A1 would ask a guitar's
-   sample stretched into mud). Queued for the next round of listening, as today's ten are unanswered: `numetal-vamp`
-   (without, `vamp.sections` 0) and `metal-low-riff` (without, `register.riff` 50).
+   sample stretched into mud). Asked: `numetal-vamp` and `metal-low-riff`.
 2. Done (12 October 2026, data): **the band with the riff**, the bass doubling it by the genre's `doubling.riff` as
    Djent's did: Nu metal's at 90-90-80, its sections with the bass on the riff 38% → 65%, its riff's onsets with the
    bass 72% → 87%; Metal's at 90-90-80, 53% → 68%; Nu metal's kick with its riff 47% → 55% of its sections (the
    figure's weight 100 over its own 60), and its bass picked first, a slap bass in 56% of its songs from 75%. No code:
    the doubling a genre's chance already. Left to listening: a slap bass in the quiet sections alone, an instrument by
-   section; queued, `numetal-lock` (without, `doubling.riff` 50 and `figure.ground.withRiff` 70).
+   section; asked, `numetal-bass-riff`.
 3. Put off (12 October 2026, measured twice): **a riff's dissonant stabs**. A chugging riff's notes off its pedal
    already step up from it by its riff scale, so its ♭2 and ♭5 are 3% of its chugging notes off the beat (Nu metal's,
    `MetalFamilyReportTest`; Djent's 8%), and its beats stay on the root and fifth, as a band's downbeat does. Tried:
