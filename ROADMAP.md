@@ -703,10 +703,12 @@ The architecture's three proposals (#168, #138, #126) and the drum solos' plan w
 order:
 
 - **A.** Done (13 October 2026): the roadmap's stale entries out; Doom's blues scale reduced (the metal family's item 5).
-- **B. Bass on the kick** (#379): a figure's `FollowsRiff` generalised to the player it follows, the kick's `withRiff`
-  the riff's and a bass figure `withKick` the kick's, the bass's turn after the kick's already; Trap and Hip-hop leaning
-  on it at the plain end, Rock, Punk, Country and Funk lower, Drum and bass lower still; never a heavy band's, whose kick
-  doubles. Measured by the bass's onsets on the kick's, by genre.
+- **B.** Done (13 October 2026, `BassOnKickTest`): **bass on the kick** (#379), a figure's `FollowsRiff` its `Follows`,
+  the player it strikes with, the kick's `withRiff` the riff's and the bass's `withKick` the kick's, the fingerprint kept
+  before the presets took it; Trap's bass on the kick 40% → 72% of its notes (63% of its bars on the figure), Hip-hop's
+  47% → 65%, Rock's 52% → 59%, Country's 40% → 46%, Drum and bass's 45% → 55%, Punk's and Funk's a few points; in a
+  bar on the figure 83% to 96% of the bass's notes with the kick, the rest its walks and fills. No heavy band's. Left to
+  listening: `trap-bass-kick`, the 808 on the kick against its own line.
 - **C. Ensemble hits** (#361): stop time generalised, its hit on a bar's first beat the band's hits on the kick's
   onsets in a section's last bar before a louder one, resting between, the lines going on and the drums' fill kept,
   out of a drop's bar; the songs' 0-3-3 as stop time's, Funk, Disco, Latin, Ska, Soul, Fusion, Jazz, Rock, Heavy metal,

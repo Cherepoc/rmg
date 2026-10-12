@@ -19,12 +19,13 @@ public enum FigurePlayer
 
 /// <summary>
 ///     A figure a player plays in place of its own rhythm: where its notes start, in 16ths, over as many bars as it lasts,
-///     or the riff's, wherever the riff's notes start; and how a section's energy leans it, a loud section the likelier
-///     above 0.
+///     or another player's, wherever that player's notes start, the kick's with the riff, the bass's with the kick; and
+///     how a section's energy leans it, a loud section the likelier above 0.
 /// </summary>
-/// <param name="Sixteenths">How many 16ths it lasts, a bar of four's or two; none for the riff's, which lasts as the riff does.</param>
+/// <param name="Sixteenths">How many 16ths it lasts, a bar of four's or two; none for one that follows, which lasts as what it follows does.</param>
+/// <param name="Follows">The player whose notes' starts it strikes, played before it, none for one of its own onsets.</param>
 /// <param name="AnswersKick">Whether it plays around the kick, between its beats, and so only in a bar the kick plays in, as a rolling bass does.</param>
-public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, bool FollowsRiff, double EnergyLean, bool AnswersKick)
+public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick)
 {
     /// <summary>The 16ths between its notes where it strikes at a steady step from the bar's start, every 16th or 8th, so that it plays in any meter; 0 for one of its own shape.</summary>
     public int Step { get; } = Sixteenths == 16 && Onsets.Length > 0 && 16 % Onsets.Length == 0 && Onsets.Select((x, i) => x == i * (16 / Onsets.Length)).All(x => x)
@@ -65,21 +66,22 @@ internal static class Figures
     /// <summary>Every figure, by its player.</summary>
     public static ImmutableArray<Figure> All { get; } =
     [
-        new("withRiff", "With the riff, wherever it plays", FigurePlayer.Ground, [], 0, true, 1, false),
-        new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, false, 1, false),
-        new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1, false),
-        new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1, false),
-        new("blast", "A blast beat, a cymbal riding it on every 8th", FigurePlayer.Time, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1, false),
-        new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, false, 0, false),
-        new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, false, 0, false),
-        new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, false, 0, false),
-        new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, false, 0, false),
-        new("sixteenths", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, false, 0, false),
-        new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, false, 0, true),
-        new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, false, 0, true),
-        new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 6, 12, 20, 24], 32, false, 0, false),
-        new("clave23", "The clave's 2-3", FigurePlayer.Claves, [4, 8, 16, 22, 28], 32, false, 0, false),
-        new("bossaClave", "The bossa nova's clave, the 3-2 with its last stroke an 8th later", FigurePlayer.Backbeat, [0, 6, 12, 20, 26], 32, false, 0, false)
+        new("withRiff", "With the riff, wherever it plays", FigurePlayer.Ground, [], 0, FigurePlayer.Riff, 1, false),
+        new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, null, 1, false),
+        new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
+        new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
+        new("blast", "A blast beat, a cymbal riding it on every 8th", FigurePlayer.Time, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
+        new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, null, 0, false),
+        new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, null, 0, false),
+        new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, null, 0, false),
+        new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, null, 0, false),
+        new("sixteenths", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, null, 0, false),
+        new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, null, 0, true),
+        new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, null, 0, true),
+        new("withKick", "With the kick, wherever it plays", FigurePlayer.Bass, [], 0, FigurePlayer.Ground, 0, false),
+        new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 6, 12, 20, 24], 32, null, 0, false),
+        new("clave23", "The clave's 2-3", FigurePlayer.Claves, [4, 8, 16, 22, 28], 32, null, 0, false),
+        new("bossaClave", "The bossa nova's clave, the 3-2 with its last stroke an 8th later", FigurePlayer.Backbeat, [0, 6, 12, 20, 26], 32, null, 0, false)
     ];
 
     /// <summary>A player's options, its own rhythm first, as its pool shows them, the songs' weight of each: their own always.</summary>
@@ -120,7 +122,7 @@ internal static class Figures
             {
                 // the player's own rhythm where a genre's pool keeps no figure a bar not in four plays
                 Weighted<string>[] options = [..ByConvention.Weigh(OptionsOf(player).Select(x => (x.Name, x.Weight)), section.Facets[Facet.Feel],
-                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || Of(player, x.Value) is not { FollowsRiff: false, Step: 0 })];
+                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || Of(player, x.Value) is not { Follows: null, Step: 0 })];
                 if (options.Length == 0)
                     options = [new Weighted<string>(1, Own)];
                 var name = context.Pick(energy.Weigh(options, x => Of(player, x)?.EnergyLean ?? 0));
@@ -143,10 +145,10 @@ internal static class Figures
             foreach (var figures in drawn.Values.Where(x => x[FigurePlayer.Claves] is not null))
                 figures[FigurePlayer.Claves] = clave;
         // but a section running a figure across its bar lines, its cycle kept, as a mutating groove keeps it, its figures
-        // drawn all the same: one of fixed onsets, as the kick with the riff follows the riff as the cycle runs it
+        // drawn all the same: one of fixed onsets, as one that follows, the kick with the riff, follows it as the cycle runs it
         foreach (var id in drawn.Keys.Where(draft.Polymeters.Contains))
             foreach (var player in players)
-                drawn[id][player] = drawn[id][player] is { FollowsRiff: true } follows ? follows : null;
+                drawn[id][player] = drawn[id][player] is { Follows: not null } follows ? follows : null;
 
         // the figures laid, by their sections and players, which the stages after read: one drawn and never played, its
         // player resting or its time halved, leaves the player its own rhythm
@@ -160,7 +162,6 @@ internal static class Figures
             barsBefore[span] = barsBefore.Count == 0 ? 0 : barsBefore.Last().Value + barsBefore.Last().Key.BarCount;
 
         int? TrackOf(TrackRole role) => song.Playing.Where(x => x.Value == role).Select(x => (int?)x.Key).FirstOrDefault(x => draft.Timeline.TrackTimelineMap.ContainsKey(x!.Value));
-        var riff = TrackOf(TrackRole.Riff) ?? TrackOf(TrackRole.Bass);
         var all = draft.Timeline.TrackTimelineMap;
         var tracks = new Dictionary<FigurePlayer, int[]>
         {
@@ -172,6 +173,9 @@ internal static class Figures
             [FigurePlayer.Chords] = TrackOf(TrackRole.Chords) is { } chords ? [chords] : [],
             [FigurePlayer.Bass] = TrackOf(TrackRole.Bass) is { } bass ? [bass] : []
         };
+
+        // what a figure that follows a player strikes with: its tracks, the riff's the bass's where the song has no riff
+        int[] Followed(FigurePlayer player) => player == FigurePlayer.Riff && tracks[player].Length == 0 && TrackOf(TrackRole.Bass) is { } bass ? [bass] : tracks[player];
 
         // the players in turn by what they follow: the kick with the riff as its figure plays it, the bass around the kick
         // as its figure plays it
@@ -189,8 +193,8 @@ internal static class Figures
                     {
                         if (drawn[span.SectionId][player] is not { } figure)
                             continue;
-                        // the riff's where the song has a riff or a bass
-                        if (figure.FollowsRiff && riff is null)
+                        // one that follows where the song plays what it follows, the riff's where it has a riff or a bass
+                        if (figure.Follows is { } followed && Followed(followed).Length == 0)
                             continue;
                         // every bar, a short last one's figure cut at the section's end
                         for (var index = 0; index < span.BarCount; index++)
@@ -198,17 +202,17 @@ internal static class Figures
                             var (bar, end) = span.Bar(index);
                             bool In(double position) => position >= bar - 1e-9 && position < end - 1e-9;
                             var own = played.Where(x => In(x.Position)).ToArray();
-                            double[] onsets = figure.FollowsRiff
-                                ? [..timelines[riff!.Value].EventTimeline.Where(x => In(x.Position)).Select(x => x.Position).Distinct()]
+                            double[] onsets = figure.Follows is { } follows
+                                ? [..Followed(follows).SelectMany(t => timelines[t].EventTimeline).Where(x => In(x.Position)).Select(x => x.Position).Distinct().Order()]
                                 : figure.Step > 0
                                     ? [..Enumerable.Range(0, span.Meter.Sixteenths).Where(x => x % figure.Step == 0).Select(x => bar + x * 0.25)]
                                     : [..figure.Onsets.Select(x => x - (barsBefore[span] + index) % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
                             // in a bar both play, each struck as the player's own note at or before it was; one around the kick
                             // where the kick plays, the player's own rhythm where it rests; and no drum's of fixed onsets in half
                             // or double time, whose figure is the drum's own rhythm stretched or pressed, as the time feel
-                            // stretches the drums alone, but one with the riff, whose notes are as the riff plays them there, a
-                            // breakdown's kick on its chugs
-                            if (own.Length == 0 || onsets.Length == 0 || song.SectionOf(span.SectionId).TimeFeel != 0 && !figure.FollowsRiff && Drums.Contains(player)
+                            // stretches the drums alone, but one that follows, whose notes are as what it follows plays them
+                            // there, a breakdown's kick on its chugs
+                            if (own.Length == 0 || onsets.Length == 0 || song.SectionOf(span.SectionId).TimeFeel != 0 && figure.Follows is null && Drums.Contains(player)
                                 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
                                 continue;
                             laid.Add((span.SectionId, player));

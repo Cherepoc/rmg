@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "figure": { "bass": { "own": 100, "withKick": [30, 30, 20] } },
       "rudiments": { "flams": [0, 35, 70], "drags": [0, 5, 30] },
       "drumStrokes": { "openHiHat": 85 },
       "cadenceRaise": { "sections": [0, 10, 10] },
@@ -376,6 +377,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
+      "figure": { "bass": { "own": [60, 70, 80], "withKick": [100, 70, 50] } },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 75 },
@@ -571,6 +573,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "figure": { "bass": { "own": 100, "withKick": [15, 15, 10] } },
       "callAndResponse": { "sections": [10, 30, 40] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "phraseBars": { "fourBars": 100 },
@@ -1565,6 +1568,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "figure": { "bass": { "own": [40, 50, 60], "withKick": [100, 80, 60] } },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
@@ -1703,7 +1707,7 @@
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
-      "figure": { "ground": { "own": [60, 80, 100], "breakbeat": [100, 80, 60] } },
+      "figure": { "ground": { "own": [60, 80, 100], "breakbeat": [100, 80, 60] }, "bass": { "own": 100, "withKick": [10, 15, 20] } },
       "dropKind": { "silent": 100, "filtered": 40 },
       "mutation": { "bars": [5, 15, 25] },
       "mixFilter": { "opening": [10, 30, 50], "dips": [5, 10, 15], "closing": 0 },
@@ -1819,6 +1823,7 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major, Mixolydian or minor, a count-in and a stop.",
     "choices": {
+      "figure": { "bass": { "own": 100, "withKick": [20, 20, 15] } },
       "polymeter": { "sections": 0 },
       "riffIntro": { "songs": [20, 30, 30] },
       "rudiments": { "flams": [0, 30, 60], "drags": [0, 0, 20] },
@@ -1993,6 +1998,7 @@
     "name": "Country",
     "description": "A fiddle, a steel-string guitar strummed, a banjo and a honky-tonk piano, plain triads moving by fourths and fifths, the bass on the root and the fifth, the snare on 2 and 4, major and Mixolydian.",
     "choices": {
+      "figure": { "bass": { "own": 100, "withKick": [20, 20, 15] } },
       "callAndResponse": { "sections": [10, 25, 35] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 25] },
       "alternatingBass": { "sections": [85, 75, 60] },

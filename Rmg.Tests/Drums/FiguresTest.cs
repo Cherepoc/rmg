@@ -185,7 +185,7 @@ public sealed class FiguresTest
             {
                 polymeters++;
                 var figures = (ImmutableDictionary<FigurePlayer, string>)song.Trace.Single(x => x.Point == TracePoints.Figures && x.Section == id).Value!;
-                await Assert.That(figures.All(x => Figures.All.Any(f => f.Player == x.Key && f.Name == x.Value && f.FollowsRiff))).IsTrue().Because($"seed {song.Seed} section {id}");
+                await Assert.That(figures.All(x => Figures.All.Any(f => f.Player == x.Key && f.Name == x.Value && f.Follows is not null))).IsTrue().Because($"seed {song.Seed} section {id}");
             }
         }
 
