@@ -293,6 +293,7 @@ public static class SongDescriptions
             EndingKind.Button => "a short hit on the home chord",
             EndingKind.RingOut => "the home chord held",
             EndingKind.Stop => "the band stopping, then hitting the home chord together",
+            EndingKind.Big => "the home chord held under a drum roll, then a last hit together",
             _ => "fading out over the last section"
         };
         return ending.SlowsDown ? $"{name}, slowing down" : name;

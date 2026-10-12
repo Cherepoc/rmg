@@ -720,9 +720,12 @@ order:
   quarters), the genres without a band's stops at 0. Songs struck in 26 of 64 (Funk), 24 (Ska), 21 (Soul), 20 (Fusion),
   18 (Heavy metal), 17 (Rock), 16 (Punk), 14 (Latin, Thrash), 6 (Jazz), 5 (Pop, the songs' own); 1.5 to 2.7 hits a bar.
   Left to listening: `funk-hits`, and the crash the band's hits want, not added.
-- **D1. The big ending** (#348, #374): an ending of its own, the ring-out's held home chord, the drums' fill stretched
-  over it on the toms and cymbals, the button's hit; Rock, the metals, Punk, Blues, Soul, Funk, Country, Ska and Power
-  ballad, the songs' 0.
+- **D1.** Done (13 October 2026, `BigEndingTest`): **the big ending** (#348, #374), an ending of its own built of the
+  ring-out's held home chord (one or two bars, slowing down half the time) and a button's last hit after it, the drums
+  rolling over the hold in 16ths down the toms from the highest, the kick and a crash on every beat, as loud as a
+  drop's build grows, and landing on the hit; the songs' never, Rock 60, Heavy metal 70, Thrash 60, Symphonic 50, Doom,
+  Punk, Blues and Power ballad 40, Soul, Funk, Country, Ska and Nu metal 30, Black metal and Djent 20 beside their
+  endings: 6 to 14 of 64 songs. Left to listening: `rock-big-ending`, the roll a machine's or a drummer's.
 - **D2. The false ending** (#372), put off until the big ending is heard: a drop's kind before the last repeat, the
   band hitting the home chord, a beat or two of silence, the drums counting back in; its hit a harmony edit before
   `Realizer`, new work, and a gimmick worn thin quickly.

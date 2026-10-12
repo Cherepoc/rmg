@@ -30,7 +30,13 @@ public enum EndingKind
     Fade,
 
     /// <summary>The last section plays once more, its parts leaving one by one, the drums alone at its end, as a DJ's track ends for the next to mix in.</summary>
-    Strip
+    Strip,
+
+    /// <summary>
+    ///     The home chord held for a bar or two while the drums roll round the toms, the kick and a crash on every beat,
+    ///     louder as they go, then the whole band's last hit together, a button, as a rock band ends a show.
+    /// </summary>
+    Big
 }
 
 /// <summary>How a song starts before its first section.</summary>
@@ -183,11 +189,18 @@ internal static class FormLayers
         new(0.13, EndingKind.Stop),
         new(0.15, EndingKind.Fade),
         // a genre's, which the songs never play
-        new(0, EndingKind.Strip)
+        new(0, EndingKind.Strip),
+        new(0, EndingKind.Big)
     ];
 
     /// <summary>Whether an ending lands on a final chord, which it holds, after the last section.</summary>
-    public static bool HasFinalChord(EndingKind ending) => ending is EndingKind.Button or EndingKind.RingOut or EndingKind.Stop;
+    public static bool HasFinalChord(EndingKind ending) => ending is EndingKind.Button or EndingKind.RingOut or EndingKind.Stop or EndingKind.Big;
+
+    /// <summary>Whether an ending holds its final chord for bars, the ring-out's and the big ending's.</summary>
+    public static bool HoldsFinalChord(EndingKind ending) => ending is EndingKind.RingOut or EndingKind.Big;
+
+    /// <summary>A big ending's roll, the drums' step round the toms over the held chord, in beats: a 16th.</summary>
+    public const double BigRollStep = 0.25;
 
     /// <summary>How often a fade steps down, in beats.</summary>
     public const double FadeStep = 0.25;
@@ -226,6 +239,7 @@ internal static class FormLayers
         EndingKind.Stop => "A stop",
         EndingKind.Fade => "A fade",
         EndingKind.Strip => "Parts dropping out",
+        EndingKind.Big => "A big ending",
         _ => ending.ToString()
     };
 

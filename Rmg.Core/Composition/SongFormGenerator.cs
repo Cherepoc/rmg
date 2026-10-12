@@ -123,13 +123,13 @@ internal sealed class SongFormGenerator
         if (FormLayers.HasFinalChord(ending))
         {
             // a ringing ending's bars, which the last section's meter makes beats once its sections are drawn
-            if (ending == EndingKind.RingOut)
+            if (FormLayers.HoldsFinalChord(ending))
                 ringOutBars = _context.Pick(FormLayers.RingOutLengths);
             else
                 held = FormLayers.ButtonLength;
             if (ending == EndingKind.Stop)
                 stop = _context.Pick(FormLayers.StopLengths);
-            slowsDown = ending == EndingKind.RingOut && _context.TestProbability(FormLayers.RitardandoChance);
+            slowsDown = FormLayers.HoldsFinalChord(ending) && _context.TestProbability(FormLayers.RitardandoChance);
         }
 
         return new FormPlan(intro, window, halfCountIn, riffFirst, ending, held, ringOutBars, stop, slowsDown, sectionIds[^1]);
@@ -241,6 +241,8 @@ internal sealed class SongFormGenerator
         var endingDuration = plan.Ending switch
         {
             _ when !FormLayers.HasFinalChord(plan.Ending) => 0,
+            // a big ending's held chord and its last hit's bar
+            EndingKind.Big => held + last.BarDuration,
             // a bar of the last section's meter at least, as the final chord's block is
             _ => Math.Max(held, last.BarDuration)
         };
@@ -309,7 +311,11 @@ internal sealed class SongFormGenerator
         var description = $"{plan.Ending} ending";
         if (FormLayers.HasFinalChord(plan.Ending))
         {
-            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), held, endingDuration, _roles));
+            // a big ending's held chord, then its last hit, a button's
+            var big = plan.Ending == EndingKind.Big;
+            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), held, big ? held : endingDuration, _roles));
+            if (big)
+                blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), FormLayers.ButtonLength, last.BarDuration, _roles));
 
             if (plan.Ending == EndingKind.Stop)
             {
@@ -326,6 +332,31 @@ internal sealed class SongFormGenerator
                 lines.Add(
                     new FillLine(end, fillSections[^1], fillSections[^1], 0, plan.Ending != EndingKind.Stop, IsLandingForced: true)
                 );
+
+            // a big ending's roll over the held chord, round the toms from the highest, the kick and a crash on every beat,
+            // louder as it goes, and the drums landing on its last hit with the band
+            if (big && _hasDrums)
+            {
+                var played = sections.SelectMany(x => x.Timeline.TrackTimelineMap.Keys).ToHashSet();
+                var (toms, crash, kick) = (DrumGroups.GetTrackNumber(DrumDefinitions.Tom), DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal),
+                    DrumGroups.Kick.Tracks.FirstOrDefault(played.Contains, -1));
+                var steps = (int)Math.Round(held / FormLayers.BigRollStep);
+                for (var step = 1; step < steps; step++)
+                {
+                    var (position, velocity) = (end + step * FormLayers.BigRollStep, FormLayers.BuildRollFrom + (FormLayers.BuildRollTo - FormLayers.BuildRollFrom) * step / steps);
+                    if (played.Contains(toms))
+                        edits.Hit(toms, position, velocity, DrumDefinitions.Tom.Sounds.Length - (step - 1) % DrumDefinitions.Tom.Sounds.Length, sectionIds[^1], HitKind.Build);
+                    if (step % (int)Math.Round(1 / FormLayers.BigRollStep) != 0)
+                        continue;
+                    if (played.Contains(crash))
+                        edits.Hit(crash, position, velocity, 1, sectionIds[^1], HitKind.Build);
+                    if (kick >= 0)
+                        edits.Hit(kick, position, velocity, 0, sectionIds[^1], HitKind.Build);
+                }
+
+                lines.Add(new FillLine(end + held, fillSections[^1], fillSections[^1], 0, false, IsLandingForced: true));
+                description += ", the drums rolling over it into a last hit";
+            }
 
             description += $", at beat {end}, held {held} beats";
             if (plan.SlowsDown)
