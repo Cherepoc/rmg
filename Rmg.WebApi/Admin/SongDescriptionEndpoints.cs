@@ -36,12 +36,14 @@ public static class SongDescriptionEndpoints
                 request = request with { Genre = preset.Choices.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, JsonElement>)x.Value), GenreName = preset.Name };
             else if (genres.Find(named) is { } body)
             {
-                using var kept = JsonDocument.Parse(body);
+                // as the page is served it, without what was taken out since
+                using var kept = JsonDocument.Parse(Genres.GenreEndpoints.Known(body));
                 request = request with
                 {
                     Genre = kept.RootElement.GetProperty("choices").EnumerateObject()
                         .ToDictionary(x => x.Name, x => (IReadOnlyDictionary<string, JsonElement>)x.Value.EnumerateObject().ToDictionary(o => o.Name, o => o.Value.Clone())),
-                    GenreName = kept.RootElement.GetProperty("name").GetString()
+                    // a genre of no name is none's, not one called nothing
+                    GenreName = kept.RootElement.GetProperty("name").GetString() is { Length: > 0 } name ? name : null
                 };
             }
             else
@@ -52,11 +54,8 @@ public static class SongDescriptionEndpoints
             return Results.BadRequest(new ErrorResponse(error!));
 
         using var turn = await queue.Enter(SongQueue.ClientOf(context.Connection.RemoteIpAddress), context.RequestAborted);
-        if (turn.Refusal is not null)
-        {
-            context.Response.Headers.RetryAfter = "1";
-            return Results.Problem("The server is busy making other songs.", statusCode: StatusCodes.Status503ServiceUnavailable);
-        }
+        if (turn.Refusal is { } refusal)
+            return SongEndpoints.Refused(context, refusal);
 
         var description = SongDescriptions.Describe(seed, overrides, mix, context.RequestAborted);
         var settingsText = given?.Format();

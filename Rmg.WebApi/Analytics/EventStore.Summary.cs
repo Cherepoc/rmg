@@ -139,10 +139,10 @@ public static class EventStoreSummary
     {
         using var command = connection.CreateCommand();
         command.CommandText = $"""
-            SELECT seed, version, genre, SUM(seconds), COUNT(*)
+            SELECT seed, version, genre, SUM(seconds), COUNT(*), COALESCE(identity, '')
             FROM events
             WHERE name = '{EventNames.Listened}' AND seed IS NOT NULL AND seconds IS NOT NULL AND day >= $since
-            GROUP BY seed, version, genre
+            GROUP BY seed, version, genre, COALESCE(identity, '')
             ORDER BY SUM(seconds) DESC
             LIMIT 10
             """;
@@ -150,10 +150,10 @@ public static class EventStoreSummary
 
         var seeds = new List<SeedListening>();
         using var reader = command.ExecuteReader();
-        // a song by its seed, its songs' version and its genre, as a seed alone names no song
+        // a song by its seed, what of its settings names it, its songs' version and its genre, as a seed alone names no song
         while (reader.Read())
-            seeds.Add(new SeedListening(Base62.FromSeed(unchecked((ulong)reader.GetInt64(0))), reader.IsDBNull(1) ? null : reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2),
-                Math.Round(reader.GetDouble(3), 1), reader.GetInt32(4)));
+            seeds.Add(new SeedListening(Base62.FromSeed(unchecked((ulong)reader.GetInt64(0))), reader.GetString(5), reader.IsDBNull(1) ? null : reader.GetString(1),
+                reader.IsDBNull(2) ? null : reader.GetString(2), Math.Round(reader.GetDouble(3), 1), reader.GetInt32(4)));
 
         return seeds;
     }
@@ -189,7 +189,7 @@ public static class EventStoreSummary
             SELECT version, SUM(seconds)
             FROM events
             WHERE name = '{EventNames.Listened}' AND version IS NOT NULL AND seed IS NOT NULL AND seconds IS NOT NULL AND day >= $since
-            GROUP BY version, visitor, seed
+            GROUP BY version, visitor, seed, COALESCE(identity, ''), COALESCE(genre, '')
             """;
         listening.Parameters.AddWithValue("$since", since);
 

@@ -41,7 +41,7 @@ public sealed class GenerateSongRequestTest
             Facets: new Dictionary<string, int> { ["chords"] = 0 },
             Volume: 31,
             Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Plays: false, Instrument: 73, Volume: 61, Pan: 0), ["counterMelody"] = new(Plays: true, Pan: 61) },
-            DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 0, IsOn: false) }
+            DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 0) }
         );
 
         await Assert.That(request.TryRead(out _, out var overrides, out var mix, out _)).IsTrue();
@@ -49,9 +49,9 @@ public sealed class GenerateSongRequestTest
         await Assert.That(overrides.Facets![Facet.Chords]).IsEqualTo(0.0);
         await Assert.That(overrides.Parts!.ToArray()).IsEquivalentTo(new[] { KeyValuePair.Create(TrackRole.Bass, false), KeyValuePair.Create(TrackRole.CounterMelody, true) }, CollectionOrdering.Matching);
         await Assert.That(mix.Volume).IsEqualTo(0.5);
-        await Assert.That(mix.Parts[TrackRole.Bass]).IsEqualTo(new PartMix(73, 1, -1, true));
+        await Assert.That(mix.Parts[TrackRole.Bass]).IsEqualTo(new PartMix(73, 1, -1));
         await Assert.That(mix.Parts[TrackRole.CounterMelody].Pan).IsEqualTo(1.0);
-        await Assert.That(mix.DrumGroups["Kick"]).IsEqualTo(new DrumGroupMix(0, false));
+        await Assert.That(mix.DrumGroups["Kick"]).IsEqualTo(new DrumGroupMix(0));
     }
 
     [Test]
@@ -141,6 +141,14 @@ public sealed class GenerateSongRequestTest
     [Arguments("genreEmptyPool")]
     [Arguments("noPieces")]
     [Arguments("piece")]
+    [Arguments("twiceGroup")]
+    [Arguments("twiceFacet")]
+    [Arguments("volume")]
+    [Arguments("length")]
+    [Arguments("partVolume")]
+    [Arguments("partPan")]
+    [Arguments("groupVolume")]
+    [Arguments("genreName")]
     public async Task AnythingOutOfItsRange_OrUnknown_IsRefused(string what)
     {
         var request = what switch
@@ -156,6 +164,14 @@ public sealed class GenerateSongRequestTest
             "noPieces" => new GenerateSongRequest(DrumPieces: []),
             "piece" => new GenerateSongRequest(DrumPieces: ["kick", "gong"]),
             "group" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["gong"] = new() }),
+            "twiceGroup" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 0), ["Kick"] = new(Volume: 61) }),
+            "twiceFacet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["feel"] = 1, ["Feel"] = 2 }),
+            "volume" => new GenerateSongRequest(Volume: 62),
+            "length" => new GenerateSongRequest(Length: -1),
+            "partVolume" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Volume: 62) }),
+            "partPan" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Pan: -1) }),
+            "groupVolume" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 62) }),
+            "genreName" => new GenerateSongRequest(Genre: Genre("meter", "3/4", 63), GenreName: new string('x', Rmg.WebApi.Genres.GenreStore.MaxNameBytes + 1)),
             "seed" => new GenerateSongRequest("zzzzzzzzzzzz"),
             "tempo" => new GenerateSongRequest(Tempo: 62),
             "key" => new GenerateSongRequest(Key: 12),
@@ -183,6 +199,8 @@ public sealed class GenerateSongRequestTest
         ["meter"] = "Meter -1", ["mode"] = $"Mode {Core.Composition.Scales.All.Length}", ["swing"] = "Swing 62", ["genreChoice"] = "kazoo is not a choice", ["genreOption"] = "1/1 is not an option",
         ["genreStep"] = "meter 3/4 is not a whole number", ["genreEnds"] = "meter 3/4 is not a whole number", ["genreEmptyPool"] = "keeps none of its options",
         ["noPieces"] = "No drum pieces", ["piece"] = "gong is not a drum piece", ["numberPart"] = "3 is not a part", ["listPart"] = "melody, bass is not a part",
-        ["twicePart"] = "named twice"
+        ["twicePart"] = "named twice", ["twiceGroup"] = "Kick drums are named twice", ["twiceFacet"] = "facet Feel is named twice", ["volume"] = "Volume 62",
+        ["length"] = "Length -1", ["partVolume"] = "bass's volume 62", ["partPan"] = "bass's pan -1", ["groupVolume"] = "kick's volume 62",
+        ["genreName"] = $"{Rmg.WebApi.Genres.GenreStore.MaxNameBytes} bytes at the most"
     };
 }

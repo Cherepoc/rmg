@@ -25,6 +25,7 @@ public sealed class SongsVersionTest
     [Arguments("", false)]
     [Arguments("0.5.\u0663\u0664\u0665", false)]
     [Arguments("0.5.0000000000000000000000", false)]
+    [Arguments("0.5.000\n", false)]
     public async Task IsNumber_TakesMajorMinorAndAPatchOfThreeDigits(string text, bool expected)
     {
         await Assert.That(SongsVersion.IsNumber(text)).IsEqualTo(expected);

@@ -15,8 +15,9 @@ public sealed record FunnelStep(string Key, string Name, int Visitors);
 public sealed record DayCount(string Day, int Visitors, int Songs, int Plays);
 
 /// <param name="Seed">The song, in letters and digits.</param>
+/// <param name="Identity">What of its settings names it with its seed, empty for every one drawn, as two songs of a seed are told apart.</param>
 /// <param name="Seconds">How long it was listened to, over every visitor who played it.</param>
-public sealed record SeedListening(string Seed, string? Version, string? Genre, double Seconds, int Plays);
+public sealed record SeedListening(string Seed, string Identity, string? Version, string? Genre, double Seconds, int Plays);
 
 /// <param name="Version">The songs' version, which a seed needs to name a song.</param>
 /// <param name="FirstDay">The first day an event of it arrived within the days summed, as yyyy-MM-dd.</param>

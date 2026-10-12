@@ -101,7 +101,7 @@ public static class Render
             var group = song.TrackDefinitions[trackNumber] is PercussionInstrumentTrack && !mix.DrumGroups.IsEmpty
                 ? mix.DrumGroups.GetValueOrDefault(DrumGroups.GroupOf(DrumGroups.GetDrum(trackNumber)).Name)
                 : null;
-            if (group is { IsOn: false } || trackNotes.Count == 0)
+            if (trackNotes.Count == 0)
                 continue;
             if (isPercussion && song.Draws?.Kit == OrchestraKit)
                 trackNotes = EventTimeline.Create(trackNotes.Duration, trackNotes.Select(x =>
@@ -232,11 +232,10 @@ public static class Render
             renderedTracks.Add(percussionTrack);
         }
 
-        // every part as it is asked to sound, over the song's volume, and those left out not written; an instrument given
+        // every part as it is asked to sound, over the song's volume; an instrument given
         // holds throughout, its changes let go of
         var mixed = renderedTracks
             .Select(track => (Track: track, Mix: mix.Of(track.Role)))
-            .Where(x => x.Mix is not { IsOn: false })
             .Select(x => new RenderedTrack(
                 x.Track.IsPercussionInstrument,
                 x.Track.Role,

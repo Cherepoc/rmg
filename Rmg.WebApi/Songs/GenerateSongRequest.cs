@@ -131,7 +131,7 @@ public sealed record GenerateSongRequest(
                 return false;
             if (part.Plays is { } plays)
                 parts[role] = plays;
-            partMixes[role] = new PartMix(part.Instrument, StepScale.ToAmount(part.Volume ?? StepScale.Last), part.Pan is { } pan ? FromPanStep(pan) : null, part.IsOn);
+            partMixes[role] = new PartMix(part.Instrument, StepScale.ToAmount(part.Volume ?? StepScale.Last), part.Pan is { } pan ? FromPanStep(pan) : null);
         }
 
         if (SongParts.LeaveNone(parts))
@@ -152,9 +152,11 @@ public sealed record GenerateSongRequest(
                 return Fail($"{name} is not a drum group. Groups are {string.Join(", ", SongMix.DrumGroupNames)}.", out error);
             if (group is null)
                 return Fail($"The {name} drums are given as nothing; leave them out instead.", out error);
+            if (groups.ContainsKey(known))
+                return Fail($"The {known} drums are named twice.", out error);
             if (!TryReadStep(group.Volume, $"The {name}'s volume", out error))
                 return false;
-            groups[known] = new DrumGroupMix(StepScale.ToAmount(group.Volume ?? StepScale.Last), group.IsOn);
+            groups[known] = new DrumGroupMix(StepScale.ToAmount(group.Volume ?? StepScale.Last));
         }
 
         if (Tempo is < 0 or >= TempoScale.Steps)
@@ -250,9 +252,7 @@ public sealed record GenerateSongRequest(
 /// <param name="Instrument">The General MIDI program it plays, the drums' kit; none for the song's own.</param>
 /// <param name="Volume">How loud it plays, 61 as it is made; none is 61.</param>
 /// <param name="Pan">Where it sits, from 0, left, through 31, the middle, to 61, right; none for the song's own.</param>
-/// <param name="IsOn">Whether it is written in the file at all, which a part switched off is not.</param>
-public sealed record PartRequest(bool? Plays = null, int? Instrument = null, int? Volume = null, int? Pan = null, bool IsOn = true);
+public sealed record PartRequest(bool? Plays = null, int? Instrument = null, int? Volume = null, int? Pan = null);
 
 /// <param name="Volume">How loud its drums play, 61 as they are made; none is 61.</param>
-/// <param name="IsOn">Whether its drums are written in the file at all.</param>
-public sealed record DrumGroupRequest(int? Volume = null, bool IsOn = true);
+public sealed record DrumGroupRequest(int? Volume = null);

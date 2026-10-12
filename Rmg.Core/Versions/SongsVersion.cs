@@ -64,6 +64,6 @@ public static partial class SongsVersion
         return plus < 0 ? null : informational![(plus + 1)..];
     }
 
-    [GeneratedRegex(@"^[0-9]{1,9}\.[0-9]{1,9}\.[0-9]{3,9}$")]
+    [GeneratedRegex(@"^[0-9]{1,9}\.[0-9]{1,9}\.[0-9]{3,9}\z")]
     private static partial Regex NumberPattern();
 }

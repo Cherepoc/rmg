@@ -43,9 +43,7 @@ public sealed record SongMix(double Volume, ImmutableDictionary<TrackRole, PartM
 /// <param name="Instrument">The General MIDI program it plays, the drums' kit; none for the song's own.</param>
 /// <param name="Volume">How loud it plays, from 0 to 1.</param>
 /// <param name="Pan">Where it sits, from -1, left, to 1, right; none for the song's own.</param>
-/// <param name="IsOn">Whether it is written at all.</param>
-public sealed record PartMix(int? Instrument, double Volume, double? Pan, bool IsOn);
+public sealed record PartMix(int? Instrument, double Volume, double? Pan);
 
 /// <param name="Volume">How loud its drums play, from 0 to 1, as a part of every note's own loudness.</param>
-/// <param name="IsOn">Whether its drums are written at all.</param>
-public sealed record DrumGroupMix(double Volume, bool IsOn);
+public sealed record DrumGroupMix(double Volume);

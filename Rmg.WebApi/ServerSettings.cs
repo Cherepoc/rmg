@@ -31,7 +31,7 @@ public enum Interfaces
 /// <param name="KnownProxies">Reverse proxies to believe about a request, beyond loopback, which always is.</param>
 /// <param name="SoundFontDirectory">Where the soundfonts are, or null for the one under the web root.</param>
 /// <param name="DefaultSoundFont">Which one the page takes unasked, or null for the first it is offered.</param>
-/// <param name="StateDirectory">Where the analytics are kept, which is the only thing this writes.</param>
+/// <param name="StateDirectory">Where the analytics are kept, and the genres songs were asked in, kept for their links, which are all this writes.</param>
 /// <param name="IsCounting">Whether anything is counted at all.</param>
 /// <param name="DashboardToken">The admin area's password (<see cref="Admin.AdminArea" />), or null to not serve it at all.</param>
 /// <param name="RetentionDays">How long an event is kept before it is thrown away.</param>
@@ -81,6 +81,13 @@ public sealed record ServerSettings(
                 "events for one visitor in a day", DefaultEventsPerVisitorPerDay, out var perVisitor, out error)) return false;
         if (!TryReadYesOrNo(Value(configuration, "AnalyticsEnabled"), "AnalyticsEnabled", true, out var isCounting, out error)) return false;
         if (!TryReadYesOrNo(Value(configuration, "Listening"), "Listening", false, out var isListening, out error)) return false;
+        // a password guessed at one a second must be long enough not to fall in days
+        var token = Value(configuration, "DashboardToken");
+        if (token is { Length: < MinTokenLength })
+        {
+            error = $"DashboardToken must be {MinTokenLength} characters or more, as the admin area is guarded by nothing else.";
+            return false;
+        }
 
         settings = new ServerSettings(
             port,
@@ -91,7 +98,7 @@ public sealed record ServerSettings(
             Value(configuration, "DefaultSoundFont"),
             Value(configuration, "StateDirectory") ?? defaultStateDirectory,
             isCounting,
-            Value(configuration, "DashboardToken"),
+            token,
             retention,
             perVisitor,
             isListening
@@ -99,6 +106,9 @@ public sealed record ServerSettings(
 
         return true;
     }
+
+    /// <summary>The fewest characters the admin area's password may have.</summary>
+    public const int MinTokenLength = 16;
 
     /// <summary>A setting nobody filled in reads as one nobody set, so a blank in a file means the default.</summary>
     private static string? Value(IConfiguration configuration, string key)

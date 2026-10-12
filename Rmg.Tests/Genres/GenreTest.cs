@@ -224,7 +224,7 @@ public sealed class GenreTest
 
             await Assert.That(song.Rendered.Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsIn([24, 25]);
             await Assert.That(TestCorpus.Get(seed).Rendered.Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsEqualTo(0);
-            var mix = new Rmg.Core.Rendering.SongMix(1, ImmutableDictionary<TrackRole, Rmg.Core.Rendering.PartMix>.Empty.Add(TrackRole.Drum, new(40, 1, null, true)),
+            var mix = new Rmg.Core.Rendering.SongMix(1, ImmutableDictionary<TrackRole, Rmg.Core.Rendering.PartMix>.Empty.Add(TrackRole.Drum, new(40, 1, null)),
                 ImmutableDictionary<string, Rmg.Core.Rendering.DrumGroupMix>.Empty);
             await Assert.That(Rmg.Core.Rendering.Render.RenderSong(song.Song, mix, CancellationToken.None).Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsEqualTo(40);
         }

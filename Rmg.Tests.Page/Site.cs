@@ -16,7 +16,7 @@ namespace Rmg.Tests.Page;
 public sealed class Site : IAsyncInitializer, IAsyncDisposable
 {
     /// <summary>The admin area's password on this server.</summary>
-    public const string Token = "page-test-token";
+    public const string Token = "page-tests-admin-token";
 
     private readonly StringBuilder _output = new();
     private readonly string _state = Path.Combine(Path.GetTempPath(), $"rmg-page-{Path.GetRandomFileName()}");

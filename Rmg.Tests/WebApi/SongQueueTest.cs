@@ -40,15 +40,35 @@ public sealed class SongQueueTest
     [Test]
     public async Task AClient_MayKeepOnlySoManyWaiting_AndAllTogether_OnlySoMany()
     {
-        var queue = new SongQueue(1, 3, 2);
+        var queue = new SongQueue(1, 2, 2);
         await queue.Enter("a", CancellationToken.None);
         _ = queue.Enter("a", CancellationToken.None);
         _ = queue.Enter("a", CancellationToken.None);
 
         await Assert.That((await queue.Enter("a", CancellationToken.None)).Refusal).IsEqualTo(SongQueue.Refusal.Client);
 
-        _ = queue.Enter("b", CancellationToken.None);
+        // the room full of a's two, b one fewer than a would have: a's newest makes way
+        var made = queue.Enter("b", CancellationToken.None);
+        await Assert.That(await IsWaiting(made)).IsTrue();
+        // and c, which would wait as many as a and b, is turned away
         await Assert.That((await queue.Enter("c", CancellationToken.None)).Refusal).IsEqualTo(SongQueue.Refusal.Full);
+    }
+
+    [Test]
+    public async Task AFullRoom_MakesWayForANewcomer_ByTheNewestOfTheLongestLine()
+    {
+        // a 2-core server, 8 waiting, 4 a client: a and b keeping theirs waiting shut nobody out
+        var queue = new SongQueue(2, 8, 4);
+        await queue.Enter("a", CancellationToken.None);
+        await queue.Enter("b", CancellationToken.None);
+        var a = Enumerable.Range(0, 4).Select(_ => queue.Enter("a", CancellationToken.None)).ToArray();
+        var b = Enumerable.Range(0, 4).Select(_ => queue.Enter("b", CancellationToken.None)).ToArray();
+
+        var c = queue.Enter("c", CancellationToken.None);
+        await Assert.That(await IsWaiting(c)).IsTrue();
+        await Assert.That((await a[3]).Refusal).IsEqualTo(SongQueue.Refusal.Full);
+        await Assert.That(await IsWaiting(b[3])).IsTrue();
+        await Assert.That(queue.Load).IsEqualTo((2, 8));
     }
 
     [Test]

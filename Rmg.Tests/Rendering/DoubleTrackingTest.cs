@@ -61,7 +61,7 @@ public sealed class DoubleTrackingTest
     public async Task ADoubledPartsMix_PlaysBothTakes_TheSecondOnTheOtherSideOfThePanGiven_OnTheOtherDrivenGuitar()
     {
         var song = Songs().First(x => x.Rendered.Tracks.Any(t => t.IsDouble && t.Role == TrackRole.Riff)).Song;
-        var mixed = Render.RenderSong(song, SongMix.None with { Parts = ImmutableDictionary<TrackRole, PartMix>.Empty.Add(TrackRole.Riff, new PartMix(30, 0.5, 0.4, true)) });
+        var mixed = Render.RenderSong(song, SongMix.None with { Parts = ImmutableDictionary<TrackRole, PartMix>.Empty.Add(TrackRole.Riff, new PartMix(30, 0.5, 0.4)) });
         var takes = mixed.Tracks.Where(x => x.Role == TrackRole.Riff).OrderBy(x => x.IsDouble).ToArray();
 
         await Assert.That(takes.Select(x => (x.PitchInstrumentCode, x.Pan))).IsEquivalentTo([(30, 0.4), (29, -0.4)], CollectionOrdering.Matching);

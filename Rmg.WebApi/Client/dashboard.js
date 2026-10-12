@@ -493,13 +493,13 @@ function drawSeeds() {
     const longest = summary.seeds[0].seconds;
 
     elements.seeds.replaceChildren(table(
-        ["Seed", "Version", "Genre", "Listened", "Plays", ""],
+        ["Seed", "Settings", "Version", "Genre", "Listened", "Plays", ""],
         summary.seeds.map((seed) => {
             const bar = document.createElement("div");
             bar.className = "bar";
             bar.style.width = `${Math.max(2, (seed.seconds / longest) * 100)}%`;
 
-            return [seed.seed, seed.version ?? "", seed.genre ?? "", seconds(seed.seconds), String(seed.plays), bar];
+            return [seed.seed, seed.identity === "" ? "drawn" : seed.identity, seed.version ?? "", seed.genre ?? "", seconds(seed.seconds), String(seed.plays), bar];
         })
     ));
 }

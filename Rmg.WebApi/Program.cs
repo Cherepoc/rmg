@@ -170,7 +170,7 @@ else if (settings.IsListening)
 }
 else
 {
-    app.Logger.LogInformation("AnalyticsEnabled is false, so nothing is counted and nothing is written");
+    app.Logger.LogInformation("AnalyticsEnabled is false, so nothing is counted; the genres songs are asked in are still kept, for their links");
 }
 
 app.Run();

@@ -43,6 +43,8 @@ public sealed class ServerSettingsTest
         await Assert.That(settings.DefaultSoundFont).IsNull();
         await Assert.That(settings.IsCounting).IsTrue();
         await Assert.That(settings.EventsPerVisitorPerDay).IsEqualTo(ServerSettings.DefaultEventsPerVisitorPerDay);
+        // the live server makes no song with stages left out
+        await Assert.That(settings.IsListening).IsFalse();
     }
 
     [Test]
@@ -92,7 +94,7 @@ public sealed class ServerSettingsTest
         var settings = Read(("Port", blank), ("Address", blank), ("KnownProxies", blank),
             ("StateDirectory", blank), ("DashboardToken", blank), ("RetentionDays", blank),
             ("SoundFontDirectory", blank), ("DefaultSoundFont", blank), ("AnalyticsEnabled", blank),
-            ("EventsPerVisitorPerDay", blank));
+            ("EventsPerVisitorPerDay", blank), ("Listening", blank));
 
         await Assert.That(settings.Port).IsEqualTo(ServerSettings.DefaultPort);
         await Assert.That(settings.Interfaces).IsEqualTo(Interfaces.Every);
@@ -105,6 +107,7 @@ public sealed class ServerSettingsTest
         await Assert.That(settings.Address).IsNull();
         await Assert.That(settings.KnownProxies.IsEmpty).IsTrue();
         await Assert.That(settings.EventsPerVisitorPerDay).IsEqualTo(ServerSettings.DefaultEventsPerVisitorPerDay);
+        await Assert.That(settings.IsListening).IsFalse();
     }
 
     [Test]
@@ -115,9 +118,10 @@ public sealed class ServerSettingsTest
             ("Address", "10.0.0.9"),
             ("KnownProxies", "10.0.0.5, 10.0.0.6"),
             ("StateDirectory", "/var/lib/rmg"),
-            ("DashboardToken", "s3cret"),
+            ("DashboardToken", "a-long-enough-s3cret"),
             ("RetentionDays", "30"),
-            ("EventsPerVisitorPerDay", "250"));
+            ("EventsPerVisitorPerDay", "250"),
+            ("Listening", "true"));
 
         await Assert.That(settings.Port).IsEqualTo(8080);
         await Assert.That(settings.Interfaces).IsEqualTo(Interfaces.One);
@@ -125,7 +129,8 @@ public sealed class ServerSettingsTest
         await Assert.That(settings.Address?.ToString()).IsEqualTo("10.0.0.9");
         await Check.That(settings.KnownProxies.Select(proxy => proxy.ToString())).IsEquivalentTo(new[] { "10.0.0.5", "10.0.0.6" }, CollectionOrdering.Matching);
         await Assert.That(settings.StateDirectory).IsEqualTo("/var/lib/rmg");
-        await Assert.That(settings.DashboardToken).IsEqualTo("s3cret");
+        await Assert.That(settings.DashboardToken).IsEqualTo("a-long-enough-s3cret");
+        await Assert.That(settings.IsListening).IsTrue();
         await Assert.That(settings.RetentionDays).IsEqualTo(30);
         await Assert.That(settings.EventsPerVisitorPerDay).IsEqualTo(250);
     }
@@ -156,6 +161,24 @@ public sealed class ServerSettingsTest
         await Assert.That(read).IsFalse();
         await Assert.That(settings).IsNull();
         await Assert.That(error).IsEqualTo($"\"{value}\" is not a port. Ports are 1 to 65535.");
+    }
+
+    [Test]
+    public async Task ADashboardTokenTooShortToGuardTheAdminArea_SaysSo()
+    {
+        var read = TryRead([("DashboardToken", "rmg1")], out _, out var error);
+
+        await Assert.That(read).IsFalse();
+        await Assert.That(error).Contains($"{ServerSettings.MinTokenLength} characters or more");
+    }
+
+    [Test]
+    public async Task AListeningThatIsNeitherYesNorNo_SaysSo()
+    {
+        var read = TryRead([("Listening", "sometimes")], out _, out var error);
+
+        await Assert.That(read).IsFalse();
+        await Assert.That(error).IsNotNull();
     }
 
     [Test]

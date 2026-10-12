@@ -6,7 +6,9 @@ namespace Rmg.WebApi.Songs;
 ///     The songs being made and those waiting their turn. As many are made at once as it is given, and each core that
 ///     comes free goes to the next client waiting, one song a client a round, so that a client asking for many delays
 ///     another by a song rather than by all of its own. A client may keep only so many waiting, and all of them together
-///     only so many, and the rest are turned away at once. A client that gives up while waiting leaves its line.
+///     only so many; where they are full, the newest of the longest line makes way for a client with fewer, so that a few
+///     clients keeping theirs waiting shut nobody out, and the rest are turned away at once. A client that gives up while
+///     waiting leaves its line.
 /// </summary>
 public sealed class SongQueue(int running, int waiting, int waitingPerClient)
 {
@@ -44,8 +46,17 @@ public sealed class SongQueue(int running, int waiting, int waitingPerClient)
                 return new Turn(this, null);
             }
 
-            if (_lines.GetValueOrDefault(client)?.Waiting.Count >= waitingPerClient) return new Turn(null, Refusal.Client);
-            if (_waiting >= waiting) return new Turn(null, Refusal.Full);
+            var own = _lines.GetValueOrDefault(client)?.Waiting.Count ?? 0;
+            if (own >= waitingPerClient) return new Turn(null, Refusal.Client);
+            if (_waiting >= waiting)
+            {
+                // the newest of the longest line turned away for one that would still wait fewer, else the newcomer
+                var longest = _rotation.MaxBy(x => x.Waiting.Count)!;
+                if (own + 1 >= longest.Waiting.Count) return new Turn(null, Refusal.Full);
+                var displaced = longest.Waiting.Last!.Value;
+                Remove(displaced);
+                displaced.Turn.TrySetResult(new Turn(null, Refusal.Full));
+            }
 
             if (!_lines.TryGetValue(client, out var line))
             {

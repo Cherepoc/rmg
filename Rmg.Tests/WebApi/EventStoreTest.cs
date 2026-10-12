@@ -352,6 +352,20 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(count.Admit("next day", address, false, 3)).IsTrue();
     }
 
+    /// <summary>A network is an IPv6 home's /64, whichever address of it a phone takes, and an IPv4 address mapped into IPv6 its IPv4.</summary>
+    [Test]
+    public async Task ANetwork_IsAnIPv6Homes64_AndAMappedIPv4ItsAddress()
+    {
+        var count = new AnalyticsEndpoints.NetworkCount();
+        await Assert.That(count.Admit("day", System.Net.IPAddress.Parse("2001:db8:1:2::1"), false, 2)).IsTrue();
+        await Assert.That(count.Admit("day", System.Net.IPAddress.Parse("2001:db8:1:2:ffff::9"), false, 2)).IsTrue();
+        await Assert.That(count.Admit("day", System.Net.IPAddress.Parse("2001:db8:1:2:abcd::5"), false, 2)).IsFalse();
+        await Assert.That(count.Admit("day", System.Net.IPAddress.Parse("2001:db8:1:3::1"), false, 2)).IsTrue();
+
+        await Assert.That(count.Admit("day", System.Net.IPAddress.Parse("192.0.2.7"), false, 1)).IsTrue();
+        await Assert.That(count.Admit("day", System.Net.IPAddress.Parse("::ffff:192.0.2.7"), false, 1)).IsFalse();
+    }
+
     /// <summary>How long an event takes to write, measured, which a queue's writer would save a request.</summary>
     [Test, Explicit]
     public async Task Report_AnEventsWrite()
@@ -447,8 +461,15 @@ public sealed class EventStoreTest : IDisposable
         var store = EventStore.Create(directory, dailyEvents: 5);
         try
         {
-            var kept = Enumerable.Range(0, 7).Count(i => store.Write(new StoredEvent(Now, EventStore.Day(Now), $"visitor {i}", EventNames.Played, null, null, null, null, null, null, null, null)));
+            StoredEvent Event(int i, string name) => new(Now, EventStore.Day(Now), $"visitor {i}", name, null, null, null, null, null, null, null, null);
+            var kept = Enumerable.Range(0, 7).Count(i => store.Write(Event(i, EventNames.Played)));
             await Assert.That(kept).IsEqualTo(5);
+            // what is told on purpose kept beside the page's telemetry, which never crowds it out
+            await Assert.That(store.Write(Event(10, EventNames.Rated))).IsTrue();
+
+            // and a server started again the same day reads the day's count back from the file
+            var again = EventStore.Create(directory, dailyEvents: 5);
+            await Assert.That(again.Write(Event(20, EventNames.Played))).IsFalse();
         }
         finally
         {
@@ -633,9 +654,11 @@ public sealed class EventStoreTest : IDisposable
             filling.ExecuteNonQuery();
         }
 
+        await Assert.That(_store.Write(Song(SongOutcome.RefusedFull))).IsTrue();
+        await Assert.That(_store.Write(Song(SongOutcome.RefusedClient))).IsFalse();
+        // the songs refused counted apart, so that a flood of them never hides the songs made
         await Assert.That(_store.Write(Song(SongOutcome.Made))).IsTrue();
-        await Assert.That(_store.Write(Song(SongOutcome.Made))).IsFalse();
-        await Assert.That(_store.Write(Song(SongOutcome.Made, Now.AddDays(1)))).IsTrue();
+        await Assert.That(_store.Write(Song(SongOutcome.RefusedFull, Now.AddDays(1)))).IsTrue();
     }
 
     [Test]

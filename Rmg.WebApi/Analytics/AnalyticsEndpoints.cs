@@ -84,8 +84,8 @@ public static class AnalyticsEndpoints
         /// <summary>Whether a network may write one more event today, counting it if it may.</summary>
         public bool Admit(string day, System.Net.IPAddress? address, bool deliberate, int most)
         {
-            var network = address is null ? "" : address.IsIPv4MappedToIPv6 ? address.MapToIPv4().ToString()
-                : address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6 ? Convert.ToHexString(address.GetAddressBytes()[..8]) : address.ToString();
+            // a network as the song queue tells a client, an IPv6 home's whole /64 one
+            var network = Songs.SongQueue.ClientOf(address);
             lock (_counts)
             {
                 if (_day != day)

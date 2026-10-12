@@ -14,19 +14,18 @@ public sealed class SongMixTest
     private static CorpusSong WithDrums() => TestCorpus.Range(8).First(x => x.PlaysDrums);
 
     [Test]
-    public async Task APart_PlaysItsInstrument_AtItsVolumeAndPan_UnderTheSongs_OrIsNotWritten()
+    public async Task APart_PlaysItsInstrument_AtItsVolumeAndPan_UnderTheSongs()
     {
         var song = TestCorpus.Get(1).Song;
-        var mixed = Render.RenderSong(song, Parts(TrackRole.Bass, new PartMix(73, 0.5, -1, true)) with { Volume = 0.8 });
+        var mixed = Render.RenderSong(song, Parts(TrackRole.Bass, new PartMix(73, 0.5, -1)) with { Volume = 0.8 });
         var bass = mixed.Tracks.Single(x => x.Role == TrackRole.Bass);
 
         await Assert.That((bass.PitchInstrumentCode, bass.Volume, bass.Pan)).IsEqualTo((73, 0.4, -1.0));
         await Assert.That(mixed.Tracks.Single(x => x.Role == TrackRole.Melody).Volume).IsEqualTo(0.8);
-        await Assert.That(Render.RenderSong(song, Parts(TrackRole.Bass, new PartMix(null, 1, null, false))).Tracks.Any(x => x.Role == TrackRole.Bass)).IsFalse();
     }
 
     [Test]
-    public async Task ADrumGroup_PlaysAtItsVolume_OrIsNotWritten()
+    public async Task ADrumGroup_PlaysAtItsVolume()
     {
         var song = WithDrums().Song;
         double[] Kicks(RenderedSong rendered) =>
@@ -37,8 +36,7 @@ public sealed class SongMixTest
         var asMade = Kicks(Render.RenderSong(song));
 
         await Assert.That(asMade).IsNotEmpty();
-        await Assert.That(Kicks(Render.RenderSong(song, Group(DrumGroups.Kick.Name, new DrumGroupMix(0.5, true))))).IsEquivalentTo(asMade.Select(x => x * 0.5), CollectionOrdering.Matching);
-        await Assert.That(Kicks(Render.RenderSong(song, Group(DrumGroups.Kick.Name, new DrumGroupMix(1, false))))).IsEmpty();
+        await Assert.That(Kicks(Render.RenderSong(song, Group(DrumGroups.Kick.Name, new DrumGroupMix(0.5))))).IsEquivalentTo(asMade.Select(x => x * 0.5), CollectionOrdering.Matching);
     }
 
     [Test]

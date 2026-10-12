@@ -13,10 +13,11 @@ public sealed class EventStore
     private readonly string _connectionString;
     private readonly Lock _writing = new();
 
-    // how many songs today's measurements are of, read from the file on the first of a day, so that a flood of
-    // requests, refused for next to nothing, cannot fill the disk with rows
+    // how many songs today's measurements are of, those refused apart from the others, read from the file on the first
+    // of a day, so that a flood of requests, refused for next to nothing, can neither fill the disk with rows nor crowd
+    // out the measurements of the songs made
     private string? _songsDay;
-    private int _songsToday;
+    private readonly Dictionary<bool, int> _songsToday = [];
 
     // the day the store last threw away what is older than it keeps, which the first write of every day does again,
     // so that a server that runs for weeks keeps no more than one started today would
@@ -40,20 +41,23 @@ public sealed class EventStore
     public int DailyEventsPerVisitor { get; }
 
     /// <summary>
-    ///     How many songs' measurements are kept in one day, well above what the server makes, as many as two a second
-    ///     all day long: about 20 MB a day at the most.
+    ///     How many songs' measurements are kept in one day, those refused and the others each, well above what the server
+    ///     makes, as many as two a second all day long: about 40 MB a day at the most.
     /// </summary>
     public const int DailySongs = 200_000;
 
     /// <summary>
-    ///     How many events are kept in one day from everyone together, well above honest use, so that clients posing as
-    ///     new visitors on every request cannot fill the disk faster than this: at the caps every day, events and songs
-    ///     together, some 40 MB a day, about 7 GB over 180 days kept, which honest use stays far below.
+    ///     How many events are kept in one day from everyone together, of those told on purpose (a rating, a verdict) and
+    ///     of the page's own each, well above honest use, so that clients posing as new visitors on every request cannot
+    ///     fill the disk faster than this, nor the page's telemetry crowd out the ratings: at the caps every day, events
+    ///     and songs together, some 80 MB a day, about 14 GB over 180 days kept, which honest use stays far below.
     /// </summary>
     public const int DailyEvents = 200_000;
 
-    // how many events today's day has kept, counted once from the file and then as they are written
-    private (string Day, long Count)? _today;
+    // how many events today's day has kept, those told on purpose apart from the others, counted once from the file and
+    // then as they are written
+    private string? _eventsDay;
+    private readonly Dictionary<bool, long> _today = [];
 
     public static EventStore Create(
         string directory,
@@ -207,16 +211,24 @@ public sealed class EventStore
 
             if (Convert.ToInt64(counting.ExecuteScalar()) >= DailyEventsPerVisitor) return false;
 
-            if (_today?.Day != stored.Day)
+            var deliberate = EventNames.IsDeliberate(stored.Name);
+            if (_eventsDay != stored.Day)
             {
-                using var all = connection.CreateCommand();
-                all.CommandText = "SELECT COUNT(*) FROM events WHERE day = $day";
-                all.Parameters.AddWithValue("$day", stored.Day);
-                _today = (stored.Day, Convert.ToInt64(all.ExecuteScalar()));
+                _today.Clear();
+                _eventsDay = stored.Day;
             }
 
-            if (_today.Value.Count >= DailyEventsOfAll) return false;
-            _today = (stored.Day, _today.Value.Count + 1);
+            if (!_today.ContainsKey(deliberate))
+            {
+                using var all = connection.CreateCommand();
+                all.CommandText = $"SELECT COUNT(*) FROM events WHERE day = $day AND (name IN ('{EventNames.Rated}', '{EventNames.Verdict}')) = $deliberate";
+                all.Parameters.AddWithValue("$day", stored.Day);
+                all.Parameters.AddWithValue("$deliberate", deliberate ? 1 : 0);
+                _today[deliberate] = Convert.ToInt64(all.ExecuteScalar());
+            }
+
+            if (_today[deliberate] >= DailyEventsOfAll) return false;
+            _today[deliberate]++;
 
             using var writing = connection.CreateCommand();
             writing.CommandText = """
@@ -258,16 +270,23 @@ public sealed class EventStore
             if (_prunedDay != day)
                 PruneOlder(connection, song.At);
 
+            var refused = song.Outcome is SongOutcome.RefusedClient or SongOutcome.RefusedFull;
             if (_songsDay != day)
             {
-                using var counting = connection.CreateCommand();
-                counting.CommandText = "SELECT COUNT(*) FROM songs WHERE day = $day";
-                counting.Parameters.AddWithValue("$day", day);
-                _songsToday = Convert.ToInt32(counting.ExecuteScalar());
+                _songsToday.Clear();
                 _songsDay = day;
             }
 
-            if (_songsToday >= DailySongs) return false;
+            if (!_songsToday.ContainsKey(refused))
+            {
+                using var counting = connection.CreateCommand();
+                counting.CommandText = $"SELECT COUNT(*) FROM songs WHERE day = $day AND (outcome IN ('{SongOutcomes.Name(SongOutcome.RefusedClient)}', '{SongOutcomes.Name(SongOutcome.RefusedFull)}')) = $refused";
+                counting.Parameters.AddWithValue("$day", day);
+                counting.Parameters.AddWithValue("$refused", refused ? 1 : 0);
+                _songsToday[refused] = Convert.ToInt32(counting.ExecuteScalar());
+            }
+
+            if (_songsToday[refused] >= DailySongs) return false;
 
             using var writing = connection.CreateCommand();
             writing.CommandText = """
@@ -288,7 +307,7 @@ public sealed class EventStore
             writing.Parameters.AddWithValue("$notes", (object?)song.Notes ?? DBNull.Value);
 
             writing.ExecuteNonQuery();
-            _songsToday++;
+            _songsToday[refused]++;
             return true;
         }
     }

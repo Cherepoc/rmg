@@ -73,10 +73,7 @@ public static class SongEndpoints
         if (turn.Refusal is { } refusal)
         {
             Record(refusal == SongQueue.Refusal.Client ? SongOutcome.RefusedClient : SongOutcome.RefusedFull);
-            context.Response.Headers.RetryAfter = "1";
-            return refusal == SongQueue.Refusal.Client
-                ? Results.Problem("You have as many songs waiting as you may.", statusCode: StatusCodes.Status429TooManyRequests)
-                : Results.Problem("The server is busy making other songs.", statusCode: StatusCodes.Status503ServiceUnavailable);
+            return Refused(context, refusal);
         }
 
         var songSeed = seed ?? Seeds.Random();
@@ -151,6 +148,15 @@ public static class SongEndpoints
         context.Response.Headers["X-Song-Settings"] = JsonSerializer.Serialize(report, AppJsonContext.Default.SongReport);
 
         return Results.File(stream, "audio/midi", SongFile.GetName(songSeed));
+    }
+
+    /// <summary>A song turned away by the queue, as every endpoint that makes one answers it: a client's own too many, or a busy server.</summary>
+    internal static IResult Refused(HttpContext context, SongQueue.Refusal refusal)
+    {
+        context.Response.Headers.RetryAfter = "1";
+        return refusal == SongQueue.Refusal.Client
+            ? Results.Problem("You have as many songs waiting as you may.", statusCode: StatusCodes.Status429TooManyRequests)
+            : Results.Problem("The server is busy making other songs.", statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 }
 

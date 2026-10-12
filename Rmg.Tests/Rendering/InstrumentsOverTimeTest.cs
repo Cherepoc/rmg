@@ -44,7 +44,7 @@ public sealed class InstrumentsOverTimeTest
         var programChanges = Enumerable.Range(0, bytes.Length - 1).Count(i => bytes[i] == (0xC0 | channel) && bytes[i + 1] < 128);
         await Assert.That(programChanges).IsGreaterThanOrEqualTo(track.ProgramChanges.Length + 1);
 
-        var given = Render.RenderSong(song.Song, SongMix.None with { Parts = ImmutableDictionary<TrackRole, PartMix>.Empty.Add(track.Role, new PartMix(5, 1, null, true)) });
+        var given = Render.RenderSong(song.Song, SongMix.None with { Parts = ImmutableDictionary<TrackRole, PartMix>.Empty.Add(track.Role, new PartMix(5, 1, null)) });
         await Assert.That(given.Tracks.Single(x => x.Role == track.Role).ProgramChanges).IsEmpty();
     }
 
