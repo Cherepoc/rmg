@@ -125,11 +125,11 @@ internal static class Groove
         return draw < half ? 1 : draw < half + twice ? -1 : 0;
     }
 
-    public static StateMap ToStateMap(Swing swing, IGenerationContext context)
+    public static StateMap ToStateMap(Swing swing)
     {
         return new StateMapBuilder(Layers.Song, perTrack: false)
             .Add(StateKinds.SwingDelay, swing.Delay)
             .Add(StateKinds.SwingPeriod, swing.Period)
-            .ToStateMap(context);
+            .ToStateMap();
     }
 }

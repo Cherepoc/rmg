@@ -22,6 +22,9 @@ internal sealed class SongFormGenerator
 
 
     // the sequence whether a lift is built to and dropped at is drawn from (FormLayers.Drop)
+    // how finely a line's place keys its drop's sequences
+    private const int LinePlacesPerBeat = 48;
+
     private readonly IGenerationContext _dropContext;
 
     // a drop's kind, silent or filtered, from a sequence of its own
@@ -374,11 +377,16 @@ internal sealed class SongFormGenerator
         var drops = new HashSet<double>();
         var filtered = new HashSet<double>();
         var kinds = ByConvention.Weigh(FormLayers.DropKinds, _songRhythm.Value, _genre.Pool<DropKind>(GenreChoices.DropKind));
+        // every line's drop and its kind from sequences of its own, by its place, drawn before any line is passed over, so
+        // that whether another line may drop leaves them as they were
+        var (dropSeed, kindSeed) = (_dropContext.GenerateSeed(), _dropKindContext.GenerateSeed());
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
-            if (line.Ending == line.Next || line.Position >= end || (line.Next.Energy - line.Ending.Energy) * line.Ending.Rhythm.Coupling <= LiftCues.Threshold
-                || !_dropContext.TestProbability(drop))
+            var place = map.PlaceKey(line.Position, LinePlacesPerBeat);
+            var dropping = new GenerationContext(Seeds.Derive(dropSeed, place)).TestProbability(drop);
+            var kind = new GenerationContext(Seeds.Derive(kindSeed, place)).Pick(kinds);
+            if (line.Ending == line.Next || line.Position >= end || (line.Next.Energy - line.Ending.Energy) * line.Ending.Rhythm.Coupling <= LiftCues.Threshold || !dropping)
                 continue;
             // but where the band does not come back on it, the section's first bar leaving every pitched part out, as a
             // texture building it up does
@@ -389,7 +397,6 @@ internal sealed class SongFormGenerator
             // the band silent over the bar before it, the bar there is, a short last bar's (ShortBars), or playing on,
             // filtered (MixFilter)
             var gap = line.Position - map.BarBefore(line.Position);
-            var kind = _dropKindContext.Pick(kinds);
             // the drums' hits kept for their fill, every other part, a soloist's too, kept out of it once the lines walk
             // into the section
             foreach (var (track, role) in _roles.Where(_ => kind == DropKind.Silent))

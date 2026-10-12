@@ -77,8 +77,10 @@ internal static class Texture
             ByConvention.Weigh(Kinds.Select(x => (x.Kind, x.Weight)), form, genre.Pool<TextureKind>(GenreChoices.Texture)),
             x => leans[x]));
         TrackRole[] pitched = [..playing.Where(x => x != TrackRole.Drum).Order()];
-        // the order the pitched parts come in, drawn whatever the texture, so that the draws stay as they are
-        var order = pitched.OrderBy(_ => context.GenerateDouble()).ToArray();
+        // the order the pitched parts come in, drawn whatever the texture, each part's place from a sequence keyed by the
+        // part, so that a part resting or held back leaves the others' places and the draws after as they were
+        var orderSeed = context.GenerateSeed();
+        var order = pitched.OrderBy(x => new GenerationContext(Seeds.Derive(orderSeed, (long)x)).GenerateDouble()).ToArray();
         // drawn whether any part plays or not, so that the draws stay as they are; among the parts that carry a section
         // alone, the drums only where they keep time, as likely each, or as a genre weighs them (GenreChoices.Alone), a
         // metal's clean arpeggio, an ambient piece's pad

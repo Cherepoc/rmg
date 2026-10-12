@@ -50,8 +50,7 @@ public static class SongFingerprint
         // generated side by side, hashed in the seeds' order, and then the songs of values supplied
         foreach (var file in Enumerable.Range(0, count).AsParallel().AsOrdered().Select(seed => Write(seed, SongOverrides.None)))
             hash.AppendData(file);
-        foreach (var file in Overrides.SelectMany(x => Enumerable.Range(0, OverrideSeeds).Select(seed => (Seed: seed, Overrides: x))).AsParallel().AsOrdered()
-                     .Select(x => Write(x.Seed, x.Overrides)))
+        foreach (var (_, file) in OverriddenSongs())
             hash.AppendData(file);
         foreach (var (_, file) in GenreSongs(genres))
             hash.AppendData(file);
@@ -60,14 +59,21 @@ public static class SongFingerprint
     }
 
     /// <summary>
-    ///     Each song's hash of seeds 0 to <paramref name="count" /> - 1, a line a seed, "seed hash", and then of each genre's
-    ///     songs, "genre/seed hash", so that two builds' lists compared count the songs a change changed.
+    ///     Each song's hash of seeds 0 to <paramref name="count" /> - 1, a line a seed, "seed hash", then of each genre's
+    ///     songs, "genre/seed hash", and then of the songs of values supplied, "overrides/index/seed hash", every song the
+    ///     fingerprint hashes, so that two builds' lists compared count the songs a change changed.
     /// </summary>
     public static IEnumerable<string> ComputeBySong(int count, IReadOnlyList<(string Id, Genre Genre)> genres) =>
         Enumerable.Range(0, count).AsParallel().AsOrdered().Select(seed => $"{seed} {Hash(Write(seed, SongOverrides.None))}").ToList()
-            .Concat(GenreSongs(genres).Select(x => $"{x.Name} {Hash(x.File)}"));
+            .Concat(GenreSongs(genres).Select(x => $"{x.Name} {Hash(x.File)}"))
+            .Concat(OverriddenSongs().Select(x => $"{x.Name} {Hash(x.File)}"));
 
     private static string Hash(byte[] file) => Convert.ToHexString(SHA256.HashData(file))[..16];
+
+    /// <summary>Each of the values supplied played on seeds 0 to <see cref="OverrideSeeds" /> - 1, named "overrides/index/seed", in order.</summary>
+    private static IEnumerable<(string Name, byte[] File)> OverriddenSongs() =>
+        Overrides.SelectMany((x, i) => Enumerable.Range(0, OverrideSeeds).Select(seed => (Name: $"overrides/{i}/{seed}", Seed: seed, Overrides: x))).AsParallel().AsOrdered()
+            .Select(x => (x.Name, Write(x.Seed, x.Overrides)));
 
     /// <summary>Each genre's songs of seeds 0 to <see cref="GenreSeeds" /> - 1, named "genre/seed", in order.</summary>
     private static IEnumerable<(string Name, byte[] File)> GenreSongs(IReadOnlyList<(string Id, Genre Genre)> genres) =>

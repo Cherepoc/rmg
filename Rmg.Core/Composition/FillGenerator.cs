@@ -87,15 +87,15 @@ internal sealed class FillGenerator
     public TrackEventStateTimelineMap<StateMap> Generate(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyList<FillLine> lines,
-        SongMap? map = null,
-        IReadOnlyList<(double Start, double End, double BarDuration)>? stops = null
+        SongMap map,
+        IReadOnlyList<(double Start, double End, double BarDuration)> stops
     )
     {
         // a fast section's runs play coarser notes, which finer ones would blur, at the tempo the section the fill ends
         // starts at, before any slowing into the ending
         var tempo = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         double MinNote(double line) =>
-            FillLayers.MinNoteSeconds * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(map?.SectionAt(line - 1e-9)?.Start ?? 0));
+            FillLayers.MinNoteSeconds * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(map.SectionAt(line - 1e-9)?.Start ?? 0));
 
         var drummer = Drummer.Generate(_context, _songRhythm.Value);
         var edits = new TimelineEdits(_context, _meter, map);
@@ -103,12 +103,12 @@ internal sealed class FillGenerator
         var lineSeed = _context.GenerateSeed();
         foreach (var line in lines)
         {
-            var key = map?.PlaceKey(line.Position, LinePlacesPerBeat) ?? (long)Math.Round(line.Position * LinePlacesPerBeat);
+            var key = map.PlaceKey(line.Position, LinePlacesPerBeat);
             (_line, _landing) = (new GenerationContext(Seeds.Derive(lineSeed, key)), new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, key), LandingStream)));
             MarkLine(song, edits, line, MinNote(line.Position), drummer, map);
         }
 
-        LandTheUnheard(song, edits, stops ?? []);
+        LandTheUnheard(song, edits, stops);
 
         return edits.ApplyTo(song);
     }
@@ -189,12 +189,12 @@ internal sealed class FillGenerator
         FillLine line,
         double minNote,
         Drummer drummer,
-        SongMap? map
+        SongMap map
     )
     {
         var ending = line.Ending;
         // the fill is in the bars of the section it ends, the bar before the line a short one's where the section cuts it
-        var meter = map?.MeterAt(line.Position - 1e-6) ?? ending.Meter;
+        var meter = map.MeterAt(line.Position - 1e-6);
         var fills = ending.Fills.Value;
         // how much the line weighs: its own weight, and the energy it leads into, as far as the section's rhythm follows it
         var lift = line.Next.Energy - ending.Energy;
@@ -232,7 +232,7 @@ internal sealed class FillGenerator
             _filled.UnionWith(landing.Select(x => x.Track));
         }
         // the bar of the pattern the fill plays in, the last before the line
-        var bar = map?.PatternBarAt(line.Position - meter.BarDuration) ?? ((int)Math.Floor(line.Position / meter.BarDuration) - 1).Mod(meter.PatternBarCount);
+        var bar = map.PatternBarAt(line.Position - meter.BarDuration);
         RecordDecision(ending.SectionId, bar, meter, play, rhythm, span, landing, isEarly, lift);
     }
 

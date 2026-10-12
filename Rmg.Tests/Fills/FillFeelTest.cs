@@ -33,7 +33,9 @@ public sealed class FillFeelTest
         var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), unconventionality, FillGrooves.FromSource(FillArchetypeTest.Groove(-2, 0, 2, FillArchetypeTest.TripletIndex)), 0, false, true, false, Meter.FourFour, 0)).ToArray();
         using var trace = StateTrace.Start();
 
-        new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5), Meter.FourFour, _ => context, Genre.None).Generate(song, FillGenerator.GetSectionLines(sections));
+        var map = new SongMap(Meter.FourFour, new IntroSpan(IntroKind.Cold, 0), [..sections.Select(x => new SectionSpan(x.SectionId, x.SectionId * 32, 32, Meter.FourFour, 0))],
+            new EndingSpan(EndingKind.Open, 8 * 32, 0, 0));
+        new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5), Meter.FourFour, _ => context, Genre.None).Generate(song, FillGenerator.GetSectionLines(sections), map, []);
 
         var decisions = trace.Entries.Where(x => x.Point == TracePoints.FillDecision).Select(x => (FillDecision)x.Value!).ToArray();
         var hits = trace.Entries.Where(x => x.Point == TracePoints.Fill && x.Value is not HitKind.Landing).ToArray();

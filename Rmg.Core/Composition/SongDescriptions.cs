@@ -181,14 +181,17 @@ public static class SongDescriptions
         );
     }
 
-    /// <summary>Every section's value in a word, by its rank among the song's: its lowest third low, its highest high.</summary>
+    /// <summary>
+    ///     Every section's value in a word, by its place among the song's from its lowest to its highest: the lowest third
+    ///     low, the highest high, so that of two the higher is high.
+    /// </summary>
     private static Dictionary<int, string> Thirds(Dictionary<int, double> values, string low, string middle, string high)
     {
         var ordered = values.Values.Distinct().Order().ToArray();
         return values.ToDictionary(x => x.Key, x =>
         {
-            var rank = Array.IndexOf(ordered, x.Value);
-            return ordered.Length < 2 ? middle : rank < ordered.Length / 3.0 ? low : rank >= 2 * ordered.Length / 3.0 ? high : middle;
+            var place = ordered.Length < 2 ? 0.5 : Array.IndexOf(ordered, x.Value) / (double)(ordered.Length - 1);
+            return place < 1 / 3.0 ? low : place > 2 / 3.0 ? high : middle;
         });
     }
 

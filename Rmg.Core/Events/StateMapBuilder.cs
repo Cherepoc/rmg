@@ -62,6 +62,22 @@ public sealed class StateMapBuilder
         return GenerateStateMap(context, _layer, _isPerTrack, _stateGenerators, _stateMapGenerators);
     }
 
+    /// <summary>The state map of a builder of values alone, which draws nothing; one that draws fails.</summary>
+    public StateMap ToStateMap() => ToStateMap(NoDraws.Instance);
+
+    /// <summary>A sequence nothing may draw from, for a builder of values alone.</summary>
+    private sealed class NoDraws : IGenerationContext
+    {
+        public static NoDraws Instance { get; } = new();
+
+        private static InvalidOperationException Drawn() => new("A state map of values alone draws nothing.");
+        public double GenerateDouble() => throw Drawn();
+        public int GenerateInt(int min, int max) => throw Drawn();
+        public ulong GenerateSeed() => throw Drawn();
+        public bool TestProbability(double probability) => throw Drawn();
+        public IGenerationContext CreateContext(ulong seed) => throw Drawn();
+    }
+
     public Func<IGenerationContext, StateMap> ToStateMapGenerator()
     {
         var layer = _layer;

@@ -23,27 +23,21 @@
         ]
       },
       {
-        "seed": "1",
-        "at": 2.6,
-        "listen": [
-          "Chords (Pizzicato Strings)",
-          "Melody (Oboe)",
-          "Bass (Timpani)"
-        ]
-      },
-      {
         "seed": "3",
-        "at": 239.7,
+        "at": 233.6,
         "listen": [
           "Melody (Violin)",
-          "Kick"
+          "Kick",
+          "Bass (Contrabass)"
         ]
       },
       {
         "seed": "5",
-        "at": 15.2,
+        "at": 32.9,
         "listen": [
-          "Bass (Contrabass)"
+          "Chords (Tremolo Strings)",
+          "Pad (Choir Aahs)",
+          "Melody (Violin)"
         ]
       },
       {
@@ -55,10 +49,19 @@
         ]
       },
       {
-        "seed": "Y",
-        "at": 25,
+        "seed": "V",
+        "at": 31.5,
         "listen": [
-          "Melody (French Horn)"
+          "Melody (Oboe)",
+          "Chords (Tremolo Strings)",
+          "Bass (Timpani)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 27.7,
+        "listen": [
+          "Bass (Tuba)"
         ]
       }
     ]
@@ -97,13 +100,6 @@
         ]
       },
       {
-        "seed": "B",
-        "at": 96.2,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
         "seed": "I",
         "at": 29.1,
         "listen": [
@@ -116,6 +112,13 @@
         "at": 87.8,
         "listen": [
           "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 110.5,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
         ]
       }
     ]
@@ -145,12 +148,12 @@
     },
     "seeds": [
       {
-        "seed": "I",
-        "at": 176.1,
+        "seed": "L",
+        "at": 210.7,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))",
+          "Melody (Electric Guitar (clean))",
           "Bass (Electric Bass (pick))",
-          "Melody (Harmonica)"
+          "Riff (Distortion Guitar)"
         ]
       },
       {
@@ -290,18 +293,17 @@
         ]
       },
       {
-        "seed": "b",
-        "at": 64,
-        "listen": [
-          "Melody (Acoustic Grand Piano)",
-          "Counter-melody (String Ensemble 1)"
-        ]
-      },
-      {
         "seed": "1D",
         "at": 64.3,
         "listen": [
           "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "1N",
+        "at": 137.7,
+        "listen": [
+          "Counter-melody (String Ensemble 1)"
         ]
       },
       {
@@ -320,7 +322,7 @@
       },
       {
         "seed": "1T",
-        "at": 2,
+        "at": 30,
         "listen": [
           "Melody (Lead 2 (sawtooth))"
         ]
@@ -370,17 +372,17 @@
         ]
       },
       {
-        "seed": "E",
-        "at": 68.6,
+        "seed": "D",
+        "at": 7.9,
         "listen": [
           "Bass (Synth Bass 2)"
         ]
       },
       {
-        "seed": "H",
-        "at": 27.2,
+        "seed": "E",
+        "at": 68.6,
         "listen": [
-          "Bass (Synth Bass 1)"
+          "Bass (Synth Bass 2)"
         ]
       }
     ]
@@ -432,19 +434,19 @@
         ]
       },
       {
-        "seed": "S",
-        "at": 16.7,
+        "seed": "P",
+        "at": 414.4,
         "listen": [
-          "Kick"
+          "Melody (Electric Piano 1)"
         ]
       },
       {
         "seed": "V",
-        "at": 0,
+        "at": 27,
         "listen": [
-          "Chords (Drawbar Organ)",
-          "Rhythm part (Electric Guitar (clean))",
-          "Melody (Alto Sax)"
+          "Counter-melody (Violin)",
+          "Melody (Alto Sax)",
+          "Bass (Electric Bass (finger))"
         ]
       }
     ]
@@ -465,18 +467,8 @@
     "seeds": [
       {
         "seed": "Y",
-        "at": 78.3,
+        "at": 174.3,
         "listen": [
-          "Melody (Lead 2 (sawtooth))",
-          "Bass (Synth Bass 2)",
-          "Chords (Pad 3 (polysynth))"
-        ]
-      },
-      {
-        "seed": "m",
-        "at": 148.8,
-        "listen": [
-          "Riff (Lead 1 (square))",
           "Melody (Lead 2 (sawtooth))"
         ]
       },
@@ -489,11 +481,18 @@
         ]
       },
       {
-        "seed": "1G",
-        "at": 223.6,
+        "seed": "1E",
+        "at": 171.7,
         "listen": [
-          "Riff (Lead 1 (square))",
-          "Bass (Synth Bass 2)"
+          "Riff (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 188.9,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))",
+          "Riff (Lead 1 (square))"
         ]
       },
       {
@@ -544,6 +543,15 @@
         ]
       },
       {
+        "seed": "E",
+        "at": 19.9,
+        "listen": [
+          "Ride",
+          "Solo (Electric Guitar (clean))",
+          "Acoustic Snare"
+        ]
+      },
+      {
         "seed": "F",
         "at": 26,
         "listen": [
@@ -562,7 +570,7 @@
       },
       {
         "seed": "M",
-        "at": 52.4,
+        "at": 54.1,
         "listen": [
           "Hi-Hat"
         ]
@@ -570,13 +578,6 @@
       {
         "seed": "N",
         "at": 26.7,
-        "listen": [
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "T",
-        "at": 44.4,
         "listen": [
           "Hi-Hat"
         ]

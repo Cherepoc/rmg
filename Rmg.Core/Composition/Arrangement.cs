@@ -62,14 +62,23 @@ internal static class Arrangement
         if (context.TestProbability(VoiceChance.At(form, genre.Chance(GenreChoices.Voice, "verses"))) && role == SectionRole.Verse)
             resting.Add(TrackRole.Melody);
 
-        // a section keeps its harmony, where the song has the chords, and more than its bass alone, which a quiet section's
-        // rhythm may leave without a note
-        var others = Rests.Any(x => x.Part is not (TrackRole.Bass or TrackRole.Chords) && !resting.Contains(x.Part));
-        if (resting.Contains(TrackRole.Chords) && (resting.Contains(TrackRole.Bass) || !others) && !absent.Contains(TrackRole.Chords))
-            resting.Remove(TrackRole.Chords);
+        var kept = KeepingHarmony([..resting], absent).ToHashSet();
         var parts = Rests.Where(x => !absent.Contains(x.Part)).ToArray();
-        if (parts.Length > 0 && parts.All(x => resting.Contains(x.Part)))
-            resting.Remove(parts.MinBy(x => x.Chance).Part);
-        return resting.ToImmutableHashSet();
+        if (parts.Length > 0 && parts.All(x => kept.Contains(x.Part)))
+            kept.Remove(parts.MinBy(x => x.Chance).Part);
+        return kept.ToImmutableHashSet();
+    }
+
+    /// <summary>
+    ///     The parts resting with the section keeping its harmony, where the song has the chords: the chords playing where
+    ///     the bass rests too, or where nothing would play but the bass, which a quiet section's rhythm may leave without a
+    ///     note.
+    /// </summary>
+    public static ImmutableHashSet<TrackRole> KeepingHarmony(ImmutableHashSet<TrackRole> resting, ImmutableHashSet<TrackRole> absent)
+    {
+        var others = Rests.Any(x => x.Part is not (TrackRole.Bass or TrackRole.Chords) && !resting.Contains(x.Part));
+        return resting.Contains(TrackRole.Chords) && (resting.Contains(TrackRole.Bass) || !others) && !absent.Contains(TrackRole.Chords)
+            ? resting.Remove(TrackRole.Chords)
+            : resting;
     }
 }
