@@ -41,10 +41,14 @@ public sealed class BreakdownTest
                 await Assert.That(structure.Roles[span.SectionId] is SectionRole.Bridge or SectionRole.Free).IsTrue().Because(because);
                 await Assert.That(span.SectionId).IsNotEqualTo(song.Map.Sections[0].SectionId).Because(because);
                 await Assert.That(song.Trace.Single(t => t.Point == TracePoints.TimeFeel && t.Section == span.SectionId).Value).IsEqualTo(1).Because(because);
-                var figures = (ImmutableDictionary<FigurePlayer, string>)song.Trace.Single(t => t.Point == TracePoints.Figures && t.Section == span.SectionId).Value!;
-                await Assert.That(figures.GetValueOrDefault(FigurePlayer.Ground)).IsEqualTo("withRiff").Because(because);
                 if (song.Solos.ContainsKey(index))
                     continue;
+                // its kick with the riff, as laid where its kick and its riff (or its bass, where it has none) play
+                var figures = (ImmutableDictionary<FigurePlayer, string>)song.Trace.Single(t => t.Point == TracePoints.Figures && t.Section == span.SectionId).Value!;
+                bool Plays(int track) => song.Song.Notes!.GetValueOrDefault(track)?.Any(n => n.IsWithin(span.Start, span.End)) == true;
+                var leader = song.Song.TrackDefinitions.Any(x => x.Value.Role == TrackRole.Riff) ? song.Track(TrackRole.Riff) : song.Track(TrackRole.Bass);
+                if (DrumGroups.Kick.Tracks.Any(Plays) && Plays(leader))
+                    await Assert.That(figures.GetValueOrDefault(FigurePlayer.Ground)).IsEqualTo("withRiff").Because(because);
                 // its riff chugging, and its kick on the riff's notes in the bars the riff plays, but a phrase's last, where a fill
                 // plays, and the landing on a phrase's first beat
                 await Assert.That(song.Trace.Single(t => t.Point == TracePoints.Chugs && t.Section == span.SectionId).Value).IsEqualTo(true).Because(because);

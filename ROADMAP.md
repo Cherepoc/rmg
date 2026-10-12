@@ -555,6 +555,9 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   what Jazz's time already plays.
 - **The breakdown chorus** (#369): a `lastRepeat` option, the first pass at the thinnest texture, the second the full
   band (Pop, Power ballad, Soul, Country, Rock, Disco, Folk).
+- Found while fixing it: **12/8's backbeat** is the meter's half-cycle-late cycle (`Meter.Backbeats`), dotted quarters
+  2, 3 and 4, where a 12/8 backbeat is 2 and 4; the snare's own in 12/8 to be measured before the cycle's node changes.
+  **Latin's clave** plays in 78 of its 299 sections (64 songs), the claves resting in the rest, though 187 draw it.
 - Later: **the tape stop** (#358), every pitched part bending down an octave over a slowing tempo into a drop or as
   the ending, a change of the tempo map and every channel's bends together; and **imitation** (#388), the
   counter-melody taking the melody's phrase a bar later, its clashes across chord changes new work.

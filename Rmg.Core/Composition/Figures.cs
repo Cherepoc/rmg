@@ -133,19 +133,21 @@ internal static class Figures
             foreach (var figures in drawn.Values.Where(x => x[FigurePlayer.Claves] is not null))
                 figures[FigurePlayer.Claves] = clave;
         // but a section running a figure across its bar lines, its cycle kept, as a mutating groove keeps it, its figures
-        // drawn all the same
+        // drawn all the same: one of fixed onsets, as the kick with the riff follows the riff as the cycle runs it
         foreach (var id in drawn.Keys.Where(draft.Polymeters.Contains))
             foreach (var player in players)
-                drawn[id][player] = null;
-        foreach (var (id, figures) in drawn)
-        {
-            var played = figures.Where(x => x.Value is not null).ToImmutableDictionary(x => x.Key, x => x.Value!.Name);
-            StateTrace.RecordSection(TracePoints.Figures, SectionGenerator.SectionTrace, id, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
-        }
+                drawn[id][player] = drawn[id][player] is { FollowsRiff: true } follows ? follows : null;
 
-        draft = draft with { Figures = drawn.ToImmutableDictionary(x => x.Key, x => x.Value.Where(f => f.Value is not null).ToImmutableDictionary(f => f.Key, f => f.Value!.Name)) };
+        // the figures laid, by their sections and players, which the stages after read: one drawn and never played, its
+        // player resting or its time halved, leaves the player its own rhythm
+        var laid = new HashSet<(int Section, FigurePlayer Player)>();
         if (drawn.Values.All(x => x.Values.All(f => f is null)))
-            return draft;
+            return Laid(song, draft, drawn, laid);
+
+        // a two-bar figure's side counted from the song's first bar, so that a clave runs on across the sections
+        var barsBefore = new Dictionary<SectionSpan, int>();
+        foreach (var span in song.Form.Map.Sections)
+            barsBefore[span] = barsBefore.Count == 0 ? 0 : barsBefore.Last().Value + barsBefore.Last().Key.BarCount;
 
         int? TrackOf(TrackRole role) => song.Playing.Where(x => x.Value == role).Select(x => (int?)x.Key).FirstOrDefault(x => draft.Timeline.TrackTimelineMap.ContainsKey(x!.Value));
         var riff = TrackOf(TrackRole.Riff) ?? TrackOf(TrackRole.Bass);
@@ -189,13 +191,16 @@ internal static class Figures
                                 ? [..timelines[riff!.Value].EventTimeline.Where(x => In(x.Position)).Select(x => x.Position).Distinct()]
                                 : figure.Step > 0
                                     ? [..Enumerable.Range(0, span.Meter.Sixteenths).Where(x => x % figure.Step == 0).Select(x => bar + x * 0.25)]
-                                    : [..figure.Onsets.Select(x => x - index % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
+                                    : [..figure.Onsets.Select(x => x - (barsBefore[span] + index) % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
                             // in a bar both play, each struck as the player's own note at or before it was; one around the kick
-                            // where the kick plays, the player's own rhythm where it rests; and none of fixed onsets in half or
-                            // double time, whose figure is the player's own rhythm stretched or pressed, but one with the riff,
-                            // whose notes are as the riff plays them there, a breakdown's kick on its chugs
-                            if (own.Length == 0 || onsets.Length == 0 || song.SectionOf(span.SectionId).TimeFeel != 0 && !figure.FollowsRiff || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
+                            // where the kick plays, the player's own rhythm where it rests; and no drum's of fixed onsets in half
+                            // or double time, whose figure is the drum's own rhythm stretched or pressed, as the time feel
+                            // stretches the drums alone, but one with the riff, whose notes are as the riff plays them there, a
+                            // breakdown's kick on its chugs
+                            if (own.Length == 0 || onsets.Length == 0 || song.SectionOf(span.SectionId).TimeFeel != 0 && !figure.FollowsRiff && Drums.Contains(player)
+                                || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
                                 continue;
+                            laid.Add((span.SectionId, player));
                             played.RemoveAll(x => In(x.Position));
                             played.AddRange(onsets.Where(In).Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
                         }
@@ -206,7 +211,19 @@ internal static class Figures
             draft = draft with { Timeline = draft.Timeline.MapTrackEvents(edits) };
         }
 
-        return HeavyBackbeat(song, draft, drawn);
+        return Laid(song, draft, drawn, laid);
+    }
+
+    /// <summary>The drums' players, whose rhythm a half or double time stretches or presses.</summary>
+    private static readonly ImmutableHashSet<FigurePlayer> Drums = [FigurePlayer.Ground, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves];
+
+    /// <summary>The song with the figures laid traced and handed on, and a heavy figure's backbeat under them.</summary>
+    private static SongDraft Laid(SongDecisions song, SongDraft draft, Dictionary<int, Dictionary<FigurePlayer, Figure?>> drawn, HashSet<(int Section, FigurePlayer Player)> laid)
+    {
+        var figures = drawn.ToImmutableDictionary(x => x.Key, x => x.Value.Where(f => f.Value is not null && laid.Contains((x.Key, f.Key))).ToImmutableDictionary(f => f.Key, f => f.Value!.Name));
+        foreach (var (id, played) in figures)
+            StateTrace.RecordSection(TracePoints.Figures, SectionGenerator.SectionTrace, id, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
+        return HeavyBackbeat(song, draft with { Figures = figures });
     }
 
     /// <summary>The ground's figures heavy enough that the snare under them strikes its head: the double kick, the blast and a breakdown's kick with its riff.</summary>
@@ -215,13 +232,13 @@ internal static class Figures
     /// <summary>
     ///     A heavy figure's backbeat: the snare under it struck on its head, never its cross-stick, as a thrash or a
     ///     breakdown's drummer hits it; and from a section's second phrase on, a bar the snare would leave empty under it
-    ///     given its backbeat, the meter's pulses after its first, so that a double kick runs a phrase at most without one,
+    ///     given its backbeat, the meter's (2 and 4 in four), so that a double kick runs a phrase at most without one,
     ///     as a drummer brings the snare in, where the section's kit plays none too.
     /// </summary>
-    private static SongDraft HeavyBackbeat(SongDecisions song, SongDraft draft, Dictionary<int, Dictionary<FigurePlayer, Figure?>> drawn)
+    private static SongDraft HeavyBackbeat(SongDecisions song, SongDraft draft)
     {
         var map = song.Form.Map;
-        var spans = map.Sections.Where(x => drawn[x.SectionId].GetValueOrDefault(FigurePlayer.Ground) is { } ground && Heavy.Contains(ground.Name)).ToArray();
+        var spans = map.Sections.Where(x => draft.Figures.GetValueOrDefault(x.SectionId)?.GetValueOrDefault(FigurePlayer.Ground) is { } ground && Heavy.Contains(ground)).ToArray();
         var snares = DrumGroups.Snare.Tracks.Where(draft.Timeline.TrackTimelineMap.ContainsKey).ToArray();
         if (spans.Length == 0 || snares.Length == 0)
             return draft;
@@ -244,7 +261,7 @@ internal static class Figures
                         var (start, end) = span.Bar(bar);
                         if (played.Any(x => x.IsWithin(start, end)))
                             continue;
-                        played.AddRange(span.Meter.Pulses.Skip(1).Select(x => start + x).Where(x => x < end - 1e-9).Select(x => own.MergeWith(head).ToTimelineItem(x)));
+                        played.AddRange(span.Meter.Backbeats.Select(x => start + x).Where(x => x < end - 1e-9).Select(x => own.MergeWith(head).ToTimelineItem(x)));
                     }
                 }
 

@@ -82,6 +82,7 @@ public sealed class MeterTreeTest
     [Test]
     [Arguments(new[] { 8, 8 }, new[] { 1.0, 3.0 })]
     [Arguments(new[] { 4, 4, 4 }, new[] { 1.0, 2.0 })]
+    [Arguments(new[] { 8, 8 }, new[] { 1.0, 3.0 })]
     [Arguments(new[] { 6, 6 }, new[] { 1.5 })]
     [Arguments(new[] { 4, 4, 4, 3 }, new[] { 1.0, 2.0, 3.0 })]
     [Arguments(new[] { 4, 3, 3, 3 }, new[] { 1.0, 1.75, 2.5 })]
@@ -93,9 +94,7 @@ public sealed class MeterTreeTest
     {
         // the backbeat's part: half a bar in four, half its cycle late
         var meter = new Meter([..groups]);
-        var slots = DyadicRankTimeline.GenerateSlots(meter.BarDuration, meter.GetCycles(2, 1), 0);
-
-        await Assert.That(slots.Select(x => x.Position).ToArray()).IsEquivalentTo(beats, CollectionOrdering.Matching);
+        await Assert.That(meter.Backbeats.ToArray()).IsEquivalentTo(beats, CollectionOrdering.Matching);
     }
 
     [Test]

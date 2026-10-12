@@ -13,8 +13,6 @@ public sealed class FiguresTest
     [
         ..song.Trace.Where(t => t.Point == TracePoints.Figures && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).GetValueOrDefault(player) == figure).Select(t => t.Section)
             .Except(song.Trace.Where(t => t.Point == TracePoints.DrumSolo).Select(t => t.Section))
-            // but in half or double time, whose player keeps its own rhythm stretched or pressed
-            .Except(song.Trace.Where(t => t.Point == TracePoints.TimeFeel && (int)t.Value! != 0).Select(t => t.Section))
     ];
 
     /// <summary>
@@ -115,12 +113,14 @@ public sealed class FiguresTest
         foreach (var name in names)
         {
             var figure = Figures.All.Single(x => x.Player == player && x.Name == name);
+            // the bars before each section, as a clave's side runs on across them
+            var barsBefore = song.Map.Sections.Select((x, i) => (x, Bars: song.Map.Sections.Take(i).Sum(y => y.BarCount))).ToDictionary(x => x.x, x => x.Bars);
             foreach (var (span, bar, position) in Hits(song, tracks, Playing(song, player, name)))
             {
                 hits++;
-                // its 16th in the figure's two bars, counted from the section's start
-                var twoBars = span.Start + Math.Floor((bar - span.Start) / (2 * span.Meter.BarDuration) + 1e-9) * 2 * span.Meter.BarDuration;
-                var sixteenth = (position - twoBars) / 0.25;
+                // its 16th in the figure's two bars, counted from the song's first bar
+                var index = barsBefore[span] + span.BarOf(bar);
+                var sixteenth = (position - bar) / 0.25 + index % 2 * 16;
                 await Assert.That(figure.Onsets.Any(x => Math.Abs(x - sixteenth) < 0.1)).IsTrue().Because($"seed {song.Seed} at {position}, {name}");
             }
         }
@@ -172,7 +172,7 @@ public sealed class FiguresTest
 
     /// <summary>A section running a figure across its bar lines plays no figure, its cycle kept.</summary>
     [Test]
-    public async Task APolymeterSection_PlaysNoFigure()
+    public async Task APolymeterSection_PlaysNoFigureOfFixedOnsets_ButAKickWithItsRiff()
     {
         var polymeters = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("idm")))))
@@ -182,7 +182,7 @@ public sealed class FiguresTest
             {
                 polymeters++;
                 var figures = (ImmutableDictionary<FigurePlayer, string>)song.Trace.Single(x => x.Point == TracePoints.Figures && x.Section == id).Value!;
-                await Assert.That(figures).IsEmpty().Because($"seed {song.Seed} section {id}");
+                await Assert.That(figures.All(x => Figures.All.Any(f => f.Player == x.Key && f.Name == x.Value && f.FollowsRiff))).IsTrue().Because($"seed {song.Seed} section {id}");
             }
         }
 

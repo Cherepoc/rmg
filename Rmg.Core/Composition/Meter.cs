@@ -204,6 +204,11 @@ public sealed record Meter(ImmutableArray<int> Groups)
 
     private ImmutableArray<double>? _pulses;
 
+    /// <summary>Where the bar's backbeat strikes, in beats, half its cycle late (<see cref="GetCycles" />): 4/4's 2 and 4, 3/4's 2 and 3, 6/8's fourth 8th.</summary>
+    public ImmutableArray<double> Backbeats => _backbeats ??= [..Probabilities.DyadicRankTimeline.GenerateSlots(BarDuration, GetCycles(2, 1), 0).Select(x => x.Position)];
+
+    private ImmutableArray<double>? _backbeats;
+
     /// <summary>How long a level's nodes most often are, in 16ths, the longer where two lengths are as common.</summary>
     private int ModeLength(int level) =>
         Levels[level].GroupBy(x => x.Length).OrderByDescending(x => x.Count()).ThenByDescending(x => x.Key).First().Key;
