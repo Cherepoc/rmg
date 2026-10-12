@@ -70,3 +70,10 @@ rejected while fixing: the place, what was decided, why.
 - Per-section chances that stop short of 1 at the wild end (a short bar, a metric modulation, a section's tempo, pushes): a share of a song's sections, which its many sections make near-certain in a wild song but not everywhere; not a song-level chance that must reach 1 (decided 11 October 2026).
 - A half count-in, an ending's ritardando and a tempo ramp drawn alike at every end: a song's style, neither plainer nor wilder, as the parts a song has are (decided 11 October 2026).
 - A chord soloist's approach asserted off the beat: not testable from the notes, as a stacked note's line may be another soloist's (decided 11 October 2026).
+
+## From the review of 11 October 2026
+
+- The tension (`tension`, a line's strong beat held on a tension) kept to Djent (and Metal's and Nu metal's counter-melody as named): its question heard 3 better, 4 worse and 5 not told apart of 12 (8 October); Black metal's taken out. Not a cut candidate again unless Djent's is heard worse.
+- The polymeter's frame (`polymeterFrame`), the melody's inversion (`inversion`) and the pinch's squeal (`pinchSound`) cut on listening: not told apart, heard worse in 5 of 6, and General MIDI's harmonics preferred. Not proposed again.
+- A part's tone closes 24 steps at its deepest, as listening on 8 October asked: not a stale number to set back to 16.
+- 12/8's backbeat is the meter's half-cycle-late cycle (`Meter.Backbeats`), dotted quarters 2, 3 and 4; the heavy figure's added backbeat follows it, as the snare's own backbeat does, until the cycle is measured (roadmap).

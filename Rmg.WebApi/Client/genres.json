@@ -1983,7 +1983,6 @@
       "passingChords": {},
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 80, "ride": 70, "tom": 70, "cymbal": 100 },
       "sectionHome": { "tonic": 100, "fourth": 20, "fifth": 15 },
-      "tension": { "melody": [20, 30, 40] },
       "planing": { "sections": [30, 40, 50], "modes": 0 },
       "alone": { "pad": 100, "rhythm": 60, "melody": 30, "chords": 20 },
       "tempo": { "from": [150, 150, 130], "to": [210, 210, 230] },
