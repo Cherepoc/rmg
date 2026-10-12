@@ -1139,7 +1139,6 @@
       "meter": { "4/4": 100, "7/8": [5, 15, 30], "5/4": [0, 5, 15], "13/16": [0, 5, 15], "15/16": [0, 5, 15] },
       "feelChances": { "halfTime": [10, 15, 20], "doubleTime": [0, 5, 15], "swing": 0 },
       "polymeter": { "sections": [60, 70, 80] },
-      "polymeterFrame": { "fourBars": [40, 20, 10], "eightBars": 100, "sixteenBars": [40, 60, 80], "thirtyTwoBars": [0, 10, 30] },
       "scale": { "phrygian": 100, "naturalMinor": 70, "locrian": [20, 30, 40], "harmonicMinor": [10, 20, 30], "hungarianMinor": [0, 0, 20], "lydian": [0, 10, 20], "major": [0, 0, 10] },
       "chordShape": { "powerChord": 100, "sus2": 30, "smallCluster": [20, 30, 40], "tritoneStack": [10, 20, 40], "add9": [20, 30, 40], "denseCluster": [0, 10, 30], "ninth": [0, 10, 30], "lydian": [0, 10, 20], "quartalTriad": [10, 20, 30] },
       "lineScale": { "section": 100, "pentatonic": 40, "octatonic": [0, 20, 40], "wholeTone": [0, 0, 20] },

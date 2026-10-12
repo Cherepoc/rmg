@@ -260,7 +260,7 @@ Djent's drone with leaps (5 of 6); `appoggiatura`, the songs' own (5 of 6); `bal
 `call-response`, Blues' (5 better, 1 worse, 1 the same); `punk-breakdown` (4 of 6); `held`, Pop's held tones and let
 ring, tied 3 to 3 and kept as they are; and `blues-12-8`, heard once and kept. Then the three the round of ten had left
 out: `classical`, its cello on a chord's third, kept (4 to 2); `djent-frame`, the polymeter's frames of 8 and 16 bars,
-not told apart (5 unsure of 5) and let go of, the frames as they are; and `dnb-ghosts` (3 better, 1 worse, 2 unsure),
+not told apart (5 unsure of 5) and let go of, the frames as they are, the choice of them cut in the review of 11 October; and `dnb-ghosts` (3 better, 1 worse, 2 unsure),
 heard good where a song ghosts little, about 1.2 to 1.6 a ghosting bar, and not told apart where it ghosts 3 to 5: a
 genre's ghosts now as many as it says (`ghostNotes`, `Ghosts.GenreOdds`), Drum and bass's 20, 1.09 ghosts a bar of
 its songs to 0.66, heard better again (`dnb-few-ghosts`, 5 of 6) and kept. Every question built so far answered.

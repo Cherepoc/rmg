@@ -92,7 +92,6 @@ public static class GenreChoiceDescriptions
         ["sectionChanges"] = "How often a section changes the song's tempo, by a jump or by a metric ratio, plays in a meter of its own, or cuts its last bar short.",
         ["alone"] = "Which part plays a section alone, where its texture leaves one: a clean guitar's arpeggio in a metal intro, a pad in an ambient piece, a piano in a ballad.",
         ["polymeter"] = "How often a section's riff, bass and kick run in a cycle of a different length across the bar, as djent and math rock do.",
-        ["polymeterFrame"] = "How many bars a polymeter's cycle drifts against the steady bar before it starts afresh on a downbeat: four, eight, sixteen or thirty-two, the longer the more the bar line is lost and the more the return lands as an arrival.",
         ["soloAnswers"] = "How often the solo part answers the melody in its gaps, as a guitarist fills between a singer's lines.",
         ["callAndResponse"] = "How often a verse calls and its band answers, as a blues or a soul band does: the melody singing the first half of every phrase and resting in the second, where the riff answers it.",
         ["lastRepeat"] = "How often the last chorus is played twice.",
