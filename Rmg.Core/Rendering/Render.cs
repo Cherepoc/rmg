@@ -170,14 +170,16 @@ public static class Render
             );
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
             {
-                // a driven guitar played twice, by the instrument it sounds, the drawn or the one given, all the way to the side it
-                // drew, its second take on the other
-                var doubles = DoubleTracking.Doubles(pitchInstrumentTrack.Role, mix.Of(pitchInstrumentTrack.Role)?.Instrument ?? pitchInstrumentTrack.InstrumentCode);
+                // a driven guitar played twice, by the instrument it sounds, the drawn or the one given, or one a section switches
+                // it to, all the way to the side it drew, its second take on the other
+                var programChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing);
+                var doubles = mix.Of(pitchInstrumentTrack.Role)?.Instrument is { } givenProgram
+                    ? DoubleTracking.Doubles(pitchInstrumentTrack.Role, givenProgram)
+                    : programChanges.Select(x => x.Program).Prepend(pitchInstrumentTrack.InstrumentCode).Any(x => DoubleTracking.Doubles(pitchInstrumentTrack.Role, x));
                 var pan = doubles ? Math.Sign(pitchInstrumentTrack.Pan) is 0 ? 1.0 : Math.Sign(pitchInstrumentTrack.Pan) : pitchInstrumentTrack.Pan;
                 // how the part is played beyond its notes, its send to the delay that echoes it among them
                 var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pan, mixClosed);
                 var played = EventTimeline.Create(trackNotes.Duration, renderedNotes);
-                var programChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing);
                 // a doubled part plays no sweep, its takes standing apart on either side
                 var controllers = doubles ? [..expression.Controllers.Where(x => x.Controller != 10)] : expression.Controllers;
                 renderedTracks.Add(
@@ -206,8 +208,10 @@ public static class Render
                     TimelineItem<RenderedNote> Late(TimelineItem<RenderedNote> note) =>
                         (note.Value with { Shift = note.Value.Shift + DoubleTracking.Delay * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position)) }).ToTimelineItem(note.Position);
                     var given = mix.Of(pitchInstrumentTrack.Role)?.Instrument;
+                    // a driven guitar's pinch, played on the harmonics, doubled with the notes around it
                     bool Driven(double position) => given is not null
-                        || InstrumentTraits.Has(programChanges.LastOrDefault(x => x.Position <= position + 1e-9, (0, pitchInstrumentTrack.InstrumentCode)).Item2, InstrumentTrait.Driven);
+                        || programChanges.LastOrDefault(x => x.Position <= position + 1e-9, (0, pitchInstrumentTrack.InstrumentCode)).Item2 is var program
+                        && (InstrumentTraits.Has(program, InstrumentTrait.Driven) || program == Composition.Expression.GuitarHarmonics);
                     renderedTracks.Add(
                         new RenderedTrack(false, pitchInstrumentTrack.Role, DoubleTracking.SecondTake(pitchInstrumentTrack.InstrumentCode),
                             EventTimeline.Create(played.Duration, played.Where(x => Driven(x.Position)).Select(Late)), -pan, DoubleTracking.Level)
@@ -338,7 +342,9 @@ public static class Render
     /// <summary>
     ///     A velocity sum made a share as loud as heard: its velocity on the fixed scale times the factor, and the sum it is
     ///     rendered from, as a roll growing from 60% of a note or a stroke struck again at 80% of it; a sum scaled by the
-    ///     factor itself would barely change near the scale's middle and grow louder where it is negative.
+    ///     factor itself would barely change near the scale's middle and grow louder where it is negative. A share is kept
+    ///     down to the scale's floor of 0.2 alone, under which every note plays at the floor, as a roll's first notes from a
+    ///     quiet drum and a ghost under a quiet snare do.
     /// </summary>
     internal static double ScaleLoudness(double sum, double factor) => FromMidiVelocity(ToMidiVelocity(sum) * factor);
 

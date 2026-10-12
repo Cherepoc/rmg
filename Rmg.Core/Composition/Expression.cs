@@ -622,8 +622,6 @@ internal static class Expression
             var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : SwellChance).At(songSound)) & songSwell;
             var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
             bool Carries(StrongEffect effect) => carriers.TryGetValue(effect, out var carrier) && carrier == track;
-            // and a backbeat drum, a snare's, where the rhythm part echoes, as a dub echoes its skank and its snare
-            var echoesBackbeat = carriers.TryGetValue(StrongEffect.Echo, out var echoing) && definitions[echoing].Role == TrackRole.Rhythm && backbeat.Contains(track);
             var tremoloDepth = 30 + part.GenerateInt(0, 40);
             var sweepDepth = 40 + part.GenerateInt(0, 60);
             var tremolo = Carries(StrongEffect.Tremolo) ? tremoloDepth : 0;
@@ -691,6 +689,8 @@ internal static class Expression
                 // the part's tone here, darker the quieter the section, as dark as it goes at an energy of -1 and below, half as
                 // dark at 1 and above
                 var tone = toned ? (int)Math.Round(ToneReach * toneDepth * (3 - Math.Clamp(energies[index], -1, 1)) / 4) : 0;
+                // every note's draws by its place, so that a note a stage before took out leaves the others' as they were
+                var noteSeed = context.GenerateSeed();
 
                 // the notes in the section, in order, the timeline's being
                 for (var i = first(span.Start); i < timeline.Count && timeline[i].Position < span.End - 1e-9; i++)
@@ -700,6 +700,7 @@ internal static class Expression
                         continue;
                     var note = timeline[i];
 
+                    var drawing = new GenerationContext(Seeds.Derive(noteSeed, map.PlaceKey(note.Position, NotePlacesPerBeat)));
                     var noteProgram = ProgramOf(note.Value, program);
                     // one note at a time, or in octaves, which bend and echo together
                     var isLine = (note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
@@ -718,16 +719,16 @@ internal static class Expression
                     // a soloist's note bends as often as it bends a note, leaned by its lean to bends as well as by the intensity
                     if (isSolo && soloist is null)
                         throw new InvalidOperationException($"Track {track} solos with no soloist.");
-                    var bendsNow = context.TestProbability(soloist is null ? bendChance
+                    var bendsNow = drawing.TestProbability(soloist is null ? bendChance
                         : isRelease ? intensity.Chance(ReleaseBendChance, 1)
                         : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.BendLean - Soloist.ExpressionLean).LogOdds).Chance(soloist.BendRate, 1));
-                    var kind = context.Pick(bendKinds);
+                    var kind = drawing.Pick(bendKinds);
                     if (isRelease)
-                        kind = context.Pick(ReleaseBends);
-                    var size = context.Pick(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1));
-                    var slidesNow = context.TestProbability(soloist is null ? slideRate : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
+                        kind = drawing.Pick(ReleaseBends);
+                    var size = drawing.Pick(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1));
+                    var slidesNow = drawing.TestProbability(soloist is null ? slideRate : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
                     // and its vibrato, a note at a time, the wide likelier the more intense
-                    var noteVibrato = soloist is null ? vibrato : context.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
+                    var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
                     // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches;
                     // the note before that a dive let go of unheard, and none from a dive, fallen away
                     var before = i - 1;
@@ -767,8 +768,8 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Tremolo, note.Value.Duration >= 1 - 1e-9 ? tremolo : 0).With(CompositionStateKinds.AutoPan, sweeps);
                     if (pumps)
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
-                    if (echoes && (isLine || role == TrackRole.Rhythm) || echoesBackbeat && Math.Abs(map.BeatInBar(note.Position) - Math.Round(map.BeatInBar(note.Position))) < 1e-9)
-                        state = state.With(CompositionStateKinds.Echo, (int)Math.Round((echoesBackbeat ? carrierDelay ?? throw new InvalidOperationException("A snare echoes before its part does.") : delay) * 4));
+                    if (echoes && (isLine || role == TrackRole.Rhythm))
+                        state = state.With(CompositionStateKinds.Echo, (int)Math.Round(delay * 4));
                     if (gate != 0)
                         state = state.With(CompositionStateKinds.Gate, gate);
                     if (tone != 0)
@@ -780,7 +781,8 @@ internal static class Expression
                             .With(CompositionStateKinds.FilterCycle, filter == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle);
                     // a pinch, a held note's harmonic, where the song pinches
                     var phrase = (index, span.PhraseOf(note.Position));
-                    if (songPinches && Pinches(noteProgram) && note.Value.Pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.Octave) == 0
+                    // but where it echoes, which plays its notes straight
+                    if (songPinches && !echoes && Pinches(noteProgram) && note.Value.Pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.Octave) == 0
                         && role.PlaysLine() && role != TrackRole.Bass
                         && state.GetStateValue(CompositionStateKinds.PalmMute) == 0 && !pinchedPhrases.Contains(phrase) && !isRelease
                         && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
@@ -810,7 +812,7 @@ internal static class Expression
 
                     // the riff's longest note of its last bar before a louder section diving into it, where the song dives, the
                     // riff letting go of its notes after it, as a guitarist leaves the riff for the bar
-                    if (songDives && role.Source() is TrackRole.Riff && !isSolo && Pinches(noteProgram) && note.Value.Pitches.Length <= 2
+                    if (songDives && !echoes && role.Source() is TrackRole.Riff && !isSolo && Pinches(noteProgram) && note.Value.Pitches.Length <= 2
                         && note.Position >= span.LastBar - 1e-9 && LongestOfBar(timeline, i, span)
                         && index + 1 < energies.Count && energies[index + 1] > energies[index]
                         && note.Value.Duration >= 1 && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
@@ -856,6 +858,13 @@ internal static class Expression
                     : x).Where((_, i) => !dropped[i])
             );
         }
+
+        // and a backbeat drum, a snare's, where the rhythm part echoes, as a dub echoes its skank and its snare, every stroke
+        // of it, as a drum's send to the delay is its note's, at the rhythm part's delay
+        if (carriers.TryGetValue(StrongEffect.Echo, out var echoing) && definitions[echoing].Role == TrackRole.Rhythm && carrierDelay is { } echoDelay)
+            foreach (var track in backbeat.Where(result.ContainsKey))
+                result[track] = EventTimeline.Create(result[track].Duration,
+                    result[track].Select(x => (x.Value with { State = x.Value.State.With(CompositionStateKinds.Echo, (int)Math.Round(echoDelay * 4)) }).ToTimelineItem(x.Position)));
 
         return result.ToImmutable();
     }

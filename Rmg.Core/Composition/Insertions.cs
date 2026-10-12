@@ -53,7 +53,7 @@ internal static class Insertions
     public static bool Suits(InsertionKind kind, TrackRole role, int program) => kind switch
     {
         InsertionKind.Wah => role is TrackRole.Rhythm or TrackRole.Chords or TrackRole.Riff && InstrumentTraits.Has(program, InstrumentTrait.Wahs),
-        InsertionKind.Phaser => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Rhythm,
+        InsertionKind.Phaser => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Rhythm && InstrumentTraits.Has(program, InstrumentTrait.Phases),
         _ => false
     };
 

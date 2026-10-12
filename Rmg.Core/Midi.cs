@@ -251,6 +251,8 @@ public static class Midi
                 (byte)x.Value.Offset,
                 x.Value.Velocity
             ))
+            // none from the song's end on, a shift may have moved there
+            .Where(x => x.OnDelta < durationDelta)
             // each key's notes in the order they sound, which a shift may have moved past another's
             .GroupBy(x => x.Key)
             .SelectMany(x => TrimOverlaps(x.OrderBy(n => n.OnDelta)))
@@ -293,7 +295,9 @@ public static class Midi
 
     private static void WriteTrack(IEnumerable<MidiEvent> events, uint durationDelta, Stream stream)
     {
+        // every event by the song's end, which the end of the track comes after
         var allEvents = events
+            .Select(x => x.Delta > durationDelta ? x with { Delta = durationDelta } : x)
             .Append(new MidiEvent(durationDelta, EndOfTrack()))
             .OrderBy(x => x.Delta)
             .ToRelativeDeltas()

@@ -48,7 +48,10 @@ public enum InstrumentTrait
     Wahs = 4096,
 
     /// <summary>Its note dies away as it rings, a struck or plucked string's or a bar's, so that a chord held long is struck again.</summary>
-    Decays = 8192
+    Decays = 8192,
+
+    /// <summary>A phaser suits its held sound: strings', a pad's, an electric piano's or a guitar's.</summary>
+    Phases = 16384
 }
 
 /// <summary>
@@ -58,7 +61,7 @@ public enum InstrumentTrait
 public static class InstrumentTraits
 {
     private const InstrumentTrait Guitar = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses
-                                           | InstrumentTrait.Tremolo | InstrumentTrait.Strums | InstrumentTrait.Wahs | InstrumentTrait.Decays;
+                                           | InstrumentTrait.Tremolo | InstrumentTrait.Strums | InstrumentTrait.Wahs | InstrumentTrait.Decays | InstrumentTrait.Phases;
 
     private const InstrumentTrait Lead = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps
                                          | InstrumentTrait.Filters;
@@ -77,7 +80,7 @@ public static class InstrumentTraits
         (64, InstrumentTrait.Bends),
         (72, InstrumentTrait.Bends),
         (80, Lead),
-        (88, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps | InstrumentTrait.Filters),
+        (88, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps | InstrumentTrait.Filters | InstrumentTrait.Phases),
         (96, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps),
         (104, InstrumentTrait.Decays),
         (112, InstrumentTrait.Decays),
@@ -90,8 +93,8 @@ public static class InstrumentTraits
         // the clavinet, a funk player's wah
         [7] = InstrumentTrait.Choruses | InstrumentTrait.Rolls | InstrumentTrait.Wahs | InstrumentTrait.Decays,
         // the electric pianos, chorused and trembling
-        [4] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo | InstrumentTrait.Decays,
-        [5] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo | InstrumentTrait.Decays,
+        [4] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo | InstrumentTrait.Decays | InstrumentTrait.Phases,
+        [5] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo | InstrumentTrait.Decays | InstrumentTrait.Phases,
         // the organs but the accordions and the harmonica, trembling and swept
         [16] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
         [17] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
@@ -126,11 +129,11 @@ public static class InstrumentTraits
         [109] = InstrumentTrait.Bends,
         [110] = InstrumentTrait.Bends,
         [111] = InstrumentTrait.Bends,
-        // the string ensembles chorused
-        [48] = InstrumentTrait.Bends | InstrumentTrait.Choruses,
-        [49] = InstrumentTrait.Bends | InstrumentTrait.Choruses,
-        [50] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Filters,
-        [51] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Filters
+        // the string ensembles chorused and phased
+        [48] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Phases,
+        [49] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Phases,
+        [50] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Filters | InstrumentTrait.Phases,
+        [51] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Filters | InstrumentTrait.Phases
     };
 
     private static readonly ImmutableArray<InstrumentTrait> Table =

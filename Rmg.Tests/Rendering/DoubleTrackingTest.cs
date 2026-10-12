@@ -26,7 +26,9 @@ public sealed class DoubleTrackingTest
             foreach (var part in song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>())
             {
                 var takes = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument && !x.IsRiser && x.Role == part.Role).ToArray();
-                if (!DoubleTracking.Doubles(part.Role, part.InstrumentCode))
+                // a part doubled where it plays a driven guitar anywhere, its own or a section's switch to one
+                var programs = takes.Where(x => !x.IsDouble).SelectMany(x => x.ProgramChanges.Select(p => p.Program)).Prepend(part.InstrumentCode);
+                if (!programs.Any(x => DoubleTracking.Doubles(part.Role, x)))
                 {
                     await Assert.That(takes.Any(x => x.IsDouble)).IsFalse();
                     continue;
@@ -39,10 +41,15 @@ public sealed class DoubleTrackingTest
                 await Assert.That(Math.Abs(first.Pan)).IsEqualTo(1);
                 await Assert.That(second.Pan).IsEqualTo(-first.Pan);
                 await Assert.That(second.PitchInstrumentCode).IsEqualTo(DoubleTracking.SecondTake(first.PitchInstrumentCode));
-                await Assert.That(second.PitchInstrumentCode).IsNotEqualTo(first.PitchInstrumentCode);
+                // the other driven guitar where the part starts on one, its switches' too
+                if (InstrumentTraits.Has(first.PitchInstrumentCode, InstrumentTrait.Driven))
+                    await Assert.That(second.PitchInstrumentCode).IsNotEqualTo(first.PitchInstrumentCode);
+                await Assert.That(second.ProgramChanges.Select(x => x.Program)).IsEquivalentTo(first.ProgramChanges.Select(x => DoubleTracking.SecondTake(x.Program)), CollectionOrdering.Matching);
                 await Assert.That((first.Volume, second.Volume)).IsEqualTo((DoubleTracking.Level, DoubleTracking.Level));
-                // the first take's notes where the part plays driven, not its acoustic or clean form's (LouderForms)
-                bool Driven(double position) => InstrumentTraits.Has(first.ProgramChanges.LastOrDefault(x => x.Position <= position + 1e-9, (0, first.PitchInstrumentCode)).Item2, InstrumentTrait.Driven);
+                // the first take's notes where the part plays driven, a pinch's harmonics among them, not its acoustic or clean
+                // form's (LouderForms)
+                bool Driven(double position) => first.ProgramChanges.LastOrDefault(x => x.Position <= position + 1e-9, (0, first.PitchInstrumentCode)).Item2 is var program
+                                                && (InstrumentTraits.Has(program, InstrumentTrait.Driven) || program == Expression.GuitarHarmonics);
                 var driven = first.NoteTimeline.Where(x => Driven(x.Position)).ToArray();
                 await Assert.That(second.NoteTimeline.Select(x => (x.Position, x.Value.Offset))).IsEquivalentTo(driven.Select(x => (x.Position, x.Value.Offset)), CollectionOrdering.Matching);
                 foreach (var (a, b) in driven.Zip(second.NoteTimeline))

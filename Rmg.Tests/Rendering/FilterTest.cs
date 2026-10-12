@@ -26,12 +26,13 @@ public sealed class FilterTest
         var (filtered, closing) = (0, 0);
         foreach (var song in Songs(effect))
         {
+            // one part, its two takes where it is doubled
             var moved = song.Rendered.Tracks.Where(x => x.Controllers.Any(c => c.Controller == ExpressionRender.BrightnessController)).ToArray();
-            await Assert.That(moved.Length).IsLessThanOrEqualTo(1);
+            await Assert.That(moved.Select(x => x.Role).Distinct().Count()).IsLessThanOrEqualTo(1);
             if (moved.Length == 0)
                 continue;
             filtered++;
-            var track = moved[0];
+            var track = moved.First(x => !x.IsDouble);
             await Assert.That(InstrumentTraits.Has(track.PitchInstrumentCode, InstrumentTrait.Filters)).IsTrue();
             var values = track.Controllers.Where(c => c.Controller == ExpressionRender.BrightnessController).Select(c => c.Value).ToArray();
             await Assert.That(values.All(x => x is >= 40 and <= 64)).IsTrue();

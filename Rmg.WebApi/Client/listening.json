@@ -154,19 +154,19 @@
         ]
       },
       {
-        "seed": "L",
-        "at": 210.7,
+        "seed": "R",
+        "at": 141.5,
         "listen": [
-          "Melody (Electric Guitar (clean))",
-          "Bass (Electric Bass (pick))",
-          "Riff (Distortion Guitar)"
+          "Solo (Distortion Guitar)"
         ]
       },
       {
-        "seed": "R",
-        "at": 143.2,
+        "seed": "T",
+        "at": 109.5,
         "listen": [
-          "Solo (Distortion Guitar)"
+          "Melody (Electric Piano 1)",
+          "Riff (Overdriven Guitar)",
+          "Rhythm part (Distortion Guitar)"
         ]
       },
       {
@@ -401,7 +401,7 @@
     "seeds": [
       {
         "seed": "1",
-        "at": 96.2,
+        "at": 110.1,
         "listen": [
           "Chords (Electric Guitar (clean))",
           "Acoustic Snare",
@@ -507,10 +507,10 @@
       },
       {
         "seed": "1p",
-        "at": 82,
+        "at": 86,
         "listen": [
-          "Riff (Lead 1 (square))",
           "Bass (Synth Bass 2)",
+          "Riff (Lead 1 (square))",
           "Chords (Pad 3 (polysynth))"
         ]
       }
