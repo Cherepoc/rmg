@@ -28,7 +28,8 @@ You review one concern across the whole codebase rather than one slice.
    - Does a later stage silently undo or break an earlier one? For example, stop time removing a fill's notes, a push moving notes another stage placed, an expression stage reading state an earlier stage dropped.
    - Is any `CanSkip` stage read by a later stage (wrongly skippable)?
    - Is the order documented and right?
-   - The sections each stage keeps out of: solos, drum solos, stop time, a polymeter's sections (`SongDraft.Polymeters`), figures, breakdowns, a short last bar, a calm or heavy section (`SectionForms`), a call and response's phrases (`CallAndResponse`), a hook intro quoting its chorus. Stages that edit the same notes should keep out of the same things; one that does not breaks what another keeps (a push moving a polymeter's cycle was such a bug).
+   - What each stage keeps out of, by the kinds of `SongDraft.Holds` it names (the primer's *What the song holds*): does every stage that makes a stretch others should keep out of (a fill, a stop, a cut, a drum solo, a call, and any new one) write it to `Holds`, and does every stage that edits the same notes name the kinds it should? Stages that edit the same notes should keep out of the same things; one that does not breaks what another keeps (a push moving a polymeter's cycle was such a bug). What `Holds` does not hold yet (a polymeter's sections, `SongDraft.Polymeters`; figures; breakdowns; a calm or heavy section; a short last bar) is checked stage by stage, and a keep-out two stages write apart is a candidate for a new kind.
+   - What each stage reads at a position of an intro or the ending: its source's decisions, by `SongMap.PlayAt`.
    - What each stage leaves a later one: an edit made before the realizer that the realizer can undo (a note struck again in a cleared span), or one made after it that misses what the realizer adds.
 
 4. **duplicates.** Mechanisms implemented twice, or nearly twice:
@@ -82,6 +83,7 @@ You review one concern across the whole codebase rather than one slice.
 10. **musicality** is followed by genre, a reviewer per cluster of presets, and by device, a reviewer per family, below.
 
 11. **bars.** Every place that turns a position into a bar, a beat, a group, a phrase or a pattern, or takes the bar before a line: `BarDuration`, `PhraseDuration`, `PatternDuration`, `PhraseBars`, `NearestGroupStart`, `BeatInBar`, `PatternBarAt`, `MeterAt`, `Math.Floor(position / ...)`.
+    - Does it ask the map (`SongMap.PlaceOf`, a span's `Bars`, `Phrases`, `Patterns`, `Span.Within`), as the primer's *The map* says? One that walks or counts by hand where the map has the answer is a finding, its fix the map's call; the questions below are for what the map does not answer.
     - Is the position counted from its section's start (or its pattern's), not the song's, in the section's own meter? A section starts wherever the sections before it end, a whole number of its bars from nowhere in particular.
     - Does it hold for a phrase of three or of six bars, a pattern of several phrases, a meter of odd groups, and a short last bar (`SectionSpan.Cut`), whose bar before the next section is shorter than the section's bar?
     - Does a loop over a section's bars reach its last, partial one, and keep its edits inside it?
@@ -141,7 +143,7 @@ choice and every stage of the family. The id is `device-<family>`. For every dev
   that plays where its own doc says it does not, is a finding.
 - **Against the others.** The family's devices in pairs, and each against the devices of other families that edit the
   same notes or the same bars (stop time, drops, solos, textures, polymeters, figures, short bars, doubling, late
-  entries, a section's calm or heavy form, call and response, held tones and let ring, the hook intro): does each keep out of the other where it should, and is what they make together intended? Most of the
+  entries, a section's calm or heavy form, call and response, held tones and let ring, the hook intro): does each keep out of the other where it should, through the kinds of `SongDraft.Holds` where the other is held there, and is what they make together intended? Most of the
   bugs a second corpus found were two devices meeting: a push moving a polymeter's cycle, a doubling silencing its
   part where a texture rested the doubled one, a drop landing on a section that builds.
 - **As it sounds.** What the device does to the music, whether a player would do it so, and where its amounts would

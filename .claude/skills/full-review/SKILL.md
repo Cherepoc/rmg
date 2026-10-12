@@ -38,7 +38,8 @@ user chose it over a faster one), and whether to run agents one at a time (the d
   verifiers' brief) and `decided.md` (findings decided against or kept on purpose, which no reviewer raises again).
 - **The scripts**, in `$S/scripts`: `manifest.py` (the slices, the commit), `offsets.py` (the corpora), `devices.py`
   (the devices, the genre clusters, the stages), `runs.sh`, `ledger.py` (what each device costs and earns), `run_findings.py`, `coverage.py`, `verify_batches.py`,
-  `merge.py`, `compare.py`, `status.py` (the fixing's bookkeeping); `load.py` and `areas.py` are shared.
+  `merge.py`, `compare.py`, `status.py` (the fixing's bookkeeping), `bisect.sh` (a held-out failure to its commit);
+  `load.py` and `areas.py` are shared.
 - **The review's record**, `$R/review.json`: the commit read, the date, the mode, the offsets and the holdout.
 
 ## Phase 0: what changed, and the briefs brought up to date
@@ -65,9 +66,12 @@ briefs whole before going on.
 $S/scripts/runs.sh <repo> $R
 ```
 
-It builds, runs the suite at the review's offsets and the three preset reports, one at a time under the memory cap, and
-turns every failure into a finding (`findings/run-<offset>.json`, category `run`) with its seed and offset, for the
-verifiers to trace. Then the device ledger, from the reports:
+It builds and runs the reports' smoke test first, stopping where it fails: the review measures with the reports, and
+one that has rotted is fixed before any reviewer reads its numbers (a review once spent its first package mending
+them). Then the suite at the review's offsets and the three preset reports, one at a time under the memory cap, every
+failure run again alone at its offset, and every failure a finding (`findings/run-<offset>.json`) with its seed and
+offset: category `run` for the verifiers to trace, or `flaky` where it passed alone, a test racing under the suite's
+load rather than a song breaking it. Then the device ledger, from the reports:
 
 ```
 python3 $S/scripts/ledger.py <repo> $R               # ledger.md: each device's presets, plays, code, past findings, questions
@@ -173,7 +177,18 @@ wait. Do not commit the review's folder or its report.
 
 When the user asks for a plan, group every finding into packages by what they change together (the high findings
 first, then each concern), each package its goal, approach, verification and critical review (overengineering and
-musicality named), written in `$R/plan/plan.md`, every finding put in its package by number:
+musicality named), written in `$R/plan/plan.md`, every finding put in its package by number. Three rules shape it:
+
+- **The failing tests first.** The `run` findings, tests failing on the review's other songs, are the first package
+  after the review's instruments, worked on a worktree of the review's commit before any package changes songs: once a
+  fix redraws them, a failure may pass with its cause untraced (four findings were once decided "passes since the
+  songs were redrawn, no cause found"). Each is traced to its cause and fixed, or its test set right, there.
+- **Two steps a package.** A package that changes songs is planned as its behaviour, one commit counting the songs it
+  changes, and then its tests and docs, the fingerprint kept: a commit changing two hundred of 256 songs at once with
+  its tests beside it can be neither heard nor bisected by its parts.
+- **Taste waits in a queue.** The findings of taste go to the package `listening`, not one worked in order: each is
+  given its status as it is planned, "open: to ask" or "open: needs code", and asked in rounds as the user listens.
+  The review is done when the other packages are, the queue listed open in the record.
 
 ```
 python3 $S/scripts/status.py $R init
@@ -182,14 +197,17 @@ python3 $S/scripts/status.py $R check                        # until no finding 
 ```
 
 Each package goes through the implementation loop, its findings read with `status.py $R show <package>` (never from
-`merged.json`, whose order is another: 44 findings were once looked up there and never worked). As each finding is
+`merged.json`, whose order is another: 44 findings were once looked up there and never worked); `status.py $R summary`
+gives every package's counts, commits, songs and what is not fixed, the report per package the user asks for. As each finding is
 done, `status.py $R set "<status>" <n>...`, the status starting fixed, partly, decided, kept, taste or open, and the
 package's commit with `status.py $R package <package> <commit> "<songs changed>"`. A package is done only when
 `status.py $R check <package>` passes.
 
 - A finding of **taste** is not a fix: it becomes a listening question (`ListeningQuestionsTest`, `?listen=`), its
-  change made only once the user has heard it. Ask the first-ranked first, a round of ten at most; a question not
-  asked by the record stays open in it, not queued in the roadmap unasked. A **mistake** is fixed.
+  change made only once the user has heard it. Ask the first-ranked first, a round of ten at most, the answers
+  collected from the test instance's dashboard (`/admin/api/summary`, its `verdicts`) before the next; a question
+  needing code has it built only when its round comes. A question not asked by the record stays open in it, not
+  queued in the roadmap unasked. A **mistake** is fixed.
 - A genre-fit change is data in `Client/genres.json`, the presets' choices named whole (a chances choice's every option,
   so that naming one does not switch the others off).
 - Every commit that changes songs reruns `ListeningQuestionsTest.Write` in the same commit, so that the listening
@@ -212,8 +230,19 @@ Once the packages are done, run the suite at the holdout offset, songs neither t
 $S/scripts/runs.sh <repo> $R --holdout               # its failures in $R/holdout/findings, triaged in the record
 ```
 
-Each failure is checked against the committed code before the review's fixes (a `git worktree` of `review.json`'s
-commit): one the fixes made is fixed now, one older is a finding of the record.
+Each failure is checked against the code before the review's fixes, and a new one traced to the commit that brought
+it:
+
+```
+$S/scripts/bisect.sh <repo> $R <holdout> <test method>   # in a worktree of its own; its log in $R/holdout/
+```
+
+A failure at the review's commit already is older than the fixes, a finding of the record. A new one's first failing
+commit says what it is: one that changed the tests alone shows older behaviour a test now sees (a rule moved onto
+songs that play the device, a larger sample), a finding of the record; one that changed code is read: a fix that broke
+the song is fixed now, and one that made a trace or a rule honest (figures traced as laid, not as drawn) shows older
+behaviour too. A test whose own assumption a fix made stale (a part a fix now lets play) is set right now. Of the
+first review's three new held-out failures, none was the fixes' doing: one stale test and two older bugs newly seen.
 
 Then the review's record goes in the repository, `reviews/<date>.md`, committed, its tables written by
 `status.py $R record <file>`: the totals, the packages with their commits and the songs they changed, every finding
@@ -221,7 +250,12 @@ open or partly done with why, and every finding by package with what became of i
 
 - **The guards.** For each theme of the summary, a class of finding that came more than once, the test that now keeps
   it closed (a rule over every preset at Base 0 against a crash at a plain end, a lint of calibrations under 64 songs),
-  or why none can; a theme with a guard has its checklist line in the primer or its angle narrowed or taken out.
+  or why none can; a theme with a guard has its checklist line in the primer or its angle narrowed or taken out. A
+  guard is a test that fails when the class comes back, not a package that fixed every case: calibrations moved to 64
+  songs or page tests rid of their waits keep their checklist lines until a lint keeps them.
+- **The briefs.** Each mechanism the fixes added that a class of finding should now be judged against (bars asked of
+  the map, keep-outs as held spans, an intro played as its source) named in the primer and its angle, so that the
+  next review asks whether code uses it rather than raising the old class again.
 - **The holdout:** its failures and what became of each.
 - **A comparison with the last review's record**, whose statuses are brought up to date from this review (found again,
   or not, its file changed by the fixes or never), naming:

@@ -23,7 +23,13 @@ RMG (`/home/glyge/Projects/sw/rmg`) is a random music generator in C# .NET 10 wi
 4. **Rendering.** `Render` turns the song into a `RenderedSong`. Velocity there is a sum mapped through a tanh curve (`Render.ToMidiVelocity`), so scaling a velocity sum by a factor does not scale loudness: `Render.ScaleLoudness` scales it on the heard scale. `Midi.cs` writes the file.
 
 ### The map
-`SongMap` places the sections, each a `SectionSpan` in a meter of its own (`Meter`, its bar's groups, its phrase's bars `PhraseBars`, its pattern's `Phrases`), whose bars count from the section's start, not the song's; a section's last bar may be cut short (`SectionSpan.Cut`, `ShortBars`), and `SongMap.MeterAt` gives the short bar's own meter there. A position measured against the wrong origin or meter is a class of bug this code has had.
+`SongMap` places the sections, each a `SectionSpan` in a meter of its own (`Meter`, its bar's groups, its phrase's bars `PhraseBars`, its pattern's `Phrases`), whose bars count from the section's start, not the song's; a section's last bar may be cut short (`SectionSpan.Cut`, `ShortBars`), and `SongMap.MeterAt` gives the short bar's own meter there. A position measured against the wrong origin or meter is a class of bug this code has had, so the map answers it in one place: `SongMap.PlaceOf` (a position's section, bar, beat and pattern bar), a span's `Bars`, `Phrases` and `Patterns` (each walked from the section's start, the short last one its own length) and `Span.Within` (one tolerance). A bar, phrase or pattern walked or counted by hand (`Math.Floor(position / BarDuration)`, a loop adding `BarDuration`) is a finding where the map has the answer.
+
+### What plays where
+`SongMap.PlayAt` gives the appearance a position plays as: an intro made from a section plays as that section, a hook intro as its chorus, the ending as the last section. A stage that reads a section's decisions at a position asks it, never the section the position merely falls in.
+
+### What the song holds
+`SongDraft.Holds(song)` lists the stretches the song holds (`HeldSpan`, by kind `Hold`: a fill, stop time as played, a drum solo, a part cut by the form, a call and its answer), and a stage keeps out of the kinds it names (`Holds.Meets`, `At`, `NextAfter`). A stage that makes such a stretch writes it there; a stage keeping out of a stretch by a list of its own, or one making a stretch others should keep out of without writing it, is a finding.
 
 ### Conventionality
 `Unconventionality` runs from 0 (plainest) to 1 (wildest), per facet: Feel, Groove, Chords, Progression, Melody, Form, Sound, Fills, Scale.
@@ -53,6 +59,7 @@ Doc comments are dense English prose describing the music. The style is delibera
    - Ask a track's role, never its number.
    - State decides, `Realizer` realizes.
    - A stage reads only what earlier stages made.
+   - Bars from the map, what plays where by `PlayAt`, keep-outs by `Holds` (see above).
 3. **Overengineering:** code that could be cut, merged with a sibling mechanism, made data, or simplified. Duplicated logic.
 4. **Optimization:**
    - Hot paths in generation and rendering: per-note or per-bar loops doing O(n) scans inside O(n) loops, repeated LINQ re-enumeration, repeated allocation, `ToArray`/`ToList` in loops, repeated `GetEffectiveStateMapAt` or `Where(...).Any` on whole timelines, recomputing what could be cached.

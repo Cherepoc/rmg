@@ -7,14 +7,20 @@ the record written from them. A finding is looked up here, never in merged.json,
     python3 status.py <review> set "<status>" <n>...          # e.g. "fixed in 6f577af", "taste: asked (?listen=x)"
     python3 status.py <review> package <package> <commit> "<songs changed>"
     python3 status.py <review> check [<package>]             # exits 1 on a finding unassigned or, in the package, unstatused
+    python3 status.py <review> summary                       # by package: counts by status, commits, songs, what is not fixed
     python3 status.py <review> record <out.md>               # the record's totals and tables
 
 A status starts with one of: fixed, partly, decided, kept, taste, roadmap (an architecture proposal accepted as a
-plan), open; the rest says how, where and why. Writes
+plan), open; the rest says how, where and why. A finding of taste waits in the listening queue, the package
+`listening`, given its status when it is planned: "open: to ask" where it can be asked as the code is, "open: needs
+code" where a question needs code first, "taste: asked in <commit> (?listen=x)" once asked; a status is a status, so
+`check` passes on the queue however long it waits. Writes
 <review>/plan/assignment.json, status.json, packages.json and numbers.json.
 """
 import collections, json, os, sys
 
+if len(sys.argv) < 3:
+    raise SystemExit(__doc__)
 R, command, args = sys.argv[1], sys.argv[2], sys.argv[3:]
 plan = os.path.join(R, 'plan')
 os.makedirs(plan, exist_ok=True)
@@ -92,6 +98,19 @@ elif command == 'check':
         print(p)
     print(f"{len(scope)} findings checked, {len(problems)} problems")
     sys.exit(1 if problems else 0)
+elif command == 'summary':
+    kind = {n: status.get(n, 'open').split()[0].rstrip(':,') for n in deduped}
+    totals = collections.Counter(kind.values())
+    print(f"{len(deduped)} findings: " + ', '.join(f"{totals[k]} {k}" for k in KINDS if totals[k]))
+    for p in sorted(set(assignment.values())):
+        mine = sorted(n for n, q in assignment.items() if q == p)
+        c = collections.Counter(kind[n] for n in mine)
+        meta = packages.get(p, {})
+        print(f"\n{p}: {len(mine)} findings, " + ', '.join(f"{c[k]} {k}" for k in KINDS if c[k])
+              + (f"; {meta['commit']}" if meta.get('commit') else '') + (f"; songs {meta['songs']}" if meta.get('songs') else ''))
+        for n in mine:
+            if kind[n] != 'fixed':
+                print(f"  #{n} {status.get(n, 'open: not worked')[:160]}")
 elif command == 'record':
     kind = {n: status.get(n, 'open').split()[0].rstrip(':,') for n in deduped}
 

@@ -12,7 +12,10 @@ For each finding in your input file:
 
 1. Open the cited file and line, and the surrounding code and callers needed to judge it. Check whether the evidence is quoted correctly and whether the failure scenario can actually happen. Trace the callers and the data: is the "empty list" ever empty, is the "wrong order" ever reached?
    - A `run` finding is a test failing on other songs: trace its cause by reading, a generator bug, a test assuming what
-     those songs break, or a calibration over too few songs, and say which in the reason; you cannot run it.
+     those songs break, or a calibration over too few songs, and say which in the reason, with the stage, the line
+     and the value you traced it to, as the fixing works it before the songs are redrawn; you cannot run it.
+   - A `flaky` finding failed in the suite and passed alone: look for what the test races (a timeout, a shared
+     server or queue, a wait on wall time), not for a generator bug.
    - An `elsewhere` finding is one a reviewer saw outside its own slice and noted in a line, with no evidence or
      scenario: find the code, judge it as any other, and give it its real `category` and `severity` in your output.
      Several reviewers may have noted the same issue: one `confirmed`, the others `duplicate` of it.

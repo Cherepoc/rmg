@@ -1,14 +1,17 @@
 """The test runs' failures as findings: every failed test of a run's output, with its message, the seed it names and the
 offset it ran at, at its test's file and line. Writes <review>/findings/run-<offset>.json in the reviewers' format.
 
-    python3 run_findings.py <repo> <review> <offset> <test output file>
+    python3 run_findings.py <repo> <review> <offset> <test output file> [<flaky list>]
 
 A failure is a finding to triage, not yet a verdict: a bug in the generator, a test assuming what other songs break,
 or a calibration over too few songs; the verifiers trace which, and the fixing checks it against the committed code.
+A test the flaky list names (runs.sh: it passed run again alone) is a finding of category `flaky`, a test racing under
+the suite's load rather than a song breaking it, which no verifier traces into the generator.
 """
 import glob, json, os, re, sys
 
 root, review, offset, output = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+flaky = set(open(sys.argv[5]).read().split()) if len(sys.argv) > 5 and os.path.exists(sys.argv[5]) else set()
 text = open(output, encoding='utf-8', errors='ignore').read().splitlines()
 
 # every test's file and line, by its method's name
@@ -35,6 +38,16 @@ for i, line in enumerate(text):
     assertion = next((x for x in block if x.startswith('at Assert')), '')
     seed = re.search(r'seed (\d+)', message)
     file, number = where.get(m.group(1), ('Rmg.Tests', 0))
+    if m.group(1) in flaky:
+        findings.append({
+            'file': file, 'line': number, 'category': 'flaky', 'severity': 'low',
+            'summary': f"{m.group(1)} fails in the suite at RMG_CORPUS_OFFSET={offset} but passes run alone",
+            'evidence': (message + ' ' + assertion).strip(),
+            'scenario': f"RMG_CORPUS_OFFSET={offset}, the whole suite under load; alone it passes",
+            'suggestion': 'Find what the test races: a timeout, a shared server or queue, a wait on wall time.',
+            'confidence': 'certain',
+        })
+        continue
     findings.append({
         'file': file, 'line': number, 'category': 'run', 'severity': 'medium',
         'summary': f"{m.group(1)}{m.group(2) or ''} fails at RMG_CORPUS_OFFSET={offset}" + (f", seed {seed.group(1)}" if seed else ''),

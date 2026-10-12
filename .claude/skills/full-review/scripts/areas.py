@@ -4,7 +4,7 @@ import os
 
 def area(path, category=None):
     b = os.path.basename(path)
-    if category == 'run':
+    if category in ('run', 'flaky'):
         return 'run'
     if category == 'genre-fit':
         return 'genre-fit'
