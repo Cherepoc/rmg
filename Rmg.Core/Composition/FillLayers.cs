@@ -45,6 +45,19 @@ public enum FillPath
     Random
 }
 
+/// <summary>A fill's rarer choice, which a drummer's signature makes more often (<see cref="FillLayers.Chances" />).</summary>
+public enum FillRarity
+{
+    /// <summary>A fill starting a note near an 8th off the beat, earlier or later.</summary>
+    OffBeat,
+
+    /// <summary>A run fading rather than swelling.</summary>
+    Fades,
+
+    /// <summary>A landing pushed a note near an 8th early.</summary>
+    EarlyLanding
+}
+
 /// <summary>Whether a run keeps its speed, or changes it by a rank halfway.</summary>
 public enum FillSpeed
 {
@@ -118,12 +131,12 @@ internal static class FillLayers
     /// </summary>
     public static double GetSpanLoudness(double span) => span <= 0 ? -1 : Math.Clamp(Math.Log2(span) / 2, -1, 1);
 
-    /// <summary>What a fill does with the groove, and how likely each is in a middling section; stopping the unconventional one, never in the plainest section and as likely as the others in the wildest (<see cref="RhythmicUnconventionality.WeightEnds" />).</summary>
-    public static ImmutableArray<Weighted<GrooveTreatment>> Treatments { get; } =
+    /// <summary>What a fill does with the groove, how likely each is in a middling section, and how it leans; stopping the unconventional one, never in the plainest section and as likely as the others in the wildest (<see cref="RhythmicUnconventionality.WeightEnds" />).</summary>
+    public static ImmutableArray<(GrooveTreatment Value, double Weight, double Lean)> Treatments { get; } =
     [
-        new(0.78, GrooveTreatment.Played),
-        new(0.1, GrooveTreatment.Stop),
-        new(0.12, GrooveTreatment.Keep)
+        (GrooveTreatment.Played, 0.78, 0),
+        (GrooveTreatment.Stop, 0.1, 1),
+        (GrooveTreatment.Keep, 0.12, 0)
     ];
 
     /// <summary>How a treatment leans, for the energy of the section a line leads into: stopping, a stop or a break, quiet.</summary>
@@ -153,11 +166,11 @@ internal static class FillLayers
     ///     beat, that a run fades, and that its landing comes early, each leaning by the section's fills facet to its ends
     ///     and by a drummer's signature (<see cref="FillGenerator.GetChance" />).
     /// </summary>
-    public static ImmutableArray<(StateKind<double> Kind, double Chance)> Chances { get; } =
+    public static ImmutableArray<(FillRarity Choice, double Chance)> Chances { get; } =
     [
-        (CompositionStateKinds.Fill.OffBeatChance, 0.015),
-        (CompositionStateKinds.Fill.FadeChance, 0.01),
-        (CompositionStateKinds.Fill.EarlyLandingChance, 0.01)
+        (FillRarity.OffBeat, 0.015),
+        (FillRarity.Fades, 0.01),
+        (FillRarity.EarlyLanding, 0.01)
     ];
 
     /// <summary>The chance a drummer has a signature, in a song of conventionality in the middle: never in the plainest, every time in the wildest.</summary>
@@ -181,23 +194,23 @@ internal static class FillLayers
 
     public const double PitchOrderLean = -2;
 
-    /// <summary>How a run walks its sounds, and how likely each is in a middling song; the random walk the unconventional one, never in the plainest.</summary>
-    public static ImmutableArray<Weighted<FillPath>> Paths { get; } =
+    /// <summary>How a run walks its sounds, how likely each is in a middling song, and how it leans; the random walk the unconventional one, never in the plainest.</summary>
+    public static ImmutableArray<(FillPath Value, double Weight, double Lean)> Paths { get; } =
     [
-        new(0.55, FillPath.OneWay),
-        new(0.15, FillPath.Turn),
-        new(0.2, FillPath.Loop),
-        new(0.1, FillPath.Random)
+        (FillPath.OneWay, 0.55, 0),
+        (FillPath.Turn, 0.15, 0),
+        (FillPath.Loop, 0.2, 0),
+        (FillPath.Random, 0.1, 1)
     ];
 
     /// <summary>The chance a random walk steps to a neighbour rather than to any sound.</summary>
     public const double NeighbourStepChance = 0.8;
 
     /// <summary>
-    ///     How many sounds of the walk each note plays together, and how likely each is in a middling section; more than
-    ///     one the unconventional, never in the plainest section.
+    ///     How many sounds of the walk each note plays together, how likely each is in a middling section, and how it leans;
+    ///     more than one the unconventional, never in the plainest section.
     /// </summary>
-    public static ImmutableArray<Weighted<int>> Widths { get; } = [new(0.85, 1), new(0.12, 2), new(0.03, 3)];
+    public static ImmutableArray<(int Value, double Weight, double Lean)> Widths { get; } = [(1, 0.85, 0), (2, 0.12, 1), (3, 0.03, 1)];
 
     /// <summary>
     ///     How many ranks finer than the groove a fill plays: the snare's backbeat plays its cycle's strongest notes
@@ -217,12 +230,12 @@ internal static class FillLayers
     /// </summary>
     public const double FullnessPerWeight = 0.45;
 
-    /// <summary>Whether a run changes speed halfway, and how likely each is in a middling section; slowing down the unconventional one, never in the plainest.</summary>
-    public static ImmutableArray<Weighted<FillSpeed>> Speeds { get; } =
+    /// <summary>Whether a run changes speed halfway, how likely each is in a middling section, and how it leans; slowing down the unconventional one, never in the plainest.</summary>
+    public static ImmutableArray<(FillSpeed Value, double Weight, double Lean)> Speeds { get; } =
     [
-        new(0.7, FillSpeed.Steady),
-        new(0.27, FillSpeed.SpeedsUp),
-        new(0.03, FillSpeed.SlowsDown)
+        (FillSpeed.Steady, 0.7, 0),
+        (FillSpeed.SpeedsUp, 0.27, 0),
+        (FillSpeed.SlowsDown, 0.03, 1)
     ];
 
     /// <summary>

@@ -12,8 +12,8 @@ namespace Rmg.Core.Composition;
 ///     than the others, and the more a song's rhythm strays, the likelier a signature: one of the fills' rarer choices,
 ///     such as starting off the beat, that it makes more often, as a layer of the song over the fills' chances.
 /// </summary>
-/// <param name="Layer">The drummer's layer over the fills' chances, such as its signature's.</param>
-internal sealed record Drummer(double Busyness, FillPath Favourite, StateMap? Layer = null)
+/// <param name="Signature">The fills' rarer choice the drummer makes more often; none for a drummer without one.</param>
+internal sealed record Drummer(double Busyness, FillPath Favourite, FillRarity? Signature = null)
 {
     /// <summary>How much more likely the favourite walk is than it would be.</summary>
     public const double FavouriteWeight = 3;
@@ -29,16 +29,12 @@ internal sealed record Drummer(double Busyness, FillPath Favourite, StateMap? La
     {
         var busyness = Math.Clamp(0.5 + SpreadGenerator(context) / 4, 0, 1);
         // any walk can be the favourite, the likelier ones more often
-        var favourite = context.Pick(FillLayers.Paths);
-        // and any of the rarer choices the signature, the likelier ones more often
-        var builder = new StateMapBuilder("Drummer", perTrack: true);
-        // its kind drawn whether it has one, so that the draws after it are as many
+        var favourite = context.Pick([..FillLayers.Paths.Select(x => new Weighted<FillPath>(x.Weight, x.Value))]);
+        // and any of the rarer choices the signature, the likelier ones more often, its kind drawn whether it has one, so
+        // that the draws after it are as many
         var signs = context.TestProbability(RhythmicUnconventionality.Ends(FillLayers.SignatureChance, 1).At(unconventionality));
-        var kind = context.Pick([..FillLayers.Chances.Select(x => new Weighted<StateKind<double>>(x.Chance, x.Kind))]);
-        if (signs)
-            builder.Add(kind, FillLayers.SignatureWeight);
-
-        return new Drummer(busyness, favourite, builder.ToStateMap(context));
+        var kind = context.Pick([..FillLayers.Chances.Select(x => new Weighted<FillRarity>(x.Chance, x.Choice))]);
+        return new Drummer(busyness, favourite, signs ? kind : (FillRarity?)null);
     }
 
     /// <summary>
@@ -62,12 +58,9 @@ internal sealed record Drummer(double Busyness, FillPath Favourite, StateMap? La
     ///     The walks' weights as this drummer takes them, by the fills facet: the favourite more likely, the random walk
     ///     never at the plain end, every walk as likely at the wild.
     /// </summary>
-    public ImmutableArray<Weighted<FillPath>> WeighPaths(ImmutableArray<Weighted<FillPath>> paths, double unconventionality)
+    public ImmutableArray<Weighted<FillPath>> WeighPaths(ImmutableArray<(FillPath Value, double Weight, double Lean)> paths, double unconventionality)
     {
-        return ByConvention.Weigh(
-            paths.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Value == Favourite ? x.Weight * FavouriteWeight : x.Weight, x.Value == FillPath.Random ? 1 : 0))),
-            unconventionality
-        );
+        return RhythmicUnconventionality.Weigh(paths.Select(x => x.Value == Favourite ? x with { Weight = x.Weight * FavouriteWeight } : x), unconventionality);
     }
 
     /// <summary>How much fuller or sparser than the line's the drummer's runs are.</summary>

@@ -262,38 +262,24 @@ internal static class CompositionStateKinds
         }
     }
 
-    /// <summary>
-    ///     What the fills are drawn by: the chances of their rarer choices, which the layers multiply, such as the
-    ///     section's chance scale and a drummer's signature, and each drum group's chance of joining a run.
-    /// </summary>
+    /// <summary>What the fills are drawn by: each drum group's chance of joining a run, and how unconventional that is.</summary>
     public sealed class FillStateKinds
     {
         public FillStateKinds(string prefix)
         {
             prefix += "Fill";
 
-            OffBeatChance = StateKinds.CreateMultiplicative<double>(prefix + "OffBeatChance");
-            FadeChance = StateKinds.CreateMultiplicative<double>(prefix + "FadeChance");
-            EarlyLandingChance = StateKinds.CreateMultiplicative<double>(prefix + "EarlyLandingChance");
             RunChance = StateKinds.CreateAdditive<double>(prefix + "RunChance");
             Unconventionality = StateKinds.CreateAdditive<double>(prefix + "Unconventionality");
         }
 
-        /// <summary>The chance a fill starts a note near an 8th off the beat, earlier or later.</summary>
-        public StateKind<double> OffBeatChance { get; }
-
-        /// <summary>The chance a run fades rather than swells.</summary>
-        public StateKind<double> FadeChance { get; }
-
-        /// <summary>The chance a landing is pushed a note near an 8th early.</summary>
-        public StateKind<double> EarlyLandingChance { get; }
-
-        /// <summary>A drum group's chance of joining a run, before the section's chance scale.</summary>
+        /// <summary>A drum group's chance of joining a run in a section of conventionality in the middle.</summary>
         public StateKind<double> RunChance { get; }
 
         /// <summary>
-        ///     How unconventional a drum group is in a run, the power of the section's chance scale that its run chance
-        ///     is multiplied by: 0 for the snare and the toms, which a plain section plays as often as a wild one.
+        ///     How a drum group's run chance leans to its ends (<see cref="RhythmicUnconventionality.Ends" />): 1 an
+        ///     unconventional group's, never at the plain end and every time at the wild, 0 the snare's and the toms', which a
+        ///     plain section plays as often as a wild one.
         /// </summary>
         public StateKind<double> Unconventionality { get; }
     }

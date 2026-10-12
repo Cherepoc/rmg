@@ -100,9 +100,9 @@ internal sealed class FillSounds
             order = [..order.Select(x => x.Role == FillDrumRole.Toms ? toms.Dequeue() : x)];
         }
 
-        var width = Math.Min(context.Pick(ByConvention.Weigh(FillLayers.Widths.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value > 1 ? 1 : 0))), unconventionality)), Math.Max(1, order.Length));
+        var width = Math.Min(context.Pick(RhythmicUnconventionality.Weigh(FillLayers.Widths, unconventionality)), Math.Max(1, order.Length));
         var path = context.Pick(drummer.WeighPaths(FillLayers.Paths, unconventionality));
-        var speed = context.Pick(ByConvention.Weigh(FillLayers.Speeds.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == FillSpeed.SlowsDown ? 1 : 0))), unconventionality));
+        var speed = context.Pick(RhythmicUnconventionality.Weigh(FillLayers.Speeds, unconventionality));
         return new FillRun(order, path, width, speed);
     }
 

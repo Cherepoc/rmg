@@ -31,8 +31,8 @@ internal static class DrumGroups
 
 
     /// <summary>
-    ///     A group's part in a fill's run: its chance of joining one, and how unconventional that is, the power of the
-    ///     section's chance scale the chance is multiplied by.
+    ///     A group's part in a fill's run: its chance of joining one, and how unconventional that is, which leans the chance
+    ///     to its ends (<see cref="RhythmicUnconventionality.Ends" />).
     /// </summary>
     private static StateMapBuilder InRuns(this StateMapBuilder builder, double chance, double unconventionality = 1)
     {

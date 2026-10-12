@@ -39,11 +39,12 @@ public sealed class DrummerTest
     public async Task WeighPaths_FavoursTheFavourite_TheRandomWalkNeverAtThePlainEnd_AndEveryWalkAsLikelyAtTheWild()
     {
         double WeightOfPath(IEnumerable<Weighted<FillPath>> paths, FillPath path) => paths.SingleOrDefault(x => x.Value == path).Weight;
+        double MiddlingWeight(FillPath path) => FillLayers.Paths.Single(x => x.Value == path).Weight;
         var drummer = new Drummer(0.5, FillPath.Loop);
         var middle = drummer.WeighPaths(FillLayers.Paths, 0.5);
 
         await Assert.That(WeightOfPath(middle, FillPath.Loop) / WeightOfPath(middle, FillPath.OneWay))
-            .IsEqualTo(WeightOfPath(FillLayers.Paths, FillPath.Loop) * Drummer.FavouriteWeight / WeightOfPath(FillLayers.Paths, FillPath.OneWay)).Within(1e-9);
+            .IsEqualTo(MiddlingWeight(FillPath.Loop) * Drummer.FavouriteWeight / MiddlingWeight(FillPath.OneWay)).Within(1e-9);
         await Assert.That(WeightOfPath(drummer.WeighPaths(FillLayers.Paths, 0), FillPath.Random)).IsEqualTo(0);
         // every walk at the wild end, as likely each
         await Assert.That(drummer.WeighPaths(FillLayers.Paths, 1).Length).IsEqualTo(FillLayers.Paths.Length);
@@ -65,7 +66,7 @@ public sealed class DrummerTest
         {
             var context = new GenerationContext(1);
             return Enumerable.Range(0, 4_000)
-                .Count(_ => !Drummer.Generate(context, value).Layer!.IsDefault) / 4_000.0;
+                .Count(_ => Drummer.Generate(context, value).Signature is not null) / 4_000.0;
         }
 
         await Assert.That(Share(0)).IsEqualTo(0);
@@ -76,17 +77,15 @@ public sealed class DrummerTest
     [Test]
     public async Task ARarerChoice_IsTheBase_AtTheFillsFacet_ItsOddsTimesTheSignature()
     {
-        var context = new GenerationContext(1);
-        var generator = new FillGenerator(context, FillArchetypeTest.Tracks(context), new RhythmicUnconventionality(0.5), Meter.FourFour, _ => context, Genre.None);
-        var fade = CompositionStateKinds.Fill.FadeChance;
-        var signature = new Drummer(0.5, FillPath.OneWay, StateMap.FromStates([fade.CreateState(FillLayers.SignatureWeight)]));
-        var baseChance = FillLayers.Chances.Single(x => x.Kind == fade).Chance;
-        var plain = generator.GetChances(new Drummer(0.5, FillPath.OneWay));
+        var fade = FillRarity.Fades;
+        var signature = new Drummer(0.5, FillPath.OneWay, fade);
+        var baseChance = FillLayers.Chances.Single(x => x.Choice == fade).Chance;
+        var plain = new Drummer(0.5, FillPath.OneWay);
 
         await Assert.That(FillGenerator.GetChance(plain, fade, 0)).IsEqualTo(0);
         await Assert.That(FillGenerator.GetChance(plain, fade, 0.5)).IsEqualTo(baseChance).Within(1e-9);
         await Assert.That(FillGenerator.GetChance(plain, fade, 1)).IsEqualTo(1);
-        await Assert.That(FillGenerator.GetChance(generator.GetChances(signature), fade, 0.5))
+        await Assert.That(FillGenerator.GetChance(signature, fade, 0.5))
             .IsEqualTo(Tilt.Of(FillLayers.SignatureWeight, 1).Chance(baseChance, 1)).Within(1e-9);
     }
 

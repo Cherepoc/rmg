@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
@@ -49,6 +50,10 @@ public sealed record RhythmicUnconventionality(double Value)
     {
         return new ByConvention(lean <= 0 ? Plainest.Tilt.Weigh(weight, lean) : 0, weight, lean >= 0 ? 1 : 0);
     }
+
+    /// <summary>Options weighed at an unconventionality by their ends (<see cref="WeightEnds" />), each by its middling weight and its lean.</summary>
+    public static ImmutableArray<Weighted<T>> Weigh<T>(IEnumerable<(T Value, double Weight, double Lean)> options, double unconventionality) =>
+        ByConvention.Weigh(options.Select(x => (x.Value, WeightEnds(x.Weight, x.Lean))), unconventionality);
 
     // the plainest, whose tilt the ends of what leaned conventional keep
     private static RhythmicUnconventionality Plainest { get; } = new(0);

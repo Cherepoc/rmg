@@ -45,8 +45,6 @@ internal sealed class FillGenerator
     // the song's drums' own state, before any section's
     private readonly FillGrooves _songDrums;
 
-    // the chances of the fills' rarer choices, which the drummer's and the section's layers multiply
-    private readonly StateMap _chances;
 
     // the meter the song's bars are in
     private readonly Meter _meter;
@@ -77,10 +75,6 @@ internal sealed class FillGenerator
             ResolvedRhythm.DefaultState,
             _drumTracks.ToImmutableDictionary(x => x, x => SongTracks.GetGenerationStateMap(tracks.Definitions[x]))
         );
-        var chances = new StateMapBuilder("Fill", perTrack: true);
-        foreach (var (kind, chance) in FillLayers.Chances)
-            chances.Add(kind, chance);
-        _chances = chances.ToStateMap(context);
     }
 
     /// <summary>Every sound a run may play, by role.</summary>
@@ -201,7 +195,6 @@ internal sealed class FillGenerator
         var ending = line.Ending;
         // the fill is in the bars of the section it ends, the bar before the line a short one's where the section cuts it
         var meter = map?.MeterAt(line.Position - 1e-6) ?? ending.Meter;
-        var chances = GetChances(drummer);
         var fills = ending.Fills.Value;
         // how much the line weighs: its own weight, and the energy it leads into, as far as the section's rhythm follows it
         var lift = line.Next.Energy - ending.Energy;
@@ -209,7 +202,7 @@ internal sealed class FillGenerator
         var tilt = Tilt.Of(SectionEnergy.HighOdds, weight);
         // and which way the energy goes, which makes stopping the groove likelier into a quieter section
         var direction = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
-        var play = line.HasFill ? DrawPlay(drummer, ending, chances, tilt, direction, weight) : FillPlay.None;
+        var play = line.HasFill ? DrawPlay(drummer, ending, tilt, direction, weight) : FillPlay.None;
         var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, meter);
         _lastRun = [];
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId, meter);
@@ -230,7 +223,7 @@ internal sealed class FillGenerator
         var landing = _sounds.DrawLanding(_landing, landings, fills);
         // a pushed landing comes a note of the fill's rhythm near an 8th early, after a fill, not where the band stops
         // or counts in and lands on the line together
-        var isEarly = _landing.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill && span > 0 && !line.IsLandingForced;
+        var isEarly = _landing.TestProbability(GetChance(drummer, FillRarity.EarlyLanding, fills)) && line.HasFill && span > 0 && !line.IsLandingForced;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
         if (!landing.IsEmpty)
@@ -247,14 +240,12 @@ internal sealed class FillGenerator
     ///     How a fill is played: its span, none for the groove running on, what it does with the groove, its layer over
     ///     the groove's rhythm, its run, and whether it starts off the beat or fades.
     /// </summary>
-    /// <param name="chances">The chances of the fills' rarer choices at the line.</param>
     /// <param name="tilt">How the line's weight leans the fill: longer on the heavy side.</param>
     /// <param name="direction">How the energy the line leads into leans it: stopping into a quieter section.</param>
     /// <param name="weight">How much the line weighs, which makes the fill fuller or sparser.</param>
     private FillPlay DrawPlay(
         Drummer drummer,
         FillSection section,
-        StateMap chances,
         Tilt tilt,
         Tilt direction,
         double weight
@@ -268,7 +259,7 @@ internal sealed class FillGenerator
             return FillPlay.None;
 
         // stopping is the unconventional treatment, and the quiet one
-        var treatments = ByConvention.Weigh(FillLayers.Treatments.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == GrooveTreatment.Stop ? 1 : 0))), rhythm.Value);
+        var treatments = RhythmicUnconventionality.Weigh(FillLayers.Treatments, rhythm.Value);
         var treatment = _line.Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
         var fullness = FillLayers.Fullness + FillLayers.FullnessPerWeight * weight + FillLayers.TreatmentFullness[treatment];
         var layer = CreateLayer(drummer, rhythm, fullness, Feels.Of(grooves.Source), section.Facets[Facet.Feel]);
@@ -284,10 +275,10 @@ internal sealed class FillGenerator
                 rhythm.Value,
                 (role, track) => !isPercussion ? GetRunChance(grooves.Of(track), rhythm.Value) : role == FillDrumRole.Percussion ? 1 : 0
             );
-        var spanShift = _line.TestProbability(GetChance(chances, CompositionStateKinds.Fill.OffBeatChance, rhythm.Value))
+        var spanShift = _line.TestProbability(GetChance(drummer, FillRarity.OffBeat, rhythm.Value))
             ? _line.TestProbability(0.5) ? 1 : -1
             : 0;
-        var fades = _line.TestProbability(GetChance(chances, CompositionStateKinds.Fill.FadeChance, rhythm.Value));
+        var fades = _line.TestProbability(GetChance(drummer, FillRarity.Fades, rhythm.Value));
         return new FillPlay(span, treatment, run, layer, spanShift, fades);
     }
 
@@ -329,23 +320,14 @@ internal sealed class FillGenerator
     }
 
     /// <summary>
-    ///     The chances of the fills' rarer choices at a line, as layers: the base and the drummer's, such as its
-    ///     signature, which multiplies a choice's odds.
+    ///     A rarer choice's chance at a line: its base chance at the section's fills facet, as an unconventional thing is,
+    ///     never at the plain end and every time at the wild, its odds the drummer's signature's weight where it is the
+    ///     drummer's signature.
     /// </summary>
-    internal StateMap GetChances(Drummer drummer)
+    internal static double GetChance(Drummer drummer, FillRarity choice, double unconventionality)
     {
-        return _chances.MergeWith(drummer.Layer ?? StateMap.Default);
-    }
-
-    /// <summary>
-    ///     A rarer choice's chance at a line (<see cref="GetChances" />): its base chance at the section's fills facet, as
-    ///     an unconventional thing is, never at the plain end and every time at the wild, its odds times what the drummer
-    ///     multiplies them by.
-    /// </summary>
-    internal static double GetChance(StateMap chances, StateKind<double> kind, double unconventionality)
-    {
-        var chance = FillLayers.Chances.Single(x => x.Kind == kind).Chance;
-        return new Tilt(Math.Log(chances.GetStateValue(kind) / chance)).Chance(RhythmicUnconventionality.Ends(chance, 1).At(unconventionality), 1);
+        var chance = FillLayers.Chances.Single(x => x.Choice == choice).Chance;
+        return Tilt.Of(FillLayers.SignatureWeight, drummer.Signature == choice ? 1 : 0).Chance(RhythmicUnconventionality.Ends(chance, 1).At(unconventionality), 1);
     }
 
     /// <summary>

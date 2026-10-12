@@ -151,7 +151,7 @@ internal static class TracePoints
     /// </summary>
     public const string SoloGestures = "Solo gestures";
 
-    /// <summary>A drum solo's segments: the appearance's place and its plan (a tuple of an <c>int</c> and an array of <see cref="SoloLines.Segment" />s).</summary>
+    /// <summary>A drum solo: the appearance's place, its plan and who plays under it (a <see cref="Composition.DrumSolo" /> record).</summary>
     public const string DrumSolo = "Drum solo";
 
     /// <summary>
