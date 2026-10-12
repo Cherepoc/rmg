@@ -169,13 +169,15 @@ internal static class InstrumentsOverTime
                 var (variants, variant) = leftOut ? (ImmutableArray<int>.Empty, program) : (drawnVariants, drawnVariant);
                 var bars = Enumerable.Range(0, span.BarCount).Select(_ => context.TestProbability(BarChance)).ToArray();
 
-                var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => x.Note.IsWithin(span.Start, span.End)).ToArray();
+                // the notes it plays, an intro made of it and the ending after the last among them, so that the final chord is
+                // played on the instrument the song ended in
+                var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => map.PlayAt(x.Note.Position)?.Index == index).ToArray();
                 var accent = inSpan.Length == 0 ? double.MaxValue : inSpan.Select(x => x.Note.Value.Velocity).OrderDescending().ElementAt((int)(inSpan.Length * AccentShare));
                 if (switches || mode != ArticulationMode.None && !variants.IsEmpty)
                     StateTrace.RecordSection(TracePoints.InstrumentOverTime, track, span.SectionId, $"{program} {mode} {variant}", (index, pitched.Role, program, variants.IsEmpty ? ArticulationMode.None : mode, variant));
                 foreach (var (note, i) in inSpan)
                 {
-                    var bar = Math.Min(bars.Length - 1, span.BarOf(note.Position));
+                    var bar = Math.Clamp(span.BarOf(note.Position + map.PlayAt(note.Position)!.Value.Offset), 0, bars.Length - 1);
                     var articulated = !variants.IsEmpty && mode switch
                     {
                         ArticulationMode.Bars => bars[bar],

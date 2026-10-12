@@ -43,7 +43,6 @@ internal static class Articulations
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var notes = SongStages.NotesOf(draft);
-        var sections = song.Form.Map.Sections;
         var stroke = StrokeFrom + (StrokeTo - StrokeFrom) * song.Stream(SongStream.Strum).GenerateDouble();
         var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var result = notes.ToBuilder();
@@ -81,7 +80,8 @@ internal static class Articulations
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
             {
                 var state = note.Value.State;
-                var section = sections.IndexOf(song.Form.Map.SectionAt(note.Position)!);
+                // the appearance it plays as, an intro's and the ending's too
+                var section = song.Form.Map.PlayAt(note.Position)?.Index ?? -1;
                 var repeats = i > 0 && timeline[i - 1].Value.Pitches.SequenceEqual(note.Value.Pitches);
                 var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
                 // by the instrument playing the note, a switched one's
