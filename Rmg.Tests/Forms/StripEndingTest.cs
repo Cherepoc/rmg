@@ -15,6 +15,7 @@ public sealed class StripEndingTest
     public async Task AStrippedSong_LosesItsPartsOneByOne_TheDrumsAloneAtItsEnd()
     {
         var songs = 0;
+        var drummed = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Stripping))))
         {
             await Assert.That(song.Map.Ending.Kind).IsEqualTo(EndingKind.Strip);
@@ -24,16 +25,20 @@ public sealed class StripEndingTest
             if (drums.Length == 0)
                 continue;
             songs++;
-            // every pitched part's last note sounds out before the last bar, and they leave at bars of their own
+            // every pitched part's last note sounds out before the last bar, and they leave at bars of their own, the drums
+            // playing on to the end; where the drums rest there, one part leads out
             var lasts = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is not PercussionInstrumentTrack && x.Value.Count > 0)
                 .GroupBy(x => song.Song.TrackDefinitions[x.Key].Role)
                 .Select(x => x.SelectMany(t => t.Value).Max(n => n.Position + n.Value.Duration)).ToArray();
-            await Assert.That(lasts.All(x => x <= end - bar + 1e-6)).IsTrue().Because($"seed {song.Seed}");
+            var drumsToTheEnd = drums.Any(x => x.Position >= end - bar - 1e-6);
+            await Assert.That(lasts.Count(x => x > end - bar + 1e-6)).IsLessThanOrEqualTo(drumsToTheEnd ? 0 : 1).Because($"seed {song.Seed}");
             await Assert.That(lasts.Select(x => Math.Floor(x / bar + 1e-6)).Distinct().Count()).IsGreaterThan(1).Because($"seed {song.Seed}");
-            // and the drums play on to the end
-            await Assert.That(drums.Any(x => x.Position >= end - bar - 1e-6)).IsTrue().Because($"seed {song.Seed}");
+            if (drumsToTheEnd)
+                drummed++;
         }
 
         await Assert.That(songs).IsGreaterThan(20);
+        // most stripped songs end on the drums alone
+        await Assert.That(drummed).IsGreaterThan(songs * 3 / 4);
     }
 }

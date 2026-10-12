@@ -315,13 +315,7 @@ internal sealed class SongFormGenerator
                 var stop = end - plan.Stop;
                 description += $", stopping {plan.Stop} beats before it";
                 foreach (var (track, role) in _roles)
-                {
-                    edits.Clear(track, stop, end);
-                    if (role == TrackRole.Drum)
-                        edits.Cut(track, stop);
-                    else
-                        edits.Silence(track, stop, end);
-                }
+                    edits.Rest(track, role, stop, end);
             }
 
             // the drums land on the final chord, where the song has them
@@ -348,20 +342,23 @@ internal sealed class SongFormGenerator
         }
 
         // a stripped song plays its last section once more and its pitched parts leave one by one over its last two patterns,
-        // each at a bar in an order drawn, a soloist too, every track of a part together, the drums alone in the last bars
+        // the appearances it adds for it covering them, each at a bar in an order drawn, those heard in the last appearance,
+        // a soloist too, every track of a part together, a riff's twin with it, the drums alone in the last bars; where the drums rest there, the
+        // last part standing leading out
         if (plan.Ending == EndingKind.Strip)
         {
-            var stripStart = Math.Max(spans[^1].Start, end - 2 * last.PatternDuration);
+            var stripStart = end - 2 * last.PatternDuration;
             var bars = (int)Math.Round((end - stripStart) / last.BarDuration);
-            TrackRole[] parts = [.._roles.Values.Where(x => x != TrackRole.Drum).Distinct().OrderBy(x => x).OrderBy(_ => _context.GenerateDouble())];
-            for (var i = 0; i < parts.Length; i++)
+            var final = sections[^1];
+            // the solo part, whose notes are played later over the melody's, heard where the melody is
+            bool Heard(TrackRole role) => role == TrackRole.Solo ? _roles.Values.Contains(role) && Heard(TrackRole.Melody) : !final.Resting.Contains(role) && final.Roles.Any(x => x.Value == role && final.Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
+            TrackRole[] parts = [.._roles.Values.Select(x => x.Source()).Where(x => x != TrackRole.Drum && Heard(x)).Distinct().OrderBy(x => x).OrderBy(_ => _context.GenerateDouble())];
+            var leaving = Heard(TrackRole.Drum) ? parts.Length : Math.Max(0, parts.Length - 1);
+            for (var i = 0; i < leaving; i++)
             {
-                var exit = stripStart + (i + 1) * bars / (parts.Length + 1) * last.BarDuration;
-                foreach (var track in _roles.Where(x => x.Value == parts[i]).Select(x => x.Key))
-                {
-                    edits.Clear(track, exit, end);
-                    edits.Silence(track, exit, end);
-                }
+                var exit = stripStart + (i + 1) * bars / (leaving + 1) * last.BarDuration;
+                foreach (var (track, role) in _roles.Where(x => x.Value.Source() == parts[i]))
+                    edits.Rest(track, role, exit, end);
 
                 description += $", {parts[i]} out at {exit}";
             }
@@ -553,13 +550,15 @@ internal sealed class SongFormGenerator
 
     /// <summary>
     ///     A line's note that ends the song, asked to land on its chord's root, which the line places nearest the note
-    ///     before (<see cref="LinePattern.Place" />), going on from it rather than starting a phrase afresh.
+    ///     before (<see cref="LinePattern.Place" />), going on from it rather than starting a phrase afresh, and no pickup,
+    ///     though the note it is made of led into a chord, as it has none after it to lead into.
     /// </summary>
     internal static TimelineItem<StateMap> LandOnRoot(TimelineItem<StateMap> note)
     {
         return note.Value
             .With(CompositionStateKinds.LineLanding, (int)ChordArrival.Root)
             .With(CompositionStateKinds.LinePhraseStart, (int)PhraseStart.None)
+            .With(CompositionStateKinds.LinePickup, 0)
             .ToTimelineItem(note.Position);
     }
 
@@ -591,12 +590,19 @@ internal sealed class SongFormGenerator
             .OrderBy(x => x.Value.EventTimeline[0].Position)
             .Select(x => x.Value.EventTimeline[0].Value.Subset(shapeKinds))
             .FirstOrDefault();
-        var tracks = homeBar.TrackTimelineMap.Select(x =>
+        GeneratedSection[] before = [..earlierSections.Reverse()];
+        // every track the song plays, one the last section rests in on the state of the last section it played in
+        var tracks = roles.Keys.Select(track => (Key: track, Value: homeBar.TrackTimelineMap.GetValueOrDefault(track)
+                                                                ?? before.FirstOrDefault(x => x.Timeline.TrackTimelineMap.ContainsKey(track))?.Timeline.TrackTimelineMap[track]
+                                                                    .Trim(lastSection.Meter.BarDuration)))
+            .Where(x => x.Value is not null)
+            .Select(x =>
             {
                 // a track that rests in the home bar plays its first note of the section, or, if it rests all of it,
                 // its last note of the sections before, over the home bar's root
-                var template = x.Value.EventTimeline.Concat(lastSection.Timeline.TrackTimelineMap[x.Key].EventTimeline)
-                    .Concat(earlierSections.Reverse().SelectMany(section =>
+                var template = x.Value!.EventTimeline.Where(_ => homeBar.TrackTimelineMap.ContainsKey(x.Key))
+                    .Concat(lastSection.Timeline.TrackTimelineMap.TryGetValue(x.Key, out var own) ? own.EventTimeline : [])
+                    .Concat(before.SelectMany(section =>
                             section.Timeline.TrackTimelineMap.TryGetValue(x.Key, out var timeline) ? timeline.EventTimeline.Reverse() : []
                         )
                     );

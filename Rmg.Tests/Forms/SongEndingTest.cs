@@ -61,13 +61,14 @@ public sealed class SongEndingTest
     }
 
     [Test]
-    public async Task ALinesLastNote_AsksToLandOnTheRoot_GoingOnFromTheNoteBefore()
+    public async Task ALinesLastNote_AsksToLandOnTheRoot_GoingOnFromTheNoteBefore_NoPickup()
     {
-        var note = StateMap.FromStates([CompositionStateKinds.LinePhraseStart.CreateState((int)PhraseStart.Afresh), StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
+        var note = StateMap.FromStates([CompositionStateKinds.LinePhraseStart.CreateState((int)PhraseStart.Afresh), CompositionStateKinds.LinePickup.CreateState(1), StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
 
         var landed = SongFormGenerator.LandOnRoot(note).Value;
         await Assert.That(landed.GetStateValue(CompositionStateKinds.LineLanding)).IsEqualTo((int)ChordArrival.Root);
         await Assert.That(landed.GetStateValue(CompositionStateKinds.LinePhraseStart)).IsEqualTo((int)PhraseStart.None);
+        await Assert.That(landed.GetStateValue(CompositionStateKinds.LinePickup)).IsEqualTo(0);
         await Assert.That(landed.GetStateValue(StateKinds.Velocity)).IsEqualTo(0.5);
     }
 

@@ -141,10 +141,10 @@ internal static class SongStages
         new("Ornaments", Composition.Ornaments.Apply, CanSkip: true),
         new("Articulation", Articulations.Apply, CanSkip: true),
         new("Mix filter", Composition.MixFilter.Apply, CanSkip: true),
-        new("Silent start", Composition.SilentStart.Apply, CanSkip: true),
         new("Timing", Pocket.Apply, CanSkip: true),
         new("Expression", ExpressionStage, CanSkip: true),
         new("Hook intro", HookIntro, CanSkip: true),
+        new("Silent start", Composition.SilentStart.Apply, CanSkip: true),
         new("Risers", Composition.Risers.Apply, CanSkip: true)
     ];
 
@@ -428,12 +428,20 @@ internal static class SongStages
         if (!Alike(StateKinds.KeyOffset) || !Alike(StateKinds.Tempo))
             return draft;
 
+        // a part whose chorus anticipates the change at its phrase's last bar, a note struck an eighth before it and held over
+        // it, which the quote plays, leaving its own strike on that bar out, as its chorus does
+        bool Anticipates(EventTimeline<RealizedNote> notes) => notes.Any(n => Math.Abs(n.Position - (chorus.Start + lead - Pushes.Early)) < 1e-6 && n.Position + n.Value.Duration > chorus.Start + lead + 1e-6)
+                                                              && !notes.Any(n => Math.Abs(n.Position - (chorus.Start + lead)) < 1e-6);
         return draft with
         {
-            Notes = NotesOf(draft).ToImmutableSortedDictionary(x => x.Key, x => EventTimeline.Create(x.Value.Duration,
-                x.Value.Where(n => !n.IsWithin(0, lead))
-                    .Concat(x.Value.Where(n => n.IsWithin(chorus.Start, chorus.Start + lead)).Select(n => n.Value.ToTimelineItem(n.Position - chorus.Start)))
-                    .OrderBy(n => n.Position)))
+            Notes = NotesOf(draft).ToImmutableSortedDictionary(x => x.Key, x =>
+            {
+                var anticipates = Anticipates(x.Value);
+                return EventTimeline.Create(x.Value.Duration,
+                    x.Value.Where(n => !n.IsWithin(0, lead) && !(anticipates && Math.Abs(n.Position - lead) < 1e-6))
+                        .Concat(x.Value.Where(n => n.IsWithin(chorus.Start, chorus.Start + lead)).Select(n => n.Value.ToTimelineItem(n.Position - chorus.Start)))
+                        .OrderBy(n => n.Position));
+            })
         };
     }
 

@@ -31,6 +31,10 @@ internal static class SilentStart
         var (track, timeline) = pitched.Where(x => x.Value[0].Position < earliest + bar - 1e-9)
             .OrderBy(x => Array.IndexOf(Holders, song.Tracks.Definitions[x.Key].Role) is var i and >= 0 ? i : Holders.Length).ThenBy(x => x.Value[0].Position).First();
         var opening = timeline[0];
+        // held into where it was; a holder coming in after the earliest part held only until that part comes in, so that
+        // it sounds over no other chord
+        if (opening.Position > earliest + 1e-9)
+            return draft with { Notes = notes.SetItem(track, EventTimeline.Create(timeline.Duration, timeline.Prepend((opening.Value with { Duration = earliest }).ToTimelineItem(0)))) };
         var held = (opening.Value with { Duration = opening.Position + opening.Value.Duration }).ToTimelineItem(0);
         return draft with { Notes = notes.SetItem(track, EventTimeline.Create(timeline.Duration, timeline.Skip(1).Prepend(held))) };
     }

@@ -77,7 +77,7 @@ public readonly record struct IntroWindow(int Bars, bool IsBefore)
 /// <summary>
 ///     How a song starts and ends around its sections. It starts with the whole band, with a count-in, or with the band
 ///     coming in part by part. It ends on the home chord of its last section, whose home is the song's tonic, most of
-///     the time, or fades out; the more its rhythm strays, the likelier an open or a stopped ending.
+///     the time, or fades out; the further its form strays, the likelier an open or a stopped ending.
 /// </summary>
 internal static class FormLayers
 {
@@ -137,7 +137,7 @@ internal static class FormLayers
     /// <summary>
     ///     How likely each part is to come in next, of those left: most often one that keeps the time or the chords, and
     ///     the melody hardly ever before the band, as it is sung over it; those with a lean of 1 lean unconventional,
-    ///     likelier the further the song's rhythm strays.
+    ///     likelier the further the song's form strays.
     /// </summary>
     public static ImmutableArray<(IntroPart Part, double Weight, double Lean)> IntroParts { get; } =
     [
@@ -154,7 +154,7 @@ internal static class FormLayers
         (new IntroPart(TrackRole.Rhythm), 1.5, 0)
     ];
 
-    /// <summary>The chance that a count-in clicks only the last two beats, rather than all four.</summary>
+    /// <summary>The chance that a count-in clicks only the second half of the bar's pulses, where it has four or more, rather than all of them.</summary>
     public const double HalfCountInChance = 0.3;
 
     /// <summary>How loud a count-in's clicks are, over the state of the drum it clicks on.</summary>
@@ -162,7 +162,7 @@ internal static class FormLayers
 
     /// <summary>
     ///     The sounds a count-in clicks on, the first of them the song has: the hi-hat's pedal, as a drummer counts in, or
-    ///     a dry sound of the percussion, or the snare's, which every song has.
+    ///     a dry sound of the percussion, or the snare's; the song's first drum where it has none of them.
     /// </summary>
     public static ImmutableArray<(PercussionInstrumentDefinition Drum, int Sound)> CountInSounds { get; } =
     [
@@ -201,7 +201,7 @@ internal static class FormLayers
     /// </summary>
     public const double GenreLiftReach = 4;
 
-    /// <summary>The endings that lean unconventional, likelier the further the song's rhythm strays.</summary>
+    /// <summary>The endings that lean unconventional, likelier the further the song's form strays.</summary>
     public static ImmutableHashSet<EndingKind> AdventurousEndings { get; } = [EndingKind.Open, EndingKind.Stop];
 
     /// <summary>

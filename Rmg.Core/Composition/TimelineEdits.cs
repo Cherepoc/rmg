@@ -58,6 +58,16 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         spans.Add((from, to));
     }
 
+    /// <summary>A track falling silent from one position up to another, as the band stops: the drums cut there, their own hits after kept, a pitched part silenced.</summary>
+    public void Rest(int track, TrackRole role, double from, double to)
+    {
+        Clear(track, from, to);
+        if (role == TrackRole.Drum)
+            Cut(track, from);
+        else
+            Silence(track, from, to);
+    }
+
     /// <summary>Where a track's notes end as the band stops, in no order; none where it never does.</summary>
     public IReadOnlyList<double> CutsOf(int track) => _cuts.GetValueOrDefault(track) ?? [];
 
