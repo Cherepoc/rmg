@@ -63,7 +63,7 @@ internal static class TracePoints
     /// <summary>What the song's drums do, keep time or mark its form (a <see cref="Composition.DrumJob" />).</summary>
     public const string DrumJob = "Drum job";
 
-    /// <summary>The drums marking the song's form, by their tracks, where its drums mark it (an <c>ImmutableArray</c> of <c>int</c>).</summary>
+    /// <summary>The drums marking the song's form, by their tracks, empty where its drums keep the groove or it has none (an <c>ImmutableArray</c> of <c>int</c>).</summary>
     public const string DrumMarks = "Drum marks";
 
     /// <summary>The ornaments the song's lines play (an <c>ImmutableArray</c> of <see cref="Composition.Ornament" />).</summary>
@@ -78,7 +78,10 @@ internal static class TracePoints
     /// <summary>Whether a section calls and its band answers, the melody singing every phrase's first half (a <c>bool</c>, <see cref="Composition.CallAndResponse" />).</summary>
     public const string CallAndResponse = "Call and response";
 
-    /// <summary>Whether a section turns its pattern around, its last bar a V or a ii–V into its start (a <c>bool</c>).</summary>
+    /// <summary>
+    ///     Whether a section turns its pattern around, its last bar a V or a ii–V into its start, and whether that changes a
+    ///     chord, a last bar on V already playing none (a <c>(bool Turns, bool Changes)</c>).
+    /// </summary>
     public const string Turnaround = "Turnaround";
 
     /// <summary>Whether a section plays its appearances' first phrase in stop time (a <c>bool</c>).</summary>

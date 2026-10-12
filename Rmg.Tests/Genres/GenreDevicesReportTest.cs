@@ -21,7 +21,8 @@ public sealed class GenreDevicesReportTest
             song.Trace.Where(x => x.Point == point).Select(x => plays(x.Value) ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average();
         var scales = song.Trace.Where(x => x.Point == TracePoints.ChordScales).SelectMany(x => (ImmutableArray<ChordScale>)x.Value!).ToArray();
         double Chords(ChordScaleKind kind) => scales.Length > 0 ? scales.Count(x => x.Kind == kind) / (double)scales.Length : double.NaN;
-        var chords = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.Where(x => x.Value.Pitches.Length >= 3).ToArray() ?? [];
+        var chordNotes = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.ToArray() ?? [];
+        var chords = chordNotes.Where(x => x.Value.Pitches.Length >= 3).ToArray();
         var lines = new[] { song.Track(TrackRole.Melody), song.Track(TrackRole.CounterMelody), song.Track(TrackRole.Riff), song.Track(TrackRole.Solo) }
             .SelectMany(x => song.Song.Notes!.GetValueOrDefault(x) ?? EventTimeline.Create<RealizedNote>(0, [])).ToArray();
         double Lines(Func<RealizedNote, bool> plays) => lines.Length > 0 ? lines.Count(x => plays(x.Value)) / (double)lines.Length : double.NaN;
@@ -34,10 +35,6 @@ public sealed class GenreDevicesReportTest
         var held = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value.Where(n =>
             n.Value.Pitches.Length >= 3 && n.Value.Duration >= 1 - 1e-9
             && InstrumentsOverTime.ProgramOf(n.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode) is >= 0 and <= 7)).ToArray();
-        // the pitched parts' sections, and those in an instrument switched to
-        var played = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
-            .SelectMany(x => sections.Select((span, i) => (x.Key, i, Notes: x.Value.Where(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9).ToArray())))
-            .Where(x => x.Notes.Length > 0).ToArray();
         return new Dictionary<string, double>
         {
             ["chords applied dominants"] = Chords(ChordScaleKind.Applied),
@@ -46,9 +43,11 @@ public sealed class GenreDevicesReportTest
             ["chords of four notes or more"] = chords.Length > 0 ? chords.Count(x => x.Value.Pitches.Select(p => p % 12).Distinct().Count() >= 4) / (double)chords.Length : double.NaN,
             ["chords parts arpeggiated"] = Sections(TracePoints.Arpeggio, x => (ArpeggioPattern)x! != ArpeggioPattern.None),
             ["sections with a passing chord"] = Sections(TracePoints.HarmonicRhythm, x => ((HarmonicRhythm)x!).Passing.Length > 0),
-            ["sections turned around"] = Sections(TracePoints.Turnaround, x => (bool)x!),
+            ["sections turned around"] = Sections(TracePoints.Turnaround, x => (((bool, bool Changes))x!).Changes),
             ["sections planing"] = Sections(TracePoints.Planing, x => x is not null),
-            ["sections with an inner line"] = Sections(TracePoints.InnerLine, x => (bool)x!),
+            ["sections with an inner line"] = sections.Length > 0
+                ? sections.Average(span => chordNotes.Any(n => span.IsWithin(n.Position) && n.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0) ? 1.0 : 0)
+                : double.NaN,
             ["sections over a pedal"] = Sections(TracePoints.SectionPedal, x => x is not null),
             ["songs reharmonising"] = song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is null ? 0 : 1,
             ["songs changing key"] = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).IsEmpty ? 0 : 1,
@@ -68,7 +67,7 @@ public sealed class GenreDevicesReportTest
             ["sections whose groove mutates"] = Sections(TracePoints.Mutations, x => (((int, int Made))x!).Made > 0),
             ["sections with a figure"] = Sections(TracePoints.Figures, x => ((System.Collections.ICollection)x!).Count > 0),
             ["sections in half or double time"] = Sections(TracePoints.TimeFeel, x => (int)x! != 0),
-            ["songs flamming or dragging"] = song.Trace.Single(x => x.Point == TracePoints.DrumOrnaments).Value is (int flams, int drags) && flams + drags > 0 ? 1 : 0,
+            ["songs flamming or dragging"] = song.Trace.Single(x => x.Point == TracePoints.DrumOrnaments).Value is (bool flams, bool drags) && (flams || drags) ? 1 : 0,
             ["songs whose drums mark the form"] = ((System.Collections.ICollection)song.Trace.Single(x => x.Point == TracePoints.DrumMarks).Value!).Count > 0 ? 1 : 0,
             ["songs swung"] = song.Swing.Delay > 0 ? 1 : 0,
             ["songs swung in 16ths"] = song.Swing.Delay > 0 && song.Swing.Period < 1 ? 1 : 0,
@@ -89,12 +88,58 @@ public sealed class GenreDevicesReportTest
             ["sections harmonising the melody"] = sections.Length == 0 ? double.NaN
                 : song.Trace.Where(x => x.Point == TracePoints.LineDoubling).Count(x => (((int, TrackRole Source, TrackRole, int))x.Value!).Source == TrackRole.Melody) / (double)sections.Length,
             ["songs repeating the last section"] = (bool)song.Trace.Single(x => x.Point == TracePoints.LastRepeat).Value! ? 1 : 0,
-            ["parts' sections switched"] = played.Length > 0
-                ? played.Count(x => x.Notes.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Program) is var p && p > 0 && p - 1 != ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode)) / (double)played.Length
+            // of every pitched part's sections, those it plays in an instrument switched to (the trace's, a pinch's harmonics and a form's guitar apart)
+            ["parts' sections switched"] = song.Song.TrackDefinitions.Values.Count(x => x is PitchInstrumentTrack) * sections.Length is var parts and > 0
+                ? song.Trace.Count(x => x.Point == TracePoints.InstrumentOverTime && song.Song.TrackDefinitions[x.Track] is PitchInstrumentTrack part
+                                        && (((int, TrackRole, int Program, ArticulationMode, int))x.Value!).Program != part.InstrumentCode) / (double)parts
                 : double.NaN,
             ["songs with a strong effect"] = ((SongEffects)song.Trace.Single(x => x.Point == TracePoints.SongEffects).Value!).Strong != StrongEffect.None ? 1 : 0,
             ["held piano chords rolled"] = held.Length > 0 ? held.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Strum) > 0) / (double)held.Length : double.NaN,
             ["reverb sent"] = song.Song.Notes!.Values.SelectMany(x => x).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Reverb) - 1.0).Where(x => x >= 0).DefaultIfEmpty(double.NaN).Average(),
+            ["sections with the riff in power chords"] = Sections(TracePoints.RiffPowerChords, x => (bool)x!),
+            ["sections whose riff chugs"] = Sections(TracePoints.Chugs, x => (bool)x!),
+            ["sections whose riff drones"] = Sections(TracePoints.Drone, x => (bool)x!),
+            ["sections with an octave bass"] = Sections(TracePoints.OctaveBass, x => (bool)x!),
+            ["sections with an alternating bass"] = Sections(TracePoints.AlternatingBass, x => (bool)x!),
+            ["sections with a melody hook"] = Sections(TracePoints.MelodyHook, x => (bool)x!),
+            ["sections calling and answered"] = Sections(TracePoints.CallAndResponse, x => (bool)x!),
+            ["songs ornamenting their lines"] = ((ImmutableArray<Ornament>)song.Trace.Single(x => x.Point == TracePoints.Ornaments).Value!).IsEmpty ? 0 : 1,
+            ["parts' sections in a scale of their own"] = Sections(TracePoints.LineScale, x => (LineScale)x! != LineScale.Section),
+            ["sections harmonising in three voices"] = sections.Length == 0 ? double.NaN : song.Trace.Count(x => x.Point == TracePoints.BlockHarmony) / (double)sections.Length,
+            ["line notes inverted"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.LineInversion) > 0),
+            ["line notes leaning"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.LineAppoggiatura) > 0),
+            ["line notes on a tension"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.LineTension) > 0),
+            ["melody notes stacked"] = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Melody))?.ToArray() is { Length: > 0 } melody
+                ? melody.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1) / (double)melody.Length
+                : double.NaN,
+            ["sections vamping"] = Sections(TracePoints.Vamp, x => (bool)x!),
+            ["sections raising the cadence"] = Sections(TracePoints.CadenceRaise, x => (((int?, bool Raised))x!).Raised),
+            ["sections at home off the tonic"] = Sections(TracePoints.SectionHome, x => (int)x! != 0),
+            ["sections changing chords every two bars"] = Sections(TracePoints.HarmonicRhythm, x => ((HarmonicRhythm)x!).Bars >= 2),
+            ["songs opening on the hook"] = song.Song.Map!.Intro.Kind == IntroKind.Hook ? 1 : 0,
+            ["songs opening on the riff"] = song.Song.Map!.Intro is { Kind: IntroKind.Entries, Entries: [{ Part.Role: TrackRole.Riff }, ..] } ? 1 : 0,
+            ["songs counted in"] = song.Song.Map!.Intro.Kind == IntroKind.CountIn ? 1 : 0,
+            ["songs ending on a button"] = song.Song.Map!.Ending.Kind == EndingKind.Button ? 1 : 0,
+            ["songs ringing out"] = song.Song.Map!.Ending.Kind == EndingKind.RingOut ? 1 : 0,
+            ["songs fading"] = song.Song.Map!.Ending.Kind == EndingKind.Fade ? 1 : 0,
+            ["songs stripped at the end"] = song.Song.Map!.Ending.Kind == EndingKind.Strip ? 1 : 0,
+            ["sections broken down"] = Sections(TracePoints.Breakdown, x => (bool)x!),
+            ["sections cut short"] = sections.Length > 0 ? sections.Average(x => x.Cut > 1e-9 ? 1.0 : 0) : double.NaN,
+            ["sections in phrases of three or six"] = sections.Length > 0 ? sections.Average(x => x.Meter.PhraseBars != Meter.DefaultPhraseBars ? 1.0 : 0) : double.NaN,
+            ["drops filtered"] = song.Trace.Count(x => x.Point is TracePoints.Drop or TracePoints.FilteredDrop) is var drops and > 0
+                ? song.Trace.Count(x => x.Point == TracePoints.FilteredDrop) / (double)drops
+                : double.NaN,
+            ["appearances of one part alone"] = song.Trace.Where(x => x.Point == TracePoints.Texture)
+                .Select(x => ((int, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>>))x.Value!).Average(x => x.Kind == TextureKind.Alone ? 1.0 : 0),
+            ["songs whose mix is filtered"] = (MixFilterPlan)song.Trace.Single(x => x.Point == TracePoints.MixFilter).Value! is var plan
+                && (plan.Opening || plan.Closing || !plan.Dips.IsEmpty || !plan.Drops.IsEmpty) ? 1 : 0,
+            ["songs in a genre's room"] = song.Song.Draws!.Room is null ? 0 : 1,
+            ["songs with an insertion effect"] = song.Song.Draws!.Insertion is null ? 0 : 1,
+            ["songs with a drum solo"] = song.Solos.Values.Any(x => x.IsDrumSolo) ? 1 : 0,
+            ["solos trading with the drums"] = song.Solos.Count > 0 ? song.Solos.Values.Average(x => x.TradesWithDrums ? 1.0 : 0) : double.NaN,
+            ["solos twinned"] = song.Solos.Count > 0 ? song.Solos.Values.Average(x => x.Mode == SoloMode.Together ? 1.0 : 0) : double.NaN,
+            ["drum solos whose feet keep time"] = song.Trace.Where(x => x.Point == TracePoints.DrumSolo).Select(x => ((DrumSolo)x.Value!).Feet ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
+            ["phrase lines filled"] = song.Trace.Where(x => x.Point == TracePoints.FillDecision).Select(x => ((FillDecision)x.Value!).Span > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["unconventionality"] = song.Song.Draws!.Unconventionality.Base
         };
     }
@@ -108,16 +153,52 @@ public sealed class GenreDevicesReportTest
         ["sections over a pedal"] = "harmonyDevices", ["songs reharmonising"] = "harmonyDevices", ["songs changing key"] = "keyChanges",
         ["sections in stop time"] = "stopTime", ["sections pushing"] = "push", ["lifts dropped"] = "drop", ["sections of 16 bars or more"] = "sectionLength",
         ["sections of 32 bars"] = "sectionLength", ["appearances building or thinning"] = "texture", ["verses without a melody"] = "voice",
-        ["songs with a solo"] = "solos", ["songs with a guitar driven when loud"] = "louderForms", ["songs swung"] = "feelChances", ["songs swung in 16ths"] = "feelValues", ["line notes bent or slid"] = "effects", ["bass's changes of pitch slid into"] = "glide",
+        ["songs with a solo"] = "solos", ["sections ghosting"] = "ghosts", ["sections whose groove mutates"] = "mutation",
+        ["sections in half or double time"] = "feelChances", ["songs flamming or dragging"] = "rudiments", ["songs whose drums mark the form"] = "drumJob",
+        ["songs swung"] = "feelChances", ["songs swung in 16ths"] = "feelValues",
+        ["sections heavy, their clean guitars driven"] = "louderForms", ["sections calm, their driven guitars acoustic"] = "louderForms",
+        ["line notes bent or slid"] = "effects", ["bass's changes of pitch slid into"] = "glide",
         ["line notes with a vibrato"] = "effects", ["line notes slurred"] = "articulation", ["sections polymetric"] = "polymeter",
         ["appearances at a tempo of their own"] = "sectionChanges", ["sections in a meter of their own"] = "sectionChanges",
         ["sections the solo part answers"] = "soloAnswers", ["lines in octaves"] = "doubling", ["sections harmonising the melody"] = "doubling",
         ["songs repeating the last section"] = "lastRepeat", ["parts' sections switched"] = "instrumentSwitches", ["songs with a strong effect"] = "strongEffect",
-        ["held piano chords rolled"] = "articulation", ["reverb sent"] = "space"
+        ["held piano chords rolled"] = "articulation", ["reverb sent"] = "space",
+        ["sections with the riff in power chords"] = "riff", ["sections whose riff chugs"] = "riff", ["sections whose riff drones"] = "riff",
+        ["sections with an octave bass"] = "octaveBass", ["sections with an alternating bass"] = "alternatingBass", ["sections with a melody hook"] = "hook",
+        ["sections calling and answered"] = "callAndResponse", ["songs ornamenting their lines"] = "ornaments", ["parts' sections in a scale of their own"] = "lineScale",
+        ["sections harmonising in three voices"] = "doubling", ["line notes inverted"] = "inversion", ["line notes leaning"] = "appoggiatura",
+        ["line notes on a tension"] = "tension", ["sections vamping"] = "vamp", ["sections raising the cadence"] = "cadenceRaise",
+        ["sections at home off the tonic"] = "sectionHome", ["sections changing chords every two bars"] = "harmonicRhythm",
+        ["songs opening on the hook"] = "intro", ["songs opening on the riff"] = "riffIntro", ["songs counted in"] = "intro",
+        ["songs ending on a button"] = "ending", ["songs ringing out"] = "ending", ["songs fading"] = "ending", ["songs stripped at the end"] = "ending",
+        ["sections broken down"] = "breakdown", ["sections cut short"] = "sectionChanges", ["sections in phrases of three or six"] = "phraseBars",
+        ["drops filtered"] = "dropKind", ["appearances of one part alone"] = "alone", ["songs whose mix is filtered"] = "mixFilter",
+        ["songs in a genre's room"] = "room", ["songs with an insertion effect"] = "insertion", ["songs with a drum solo"] = "soloists",
+        ["solos trading with the drums"] = "soloists", ["solos twinned"] = "solos", ["drum solos whose feet keep time"] = "drumSoloFeet", ["phrase lines filled"] = "fills"
     };
 
     /// <summary>The measures that are numbers rather than shares.</summary>
     private static readonly HashSet<string> Numbers = ["reverb sent", "unconventionality"];
+
+    /// <summary>
+    ///     The device and idiom reports measure a song of every preset and of none, which the review and listening read,
+    ///     and every measure's choice is one of the genre's choices.
+    /// </summary>
+    [Test]
+    public async Task TheReports_MeasureASongOfEveryPreset_EachMeasureByAChoiceThereIs()
+    {
+        Genre?[] genres = [null, ..GenrePresets.All.Select(GenrePresets.Genre)];
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, genres.Length), i => TestCorpus.Get(0, new SongOverrides(Genre: genres[i])));
+        var measures = songs.Select(Measure).ToArray();
+        foreach (var song in songs)
+            await Assert.That(GenreIdiomsReportTest.Measure(song)).IsNotEmpty();
+        await Assert.That(measures.All(x => x.Keys.ToHashSet().SetEquals(measures[0].Keys))).IsTrue();
+        foreach (var (measure, choice) in ChoiceOf)
+        {
+            await Assert.That(measures[0].ContainsKey(measure)).IsTrue().Because(measure);
+            await Assert.That(GenreChoices.All.Any(x => x.Name == choice)).IsTrue().Because($"{measure}: {choice}");
+        }
+    }
 
     [Test]
     [Explicit]

@@ -35,7 +35,7 @@ public sealed class PhraseLengthTest
                 await Assert.That(meter.Phrases).IsEqualTo(1).Because(because);
 
             var rhythm = Traced<HarmonicRhythm>(TracePoints.HarmonicRhythm);
-            if (meter.PhraseBars <= Meter.DefaultPhraseBars || !rhythm.Passing.IsEmpty || Traced<bool>(TracePoints.Turnaround) || song.Trace.Single(x => x.Point == TracePoints.Planing && x.Section == id).Value is not null)
+            if (meter.PhraseBars <= Meter.DefaultPhraseBars || !rhythm.Passing.IsEmpty || Traced<(bool Turns, bool)>(TracePoints.Turnaround).Turns || song.Trace.Single(x => x.Point == TracePoints.Planing && x.Section == id).Value is not null)
                 continue;
             var progression = Traced<ImmutableArray<int>>(TracePoints.Progression);
             var again = (meter.PhraseBars - Meter.DefaultPhraseBars) * meter.BarDuration;

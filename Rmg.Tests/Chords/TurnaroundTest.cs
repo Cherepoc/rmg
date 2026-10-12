@@ -25,7 +25,7 @@ public sealed class TurnaroundTest
         // but a section that planes, its chords the home's shape moved rather than its progression's
         // each section's turnaround with its own progression, joined by the section
         var sections = songs.SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.Turnaround)
-            .Select(turn => (Turns: (bool)turn.Value!, Progression: (ImmutableArray<int>)song.Trace.Last(p => p.Point == TracePoints.Progression && p.Section == turn.Section).Value!, turn.Section))
+            .Select(turn => (Turns: (((bool Turns, bool))turn.Value!).Turns, Progression: (ImmutableArray<int>)song.Trace.Last(p => p.Point == TracePoints.Progression && p.Section == turn.Section).Value!, turn.Section))
             .Where(x => song.Trace.Where(p => p.Point == TracePoints.Planing && p.Section == x.Section).All(p => p.Value is null))
             .Select(x => (x.Turns, x.Progression))).ToArray();
 

@@ -59,7 +59,7 @@ public sealed class GenreIdiomsReportTest
             .SelectMany(x => x.Zip(x.Skip(1), (a, b) => ((b - a) % 7 + 7) % 7)).ToArray();
         double Motion(int steps) => motions.Length > 0 ? motions.Count(x => x == steps) / (double)motions.Length : double.NaN;
         var changes = map.Sections.Sum(x => song.ChordChanges.Count(c => c >= x.Start - 1e-9 && c < x.End - 1e-9));
-        var phrases = map.Sections.Sum(x => x.Duration / x.Meter.PhraseDuration);
+        var fours = map.Sections.Sum(x => x.Duration / x.Meter.BarDuration) / 4;
 
         var melody = notes.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
         var drumVelocities = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack && notes.ContainsKey(x.Key)).SelectMany(x => notes[x.Key]).Select(x => 127 * Render.GetMidiVelocity(x.Value)).ToArray();
@@ -109,7 +109,7 @@ public sealed class GenreIdiomsReportTest
         {
             ["chorus phrases of two bars at most"] = Repeating(SectionRole.Chorus),
             ["verse phrases of two bars at most"] = Repeating(SectionRole.Verse),
-            ["chords in 4 bars"] = phrases > 0 ? changes / phrases : double.NaN,
+            ["chords in 4 bars"] = fours > 0 ? changes / fours : double.NaN,
             ["roots down a fifth (ii-V, V-I)"] = Motion(3),
             ["roots down a fourth (I-V, IV-I)"] = Motion(4),
             ["roots down a third (vi-IV, i-bVI)"] = Motion(5),

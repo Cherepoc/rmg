@@ -304,9 +304,11 @@ internal sealed class SectionGenerator
         // a turnaround now and then, the pattern's last bar leading back to its start, by the progression facet and a genre's,
         // from a sequence of its own
         var turnaround = Stream(sectionId, SectionStream.Turnaround).TestProbability(Progressions.Turnaround.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Turnaround, "sections")));
+        var untouched = progression;
         if (turnaround)
             progression = Progressions.TurnAround(progression, harmonicRhythm.Changes.Count(x => x >= meter.PatternDuration - meter.BarDuration - 1e-9));
-        StateTrace.RecordSection(TracePoints.Turnaround, SectionTrace, sectionId, $"{turnaround}", turnaround);
+        // whether it turns, and whether that changes a chord, as a last bar on V already plays no turnaround
+        StateTrace.RecordSection(TracePoints.Turnaround, SectionTrace, sectionId, $"{turnaround}", (Turns: turnaround, Changes: !progression.SequenceEqual(untouched)));
         // the cadence raising the seventh for a major chord on the fifth, where the scale allows it, by the progression
         // facet, from a sequence of its own
         var raisable = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);

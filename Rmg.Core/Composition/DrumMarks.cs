@@ -75,15 +75,16 @@ internal static class DrumMarks
     /// <summary>The song with its drums marking its form where its genre has them do so.</summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
+        // an empty marking traced where the drums keep the groove or the song has none, so that the trace is there on every path
         if (song.DrumJob == DrumJob.Groove)
-            return draft;
+            return Unmarked();
 
         var context = song.Stream(SongStream.DrumMarks);
 
         var notes = SongStages.NotesOf(draft);
         var drums = notes.Where(x => song.Tracks.Definitions[x.Key] is PercussionInstrumentTrack && x.Value.Count > 0).Select(x => x.Key).ToArray();
         if (drums.Length == 0)
-            return draft;
+            return Unmarked();
         var count = Math.Min(context.Pick(Counts), drums.Length);
         var marking = drums.OrderBy(_ => context.GenerateDouble()).Take(count).ToArray();
         // every drum's typical note, the middle of its notes by loudness, which its marks play as
@@ -139,6 +140,12 @@ internal static class DrumMarks
                 marks.TryGetValue(track, out var own) ? own.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position) : []);
         StateTrace.RecordSong(TracePoints.DrumMarks, string.Join(", ", marking), marking.ToImmutableArray());
         return draft with { Notes = result.ToImmutable() };
+
+        SongDraft Unmarked()
+        {
+            StateTrace.RecordSong(TracePoints.DrumMarks, "", ImmutableArray<int>.Empty);
+            return draft;
+        }
     }
 
     /// <summary>
