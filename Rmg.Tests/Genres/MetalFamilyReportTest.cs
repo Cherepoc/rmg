@@ -1,0 +1,92 @@
+using System.Collections.Immutable;
+using Rmg.Core.Composition;
+using Rmg.Core.Events;
+using Rmg.Core.Songs;
+
+namespace Rmg.Tests.Genres;
+
+/// <summary>
+///     The metal family against its sound: how long its chords hold still, how low its riff plays and whether its tonic is
+///     the guitar's floor, how many pitches a bar its riff plays, and how closely its kick and bass play with it.
+/// </summary>
+public sealed class MetalFamilyReportTest
+{
+    private const int Count = 64;
+
+    private static readonly string[] Genres = ["nuMetal", "djent", "metal", "blackMetal", "rock", "techno", "funk"];
+
+    [Test]
+    [Explicit]
+    public async Task Report()
+    {
+        foreach (var name in Genres)
+        {
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name))));
+            var spans = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.HarmonicRhythm).Select(t => ((HarmonicRhythm)t.Value!).Bars)).ToArray();
+            string Span(double bars) => $"{spans.Count(x => x == bars) / (double)spans.Length:P0}";
+
+            // the longest a root holds in a section, in bars, and the share of the sections' bars under a root held four bars or more
+            var (longest, stillBars, allBars) = (new List<double>(), 0.0, 0.0);
+            // the riff's lowest note, whether it is the key's tonic, and its pitch classes a bar
+            var (lowest, tonicLowest, classes) = (new List<int>(), 0, new List<double>());
+            // a riff's onsets with the bass on them, and its sections with the kick's figure its own
+            var (riffOnsets, withBass) = (0, 0);
+            foreach (var song in songs)
+            {
+                var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+                var roots = common.GetStateTimeline(StateKinds.ChordRoot).Select(x => (x.Position, x.Value)).ToArray();
+                foreach (var section in song.Map.Sections)
+                {
+                    var bar = section.Meter.BarDuration;
+                    // the root sounding as the section starts, a vamp's the only one
+                    (double Position, int Value)[] inside = [(section.Start, common.GetEffectiveStateMapAt(section.Start).GetStateValue(StateKinds.ChordRoot)),
+                        ..roots.Where(x => x.Position > section.Start + 1e-9 && x.Position < section.End - 1e-9)];
+                    var runs = new List<double>();
+                    for (var i = 0; i < inside.Length;)
+                    {
+                        var j = i;
+                        while (j + 1 < inside.Length && inside[j + 1].Value == inside[i].Value)
+                            j++;
+                        var end = j + 1 < inside.Length ? inside[j + 1].Position : section.End;
+                        runs.Add((end - inside[i].Position) / bar);
+                        i = j + 1;
+                    }
+
+                    if (runs.Count == 0)
+                        continue;
+                    longest.Add(runs.Max());
+                    stillBars += runs.Where(x => x >= 4 - 1e-9).Sum();
+                    allBars += runs.Sum();
+                }
+
+                if (song.Absent.Contains(TrackRole.Riff))
+                    continue;
+                var riff = song.Notes(song.Track(TrackRole.Riff));
+                if (riff.Length == 0)
+                    continue;
+                var lowestNote = riff.MinBy(x => x.Value.Offset);
+                var low = lowestNote.Value.Offset;
+                var key = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(lowestNote.Position).GetStateValue(StateKinds.KeyOffset);
+                lowest.Add(low);
+                if (((low - key) % 12 + 12) % 12 == 0)
+                    tonicLowest++;
+                classes.AddRange(riff.GroupBy(x => (int)Math.Floor(x.Position / song.Song.Meter.BarDuration)).Select(g => (double)g.Select(x => x.Value.Offset % 12).Distinct().Count()));
+                if (!song.Absent.Contains(TrackRole.Bass))
+                {
+                    var bass = song.Notes(song.Track(TrackRole.Bass)).Select(x => Math.Round(x.Position * 48)).ToHashSet();
+                    riffOnsets += riff.Length;
+                    withBass += riff.Count(x => bass.Contains(Math.Round(x.Position * 48)));
+                }
+            }
+
+            var figures = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Figures).Select(t => (ImmutableDictionary<FigurePlayer, string>)t.Value!)).ToArray();
+            Console.WriteLine($"{name}: {longest.Count} sections; spans half {Span(0.5)}, one {Span(1)}, two {Span(2)}; a section's longest root {longest.Average():0.0} bars, " +
+                              $"its bars under a root of four or more {stillBars / allBars:P0}");
+            Console.WriteLine($"{name}: the riff's lowest {lowest.DefaultIfEmpty().Average():0.0} (min {lowest.DefaultIfEmpty().Min()}), the tonic {tonicLowest / (double)Math.Max(1, lowest.Count):P0}, " +
+                              $"pitch classes a bar {classes.DefaultIfEmpty().Average():0.00}; its onsets with the bass {withBass / (double)Math.Max(1, riffOnsets):P0}, " +
+                              $"sections with the kick on it {figures.Count(x => x.GetValueOrDefault(FigurePlayer.Ground) == "withRiff") / (double)Math.Max(1, figures.Length):P0}");
+        }
+
+        await Task.CompletedTask;
+    }
+}

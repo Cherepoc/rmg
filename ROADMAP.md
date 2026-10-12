@@ -625,6 +625,41 @@ calm guitar the absurdity listening split on, so the drums are measured; the jum
 black metal cuts, a fill or a fade there only if listening asks; Classical judged by its cadences, its bass and its
 dynamics, as it has no drums.
 
+### Planned: the metal family, tuned down, locked and split
+
+Planned 12 October 2026 from listening (Nu metal heard as not its sound): its riff a fifth too high, a melody rather
+than a groove, chords changing every bar or two, the band not in unison. Metal heard as too diverse: its facets drawn
+apart, a choir and a violin over a thrash tempo, a gallop under organ chords, which a preset of its own for each style
+keeps together. Each step through the implementation loop, with a listening question. In order:
+
+1. Done (12 October 2026, data, `MetalFamilyReportTest`): **Nu metal's harmony held still**, a vamp in 40-50-50% of
+   its sections and the same root leaned 75, its bars under a root held four bars or more 1% → 56% (Djent's 48%,
+   Funk's 46%, Techno's 78%); **Metal's riff an octave down** as Nu metal's and Djent's already were, its lowest note
+   50.3 → 38.3. Dropped, measured unneeded: a span of four bars (the vamp and the same root hold a chord as long), and
+   a tuning below E2 (Nu metal's and Djent's riffs already reach C2, 36, the octave's floor; A1 would ask a guitar's
+   sample stretched into mud). Queued for the next round of listening, as today's ten are unanswered: `numetal-vamp`
+   (without, `vamp.sections` 0) and `metal-low-riff` (without, `register.riff` 50).
+2. **The bass with the riff throughout** on a driven guitar, not only where it would rest (`LineDoubling`), in unison
+   where the riff sits under the bass's floor; Nu metal's kick with its riff more often, its slap bass the quiet
+   sections' and a picked bass doubling.
+3. **A riff's accent tone** (`riff.accent`: the chord's, the ♭2, the ♭5, the ♭3), the strong notes off the chord where
+   its harmony holds still, with rests between; Nu metal, Thrash, Djent, Doom and Blues. Only with step 1's four bars,
+   as a ♭2 over a clean triad sounds a mistake.
+4. **Metal split** into Heavy metal (keeping `metal`: the gallop, twin solos, harmonic minor, 110 to 170), Thrash
+   (fast, the double kick, tremolo and 16th chugs, Phrygian, the kick with the riff, the accent tone), Symphonic metal
+   (the choir, strings, violin and organ, a soaring melody) and Doom (new: 50 to 80, B1 to C2, the ♭5, four bars a
+   chord, held chords). Groove metal left to Thrash, Nu metal and Djent between them. Ratings under `metal` from before
+   the split not used to tune its presets.
+5. Left to listening: **a melody spoken rather than sung** (Nu metal, Hip-hop, Trap, Punk, Thrash), a narrow range and
+   repeated notes, with *A melody sung rather than played* (*Genres*).
+
+Review: **overengineering**: the tuning one drawn floor, no strings or retuning per section; the accent tone an option
+of the riff's; the split data on the steps before it, Thrash without the accent tone and four bars only a fast Heavy
+metal, Doom without the tuning a slow one; no sub-styles within a genre, a preset being what keeps choices together.
+**Musicality**: a stretched guitar sample muddy below E2 by soundfont, so heard before tuned; dissonant accents only
+over still harmony; a slap bass doubling a distorted riff turning it to funk metal, so picked where it doubles; a
+narrow melody on a guitar possibly only dull, so asked before built.
+
 ### Conventionality
 
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
