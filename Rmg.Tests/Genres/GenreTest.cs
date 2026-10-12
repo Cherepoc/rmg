@@ -418,6 +418,24 @@ public sealed class GenreTest
         await Assert.That(octaves).IsGreaterThan(0);
     }
 
+    /// <summary>A song of a preset that names its intros opens on one of them, a hook intro among them only where it names it; opening on the riff, its band entering, aside.</summary>
+    [Test]
+    public async Task ASongsIntro_IsOneItsGenreNames()
+    {
+        foreach (var preset in GenrePresets.All.Where(x => x.Choices.ContainsKey(GenreChoices.Intro.Name)))
+        {
+            var named = preset.Choices[GenreChoices.Intro.Name].Where(x => x.Value.ValueKind == System.Text.Json.JsonValueKind.Array ? x.Value.EnumerateArray().Any(y => y.GetInt32() > 0) : x.Value.GetInt32() > 0)
+                .Select(x => x.Key).ToHashSet();
+            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))))
+            {
+                var intro = song.Map.Intro;
+                var opensOnRiff = intro is { Kind: IntroKind.Entries, Entries: [{ Part.Role: TrackRole.Riff }, ..] };
+                await Assert.That(named.Contains(GenreChoices.Name(intro.Kind.ToString())) || opensOnRiff || intro.Kind == IntroKind.Cold && named.Count == 0)
+                    .IsTrue().Because($"{preset.Id} seed {song.Seed}: {intro.Kind}");
+            }
+        }
+    }
+
     [Test]
     public async Task EveryDevice_NamedAsTheSongsHaveIt_PlaysAsNoGenre()
     {

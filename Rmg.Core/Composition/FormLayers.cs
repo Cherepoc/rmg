@@ -82,13 +82,6 @@ public readonly record struct IntroWindow(int Bars, bool IsBefore)
 internal static class FormLayers
 {
     /// <summary>
-    ///     The chance a song opens on its chorus's hook, by its form facet: a convention, and no aptest in the plainest
-    ///     songs, as often in them as in a middling one and never at the wild end; drawn after its other intro, which it
-    ///     replaces, and played where the song has a chorus to quote that does not open it.
-    /// </summary>
-    public static ByConvention HookIntro { get; } = new(0.25, 0.25, 0);
-
-    /// <summary>
     ///     The chance a song opens on its riff alone, the band coming in part by part after it, as a riff-driven band's
     ///     song does, by its form facet: the songs' never; a genre's where it names it, in place of its other intro.
     /// </summary>
@@ -245,9 +238,13 @@ internal static class FormLayers
         return ByConvention.Weigh(IntroWeights, unconventionality, genre.Pool<IntroKind>(GenreChoices.Intro));
     }
 
-    /// <summary>The intros' weights at the ends, the songs' alike at every end.</summary>
+    /// <summary>
+    ///     The intros' weights at the ends, the songs' alike at every end, but the chorus's hook, a convention and no aptest
+    ///     in the plainest songs, a quarter of them and of the middling ones, never at the wild end, played where the song
+    ///     has a chorus to quote.
+    /// </summary>
     public static ImmutableArray<(IntroKind Intro, ByConvention Weight)> IntroWeights { get; } =
-        [..Intros.Select(x => (x.Value, new ByConvention(x.Weight, x.Weight, x.Weight)))];
+        [..Intros.Select(x => (x.Value, new ByConvention(x.Weight, x.Weight, x.Weight))), (IntroKind.Hook, new ByConvention(1 / 3.0, 1 / 3.0, 0))];
 
     /// <summary>An intro as a genre's page shows it.</summary>
     public static string LabelOf(IntroKind intro) => intro switch
@@ -255,6 +252,7 @@ internal static class FormLayers
         IntroKind.Cold => "The whole band",
         IntroKind.CountIn => "A count-in",
         IntroKind.Entries => "Part by part",
+        IntroKind.Hook => "The chorus's hook",
         _ => intro.ToString()
     };
 

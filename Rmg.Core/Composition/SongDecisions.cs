@@ -230,7 +230,6 @@ internal sealed record SongDecisions(
         var formGenerator = new SongFormGenerator(
             Stream(SongStream.Form),
             Stream(SongStream.Intro),
-            Stream(SongStream.HookIntro),
             Stream(SongStream.Drops),
             Stream(SongStream.DropKind),
             Stream(SongStream.RiffIntro),
@@ -239,6 +238,7 @@ internal sealed record SongDecisions(
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
             !absent.Contains(TrackRole.Drum),
             drumJob == DrumJob.Groove,
+            Stream(SongStream.HookIntro),
             !absent.Contains(TrackRole.Riff),
             meter
         );
@@ -268,10 +268,10 @@ internal sealed record SongDecisions(
         // an intro's entries over the first section's first phrase, as long as its phrase is
         if (plan.Intro == IntroKind.Entries && !plan.Window.IsBefore)
             plan = plan with { Window = plan.Window with { Bars = sectionMeters[sectionIds[0]].PhraseBars } };
-        // a hook intro where the song has a chorus to quote, and a cold start where it has none
+        // a hook intro where the song has a chorus to quote, and where it has none another of the genre's intros
         var hook = SongFormGenerator.HookOf(sectionIds, structure.Roles, sectionMeters);
         if (plan.Intro == IntroKind.Hook && hook is null)
-            plan = plan with { Intro = IntroKind.Cold };
+            plan = formGenerator.WithoutHook(plan);
 
         // every section's drums, drawn before the sections are made, every drum of the song's groove in one of them at
         // least, from a stream of its own, where the song plays drums

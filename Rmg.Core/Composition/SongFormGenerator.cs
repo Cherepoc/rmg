@@ -20,8 +20,6 @@ internal sealed class SongFormGenerator
     // the sequence an intro's entries are drawn from, apart from the rest of the form
     private readonly IGenerationContext _introContext;
 
-    // the sequence whether the song opens on its hook is drawn from (FormLayers.HookIntro)
-    private readonly IGenerationContext _hookContext;
 
     // the sequence whether a lift is built to and dropped at is drawn from (FormLayers.Drop)
     private readonly IGenerationContext _dropContext;
@@ -50,13 +48,15 @@ internal sealed class SongFormGenerator
     // in its sections alone (DrumMarks)
     private readonly bool _drumsKeepTime;
 
+    // the sequence another intro is drawn from where the song has no chorus for its hook to quote (WithoutHook)
+    private readonly IGenerationContext _hookContext;
+
     // whether the song plays a riff, which it may open on alone
     private readonly bool _playsRiff;
 
     public SongFormGenerator(
         IGenerationContext context,
         IGenerationContext introContext,
-        IGenerationContext hookContext,
         IGenerationContext dropContext,
         IGenerationContext dropKindContext,
         IGenerationContext riffContext,
@@ -65,13 +65,13 @@ internal sealed class SongFormGenerator
         IReadOnlyDictionary<int, TrackRole> roles,
         bool hasDrums,
         bool drumsKeepTime,
+        IGenerationContext hookContext,
         bool playsRiff,
         Meter meter
     )
     {
         _context = context;
         _introContext = introContext;
-        _hookContext = hookContext;
         _dropContext = dropContext;
         _dropKindContext = dropKindContext;
         _riffContext = riffContext;
@@ -80,6 +80,7 @@ internal sealed class SongFormGenerator
         _roles = roles;
         _hasDrums = hasDrums;
         _drumsKeepTime = hasDrums && drumsKeepTime;
+        _hookContext = hookContext;
         _playsRiff = playsRiff;
         _meter = meter;
     }
@@ -89,20 +90,23 @@ internal sealed class SongFormGenerator
     ///     last section then leads home to the tonic, where the ending lands.
     /// </summary>
     /// <param name="sectionIds">The sections in the song's order.</param>
+    /// <summary>A plan whose hook has no chorus to quote with another of the genre's intros, from a sequence of its own, a count-in where the drums keep time.</summary>
+    public FormPlan WithoutHook(FormPlan plan)
+    {
+        ImmutableArray<Weighted<IntroKind>> others = [..FormLayers.WeighIntros(_songRhythm.Value, _genre).Where(x => x.Value != IntroKind.Hook && (x.Value != IntroKind.CountIn || _drumsKeepTime))];
+        return plan with { Intro = others.IsEmpty ? IntroKind.Cold : _hookContext.Pick(others) };
+    }
+
     public FormPlan Plan(IReadOnlyList<int> sectionIds)
     {
         var intro = _context.Pick(FormLayers.WeighIntros(_songRhythm.Value, _genre));
         var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Value, _genre));
         // the entries' window and a count-in's half drawn whatever the intro, so that the draws after them are as many
-        var drawnWindow = _introContext.Pick(FormLayers.IntroWindows);
-        var window = intro == IntroKind.Entries ? drawnWindow : default;
+        var window = _introContext.Pick(FormLayers.IntroWindows);
         var halfCountIn = _context.TestProbability(FormLayers.HalfCountInChance) && intro == IntroKind.CountIn;
         // a song without drums that keep time has nobody to count it in, so it starts cold, drawn as it would be all the same
         if (intro == IntroKind.CountIn && !_drumsKeepTime)
             (intro, halfCountIn) = (IntroKind.Cold, false);
-        // the hook in its place now and then, the other's draws made all the same
-        if (_hookContext.TestProbability(FormLayers.HookIntro.At(_songRhythm.Value)))
-            (intro, window, halfCountIn) = (IntroKind.Hook, default, false);
         // or the riff alone opening it, the band coming in after it, a genre's, from a sequence of its own, over the
         // window drawn for the entries or one of its own
         var riffFirst = _riffContext.TestProbability(FormLayers.RiffIntro.At(_songRhythm.Value, _genre.Chance(GenreChoices.RiffIntro, "songs")))

@@ -135,10 +135,10 @@ public sealed class DropTest
     [Test]
     public async Task ADrop_AfterAnIntro_TakesItsRiser()
     {
-        // a song found to drop in after its intro, rare among the corpus's, its case asserted so that it fails rather than
-        // passes untested once the songs are drawn again
+        // a song found to drop in after its intro, a Trap opening on its hook, which no preset's songs both do, its case
+        // asserted so that it fails rather than passes untested once the songs are drawn again
         using var trace = StateTrace.Start(explains: false);
-        var song = SongGenerator.GenerateSong(5730926807999, new SongOverrides(Genre: GenrePresets.Genre("trap")));
+        var song = SongGenerator.GenerateSong(5730926807999, new SongOverrides(Genre: GenrePresets.With("trap", GenreChoices.Intro, ("hook", 1))));
         await Assert.That(song.Map!.Origin).IsGreaterThan(0);
         await Assert.That(trace.Entries.Any(x => x.Point is TracePoints.Drop or TracePoints.FilteredDrop && Math.Abs((double)x.Value! - song.Map.Origin) < 1e-9)).IsTrue();
         await Assert.That(song.Notes!.Values.SelectMany(x => x).Any(x => x.Position < song.Map.Origin && x.Value.State.GetStateValue(CompositionStateKinds.Program) == Risers.Program + 1)).IsTrue();

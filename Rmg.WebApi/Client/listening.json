@@ -221,21 +221,21 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 206.5,
+        "at": 203.2,
         "listen": [
           "Bass (Acoustic Bass)"
         ]
       },
       {
         "seed": "s",
-        "at": 0,
+        "at": 0.7,
         "listen": [
           "Bass (Acoustic Bass)"
         ]
       },
       {
         "seed": "16",
-        "at": 24.8,
+        "at": 27.2,
         "listen": [
           "Solo (Overdriven Guitar)",
           "Bass (Acoustic Bass)"
@@ -243,7 +243,7 @@
       },
       {
         "seed": "1E",
-        "at": 54.2,
+        "at": 54.4,
         "listen": [
           "Solo (Harmonica)",
           "Bass (Acoustic Bass)"
@@ -313,14 +313,14 @@
       },
       {
         "seed": "1S",
-        "at": 273.1,
+        "at": 264.1,
         "listen": [
           "Melody (Lead 2 (sawtooth))"
         ]
       },
       {
         "seed": "1T",
-        "at": 6,
+        "at": 2,
         "listen": [
           "Melody (Lead 2 (sawtooth))"
         ]
@@ -350,7 +350,7 @@
       },
       {
         "seed": "5",
-        "at": 48.4,
+        "at": 0,
         "listen": [
           "Bass (Synth Bass 2)"
         ]
@@ -410,7 +410,7 @@
       },
       {
         "seed": "3",
-        "at": 2.1,
+        "at": 0,
         "listen": [
           "Melody (Electric Piano 1)"
         ]
@@ -419,8 +419,7 @@
         "seed": "D",
         "at": 2.8,
         "listen": [
-          "Chords (Drawbar Organ)",
-          "Bass (Electric Bass (finger))"
+          "Chords (Drawbar Organ)"
         ]
       },
       {
@@ -434,7 +433,7 @@
       },
       {
         "seed": "S",
-        "at": 12.3,
+        "at": 0,
         "listen": [
           "Kick"
         ]
@@ -482,7 +481,7 @@
       },
       {
         "seed": "u",
-        "at": 223.7,
+        "at": 218.5,
         "listen": [
           "Chords (Pad 3 (polysynth))"
         ]
@@ -552,7 +551,7 @@
       },
       {
         "seed": "G",
-        "at": 31.9,
+        "at": 20.1,
         "listen": [
           "Ride",
           "Acoustic Snare",
@@ -614,12 +613,20 @@
         ]
       },
       {
-        "seed": "v",
-        "at": 51.5,
+        "seed": "l",
+        "at": 0,
         "listen": [
-          "Riff (Electric Guitar (clean))",
-          "Kick",
-          "Hi-Hat"
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "v",
+        "at": 1.5,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
         ]
       },
       {
@@ -629,15 +636,6 @@
           "Riff (Overdriven Guitar)",
           "Ride",
           "Kick"
-        ]
-      },
-      {
-        "seed": "1A",
-        "at": 1.7,
-        "listen": [
-          "Kick",
-          "Riff (Electric Guitar (clean))",
-          "Hi-Hat"
         ]
       },
       {
