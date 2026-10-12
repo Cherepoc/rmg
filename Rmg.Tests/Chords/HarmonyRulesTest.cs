@@ -6,7 +6,7 @@ using Rmg.Core.Probabilities;
 
 namespace Rmg.Tests.Chords;
 
-/// <summary>The harmony's devices kept where they belong: out of the plainest songs, a vamp on its one chord, a section's home in its genre's pool, a dominant before a chord it resolves to.</summary>
+/// <summary>The harmony's devices kept where they belong: out of the plainest songs, a vamp on its one chord, a section's home in its genre's pool, a dominant before a chord it resolves to, a loop on the first section's harmony.</summary>
 public sealed class HarmonyRulesTest
 {
     private static Genre With(GenreChoice choice, string option) => TestCorpus.Always(choice, option);
@@ -88,5 +88,37 @@ public sealed class HarmonyRulesTest
         }
 
         await Assert.That(dominants).IsGreaterThan(20);
+    }
+
+    /// <summary>
+    ///     A looping section plays the song's first section's harmony, its chords, where they change and their scales, the
+    ///     song's last only where that harmony is at home on the tonic; and the plainest songs never loop.
+    /// </summary>
+    [Test]
+    public async Task ALoopingSection_PlaysTheFirstSectionsHarmony_AndThePlainestNeverLoop()
+    {
+        var looping = 0;
+        var genre = With(GenreChoices.Loop, "sections");
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            T Last<T>(string point, int section) => (T)song.Trace.Last(x => x.Point == point && x.Section == section).Value!;
+            var first = song.Map.Sections[0].SectionId;
+            foreach (var section in song.Trace.Where(x => x.Point == TracePoints.Loop && (bool)x.Value!).Select(x => x.Section))
+            {
+                looping++;
+                await Assert.That(Last<ImmutableArray<int>>(TracePoints.Progression, section).SequenceEqual(Last<ImmutableArray<int>>(TracePoints.Progression, first))).IsTrue().Because($"seed {song.Seed}, section {section}");
+                await Assert.That(Last<HarmonicRhythm>(TracePoints.HarmonicRhythm, section).Changes.SequenceEqual(Last<HarmonicRhythm>(TracePoints.HarmonicRhythm, first).Changes)).IsTrue().Because($"seed {song.Seed}, section {section}");
+                await Assert.That(Last<ImmutableArray<ChordScale>>(TracePoints.ChordScales, section).SequenceEqual(Last<ImmutableArray<ChordScale>>(TracePoints.ChordScales, first))).IsTrue().Because($"seed {song.Seed}, section {section}");
+                if (section == song.Map.Sections[^1].SectionId)
+                    await Assert.That(Last<int>(TracePoints.SectionHome, first)).IsEqualTo(0).Because($"seed {song.Seed}");
+            }
+        }
+
+        await Assert.That(looping).IsGreaterThan(20);
+        // a genre looping but at its plain end
+        var unlessPlain = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
+            .Add(GenreChoices.Loop.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("sections", new ByConvention(0, 1, 1))));
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: unlessPlain))))
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.Loop).All(x => !(bool)x.Value!)).IsTrue().Because($"seed {song.Seed}");
     }
 }

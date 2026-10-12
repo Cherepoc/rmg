@@ -243,7 +243,7 @@
       },
       {
         "seed": "1E",
-        "at": 54.4,
+        "at": 50.3,
         "listen": [
           "Solo (Harmonica)",
           "Bass (Acoustic Bass)"
@@ -464,15 +464,6 @@
     },
     "seeds": [
       {
-        "seed": "6",
-        "at": 278.4,
-        "listen": [
-          "Melody (Lead 1 (square))",
-          "Chords (Pad 3 (polysynth))",
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
         "seed": "Y",
         "at": 78.3,
         "listen": [
@@ -496,6 +487,14 @@
           "Riff's twin (Lead 2 (sawtooth))",
           "Riff (Lead 2 (sawtooth))",
           "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 223.6,
+        "listen": [
+          "Riff (Lead 1 (square))",
+          "Bass (Synth Bass 2)"
         ]
       },
       {

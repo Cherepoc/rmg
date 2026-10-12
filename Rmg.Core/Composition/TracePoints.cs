@@ -75,6 +75,9 @@ internal static class TracePoints
     /// <summary>Whether a section vamps on its home (a <c>bool</c>, <see cref="SectionGenerator.Vamp" />).</summary>
     public const string Vamp = "Vamp";
 
+    /// <summary>Whether a section plays the song's first section's harmony, a loop (a <c>bool</c>, <see cref="SectionGenerator.Loop" />).</summary>
+    public const string Loop = "Loop";
+
     /// <summary>Whether a section calls and its band answers, the melody singing every phrase's first half (a <c>bool</c>, <see cref="Composition.CallAndResponse" />).</summary>
     public const string CallAndResponse = "Call and response";
 

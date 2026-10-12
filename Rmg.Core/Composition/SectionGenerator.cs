@@ -366,9 +366,14 @@ internal sealed class SectionGenerator
         var harmony = new SectionHarmony(scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, planes);
         if (plan.KeepsSongScale)
             _firstHarmony = (harmony, meter);
-        else if (loops && (_firstHarmony ?? throw new InvalidOperationException("A section loops before the song's first is made.")).Meter.Equals(meter))
-            // the song's last on its tonic as it must be, to land the ending home
-            harmony = plan.HasTonicHome ? _firstHarmony.Value.Harmony with { Home = 0 } : _firstHarmony.Value.Harmony;
+        // but the song's last, which must land the ending home, where the first's home is not the tonic, as its chords'
+        // scales were worked out on its own home
+        var looped = !plan.KeepsSongScale && loops
+                     && (_firstHarmony ?? throw new InvalidOperationException("A section loops before the song's first is made.")).Meter.Equals(meter)
+                     && (!plan.HasTonicHome || _firstHarmony.Value.Harmony.Home == 0);
+        StateTrace.RecordSection(TracePoints.Loop, SectionTrace, sectionId, $"{looped}", looped);
+        if (looped)
+            harmony = _firstHarmony!.Value.Harmony;
         (scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, _) = harmony;
         StateTrace.RecordSection(TracePoints.SectionScale, SectionTrace, sectionId, scale.Name, scale);
         StateTrace.RecordSection(TracePoints.HarmonicRhythm, SectionTrace, sectionId, $"{harmonicRhythm.Span}", harmonicRhythm);

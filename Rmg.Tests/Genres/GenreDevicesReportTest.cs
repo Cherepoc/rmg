@@ -112,6 +112,7 @@ public sealed class GenreDevicesReportTest
                 ? melody.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1) / (double)melody.Length
                 : double.NaN,
             ["sections vamping"] = Sections(TracePoints.Vamp, x => (bool)x!),
+            ["sections looping"] = Sections(TracePoints.Loop, x => (bool)x!),
             ["sections raising the cadence"] = Sections(TracePoints.CadenceRaise, x => (((int?, bool Raised))x!).Raised),
             ["sections at home off the tonic"] = Sections(TracePoints.SectionHome, x => (int)x! != 0),
             ["sections changing chords every two bars"] = Sections(TracePoints.HarmonicRhythm, x => ((HarmonicRhythm)x!).Bars >= 2),
@@ -166,7 +167,7 @@ public sealed class GenreDevicesReportTest
         ["sections with an octave bass"] = "octaveBass", ["sections with an alternating bass"] = "alternatingBass", ["sections with a melody hook"] = "hook",
         ["sections calling and answered"] = "callAndResponse", ["songs ornamenting their lines"] = "ornaments", ["parts' sections in a scale of their own"] = "lineScale",
         ["sections harmonising in three voices"] = "doubling", ["line notes leaning"] = "appoggiatura",
-        ["line notes on a tension"] = "tension", ["sections vamping"] = "vamp", ["sections raising the cadence"] = "cadenceRaise",
+        ["line notes on a tension"] = "tension", ["sections vamping"] = "vamp", ["sections looping"] = "loop", ["sections raising the cadence"] = "cadenceRaise",
         ["sections at home off the tonic"] = "sectionHome", ["sections changing chords every two bars"] = "harmonicRhythm",
         ["songs opening on the hook"] = "intro", ["songs opening on the riff"] = "riffIntro", ["songs counted in"] = "intro",
         ["songs ending on a button"] = "ending", ["songs ringing out"] = "ending", ["songs fading"] = "ending", ["songs stripped at the end"] = "ending",
