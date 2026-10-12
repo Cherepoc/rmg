@@ -123,7 +123,7 @@ internal static class SectionTempo
                 if (eases && Math.Abs(ratio - 1) > 1e-9 && !MetricRatios.Any(x => Math.Abs(x - ratio) < 1e-9))
                 {
                     // over the bar before the section, a short one's where the section before cuts it
-                    var bar = map.MeterAt(section.Start - 1e-6).BarDuration;
+                    var bar = map.BarBefore(section.Start);
                     var beats = (int)Math.Ceiling(bar - 1e-9);
                     for (var k = 0; k < beats; k++)
                         items.Add((before * Math.Pow(ratio, (k + 1) / (double)(beats + 1))).ToTimelineItem(section.Start - bar + k));

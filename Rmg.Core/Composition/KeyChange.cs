@@ -122,15 +122,14 @@ public sealed record KeyChange(double Position, int Semitones)
         // how far the key has moved for good, and the key playing, both from the song's own
         var lift = 0;
         var key = 0;
-        var place = 0;
         foreach (var (section, index) in map.Sections.Select((x, i) => (x, i)))
-        for (var start = section.Start; start < section.End - 1e-9; start += section.Meter.PatternDuration, place++)
+        foreach (var (pattern, start, _) in section.Patterns)
         {
             // the song starts in its own key
-            if (place == 0) continue;
+            if (index == 0 && pattern == 0) continue;
 
-            var isLastSection = index == liftAt && start == section.Start;
-            var drawing = isLastSection ? context : places(index, (int)Math.Round((start - section.Start) / section.Meter.PatternDuration));
+            var isLastSection = index == liftAt && pattern == 0;
+            var drawing = isLastSection ? context : places(index, pattern);
             var chance = isLastSection && cameBack ? LastSectionChance.At(unconventionality, lastSection) : ElsewhereChance.At(unconventionality, elsewhere);
             var isChanging = drawing.TestProbability(chance);
             var step = drawing.Pick(ByConvention.Weigh(Steps, unconventionality));
@@ -286,7 +285,7 @@ public sealed record KeyChange(double Position, int Semitones)
             // a pedal: the old key's chords as they are, the bass holding the new key's dominant over their last bar
             if (device == Device.Pedal)
             {
-                chains.Add((change, [Math.Max(since, change - map.MeterAt(change - 1e-6).BarDuration)], Device.Pedal));
+                chains.Add((change, [Math.Max(since, change - map.BarBefore(change))], Device.Pedal));
                 continue;
             }
 

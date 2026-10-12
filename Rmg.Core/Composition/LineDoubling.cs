@@ -219,9 +219,8 @@ internal static class LineDoubling
                     continue;
 
                 var filled = new List<TimelineItem<StateMap>>();
-                for (var start = span.Start; start < span.End - 1e-9; start += span.Meter.PatternDuration)
+                foreach (var (_, start, end) in span.Patterns)
                 {
-                    var end = Math.Min(start + span.Meter.PatternDuration, span.End);
                     if (In(bassTrack, start, end).Length > 0 || In(riffTrack, start, end) is not { Length: > 0 } riff)
                         continue;
 

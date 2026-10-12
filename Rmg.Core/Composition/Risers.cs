@@ -38,7 +38,7 @@ internal static class Risers
         var risers = new List<TimelineItem<RealizedNote>>();
         foreach (var drop in song.Form.Drops)
         {
-            var bar = drop - song.Form.Map.MeterAt(drop - 1e-6).BarDuration;
+            var bar = drop - song.Form.Map.BarBefore(drop);
             // the part's last note before the bar, whose loudness and sends the riser takes, or its first where it comes in later
             var before = notes[track].LastOrDefault(n => n.Position < bar - 1e-9) is { Value: not null } last ? last : notes[track][0];
             var state = StateMap.Default.With(CompositionStateKinds.Program, Program + 1)

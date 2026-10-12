@@ -77,21 +77,42 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     /// <summary>How long the bar ending at a position is: a section's short last bar before the next section's start, its meter's bar otherwise.</summary>
     public double BarBefore(double position) => MeterAt(position - 1e-6).BarDuration;
 
-    /// <summary>The bar of a section's pattern a position is in, counted from its section's start, before the first too, a short last bar the pattern's own.</summary>
-    public int PatternBarAt(double position)
+    /// <summary>
+    ///     Where a position is in the song's bars: its bar counted from its section's start, before the first and after the
+    ///     last too, in the section's meter, and how far into the bar it is, a hair before a bar line counted at it
+    ///     against a sum's rounding; the bar's own meter a short last bar's (<see cref="MeterAt" />).
+    /// </summary>
+    public Place PlaceOf(double position)
     {
-        var meter = BarsAt(position)?.Meter ?? Meter;
-        return ((int)Math.Floor((position - (BarsAt(position)?.Start ?? Origin)) / meter.BarDuration + 1e-9)).Mod(meter.PatternBarCount);
+        var span = BarsAt(position);
+        var meter = span?.Meter ?? Meter;
+        var fromStart = position - (span?.Start ?? Origin);
+        var bar = (int)Math.Floor(fromStart / meter.BarDuration + 1e-9);
+        return new Place(bar, bar.Mod(meter.PatternBarCount), Math.Max(0, fromStart - bar * meter.BarDuration), MeterAt(position));
     }
 
+    /// <summary>The bar of a section's pattern a position is in, counted from its section's start, before the first too, a short last bar the pattern's own.</summary>
+    public int PatternBarAt(double position) => PlaceOf(position).PatternBar;
+
     /// <summary>How far into its bar a position is, in beats, the bars counted from its section's start.</summary>
-    public double BeatInBar(double position)
-    {
-        var meter = BarsAt(position)?.Meter ?? Meter;
-        var fromStart = position - (BarsAt(position)?.Start ?? Origin);
-        // a hair before a bar line counted at it, against a sum's rounding
-        return Math.Max(0, fromStart - Math.Floor(fromStart / meter.BarDuration + 1e-9) * meter.BarDuration);
-    }
+    public double BeatInBar(double position) => PlaceOf(position).Beat;
+}
+
+/// <summary>Where a position is in the song's bars (<see cref="SongMap.PlaceOf" />).</summary>
+/// <param name="Bar">Its bar, counted from its section's start, negative before the first section.</param>
+/// <param name="PatternBar">Its bar of the section's pattern.</param>
+/// <param name="Beat">How far into its bar it is, in beats.</param>
+/// <param name="Meter">Its bar's own meter, a short last bar's.</param>
+public readonly record struct Place(int Bar, int PatternBar, double Beat, Meter Meter);
+
+/// <summary>A stretch of a section, a bar, a phrase or a play of its pattern, by its index from the section's start, the last cut at the section's end.</summary>
+public readonly record struct Span(int Index, double Start, double End)
+{
+    /// <summary>Whether a position is in the stretch, a hair early counting as at its start, as every stage asks.</summary>
+    public bool Contains(double position) => Within(position, Start, End);
+
+    /// <summary>Whether a position is within [start, end), a hair early counting as at a bound, the one tolerance the stages share.</summary>
+    public static bool Within(double position, double start, double end) => position >= start - 1e-9 && position < end - 1e-9;
 }
 
 /// <summary>How a song starts: its intro's kind, and how long it plays before the first section, 0 for none.</summary>
@@ -113,7 +134,7 @@ public sealed record SectionSpan(int SectionId, double Start, double Duration, M
     public double LastBar => End - Meter.BarDuration + Cut;
 
     /// <summary>Whether a position is in it, a hair early counting as at its start.</summary>
-    public bool IsWithin(double position) => position >= Start - 1e-9 && position < End - 1e-9;
+    public bool IsWithin(double position) => Span.Within(position, Start, End);
 
     /// <summary>How many bars it plays, a short last one among them.</summary>
     public int BarCount => (int)Math.Ceiling(Duration / Meter.BarDuration - 1e-9);
@@ -131,6 +152,21 @@ public sealed record SectionSpan(int SectionId, double Start, double Duration, M
 
     /// <summary>Where a bar of it starts and ends, a short last one ending at the section's end.</summary>
     public (double Start, double End) Bar(int index) => (Start + index * Meter.BarDuration, Math.Min(Start + (index + 1) * Meter.BarDuration, End));
+
+    /// <summary>Its bars, a short last one among them.</summary>
+    public IEnumerable<Span> Bars => Walk(Meter.BarDuration);
+
+    /// <summary>Its phrases, the last cut at its end.</summary>
+    public IEnumerable<Span> Phrases => Walk(Meter.PhraseDuration);
+
+    /// <summary>The plays of its pattern, the last cut at its end.</summary>
+    public IEnumerable<Span> Patterns => Walk(Meter.PatternDuration);
+
+    private IEnumerable<Span> Walk(double length)
+    {
+        for (var index = 0; Start + index * length < End - 1e-9; index++)
+            yield return new Span(index, Start + index * length, Math.Min(Start + (index + 1) * length, End));
+    }
 }
 
 /// <summary>How a song ends: the ending's kind, where it starts, how long it is, and its final chord's length.</summary>

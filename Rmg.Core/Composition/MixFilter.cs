@@ -68,7 +68,7 @@ internal static class MixFilter
 
         // a filtered drop's bar before it closing all the way, opening on its downbeat (FormLayers.DropKinds)
         foreach (var drop in song.Form.FilteredDrops)
-            ramps.Add((drop - song.Form.Map.MeterAt(drop - 1e-6).BarDuration, drop, 0, 1));
+            ramps.Add((drop - song.Form.Map.BarBefore(drop), drop, 0, 1));
 
         var closes = stream.TestProbability(Chance(ClosingChance, "closing"));
         var closingDepth = 0.6 + 0.4 * stream.GenerateDouble();

@@ -64,10 +64,8 @@ internal static class Ghosts
             {
                 if (ghosting[span.SectionId] is not { } draws)
                     continue;
-                var bar = span.Meter.BarDuration;
-                for (var start = span.Start; start < span.End - 1e-9; start += bar)
+                foreach (var (_, start, end) in span.Bars)
                 {
-                    var end = Math.Min(span.End, start + bar);
                     var own = timeline.Where(x => x.IsWithin(start, end)).ToArray();
                     // nor in a bar whose snare plays off the 16ths, a tuplet's, whose grid the ghosts would fall between
                     if (own.Length == 0 || busy(start, end) || own.Any(x => Math.Abs((x.Position - start) / Length - Math.Round((x.Position - start) / Length)) > 1e-6))
