@@ -44,4 +44,17 @@ public sealed class AppoggiaturaTest
         Console.WriteLine($"the melody's notes resolved by step from off the chord: {leaning.Resolved} of {leaning.Notes} leaning every time, {own.Resolved} of {own.Notes} the songs' own, {none.Resolved} of {none.Notes} never");
         await Assert.That(leaning.Resolved).IsGreaterThan(none.Resolved + leaning.Notes / 50);
     }
+
+    /// <summary>The plainest melodies never lean on a tension, nor call for the band to answer.</summary>
+    [Test]
+    public async Task ThePlainestMelodies_NeitherLeanNorCall()
+    {
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Melody, 0))))))
+        {
+            foreach (var role in new[] { TrackRole.Melody, TrackRole.CounterMelody })
+                if (song.Song.Notes!.TryGetValue(song.Track(role), out var notes))
+                    await Assert.That(notes.All(x => x.Value.State.GetStateValue(CompositionStateKinds.LineAppoggiatura) == 0)).IsTrue().Because($"seed {song.Seed}, {role}");
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.CallAndResponse).All(x => !(bool)x.Value!)).IsTrue().Because($"seed {song.Seed}");
+        }
+    }
 }

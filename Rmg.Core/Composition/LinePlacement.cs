@@ -8,14 +8,12 @@ namespace Rmg.Core.Composition;
 ///     A note of a line to place: the note, its state as <c>Realizer</c> reads it, and the chord it plays over, as the
 ///     scale's steps above the chord's root, the chord's notes among them, and their pitch classes.
 /// </summary>
-/// <param name="ScaleLength">How many steps the note's scale has.</param>
 internal sealed record LineNote(
     TimelineItem<StateMap> Note,
     StateMap State,
     ChordContext Chord,
     ImmutableArray<int> Steps,
-    IReadOnlySet<int> Classes,
-    int ScaleLength
+    IReadOnlySet<int> Classes
 )
 {
     public double Position => Note.Position;
@@ -41,7 +39,7 @@ internal static class LinePlacement
                 {
                     var (note, state) = x;
                     var (chord, steps, classes) = Realizer.GetChordNotes(state.Value);
-                    return new LineNote(note, state.Value, chord, steps, classes, Realizer.GetChord(state.Value).ScaleOffsets.Length);
+                    return new LineNote(note, state.Value, chord, steps, classes);
                 }
             )
         ];

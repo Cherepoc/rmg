@@ -41,7 +41,7 @@ public enum PhraseStart
 /// <param name="ContourShare">How much the shape the phrases take moves where the line aims: 1 all of it, 0 none, a line that keeps to the middle of its range.</param>
 /// <param name="ImprovisationShare">How much of the song's improvisation the line takes as its sections recur.</param>
 /// <param name="PhraseArc">
-///     How much louder a phrase's highest note plays than its lowest, in the velocity's units, about 50 MIDI steps one
+///     How much louder a phrase's highest note plays than its lowest, in the velocity's units, about 35 to 50 MIDI steps one, fewer above the middle
 ///     (<see cref="LinePattern.PhraseArc" />); a few steps, so that the beat's accents still lead.
 /// </param>
 /// <param name="AimOdds">

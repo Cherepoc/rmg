@@ -6,7 +6,7 @@ using Rmg.Core.Songs;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The melody's part of a section: the state its bar patterns' notes carry for <see cref="Line" /> to place
+///     A line's part of a section, the melody's, the bass's, the counter-melody's or the riff's: the state its bar patterns' notes carry for <see cref="Line" /> to place
 ///     them by, the end of its phrases, and the notes placed once its bars are made.
 /// </summary>
 internal sealed class LinePattern
@@ -296,7 +296,7 @@ internal sealed class LinePattern
 
     /// <summary>A note's tensions: its scale's notes outside its chord, as pitch classes.</summary>
     private static IReadOnlySet<int> TensionsOf(LineNote note) =>
-        Enumerable.Range(0, note.ScaleLength).Select(x => note.Chord.GetPitch(x).Mod(12)).Where(x => !note.Classes.Contains(x)).ToHashSet();
+        Enumerable.Range(0, Scales.StepCount).Select(x => note.Chord.GetPitch(x).Mod(12)).Where(x => !note.Classes.Contains(x)).ToHashSet();
 
     /// <summary>
     ///     Whether a hook's note fits the chord its repeat plays over: of its scale, and, on any beat, no note of the chord a
@@ -304,7 +304,7 @@ internal sealed class LinePattern
     ///     as a hook repeated over its loop's chords sings.
     /// </summary>
     private static bool FitsHook((LineNote Note, int Rank, int Pitch) note, int pitch) =>
-        Enumerable.Range(0, note.Note.ScaleLength).Any(x => note.Note.Chord.GetPitch(x).Mod(12) == pitch.Mod(12))
+        Enumerable.Range(0, Scales.StepCount).Any(x => note.Note.Chord.GetPitch(x).Mod(12) == pitch.Mod(12))
         && !note.Note.Classes.Any(x => (x - pitch).Mod(12) is 1 or 11);
 
     /// <summary>Whether a pitch fits a note's chord where it plays: one of its notes on a strong beat, of its scale on another.</summary>
@@ -313,7 +313,7 @@ internal sealed class LinePattern
         var isStrong = note.Rank <= profile.StrongestWeakRank && note.Note.Classes.Count > 0;
         return isStrong
             ? note.Note.Classes.Contains(pitch.Mod(12))
-            : Enumerable.Range(0, note.Note.ScaleLength).Any(x => note.Note.Chord.GetPitch(x).Mod(12) == pitch.Mod(12));
+            : Enumerable.Range(0, Scales.StepCount).Any(x => note.Note.Chord.GetPitch(x).Mod(12) == pitch.Mod(12));
     }
 
     /// <summary>
@@ -359,7 +359,7 @@ internal sealed class LinePattern
     }
 
     /// <summary>
-    ///     A section's melody as a question and its answer: its 4 bars, and the answer's, of the same bar patterns, whose
+    ///     A section's line as a question and its answer: its pattern's bars, and the answer's, of the same bar patterns, whose
     ///     later bars' rhythm is varied (<see cref="PatternGenerator.GenerateBars" />) and whose notes there are mutated
     ///     (<see cref="Mutate" />, <see cref="MelodyLayers.AnswerShare" />), so that they are placed by the rules where
     ///     they echoed the question.
@@ -390,7 +390,7 @@ internal sealed class LinePattern
     }
 
     /// <summary>
-    ///     A melody's notes mutated, a decision at a time: a mutated note draws afresh where it means to go, as it was
+    ///     A line's notes mutated, a decision at a time: a mutated note draws afresh where it means to go, as it was
     ///     drawn (<see cref="LineProfile.GenerateStep" />), and plays no note heard before, so that it is placed by the rules. Whether a note is mutated, and how, is
     ///     drawn from a sequence of the note's own, by its key (<see cref="CompositionStateKinds.NoteKey" />), so that the
     ///     notes of a figure that comes back mutate alike, and take a key of their own, so that they come back alike.
@@ -490,8 +490,8 @@ internal sealed class LinePattern
 ///     A section's line before it is placed: its bars, the question and its answer, and what varies them every time the
 ///     section plays, so that every appearance brings its own bars for the song to place (<see cref="LinePattern.Place" />).
 /// </summary>
-/// <param name="Bars">The section's 8 bars, the answer's mutated.</param>
-/// <param name="BuildBars">The section's 8 bars built afresh, the answer's mutated, every bar drawing its rhythm afresh by its key, 0 for none.</param>
+/// <param name="Bars">The section's pattern's bars twice, the question's and the answer's, the answer's mutated.</param>
+/// <param name="BuildBars">Those bars built afresh, the answer's mutated, every bar drawing its rhythm afresh by its key, 0 for none.</param>
 /// <param name="Letters">Every bar's letter in the section's phrase scheme.</param>
 /// <param name="HarmonicRhythm">Where the section's chords change.</param>
 /// <param name="Approaches">How each chord of the pattern leads into the next (<see cref="LinePattern.DrawApproaches" />).</param>

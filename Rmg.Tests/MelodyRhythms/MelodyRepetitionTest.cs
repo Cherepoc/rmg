@@ -11,6 +11,13 @@ namespace Rmg.Tests.MelodyRhythms;
 /// </summary>
 public sealed class MelodyRepetitionTest
 {
+    /// <summary>The melody's pitches by their places, less the key there, so that a section moved up a key comes back as it was.</summary>
+    private static Dictionary<double, int> InTheKey(CorpusSong song)
+    {
+        var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
+        return song.Song.Notes![song.Song.Track(TrackRole.Melody)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0] - keys.GetEffectiveValueAt(x.Position));
+    }
+
     private const int SongCount = 128;
 
     /// <param name="Pairs">Notes at the same place in a pattern that comes back, both played.</param>
@@ -74,21 +81,22 @@ public sealed class MelodyRepetitionTest
                 onBeatChord += chord.Classes.Contains(note.Value.Pitches[0].Mod(12)) ? 1 : 0;
             }
 
-            // what comes back: every section's second pattern against its first, and a section against its first place
-            var pitches = melody.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
+            // what comes back: every section's second pattern against its first, of a section two patterns long or longer, and
+            // a section against its first place, in the key, as a section moved up a key comes back
+            var pitches = InTheKey(song);
             var spans = song.Map.Sections;
-            var comparisons = spans.Select(x => (From: x.Start, To: x.Start + x.Meter.PatternDuration, Length: x.Meter.PatternDuration))
+            var comparisons = spans.Where(x => x.Duration >= 2 * x.Meter.PatternDuration - 1e-9).Select(x => (From: x.Start, To: x.Start + x.Meter.PatternDuration, Length: x.Meter.PatternDuration))
                 .Concat(spans.Select((x, i) => (Span: x, First: spans.First(s => s.SectionId == x.SectionId)))
                     .Where(x => x.First != x.Span)
                     .Select(x => (From: x.First.Start, To: x.Span.Start, Length: x.Span.Duration)));
             foreach (var (from, to, length) in comparisons)
-            foreach (var note in melody.Where(x => x.Position >= from && x.Position < from + length))
+            foreach (var note in pitches.Where(x => x.Key >= from && x.Key < from + length))
             {
-                if (!pitches.TryGetValue(Math.Round(note.Position - from + to, 6), out var again))
+                if (!pitches.TryGetValue(Math.Round(note.Key - from + to, 6), out var again))
                     continue;
                 pairs++;
-                same += again == note.Value.Pitches[0] ? 1 : 0;
-                sameClass += (again - note.Value.Pitches[0]).Mod(12) == 0 ? 1 : 0;
+                same += again == note.Value ? 1 : 0;
+                sameClass += (again - note.Value).Mod(12) == 0 ? 1 : 0;
             }
 
             foreach (var span in spans.Skip(1))
@@ -222,8 +230,7 @@ public sealed class MelodyRepetitionTest
         {
             var improvises = (double)song.Trace.Single(x => x.Point == TracePoints.MelodyImprovisation).Value! > 0 ? 1 : 0;
             // every note in the song's key where it plays, which a key change for a last section moves
-            var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
-            var melody = song.Song.Notes![song.Song.Track(TrackRole.Melody)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0] - keys.GetEffectiveValueAt(x.Position));
+            var melody = InTheKey(song);
             var firsts = song.Map.Sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
             foreach (var span in song.Map.Sections)
             {
@@ -328,7 +335,7 @@ public sealed class MelodyRepetitionTest
             if ((double)song.Trace.Single(x => x.Point == TracePoints.MelodyImprovisation).Value! <= 0)
                 continue;
 
-            var melody = song.Song.Notes![song.Song.Track(TrackRole.Melody)].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
+            var melody = InTheKey(song);
             var sections = song.Map.Sections;
             var firsts = sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
             for (var i = 0; i < sections.Length; i++)

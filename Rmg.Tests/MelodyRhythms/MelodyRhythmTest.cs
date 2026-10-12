@@ -76,8 +76,13 @@ public sealed class MelodyRhythmTest
         var context = new GenerationContext(1);
         var values = Enumerable.Range(0, 20_000).Select(_ => MelodyBusyness.Generate(context).Value).Order().ToArray();
 
+        var (low, high) = (values[values.Length / 10], values[values.Length * 9 / 10]);
+        Console.WriteLine($"busyness's 10th percentile {low:F2}, its 90th {high:F2}");
         await Assert.That(values[values.Length / 2]).IsEqualTo(0.5).Within(0.03);
         await Assert.That(values.All(x => x is >= 0 and <= 1)).IsTrue();
+        // spread over the range, not held at the middle
+        await Assert.That(low).IsLessThan(0.35);
+        await Assert.That(high).IsGreaterThan(0.65);
     }
 
     /// <summary>The melody without its ornaments, a note in octaves once, by its own pitch, which comes first.</summary>

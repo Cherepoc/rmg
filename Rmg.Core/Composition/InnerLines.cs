@@ -54,18 +54,18 @@ internal static class InnerLines
             spans.Insert(0, (0, map.Origin, chorus.Meter));
         var held = spans
             .SelectMany(span => changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9)
-                .Select(x => (Start: x, End: Math.Min(changes.FirstOrDefault(c => c > x + 1e-9, span.End), span.End), span.Meter, Bars: span.Start))
+                .Select(x => (Start: x, End: Math.Min(changes.FirstOrDefault(c => c > x + 1e-9, span.End), span.End), span.Meter, Origin: span.Start))
                 .Where(x => x.End - x.Start >= Bars * x.Meter.BarDuration - 1e-9))
             .Where(x => !kept.Contains(x.Start) && common.GetEffectiveStateMapAt(x.Start).GetStateValue(StateKinds.ChordShift) == 0 && Lines((x.Start, x.End)))
             .ToArray();
         var (falls, marks, scales) = (new List<TimelineItem<int>>(), new List<TimelineItem<int>>(), new List<TimelineItem<LayerValue<StepAlterations>>>());
-        foreach (var (start, end, meter, bars) in held)
+        foreach (var (start, end, meter, origin) in held)
         {
             var before = start;
             for (var quarter = 1; quarter < 4; quarter++)
             {
                 // on the meter's nearest group, never on the step before it
-                var at = bars + meter.NearestGroupStart(start + quarter * (end - start) / 4 - bars);
+                var at = origin + meter.NearestGroupStart(start + quarter * (end - start) / 4 - origin);
                 if (at <= before + 1e-9 || at >= end - 1e-9)
                     break;
                 before = at;
