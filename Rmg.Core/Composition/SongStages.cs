@@ -32,18 +32,51 @@ internal sealed record SongDraft(
     /// <summary>Where the drums fill, from a run's first note to its line, which the stages that play around a fill keep out of.</summary>
     public (double From, double To)[] FillSpans => [..Runs.Where(x => !x.Positions.IsEmpty).Select(x => (x.Positions.Min(), x.Line))];
 
-    /// <summary>Whether a span meets a fill, from its first note to its line, the song's stop time as played or a drum solo: where the drums' own touches keep out.</summary>
-    public Func<double, double, bool> Busy(SongDecisions song)
-    {
-        var (fills, stops) = (FillSpans, Stopped);
-        var solos = DrumSoloSpans(song);
-        return (from, to) => fills.Any(x => x.From < to - 1e-9 && x.To > from + 1e-9) || stops.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9)
-                             || solos.Any(x => x.Start < to - 1e-9 && x.End > from + 1e-9);
-    }
+    /// <summary>
+    ///     What the song holds, which a stage keeps out of by the kinds it names (<see cref="Hold" />): the drums' fills, its
+    ///     stop time as played, its drum solos and trades, and where the form stops a part (<see cref="TimelineEdits.StopsOf" />).
+    /// </summary>
+    public Holds Holds(SongDecisions song) => new(
+    [
+        ..FillSpans.Select(x => new HeldSpan(Hold.Fill, x.From, x.To, null)),
+        ..Stopped.Select(x => new HeldSpan(Hold.Stop, x.Start, x.End, null)),
+        ..song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key])
+            .Select(x => new HeldSpan(Hold.DrumSolo, x.Start, x.End, null)),
+        ..song.Tracks.Definitions.Keys.SelectMany(track => song.Form.Edits.StopsOf(track).Select(x => new HeldSpan(Hold.Cut, x.From, x.To, track)))
+    ]);
+}
 
-    /// <summary>The appearances the drums solo in, alone or trading with the band, which the drummer plays as the solo has it.</summary>
-    public static SectionSpan[] DrumSoloSpans(SongDecisions song) =>
-        [..song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key])];
+/// <summary>What a stretch of the song is held by, which a stage keeps out of by the kinds it names.</summary>
+[Flags]
+internal enum Hold
+{
+    /// <summary>The drums' fill, from its first note to its line.</summary>
+    Fill = 1,
+
+    /// <summary>Stop time, as it played.</summary>
+    Stop = 2,
+
+    /// <summary>A drum solo, or a solo the drums trade.</summary>
+    DrumSolo = 4,
+
+    /// <summary>A part stopped by the form: a stop ending, a stripped ending's exits, a silent drop.</summary>
+    Cut = 8
+}
+
+/// <summary>A stretch the song holds, of a kind, a part's own or the whole band's.</summary>
+/// <param name="Track">The track it holds; none for every track.</param>
+internal readonly record struct HeldSpan(Hold Kind, double Start, double End, int? Track);
+
+/// <summary>Every stretch the song holds, asked by the kinds a stage keeps out of.</summary>
+internal sealed class Holds(ImmutableArray<HeldSpan> spans)
+{
+    /// <summary>Whether a stretch of a kind given meets [from, to), a track's own among them where one is asked of.</summary>
+    public bool Meets(Hold kinds, double from, double to, int? track = null) =>
+        spans.Any(x => (x.Kind & kinds) != 0 && (x.Track is null || x.Track == track) && x.Start < to - 1e-9 && x.End > from + 1e-9);
+
+    /// <summary>Whether a position lies in a stretch of a kind given, a hair early counting as at its start.</summary>
+    public bool At(Hold kinds, double position, int? track = null) =>
+        spans.Any(x => (x.Kind & kinds) != 0 && (x.Track is null || x.Track == track) && Span.Within(position, x.Start, x.End));
 }
 
 /// <summary>A stage of the song after it is put together: its name, what it does, and whether a test may leave it out.</summary>

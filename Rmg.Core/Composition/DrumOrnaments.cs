@@ -8,6 +8,9 @@ namespace Rmg.Core.Composition;
 /// <summary>The snare's flams and drags, a stage of the song after its notes are made (<see cref="SongStages" />).</summary>
 internal static class DrumOrnaments
 {
+    /// <summary>What a flam or a drag keeps out of: stop time and a drum solo, whose strokes are the drummer's own.</summary>
+    private const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo;
+
     /// <summary>The chance a song's snare flams its beats in a fill, by its fills facet: never at the plain end, every song at the wild.</summary>
     public static ByConvention FlamChance { get; } = new(0, 0.25, 1);
 
@@ -46,8 +49,7 @@ internal static class DrumOrnaments
         var notes = SongStages.NotesOf(draft);
         var snares = notes.Keys.Where(DrumGroups.SnareHeads.Contains).ToArray();
         var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
-        var (fills, stops, map) = (draft.FillSpans, draft.Stopped, song.Form.Map);
-        var solos = SongDraft.DrumSoloSpans(song);
+        var (holds, map) = (draft.Holds(song), song.Form.Map);
         var result = notes.ToBuilder();
         foreach (var track in snares)
         {
@@ -57,11 +59,10 @@ internal static class DrumOrnaments
                 var position = note.Position;
                 // the snare's head in a section, a count-in's clicks aside, out of stop time and of a drum solo, whose strokes are
                 // the drummer's own
-                if (note.Value.Pitches is not [var code] || code != head || map.SectionAt(position) is not { } section || stops.Any(x => position >= x.Start - 1e-9 && position < x.End - 1e-9)
-                    || solos.Any(x => x.IsWithin(position)))
+                if (note.Value.Pitches is not [var code] || code != head || map.SectionAt(position) is not { } section || holds.At(KeepsOutOf, position))
                     return note;
                 // in a fill on an 8th, its accents, and elsewhere on a pulse of its bar, its backbeat
-                var inFill = fills.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9);
+                var inFill = holds.At(Hold.Fill, position);
                 var beat = map.BeatInBar(position);
                 if (inFill ? Math.Abs(beat * 2 - Math.Round(beat * 2)) > 1e-6 : !map.MeterAt(position).Pulses.Any(x => Math.Abs(x - beat) < 1e-6))
                     return note;
