@@ -536,8 +536,8 @@ public static class GenreChoices
     /// <summary>The chances of the feel's: that the song swings, and that a section's drums play in half or double time.</summary>
     public static GenreChoice FeelChances { get; } = Chances("feelChances", "Swing and half time",
     [
-        ("swing", "Swings", Groove.SwingChance), ("halfTime", "A section's drums in half time", Even(Groove.HalfTimeChance)),
-        ("doubleTime", "A section's drums in double time", Even(Groove.DoubleTimeChance))
+        ("swing", "Swings", Groove.SwingChance), ("halfTime", "A section's drums in half time", Groove.HalfTimeChance),
+        ("doubleTime", "A section's drums in double time", Groove.DoubleTimeChance)
     ]);
 
     /// <summary>The values of the feel's: how much a song that swings swings, and how fast a tempo still swings its 16ths rather than its 8ths.</summary>

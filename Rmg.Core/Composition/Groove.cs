@@ -99,11 +99,14 @@ internal static class Groove
         return swings && meter.Pairs(period) ? new Swing(amount * period / 6, period) : Swing.None;
     }
 
-    /// <summary>The chance a section's drums play in half time, at a section of middling energy.</summary>
-    public const double HalfTimeChance = 0.08;
+    /// <summary>
+    ///     The chance a section's drums play in half time, at a section of middling energy: never in the plainest songs,
+    ///     which keep their time, and as often in the wildest as in a middling one.
+    /// </summary>
+    public static ByConvention HalfTimeChance { get; } = new(0, 0.08, 0.08);
 
-    /// <summary>The chance a section's drums play in double time, at a section of middling energy, rarer, as it is a busy effect.</summary>
-    public const double DoubleTimeChance = 0.04;
+    /// <summary>The chance a section's drums play in double time, as half time's, rarer, as it is a busy effect, heard as a scramble more often than a lift.</summary>
+    public static ByConvention DoubleTimeChance { get; } = new(0, 0.02, 0.02);
 
     /// <summary>
     ///     How a section's drums keep time: as a step of every drum's period, 1 for half time, the backbeat on the bar's
@@ -115,8 +118,7 @@ internal static class Groove
     /// <param name="genre">The genre whose chances of half and double time, at a section of middling energy, they take.</param>
     public static int DrawTimeFeel(IGenerationContext context, Tilt energy, double groove, Genre genre)
     {
-        // never in the plainest songs, which keep their time, and as often in the wildest as in a middling one
-        double Within(double chance, string option) => new ByConvention(0, chance, chance).At(groove, genre.Chance(GenreChoices.FeelChances, option));
+        double Within(ByConvention chance, string option) => chance.At(groove, genre.Chance(GenreChoices.FeelChances, option));
         var half = energy.Chance(Within(HalfTimeChance, "halfTime"), -1);
         var twice = energy.Chance(Within(DoubleTimeChance, "doubleTime"), 1);
         var draw = context.GenerateDouble();

@@ -1,570 +1,651 @@
 [
   {
-    "id": "rock-rhythm-clean",
-    "question": "Rock's rhythm guitar clean or muted beside its driven chords and riff: a contrast, or wanted driven too?",
-    "decides": "The clean and muted guitars' weight in Rock's rhythm part.",
-    "genre": "rock",
+    "id": "orchestral-metric",
+    "question": "Orchestral's section taking the tempo before it by a metric ratio, a triplet's pulse becoming the new beat: a modulation heard, or a jump like any other?",
+    "decides": "The metric modulation's chance in the songs.",
+    "genre": "orchestral",
     "without": {
       "skip": [],
       "genre": {
-        "instrument.rhythm": {
-          "electricGuitarClean": 0,
-          "electricGuitarMuted": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "5",
-        "at": 68,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))"
-        ]
-      },
-      {
-        "seed": "I",
-        "at": 116.2,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "S",
-        "at": 157.4,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "V",
-        "at": 8.6,
-        "listen": [
-          "Rhythm part (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "b",
-        "at": 53,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "h",
-        "at": 55.5,
-        "listen": [
-          "Rhythm part (Distortion Guitar)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "pop-double-time",
-    "question": "Pop's drums in double time for a section, the snare on every beat, as the songs' own chance has it: a lift, or a scramble?",
-    "decides": "Double time's chance in the songs.",
-    "genre": "pop",
-    "without": {
-      "skip": [],
-      "genre": {
-        "feelChances": {
-          "doubleTime": 0,
-          "swing": [
-            0,
-            20,
-            20
-          ],
-          "halfTime": 8
+        "sectionChanges": {
+          "modulation": 0
         }
       }
     },
     "seeds": [
       {
         "seed": "1",
-        "at": 4.1,
+        "at": 2.6,
         "listen": [
-          "Acoustic Snare",
-          "Clap",
-          "Hi-Hat"
+          "Chords (Pizzicato Strings)",
+          "Bass (Timpani)",
+          "Melody (Oboe)"
         ]
       },
-      {
-        "seed": "G",
-        "at": 21.5,
-        "listen": [
-          "Hi-Hat",
-          "Acoustic Snare",
-          "Clap"
-        ]
-      },
-      {
-        "seed": "Z",
-        "at": 62.3,
-        "listen": [
-          "Hi-Hat",
-          "Electric Snare"
-        ]
-      },
-      {
-        "seed": "m",
-        "at": 88,
-        "listen": [
-          "Ride",
-          "Hi-Hat",
-          "Tom"
-        ]
-      },
-      {
-        "seed": "r",
-        "at": 207.6,
-        "listen": [
-          "Ride",
-          "Kick",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "1N",
-        "at": 129.5,
-        "listen": [
-          "Electric Snare",
-          "Hi-Hat",
-          "Tom"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "rock-section-tempo",
-    "question": "Rock with a section at a tempo of its own, eased in or taken at once: a change of gear, or the band losing time?",
-    "decides": "A section's own tempo's chance in the songs.",
-    "genre": "rock",
-    "without": {
-      "skip": [],
-      "genre": {
-        "sectionChanges": {
-          "tempo": 0,
-          "modulation": 0,
-          "meter": [
-            0,
-            2,
-            100
-          ],
-          "shortBar": [
-            0,
-            4,
-            50
-          ]
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "F",
-        "at": 64.2,
-        "listen": [
-          "Chords (Distortion Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Cymbal"
-        ]
-      },
-      {
-        "seed": "I",
-        "at": 94,
-        "listen": [
-          "Hi-Hat",
-          "Chords (Overdriven Guitar)",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 119.6,
-        "listen": [
-          "Ride",
-          "Acoustic Snare",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "W",
-        "at": 97.4,
-        "listen": [
-          "Riff (Electric Guitar (muted))",
-          "Hi-Hat",
-          "Melody (Electric Piano 1)"
-        ]
-      },
-      {
-        "seed": "g",
-        "at": 1.3,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Ride",
-          "Solo (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "t",
-        "at": 168,
-        "listen": [
-          "Hi-Hat",
-          "Riff (Distortion Guitar)",
-          "Solo (Overdriven Guitar)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "pop-section-meter",
-    "question": "Pop with a section in a meter of its own, a bridge in 3/4 or 6/8 among 4/4: a turn, or a stumble?",
-    "decides": "A section's own meter's chance in the songs.",
-    "genre": "pop",
-    "without": {
-      "skip": [],
-      "genre": {
-        "sectionChanges": {
-          "meter": 0,
-          "tempo": [
-            0,
-            4,
-            100
-          ],
-          "modulation": [
-            0,
-            5,
-            50
-          ],
-          "shortBar": [
-            0,
-            4,
-            50
-          ]
-        }
-      }
-    },
-    "seeds": [
       {
         "seed": "3",
-        "at": 37.5,
+        "at": 233.6,
         "listen": [
-          "Hi-Hat",
-          "Melody (Acoustic Grand Piano)",
-          "Bass (Electric Bass (finger))"
+          "Melody (Violin)",
+          "Kick",
+          "Bass (Contrabass)"
         ]
       },
       {
         "seed": "5",
-        "at": 19.9,
+        "at": 15.2,
         "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Melody (Acoustic Grand Piano)",
-          "Riff (Electric Guitar (clean))"
+          "Bass (Contrabass)"
         ]
       },
       {
-        "seed": "J",
+        "seed": "F",
         "at": 121.7,
         "listen": [
-          "Bass (Electric Bass (finger))",
-          "Tambourine",
-          "Pad (Pad 2 (warm))"
+          "Chords (Choir Aahs)",
+          "Bass (Bassoon)"
         ]
       },
       {
-        "seed": "W",
-        "at": 17.5,
+        "seed": "O",
+        "at": 107,
         "listen": [
-          "Riff (Synth Brass 1)",
-          "Bass (Electric Bass (finger))",
-          "Chords (Electric Piano 1)"
+          "Bass (Tuba)"
         ]
       },
       {
-        "seed": "Z",
-        "at": 104.8,
+        "seed": "Y",
+        "at": 25,
         "listen": [
-          "Rhythm part (Acoustic Guitar (steel))",
-          "Counter-melody (Cello)",
-          "Chords (Pizzicato Strings)"
-        ]
-      },
-      {
-        "seed": "e",
-        "at": 88.7,
-        "listen": [
-          "Hi-Hat",
-          "Melody (Electric Piano 1)",
-          "Bass (Synth Bass 1)"
+          "Melody (French Horn)"
         ]
       }
     ]
   },
   {
-    "id": "folk-key-sections",
-    "question": "Folk with a section in a key of its own, or a pattern starting in a new key, beyond the last chorus's lift: a journey, or lost?",
-    "decides": "A section's own key's chance in the songs.",
-    "genre": "folk",
+    "id": "pop-melody-chords",
+    "question": "Pop's melody leaning on a double stop on every bar's first beat through a section: a pianist playing the tune, or a melody thickened?",
+    "decides": "The melody's line chords, a quarter of its sections in every genre whose melody plays chords.",
+    "genre": "pop",
+    "without": {
+      "skip": [
+        "Line chords"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 13.6,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 32.6,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 29.5,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 96.2,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 29.1,
+        "listen": [
+          "Melody (Electric Piano 1)",
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 87.8,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rock-reharm",
+    "question": "Rock's last chorus with some of its chords swapped for chords a third away, vi for I or ii for IV: a fresh last chorus, or the chorus gone wrong?",
+    "decides": "Reharmonisation's chance in the songs.",
+    "genre": "rock",
     "without": {
       "skip": [],
       "genre": {
-        "keyChanges": {
-          "sections": 0,
-          "patterns": 0,
-          "lastSection": [
+        "harmonyDevices": {
+          "reharmonised": 0,
+          "innerLine": [
             0,
-            8,
-            100
+            15,
+            30
+          ],
+          "pedal": [
+            0,
+            6,
+            15
           ]
         }
       }
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 86.4,
-        "listen": [
-          "Bass (Acoustic Bass)",
-          "Melody (Acoustic Guitar (nylon))",
-          "Chords (Acoustic Guitar (steel))"
-        ]
-      },
-      {
-        "seed": "B",
-        "at": 30.3,
-        "listen": [
-          "Rhythm part (Acoustic Guitar (nylon))",
-          "Melody (Acoustic Guitar (nylon))",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 66.5,
-        "listen": [
-          "Rhythm part (Acoustic Guitar (steel))",
-          "Chords (Acoustic Guitar (nylon))",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
         "seed": "R",
-        "at": 100,
+        "at": 143.2,
         "listen": [
-          "Melody (Acoustic Guitar (nylon))"
+          "Solo (Distortion Guitar)"
         ]
       },
       {
-        "seed": "V",
-        "at": 22.2,
+        "seed": "r",
+        "at": 107.1,
         "listen": [
-          "Chords (Reed Organ)",
+          "Riff (Distortion Guitar)",
+          "Chords (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "z",
+        "at": 98.9,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))",
+          "Counter-melody (String Ensemble 1)",
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "11",
+        "at": 200.2,
+        "listen": [
+          "Melody (Acoustic Grand Piano)",
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 136.8,
+        "listen": [
           "Melody (Harmonica)",
-          "Bass (Acoustic Bass)"
+          "Counter-melody (Harmonica)",
+          "Riff (Distortion Guitar)"
         ]
       },
       {
-        "seed": "a",
-        "at": 92,
+        "seed": "1N",
+        "at": 206.7,
         "listen": [
-          "Chords (Acoustic Guitar (steel))",
-          "Melody (Acoustic Guitar (nylon))",
-          "Bass (Acoustic Bass)"
+          "Melody (Electric Piano 1)",
+          "Rhythm part (Overdriven Guitar)",
+          "Chords (Distortion Guitar)"
         ]
       }
     ]
   },
   {
-    "id": "pop-switch",
-    "question": "Pop's part handed to another instrument of its family when its section returns, a piano's line on an electric piano: colour, or a part that changes its mind?",
-    "decides": "Instrument switches' chance in the songs.",
+    "id": "blues-call-bass",
+    "question": "Blues' calling verse, the bass playing the riff and so resting with it under every call: the band's answer, or a hole under the singer?",
+    "decides": "Whether the bass doubling the riff rests with it under a call, or plays its own line there.",
+    "genre": "blues",
+    "without": {
+      "skip": [],
+      "genre": {
+        "doubling": {
+          "riff": 0,
+          "octaves": [
+            7,
+            11,
+            15
+          ],
+          "harmony": 25,
+          "block": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 206.5,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "s",
+        "at": 0,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "16",
+        "at": 24.8,
+        "listen": [
+          "Solo (Overdriven Guitar)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "1E",
+        "at": 54.2,
+        "listen": [
+          "Solo (Harmonica)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 68,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "1u",
+        "at": 98.3,
+        "listen": [
+          "Solo (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pop-ornaments",
+    "question": "Pop's melody trilling and turning on its held notes, grace notes opening its beats: a pop singer's runs, or an ornament from another style?",
+    "decides": "Ornaments in Pop and Power ballad, the songs' own, where Rock and Punk keep to grace notes.",
     "genre": "pop",
     "without": {
       "skip": [],
       "genre": {
-        "instrumentSwitches": {
+        "ornaments": {
+          "graces": 0,
+          "turns": 0,
+          "trills": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 0,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 64,
+        "listen": [
+          "Melody (Acoustic Grand Piano)",
+          "Counter-melody (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "1D",
+        "at": 13,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "1P",
+        "at": 0,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "1S",
+        "at": 273.1,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "1T",
+        "at": 6,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "synthwave-octave",
+    "question": "Synthwave's bass bouncing in octaves in 8ths in about half its sections, rather than one in five: the style's driving bass, or a gimmick?",
+    "decides": "The octave bass's chance in Synthwave, 35-45-45 now.",
+    "genre": "synthwave",
+    "without": {
+      "skip": [],
+      "genre": {
+        "octaveBass": {
           "sections": 0
         }
       }
     },
     "seeds": [
       {
+        "seed": "1",
+        "at": 4.8,
+        "listen": [
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 48.4,
+        "listen": [
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 5.2,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 0.6,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
         "seed": "E",
-        "at": 0.3,
+        "at": 68.8,
         "listen": [
-          "Chords (Acoustic Grand Piano)"
+          "Bass (Synth Bass 2)"
         ]
       },
       {
-        "seed": "J",
-        "at": 116.5,
+        "seed": "H",
+        "at": 26,
         "listen": [
-          "Bass (Electric Bass (finger))",
-          "Melody (Lead 2 (sawtooth))",
-          "Chords (Electric Piano 1)"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 126.3,
-        "listen": [
-          "Melody (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "V",
-        "at": 11.5,
-        "listen": [
-          "Melody (Electric Guitar (clean))",
-          "Chords (Synth Brass 1)"
-        ]
-      },
-      {
-        "seed": "b",
-        "at": 153.9,
-        "listen": [
-          "Solo (Soprano Sax)",
-          "Rhythm part (Electric Guitar (clean))",
-          "Chords (Acoustic Guitar (steel))"
-        ]
-      },
-      {
-        "seed": "g",
-        "at": 0,
-        "listen": [
-          "Chords (Acoustic Guitar (steel))",
-          "Melody (Acoustic Grand Piano)"
+          "Bass (Synth Bass 1)"
         ]
       }
     ]
   },
   {
-    "id": "pop-off-scale",
-    "question": "Pop's chords leaving the key now and then, an applied dominant or a chord borrowed from the minor: colour, or wrong chords?",
-    "decides": "Applied and borrowed chords' chance in Pop.",
-    "genre": "pop",
+    "id": "soul-sixteenths",
+    "question": "A swung Soul song swinging its 16ths, a laid-back lilt, where a mid-tempo soul song might shuffle its 8ths: the groove, or the wrong one?",
+    "decides": "Soul's swung 16ths, the songs' own below 107 a minute.",
+    "genre": "soul",
     "without": {
       "skip": [],
       "genre": {
-        "chordScales": {
-          "applied": 0,
-          "borrowed": 0
+        "feelValues": {
+          "sixteenths": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 96.2,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Acoustic Snare",
+          "Bass (Drawbar Organ)"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 2.1,
+        "listen": [
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 2.8,
+        "listen": [
+          "Chords (Drawbar Organ)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 100.2,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Acoustic Grand Piano)",
+          "Solo (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 12.3,
+        "listen": [
+          "Kick"
+        ]
+      },
+      {
+        "seed": "V",
+        "at": 0,
+        "listen": [
+          "Chords (Drawbar Organ)",
+          "Melody (Alto Sax)",
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "trance-raise",
+    "question": "A trance loop resolving to a major chord on the fifth, its leading tone raised: trance, or a classical minor cadence in the wrong style?",
+    "decides": "Trance's cadence raise, the songs' own.",
+    "genre": "trance",
+    "without": {
+      "skip": [],
+      "genre": {
+        "cadenceRaise": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 278.4,
+        "listen": [
+          "Melody (Lead 1 (square))",
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 53.8,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Riff (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "m",
+        "at": 148.8,
+        "listen": [
+          "Riff (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "u",
+        "at": 6.5,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "1c",
+        "at": 147.1,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Synth Bass 2)",
+          "Riff (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "1p",
+        "at": 82,
+        "listen": [
+          "Riff (Lead 1 (square))",
+          "Bass (Synth Bass 2)",
+          "Chords (Pad 3 (polysynth))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reggae-half-double",
+    "question": "Reggae's one drop played a section in half or double time, the drop once in two bars or the strokes on every beat: a change of feel, or the one drop lost?",
+    "decides": "Reggae's half and double time, the songs' own.",
+    "genre": "reggae",
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelChances": {
+          "halfTime": 0,
+          "doubleTime": 0,
+          "swing": [
+            0,
+            20,
+            20
+          ]
         }
       }
     },
     "seeds": [
       {
         "seed": "2",
-        "at": 28.1,
+        "at": 2.7,
         "listen": [
-          "Solo (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 52.3,
-        "listen": [
-          "Melody (Electric Guitar (clean))",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "E",
-        "at": 79.2,
-        "listen": [
-          "Bass (Electric Bass (pick))",
-          "Chords (Pad 3 (polysynth))",
-          "Rhythm part (Electric Piano 1)"
+          "Hi-Hat"
         ]
       },
       {
         "seed": "F",
-        "at": 50.7,
+        "at": 26,
         "listen": [
-          "Melody (Acoustic Grand Piano)"
+          "Hi-Hat",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 31.9,
+        "listen": [
+          "Ride",
+          "Acoustic Snare",
+          "Conga"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 52.4,
+        "listen": [
+          "Hi-Hat"
         ]
       },
       {
         "seed": "N",
-        "at": 54.9,
+        "at": 26.7,
         "listen": [
-          "Rhythm part (Acoustic Guitar (steel))",
-          "Bass (Electric Bass (finger))",
-          "Riff (Electric Guitar (muted))"
+          "Hi-Hat"
         ]
       },
       {
-        "seed": "Q",
-        "at": 112.5,
+        "seed": "T",
+        "at": 44.4,
         "listen": [
-          "Melody (Electric Piano 1)"
+          "Hi-Hat"
         ]
       }
     ]
   },
   {
-    "id": "orchestral-alone",
-    "question": "Orchestral's section left to one part alone a while, the others resting, whichever part it is, the contrabass or the drums too: a solo passage, or parts gone missing?",
-    "decides": "The part alone's weight in Orchestral, and whether any part may be the one.",
-    "genre": "orchestral",
+    "id": "metal-calm",
+    "question": "Metal's quieter section turned calm, a clean guitar breaking the chords and letting them ring between the heavy ones: the style's contrast, or the band gone soft?",
+    "decides": "Metal's calm sections, 5-10-20 now.",
+    "genre": "metal",
     "without": {
       "skip": [],
       "genre": {
-        "texture": {
-          "alone": 0
+        "louderForms": {
+          "quieter": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 83,
+        "seed": "Y",
+        "at": 0,
         "listen": [
-          "Bass (Contrabass)",
-          "Riff (Brass Section)",
-          "Melody (Clarinet)"
+          "Riff (Electric Guitar (clean))",
+          "Chords (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "H",
-        "at": 4,
+        "seed": "f",
+        "at": 0,
         "listen": [
-          "Melody (Oboe)",
-          "Pad (Choir Aahs)",
-          "Chords (Orchestral Harp)"
+          "Chords (Distortion Guitar)",
+          "Riff (Acoustic Guitar (steel))",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
-        "seed": "J",
-        "at": 21.5,
+        "seed": "v",
+        "at": 51.5,
+        "listen": [
+          "Riff (Electric Guitar (clean))",
+          "Kick",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "x",
+        "at": 0,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Ride",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "1A",
+        "at": 2,
         "listen": [
           "Kick",
-          "Melody (Flute)",
-          "Acoustic Snare"
+          "Riff (Electric Guitar (clean))",
+          "Hi-Hat"
         ]
       },
       {
-        "seed": "M",
-        "at": 63.2,
+        "seed": "1I",
+        "at": 50.1,
         "listen": [
-          "Bass (Contrabass)",
-          "Chords (Orchestral Harp)"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 141.8,
-        "listen": [
-          "Melody (French Horn)",
-          "Chords (Pizzicato Strings)",
-          "Pad (Tremolo Strings)"
-        ]
-      },
-      {
-        "seed": "Y",
-        "at": 44.6,
-        "listen": [
-          "Melody (French Horn)",
-          "Chords (String Ensemble 2)"
+          "Hi-Hat",
+          "Riff (Overdriven Guitar)"
         ]
       }
     ]

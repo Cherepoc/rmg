@@ -46,34 +46,42 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("rock-rhythm-clean", "Rock's rhythm guitar clean or muted beside its driven chords and riff: a contrast, or wanted driven too?",
-            "The clean and muted guitars' weight in Rock's rhythm part.", "rock", [], new() { ["instrument.rhythm"] = new() { ["electricGuitarClean"] = 0, ["electricGuitarMuted"] = 0 } },
-            x => !x.Absent.Contains(TrackRole.Rhythm) && x.Song.TrackDefinitions[x.Track(TrackRole.Rhythm)] is PitchInstrumentTrack { InstrumentCode: 27 or 28 } ? 0 : null),
-        new("pop-double-time", "Pop's drums in double time for a section, the snare on every beat, as the songs' own chance has it: a lift, or a scramble?",
-            "Double time's chance in the songs.", "pop", [], new() { ["feelChances"] = new() { ["doubleTime"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == -1), 1)),
-        new("rock-section-tempo", "Rock with a section at a tempo of its own, eased in or taken at once: a change of gear, or the band losing time?",
-            "A section's own tempo's chance in the songs.", "rock", [], new() { ["sectionChanges"] = new() { ["tempo"] = 0, ["modulation"] = 0 } },
-            x => ((ImmutableArray<double>)x.Trace.Single(t => t.Point == TracePoints.SectionTempo).Value!).Select((v, i) => (v, i)).Where(p => Math.Abs(p.v - 1) > 1e-9 && p.i < x.Map.Sections.Length)
-                .Select(p => (double?)x.Map.Sections[p.i].Start).FirstOrDefault() is { } start ? Before(x, start, 2) : null),
-        new("pop-section-meter", "Pop with a section in a meter of its own, a bridge in 3/4 or 6/8 among 4/4: a turn, or a stumble?",
-            "A section's own meter's chance in the songs.", "pop", [], new() { ["sectionChanges"] = new() { ["meter"] = 0 } },
-            x => x.Map.Sections.FirstOrDefault(s => !s.Meter.Equals(x.Map.Sections[0].Meter)) is { } section ? Before(x, section.Start, 2) : null),
-        new("folk-key-sections", "Folk with a section in a key of its own, or a pattern starting in a new key, beyond the last chorus's lift: a journey, or lost?",
-            "A section's own key's chance in the songs.", "folk", [], new() { ["keyChanges"] = new() { ["sections"] = 0, ["patterns"] = 0 } },
-            x => ((ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!) is { Length: > 0 } changes ? Before(x, changes.Min(c => c.Position), 2) : null),
-        new("pop-switch", "Pop's part handed to another instrument of its family when its section returns, a piano's line on an electric piano: colour, or a part that changes its mind?",
-            "Instrument switches' chance in the songs.", "pop", [], new() { ["instrumentSwitches"] = new() { ["sections"] = 0 } },
-            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.InstrumentOverTime && x.Song.TrackDefinitions[t.Track] is PitchInstrumentTrack part
-                    && (((int, TrackRole, int, ArticulationMode, int))t.Value!).Item3 != part.InstrumentCode)
-                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 1)),
-        new("pop-off-scale", "Pop's chords leaving the key now and then, an applied dominant or a chord borrowed from the minor: colour, or wrong chords?",
-            "Applied and borrowed chords' chance in Pop.", "pop", [], new() { ["chordScales"] = new() { ["applied"] = 0, ["borrowed"] = 0 } },
-            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.ChordScales && ((ImmutableArray<ChordScale>)t.Value!).Any(c => c.Kind is ChordScaleKind.Applied or ChordScaleKind.Borrowed))
-                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 1)),
-        new("orchestral-alone", "Orchestral's section left to one part alone a while, the others resting, whichever part it is, the contrabass or the drums too: a solo passage, or parts gone missing?",
-            "The part alone's weight in Orchestral, and whether any part may be the one.", "orchestral", [], new() { ["texture"] = new() { ["alone"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Texture, v => (((int, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>>))v!).Item2 == TextureKind.Alone), 1))
+        new("orchestral-metric", "Orchestral's section taking the tempo before it by a metric ratio, a triplet's pulse becoming the new beat: a modulation heard, or a jump like any other?",
+            "The metric modulation's chance in the songs.", "orchestral", [], new() { ["sectionChanges"] = new() { ["modulation"] = 0 } },
+            x => ((ImmutableArray<double>)x.Trace.Single(t => t.Point == TracePoints.SectionTempo).Value!) is var tempos
+                 && Enumerable.Range(1, Math.Max(0, Math.Min(tempos.Length, x.Map.Sections.Length) - 1)).Where(i => SectionTempo.MetricRatios.Any(r => Math.Abs(tempos[i] / tempos[i - 1] - r) < 1e-9))
+                     .Select(i => (double?)x.Map.Sections[i].Start).FirstOrDefault() is { } start ? Before(x, start, 2) : null),
+        new("pop-melody-chords", "Pop's melody leaning on a double stop on every bar's first beat through a section: a pianist playing the tune, or a melody thickened?",
+            "The melody's line chords, a quarter of its sections in every genre whose melody plays chords.", "pop", ["Line chords"], null,
+            x => x.Absent.Contains(TrackRole.Melody) ? null : Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?
+                .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1).Select(n => (double?)n.Position).FirstOrDefault(), 1)),
+        new("rock-reharm", "Rock's last chorus with some of its chords swapped for chords a third away, vi for I or ii for IV: a fresh last chorus, or the chorus gone wrong?",
+            "Reharmonisation's chance in the songs.", "rock", [], new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
+            x => x.Trace.Where(t => t.Point == TracePoints.Reharmonisation && t.Value is not null)
+                .Select(t => ((ValueTuple<int, ImmutableArray<double>>)t.Value!).Item2.Select(p => (double?)p).Min()).Min() is { } at ? Before(x, at, 2) : null),
+        new("blues-call-bass", "Blues' calling verse, the bass playing the riff and so resting with it under every call: the band's answer, or a hole under the singer?",
+            "Whether the bass doubling the riff rests with it under a call, or plays its own line there.", "blues", [], new() { ["doubling"] = new() { ["riff"] = 0 } },
+            x => x.Trace.Where(t => t.Point == TracePoints.LineDoubling && ((int, TrackRole, TrackRole, int))t.Value! is (_, TrackRole.Riff, TrackRole.Bass, _)).Select(t => t.Section)
+                .Intersect(x.Trace.Where(t => t.Point == TracePoints.CallAndResponse && (bool)t.Value!).Select(t => t.Section))
+                .Select(s => x.Map.Sections.Where(p => p.SectionId == s).Select(p => (double?)p.Start).Min()).Min() is { } at ? Before(x, at, 1) : null),
+        new("pop-ornaments", "Pop's melody trilling and turning on its held notes, grace notes opening its beats: a pop singer's runs, or an ornament from another style?",
+            "Ornaments in Pop and Power ballad, the songs' own, where Rock and Punk keep to grace notes.", "pop", [], new() { ["ornaments"] = new() { ["graces"] = 0, ["turns"] = 0, ["trills"] = 0 } },
+            x => ((ImmutableArray<Ornament>)x.Trace.Single(t => t.Point == TracePoints.Ornaments).Value!).Any(o => o is Ornament.Turn or Ornament.Trill) ? 0 : null),
+        new("synthwave-octave", "Synthwave's bass bouncing in octaves in 8ths in about half its sections, rather than one in five: the style's driving bass, or a gimmick?",
+            "The octave bass's chance in Synthwave, 35-45-45 now.", "synthwave", [], new() { ["octaveBass"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.OctaveBass, v => (bool)v!)),
+        new("soul-sixteenths", "A swung Soul song swinging its 16ths, a laid-back lilt, where a mid-tempo soul song might shuffle its 8ths: the groove, or the wrong one?",
+            "Soul's swung 16ths, the songs' own below 107 a minute.", "soul", [], new() { ["feelValues"] = new() { ["sixteenths"] = 0 } },
+            x => ((Swing)x.Trace.Single(t => t.Point == TracePoints.Swing).Value!).Period == 0.5 ? 0 : null),
+        new("trance-raise", "A trance loop resolving to a major chord on the fifth, its leading tone raised: trance, or a classical minor cadence in the wrong style?",
+            "Trance's cadence raise, the songs' own.", "trance", [], new() { ["cadenceRaise"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.CadenceRaise, v => (((int?, bool))v!).Item2)),
+        new("reggae-half-double", "Reggae's one drop played a section in half or double time, the drop once in two bars or the strokes on every beat: a change of feel, or the one drop lost?",
+            "Reggae's half and double time, the songs' own.", "reggae", [], new() { ["feelChances"] = new() { ["halfTime"] = 0, ["doubleTime"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! != 0), 2)),
+        new("metal-calm", "Metal's quieter section turned calm, a clean guitar breaking the chords and letting them ring between the heavy ones: the style's contrast, or the band gone soft?",
+            "Metal's calm sections, 5-10-20 now.", "metal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1))
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

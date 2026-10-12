@@ -295,16 +295,28 @@ so far answered. Left for later: Medieval's plain ornaments (#425) and Djent's r
 barely different or no ornament at all; Dungeon synth's arpeggios on its sustained voices (#429), its harpsichord's
 ostinato played by the same arpeggio.
 
-Asked from 12 October 2026, the plan's own questions below, each as the presets are, the song without leaving the
-device out: `rock-rhythm-clean` (Rock's rhythm guitar clean or muted beside its driven parts, *Sound*),
-`pop-double-time` (double time a lift or a scramble, *The song and its sections*), `rock-section-tempo` (a section's
-own tempo), `pop-section-meter` (a section's own meter), `folk-key-sections` (a section's or a pattern's own key beyond
-the last lift), `pop-switch` (instrument switches within the family, *Sound*), `pop-off-scale` (applied and borrowed
-chords, *Harmony and lines*) and `orchestral-alone` (a part alone, any part, the review's #468). Left out: Folk's
-mutating groove (#93), too few songs and barely heard (0.10); and Soul's horns before strings (#459), whose song
-without plays the same notes on another instrument, which the measure (`HeardDifference`) does not hear and so refuses,
-an instrument's change heard only where it changes the notes. The review's other findings to listen to need the code
-changed first (#138, #18, #43, #40, #79, #117, #119, #21), or were set aside (#425, #431, #429).
+Answered on 12 October 2026, the plan's own questions, each as the presets are. Kept: `orchestral-alone`
+(Orchestral's part alone, any part, 6 of 6), `folk-key-sections` (a section's or a pattern's own key, 6 of 6),
+`rock-section-tempo` (a section's own tempo, 4 of 4 sure), `rock-rhythm-clean` (Rock's clean or muted rhythm guitar,
+3 to 2), `pop-section-meter` (a section's own meter, 3 to 2) and `pop-off-scale` (applied and borrowed chords, 2 better
+and 4 not told apart); `pop-switch` (instrument switches within the family) tied 3 to 3 and allowed, as they are.
+Lowered: `pop-double-time`, heard a scramble in 4 of 6, the songs' double time at 2% of a middling section from 4%
+(`Groove.DoubleTimeChance`), 3.3% of the corpus's sections in four from 6.5%, and the presets that copied the songs' 4
+with it (Rock, Latin, Ambient, Disco, Ska, Fusion, Soul, Country and Chiptune); half and double time's own amounts now
+declared as the songs draw them, never at the plain end (the review of 11 October's #56), the presets' flat amounts
+still to follow (#378).
+
+Asked from 12 October 2026, ten of the review of 11 October's proposed questions. As the presets are:
+`orchestral-metric` (Orchestral's metric modulation, a cut candidate, #113), `pop-melody-chords` (the melody's double
+stops on every downbeat, #72, the least heard, 0.12; its song without loses the riff's landing chords too), `rock-reharm`
+(Rock's reharmonised last chorus, a cut candidate, #99), `blues-call-bass` (the bass doubling the riff resting with it
+under every call, #14), `pop-ornaments` (Pop's trills and turns, #367), `soul-sixteenths` (Soul's swung 16ths, #383),
+`trance-raise` (Trance's raised cadence, #381) and `reggae-half-double` (Reggae's one drop in half or double time, #359).
+Added to try: `synthwave-octave` (Synthwave's octave bass, 35-45-45% from 15-20-25%, #356) and `metal-calm` (Metal's
+calm sections, 5-10-20%, #371). Left out: the pump where the kick drops out (#29), whose song without loses the pump
+everywhere, so that it asks `disco-pump` again until the pump can keep out of a kickless stretch; and the questions that
+need the code changed first (#11, #124, #44, #71, #65, #23, #67), or that earlier rounds settled (#112, #363, #96, #27,
+#80, #79).
 
 Answered on 11 October 2026, the review of 10 October's findings of taste: taken out, `disco-pump` (0 of 6 kept it),
 Disco's sidechain pump; `metal-turnaround` (1 of 6), Metal's turnaround; and `trap-reharm` (2 to 2), a trap loop's
@@ -356,15 +368,13 @@ live deploy.
 - **The sections' energy:** quieter sections heard as sections, louder ones lifting; a last appearance 0.10 louder
   than the first; fills into a quieter section 54% of the time. Decides the energy's contrast and the fills' landings.
 - **Rests, entries and textures:** breakdowns and melody-less sections as arrangement or parts gone missing; parts held
-  back at the start (15-18%); one part alone or parts dropping out, leaned to the quieter sections (`TextureTest`).
+  back at the start (15-18%); one part alone (`orchestral-alone` heard better, 12 October 2026) or parts dropping out, leaned to the quieter sections (`TextureTest`).
   Decides the textures' weights and their lean.
 - **The lift** (`lift-cues` heard better, 8 October 2026): a crescendo of 8 of 127 into a louder section, and the drums' cues, 2.6 a song.
   Decides whether the cues stay, and how often.
 - **Key changes:** two a song in the fourth fifth; prepared ones, pivots, pedals, sequences heard. Decides their
   chances and devices.
-- **Tempo:** a section's own tempo eased in or taken at once; 6/8 counted in quarters; 13/16 too busy? Decides the
-  easing and the odd meters' weights.
-- **Half and double time:** double time's 22 drum notes a bar a lift or a scramble? Decides its weight.
+- **Tempo:** 6/8 counted in quarters; 13/16 too busy? Decides the odd meters' weights.
 - **The fade-outs:** a ritardando into the fade, the drums fading first, a tag after it? Decides whether to build one.
 - **The settings panel:** a song made again with changed settings sounding moved rather than jumped; the pad in 80% of
   songs, the counter-melody in 60%, the drums in 95%. Decides the parts' chances.
@@ -382,8 +392,6 @@ live deploy.
 - **The walks into a section:** the melody at 15% of changes, the bass at half of the runs. Decides their chances.
 - **Double stops and the riff's chords:** the melody's on a chord instrument's downbeats in a quarter of sections.
   Decides their chance.
-- **Borrowed and applied chords:** 7-12% of chords leaving the scale (`ChordScalesReportTest`); a held melody note
-  clashing, an applied dominant's resolution spoiled? Decides their chances.
 - **The bass's pickup** always on the beat: square? Decides an 8th before the bar line, leaned by convention.
 - **A walking bass** (from the review of 9 October 2026): its weak quarters keep to the chord's notes, so a ii–V may
   walk arpeggios rather than a line. A report of the share of Jazz's bass notes on beats 2 and 4 outside the chord
@@ -459,10 +467,7 @@ live deploy.
 - **The dub echo, the insertion effect and the rooms** (`DubEchoTest`, `InsertionTest.Report`): echoes as notes thin,
   the wah's and phaser's settings, the rooms wet enough? Decides the GS delay and the effects' settings.
 - **Louder forms** (`louder-forms` heard better, 8 October 2026): a clean guitar turned driven when loud. Decides its chance by genre.
-- **Rock's rhythm guitar** clean (53%) or muted (20%) beside driven chords and riff: a contrast, or wanted driven?
-  Decides the exclusion's lean.
 - **The bass under E1** (9% of its notes, `RegisterReportTest`). Decides the bass's range.
-- **Instrument switches** within the family, 58% of a middling song's. Decides their families.
 
 ### Genres
 
