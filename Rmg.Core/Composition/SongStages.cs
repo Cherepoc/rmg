@@ -381,7 +381,7 @@ internal static class SongStages
                 song.Solos,
                 song.Soloists[TrackRole.Solo],
                 index => song.Sections[index].Facets[Facet.Melody],
-                index => song.AppearanceStream(SongStream.SoloAnswers, index),
+                index => (song.AppearanceStream(SongStream.SoloAnswers, index), song.AppearanceStream(SongStream.SoloAnswerVoicings, index), song.AppearanceStream(SongStream.SoloAnswerMotifs, index)),
                 song.Genre,
                 draft.Holds(song)
             )

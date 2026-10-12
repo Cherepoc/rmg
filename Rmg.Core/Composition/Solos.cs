@@ -12,7 +12,7 @@ public enum SoloMode
     /// <summary>They take its phrases in turn.</summary>
     Trading,
 
-    /// <summary>They play it together, the others a similar line a step or more away, some of its notes left out.</summary>
+    /// <summary>They play it together, the others the same line or a similar one a third or a sixth away, all at the one step, some of its notes left out.</summary>
     Together
 }
 
@@ -46,7 +46,8 @@ public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode,
 ///     and at the wild end as likely as not, so that a wild song may be solos throughout without having to be. A pitched
 ///     solo is a line of the solo's own (<see cref="SoloLines" />), on the melody's near the plain end and its own over
 ///     the chords at the wild, by the melody facet, played by the soloists instead of the melody, the melody resting; several soloists take its phrases in turn or play it together, the others a similar line; the drums solo
-///     alone, the band resting, a fill at every bar. Who solos leans by the melody facet: near the plain end the solo
+///     as <see cref="DrumSolos" /> plans them, gesture by gesture, alone or trading turns with a pitched solo, the last bar
+///     a fill. Who solos leans by the melody facet: near the plain end the solo
 ///     part, a lead of its own, the likeliest, and the melody's instrument, the chords or the riff now and then, and at
 ///     the wild end any part as likely.
 /// </summary>
@@ -270,7 +271,7 @@ internal static class Solos
             // the solo's line, in the first soloist's vocabulary and range
             var first = trackOf[solo.Soloists[0]];
             var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
-            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, soloists[solo.Soloists[0]], solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, span.Start, soloists[solo.Soloists[0]], solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
             StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
 
             // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart

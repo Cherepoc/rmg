@@ -272,7 +272,8 @@ internal static class DrumSolos
                 // the groove is there to quote throughout
                 (_, _) => 1,
                 position => Meter.BeatsPerSecond(common.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(position)),
-                solo.TradesWithDrums ? SoloPlan.TurnOf(whole) : span.Duration
+                solo.TradesWithDrums ? SoloPlan.TurnOf(whole) : span.Duration,
+                span.Start
             );
             var turn = SoloPlan.TurnOf(whole);
             // its segments in the drums' turns, a segment across a turn's end cut there

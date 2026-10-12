@@ -164,6 +164,7 @@ internal static class SoloLines
     /// <param name="melody">The melody's notes in the solo, which a solo on the melody aims at and quotes, and every note takes its state from.</param>
     /// <param name="band">The chords' notes in the solo, the band's chord a stacked note stacks; the melody's where they rest.</param>
     /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
+    /// <param name="barOrigin">Where the bars the span plays in start, its section's start (<see cref="Plan" />).</param>
     /// <param name="track">The soloist's track, whose state its notes are realized over.</param>
     /// <param name="definition">The soloist's definition, its range.</param>
     /// <param name="voicing">The sequence that draws which gestures the soloist stacks, a stream of its own.</param>
@@ -174,6 +175,7 @@ internal static class SoloLines
         IGenerationContext motifs,
         SectionSpan span,
         double turn,
+        double barOrigin,
         Soloist soloist,
         bool isOwn,
         IReadOnlyList<TimelineItem<StateMap>> melody,
@@ -248,7 +250,8 @@ internal static class SoloLines
             // a quote wants the melody's notes there
             (start, end) => !melody.Any(n => n.IsWithin(start, end)) ? 0 : isOwn ? OwnQuoteWeight : MelodyQuoteWeight,
             position => Meter.BeatsPerSecond(common.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(position)),
-            turn
+            turn,
+            barOrigin
         );
         var line = new List<TimelineItem<StateMap>>();
         var current = Nearest(ChordNotes(span.Start), middle);
@@ -370,20 +373,21 @@ internal static class SoloLines
     /// <param name="quoteWeight">How much a quote weighs from a segment's start to its end: what there is to quote there.</param>
     /// <param name="beatsASecond">The tempo at a position, in beats a second, which the speeds keep under the soloist's fastest.</param>
     /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
+    /// <param name="barOrigin">Where the bars the span plays in start, its section's start, which its strong beats are counted from, as an answer's span starts off the bar.</param>
     internal static Segment[] Plan(IGenerationContext context, SectionSpan span, Soloist soloist, Func<double, double, double> quoteWeight, Func<double, double> beatsASecond,
-        double turn)
+        double turn, double barOrigin)
     {
         var bar = span.Meter.BarDuration;
         // a bar's strong beats, its groups' starts, as an odd meter's 3+2 are, 3/4's three beats and 6/8's two, so that a
         // one-bar phrase in a short bar releases on a beat after its first
         double[] strong = [..span.Meter.Levels[1].Select(x => x.Start / 4.0)];
-        // the last strong beat at or before a position, counted in bars from a phrase's start
+        // the last strong beat of the bars from a position up to another; none where there is none
         double LastStrong(double from, double limit)
         {
-            for (var b = Math.Floor((limit - from) / bar + 1e-9); b >= 0; b--)
-                if (strong.Select(x => from + b * bar + x).Where(x => x <= limit + 1e-9).DefaultIfEmpty(double.NaN).Max() is var at && !double.IsNaN(at))
+            for (var b = Math.Floor((limit - barOrigin) / bar + 1e-9); b >= Math.Floor((from - barOrigin) / bar + 1e-9); b--)
+                if (strong.Select(x => barOrigin + b * bar + x).Where(x => x >= from - 1e-9 && x <= limit + 1e-9).DefaultIfEmpty(double.NaN).Max() is var at && !double.IsNaN(at))
                     return at;
-            return from;
+            return double.NaN;
         }
         var segments = new List<Segment>();
         // how long the run going on has played at each speed, which the soloist's stamina keeps it to
@@ -407,8 +411,11 @@ internal static class SoloLines
             var isLate = context.TestProbability(soloist.OffBarChance);
             var late = context.GenerateInt(1, 3);
             var start = isLate && to - from >= 2 * bar ? from + late : from;
-            // and its release from the last strong beat a beat or more before its end, and whether a breath follows
-            var releaseAt = Math.Max(start, LastStrong(from, to - 1));
+            // and its release from the last strong beat a beat or more before its end, or, where it has none, as an answer in
+            // a short gap, from its last half beat half a beat or more before its end; and whether a breath follows
+            var releaseAt = Math.Max(start, LastStrong(from, to - 1) is var last && !double.IsNaN(last)
+                ? last
+                : barOrigin + Math.Floor(2 * (to - 0.5 - barOrigin) + 1e-9) / 2);
             var breathes = context.TestProbability(soloist.BreathChance);
             if (start > from)
                 segments.Add(new Segment(from, start, peak * Contour(contour, 0), SoloGesture.Pause, soloist.Speeds[0], soloist.Shapes[0], [soloist.CellSizes[0]], false, phrase, false));

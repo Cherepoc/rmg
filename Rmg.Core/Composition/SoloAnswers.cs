@@ -39,7 +39,7 @@ internal static class SoloAnswers
     /// <summary>The song with the solo part's answers played, each section drawing from a sequence of its own.</summary>
     /// <param name="answerer">The solo part's vocabulary, its soloist's.</param>
     /// <param name="melodyFacet">Every section's melody facet, by its place among the song's sections.</param>
-    /// <param name="streams">A section's sequence, by its place.</param>
+    /// <param name="streams">A section's sequence, by its place, and its answers' voicings' and motifs', each of its own.</param>
     /// <param name="genre">The genre whose chance of answering a section draws (<see cref="GenreChoices.SoloAnswers" />).</param>
     /// <param name="holds">What the song holds, a calling verse's answer among it, which the answers keep out of.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
@@ -50,7 +50,7 @@ internal static class SoloAnswers
         IReadOnlyDictionary<int, SoloPlan> solos,
         Soloist answerer,
         Func<int, double> melodyFacet,
-        Func<int, IGenerationContext> streams,
+        Func<int, (IGenerationContext Answers, IGenerationContext Voicing, IGenerationContext Motifs)> streams,
         Genre genre,
         Holds holds
     )
@@ -66,7 +66,7 @@ internal static class SoloAnswers
         var melodyHeard = new Lazy<TimelineItem<StateMap>[]>(() => [..Realizer.GetNoteStates(melodyTrack, definitions[trackOf[TrackRole.Melody]], song.CommonStateTimelineMap)]);
         foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
         {
-            var context = streams(index);
+            var (context, voicing, motifs) = streams(index);
             var answering = context.TestProbability(Chance.At(melodyFacet(index), genre.Chance(GenreChoices.SoloAnswers, "sections")));
             bool IsIn(TimelineItem<StateMap> note) => note.IsWithin(span.Start, span.End);
             var counterRests = !trackOf.TryGetValue(TrackRole.CounterMelody, out var counter) || !song.TrackTimelineMap.TryGetValue(counter, out var counterTrack) || !counterTrack.EventTimeline.Any(IsIn);
@@ -86,9 +86,11 @@ internal static class SoloAnswers
             // melody as it is heard there
             var heard = Solos.Loudness(melodyHeard.Value.Where(IsIn), 0);
             var onsets = melody.Select(x => x.Position).Append(span.End).ToArray();
+            // every gap's test drawn before any line, so that a line's draws leave which gaps are answered
+            var gaps = Enumerable.Range(0, onsets.Length - 1).Select(_ => context.TestProbability(GapChance)).ToArray();
             for (var i = 0; i + 1 < onsets.Length; i++)
             {
-                var answered = context.TestProbability(GapChance);
+                var answered = gaps[i];
                 // on a half beat of the section's bars, counted from its start, as a short bar before it moves the song's grid
                 var start = span.Start + Math.Ceiling(2 * (onsets[i] + After - span.Start) - 1e-9) / 2;
                 // a short line, a bar or two at most, however long the gap
@@ -98,7 +100,8 @@ internal static class SoloAnswers
                     continue;
 
                 var gap = span with { Start = start, Duration = end - start };
-                var (line, _) = SoloLines.Generate(context, context, context, gap, gap.Duration, answerer, true, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
+                // its strong beats on its section's bars
+                var (line, _) = SoloLines.Generate(context, voicing, motifs, gap, gap.Duration, span.Start, answerer, true, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
                 var lift = Solos.Lift(
                     Realizer.GetNoteStates(EventStateTimelineMap.Create(song.Duration, EventTimeline.Create(song.Duration, line), track.StateTimelineMap), definitions[soloTrack], song.CommonStateTimelineMap).ToArray(),
                     heard - Quieter);

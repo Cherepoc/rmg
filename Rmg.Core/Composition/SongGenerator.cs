@@ -249,5 +249,7 @@ internal enum SongStream
     ShortBars = 108,
     DrumGroup = 109,
     LetRing = 110,
-    CallAndResponse = 111
+    CallAndResponse = 111,
+    SoloAnswerVoicings = 112,
+    SoloAnswerMotifs = 113
 }
