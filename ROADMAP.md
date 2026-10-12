@@ -563,6 +563,9 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   the chords play a triad's shape and the riff a five-note one, each on its own note as the section made it, in a
   section taking an inner line; neither the inner line, the polymeter, the mutations nor the figures write a shape,
   so the riff's bar as an appearance redraws it is the next place to look.
+  **A long lift moving notes outside its swell** (#224): a genre's long lift moves about a hundred notes of 64 songs
+  outside the swell's bars by more than 0.01 of the velocity, through a stage that sets a part by the song as heard;
+  `LiftTest` counts them.
 - Later: **the tape stop** (#358), every pitched part bending down an octave over a slowing tempo into a drop or as
   the ending, a change of the tempo map and every channel's bends together; and **imitation** (#388), the
   counter-melody taking the melody's phrase a bar later, its clashes across chord changes new work.

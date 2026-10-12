@@ -2,7 +2,10 @@ using Rmg.Core.Composition;
 
 namespace Rmg.Tests.Forms;
 
-/// <summary>How many times the sections play their patterns, by how conventional their rhythm is, and how long the songs are.</summary>
+/// <summary>
+///     How many times the sections play their patterns: once, twice or four times as their spans are long, a rule; and a
+///     report of it by how conventional their rhythm is, and of how long the songs are.
+/// </summary>
 public sealed class SectionLengthReportTest
 {
     [Test]

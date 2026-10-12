@@ -2,7 +2,11 @@ using Rmg.Core.Composition;
 
 namespace Rmg.Tests.Forms;
 
-/// <summary>How much louder the band plays in the bar before a section change than in the bar before that, into louder sections and quieter ones.</summary>
+/// <summary>
+///     A lift into a section: the cue before a bigger one, the hi-hat opening on the last beat and the snare on its head,
+///     a rule; and a report of how much louder the band plays in the bar before a section change than in the bar before
+///     that, into louder sections and quieter ones.
+/// </summary>
 public sealed class LiftReportTest
 {
     [Test]

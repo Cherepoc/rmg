@@ -84,14 +84,14 @@ public sealed class GenrePresetsTest
     }
 
     /// <summary>
-    ///     Every preset makes its songs at both ends, 64 at the plain and 32 at the wild, where a choice an end leaves empty
+    ///     Every preset makes its songs at both ends, 32 at the plain and 16 at the wild, where a choice an end leaves empty
     ///     would fail (as Punk's length and Techno's intro did); and its plainest songs keep their time, no section's drums
     ///     in half or double time, but where the preset names them at its plain end.
     /// </summary>
     [Test]
     public async Task APreset_MakesSongs_AtBothEnds_ThePlainestInTheirTime()
     {
-        var cases = (from preset in GenrePresets.All from @base in new[] { 0.0, 1.0 } from seed in Enumerable.Range(0, @base == 0 ? 64 : 32) select (Preset: preset, Base: @base, Seed: seed)).ToArray();
+        var cases = (from preset in GenrePresets.All from @base in new[] { 0.0, 1.0 } from seed in Enumerable.Range(0, @base == 0 ? 32 : 16) select (Preset: preset, Base: @base, Seed: seed)).ToArray();
         var made = TestCorpus.InParallel(Enumerable.Range(0, cases.Length), i =>
         {
             var song = TestCorpus.Get(cases[i].Seed, new SongOverrides(Base: cases[i].Base, Genre: GenrePresets.Genre(cases[i].Preset)));

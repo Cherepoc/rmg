@@ -26,7 +26,8 @@ public sealed class SongLengthTest
 
         // among the lengths the forms reach: 1.43 plays a section at a minute, 2.81 at three and 3.19 at five; ten, mostly
         // in free forms, as many more sections as longer ones, 2.77
-        await Assert.That(Average(60)).IsLessThan(Average(180));
-        await Assert.That(Average(180)).IsLessThan(Average(300));
+        var (one, three, five) = (Average(60), Average(180), Average(300));
+        await Assert.That(one).IsLessThan(three);
+        await Assert.That(three).IsLessThan(five);
     }
 }

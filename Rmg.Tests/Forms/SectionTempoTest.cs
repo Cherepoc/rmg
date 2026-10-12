@@ -59,6 +59,8 @@ public sealed class SectionTempoTest
             }
         }
 
+        Console.WriteLine($"{eased} of {changes} changes of tempo eased");
+        // measured 51% to 53% of 259 to 303 changes, at offsets 0, a million and 725 million
         await Assert.That(changes).IsGreaterThan(30);
         await Assert.That(eased / (double)changes).IsEqualTo(0.5).Within(0.15);
     }

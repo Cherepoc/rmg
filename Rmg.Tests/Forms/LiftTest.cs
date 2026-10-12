@@ -6,12 +6,15 @@ namespace Rmg.Tests.Forms;
 
 public sealed class LiftTest
 {
+    /// <summary>How far a note outside a swell may move, in the velocity's units, well under a swell's own steps.</summary>
+    private const double Hair = 0.01;
+
     [Test]
-    public async Task AGenresLongLift_SwellsFromBeforeTheSectionsLastBar_TheNotesOtherwiseAsTheSongsAre()
+    public async Task AGenresLongLift_SwellsFromBeforeTheSectionsLastBar()
     {
         var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
             .Add("dynamics", ImmutableDictionary<string, ByConvention>.Empty.Add("lift", new(1, 1, 1))));
-        var (earlier, louder) = (0, 0);
+        var (earlier, louder, outside) = (0, 0, 0);
         foreach (var seed in Enumerable.Range(0, 64))
         {
             var (own, longer) = (TestCorpus.Get(seed), TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
@@ -24,12 +27,19 @@ public sealed class LiftTest
                 foreach (var (a, b) in notes.Zip(other))
                 {
                     await Assert.That(b.Position).IsEqualTo(a.Position);
-                    if (Math.Abs(a.Value.Velocity - b.Value.Velocity) > 1e-9
-                        && starts.Any(x => a.Position < x.Start - x.Last - 1e-9 && a.Position >= x.Start - x.Last - 3 * x.BarDuration - 1e-9))
+                    if (Math.Abs(a.Value.Velocity - b.Value.Velocity) <= 1e-9)
+                        continue;
+                    if (starts.Any(x => a.Position < x.Start - x.Last - 1e-9 && a.Position >= x.Start - x.Last - 3 * x.BarDuration - 1e-9))
                     {
                         earlier++;
                         louder += b.Value.Velocity > a.Value.Velocity ? 1 : 0;
                     }
+                    // and the notes elsewhere that move more than a hair, but in the last bar, which the songs' own lift swells too,
+                    // and a solo, set over the band as its section heard it, swell and all (Solos.Lift); counted, a few, through a
+                    // stage that sets a part by the song as heard (ROADMAP.md)
+                    else if (!starts.Any(x => a.Position >= x.Start - x.Last - 1e-9 && a.Position < x.Start + 1e-9) && own.Song.TrackDefinitions[track].Role != Rmg.Core.Songs.TrackRole.Solo
+                             && Math.Abs(a.Value.Velocity - b.Value.Velocity) > Hair)
+                        outside++;
                 }
             }
         }
@@ -39,6 +49,7 @@ public sealed class LiftTest
         Console.WriteLine($"{louder} of {earlier} notes before the last bar louder");
         await Assert.That(earlier).IsGreaterThan(0);
         await Assert.That((double)louder).IsGreaterThan(earlier * 0.95);
+        Console.WriteLine($"{outside} notes elsewhere moved more than a hair");
     }
 
     /// <summary>
@@ -58,6 +69,7 @@ public sealed class LiftTest
                 drumless += song.PlaysDrums ? 0 : 1;
                 await Assert.That(starts.Contains(Math.Round(position, 6))).IsTrue().Because($"seed {song.Seed} at {position}");
                 await Assert.That(lift).IsGreaterThan(0);
+
             }
         }
 
