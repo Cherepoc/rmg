@@ -46,33 +46,22 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("numetal-vamp", "Nu metal's section sitting on one chord, its riff chugging over the same root throughout: the style's grinding groove, or a section going nowhere?",
-            "Nu metal's vamp, 40-50-50% of its sections.", "nuMetal", [], new() { ["vamp"] = new() { ["sections"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Vamp, v => (bool)v!), 1)),
-        new("numetal-bass-riff", "Nu metal's bass playing the riff with the guitar, note for note: the band's weight, or a bass with nothing of its own?",
-            "Nu metal's bass doubling its riff, 90-90-80% of its sections.", "nuMetal", [], new() { ["doubling"] = new() { ["riff"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.LineDoubling, v => ((int, TrackRole, TrackRole, int))v! is (_, TrackRole.Riff, TrackRole.Bass, _)), 1)),
-        new("metal-low-riff", "Heavy metal's riff an octave lower, chugging and galloping on the guitar's bottom strings: heavier, or muddy?",
-            "Heavy metal's riff's register, an octave down at every end, as Nu metal's, Djent's, Thrash's and Doom's.", "metal", [], new() { ["register"] = new() { ["riff"] = 50 } },
-            x => x.Absent.Contains(TrackRole.Riff) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Riff))?.Select(n => (double?)n.Position).FirstOrDefault()),
-        new("metal-calm", "Heavy metal's quieter section turned calm, a clean guitar breaking the chords and letting them ring between the heavy ones: the style's contrast, or the band gone soft?",
-            "Heavy metal's calm sections, 5-10-20 now, every guitar but the one breaking the chords resting, no solo over them; tied 3 to 3 twice, the losers a riff's tremolo or chugs under the broken chords.", "metal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1), [6, 27, 34, 41, 47, 57, 59, 72, 80, 99, 108, 120]),
-        new("thrash-vamp", "Thrash metal's section on one chord, its 16ths hammering the low string: thrash's drive, or a riff stuck in place?",
-            "Thrash metal's vamp, 30-40-50% of its sections.", "thrash", [], new() { ["vamp"] = new() { ["sections"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Vamp, v => (bool)v!), 1)),
-        new("doom-blues", "Doom metal's riff on the blues scale, its flat fifth leaning on the root: doom's dread, or a blues band slowed down?",
-            "Doom metal's riff's blues scale, 30-40-50 by weight.", "doom", [], new() { ["riffScale"] = new() { ["blues"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.LineScale, v => (LineScale)v! == LineScale.Blues), 1)),
-        new("doom-half-time", "Doom metal's section in half time, the snare once a bar under an already slow riff: crushing, or the song stalling?",
-            "Doom metal's half time, 10-20-30% of its sections.", "doom", [], new() { ["feelChances"] = new() { ["halfTime"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! > 0), 1)),
-        new("symphonic-choir", "Symphonic metal's choir and strings held behind the distorted guitars: a wall of sound, or mud?",
-            "Symphonic metal's pad, 80-80-90% of its songs.", "symphonic", [], new() { ["parts"] = new() { ["pad"] = 0 } },
-            x => x.Absent.Contains(TrackRole.Pad) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Pad))?.Select(n => (double?)n.Position).FirstOrDefault()),
-        new("symphonic-raise", "Symphonic metal's cadence on a major chord on the fifth, harmonic minor's raised leading tone: the style's drama, or a classical cadence out of place?",
-            "Symphonic metal's raised cadence, 30-40-50% of its sections.", "symphonic", [], new() { ["cadenceRaise"] = new() { ["sections"] = 0 } },
-            x => FirstSection(x, TracePoints.CadenceRaise, v => (((int?, bool))v!).Item2))
+        new("numetal-narrow", "Nu metal's melody kept to its narrowest, about nine semitones a section rather than thirteen, nearer a voice half spoken: the style's delivery, or a duller tune?",
+            "Nu metal's, Thrash's, Punk's and Trap's melody range at 0, the mechanism's narrowest; a range of a fifth and repeated notes, code of their own, built only if narrower helps.", "nuMetal", [], new() { ["melodyRange"] = new() { ["wide"] = 50 } },
+            x => x.Absent.Contains(TrackRole.Melody) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Select(n => (double?)n.Position).FirstOrDefault()),
+        new("numetal-chromatic", "Nu metal's riff on the chromatic scale, its notes off the open string a half step or a tritone away: the style's dissonance, or wrong notes?",
+            "Whether the riff's chromatic colour is what Nu metal lacks, before a palette of its stabs is built (the metal family's step 3).", "nuMetal", [], new() { ["riffScale"] = new() { ["chromatic"] = 0 } },
+            x => x.Absent.Contains(TrackRole.Riff) ? null : Before(x, x.Trace.Where(t => t.Point == TracePoints.LineScale && t.Track == x.Track(TrackRole.Riff) && (LineScale)t.Value! == LineScale.Chromatic)
+                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 1)),
+        new("trap-bass-kick", "Trap's 808 striking with the kick, note for note: the style's low end, or a bass with nothing of its own?",
+            "The bass on the kick, Trap's and Hip-hop's leaning plain, 100-80-60 by weight.", "trap", ["Figures"], null,
+            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Bass) == "withKick"), 1)),
+        new("funk-hits", "Funk's band striking the kick's notes together in a section's last bar before a louder one, resting between: a band's hits, or the groove falling apart?",
+            "Ensemble hits, Funk's 20-30-40% of its sections before a louder one, the songs' 0-3-3.", "funk", [], new() { ["ensembleHits"] = new() { ["sections"] = 0 } },
+            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.EnsembleHits).SelectMany(t => (ImmutableArray<double>)t.Value!).Select(p => (double?)p).Min(), 1)),
+        new("rock-big-ending", "Rock's last chord held while the drums roll round the toms and crash, then the band's last hit together: a show's end, or a drum machine's fill?",
+            "The big ending, Rock's 60 beside its button's 100.", "rock", [], new() { ["ending"] = new() { ["big"] = 0 } },
+            x => x.Map.Ending.Kind == EndingKind.Big ? Before(x, x.Map.Ending.Start, 2) : null)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

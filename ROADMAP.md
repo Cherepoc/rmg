@@ -319,6 +319,12 @@ guitar but the one breaking the chords rests, clean or driven, a section is calm
 the first section too, and no solo plays over it (`CalmTest`: Heavy metal's calm sections with a rhythm guitar under
 them 14 of 22 → 2, with the riff 6 → 0); asked again over other songs.
 
+Asked from 13 October 2026, the band devices' round: `numetal-narrow`, `numetal-chromatic`, `trap-bass-kick`
+(without, the figures' stage), `funk-hits` (faint, 0.07: one bar of a window) and `rock-big-ending`.
+
+Answered on 13 October 2026, `metal-calm` asked again over six other songs after the calm sections' fix: 6 of 6 for
+the calm sections, 9 to 3 in all; Heavy metal's calm kept at 5-10-20.
+
 Asked from 13 October 2026, the metal family's first, Metal now Heavy metal and three new genres beside it, as the
 presets are: `numetal-vamp` (Nu metal's sections on one chord), `numetal-bass-riff` (its bass doubling the riff),
 `metal-low-riff` (Heavy metal's riff an octave down), `metal-calm` (Heavy metal's calm sections, asked again over other
@@ -688,8 +694,8 @@ keeps together. Each step through the implementation loop, with a listening ques
    (`MetalFamilyReportTest`), so the blues band heard is in the line's ♭3–4–♭5 motion, not its single notes. Left to
    listening: whether that motion, slow and stepwise, is the blues lick heard, and a held or bent ♭5 the doom way to
    play the scale; the question itself faint (0.12 to 0.18), so asked again over louder songs once reduced.
-6. Left to listening: **a melody spoken rather than sung** (Nu metal, Hip-hop, Trap, Punk, Thrash), a narrow range and
-   repeated notes, with *A melody sung rather than played* (*Genres*).
+6. Asked as `numetal-narrow` (band devices' step E): **a melody spoken rather than sung**, the range at its narrowest;
+   repeated notes and a range of a fifth left until it is answered, with *A melody sung rather than played* (*Genres*).
 
 Review: **overengineering**: the tuning one drawn floor, no strings or retuning per section; the accent tone an option
 of the riff's; the split data on the steps before it, Thrash without the accent tone and four bars only a fast Heavy
@@ -729,9 +735,11 @@ order:
 - **D2. The false ending** (#372), put off until the big ending is heard: a drop's kind before the last repeat, the
   band hitting the home chord, a beat or two of silence, the drums counting back in; its hit a harmony edit before
   `Realizer`, new work, and a gimmick worn thin quickly.
-- **E.** The metal leftovers as questions: Nu metal's, Thrash's, Punk's and Trap's `melodyRange` about 20, as Hip-hop's,
-  asked as `numetal-narrow`; and `numetal-chromatic` (without, `riffScale.chromatic` 0), whether the chromatic colour
-  is what Nu metal lacks before a stab palette is built.
+- **E.** Done (13 October 2026, `MelodyRangeReportTest`): the metal leftovers as questions. Nu metal's, Thrash's,
+  Punk's and Trap's `melodyRange` at 0, the mechanism's narrowest, a section's melody 13.2 → 10.8 semitones (Nu metal),
+  12.9 → 9.8 (Thrash), 14.5 → 11.7 (Punk), 11.7 → 9.5 (Trap); 20, Hip-hop's, narrowed only by two. Asked as
+  `numetal-narrow`; a range of a fifth and repeated notes are code of their own, the range's floor about nine
+  semitones, built only if narrower helps. And `numetal-chromatic` (without, `riffScale.chromatic` 0).
 
 Review: **overengineering**: a field generalised and one figure, not a player following any other; ensemble hits one
 stage with stop time, not a second, its growth in conditions watched; the false ending split off; the leftovers asked

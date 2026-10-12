@@ -1004,6 +1004,7 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "melodyRange": { "wide": 0 },
       "rudiments": { "flams": [0, 35, 70], "drags": [0, 0, 20] },
       "pocket": { "laidBack": 10 },
       "riffIntro": { "songs": [30, 40, 50] },
@@ -1442,6 +1443,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, the kick and the bass with it, a picked or clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "melodyRange": { "wide": 0 },
       "phraseBars": { "fourBars": 100 },
       "riffIntro": { "songs": [25, 35, 45] },
       "breakdown": { "sections": [30, 40, 50] },
@@ -1582,6 +1584,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "melodyRange": { "wide": 0 },
       "figure": { "bass": { "own": [40, 50, 60], "withKick": [100, 80, 60] } },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "phraseBars": { "fourBars": 100 },
@@ -1839,6 +1842,7 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major, Mixolydian or minor, a count-in and a stop.",
     "choices": {
+      "melodyRange": { "wide": 0 },
       "figure": { "bass": { "own": 100, "withKick": [20, 20, 15] } },
       "polymeter": { "sections": 0 },
       "riffIntro": { "songs": [20, 30, 30] },
