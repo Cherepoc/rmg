@@ -707,7 +707,7 @@ narrow melody on a guitar possibly only dull, so asked before built.
 Agreed 13 October 2026, the plans below in one order, each step through the implementation loop, deployed to test
 with its questions after each group:
 
-1. **The rules kept and the mismatches measured**: *Planned: rules kept…*'s group A (the scale rule and the shared
+1. Done (13 October 2026): **the rules kept and the mismatches measured**: *Planned: rules kept…*'s group A (the scale rule and the shared
    shape over 64 songs, the squelch, 12/8's backbeat, Latin's clave resting) with *Planned: the genres as their records
    play them*'s group V (a long pattern's inner chords, the clave's span, the one drop, Funk's swing, Ska's skank,
    Disco's octave bass, double time's hats, the minor cadences, the data errors).
@@ -810,8 +810,10 @@ wild end, a rock solo, metal's twin leads, a slow genre's half time, is data, no
    to a drop where the records have two (its chords' and rhythm's period doubled, on 2 and 4); Disco's bass moving an
    octave in 17% of its moves for octave bass in 60-70% of its sections (its bass in steady 8ths); Ska's skank right,
    every offbeat at its 140-170.
-3. Minor cadences: Classical's ♭VII–i as often as V–i, and the Aeolian genres' (Dungeon synth, Orchestral's film side)
-   every minor V raised; Symphonic metal's `solos.trades` naming drum trades, a data error; Trap's verses for a voice
+3. Done (13 October 2026), measured, all data for the retunes: minor cadences in 64 songs, Classical's on V 36%, ♭VII
+   26%, IV 24%, a step raised 19% (its `cadenceDegree` to V and its raise up); Dungeon synth's on ♭VII 30%, V 25%,
+   raised 11%, Aeolian enough, the report's claim refuted; Orchestral's ♭VII 33%, V 29%, raised 27% (its film side's
+   raise down). Symphonic metal's `solos.trades` naming drum trades, a data error (0); Trap's verses for a voice
    leaving out the beat's own loop; the echo never on the chords part (Lyrical guitar's cascade on the rhythm part).
 
 **R. Retunes by data** (a step per family, each with its questions; most presets set no length, and many tempo
