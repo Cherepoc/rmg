@@ -326,9 +326,12 @@ internal static class Realizer
         if (isLine && voices > 1)
             notes = [notes[0], ..Stack(notes[0], voices - 1, stateMap).Where(x => x >= range.Low)];
         // a riff in power chords plays its note, the perfect fifth over it whatever the scale, as a power chord is never
-        // diminished, and its octave where the range has it
+        // diminished, and its octave where the range has it; at the top of its range, where the fifth is not, the shape an
+        // octave down, its note the octave on top, as a guitar plays it lower on the neck
         else if (isLine && stateMap.GetStateValue(CompositionStateKinds.PowerChord) > 0)
-            notes = [notes[0], ..new[] { notes[0] + PerfectFifth, notes[0] + OctaveNoteCount }.Where(x => x <= range.High)];
+            notes = notes[0] + PerfectFifth > range.High && notes[0] - OctaveNoteCount >= range.Low
+                ? [notes[0], notes[0] - OctaveNoteCount, notes[0] - OctaveNoteCount + PerfectFifth]
+                : [notes[0], ..new[] { notes[0] + PerfectFifth, notes[0] + OctaveNoteCount }.Where(x => x <= range.High)];
         // a line in octaves plays its note and the note an octave above, or below where above would leave the range, its
         // own first
         else if (isLine && stateMap.GetStateValue(CompositionStateKinds.Octave) > 0)
