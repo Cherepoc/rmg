@@ -797,9 +797,12 @@ wild end, a rock solo, metal's twin leads, a slow genre's half time, is data, no
 
 **V. Suspected mismatches, measured first** (each a bug to fix or a value to retune, one step):
 
-1. A long pattern's inner chords: a 12-bar's bars 2, 3, 6 and 7 drawn by root motion alone, a blues opening I7 to II7
-   or VI7 possible; fix, should it show, a phrase's middle holding the chord it starts on, the IV in its second bar now
-   and then, for every 8-, 12- and 16-bar genre.
+1. Done (13 October 2026): a long pattern's inner chords, the blues' first two phrases holding their start through
+   their first half and home through the rest by their place alone, the quick change's IV in 20%, exact at the plain
+   end; in 428 sections of 64 Blues songs bar 3 on I 15% → 50%, bar 6 on IV 26% → 48%, bar 7 on I 34% → 72%, the rest
+   the progression's strictness easing by its facet (`Progressions.Strictness`, 0.85 in the middle). Left: a genre's
+   own strictness, should a middling blues still wander (Blues' retune); 8-bar patterns left free, as a pop period's
+   chords move.
 2. Latin's clave over two bars against its half-note count (a one-bar clave in 16ths if so); Reggae's one drop, a drop
    every four skanks rather than two; Funk's swing an 8th's shuffle above about 107, not a 16th's; Ska's skank onsets;
    Disco's octave bass moving on weak notes only; double time's hats at 200 (the skank beat of Punk and Thrash).

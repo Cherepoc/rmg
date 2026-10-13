@@ -58,6 +58,26 @@ public sealed class ProgressionsTest
         await Task.CompletedTask;
     }
 
+    /// <summary>The blues' first two phrases at the plainest: each holding its start through its first half and home through the rest, the first's second chord IV now and then.</summary>
+    [Test]
+    public async Task ThreePhrases_HoldTheirStartThenHome_TheFirstTwo_WithAQuickChangeNowAndThen()
+    {
+        var major = Rmg.Core.Composition.Scales.All.Single(x => x.Name == "Major");
+        var context = new GenerationContext(1);
+        var phrases = Enumerable.Range(0, 2000).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, 1, 12, 3, _ => 0, _ => 0, _ => 0)).ToArray();
+        foreach (var roots in phrases)
+        {
+            await Assert.That(Mod7(roots[1]) is 0 or 3).IsTrue();
+            await Assert.That(new[] { roots[2], roots[3], roots[6], roots[7] }.All(x => Mod7(x) == 0)).IsTrue();
+            await Assert.That(roots[5]).IsEqualTo(roots[4]);
+        }
+
+        var quick = phrases.Count(x => Mod7(x[1]) == 3) / (double)phrases.Length;
+        Console.WriteLine($"the quick change in {quick:P0}");
+        // measured 20%
+        await Assert.That(quick).IsBetween(0.1, 0.3);
+    }
+
     [Test]
     public async Task ThreePhrases_StartFromHomeThenIVThenV_TheFirstTwoEndingHome_TheLastTurningAround_AsTheBluesDoes()
     {
