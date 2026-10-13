@@ -374,6 +374,8 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "intensity": { "from": -70, "to": 80 },
+      "darkness": { "from": -80, "to": 90 },
       "echo": { "dottedEighth": 100, "quarter": 100, "eighth": 100, "cascade": [0, 5, 10] },
       "rootDegree": { "sixth": 75, "seventh": 70, "third": 65 },
       "sung": { "halves": [60, 50, 40], "eighths": [80, 50, 30] },
@@ -1185,6 +1187,8 @@
     "name": "Heavy metal",
     "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
+      "intensity": { "from": -60, "to": 80 },
+      "darkness": { "from": -70, "to": 70 },
       "sectionChanges": { "tempo": [0, 10, 30], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": [0, 4, 50] },
       "length": { "from": [170, 180, 200], "to": [330, 400, 600] },
       "lastRepeat": { "songs": [30, 40, 40] },
@@ -2001,6 +2005,8 @@
     "name": "Drum and bass",
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
+      "intensity": { "from": -40, "to": 90 },
+      "darkness": { "from": -50, "to": 90 },
       "sung": { "halves": [30, 30, 20], "eighths": [20, 10, 0] },
       "ghosts": { "sections": [30, 50, 60] },
       "ghostNotes": { "many": 20 },

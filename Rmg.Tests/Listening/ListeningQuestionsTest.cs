@@ -51,10 +51,6 @@ public sealed class ListeningQuestionsTest
         new("bass-step-down", "Cinematic piano's bass stepping down through the chords, a semitone or a tone at a time, the chords above it inverted: a film's piano, or a bass sliding off?",
             "The bass's landing a step down, Cinematic piano's 100 beside the root's 70-60-60, against the root and the third alone.", "filmPiano", [], new() { ["bassLanding"] = new() { ["stepDown"] = 0 } },
             x => (double?)x.Map.Sections[0].Start),
-        new("cinematic-pad", "Cinematic piano's strings swelling under the piano: a film score, or a piano drowned?",
-            "Cinematic piano's string pad, 70-80-80 of its songs.", "filmPiano", [], new() { ["parts"] = new() { ["pad"] = 0 } },
-            x => x.Absent.Contains(TrackRole.Pad) ? null : (double?)x.Map.Sections[0].Start)
-,
         new("funkrock-chorus", "Funk rock's louder sections opening into distorted guitars over the slap bass and the 16th groove: funk rock, or a funk band too loud?",
             "Funk rock's heavy sections, louderForms.guitars 30-50-60, against its guitars clean throughout as Funk's.", "funkRock", [], new() { ["louderForms"] = new() { ["guitars"] = 0 } },
             x => FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Heavy),
@@ -72,15 +68,20 @@ public sealed class ListeningQuestionsTest
         new("lyrical-echo", "Lyrical guitar's heavy delay on its acoustic guitars or its melody, each note repeated and dying away: the style's haze, or a blur?",
             "Lyrical guitar's echo as its strong effect 60-70-80, against none.", "lyrical", [], new() { ["strongEffect"] = new() { ["echo"] = 0 } },
             x => (double?)x.Map.Sections[0].Start),
-        new("lyrical-beat", "Lyrical guitar's downtempo beat swung lightly, as a hip-hop beat is, under the guitars: trip-hop, or lo-fi?",
-            "Lyrical guitar's swing 40-50-40, against its beat straight as a ballad's.", "lyrical", [], new() { ["feelChances"] = new() { ["swing"] = 0 } },
-            x => x.Swing.Delay > 0 && !x.Absent.Contains(TrackRole.Drum) ? (double?)x.Map.Sections[0].Start : null),
         new("lyrical-cascade", "Lyrical guitar's echo repeating each note once, a dotted 8th later and almost as loud, its broken chords running on as 16ths: a cascade, or a stutter?",
             "The cascade, Lyrical guitar's 0-25-60 beside the dying echoes, against those alone.", "lyrical", [], new() { ["echo"] = new() { ["cascade"] = 0 } },
             x => x.Rendered.EchoOnce ? (double?)x.Map.Sections[0].Start : null),
         new("pop-eighths", "Pop's melody sung in 8ths, no note shorter, as a singer phrases, where it ran in 16ths now and then: a sung line, or a square one?",
             "The sung melody's 8ths, sung.eighths, Pop's 80-50-30, against none.", "pop", [], new() { ["sung"] = new() { ["eighths"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.SungEighths, v => (bool)v!), 1))
+            x => Before(x, FirstSection(x, TracePoints.SungEighths, v => (bool)v!), 1)),
+        new("synthwave-dark", "Synthwave at its darkest and fiercest, minor and Phrygian, faster, the drums doubling: darksynth, or a song gone sour?",
+            "Synthwave's mood spans, darkness -80 to 90 and intensity -70 to 80, the songs heard at their darkest, against a neutral mood.", "synthwave", [],
+            new() { ["darkness"] = new() { ["from"] = 0, ["to"] = 0 }, ["intensity"] = new() { ["from"] = 0, ["to"] = 0 } },
+            x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!).Darkness > 0.5 ? (double?)x.Map.Sections[0].Start : null),
+        new("dnb-dark", "Drum and bass at its darkest, minor and Phrygian, fiercer and faster: dark drum and bass, or liquid gone sour?",
+            "Drum and bass's mood spans, darkness -50 to 90 and intensity -40 to 90, the songs heard at their darkest, against a neutral mood.", "dnb", [],
+            new() { ["darkness"] = new() { ["from"] = 0, ["to"] = 0 }, ["intensity"] = new() { ["from"] = 0, ["to"] = 0 } },
+            x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!).Darkness > 0.5 ? (double?)x.Map.Sections[0].Start : null)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

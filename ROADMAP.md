@@ -784,7 +784,7 @@ with its questions after each group:
      two octaves wide, strings as a pad, add9, sus and seventh chords, major, minor and Lydian, AABA, a key's lift, no
      drums, 68-81-94; with **the bass stepping down** (`bassLanding.stepDown`, a genre's alone): the chord's note a
      semitone or a tone below the last chord's landing, the root where none is, 21% of its chord arrivals a step down
-     (Chamber's 11%), 237 descents of three chords or more in 64 songs (73); asked: `bass-step-down`, `cinematic-pad`.
+     (Chamber's 11%), 237 descents of three chords or more in 64 songs (73); asked: `bass-step-down`; `cinematic-pad` (its strings' pad) to ask when a round has room.
      **Classical renamed Chamber**, its id and its name.
    - Done (14 October 2026): **Funk rock** (`funkRock`), beside Funk: its slap bass, ghosts in 75% of sections, a
      muted 16th guitar never chugging, an overdriven riff and 25% of its sections heavy (Funk's none), power chords,
@@ -981,8 +981,10 @@ half time, fills, the kit, driven instruments, chugs and power chords, the bass 
    rock's 28%-37%-46%); the drawn songs' as at 0. Left: the drum figures (the double kick, the blast), the bass
    figures, fills, the songs' own tempo (a dyadic draw, not a range).
 4. The sound's leans: instruments by their traits, the tone, the register.
-5. The genres' spans: Synthwave from dreamwave to darksynth, Drum and bass from liquid to dark, Heavy metal checked
-   against gothic and power metal; asked, a genre's two ends.
+5. Done (14 October 2026): the genres' spans, Synthwave darkness -80 to 90 and intensity -70 to 80 (dreamwave to
+   darksynth), Drum and bass -50 to 90 and -40 to 90 (liquid to dark), Heavy metal -70 to 70 and -60 to 80 (gothic and
+   power metal's shades); asked: `synthwave-dark`, `dnb-dark`, the darkest songs against a neutral mood. Left: the
+   other genres' spans, by listening.
 6. The page: the two given by controls, with its tests.
 
 Review: **overengineering**: the cost is the lean data, two numbers an option, so ten or so choices whose meaning is
@@ -1053,7 +1055,7 @@ implementation loop:
    chords on the rhythm part, which an echo reaches (the chords part it never does), the echo in 48 of 64 songs (the
    rhythm part's in 22, the melody's in 20), 18 of 64 drumless and the bass resting as often, as two of its three
    records play, guitars 65% of the parts, the melody a jazz guitar first, minor and Dorian, 79-86-93, 4:54 at the
-   median, never a louder form; asked: `lyrical-echo`, `lyrical-beat`. As planned: tempo 70-95, up to 150 at the wild end, leaning slow; 4/4; natural minor and Dorian first,
+   median, never a louder form; asked: `lyrical-echo`; `lyrical-beat` (its swung beat) to ask when a round has room. As planned: tempo 70-95, up to 150 at the wild end, leaning slow; 4/4; natural minor and Dorian first,
    harmonic minor and Phrygian dominant at the middle and wild end for the Spanish colour and the ominous pieces, major
    at the plain end lower; seventh, add9, sus2 and minor-ninth shapes, chords a bar or two, few changes, vamps; the
    melody on an acoustic (steel or nylon) or a jazz guitar, then a clean one, repetitive (`rhythm.melody.repetition`

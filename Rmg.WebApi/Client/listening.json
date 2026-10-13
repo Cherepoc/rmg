@@ -58,67 +58,6 @@
     ]
   },
   {
-    "id": "cinematic-pad",
-    "question": "Cinematic piano's strings swelling under the piano: a film score, or a piano drowned?",
-    "decides": "Cinematic piano's string pad, 70-80-80 of its songs.",
-    "genre": "filmPiano",
-    "without": {
-      "skip": [],
-      "genre": {
-        "parts": {
-          "pad": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "3",
-        "at": 139.3,
-        "listen": [
-          "Pad (String Ensemble 1)"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 0,
-        "listen": [
-          "Chords (Acoustic Grand Piano)",
-          "Pad (String Ensemble 1)"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 4.8,
-        "listen": [
-          "Pad (String Ensemble 2)"
-        ]
-      },
-      {
-        "seed": "M",
-        "at": 117.6,
-        "listen": [
-          "Bass (Contrabass)"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 0,
-        "listen": [
-          "Pad (String Ensemble 2)"
-        ]
-      },
-      {
-        "seed": "V",
-        "at": 133.1,
-        "listen": [
-          "Chords (Acoustic Grand Piano)",
-          "Bass (Acoustic Grand Piano)",
-          "Pad (String Ensemble 1)"
-        ]
-      }
-    ]
-  },
-  {
     "id": "funkrock-chorus",
     "question": "Funk rock's louder sections opening into distorted guitars over the slap bass and the 16th groove: funk rock, or a funk band too loud?",
     "decides": "Funk rock's heavy sections, louderForms.guitars 30-50-60, against its guitars clean throughout as Funk's.",
@@ -432,71 +371,6 @@
     ]
   },
   {
-    "id": "lyrical-beat",
-    "question": "Lyrical guitar's downtempo beat swung lightly, as a hip-hop beat is, under the guitars: trip-hop, or lo-fi?",
-    "decides": "Lyrical guitar's swing 40-50-40, against its beat straight as a ballad's.",
-    "genre": "lyrical",
-    "without": {
-      "skip": [],
-      "genre": {
-        "feelChances": {
-          "swing": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "3",
-        "at": 93.2,
-        "listen": [
-          "Melody (Acoustic Guitar (nylon))",
-          "Cabasa"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 102.7,
-        "listen": [
-          "Chords (Electric Guitar (clean))",
-          "Rhythm part (Acoustic Guitar (steel))"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 76.8,
-        "listen": [
-          "Hi-Hat",
-          "Melody (Acoustic Guitar (steel))",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "K",
-        "at": 123.2,
-        "listen": [
-          "Ride",
-          "Solo (Distortion Guitar)",
-          "Cabasa"
-        ]
-      },
-      {
-        "seed": "b",
-        "at": 117.3,
-        "listen": [
-          "Ride",
-          "Clap"
-        ]
-      },
-      {
-        "seed": "i",
-        "at": 22.4,
-        "listen": [
-          "Hi-Hat"
-        ]
-      }
-    ]
-  },
-  {
     "id": "lyrical-cascade",
     "question": "Lyrical guitar's echo repeating each note once, a dotted 8th later and almost as loud, its broken chords running on as 16ths: a cascade, or a stutter?",
     "decides": "The cascade, Lyrical guitar's 0-25-60 beside the dying echoes, against those alone.",
@@ -608,6 +482,153 @@
         "at": 154.7,
         "listen": [
           "Melody (Acoustic Grand Piano)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "synthwave-dark",
+    "question": "Synthwave at its darkest and fiercest, minor and Phrygian, faster, the drums doubling: darksynth, or a song gone sour?",
+    "decides": "Synthwave's mood spans, darkness -80 to 90 and intensity -70 to 80, the songs heard at their darkest, against a neutral mood.",
+    "genre": "synthwave",
+    "without": {
+      "skip": [],
+      "genre": {
+        "darkness": {
+          "from": 0,
+          "to": 0
+        },
+        "intensity": {
+          "from": 0,
+          "to": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "V",
+        "at": 3.2,
+        "listen": [
+          "Chords (Synth Brass 1)",
+          "Bass (Synth Bass 2)",
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "13",
+        "at": 125.8,
+        "listen": [
+          "Hi-Hat",
+          "Solo (Lead 5 (charang))",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Bass (Synth Bass 2)",
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "1L",
+        "at": 0,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "1Q",
+        "at": 3.7,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Hi-Hat",
+          "Chords (Electric Piano 2)"
+        ]
+      },
+      {
+        "seed": "23",
+        "at": 15.2,
+        "listen": [
+          "Hi-Hat",
+          "Pad (Pad 2 (warm))",
+          "Electric Snare"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dnb-dark",
+    "question": "Drum and bass at its darkest, minor and Phrygian, fiercer and faster: dark drum and bass, or liquid gone sour?",
+    "decides": "Drum and bass's mood spans, darkness -50 to 90 and intensity -40 to 90, the songs heard at their darkest, against a neutral mood.",
+    "genre": "dnb",
+    "without": {
+      "skip": [],
+      "genre": {
+        "darkness": {
+          "from": 0,
+          "to": 0
+        },
+        "intensity": {
+          "from": 0,
+          "to": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "T",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Ride",
+          "Chords (Pad 2 (warm))"
+        ]
+      },
+      {
+        "seed": "V",
+        "at": 39.4,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "12",
+        "at": 183.6,
+        "listen": [
+          "Hi-Hat",
+          "Ride",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 1.6,
+        "listen": [
+          "Hi-Hat",
+          "Melody (Electric Piano 1)",
+          "Tom"
+        ]
+      },
+      {
+        "seed": "1Q",
+        "at": 1.5,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare",
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "1t",
+        "at": 18.3,
+        "listen": [
+          "Hi-Hat",
+          "Chords (Electric Piano 2)",
+          "Acoustic Snare"
         ]
       }
     ]
