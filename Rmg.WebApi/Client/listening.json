@@ -15,14 +15,14 @@
     "seeds": [
       {
         "seed": "I",
-        "at": 63.5,
+        "at": 62,
         "listen": [
           "Riff (Overdriven Guitar)"
         ]
       },
       {
         "seed": "N",
-        "at": 6,
+        "at": 4.3,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (pick))",
@@ -31,7 +31,7 @@
       },
       {
         "seed": "r",
-        "at": 320.3,
+        "at": 316,
         "listen": [
           "Bass (Electric Bass (pick))",
           "Riff (Overdriven Guitar)",
@@ -40,7 +40,7 @@
       },
       {
         "seed": "u",
-        "at": 276.6,
+        "at": 275.2,
         "listen": [
           "Bass (Electric Bass (pick))",
           "Riff (Overdriven Guitar)"
@@ -48,7 +48,7 @@
       },
       {
         "seed": "z",
-        "at": 254.5,
+        "at": 255.7,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (pick))"
@@ -56,7 +56,7 @@
       },
       {
         "seed": "1p",
-        "at": 177.6,
+        "at": 175.5,
         "listen": [
           "Bass (Electric Bass (pick))",
           "Riff (Overdriven Guitar)"
@@ -80,7 +80,7 @@
     "seeds": [
       {
         "seed": "2",
-        "at": 8.1,
+        "at": 10,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (pick))"
@@ -88,14 +88,14 @@
       },
       {
         "seed": "3",
-        "at": 3.3,
+        "at": 0,
         "listen": [
           "Riff (Distortion Guitar)"
         ]
       },
       {
         "seed": "5",
-        "at": 76.8,
+        "at": 73.8,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (pick))"
@@ -103,7 +103,7 @@
       },
       {
         "seed": "6",
-        "at": 44.2,
+        "at": 42.2,
         "listen": [
           "Riff (Distortion Guitar)",
           "Bass (Electric Bass (finger))"
@@ -111,7 +111,7 @@
       },
       {
         "seed": "I",
-        "at": 38.9,
+        "at": 37.1,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Riff's twin (Overdriven Guitar)",
@@ -120,7 +120,7 @@
       },
       {
         "seed": "N",
-        "at": 16.5,
+        "at": 14.9,
         "listen": [
           "Riff (Distortion Guitar)",
           "Bass (Electric Bass (pick))"

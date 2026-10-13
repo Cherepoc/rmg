@@ -26,6 +26,7 @@ public sealed class ListeningQuestionsTest
     /// <param name="GenrePatch">The options the song without the device lays over its genre's, by choice and option, the genre's others as they are.</param>
     /// <param name="At">Where the song first plays the device, in beats, as its trace and notes have it, a little before it where it grows; none where it does not.</param>
     /// <param name="Heard">The corpus seeds asked before, left out where the question is asked again over other songs.</param>
+    /// <param name="In">The sections the device plays in, where alone it is listened to; every section for none.</param>
     private sealed record Question(
         string Id,
         string Text,
@@ -34,7 +35,8 @@ public sealed class ListeningQuestionsTest
         string[] Skip,
         Dictionary<string, Dictionary<string, int>>? GenrePatch,
         Func<CorpusSong, double?> At,
-        int[]? Heard = null
+        int[]? Heard = null,
+        Func<CorpusSong, SectionSpan, bool>? In = null
     );
 
     /// <summary>Where a section the trace finds playing the device first plays.</summary>
@@ -75,9 +77,6 @@ public sealed class ListeningQuestionsTest
 
     /// <summary>How long a listener hears a song from where to listen, in seconds, which its difference is measured over.</summary>
     private const double Heard = 16;
-
-    /// <summary>How far apart the places to listen from are tried, in seconds.</summary>
-    private const double Step = 2;
 
     /// <summary>How many of the corpus's songs that play a question's device are measured, of which the most different are asked.</summary>
     private const int Candidates = 24;
@@ -131,7 +130,7 @@ public sealed class ListeningQuestionsTest
         return GenrePresets.Genre(preset with { Choices = choices });
     }
 
-    /// <summary>How long before the two first differ a song is listened from, in seconds, the page starting it a moment earlier still.</summary>
+    /// <summary>How long before a pattern's start a song is listened from, in seconds, the page starting it a moment earlier still.</summary>
     private const double LeadIn = 4;
 
     /// <summary>How many parts a song names to listen to at most, and how much of the most different's difference one makes at least to be named.</summary>
@@ -140,21 +139,29 @@ public sealed class ListeningQuestionsTest
     private const double ListenedShare = 0.25;
 
     /// <summary>
-    ///     A song of a question heard with its device and without, from where the device first plays: how much the two differ
-    ///     where they differ the most, at the earliest place nearly as different, that place, in seconds, and the parts that
-    ///     differ the most there, to listen to.
+    ///     A song of a question heard with its device and without, from where the device first plays, at a pattern's start, as
+    ///     a figure is stated in its first bar and played again in the rest, which alone may differ, in the sections the
+    ///     device plays in: how much the two differ where they differ the most, at the earliest pattern nearly as different,
+    ///     where to listen from, in seconds, and the parts that differ the most there, to listen to; none where no pattern
+    ///     is the device's.
     /// </summary>
-    private static (double Difference, double At, string[] Listen) Measure(Question question, int seed, CorpusSong with, double first)
+    private static (double Difference, double At, string[] Listen)? Measure(Question question, int seed, CorpusSong with, double first)
     {
         var without = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), new SongOverrides(Genre: GenreOf(question, true)), question.Skip.ToImmutableHashSet(), CancellationToken.None);
         var difference = new HeardDifference(with.Rendered, Rmg.Core.Rendering.Render.RenderSong(without));
-        var places = Enumerable.Range(0, (int)Math.Max(1, Math.Ceiling((with.Rendered.Seconds - Heard - first) / Step)))
-            .Select(k => first + k * Step).Select(at => (Difference: difference.Between(at, at + Heard), At: at)).ToArray();
+        var places = with.Map.Sections
+            .Where(x => x.End > first + 1e-9 && (question.In?.Invoke(with, x) ?? true))
+            .SelectMany(x => x.Patterns.Where(p => p.End > first + 1e-9))
+            .Select(p => with.Rendered.SecondsAt(p.Start))
+            .Select(at => (Difference: difference.Between(at, at + Heard), At: at))
+            .ToArray();
+        if (places.Length == 0)
+            return null;
         var best = places.Max(x => x.Difference);
         var (most, at) = places.First(x => x.Difference >= best * NearBest - 1e-9);
         var parts = difference.Parts(at, at + Heard).OrderByDescending(x => x.Value).ToArray();
-        // heard from a few seconds before the two first differ there, so that the device comes after what leads into it
-        at = Math.Max(0, (difference.FirstDifference(at, at + Heard) ?? at) - LeadIn);
+        // heard from a few seconds before the pattern, so that the device comes after what leads into it
+        at = Math.Max(0, at - LeadIn);
         // a part once, at its largest share, which its second take or its other instrument would name again
         return (most, at, [..parts.Where(x => x.Value >= parts.FirstOrDefault().Value * ListenedShare).DistinctBy(x => x.Key.Split(" (")[0]).Take(Listened).Select(x => x.Key)]);
     }
@@ -176,7 +183,7 @@ public sealed class ListeningQuestionsTest
             var measured = TestCorpus.InParallel(Enumerable.Range(0, 128).Except(question.Heard ?? []), seed =>
                 {
                     var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
-                    return question.At(song) is { } at ? (Seed: seed, Measure: (ValueTuple<double, double, string[]>?)Measure(question, seed, song, song.Rendered.SecondsAt(at))) : (seed, null);
+                    return question.At(song) is { } at ? (Seed: seed, Measure: Measure(question, seed, song, at)) : (seed, null);
                 })
                 .Where(x => x.Measure is not null).Take(Candidates).Select(x => (x.Seed, Difference: x.Measure!.Value.Item1, At: x.Measure.Value.Item2, Listen: x.Measure.Value.Item3)).ToArray();
             var asked = measured.OrderByDescending(x => x.Difference).Take(Seeds).OrderBy(x => x.Seed).ToArray();
