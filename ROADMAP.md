@@ -1296,6 +1296,9 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 
 - **A song's mood** (P4): a value drawn per song that a preset's options lean dark or bright by, so that one preset
   spans liquid and dark drum and bass coherently; a preset of each until a third genre asks for a span.
+- **The twin lead's share and busyness:** a twin leading half a twin song's sections (`doubling.twin` 50), its riff
+  barely busier than elsewhere (7.1 notes a bar to 6.7, `LineDoubling.TwinLeadFullness` 0.3); heard good as it is (13
+  October 2026), tuned only if listening asks.
 - **Segments in any pattern:** bars that mix feels, such as three straight beats and a quintuplet beat; a fill's speed
   change, a rank more for one half of its span, would be a case of it.
 - **A drum's sounds together:** a drum is one track, whose note plays one sound, so a run never plays two toms
