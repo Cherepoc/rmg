@@ -31,7 +31,7 @@ public sealed class SongGeneratorChordProgressionTest
     [Arguments(3)]
     public async Task PitchedTracks_ShareTheChordShapeAtTheSameTime(int phrases)
     {
-        for (var seed = 0; seed < 8; seed++)
+        for (var seed = 0; seed < 64; seed++)
         {
             // a section's pattern of a phrase, as every song's, or of three, the blues' twelve bars
             var song = (phrases == 1 ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(phrases)))).Song;
@@ -108,8 +108,9 @@ public sealed class SongGeneratorChordProgressionTest
             var notes = Realizer.GetNoteStates(trackTimelineMap, song.TrackDefinitions[trackNumber], commonStateTimelineMap);
             foreach (var note in notes)
             {
-                // but a solo's, whose stacked notes the soloist voices as it stacks them, an octave on a power chord
-                if (note.Value.GetStateValue(CompositionStateKinds.LineSolo) == 1)
+                // but a solo's, whose stacked notes the soloist voices as it stacks them, an octave on a power chord, and the solo
+                // part's answers to the melody, lines of the same vocabulary
+                if (note.Value.GetStateValue(CompositionStateKinds.LineSolo) == 1 || song.TrackDefinitions[trackNumber].Role == TrackRole.Solo)
                     continue;
                 var shape = string.Join(",", note.Value.GetStateValue(StateKinds.ChordNotePitchOffsets));
                 yield return (trackNumber, note.Position, shape);

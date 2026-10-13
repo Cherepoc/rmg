@@ -116,11 +116,11 @@ public sealed class ScalesTest
         await Assert.That(Rmg.Core.Composition.Scales.HarmonicMinor.Distance(Rmg.Core.Composition.Scales.NaturalMinor)).IsEqualTo(1);
     }
 
-    /// <summary>The central rule, over three songs; over 64 it fails on a few, which ROADMAP.md lists.</summary>
+    /// <summary>The central rule, over 64 songs; ROADMAP.md lists those it fails on at other offsets of the corpus.</summary>
     [Test]
     public async Task EveryPitchedNote_IsInItsSectionsScaleAndTheKey_WithTheStepsRaisedWhereTheyAre()
     {
-        foreach (var seed in Enumerable.Range(1, 3))
+        foreach (var seed in Enumerable.Range(0, 64))
             await InItsScale(seed);
     }
 
@@ -147,6 +147,10 @@ public sealed class ScalesTest
         var pedals = ((ImmutableArray<(double Change, ImmutableArray<double> Chords, KeyChange.Device Device)>)TestCorpus.Get(seed).Trace.Single(x => x.Point == TracePoints.KeyPreparation).Value!)
             .Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (From: x.Chords[0], To: x.Change)).ToArray();
 
+        // the sections that push their changes
+        var pushing = TestCorpus.Get(seed).Trace.Where(x => x.Point == TracePoints.Push && (bool)x.Value!).Select(x => x.Section).ToHashSet();
+        bool Pushes(double position) => song.Map!.SectionAt(position) is { } span && pushing.Contains(span.SectionId);
+
         var tracks = TestCorpus.Get(seed).Rendered.Tracks.Where(x => !x.IsPercussionInstrument).ToArray();
         // a pinch harmonic, which sounds its string's overtone, the note's octave and fifth, wherever the scale is, as played
         var swing = Render.GetSwing(song);
@@ -168,10 +172,11 @@ public sealed class ScalesTest
             var sounding = realized.GetValueOrDefault(track.Role)?.LastOrDefault(x => swing.Apply(x.Position) <= note.Position + 1e-3);
             var approach = (ChordApproach)(sounding?.Value.State.GetStateValue(CompositionStateKinds.LineApproach) is > 0 and var own ? own : approaches.GetEffectiveValueAt(note.Position));
             var nextChange = changes.Where(x => x > note.Position + 1e-9).DefaultIfEmpty(double.MaxValue).Min();
+            // a change a pushing section strikes an eighth early, its arrival there
             var isChromaticApproach = track.Role == TrackRole.Bass
-                && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9)
+                && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9 && !(Pushes(x.Position) && Math.Abs(x.Position - (nextChange - Rmg.Core.Composition.Pushes.Early)) < 1e-3))
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
-            var isPedal = track.Role == TrackRole.Bass && pedals.Any(x => note.Position >= x.From - 0.2 && note.Position < x.To);
+            var isPedal = track.Role == TrackRole.Bass && pedals.Any(x => note.Position >= x.From - (Pushes(x.From) ? Rmg.Core.Composition.Pushes.Early : 0) - 0.2 && note.Position < x.To);
             if (isChromaticApproach || isPedal || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End) || pinched.Any(x => Math.Abs(x - note.Position) < 1e-3) || planed.Any(x => Math.Abs(x - note.Position) < 1e-3))
                 continue;
 

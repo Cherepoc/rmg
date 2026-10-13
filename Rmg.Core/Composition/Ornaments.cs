@@ -62,6 +62,7 @@ internal static class Ornaments
 
         var notes = SongStages.NotesOf(draft);
         var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
+        var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
@@ -78,11 +79,14 @@ internal static class Ornaments
                 var draw = song.Stream(SongStream.Ornaments, key).GenerateDouble();
                 // a quick note's length in beats at the tempo there
                 var step = Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position)) / Rate;
-                var seconds = note.Value.Duration / (step * Rate);
+                // as long as the note sounds over its own chord, its neighbours that chord's scale's, a note held into the
+                // next chord ornamented before it, the rest held
+                var length = Math.Min(note.Value.Duration, changes.Where(x => x > note.Position + 1e-9).Select(x => x - note.Position).DefaultIfEmpty(double.MaxValue).Min());
+                var seconds = length / (step * Rate);
                 var onBeat = note.Value.State.GetStateValue(CompositionStateKinds.BeatRank) == 0;
                 // the longest ornament the note may take, of those the song plays and the note drew
-                var ornament = plays.LastOrDefault(x => draw < x.Share && seconds >= x.Seconds && note.Value.Duration >= x.Beats - 1e-9 && (x.Ornament != Ornament.Grace || onBeat));
-                return ornament.Share > 0 ? Ornamented(note, ornament.Ornament, step, draw < ornament.Share / 2) : note;
+                var ornament = plays.LastOrDefault(x => draw < x.Share && seconds >= x.Seconds && length >= x.Beats - 1e-9 && (x.Ornament != Ornament.Grace || onBeat));
+                return ornament.Share > 0 ? Ornamented(note, ornament.Ornament, step, draw < ornament.Share / 2, length) : note;
             }));
         }
 
@@ -94,13 +98,14 @@ internal static class Ornaments
 
     /// <summary>A note with its ornament, its quick notes a step each from its start, the note held for the rest.</summary>
     /// <param name="below">A grace note's neighbour below rather than above.</param>
-    internal static TimelineItem<RealizedNote> Ornamented(TimelineItem<RealizedNote> note, Ornament ornament, double step, bool below)
+    /// <param name="length">How long the note sounds over its own chord, in beats, which a trill takes its share of.</param>
+    internal static TimelineItem<RealizedNote> Ornamented(TimelineItem<RealizedNote> note, Ornament ornament, double step, bool below, double length)
     {
         int[] steps = ornament switch
         {
             Ornament.Grace => [below ? -1 : 1],
             Ornament.Turn => [1, 0, -1],
-            _ => Enumerable.Range(0, Math.Max(2, (int)Math.Min(note.Value.Duration * TrillShare / step, TrillSeconds * Rate) / 2 * 2)).Select(x => x % 2).ToArray()
+            _ => Enumerable.Range(0, Math.Max(2, (int)Math.Min(length * TrillShare / step, TrillSeconds * Rate) / 2 * 2)).Select(x => x % 2).ToArray()
         };
         var pitch = note.Value.Pitches[0];
         // the neighbours in the line's scale, or the section's where the line keeps to it, or where the line's leaves a gap
