@@ -12,16 +12,20 @@ public sealed class SungMelodyReportTest
     [Arguments(null)]
     [Arguments("blues")]
     [Arguments("folk")]
+    [Arguments("pop")]
+    [Arguments("hipHop")]
+    [Arguments("techno")]
     public async Task Report(string? genre)
     {
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => genre is null ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))))
             .Where(x => !x.Absent.Contains(TrackRole.Melody)).ToArray();
-        Console.WriteLine(genre ?? "the songs' own");
+        var report = new System.Text.StringBuilder(genre ?? "the songs' own").AppendLine();
         var (bars, notes, busyBars, runs, longRuns, veryLong, intervals, repeats, steps, thirds, fourthsToSixths, leaps) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         var (legato, legatoCount, offEighth, onDownbeat, runBeats) = (0.0, 0, 0, 0, 0.0);
         var notesPerRun = new List<int>();
         var leapSizes = new int[25];
         var together = 0;
+        var gaps = new int[4];
         var (lastEnds, lastCount, innerEnds, innerCount, halfRests, halfCount) = (0, 0, 0, 0, 0, 0);
         var durations = new List<double>();
         foreach (var song in songs)
@@ -33,6 +37,11 @@ public sealed class SungMelodyReportTest
             if (n.Length < 2)
                 continue;
             var bar = span.Meter.BarDuration;
+            // the gaps between the melody's onsets as written, before swing: 16ths or quicker, a triplet's 8ths, 8ths, longer
+            var written = (song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Select(x => x.Position) ?? [])
+                .Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9).Distinct().Order().ToArray();
+            foreach (var gap in written.Zip(written.Skip(1)).Select(x => x.Second - x.First))
+                gaps[gap < 0.3 ? 0 : gap < 0.4 ? 1 : gap < 0.6 ? 2 : 3]++;
             // a rest, a gap of half a beat or more, in each phrase's last bar, the pattern's last phrase and the ones within it
             for (var end = span.Start + span.Meter.PhraseDuration; end <= span.End + 1e-9; end += span.Meter.PhraseDuration)
             {
@@ -93,15 +102,17 @@ public sealed class SungMelodyReportTest
 
         notesPerRun.Sort();
         durations.Sort();
-        Console.WriteLine($"{songs.Length} songs, {bars} bars, {notes / (double)bars:0.0} notes a bar, {busyBars / (double)bars:P0} of bars of 8 notes or more");
-        Console.WriteLine($"rests (a gap of half a beat or more): a phrase {runBeats / runs:0.0} beats, {notesPerRun.Average():0.0} notes (median {notesPerRun[notesPerRun.Count / 2]}), " +
+        report.AppendLine($"{songs.Length} songs, {bars} bars, {notes / (double)bars:0.0} notes a bar, {busyBars / (double)bars:P0} of bars of 8 notes or more");
+        report.AppendLine($"rests (a gap of half a beat or more): a phrase {runBeats / runs:0.0} beats, {notesPerRun.Average():0.0} notes (median {notesPerRun[notesPerRun.Count / 2]}), " +
                           $"{longRuns / (double)runs:P0} over two bars, {veryLong / (double)runs:P0} over four; {onDownbeat / (double)runs:P0} start on a downbeat");
-        Console.WriteLine($"moves in a phrase: repeated {repeats / (double)intervals:P0}, steps {steps / (double)intervals:P0}, thirds {thirds / (double)intervals:P0}, " +
+        report.AppendLine($"moves in a phrase: repeated {repeats / (double)intervals:P0}, steps {steps / (double)intervals:P0}, thirds {thirds / (double)intervals:P0}, " +
                           $"4ths-6ths {fourthsToSixths / (double)intervals:P0}, over a 6th {leaps / (double)intervals:P0}");
-        Console.WriteLine($"legato (duration over the gap to the next) {legato / legatoCount:P0}; off the 8ths {offEighth / (double)notes:P0}; " +
+        report.AppendLine($"legato (duration over the gap to the next) {legato / legatoCount:P0}; off the 8ths {offEighth / (double)notes:P0}; " +
                           $"durations: median {durations[durations.Count / 2]:0.00}, 90th {durations[durations.Count * 9 / 10]:0.00} beats");
-        Console.WriteLine($"onsets together {together}; leaps over a 6th by size: {string.Join(", ", leapSizes.Select((c, i) => (c, i)).Where(x => x.c > 0).Select(x => $"{x.i}:{x.c}"))}");
-        Console.WriteLine($"a rest in a phrase's last bar: the pattern's last phrase {lastEnds / (double)lastCount:P0} of {lastCount}, a phrase within it {innerEnds / (double)Math.Max(1, innerCount):P0} of {innerCount}; at half a phrase {halfRests / (double)Math.Max(1, halfCount):P0} of {halfCount}");
+        report.AppendLine($"onsets together {together}; leaps over a 6th by size: {string.Join(", ", leapSizes.Select((c, i) => (c, i)).Where(x => x.c > 0).Select(x => $"{x.i}:{x.c}"))}");
+        report.AppendLine($"a rest in a phrase's last bar: the pattern's last phrase {lastEnds / (double)lastCount:P0} of {lastCount}, a phrase within it {innerEnds / (double)Math.Max(1, innerCount):P0} of {innerCount}; at half a phrase {halfRests / (double)Math.Max(1, halfCount):P0} of {halfCount}");
+        report.AppendLine($"onsets apart, as written: a 16th or less {gaps[0] / (double)gaps.Sum():P0}, a triplet's 8th {gaps[1] / (double)gaps.Sum():P0}, an 8th {gaps[2] / (double)gaps.Sum():P0}, longer {gaps[3] / (double)gaps.Sum():P0}");
+        Console.WriteLine(report);
         await Task.CompletedTask;
     }
 }

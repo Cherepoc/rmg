@@ -704,6 +704,101 @@ metal, Doom without the tuning a slow one; no sub-styles within a genre, a prese
 over still harmony; a slap bass doubling a distorted riff turning it to funk metal, so picked where it doubles; a
 narrow melody on a guitar possibly only dull, so asked before built.
 
+### Planned: dark jazz
+
+Planned 13 October 2026: a preset of slow, dark jazz, a noir lounge band played at a funeral's pace: a tenor sax or a
+vibraphone holding long notes over an electric piano's held minor chords, an upright bass on the roots, brushes and a
+ride barely there, an organ or strings under them, minutes on two or three chords, everything soft and in a hall. Its
+neighbours are Jazz (its band and its harmony), Ambient (its stillness) and Doom metal (its pace and its length). A
+genre is data first (`Client/genres.json`): every step below a preset's values but the guarded ones, which are code
+only if listening asks. Each through the implementation loop:
+
+1. **The preset** (`darkJazz`, "Dark jazz"), data alone. Tempo 60-72, the half-time feel likely (`feelChances.halfTime`),
+   swing light or none; natural and harmonic minor, Dorian at the wild end, the Phrygian second as a colour; seventh,
+   ninth and shell shapes (a minor key's seventh on its second degree is the half-diminished one); chords two bars or
+   more (`harmonicRhythm.twoBars`), no turnarounds, passing chords or key changes; the electric piano's chords held
+   (`rhythm.chords.speed` 0), its tremolo now and then (`strongEffect.tremolo`); the bass on roots and fifths, not
+   walking (`bass.leading` low, `rhythm.bass.speed` low); the melody tenor sax, vibraphone, muted trumpet or the electric
+   piano, sparse (`rhythm.melody.busyness` and `speed` low, `space`), swelling and with vibrato; the brush kit, the ride
+   and the snare's backbeat alone, fills and ghosts few; an organ, strings or a choir as the pad; a counter-melody on
+   the vibraphone now and then, solos rare and slow; dynamics low and even, the hall; sections of 16 and 32 bars,
+   textures steady and thin, entries for the intro, a ring-out or a fade for the ending; songs of five to nine minutes.
+   No riff, rhythm guitar, stops, hits, pushes or big ending. Measured against Jazz, Ambient and Doom metal on 64 songs
+   each (a report of its own): the tempo felt, every part's notes a second, a chord's length in seconds, the melody's
+   share of silence, the drums' hits a second; the targets the slowest and sparsest of the four, set from that
+   baseline. Asked: `darkjazz-halftime` (the half-time feel against none) and `darkjazz-swing` (light swing against
+   straight), the two choices most likely to tip it into a lounge ballad.
+2. **Guarded: a tempo under 60** (the page's tempo runs from 60, `GenreChoices.Tempo`'s scale), only if 60 with the
+   half time is heard too quick; the scale moved down, the page's slider and its tests with it.
+3. **Guarded: the brushes' swirl keeping time** (the brush kit's sustained stroke, on the electric snare's key), only if
+   the ride's taps are heard too busy; first checked that a genre's time role can name the electric snare.
+
+Review: **overengineering**: no mechanism of its own, a preset of choices that exist; the tempo floor and the swirl
+behind listening; no tape hiss, vinyl crackle or a film's samples (beyond General MIDI); no Mellotron, which General
+MIDI has not, the strings, a flute and the choir standing in. **Musicality**: slowness alone makes a lounge ballad, not
+this: the dread comes from space, held chords and the minor's dark degrees, so comping, walking and fills are the
+risks and are kept down; swing at 60 easily sounds cheesy, so asked; a sax held soft is thin in General MIDI, so its
+level kept up against the band's; eight static minutes bore, so the textures thin and fill the sections, the form's
+plainness kept; the harmonic minor's dominant with its flat ninth the colour, not chromatic passing chords; the brush
+kit is in both soundfonts (program 40), its sound heard before its weight is raised.
+
+### Planned: lyrical guitar
+
+Planned 13 October 2026, revised the same day from reviews of the reference records: mellow, melancholic instrumental
+guitar music, mostly acoustic. Reviews agree on: acoustic guitars intertwined with a clean electric one of a dry,
+neutral, jazz-like tone and a simple bass; heavy delay on everything, sometimes the pulse itself; a steady,
+prominent hip-hop or trip-hop beat under most pieces, loops, now and then a near-industrial one, a heartbeat-like
+pulse in the darker ones; melodies repetitive, "geometric", the album hardly varying; a distorted, heartfelt solo
+building at the end of the most electric piece, over a bass-driven groove and cold synth swathes; a cello and a viola
+on two pieces, turntable scratches on three; a Spanish-sounding harmony now and then; some pieces ominous rather than
+sad. The companion record has no drums at all, its delays the rhythm. Tempos about 80 (two pieces estimated at 81 and
+82 by tempo databases' estimates, both minor). Its neighbours are Hip-hop (its beat) and the Power ballad (its let-ringing guitars). Each through the
+implementation loop:
+
+1. **The preset** (`lyrical`, "Lyrical guitar"), data alone: tempo 70-95, up to 150 at the wild end, leaning slow; 4/4; natural minor and Dorian first,
+   harmonic minor and Phrygian dominant at the middle and wild end for the Spanish colour and the ominous pieces, major
+   at the plain end lower; seventh, add9, sus2 and minor-ninth shapes, chords a bar or two, few changes, vamps; the
+   melody on an acoustic (steel or nylon) or a jazz guitar, then a clean one, repetitive (`rhythm.melody.repetition`
+   high), its lines sung (`sung.halves`); the chords an acoustic or clean guitar's broken chords let ring, held tones
+   now and then; the bass simple, on roots, repeating; the drums a steady downtempo beat on most sections, Hip-hop's
+   lightly swung 16ths and syncopated kick on a standard or room kit, few fills, the drums resting at the wild end only
+   (the drumless record); a heavy delay as a section's strong effect at the middle (`strongEffect.echo`), chorus,
+   the hall; a cello as the counter-melody now and then, a cold pad at the wild end; the solo an overdriven guitar's, a
+   build at the end of a song now and then (`solos`), the only distorted part; textures steady, no louder form, key
+   change, stops, hits or big ending; songs of three to six minutes. Measured against Hip-hop and the Power ballad on
+   64 songs each: the drums' share of sections, the beat's swing, the melody's repetition, the echo's share, the
+   guitars' share of the parts; targets from that baseline. Asked: `lyrical-echo` (the delay against none) and
+   `lyrical-beat` (the downtempo beat against a ballad's).
+2. **The echo cascade**, a device of its own, then the preset's: a fast piece of a guitar alone, about a minute, at
+   about 150, playing even 8ths, short and muted, its broken chords echoed once a dotted 8th later and almost as loud,
+   so that the playing and the echo together sound an unbroken run of 16ths; a minor key's chords stepping down with
+   their fifth in the bass (i, VII and VI as second inversions), arpeggios over the tonic, an add9 at the end. The
+   echo is the synthesizer's delay (`Expression.EchoDelays`, `Midi.DelayFeedback`): its time drawn evenly among a
+   dotted 8th, a quarter and an 8th, and its feedback fixed at about half, several repeats dying away. The echo's kind
+   a genre's pool (`echo`: a dotted 8th, a quarter, an 8th, and the cascade, a dotted 8th repeated once, its feedback
+   none and its level the note's), the songs' as now, evenly among the three; the cascade the echoing part's broken
+   chords in even 8ths where it carries it, its notes short. Lyrical guitar's cascade at its wild end, where its tempo
+   reaches 150 and its drums and bass rest more; Ambient's and Synthwave's now and then. Measured: the carrier's 8ths
+   struck in a cascade's bars, its notes' lengths, the delay's time and feedback as written; asked as
+   `lyrical-cascade` (the cascade against the half-feedback echo). The piece itself, a fast guitar alone, is the wild
+   end's rare outcome, not a preset of its own.
+3. **Guarded: turntable scratches** as a percussion sound (the kits' scratch keys, 29 and 30, if the soundfonts have
+   them), only if listening misses them; checked first that both soundfonts sound them.
+4. **Guarded: legato slides** (*Instruments and expression*), only if the lead's slides are heard as stutters.
+
+Review: **overengineering**: a preset of choices that exist but the echo's kind, one pool generalising the echo's
+fixed feedback and its even draw of a delay rather than a cascade mechanism; the scratches and slides behind listening; no
+whammy, tapping or kill-switch devices (other records'); the delay the existing echo, not a delay of its own as
+the rhythm, which the drumless companion record would want and the preset's wild end only approximates.
+**Musicality**: the identity is the acoustic guitars, the delay and the steady beat together; General MIDI's acoustic
+guitars are decent, the delay helps, but an echo's taps blur a fast figure, so heard; a beat too swung turns it
+lo-fi and too plain a ballad, so asked; the sameness the reviews note is the style, but a generator's sameness
+across songs is worse than an album's, so the facets vary the scale, the beat and the solo; the distorted solo only as
+a build at the end, never over the acoustic theme; the minor's melancholy and the harmonic minor's Spanish colour, not
+a major key's sweetness; the cascade only works with every 8th struck and the repeat almost as loud, a gap or a
+long note breaking the run, and a song-wide delay echoing whatever else is sent to it, so the cascade's song sends one
+part alone.
+
 ### Planned: band devices and the metal leftovers
 
 Planned 13 October 2026 from the roadmap's priorities, reviewed the same day; each step through the implementation loop.
@@ -925,10 +1020,16 @@ left:
     stands for a voice by how it phrases, not by its sound. Measured (`SungMelodyReportTest`, 128 songs): its moves
     already sing (repeated 28%, steps 33%, thirds 19%, over a sixth 3%, legato 96%); every phrase of a pattern ends in a
     rest, and a sung section's at half its phrase too (`GenreChoices.Sung`, `PhraseRestTest`), a run outlasting two bars
-    18% of the time; its rhythm does not: 20% of bars carry eight notes or more, 33% of notes fall off the 8ths, 68% of
-    phrases start on a downbeat. Left: word rhythm by the same choice, the busyness and the 16ths leaned down
-    (`MelodyBusyness`, the rhythm's density), a phrase's first note after the downbeat now and then, the repeat chance
-    up, all through existing settings; built only if the answer keeps the sung lines. Not: lyrics or syllables, melisma,
+    18% of the time; its rhythm does not: 20% of bars carry eight notes or more, 29% of its onsets a 16th or less apart,
+    68% of phrases start on a downbeat. Left, step 3: a sung section's melody no finer than 8ths, its parts' cap
+    (`CompositionStateKinds.ShortestNote`, the calm sections' own), drawn per section from a stream of its own by a second
+    option of the same choice (`sung.eighths`): the songs' 100-50-0, the plain sung genres' (Folk, Country, Ballad, Rock,
+    Punk, Blues, the metal family) high, Pop's, Soul's and Funk's middling, Hip-hop's and Trap's low, as their lines
+    syncopate in 16ths. Measured as written (before swing): a 16th or less between onsets 30% in Pop, 29% the songs',
+    25% Folk, 22% Blues, 11% Hip-hop; the target about half, the triplet's 8ths kept (1-3% now). Asked as `pop-eighths`.
+    Cut on review: the busyness leaned down (the cap does it, eight notes a bar at most), the repeat chance up (28%
+    already), a phrase starting after the downbeat (73% of Pop's start on it, against no measure of a sung line; by
+    listening, should the cap's lines sound square). Not: lyrics or syllables, melisma,
     a singer's vibrato or scoops by pitch bend, Voice Oohs as a lead by default (a pad's slow attack; a weight only by
     listening). A genre's instrumental lines (Techno's and IDM's leads, a riff) keep the choice low, so it is a lean,
     never a rule over every melody.
