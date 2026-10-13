@@ -36,7 +36,8 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 /// <summary>
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
 ///     double kick; a black metal band's blast beat, its cymbal riding it, and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
-///     band's galloping riff, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a clave's three and two,
+///     band's galloping riff, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a jazz drummer's ride,
+///     on the beats and the skip after 2 and 4; a clave's three and two,
 ///     and the bossa nova's on the snare's stroke, its cross-stick; a trance's chords in 16ths, its arpeggio's steady run, and its bass
 ///     rolling in the 16ths after the kick or on the offbeats. A section draws each player's, its own rhythm or one of its
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
@@ -71,6 +72,8 @@ internal static class Figures
         new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
         new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
         new("blast", "A blast beat, a cymbal riding it on every 8th", FigurePlayer.Time, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
+        // the swing ride, the skip played late by the song's swing
+        new("swingRide", "The swing ride, on the beats and the skip after 2 and 4", FigurePlayer.Time, [0, 4, 6, 8, 12, 14], 16, null, 0, false),
         new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, null, 0, false),
         new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, null, 0, false),
         new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, null, 0, false),

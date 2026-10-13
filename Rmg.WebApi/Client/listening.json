@@ -576,5 +576,67 @@
         ]
       }
     ]
+  },
+  {
+    "id": "jazz-ride",
+    "question": "Jazz's ride on the beats with the skip after 2 and 4, swung: the swing ride, or a metronome?",
+    "decides": "The swing ride as the time drum's figure, Jazz's 100 beside its own rhythm's 20-30-40; its own ride struck about once a bar before.",
+    "genre": "jazz",
+    "without": {
+      "skip": [
+        "Figures"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 26.5,
+        "listen": [
+          "Hi-Hat",
+          "Ride"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 81.1,
+        "listen": [
+          "Hi-Hat",
+          "Ride"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 0,
+        "listen": [
+          "Ride",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Ride"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 0,
+        "listen": [
+          "Ride",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 24.2,
+        "listen": [
+          "Ride",
+          "Hi-Hat"
+        ]
+      }
+    ]
   }
 ]

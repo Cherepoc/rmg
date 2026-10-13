@@ -74,6 +74,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "figure": { "time": { "own": [20, 30, 40], "swingRide": 100 } },
       "length": { "from": [180, 200, 180], "to": [360, 420, 600] },
       "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": [100, 50, 0], "block": [0, 10, 25] },
       "vamp": { "sections": [0, 10, 25] },

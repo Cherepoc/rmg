@@ -72,7 +72,10 @@ public sealed class ListeningQuestionsTest
             x => x.Swing.Delay > 0 ? (double?)x.Map.Sections[0].Start : null),
         new("classical-cadence", "Classical's minor sections closing on V, V to i, where they closed on ♭VII or IV as often: a classical cadence, or a predictable one?",
             "Classical's cadence degree leaning to the fifth, 100, and away from the seventh, 20.", "classical", [], new() { ["cadenceDegree"] = new() { ["fifth"] = 50, ["seventh"] = 50 } },
-            x => (double?)x.Map.Sections[0].Start)
+            x => (double?)x.Map.Sections[0].Start),
+        new("jazz-ride", "Jazz's ride on the beats with the skip after 2 and 4, swung: the swing ride, or a metronome?",
+            "The swing ride as the time drum's figure, Jazz's 100 beside its own rhythm's 20-30-40; its own ride struck about once a bar before.", "jazz", ["Figures"], null,
+            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Time) == "swingRide"), 1))
 
     ];
 

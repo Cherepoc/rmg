@@ -577,8 +577,6 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   1–3–5–6–♭7–6–5–3 (Blues, Rock, Country), after the pedal's keep-out.
 - **The alternating thumb** (#362): an arpeggio pattern, the thumb alternating root and fifth on the beats (Folk,
   Country, Power ballad, Blues, Bossa nova, Medieval).
-- **The jazz ride** (#349): a time drum's figure, the swing ride's skip note after 2 and 4, measured first against
-  what Jazz's time already plays.
 - **The breakdown chorus** (#369): a `lastRepeat` option, the first pass at the thinnest texture, the second the full
   band (Pop, Power ballad, Soul, Country, Rock, Disco, Folk).
 - Found while fixing it:
@@ -742,7 +740,9 @@ with its questions after each group:
 4. **The idioms and the figures**: done (13 October 2026), swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
-   heads harmonised and in blocks now and then. Left: the jazz ride, the boogie, the alternating thumb, Latin's bass
+   heads harmonised and in blocks now and then. The jazz ride (#349): the swing ride a time drum's figure, on the beats
+   and the skip after 2 and 4, swung by the song, Jazz's in 151 of its 421 sections, its ride struck 0.6-0.9 times on
+   every beat and skip there where its own struck about once a bar (asked: `jazz-ride`). Left: the boogie, the alternating thumb, Latin's bass
    figures (after the clave's span is settled), and the rows of figures (group F).
 5. **The two planned genres and the sung melody**: dark jazz and lyrical guitar, with the research's corrections (their
    reports), the echo cascade on the rhythm part; the sung melody's 8ths cap (`sung.eighths`, *A melody sung rather
@@ -774,8 +774,7 @@ it:
 
 **B. Four idioms** (each a step from a mechanism that exists):
 
-5. **The jazz ride** (#349): what Jazz's time plays now measured, then the swing ride's skip note after 2 and 4 as a
-   time drum's figure (`Figures`), Jazz's and dark jazz's; asked as `jazz-ride`.
+5. Done (13 October 2026): the jazz ride, a time drum's figure (`Figures`), Jazz's; dark jazz's with its preset.
 6. **The boogie** (#366): the alternating bass generalised to a cycle of the chord's degrees, root and fifth its
    shortest, 1-3-5-6-flat 7-6-5-3 its longest, after the pedal's keep-out; Blues', Rock's, Country's; asked.
 7. **The alternating thumb** (#362): an arpeggio pattern, the thumb on root and fifth on the beats, the fingers between;
