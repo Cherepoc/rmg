@@ -11,7 +11,7 @@ public sealed class PinchTest
     [Test]
     [Arguments("metal")]
     [Arguments("nuMetal")]
-    [Arguments("blackMetal")]
+    [Arguments("thrash")]
     public async Task APinch_IsAHeldSingleNotesHighlight_NeverAChordOrInARun_OneAPartAPhrase_AlwaysWavering(string genre)
     {
         var (pinches, length) = (0, 0.0);

@@ -49,22 +49,15 @@ public sealed class ListeningQuestionsTest
         new("numetal-narrow", "Nu metal's melody kept to its narrowest, about eleven semitones a section rather than thirteen, nearer a voice half spoken: the style's delivery, or a duller tune?",
             "Nu metal's, Thrash's, Punk's and Trap's melody range at 0, the mechanism's narrowest; a range of a fifth and repeated notes, code of their own, built only if narrower helps.", "nuMetal", [], new() { ["melodyRange"] = new() { ["wide"] = 50 } },
             x => x.Absent.Contains(TrackRole.Melody) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Select(n => (double?)n.Position).FirstOrDefault()),
-        new("numetal-chromatic", "Nu metal's riff on the chromatic scale, its notes off the open string a half step or a tritone away: the style's dissonance, or wrong notes?",
-            "Whether the riff's chromatic colour is what Nu metal lacks, before a palette of its stabs is built (the metal family's step 3).", "nuMetal", [], new() { ["riffScale"] = new() { ["chromatic"] = 0 } },
-            x => x.Absent.Contains(TrackRole.Riff) ? null : Before(x, x.Trace.Where(t => t.Point == TracePoints.LineScale && t.Track == x.Track(TrackRole.Riff) && (LineScale)t.Value! == LineScale.Chromatic)
-                .Select(t => x.Map.Sections.Where(s => s.SectionId == t.Section).Select(s => (double?)s.Start).Min()).Min(), 1)),
-        new("trap-bass-kick", "Trap's 808 striking with the kick, note for note: the style's low end, or a bass with nothing of its own?",
-            "The bass on the kick, Trap's and Hip-hop's leaning plain, 100-80-60 by weight.", "trap", ["Figures"], null,
-            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Bass) == "withKick"), 1)),
-        new("funk-hits", "Funk's band striking the kick's notes together in a section's last bar before a louder one, resting between: a band's hits, or the groove falling apart?",
-            "Ensemble hits, Funk's 20-30-40% of its sections before a louder one, the songs' 0-3-3.", "funk", [], new() { ["ensembleHits"] = new() { ["sections"] = 0 } },
-            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.EnsembleHits).SelectMany(t => (ImmutableArray<double>)t.Value!).Select(p => (double?)p).Min(), 1)),
-        new("rock-big-ending", "Rock's last chord held while the drums roll round the toms and crash, then the band's last hit together: a show's end, or a drum machine's fill?",
-            "The big ending, Rock's 60 beside its button's 100.", "rock", [], new() { ["ending"] = new() { ["big"] = 0 } },
-            x => x.Map.Ending.Kind == EndingKind.Big ? Before(x, x.Map.Ending.Start, 2) : null),
-        new("pop-sung-lines", "Pop's melody sung in lines, resting halfway through its phrases as well as at their ends: a singer's lines, or a tune chopped up?",
-            "A melody's rests at half its phrase, the songs' 100-50-0 by the melody facet, the sung genres' 100-80-60; then word rhythm by the same choice.", "pop", [], new() { ["sung"] = new() { ["halves"] = 0 } },
-            x => x.Absent.Contains(TrackRole.Melody) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Select(n => (double?)n.Position).FirstOrDefault())
+        new("metal-twins", "Heavy metal's riff with its twin a third above, from the plainest songs on, and its melody harmonised: the twin-guitar sound, or a riff cluttered?",
+            "Heavy metal's riff twin 25-35-35 and harmonised melody 40-50-50, the genre's convention at its plain end.", "metal", [], new() { ["parts"] = new() { ["riffTwin"] = 0 } },
+            x => x.Absent.Contains(TrackRole.RiffTwin) ? null : Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.RiffTwin))?.Select(n => (double?)n.Position).FirstOrDefault(), 1)),
+        new("thrash-skank", "Thrash's fast sections in double time, the kick on the beats and the snare on every offbeat, the hats in 8ths: the skank beat, or a scramble?",
+            "Thrash's double time 35-45-50, its time drum no finer than 8ths, against 10-20-30.", "thrash", [], new() { ["feelChances"] = new() { ["doubleTime"] = 15 } },
+            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == -1), 1)),
+        new("djent-calm", "Djent's quieter sections calm, a clean guitar letting chords ring and the drums in half time: the genre's ambient interludes, or the heaviness lost?",
+            "Djent's calm sections 10-20-30, where it had none.", "djent", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1))
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

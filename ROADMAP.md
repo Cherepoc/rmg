@@ -711,9 +711,16 @@ with its questions after each group:
    shape over 64 songs, the squelch, 12/8's backbeat, Latin's clave resting) with *Planned: the genres as their records
    play them*'s group V (a long pattern's inner chords, the clave's span, the one drop, Funk's swing, Ska's skank,
    Disco's octave bass, double time's hats, the minor cadences, the data errors).
-2. **The retunes of the genres researched with a search** (*…as their records play them*, group R): Rock, Punk, Heavy
-   metal, Thrash, Black metal, Symphonic metal, Djent, Nu metal, Doom metal, the Power ballad, House, Techno, IDM,
-   Hip-hop, Synthwave, Chiptune, Funk, Fusion, Classical; Jazz's tempo only after swing by tempo (step 4).
+2. **The retunes of the genres researched with a search** (*…as their records play them*, group R): Rock, Punk, the
+   Power ballad, House, Techno, IDM, Hip-hop, Synthwave, Chiptune, Funk, Fusion, Classical; Jazz's tempo only after swing
+   by tempo (step 4). Done (13 October 2026, `GenreRetuneReportTest`): the metal family. Heavy metal's riff twin in 38%
+   of its songs (13%), its gallop 22% of sections (14%), 3:29-4:33-5:35 long (1:43-2:48-4:27), to 190; Thrash's double
+   time 47% of sections (28%), a section's own tempo in 73% of songs, 5:00 at the median (2:02); Black metal 5:47 (3:31),
+   more triple meter and half time, the bass on the riff; Symphonic's trades out, its double kick 14% (9%), its last
+   chorus up in 47% of songs (39%), 5:12 (2:40); Djent calm in 8% of sections (none), its verses for a voice, its home
+   the tonic 86% (74%), 4:47 (3:12); Nu metal's ghosts 24% (none), Phrygian dominant and Dorian, 3:28; Doom's solos 15%
+   (7%), calm 8% (4%), chorused guitars, 6:49. Asked: `metal-twins`, `thrash-skank`, `djent-calm`. Left: a section's
+   tempo changed at once, not eased, Thrash's (the research's missing device).
 3. **The research again** for the genres researched without a search (Reggae, Latin, Ambient, Folk, Dungeon synth,
    Drum and bass, Soul, Pop, Trance, Trap, Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues, and the two
    planned genres), in a session with its search budget, a few agents at a time with a limit of searches each; then
@@ -972,8 +979,8 @@ order:
   the player it strikes with, the kick's `withRiff` the riff's and the bass's `withKick` the kick's, the fingerprint kept
   before the presets took it; Trap's bass on the kick 40% → 72% of its notes (63% of its bars on the figure), Hip-hop's
   47% → 65%, Rock's 52% → 59%, Country's 40% → 46%, Drum and bass's 45% → 55%, Punk's and Funk's a few points; in a
-  bar on the figure 83% to 96% of the bass's notes with the kick, the rest its walks and fills. No heavy band's. Left to
-  listening: `trap-bass-kick`, the 808 on the kick against its own line.
+  bar on the figure 83% to 96% of the bass's notes with the kick, the rest its walks and fills. No heavy band's. Heard and
+  kept: `trap-bass-kick`, 6-0.
 - **C.** Done (13 October 2026, `EnsembleHitsTest`): **ensemble hits** (#361), stop time's stage striking a section's
   last bar before a louder one too, its band on the kick's notes there, each part its note sounding at each, a chord
   held into the bar ended at its line, the drums whatever falls on a hit and their fill; never where a drop, stop
@@ -982,13 +989,13 @@ order:
   Ska, Soul, Fusion, Jazz, Rock, Heavy metal, Thrash and Punk raised, Disco not (its kick on every beat would chop the
   quarters), the genres without a band's stops at 0. Songs struck in 26 of 64 (Funk), 24 (Ska), 21 (Soul), 20 (Fusion),
   18 (Heavy metal), 17 (Rock), 16 (Punk), 14 (Latin, Thrash), 6 (Jazz), 5 (Pop, the songs' own); 1.5 to 2.7 hits a bar.
-  Left to listening: `funk-hits`, and the crash the band's hits want, not added.
+  Heard and kept: `funk-hits`, 6-0; the crash the band's hits want, not added, left to listening.
 - **D1.** Done (13 October 2026, `BigEndingTest`): **the big ending** (#348, #374), an ending of its own built of the
   ring-out's held home chord (one or two bars, slowing down half the time) and a button's last hit after it, the drums
   rolling over the hold in 16ths down the toms from the highest, the kick and a crash on every beat, as loud as a
   drop's build grows, and landing on the hit; the songs' never, Rock 60, Heavy metal 70, Thrash 60, Symphonic 50, Doom,
   Punk, Blues and Power ballad 40, Soul, Funk, Country, Ska and Nu metal 30, Black metal and Djent 20 beside their
-  endings: 6 to 14 of 64 songs. Left to listening: `rock-big-ending`, the roll a machine's or a drummer's.
+  endings: 6 to 14 of 64 songs. Heard and kept: `rock-big-ending`, 6-0.
 - **D2. The false ending** (#372), put off until the big ending is heard: a drop's kind before the last repeat, the
   band hitting the home chord, a beat or two of silence, the drums counting back in; its hit a harmony edit before
   `Realizer`, new work, and a gimmick worn thin quickly.
@@ -996,7 +1003,7 @@ order:
   Punk's and Trap's `melodyRange` at 0, the mechanism's narrowest, a section's melody 13.2 → 10.8 semitones (Nu metal),
   12.9 → 9.8 (Thrash), 14.5 → 11.7 (Punk), 11.7 → 9.5 (Trap); 20, Hip-hop's, narrowed only by two. Asked as
   `numetal-narrow`; a range of a fifth and repeated notes are code of their own, the range's floor about nine
-  semitones, built only if narrower helps. And `numetal-chromatic` (without, `riffScale.chromatic` 0).
+  semitones, built only if narrower helps. And `numetal-chromatic`, heard and kept 6-0.
 
 Review: **overengineering**: a field generalised and one figure, not a player following any other; ensemble hits one
 stage with stop time, not a second, its growth in conditions watched; the false ending split off; the leftovers asked

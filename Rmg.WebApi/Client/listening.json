@@ -22,345 +22,230 @@
       },
       {
         "seed": "2",
-        "at": 70.3,
+        "at": 72.7,
         "listen": [
           "Melody (Lead 2 (sawtooth))"
         ]
       },
       {
         "seed": "4",
-        "at": 133.8,
+        "at": 179.9,
         "listen": [
           "Melody (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "8",
-        "at": 44.1,
-        "listen": [
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 180.5,
+        "at": 143.7,
         "listen": [
           "Melody (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "J",
-        "at": 144.5,
+        "at": 145.4,
         "listen": [
           "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "K",
+        "at": 82.3,
+        "listen": [
+          "Chords (Distortion Guitar)",
+          "Melody (Electric Guitar (clean))"
         ]
       }
     ]
   },
   {
-    "id": "numetal-chromatic",
-    "question": "Nu metal's riff on the chromatic scale, its notes off the open string a half step or a tritone away: the style's dissonance, or wrong notes?",
-    "decides": "Whether the riff's chromatic colour is what Nu metal lacks, before a palette of its stabs is built (the metal family's step 3).",
-    "genre": "nuMetal",
+    "id": "metal-twins",
+    "question": "Heavy metal's riff with its twin a third above, from the plainest songs on, and its melody harmonised: the twin-guitar sound, or a riff cluttered?",
+    "decides": "Heavy metal's riff twin 25-35-35 and harmonised melody 40-50-50, the genre's convention at its plain end.",
+    "genre": "metal",
     "without": {
       "skip": [],
       "genre": {
-        "riffScale": {
-          "chromatic": 0
+        "parts": {
+          "riffTwin": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "6",
-        "at": 245.9,
+        "seed": "I",
+        "at": 8,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 80.2,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Slap Bass 2)"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 113,
-        "listen": [
-          "Riff (Distortion Guitar)"
+          "Riff's twin (Overdriven Guitar)"
         ]
       },
       {
         "seed": "N",
-        "at": 10.7,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "X",
-        "at": 70,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "Y",
-        "at": 36.4,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "trap-bass-kick",
-    "question": "Trap's 808 striking with the kick, note for note: the style's low end, or a bass with nothing of its own?",
-    "decides": "The bass on the kick, Trap's and Hip-hop's leaning plain, 100-80-60 by weight.",
-    "genre": "trap",
-    "without": {
-      "skip": [
-        "Figures"
-      ],
-      "genre": {}
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 2,
-        "listen": [
-          "Bass (Synth Bass 2)"
-        ]
-      },
-      {
-        "seed": "3",
-        "at": 25.1,
-        "listen": [
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
-        "seed": "4",
         "at": 0,
         "listen": [
-          "Bass (Synth Bass 2)"
+          "Riff's twin (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "6",
-        "at": 38.4,
+        "seed": "r",
+        "at": 316,
         "listen": [
-          "Bass (Synth Bass 1)"
+          "Riff's twin (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "8",
-        "at": 54.8,
+        "seed": "u",
+        "at": 44.3,
         "listen": [
-          "Bass (Synth Bass 1)"
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "J",
-        "at": 122.2,
+        "seed": "z",
+        "at": 0,
         "listen": [
-          "Bass (Synth Bass 2)"
+          "Riff's twin (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1p",
+        "at": 240.6,
+        "listen": [
+          "Riff's twin (Overdriven Guitar)"
         ]
       }
     ]
   },
   {
-    "id": "funk-hits",
-    "question": "Funk's band striking the kick's notes together in a section's last bar before a louder one, resting between: a band's hits, or the groove falling apart?",
-    "decides": "Ensemble hits, Funk's 20-30-40% of its sections before a louder one, the songs' 0-3-3.",
-    "genre": "funk",
+    "id": "thrash-skank",
+    "question": "Thrash's fast sections in double time, the kick on the beats and the snare on every offbeat, the hats in 8ths: the skank beat, or a scramble?",
+    "decides": "Thrash's double time 35-45-50, its time drum no finer than 8ths, against 10-20-30.",
+    "genre": "thrash",
     "without": {
       "skip": [],
       "genre": {
-        "ensembleHits": {
-          "sections": 0
+        "feelChances": {
+          "doubleTime": 15
         }
       }
     },
     "seeds": [
       {
-        "seed": "8",
-        "at": 78.8,
+        "seed": "0",
+        "at": 131.2,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Chords (Drawbar Organ)",
-          "Pad (String Ensemble 1)"
+          "Kick",
+          "Acoustic Snare",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "1",
+        "at": 24.1,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 12,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare"
         ]
       },
       {
         "seed": "A",
-        "at": 133.3,
-        "listen": [
-          "Rhythm part (Clavinet)"
-        ]
-      },
-      {
-        "seed": "C",
-        "at": 96.7,
-        "listen": [
-          "Rhythm part (Clavinet)"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 286.6,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Chords (Drawbar Organ)",
-          "Riff (Clavinet)"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 20.7,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))",
-          "Chords (Electric Piano 2)"
-        ]
-      },
-      {
-        "seed": "11",
-        "at": 129.6,
-        "listen": [
-          "Rhythm part (Clavinet)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "rock-big-ending",
-    "question": "Rock's last chord held while the drums roll round the toms and crash, then the band's last hit together: a show's end, or a drum machine's fill?",
-    "decides": "The big ending, Rock's 60 beside its button's 100.",
-    "genre": "rock",
-    "without": {
-      "skip": [],
-      "genre": {
-        "ending": {
-          "big": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "m",
-        "at": 63.1,
+        "at": 138.7,
         "listen": [
           "Hi-Hat",
-          "Rhythm part (Electric Guitar (clean))",
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "1G",
-        "at": 132.6,
-        "listen": [
-          "Hi-Hat",
-          "Riff (Distortion Guitar)",
-          "Melody (Harmonica)"
-        ]
-      },
-      {
-        "seed": "1b",
-        "at": 121.4,
-        "listen": [
-          "Hi-Hat",
-          "Pad (String Ensemble 1)",
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "1e",
-        "at": 83.2,
-        "listen": [
-          "Chords (Distortion Guitar)",
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "1y",
-        "at": 128.9,
-        "listen": [
-          "Melody (Electric Guitar (clean))",
-          "Chords (Distortion Guitar)",
-          "Pad (Synth Strings 1)"
-        ]
-      },
-      {
-        "seed": "1z",
-        "at": 209.7,
-        "listen": [
-          "Bass (Electric Bass (pick))",
-          "Kick",
-          "Rhythm part (Electric Guitar (muted))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "pop-sung-lines",
-    "question": "Pop's melody sung in lines, resting halfway through its phrases as well as at their ends: a singer's lines, or a tune chopped up?",
-    "decides": "A melody's rests at half its phrase, the songs' 100-50-0 by the melody facet, the sung genres' 100-80-60; then word rhythm by the same choice.",
-    "genre": "pop",
-    "without": {
-      "skip": [],
-      "genre": {
-        "sung": {
-          "halves": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 37.8,
-        "listen": [
-          "Melody (Steel Drums)"
-        ]
-      },
-      {
-        "seed": "3",
-        "at": 0,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 18.5,
-        "listen": [
-          "Melody (Lead 2 (sawtooth))"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 30.2,
-        "listen": [
-          "Melody (Lead 2 (sawtooth))",
-          "Counter-melody (Lead 2 (sawtooth))"
+          "Acoustic Snare"
         ]
       },
       {
         "seed": "I",
-        "at": 158.5,
+        "at": 77.2,
         "listen": [
-          "Melody (Electric Piano 1)"
+          "Acoustic Snare",
+          "Ride",
+          "Tom"
         ]
       },
       {
         "seed": "L",
-        "at": 46.2,
+        "at": 126.3,
         "listen": [
-          "Melody (Lead 1 (square))"
+          "Acoustic Snare",
+          "Hi-Hat"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "djent-calm",
+    "question": "Djent's quieter sections calm, a clean guitar letting chords ring and the drums in half time: the genre's ambient interludes, or the heaviness lost?",
+    "decides": "Djent's calm sections 10-20-30, where it had none.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "quieter": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 108,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Rhythm part (Electric Guitar (clean))",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "l",
+        "at": 0,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "o",
+        "at": 12.6,
+        "listen": [
+          "Solo (Electric Guitar (clean))",
+          "Melody (Lead 5 (charang))",
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "x",
+        "at": 92,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Rhythm part (Electric Guitar (clean))"
         ]
       }
     ]
