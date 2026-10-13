@@ -1007,8 +1007,9 @@ only if listening asks. Each through the implementation loop:
    share of silence, the drums' hits a second; the targets the slowest and sparsest of the four, set from that
    baseline. Asked: `darkjazz-halftime` (the half-time feel against none) and `darkjazz-swing` (light swing against
    straight), the two choices most likely to tip it into a lounge ballad.
-2. **Guarded: a tempo under 60** (the page's tempo runs from 60, `GenreChoices.Tempo`'s scale), only if 60 with the
-   half time is heard too quick; the scale moved down, the page's slider and its tests with it.
+2. Done (14 October 2026), promoted by its research, as half time never plays at the plain end: **a tempo under 60**,
+   a genre's tempo ranging from 40 (`GenreChoices.TempoOf`), its steps the like ratios they were, no song changed; the
+   song's own tempo given from 60 as before.
 3. **Guarded: the brushes' swirl keeping time** (the brush kit's sustained stroke, on the electric snare's key), only if
    the ride's taps are heard too busy; first checked that a genre's time role can name the electric snare.
 

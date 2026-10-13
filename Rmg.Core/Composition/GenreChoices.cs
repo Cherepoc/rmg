@@ -14,13 +14,16 @@ public static class GenreChoices
 {
 
     /// <summary>
-    ///     A tempo, as a multiple of <see cref="Composition.Meter.BaseTempo" />, by its amount from 0, 60 beats a minute,
-    ///     through 1/2, 120, to 1, 240, every like step a like ratio, as a tempo given is (the page's tempo's steps).
+    ///     A tempo, as a multiple of <see cref="Composition.Meter.BaseTempo" />, by its amount from 0, 40 beats a minute, a
+    ///     dirge's, to 1, 240, every like step a like ratio, as a tempo given is (the page's tempo's steps).
     /// </summary>
-    public static double TempoOf(double amount) => Math.Pow(2, 2 * amount - 1);
+    public static double TempoOf(double amount) => Math.Pow(SlowestTempos, amount) * SlowestTempo;
 
     /// <summary>A tempo's amount, as a multiple of <see cref="Composition.Meter.BaseTempo" /> (<see cref="TempoOf" />).</summary>
-    public static double AmountOfTempo(double tempo) => (Math.Log2(tempo) + 1) / 2;
+    public static double AmountOfTempo(double tempo) => Math.Log(tempo / SlowestTempo, SlowestTempos);
+
+    /// <summary>The slowest tempo a genre ranges, 40 beats a minute, as a multiple of the base tempo, and how many times it the fastest is.</summary>
+    private const double SlowestTempo = 1 / 3.0, SlowestTempos = 6;
 
     /// <summary>The shortest and the longest a song's length is given or ranged, in seconds: half a minute and fifteen.</summary>
     public const double ShortestLength = 30;
@@ -44,7 +47,7 @@ public static class GenreChoices
         new("lean", "Lean", Even(0.5))
     ])
     {
-        Scale = new RangeScale("bpm", 60, 240, x => TempoOf(x) * Composition.Meter.BaseTempo, x => AmountOfTempo(x / Composition.Meter.BaseTempo))
+        Scale = new RangeScale("bpm", 40, 240, x => TempoOf(x) * Composition.Meter.BaseTempo, x => AmountOfTempo(x / Composition.Meter.BaseTempo))
     };
 
     /// <summary>
