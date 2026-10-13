@@ -318,5 +318,132 @@
         ]
       }
     ]
+  },
+  {
+    "id": "house-sevenths",
+    "question": "House's chords minor sevenths and ninths, on a Rhodes, a piano or an organ, where they were sus and add9 chords on a polysynth: deep house, or a lounge?",
+    "decides": "House's seventh 100-100-70 and ninth 40-70-60 leading its chord shapes.",
+    "genre": "electronic",
+    "without": {
+      "skip": [],
+      "genre": {
+        "chordShape": {
+          "seventh": 20,
+          "ninth": 0,
+          "sus2": 60,
+          "add9": 60
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 118.2,
+        "listen": [
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 34.4,
+        "listen": [
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 31.7,
+        "listen": [
+          "Chords (Pad 2 (warm))",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 192.3,
+        "listen": [
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 521.2,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))",
+          "Counter-melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 399.5,
+        "listen": [
+          "Bass (Synth Bass 2)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hiphop-kit",
+    "question": "Hip-hop's beat on an acoustic kit, its snare a real one, as a sampled break, where it was a TR-808's clap: boom bap, or a band?",
+    "decides": "Hip-hop's standard and room kits first, the TR-808 40-50-60, its acoustic snare 100 and claps 30-40-60.",
+    "genre": "hipHop",
+    "without": {
+      "skip": [],
+      "genre": {
+        "kit": {
+          "standard": 0,
+          "room": 0,
+          "tr808": 100
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 130.1,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 96.1,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 80,
+        "listen": [
+          "Electric Snare",
+          "Hi-Hat",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 0,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 33.6,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 85.4,
+        "listen": [
+          "Hi-Hat"
+        ]
+      }
+    ]
   }
 ]

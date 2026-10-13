@@ -711,8 +711,14 @@ with its questions after each group:
    shape over 64 songs, the squelch, 12/8's backbeat, Latin's clave resting) with *Planned: the genres as their records
    play them*'s group V (a long pattern's inner chords, the clave's span, the one drop, Funk's swing, Ska's skank,
    Disco's octave bass, double time's hats, the minor cadences, the data errors).
-2. **The retunes of the genres researched with a search** (*…as their records play them*, group R): House, Techno, IDM,
-   Hip-hop, Synthwave, Chiptune, Funk, Fusion, Classical; Jazz's tempo only after swing by tempo (step 4). Done: Rock,
+2. **The retunes of the genres researched with a search** (*…as their records play them*, group R): Funk, Fusion,
+   Classical; Jazz's tempo only after swing by tempo (step 4). Done: House's chords minor sevenths and ninths on a
+   Rhodes, piano or organ, Dorian and major more, a shaker and the filter's sweep (asked: `house-sevenths`); Techno 6:27-
+   8:18 (its songs 3:03-13:43 before, the report's claim of short ones refuted), Detroit's sevenths and Dorian, a shaker;
+   IDM's double time 27% (10%), major 16% (6%), a piano, strings and acoustic kits, tape at its plain end; Hip-hop
+   on an acoustic kit and snare, a major key now and then, a fingered bass, horns, stabs, 3:14-4:50 (to 12:13 before)
+   (asked: `hiphop-kit`); Synthwave minor first, to 160, a sax solo, the power kit; Chiptune's vibrato, cold intros,
+   looping forms and fades, harmonic minor. Done: Rock,
    Punk and the Power ballad, Rock calm in 9% of sections (none) from 90 BPM, its bass driving in 8ths, the kick on its
    riff, fewer chugs, more Mixolydian and major, less pad (asked: `rock-quiet`); Punk from 140 to 3:30, its double time
    34% (21%), pushes, a pre-chorus form, the last chorus twice 25% (17%); the Power ballad's solo part in 88% of songs

@@ -60,7 +60,14 @@ public sealed class ListeningQuestionsTest
             x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1)),
         new("rock-quiet", "Rock's quieter sections calm, a clean guitar under the verse before the band crashes back in: the quiet-loud form, or the drive lost?",
             "Rock's calm sections 0-20-35, where it had none.", "rock", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1))
+            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1)),
+        new("house-sevenths", "House's chords minor sevenths and ninths, on a Rhodes, a piano or an organ, where they were sus and add9 chords on a polysynth: deep house, or a lounge?",
+            "House's seventh 100-100-70 and ninth 40-70-60 leading its chord shapes.", "electronic", [], new() { ["chordShape"] = new() { ["seventh"] = 20, ["ninth"] = 0, ["sus2"] = 60, ["add9"] = 60 } },
+            x => x.Absent.Contains(TrackRole.Chords) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Chords))?.Select(n => (double?)n.Position).FirstOrDefault()),
+        new("hiphop-kit", "Hip-hop's beat on an acoustic kit, its snare a real one, as a sampled break, where it was a TR-808's clap: boom bap, or a band?",
+            "Hip-hop's standard and room kits first, the TR-808 40-50-60, its acoustic snare 100 and claps 30-40-60.", "hipHop", [], new() { ["kit"] = new() { ["standard"] = 0, ["room"] = 0, ["tr808"] = 100 } },
+            x => x.Absent.Contains(TrackRole.Drum) ? null : (double?)x.Map.Sections[0].Start)
+
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>
