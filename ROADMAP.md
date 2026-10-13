@@ -779,8 +779,11 @@ with its questions after each group:
    - **Cinematic piano**, beside Classical: a piano melody over a piano ostinato (wide arpeggios, a cell repeated, the
      riff's hook), strings swelling as a pad, add9, maj7, sus and quartal chords, major, natural minor and Lydian, the
      IV–V–iii–vi motion, film forms, AABA with a big return and the last section lifted a key, no drums, 60 to 90 or a
-     bouncy 150. With it, **Classical renamed Chamber**, its label alone, its id kept for the links and the ratings
-     made with it: the classical period's chamber idiom (triads, Alberti, a cello's bass, V–I), the film and romantic
+     bouncy 150; and its missing device first, **the bass stepping down through inversions** (the line cliché in the
+     bass, a descending bass under held harmony: I, I/7, vi, vi/5, IV, IV/3, ii, V), a bass figure of a chord's
+     inversion chosen so the bass falls by step, a genre's chance by section, Cinematic piano's, Classical's, the Power
+     ballad's, Doom's and Pop's, taken from group D. With it, **Classical renamed Chamber**, its id and its label, the
+     live site having no genres yet: the classical period's chamber idiom (triads, Alberti, a cello's bass, V–I), the film and romantic
      piano now Cinematic piano's.
    - **Funk rock**, beside Funk: Funk's slap bass, 16th hats, ghosts, a muted 16th guitar and its vamps, with an
      overdriven guitar riff and its chorus opening into big distorted chords (`louderForms.guitars`), power chords,
@@ -792,10 +795,10 @@ with its questions after each group:
      swung 16ths were heard worse (`funk-swing`, 0 to 5).
    Measured by `GenreRetuneReportTest` against its parent's 64 songs; asked: `cinematic-pad` (the strings' pad),
    `funkrock-chorus` (the distorted chorus) and `jazzfunk-chords` (its chords against Funk's ninths). Review:
-   **overengineering**: data, three presets beside the 38, no code but a device a preset finds missing (the bass
-   stepping down through inversions, group D, wanted by Cinematic piano, left to group D); funk rock the borderline,
+   **overengineering**: data, three presets beside the 38, and one device, the bass stepping down, a choice of the
+   chord's inversion by the bass's step rather than a new part; funk rock the borderline,
    which the mood might cover as a fierce Funk whose pool allowed a driven guitar, kept a preset by the owner's choice.
-   **Musicality**: Cinematic piano without its bass stepping down misses a signature, asked as it is; Funk rock's
+   **Musicality**: the bass stepping down a signature of film and ballad piano, asked on its own (`bass-step-down`); Funk rock's
    driven guitar must not chug on the clean muted program, a rule already; Jazz-funk beside Soul, Funk and Fusion risks
    a fourth shade of the same band, its harmony and its pocket what sets it apart, asked against Funk's; Chamber's
    name narrower than its songs, a piano melody among them, which chamber music holds (a sonata with a cello).
@@ -915,8 +918,7 @@ Charleston comp, a one-bar clave, the conga's tumbao; beside the planned jazz ri
 reached by a figure, and figures outside 4/4 (a hand drum's in 6/8 and 3/4).
 
 **D. Devices** (each a step, by how many genres want it): a strophic form, verse after verse (Folk, Blues, Country), as
-data of `SongForms`; the bass stepping down through inversions (Classical, the Power ballad, Doom, Pop), the line
-cliché in the bass; the bass on the beat and the chords after it (a waltz, a march, the boom-chicka), an arpeggio
+data of `SongForms`; the bass on the beat and the chords after it (a waltz, a march, the boom-chicka), an arpeggio
 pattern beside the alternating thumb; a drone under a whole section (Ambient, Medieval, Dungeon synth), the pedal
 widened; a section's energy choosing its guitars' muting (pop punk's verses) and figure (ska punk's choruses); swing
 by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's
