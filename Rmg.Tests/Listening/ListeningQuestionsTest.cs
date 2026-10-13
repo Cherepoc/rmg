@@ -57,6 +57,9 @@ public sealed class ListeningQuestionsTest
             x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == -1), 1)),
         new("djent-calm", "Djent's quieter sections calm, a clean guitar letting chords ring and the drums in half time: the genre's ambient interludes, or the heaviness lost?",
             "Djent's calm sections 10-20-30, where it had none.", "djent", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1)),
+        new("rock-quiet", "Rock's quieter sections calm, a clean guitar under the verse before the band crashes back in: the quiet-loud form, or the drive lost?",
+            "Rock's calm sections 0-20-35, where it had none.", "rock", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1))
     ];
 

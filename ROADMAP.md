@@ -711,9 +711,12 @@ with its questions after each group:
    shape over 64 songs, the squelch, 12/8's backbeat, Latin's clave resting) with *Planned: the genres as their records
    play them*'s group V (a long pattern's inner chords, the clave's span, the one drop, Funk's swing, Ska's skank,
    Disco's octave bass, double time's hats, the minor cadences, the data errors).
-2. **The retunes of the genres researched with a search** (*…as their records play them*, group R): Rock, Punk, the
-   Power ballad, House, Techno, IDM, Hip-hop, Synthwave, Chiptune, Funk, Fusion, Classical; Jazz's tempo only after swing
-   by tempo (step 4). Done (13 October 2026, `GenreRetuneReportTest`): the metal family. Heavy metal's riff twin in 38%
+2. **The retunes of the genres researched with a search** (*…as their records play them*, group R): House, Techno, IDM,
+   Hip-hop, Synthwave, Chiptune, Funk, Fusion, Classical; Jazz's tempo only after swing by tempo (step 4). Done: Rock,
+   Punk and the Power ballad, Rock calm in 9% of sections (none) from 90 BPM, its bass driving in 8ths, the kick on its
+   riff, fewer chugs, more Mixolydian and major, less pad (asked: `rock-quiet`); Punk from 140 to 3:30, its double time
+   34% (21%), pushes, a pre-chorus form, the last chorus twice 25% (17%); the Power ballad's solo part in 88% of songs
+   (38%), its last chorus up in 34% (61%), 12/8 rarer, a hall, the power kit, 4:48 at the median (4:05). Done (13 October 2026, `GenreRetuneReportTest`): the metal family. Heavy metal's riff twin in 38%
    of its songs (13%), its gallop 22% of sections (14%), 3:29-4:33-5:35 long (1:43-2:48-4:27), to 190; Thrash's double
    time 47% of sections (28%), a section's own tempo in 73% of songs, 5:00 at the median (2:02); Black metal 5:47 (3:31),
    more triple meter and half time, the bass on the riff; Symphonic's trades out, its double kick 14% (9%), its last
@@ -1185,7 +1188,7 @@ left:
   quiet sections are presets now. Left:
   - The riff between the sections (P3): one part alone is a texture already (`TextureKind.Alone`), the riff a genre's
     weight of it, but not placed as an interlude of its own.
-  - A melody sung rather than played (P3, `pop-sung-lines` asked first): no singer in General MIDI, so the melody
+  - A melody sung rather than played (P3, `pop-sung-lines` heard and kept 4-0): no singer in General MIDI, so the melody
     stands for a voice by how it phrases, not by its sound. Measured (`SungMelodyReportTest`, 128 songs): its moves
     already sing (repeated 28%, steps 33%, thirds 19%, over a sixth 3%, legato 96%); every phrase of a pattern ends in a
     rest, and a sung section's at half its phrase too (`GenreChoices.Sung`, `PhraseRestTest`), a run outlasting two bars

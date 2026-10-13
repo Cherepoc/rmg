@@ -249,5 +249,74 @@
         ]
       }
     ]
+  },
+  {
+    "id": "rock-quiet",
+    "question": "Rock's quieter sections calm, a clean guitar under the verse before the band crashes back in: the quiet-loud form, or the drive lost?",
+    "decides": "Rock's calm sections 0-20-35, where it had none.",
+    "genre": "rock",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "quieter": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "R",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Hi-Hat",
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Riff (Distortion Guitar)",
+          "Melody (Harmonica)"
+        ]
+      },
+      {
+        "seed": "f",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "m",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Riff (Distortion Guitar)",
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "o",
+        "at": 20.2,
+        "listen": [
+          "Solo (Distortion Guitar)",
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "r",
+        "at": 0,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      }
+    ]
   }
 ]
