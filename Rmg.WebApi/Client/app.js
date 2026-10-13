@@ -185,10 +185,10 @@ const SETTLE_MS = 250;
 /** A share of the bar as a time in the song: of its length as the player has it, or as the server said until then. */
 const timeAt = (share) => share * (playedSeconds > 0 ? playedSeconds : songSeconds);
 
-/** The key, its mode and the chord playing at a time, shown beside the times. */
+/** The key, its mode and the chord playing at a time, and the tempo and the meter, shown beside the times. */
 function showHarmony(seconds) {
     const playing = harmonyAt(songHarmony, seconds);
-    elements.harmony.textContent = playing === null ? "" : `${playing.key} · ${playing.chord}`;
+    elements.harmony.textContent = playing === null ? "" : `${playing.key} · ${playing.chord} · ${playing.bpm} BPM · ${playing.meter}`;
 }
 let isSeeking = false;
 let seekedFrom = null;

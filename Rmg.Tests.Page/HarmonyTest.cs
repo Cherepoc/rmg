@@ -1,13 +1,13 @@
 namespace Rmg.Tests.Page;
 
-/// <summary>The key, its mode and the chord playing, beside the times, and the seek bar on a line of its own.</summary>
+/// <summary>The key, its mode and the chord playing, the tempo and the meter, beside the times, and the seek bar on a line of its own.</summary>
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class HarmonyTest(Site site)
 {
-    private const string Shown = @"^[A-G][♯♭]? [A-Z][a-z]+( [a-z]+)* · [A-G][♯♭]?\S*$";
+    private const string Shown = @"^[A-G][♯♭]? [A-Z][a-z]+( [a-z]+)* · [A-G][♯♭]?\S* · \d+ BPM · \d+/\d+$";
 
     [Test]
-    public async Task TheKeyAndChord_AreShownAsTheSongPlays_AndFollowASeek()
+    public async Task TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek()
     {
         await using var page = await SongPage.Open(site);
         await page.FirstSong();

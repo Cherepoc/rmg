@@ -795,9 +795,9 @@ with its questions after each group:
      leading, a flute, an electric piano or voices leading, a laid-back pocket, 79-89-96 (Funk's 92-103-111, Fusion's
      89-125-158), solos in 6% of sections (Fusion's 38%), 4/4 alone, its 16ths straight, as Funk's swung ones were heard
      worse; asked: `jazzfunk-chords`.
-6. **The page's harmony line**: beside the key, its mode and the chord, the tempo and the meter as they play, from the
-   file's tempo and time-signature events (`harmony.js`), a section's own tempo and meter shown as they change; with
-   its page test.
+6. Done (14 October 2026): **the page's harmony line**, the tempo and the meter beside the key and the chord, "A
+   Dorian · Dm7 · 120 BPM · 7/8", from the file's tempo and time-signature events as they change (`harmony.js`),
+   `HarmonyTest` reading all four.
 7. **The two planned genres and the sung melody**: dark jazz and lyrical guitar, with the research's corrections (their
    reports), the echo cascade on the rhythm part; the sung melody's 8ths cap (`sung.eighths`, *A melody sung rather
    than played*), `pop-sung-lines` having kept the sung lines 4-0.

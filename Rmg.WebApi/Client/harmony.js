@@ -1,14 +1,17 @@
 /**
  *     The song's harmony as its file marks it: at every change of chord a marker in its first track, "A Dorian: Dm7", its
- *     key and mode and its chord, which a DAW shows over the song and the page shows as it plays.
+ *     key and mode and its chord, which a DAW shows over the song and the page shows as it plays, with the tempo and the
+ *     meter the same track sets.
  */
 
 const MARKER = 0x06;
 const TEMPO = 0x51;
+const METER = 0x58;
 
 /**
- *     The markers of a MIDI file's first track, the tempos and the system messages beside them, each its time in seconds
- *     by the track's tempos and its key and chord; none where the file has none or is not one.
+ *     The markers of a MIDI file's first track, its tempos and meters, and the system messages beside them: every change of
+ *     one, from the first chord on, its time in seconds by the track's tempos, its key and chord, its tempo in beats a
+ *     minute and its meter; none where the file has none or is not one.
  */
 export function readHarmony(buffer) {
     const bytes = new Uint8Array(buffer);
@@ -32,6 +35,15 @@ export function readHarmony(buffer) {
     let [seconds, counted, secondsPerTick] = [0, 0, 0.5 / ticksPerBeat];
     let ticks = 0;
     const harmony = [];
+    // what plays as of now, the key and chord from the first marker on, the tempo in beats a minute and the meter
+    let playing = { key: null, chord: null, bpm: 120, meter: "4/4" };
+    const changed = (change) => {
+        playing = { ...playing, ...change };
+        if (playing.chord === null) return;
+        // a change at the same time as the one before replaces it, so that a place shows all of what starts there
+        if (harmony.length > 0 && Math.abs(harmony[harmony.length - 1].seconds - seconds) < 1e-6) harmony.pop();
+        harmony.push({ seconds, ...playing });
+    };
     while (at < Math.min(end, bytes.length)) {
         ticks += number();
         seconds += (ticks - counted) * secondsPerTick;
@@ -42,10 +54,15 @@ export function readHarmony(buffer) {
         if (status !== 0xff && status !== 0xf0 && status !== 0xf7) break;
         const type = status === 0xff ? bytes[at++] : -1;
         const length = number();
-        if (type === TEMPO) secondsPerTick = ((bytes[at] << 16) | (bytes[at + 1] << 8) | bytes[at + 2]) / 1e6 / ticksPerBeat;
+        if (type === TEMPO) {
+            const microseconds = (bytes[at] << 16) | (bytes[at + 1] << 8) | bytes[at + 2];
+            secondsPerTick = microseconds / 1e6 / ticksPerBeat;
+            changed({ bpm: Math.round(60e6 / microseconds) });
+        }
+        if (type === METER) changed({ meter: `${bytes[at]}/${2 ** bytes[at + 1]}` });
         if (type === MARKER) {
             const [key, chord] = text(at, length).split(": ");
-            if (chord !== undefined) harmony.push({ seconds, key, chord });
+            if (chord !== undefined) changed({ key, chord });
         }
         at += length;
     }
@@ -53,7 +70,7 @@ export function readHarmony(buffer) {
     return harmony;
 }
 
-/** What plays at a time, its key and chord, the change before it held; none before the first. */
+/** What plays at a time, its key and chord, its tempo and its meter, the change before it held; none before the first chord. */
 export function harmonyAt(harmony, seconds) {
     return harmony.findLast((x) => x.seconds <= seconds + 1e-3) ?? null;
 }
