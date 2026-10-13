@@ -56,10 +56,16 @@ public sealed class FilterTest
             var curve = track.Controllers.Where(c => c.Controller == ExpressionRender.BrightnessController).ToArray();
             // its notes in the sections, before the ending, which plays no effect
             var notes = track.NoteTimeline.Where(x => x.Position < song.Swing.Apply(song.Map.Sections[^1].End) - 1e-9).ToArray();
+            // an ornamented note, its quick notes and its held rest played from where it starts, as heard
+            var ornamented = (song.Song.Notes!.GetValueOrDefault(song.Track(track.Role))?.ToArray() ?? [])
+                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Ornament).Length > 0)
+                .Select(x => (Start: song.Swing.Apply(x.Position), End: song.Swing.Apply(x.Position + x.Value.Duration)))
+                .ToArray();
+            double Ahead(double position) => Math.Max(0.5, ornamented.Where(x => x.Start < position - 1e-6 && x.End > position + 1e-6).Select(x => position - x.Start + 1e-3).DefaultIfEmpty(0).Max());
             if (effect == StrongEffect.Squelch)
                 // open at its start, which an ornament's quick notes play ahead of
                 foreach (var note in notes.Where(x => x.Value.Duration >= 0.5))
-                    await Assert.That(curve.Any(c => c.Value == 64 && c.Position <= note.Position + 1e-6 && c.Position > note.Position - 0.5)).IsTrue()
+                    await Assert.That(curve.Any(c => c.Value == 64 && c.Position <= note.Position + 1e-6 && c.Position > note.Position - Ahead(note.Position))).IsTrue()
                         .Because($"seed {song.Seed} {track.Role} at {note.Position} for {note.Value.Duration}: {string.Join(" ", curve.Where(c => Math.Abs(c.Position - note.Position) < 1).Select(c => $"{c.Position:F3}:{c.Value}"))}");
             else
                 // a cycle of a quarter at the longest: its curve both closed and open within any beat a note holds

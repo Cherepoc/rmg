@@ -600,8 +600,6 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   riff's six-nine over the chords' triad; seed 49 at 44, a cluster under the melody's triad; seed 52 at 36, a shell
   under it), each a stage giving a part a shape of its own, the next places to look the line chords, the riff's
   appearance and the melody's stack.
-  **A squelch at a million** (offset 1000000): `ASquelch_OpensOnEveryNote_AndAWobble_ClosesAndOpensWithinACycle` fails
-  there at the committed code of 13 October 2026, before ensemble hits; to bisect.
   **The held-out corpus** (offset 716000000) after the packages: 12 of 1581 tests fail, against 13 at the review's
   commit; four of those fixed by the packages, a dive's (the twin diving with its riff) the test's own. Two more were
   older behaviour the packages' tests now see: a djent breakdown at seed 48, section 7, in 15/16 (4+4+3+4), whose kick
@@ -745,8 +743,9 @@ it:
 1. **The scale rule and the shared chord shape over 64 songs** (#287, #296): each failure reproduced at the committed
    code first (seeds 19 and 25 for the scale, 46 and the offset's 5 for the shape), then fixed where the rule breaks,
    the tests run on 64 songs. A bug's cause not found in the step put off with what was ruled out.
-2. **The squelch at a million**: bisected (`git bisect` over the corpus's failing seed), fixed or its test given its
-   reason.
+2. Done (13 October 2026): the squelch at a million, the test's own: an ornament's quick notes and its held rest
+   played from where its note starts, which the squelch opens on, its allowance of half a beat too short for a turn or
+   a swung trill.
 3. **12/8's backbeat** (`Meter.Backbeats`): the snare's in 12/8 measured first (where it lands, 2, 3 and 4 or 2 and 4),
    then on 2 and 4, Blues' and Soul's 12/8 songs changing; asked as `blues-12-8-backbeat`.
 4. **Latin's clave** resting in 221 of 299 sections that draw it: the cause found (the claves' part resting, a texture,
