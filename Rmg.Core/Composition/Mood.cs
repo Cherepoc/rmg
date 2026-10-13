@@ -35,7 +35,7 @@ public readonly record struct Mood(double Darkness, double Intensity)
     ///     leans it as the songs have it, where its options' own amounts are the songs' draw, and not where the songs draw
     ///     otherwise, as their kit by their drums' job. The scales by their darkness, Dorian's none, Lydian bright and
     ///     Locrian dark (<see cref="Scale.Darkness" />); the fiercer, the likelier the power kit, double time, a riff that
-    ///     chugs or plays power chords, and the calmer the brushes, the jazz kit and half time; a tempo's range leaning to
+    ///     chugs or plays power chords, a driven instrument, and the calmer the brushes, the jazz kit and half time; a tempo's range leaning to
     ///     its fast end the fiercer.
     /// </summary>
     // built when first asked, as the choices it names take the songs' span of a mood from here
@@ -45,7 +45,11 @@ public readonly record struct Mood(double Darkness, double Intensity)
         (GenreChoices.Kit, name => (0, name switch { "power" => 1, "room" => -0.3, "jazz" => -0.7, "brush" => -1, _ => 0 }), false),
         (GenreChoices.FeelChances, name => (0, name switch { "doubleTime" => 1, "halfTime" => -0.5, _ => 0 }), true),
         (GenreChoices.Riff, name => (0, name switch { "chugs" => 1, "powerChords" => 0.5, _ => 0 }), true),
-        (GenreChoices.Tempo, name => (0, name == "lean" ? 1 : 0), false)
+        (GenreChoices.Tempo, name => (0, name == "lean" ? 1 : 0), false),
+        // every part's instruments, a driven one the fiercer
+        ..GenreChoices.InstrumentPools.Select(x => (GenreChoices.Instruments[x.Role],
+            (Func<string, (double, double)>)(name => (0, InstrumentTraits.Has(x.Pool.Everything.First(i => GenreChoices.Name(i.Name) == name).Program, InstrumentTrait.Driven) ? 1 : 0)),
+            true))
     ] : field;
 
     /// <summary>How far an option's lean moves its odds under this mood, in log-odds.</summary>

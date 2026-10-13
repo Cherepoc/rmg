@@ -601,7 +601,7 @@ public static class GenreChoices
         PartsOf([..Arrangement.Rests.Select(x => x.Part)]), Facet.Form);
 
     // the pitched parts' pools, in the order the page shows them
-    private static readonly (TrackRole Role, InstrumentRole Pool)[] InstrumentPools =
+    internal static readonly (TrackRole Role, InstrumentRole Pool)[] InstrumentPools =
     [
         (TrackRole.Melody, InstrumentRoles.Melody),
         (TrackRole.Chords, InstrumentRoles.Chords),

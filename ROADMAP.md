@@ -977,9 +977,9 @@ half time, fills, the kit, driven instruments, chugs and power chords, the bass 
    tempo within a genre's range (Heavy metal 126-142-156 at intensity -1, 0 and 1, Rock 112-125-137), double time
    (Heavy metal 9%-24%-47% of sections) and half time against it, the riff's chugs (34%-57%-73%) and power chords,
    the kit (the power kit fiercer, the brushes and the jazz kit calmer, where the genre names its kit, as the songs
-   draw theirs by their drums' job); the drawn songs' as at 0. Left: the drum figures (the double kick, the blast), the
-   bass figures, fills, driven instruments by their trait (the instrument choice nested by part), the songs' own tempo
-   (a dyadic draw, not a range).
+   draw theirs by their drums' job), every part's driven instruments (the songs' 3%-7%-15% of their parts playing, Funk
+   rock's 28%-37%-46%); the drawn songs' as at 0. Left: the drum figures (the double kick, the blast), the bass
+   figures, fills, the songs' own tempo (a dyadic draw, not a range).
 4. The sound's leans: instruments by their traits, the tone, the register.
 5. The genres' spans: Synthwave from dreamwave to darksynth, Drum and bass from liquid to dark, Heavy metal checked
    against gothic and power metal; asked, a genre's two ends.

@@ -140,10 +140,10 @@
         ]
       },
       {
-        "seed": "I",
-        "at": 0,
+        "seed": "L",
+        "at": 39.6,
         "listen": [
-          "Rhythm part (Electric Guitar (muted))"
+          "Rhythm part (Electric Guitar (clean))"
         ]
       },
       {
@@ -600,7 +600,7 @@
         "seed": "K",
         "at": 11.6,
         "listen": [
-          "Solo (Electric Guitar (clean))"
+          "Solo (Overdriven Guitar)"
         ]
       },
       {
