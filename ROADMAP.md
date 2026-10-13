@@ -591,11 +591,15 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   **A long lift moving notes outside its swell** (#224): a genre's long lift moves about a hundred notes of 64 songs
   outside the swell's bars by more than 0.01 of the velocity, through a stage that sets a part by the song as heard;
   `LiftTest` counts them.
-  **The central rules over 64 songs** (#287), postponed: the scale rule (`ScalesTest`) and the parts sharing a chord's
-  shape (`SongGeneratorChordProgressionTest`) run on 3 and 8 songs; over 64 the scale rule fails on seed 19, a section's
-  tonic pedal at beat 276.25 sounding D in F Phrygian, its A♭ right in the state at the pedal's start, and on seed 25's
-  bass at 142.5, and the shape rule on seed 46 at 126 (as #296). Seeds 4 and 14 were the test's own (a planed stack, a
-  line's approach read from the bar), fixed.
+  **The central rules over 64 songs** (#287, #296): both run on 64 songs (13 October 2026), every failure at the
+  corpus's own offset fixed or explained: a trill held over a change of chord ends before it; a pushed change's
+  approach and pedal, an eighth early; a line's ornament in its own line scale; the solo part's answers stacked as its
+  solos; a spread voicing the same chord. Left: at offset 816000000, seed 21's bass at 90 landing a semitone over its
+  chord's root, placed so by `LinePattern.Place` (not a pedal, a push, a doubling, a line scale or an ornament); shapes
+  apart at offset 1000000 (seed 62 at 38, the chords' add9 over the bass's sus2) and at 816000000 (seed 5 at 173.5, the
+  riff's six-nine over the chords' triad; seed 49 at 44, a cluster under the melody's triad; seed 52 at 36, a shell
+  under it), each a stage giving a part a shape of its own, the next places to look the line chords, the riff's
+  appearance and the melody's stack.
   **A squelch at a million** (offset 1000000): `ASquelch_OpensOnEveryNote_AndAWobble_ClosesAndOpensWithinACycle` fails
   there at the committed code of 13 October 2026, before ensemble hits; to bisect.
   **The held-out corpus** (offset 716000000) after the packages: 12 of 1581 tests fail, against 13 at the review's

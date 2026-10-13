@@ -112,7 +112,8 @@ public sealed class SongGeneratorChordProgressionTest
                 // part's answers to the melody, lines of the same vocabulary
                 if (note.Value.GetStateValue(CompositionStateKinds.LineSolo) == 1 || song.TrackDefinitions[trackNumber].Role == TrackRole.Solo)
                     continue;
-                var shape = string.Join(",", note.Value.GetStateValue(StateKinds.ChordNotePitchOffsets));
+                // the chord's notes whatever their octave, as a spread voicing moves one up
+                var shape = string.Join(",", note.Value.GetStateValue(StateKinds.ChordNotePitchOffsets).Select(x => Math.Round(x - Math.Floor(x + 1e-9), 4)).Distinct().Order());
                 yield return (trackNumber, note.Position, shape);
             }
         }
