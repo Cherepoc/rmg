@@ -790,19 +790,11 @@ with its questions after each group:
      muted 16th guitar never chugging, an overdriven riff and 25% of its sections heavy (Funk's none), power chords,
      sevenths and 7♯9, guitar solos in 19% of sections, no horns, keys nor pad, the power kit, 91-101-109; asked:
      `funkrock-chorus`.
-   - **Jazz-funk**, between Funk and Fusion: maj7, m9, m11 and 6/9 chords, mediants and ii–V passing chords, an
-     electric piano and soft synth pads, a finger bass high and leading, a soft lead (flute, electric piano, synth), a
-     laid-back pocket, 75 to 100, 4/4 alone, short sung forms, few solos; its 16ths straight until asked, as Funk's
-     swung 16ths were heard worse (`funk-swing`, 0 to 5).
-   Measured by `GenreRetuneReportTest` against its parent's 64 songs; asked: `cinematic-pad` (the strings' pad),
-   `funkrock-chorus` (the distorted chorus) and `jazzfunk-chords` (its chords against Funk's ninths). Review:
-   **overengineering**: data, three presets beside the 38, and one device, the bass stepping down, a choice of the
-   chord's inversion by the bass's step rather than a new part; funk rock the borderline,
-   which the mood might cover as a fierce Funk whose pool allowed a driven guitar, kept a preset by the owner's choice.
-   **Musicality**: the bass stepping down a signature of film and ballad piano, asked on its own (`bass-step-down`); Funk rock's
-   driven guitar must not chug on the clean muted program, a rule already; Jazz-funk beside Soul, Funk and Fusion risks
-   a fourth shade of the same band, its harmony and its pocket what sets it apart, asked against Funk's; Chamber's
-   name narrower than its songs, a piano melody among them, which chamber music holds (a sonata with a cello).
+   - Done (14 October 2026): **Jazz-funk** (`jazzFunk`), between Funk and Fusion: sevenths, ninths, elevenths, 6/9 and
+     thirteenths, mediants, applied chords and ii–V passing chords, an electric piano and warm pads, a finger bass
+     leading, a flute, an electric piano or voices leading, a laid-back pocket, 79-89-96 (Funk's 92-103-111, Fusion's
+     89-125-158), solos in 6% of sections (Fusion's 38%), 4/4 alone, its 16ths straight, as Funk's swung ones were heard
+     worse; asked: `jazzfunk-chords`.
 6. **The page's harmony line**: beside the key, its mode and the chord, the tempo and the meter as they play, from the
    file's tempo and time-signature events (`harmony.js`), a section's own tempo and meter shown as they change; with
    its page test.

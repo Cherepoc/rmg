@@ -58,7 +58,11 @@ public sealed class ListeningQuestionsTest
         new("funkrock-chorus", "Funk rock's louder sections opening into distorted guitars over the slap bass and the 16th groove: funk rock, or a funk band too loud?",
             "Funk rock's heavy sections, louderForms.guitars 30-50-60, against its guitars clean throughout as Funk's.", "funkRock", [], new() { ["louderForms"] = new() { ["guitars"] = 0 } },
             x => FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Heavy),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.SectionForm && t.Section == span.SectionId && (SectionFormKind)t.Value! == SectionFormKind.Heavy))
+            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.SectionForm && t.Section == span.SectionId && (SectionFormKind)t.Value! == SectionFormKind.Heavy)),
+        new("jazzfunk-chords", "Jazz-funk's chords, elevenths, 6/9 and thirteenths, mediants and applied chords on an electric piano, where Funk vamps on sevenths and ninths: jazz-funk, or a lounge?",
+            "Jazz-funk's eleventh 50-60-70, sixNine 40 and thirteenth 20-30-40, its mediants and applied chords, against sevenths and ninths alone.", "jazzFunk", [],
+            new() { ["chordShape"] = new() { ["eleventh"] = 0, ["sixNine"] = 0, ["thirteenth"] = 0 }, ["chordScales"] = new() { ["mediant"] = 0, ["applied"] = 0 } },
+            x => (double?)x.Map.Sections[0].Start)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

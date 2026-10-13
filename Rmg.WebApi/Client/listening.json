@@ -175,5 +175,72 @@
         ]
       }
     ]
+  },
+  {
+    "id": "jazzfunk-chords",
+    "question": "Jazz-funk's chords, elevenths, 6/9 and thirteenths, mediants and applied chords on an electric piano, where Funk vamps on sevenths and ninths: jazz-funk, or a lounge?",
+    "decides": "Jazz-funk's eleventh 50-60-70, sixNine 40 and thirteenth 20-30-40, its mediants and applied chords, against sevenths and ninths alone.",
+    "genre": "jazzFunk",
+    "without": {
+      "skip": [],
+      "genre": {
+        "chordShape": {
+          "eleventh": 0,
+          "sixNine": 0,
+          "thirteenth": 0
+        },
+        "chordScales": {
+          "mediant": 0,
+          "applied": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 26.3,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 194.6,
+        "listen": [
+          "Rhythm part (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 7.6,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Chords (Electric Piano 2)",
+          "Pad (Pad 2 (warm))"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 124,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Electric Piano 1)",
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 124.7,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      }
+    ]
   }
 ]
