@@ -201,6 +201,9 @@ internal static class TracePoints
     /// <summary>The register a section's melody aims at in each bar of its pattern (an <c>ImmutableArray</c> of doubles).</summary>
     public const string MelodyContour = "Melody contour";
 
+    /// <summary>Where a section's melody phrases end (an <c>ImmutableArray</c> of ints): every bar of its pattern's beat before which its last note starts, 0 for a bar no phrase ends in (<see cref="MelodyLayers.PhraseEnds" />).</summary>
+    public const string MelodyPhraseEnds = "Melody phrase ends";
+
     /// <summary>The feel a song plays in, or a section changes it to (an <c>int</c>, a step of the rhythm's period, see <see cref="Feels" />).</summary>
     public const string Feel = "Feel";
 

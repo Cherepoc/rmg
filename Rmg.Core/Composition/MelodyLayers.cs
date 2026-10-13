@@ -127,6 +127,13 @@ internal static class MelodyLayers
         return improvisation > 0 ? Math.Min(improvisation, 1) : 0;
     }
 
+    /// <summary>
+    ///     The chance a section's melody rests at half its phrase too, as at its end, a phrase of four bars sung as two lines
+    ///     of two, by the melody facet: every section at the plain end, half at the middle and none at the wild, whose
+    ///     phrases run on as a played tune does; a genre's where it names it (<see cref="GenreChoices.Sung" />).
+    /// </summary>
+    public static ByConvention HalfRests { get; } = new(1, 0.5, 0);
+
     /// <summary>How long the melody rests before its next phrase, in beats.</summary>
     public const double PhraseEndRest = 1;
 

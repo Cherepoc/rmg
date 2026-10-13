@@ -22,7 +22,7 @@ public sealed class SungMelodyReportTest
         var notesPerRun = new List<int>();
         var leapSizes = new int[25];
         var together = 0;
-        var (lastEnds, lastCount, innerEnds, innerCount) = (0, 0, 0, 0);
+        var (lastEnds, lastCount, innerEnds, innerCount, halfRests, halfCount) = (0, 0, 0, 0, 0, 0);
         var durations = new List<double>();
         foreach (var song in songs)
         foreach (var span in song.Map.Sections.Where(s => !song.IsSolo(s)))
@@ -39,6 +39,10 @@ public sealed class SungMelodyReportTest
                 var rests = n.Where((x, i) => x.Position >= end - bar - 1e-9 && x.Position < end - 1e-9
                                                  && (i + 1 == n.Length ? end : n[i + 1].Position) - (x.Position + x.Value.Duration) >= 0.5 - 1e-6).Any()
                                || !n.Any(x => x.Position >= end - bar - 1e-9 && x.Position < end - 1e-9);
+                var half = end - span.Meter.PhraseDuration / 2;
+                if (span.Meter.PhraseBars >= 4)
+                    (halfRests, halfCount) = (halfRests + (n.Where((x, i) => x.Position >= half - bar - 1e-9 && x.Position < half - 1e-9
+                                                                            && (i + 1 == n.Length ? half : n[i + 1].Position) - (x.Position + x.Value.Duration) >= 0.5 - 1e-6).Any() ? 1 : 0), halfCount + 1);
                 var isLast = Math.Abs((end - span.Start) % span.Meter.PatternDuration) < 1e-6;
                 if (isLast) (lastEnds, lastCount) = (lastEnds + (rests ? 1 : 0), lastCount + 1);
                 else (innerEnds, innerCount) = (innerEnds + (rests ? 1 : 0), innerCount + 1);
@@ -97,7 +101,7 @@ public sealed class SungMelodyReportTest
         Console.WriteLine($"legato (duration over the gap to the next) {legato / legatoCount:P0}; off the 8ths {offEighth / (double)notes:P0}; " +
                           $"durations: median {durations[durations.Count / 2]:0.00}, 90th {durations[durations.Count * 9 / 10]:0.00} beats");
         Console.WriteLine($"onsets together {together}; leaps over a 6th by size: {string.Join(", ", leapSizes.Select((c, i) => (c, i)).Where(x => x.c > 0).Select(x => $"{x.i}:{x.c}"))}");
-        Console.WriteLine($"a rest in a phrase's last bar: the pattern's last phrase {lastEnds / (double)lastCount:P0} of {lastCount}, a phrase within it {innerEnds / (double)Math.Max(1, innerCount):P0} of {innerCount}");
+        Console.WriteLine($"a rest in a phrase's last bar: the pattern's last phrase {lastEnds / (double)lastCount:P0} of {lastCount}, a phrase within it {innerEnds / (double)Math.Max(1, innerCount):P0} of {innerCount}; at half a phrase {halfRests / (double)Math.Max(1, halfCount):P0} of {halfCount}");
         await Task.CompletedTask;
     }
 }

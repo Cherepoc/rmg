@@ -349,6 +349,12 @@ public static class GenreChoices
     public static GenreChoice Hook { get; } = Chances("hook", "Hook",
         [("choruses", "Choruses on a hook", MelodyLayers.HookChanceOf(SectionRole.Chorus)), ("sections", "Other sections on a hook", MelodyLayers.HookChanceOf(SectionRole.Verse))]);
 
+    /// <summary>
+    ///     The chance a section's melody is sung in lines, resting at half its phrase as at its end; the songs' every
+    ///     section's at the plain end and none at the wild (<see cref="MelodyLayers.HalfRests" />).
+    /// </summary>
+    public static GenreChoice Sung { get; } = Chances("sung", "Sung lines", [("halves", "Resting at half a phrase", MelodyLayers.HalfRests)]);
+
     /// <summary>How long a section's chords last (<see cref="Composition.HarmonicRhythm.Spans" />): half a bar, a bar or two bars, the faster the more energy.</summary>
     public static GenreChoice HarmonicRhythm { get; } = Pool("harmonicRhythm", "Chords' pace",
         Composition.HarmonicRhythm.Spans.Select(x => (Composition.HarmonicRhythm.NameOf(x.Span.Value), Composition.HarmonicRhythm.LabelOf(x.Span.Value),
@@ -668,7 +674,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

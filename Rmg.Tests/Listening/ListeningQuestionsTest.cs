@@ -46,7 +46,7 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("numetal-narrow", "Nu metal's melody kept to its narrowest, about nine semitones a section rather than thirteen, nearer a voice half spoken: the style's delivery, or a duller tune?",
+        new("numetal-narrow", "Nu metal's melody kept to its narrowest, about eleven semitones a section rather than thirteen, nearer a voice half spoken: the style's delivery, or a duller tune?",
             "Nu metal's, Thrash's, Punk's and Trap's melody range at 0, the mechanism's narrowest; a range of a fifth and repeated notes, code of their own, built only if narrower helps.", "nuMetal", [], new() { ["melodyRange"] = new() { ["wide"] = 50 } },
             x => x.Absent.Contains(TrackRole.Melody) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Select(n => (double?)n.Position).FirstOrDefault()),
         new("numetal-chromatic", "Nu metal's riff on the chromatic scale, its notes off the open string a half step or a tritone away: the style's dissonance, or wrong notes?",
@@ -61,7 +61,10 @@ public sealed class ListeningQuestionsTest
             x => Before(x, x.Trace.Where(t => t.Point == TracePoints.EnsembleHits).SelectMany(t => (ImmutableArray<double>)t.Value!).Select(p => (double?)p).Min(), 1)),
         new("rock-big-ending", "Rock's last chord held while the drums roll round the toms and crash, then the band's last hit together: a show's end, or a drum machine's fill?",
             "The big ending, Rock's 60 beside its button's 100.", "rock", [], new() { ["ending"] = new() { ["big"] = 0 } },
-            x => x.Map.Ending.Kind == EndingKind.Big ? Before(x, x.Map.Ending.Start, 2) : null)
+            x => x.Map.Ending.Kind == EndingKind.Big ? Before(x, x.Map.Ending.Start, 2) : null),
+        new("pop-sung-lines", "Pop's melody sung in lines, resting halfway through its phrases as well as at their ends: a singer's lines, or a tune chopped up?",
+            "A melody's rests at half its phrase, the songs' 100-50-0 by the melody facet, the sung genres' 100-80-60; then word rhythm by the same choice.", "pop", [], new() { ["sung"] = new() { ["halves"] = 0 } },
+            x => x.Absent.Contains(TrackRole.Melody) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Select(n => (double?)n.Position).FirstOrDefault())
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

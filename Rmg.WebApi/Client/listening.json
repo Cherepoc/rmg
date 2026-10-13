@@ -1,7 +1,7 @@
 [
   {
     "id": "numetal-narrow",
-    "question": "Nu metal's melody kept to its narrowest, about nine semitones a section rather than thirteen, nearer a voice half spoken: the style's delivery, or a duller tune?",
+    "question": "Nu metal's melody kept to its narrowest, about eleven semitones a section rather than thirteen, nearer a voice half spoken: the style's delivery, or a duller tune?",
     "decides": "Nu metal's, Thrash's, Punk's and Trap's melody range at 0, the mechanism's narrowest; a range of a fifth and repeated notes, code of their own, built only if narrower helps.",
     "genre": "nuMetal",
     "without": {
@@ -15,14 +15,14 @@
     "seeds": [
       {
         "seed": "0",
-        "at": 61.1,
+        "at": 59.8,
         "listen": [
           "Melody (Lead 6 (voice))"
         ]
       },
       {
         "seed": "2",
-        "at": 73.6,
+        "at": 70.3,
         "listen": [
           "Melody (Lead 2 (sawtooth))"
         ]
@@ -35,22 +35,22 @@
         ]
       },
       {
-        "seed": "9",
-        "at": 183.8,
+        "seed": "8",
+        "at": 44.1,
         "listen": [
           "Melody (Electric Guitar (clean))"
         ]
       },
       {
-        "seed": "A",
-        "at": 13.7,
+        "seed": "9",
+        "at": 180.5,
         "listen": [
-          "Melody (Lead 2 (sawtooth))"
+          "Melody (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "J",
-        "at": 136.4,
+        "at": 144.5,
         "listen": [
           "Melody (Lead 2 (sawtooth))"
         ]
@@ -96,9 +96,8 @@
       },
       {
         "seed": "N",
-        "at": 40.1,
+        "at": 10.7,
         "listen": [
-          "Bass (Electric Bass (pick))",
           "Riff (Overdriven Guitar)"
         ]
       },
@@ -153,7 +152,7 @@
       },
       {
         "seed": "6",
-        "at": 40,
+        "at": 38.4,
         "listen": [
           "Bass (Synth Bass 1)"
         ]
@@ -302,7 +301,66 @@
         "listen": [
           "Bass (Electric Bass (pick))",
           "Kick",
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pop-sung-lines",
+    "question": "Pop's melody sung in lines, resting halfway through its phrases as well as at their ends: a singer's lines, or a tune chopped up?",
+    "decides": "A melody's rests at half its phrase, the songs' 100-50-0 by the melody facet, the sung genres' 100-80-60; then word rhythm by the same choice.",
+    "genre": "pop",
+    "without": {
+      "skip": [],
+      "genre": {
+        "sung": {
+          "halves": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 37.8,
+        "listen": [
+          "Melody (Steel Drums)"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 0,
+        "listen": [
           "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 18.5,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 30.2,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))",
+          "Counter-melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 158.5,
+        "listen": [
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 46.2,
+        "listen": [
+          "Melody (Lead 1 (square))"
         ]
       }
     ]

@@ -22,7 +22,7 @@ internal sealed class BarStateGenerator
     private const int BassLeadingStream = 101;
 
     // the home's and the cadence's chords, the voicing's resets, the melody's contour and its phrase end, each its own
-    private const int HomeChordStream = 102, CadenceChordStream = 103, ResetsStream = 104, ContourStream = 105, PhraseEndStream = 106;
+    private const int HomeChordStream = 102, CadenceChordStream = 103, ResetsStream = 104, ContourStream = 105, PhraseEndStream = 106, HalfRestStream = 107;
 
     // the state that changes along the pattern besides the progression; every state has its own timeline, so each can
     // change at its own pace
@@ -156,7 +156,7 @@ internal sealed class BarStateGenerator
                 GenerateResets(context.CreateContext(Seeds.Derive(seed, ResetsStream)), facets[Facet.Chords]),
                 ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),
                 GenerateMelodyContour(context.CreateContext(Seeds.Derive(seed, ContourStream)), context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), facets[Facet.Melody]),
-                GenerateMelodyPhraseEnd(context.CreateContext(Seeds.Derive(seed, PhraseEndStream)))
+                GenerateMelodyPhraseEnd(context.CreateContext(Seeds.Derive(seed, PhraseEndStream)), context.CreateContext(Seeds.Derive(seed, HalfRestStream)), facets[Facet.Melody])
             ]
         );
     }
@@ -200,17 +200,25 @@ internal sealed class BarStateGenerator
     /// <summary>
     ///     Where the melody's phrases end, in every phrase's last bar, each by its own draw in the phrase's order, so that a
     ///     blues' three lines each end and rest; a phrase within the pattern always, the pattern's last now and then running
-    ///     on into the next; none in another bar.
+    ///     on into the next; and, where the section rests at half its phrases (<see cref="MelodyLayers.HalfRests" />), in
+    ///     every phrase's half's last bar too, from a sequence of its own; none in another bar.
     /// </summary>
-    private StateTimeline<int> GenerateMelodyPhraseEnd(IGenerationContext context)
+    /// <param name="halfContext">The sequence the section's rests at half its phrases are drawn from.</param>
+    /// <param name="unconventionality">The melody facet, which the rests at half a phrase lean by.</param>
+    private StateTimeline<int> GenerateMelodyPhraseEnd(IGenerationContext context, IGenerationContext halfContext, double unconventionality)
     {
         ImmutableArray<Weighted<int>> inner = [..MelodyLayers.PhraseEnds.Where(x => x.Value > 0)];
+        // a phrase of two bars rests at every other already
+        var half = _meter.PhraseBars >= 4 && halfContext.TestProbability(MelodyLayers.HalfRests.At(unconventionality, _genre.Chance(GenreChoices.Sung, "halves")))
+            ? _meter.PhraseBars / 2 - 1
+            : -1;
         return StateTimeline.Create(
                 _meter.PatternDuration,
                 CompositionStateKinds.MelodyPhraseEnd,
                 Enumerable.Range(0, _meter.PatternBarCount)
-                    .Select(bar => bar % _meter.PhraseBars != _meter.PhraseBars - 1 ? 0
-                        : context.Pick(bar == _meter.PatternBarCount - 1 ? MelodyLayers.PhraseEnds : inner))
+                    .Select(bar => bar % _meter.PhraseBars == _meter.PhraseBars - 1 ? context.Pick(bar == _meter.PatternBarCount - 1 ? MelodyLayers.PhraseEnds : inner)
+                        : bar % _meter.PhraseBars == half ? halfContext.Pick(inner)
+                        : 0)
                     .Select((end, bar) => end.ToTimelineItem(bar * _meter.BarDuration))
                     .ToArray()
             )
