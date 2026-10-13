@@ -197,14 +197,22 @@ internal sealed class BarStateGenerator
             .WithLayer("Bar");
     }
 
-    /// <summary>Where the melody's phrase ends in the pattern's last bar, if it does.</summary>
+    /// <summary>
+    ///     Where the melody's phrases end, in every phrase's last bar, each by its own draw in the phrase's order, so that a
+    ///     blues' three lines each end and rest; a phrase within the pattern always, the pattern's last now and then running
+    ///     on into the next; none in another bar.
+    /// </summary>
     private StateTimeline<int> GenerateMelodyPhraseEnd(IGenerationContext context)
     {
-        var end = context.Pick(MelodyLayers.PhraseEnds);
+        ImmutableArray<Weighted<int>> inner = [..MelodyLayers.PhraseEnds.Where(x => x.Value > 0)];
         return StateTimeline.Create(
                 _meter.PatternDuration,
                 CompositionStateKinds.MelodyPhraseEnd,
-                [end.ToTimelineItem(LastBarPosition)]
+                Enumerable.Range(0, _meter.PatternBarCount)
+                    .Select(bar => bar % _meter.PhraseBars != _meter.PhraseBars - 1 ? 0
+                        : context.Pick(bar == _meter.PatternBarCount - 1 ? MelodyLayers.PhraseEnds : inner))
+                    .Select((end, bar) => end.ToTimelineItem(bar * _meter.BarDuration))
+                    .ToArray()
             )
             .WithLayer("Bar");
     }

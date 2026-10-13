@@ -47,7 +47,7 @@ internal static class MelodyLayers
 
     /// <summary>
     ///     Where a phrase ends in its last bar, as the beat before which its last note starts, and how likely each is;
-    ///     0 for a phrase that runs on into the next. The last note is held until <see cref="PhraseEndRest" /> before
+    ///     0 for a phrase that runs on into the next, the pattern's last alone, a phrase within it ending always. The last note is held until <see cref="PhraseEndRest" /> before
     ///     the bar line, so the earlier it starts the longer it is.
     /// </summary>
     public static ImmutableArray<Weighted<int>> PhraseEnds { get; } =

@@ -921,8 +921,19 @@ left:
   quiet sections are presets now. Left:
   - The riff between the sections (P3): one part alone is a texture already (`TextureKind.Alone`), the riff a genre's
     weight of it, but not placed as an interlude of its own.
-  - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
-    rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
+  - A melody sung rather than played (P3, a listening question first): no singer in General MIDI, so the melody
+    stands for a voice by how it phrases, not by its sound. Measured (`SungMelodyReportTest`, 128 songs): its moves
+    already sing (repeated 27%, steps 34%, thirds 18%, over a sixth 3%, legato 96%), and every phrase of a pattern ends
+    in a rest (`PhraseRestTest`); within a phrase it rests only by its rhythm's own gaps: a run outlasts two bars 37% of
+    the time; 22% of bars carry eight notes or more, 32% of notes fall off the 8ths, 61% of phrases start on a downbeat.
+    The plan, in steps, each heard before the next:
+    1. A rest within a phrase, a genre's value (`sung`, the melody facet's): a rest of a beat or more after a run of
+       two bars, the run's last note held, as `EndPhrase` does at a half phrase; Call and response's cut is the same edit.
+    2. Word rhythm by the same value: the busyness and the 16ths leaned down (`MelodyBusyness`, the rhythm's density),
+       a phrase's first note after the downbeat now and then, the repeat chance up, all through existing settings.
+    Not: lyrics or syllables, melisma, a singer's vibrato or scoops by pitch bend, Voice Oohs as a lead by default (a
+    pad's slow attack; a weight only by listening). A genre's instrumental lines (EDM's lead, Jazz's head, a riff) keep
+    their own value low, so the step is a lean, never a rule over every melody.
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:
