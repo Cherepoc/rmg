@@ -354,6 +354,9 @@ internal static class TracePoints
     /// <summary>Whether a section's riff plays its weak notes on a drone (a <c>bool</c>; <see cref="Composition.SectionGenerator.DroneChance" />).</summary>
     public const string Drone = "Drone";
 
+    /// <summary>Whether a section's melody is sung in 8ths, no note of it shorter (a <c>bool</c>; <see cref="Composition.MelodyLayers.SungEighths" />).</summary>
+    public const string SungEighths = "Sung eighths";
+
     /// <summary>Whether a section is one the riff's twin leads in (a <c>bool</c>; <see cref="Composition.LineDoubling.TwinLeadChance" />).</summary>
     public const string TwinLead = "Twin lead";
 

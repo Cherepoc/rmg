@@ -236,7 +236,7 @@
       },
       {
         "seed": "J",
-        "at": 124.7,
+        "at": 114,
         "listen": [
           "Rhythm part (Electric Guitar (clean))"
         ]
@@ -550,6 +550,64 @@
         "at": 75.1,
         "listen": [
           "Melody (Acoustic Guitar (steel))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pop-eighths",
+    "question": "Pop's melody sung in 8ths, no note shorter, as a singer phrases, where it ran in 16ths now and then: a sung line, or a square one?",
+    "decides": "The sung melody's 8ths, sung.eighths, Pop's 80-50-30, against none.",
+    "genre": "pop",
+    "without": {
+      "skip": [],
+      "genre": {
+        "sung": {
+          "eighths": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 114.9,
+        "listen": [
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 144.4,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 146.3,
+        "listen": [
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 84.6,
+        "listen": [
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "K",
+        "at": 11.7,
+        "listen": [
+          "Solo (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "P",
+        "at": 153.3,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
         ]
       }
     ]

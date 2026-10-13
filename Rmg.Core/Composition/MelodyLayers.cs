@@ -134,6 +134,16 @@ internal static class MelodyLayers
     /// </summary>
     public static ByConvention HalfRests { get; } = new(1, 0.5, 0);
 
+    /// <summary>
+    ///     The chance a section's melody is sung in 8ths, no note of it shorter, as a voice phrases where an instrument runs in
+    ///     16ths, by the melody facet: every section at the plain end, half at the middle and none at the wild; a genre's where
+    ///     it names it, a rapper's or a synth lead's lines the less (<see cref="GenreChoices.Sung" />).
+    /// </summary>
+    public static ByConvention SungEighths { get; } = new(1, 0.5, 0);
+
+    /// <summary>The shortest note a sung section's melody plays, in beats: an 8th.</summary>
+    public const double SungShortest = 0.5;
+
     /// <summary>How long the melody rests before its next phrase, in beats.</summary>
     public const double PhraseEndRest = 1;
 

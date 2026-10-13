@@ -50,7 +50,7 @@ public static class GenreChoiceDescriptions
         ["articulation"] = "How the notes are played: a line's steps slurred together, a piano's chords rolled from the bottom up, the chords struck short as stabs, a broken chord's notes let ring.",
         ["levels"] = "How loud each part plays against the others: above the middle louder, below quieter, as a beat's drums lead it or a dub's bass does.",
         ["rests"] = "How often each part sits out a section: above the middle the oftener, as a dub's drums and bass drop out.",
-        ["sung"] = "How often a section's melody is sung in lines, resting halfway through its phrase as well as at its end; below the middle its phrases run on, as a played tune's do.",
+        ["sung"] = "How often a section's melody is sung in lines, resting halfway through its phrase as well as at its end, and in 8ths, no note of it shorter, as a voice phrases; below the middle its phrases run on and run in 16ths, as a played tune's or a rapper's do.",
         ["voice"] = "How often a verse leaves its melody out, the room a rapper's voice takes over the beat.",
         ["grooveHold"] = "How steady the groove stays from section to section: above the middle the backbeat holds to 2 and 4 and the patterns barely move.",
         ["pins"] = "How often each part keeps one figure every bar, unchanging, as a four-on-the-floor kick or a reggae skank does.",

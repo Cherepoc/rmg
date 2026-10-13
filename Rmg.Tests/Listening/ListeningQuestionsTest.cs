@@ -77,7 +77,10 @@ public sealed class ListeningQuestionsTest
             x => x.Swing.Delay > 0 && !x.Absent.Contains(TrackRole.Drum) ? (double?)x.Map.Sections[0].Start : null),
         new("lyrical-cascade", "Lyrical guitar's echo repeating each note once, a dotted 8th later and almost as loud, its broken chords running on as 16ths: a cascade, or a stutter?",
             "The cascade, Lyrical guitar's 0-25-60 beside the dying echoes, against those alone.", "lyrical", [], new() { ["echo"] = new() { ["cascade"] = 0 } },
-            x => x.Rendered.EchoOnce ? (double?)x.Map.Sections[0].Start : null)
+            x => x.Rendered.EchoOnce ? (double?)x.Map.Sections[0].Start : null),
+        new("pop-eighths", "Pop's melody sung in 8ths, no note shorter, as a singer phrases, where it ran in 16ths now and then: a sung line, or a square one?",
+            "The sung melody's 8ths, sung.eighths, Pop's 80-50-30, against none.", "pop", [], new() { ["sung"] = new() { ["eighths"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.SungEighths, v => (bool)v!), 1))
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

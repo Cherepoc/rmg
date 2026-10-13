@@ -710,6 +710,12 @@ internal sealed class SectionGenerator
                 sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, Generators.Spread(MelodyLayers.Section)),
                 sectionRhythm.Energy
             );
+            // sung in 8ths now and then, no note of it shorter, from a sequence of its own
+            var sung = Stream(sectionId, SectionStream.SungEighths)
+                .TestProbability(MelodyLayers.SungEighths.At(sectionRhythm.Facets[Facet.Melody], _genre.Chance(GenreChoices.Sung, "eighths")));
+            StateTrace.RecordSection(TracePoints.SungEighths, SectionTrace, sectionId, $"{sung}", sung);
+            if (sung)
+                sectionTrackLayer.Add(CompositionStateKinds.ShortestNote, MelodyLayers.SungShortest);
         }
         // the melody's and the riff's line scales, each from a sequence of its own, by the section's scale facet
         if (_tracks.Definitions[trackNumber].Role is TrackRole.Melody or TrackRole.Riff)
@@ -1123,5 +1129,6 @@ internal enum SectionStream
     CalmArpeggio = 63,
     Boogie = 64,
     RiffHook = 65,
-    TwinLead = 66
+    TwinLead = 66,
+    SungEighths = 67
 }

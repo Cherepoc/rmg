@@ -798,7 +798,7 @@ with its questions after each group:
 6. Done (14 October 2026): **the page's harmony line**, the tempo and the meter beside the key and the chord, "A
    Dorian · Dm7 · 120 BPM · 7/8", from the file's tempo and time-signature events as they change (`harmony.js`),
    `HarmonyTest` reading all four.
-7. **The two planned genres and the sung melody**: dark jazz and lyrical guitar, with the research's corrections (their
+7. Done (14 October 2026): **the two planned genres and the sung melody**: dark jazz and lyrical guitar, with the research's corrections (their
    reports), the echo cascade on the rhythm part; the sung melody's 8ths cap (`sung.eighths`, *A melody sung rather
    than played*), `pop-sung-lines` having kept the sung lines 4-0.
 8. **The devices**: group D's, with the club's and pop's (the kick-out, the breakdown chorus, the ostinato).
@@ -1312,12 +1312,11 @@ left:
     already sing (repeated 28%, steps 33%, thirds 19%, over a sixth 3%, legato 96%); every phrase of a pattern ends in a
     rest, and a sung section's at half its phrase too (`GenreChoices.Sung`, `PhraseRestTest`), a run outlasting two bars
     18% of the time; its rhythm does not: 20% of bars carry eight notes or more, 29% of its onsets a 16th or less apart,
-    68% of phrases start on a downbeat. Left, step 3: a sung section's melody no finer than 8ths, its parts' cap
-    (`CompositionStateKinds.ShortestNote`, the calm sections' own), drawn per section from a stream of its own by a second
-    option of the same choice (`sung.eighths`): the songs' 100-50-0, the plain sung genres' (Folk, Country, Ballad, Rock,
-    Punk, Blues, the metal family) high, Pop's, Soul's and Funk's middling, Hip-hop's and Trap's low, as their lines
-    syncopate in 16ths. Measured as written (before swing): a 16th or less between onsets 30% in Pop, 29% the songs',
-    25% Folk, 22% Blues, 11% Hip-hop; the target about half, the triplet's 8ths kept (1-3% now). Asked as `pop-eighths`.
+    68% of phrases start on a downbeat. Done (14 October 2026), step 3: a sung section's melody no finer than 8ths
+    (`sung.eighths`, the songs' 100-50-0, the plain sung genres' 100-80-60, Pop's, Soul's and Funk's 80-50-30,
+    Hip-hop's, Trap's and the instrumental leads' 20-10-0, by the calm sections' cap, `CompositionStateKinds.ShortestNote`),
+    a 16th or less between onsets 29% → 14% the songs', Pop's 30% → 17%, Folk's 25% → 7%, Blues' 22% → 8%, Hip-hop's
+    14% kept; asked: `pop-eighths`.
     Cut on review: the busyness leaned down (the cap does it, eight notes a bar at most), the repeat chance up (28%
     already), a phrase starting after the downbeat (73% of Pop's start on it, against no measure of a sung line; by
     listening, should the cap's lines sound square). Not: lyrics or syllables, melisma,

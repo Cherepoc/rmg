@@ -358,7 +358,8 @@ public static class GenreChoices
     ///     The chance a section's melody is sung in lines, resting at half its phrase as at its end; the songs' every
     ///     section's at the plain end and none at the wild (<see cref="MelodyLayers.HalfRests" />).
     /// </summary>
-    public static GenreChoice Sung { get; } = Chances("sung", "Sung lines", [("halves", "Resting at half a phrase", MelodyLayers.HalfRests)]);
+    public static GenreChoice Sung { get; } = Chances("sung", "Sung lines",
+        [("halves", "Resting at half a phrase", MelodyLayers.HalfRests), ("eighths", "In 8ths, no note shorter", MelodyLayers.SungEighths)]);
 
     /// <summary>How long a section's chords last (<see cref="Composition.HarmonicRhythm.Spans" />): half a bar, a bar or two bars, the faster the more energy.</summary>
     public static GenreChoice HarmonicRhythm { get; } = Pool("harmonicRhythm", "Chords' pace",
