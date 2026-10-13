@@ -76,6 +76,12 @@ internal static class Groove
     public const double ShortestSwungNote = 0.14;
 
     /// <summary>
+    ///     The shortest a swung pair's second note plays, in seconds: a drawn swing lighter where it would play it shorter,
+    ///     as a drummer's swing evens out the faster the tempo, nearly straight at the fastest.
+    /// </summary>
+    public const double ShortestSecondNote = 0.1;
+
+    /// <summary>
     ///     How far a genre moves the shortest note swung at its most and its least, as a factor: half as long, 16ths swung up
     ///     to 214 beats a minute, as a house track's shuffle, or twice, 8ths swung down to 53 (<see cref="GenreChoices.FeelValues" />).
     /// </summary>
@@ -90,11 +96,13 @@ internal static class Groove
         // drawn when it is given too, so that the rest is as it was
         var swings = context.TestProbability(SwingChance.At(unconventionality, genre.Chance(GenreChoices.FeelChances, "swing")));
         var amount = LightestSwing + (1 - LightestSwing) * Math.Pow(context.GenerateDouble(), Math.Exp(-AmountLean * genre.Shift(GenreChoices.FeelValues, "swing")));
+        var sixteenth = Meter.SecondsPerBeat(tempo) / 4;
+        var period = sixteenth >= ShortestSwungNote * Math.Pow(GenreSwungNoteReach, -genre.Shift(GenreChoices.FeelValues, "sixteenths")) ? 0.5 : 1;
+        // no heavier than leaves the pair's second note its shortest, its middle a sixth of the pair late at the triplet's
+        amount = Math.Clamp(6 * (period / 2 - ShortestSecondNote / Meter.SecondsPerBeat(tempo)) / period, 0, amount);
         if (given is { } amountGiven)
             (swings, amount) = (amountGiven > 0, amountGiven);
 
-        var sixteenth = Meter.SecondsPerBeat(tempo) / 4;
-        var period = sixteenth >= ShortestSwungNote * Math.Pow(GenreSwungNoteReach, -genre.Shift(GenreChoices.FeelValues, "sixteenths")) ? 0.5 : 1;
         // a triplet's swing plays the pair's second note a third of the pair late of its middle, at two thirds
         return swings && meter.Pairs(period) ? new Swing(amount * period / 6, period) : Swing.None;
     }

@@ -22,11 +22,12 @@ public sealed class TurnaroundTest
     public async Task ASectionTurnedAround_EndsOnV_AndAJazzSongsSectionsMostly()
     {
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz"))));
-        // but a section that planes, its chords the home's shape moved rather than its progression's
+        // but a section that planes, its chords the home's shape moved rather than its progression's, or vamps, on its home
         // each section's turnaround with its own progression, joined by the section
         var sections = songs.SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.Turnaround)
             .Select(turn => (Turns: (((bool Turns, bool))turn.Value!).Turns, Progression: (ImmutableArray<int>)song.Trace.Last(p => p.Point == TracePoints.Progression && p.Section == turn.Section).Value!, turn.Section))
-            .Where(x => song.Trace.Where(p => p.Point == TracePoints.Planing && p.Section == x.Section).All(p => p.Value is null))
+            .Where(x => song.Trace.Where(p => p.Point == TracePoints.Planing && p.Section == x.Section).All(p => p.Value is null)
+                        && !song.Trace.Any(p => p.Point == TracePoints.Vamp && p.Section == x.Section && (bool)p.Value!))
             .Select(x => (x.Turns, x.Progression))).ToArray();
 
         await Assert.That(sections.Where(x => x.Item1).All(x => x.Item2[^1] == -3)).IsTrue();

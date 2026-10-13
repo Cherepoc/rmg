@@ -739,7 +739,10 @@ with its questions after each group:
    Drum and bass, Soul, Pop, Trance, Trap, Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues, and the two
    planned genres), in a session with its search budget, a few agents at a time with a limit of searches each; then
    their retunes.
-4. **The idioms and the figures**: swing by tempo, then the jazz ride, the boogie, the alternating thumb, Latin's bass
+4. **The idioms and the figures**: done (13 October 2026), swing by tempo, a drawn swing's pair's second note never
+   under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
+   retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
+   heads harmonised and in blocks now and then. Left: the jazz ride, the boogie, the alternating thumb, Latin's bass
    figures (after the clave's span is settled), and the rows of figures (group F).
 5. **The two planned genres and the sung melody**: dark jazz and lyrical guitar, with the research's corrections (their
    reports), the echo cascade on the rhythm part; the sung melody's 8ths cap (`sung.eighths`, *A melody sung rather
