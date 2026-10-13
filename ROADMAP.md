@@ -573,8 +573,6 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   strong beat moved to a chord tone at the plain end, kept at the wild (Techno, Trance, House; Synthwave, IDM,
   Chiptune, Ambient, Dungeon synth, Orchestral lower); the scale rule checked against it first.
 - **Latin bass figures** (#360): the tumbao and bossa's bass as bass figures, data.
-- **The alternating thumb** (#362): an arpeggio pattern, the thumb alternating root and fifth on the beats (Folk,
-  Country, Power ballad, Blues, Bossa nova, Medieval).
 - **The breakdown chorus** (#369): a `lastRepeat` option, the first pass at the thinnest texture, the second the full
   band (Pop, Power ballad, Soul, Country, Rock, Disco, Folk).
 - Found while fixing it:
@@ -742,7 +740,10 @@ with its questions after each group:
    heads harmonised and in blocks now and then. The boogie (#366): the alternating bass a cycle of its chord's steps
    (`SectionGenerator.BassCycle`), root and fifth or the boogie's root, third, fifth, sixth, seventh and back, each
    nearest the strong note before, in the chord's own scale; on its step in 92% of a boogie's strong notes after a
-   chord's first (13% elsewhere), Blues' 30-40-50%, Rock's and Country's 10-15-20% (asked: `blues-boogie`). The jazz ride (#349): the swing ride a time drum's figure, on the beats
+   chord's first (13% elsewhere), Blues' 30-40-50%, Rock's and Country's 10-15-20% (asked: `blues-boogie`). The
+   alternating thumb (#362): an arpeggio pattern, the root and the fifth on the beats by turns and the notes above off
+   them, Folk's 60-60-50 ahead of its Alberti, Country's 40, the Power ballad's, Medieval's 20, Blues' 10-10-20; to ask
+   when the round has room (`folk-thumb`). The jazz ride (#349): the swing ride a time drum's figure, on the beats
    and the skip after 2 and 4, swung by the song, Jazz's in 151 of its 421 sections, its ride struck 0.6-0.9 times on
    every beat and skip there where its own struck about once a bar (asked: `jazz-ride`). Left: the boogie, the alternating thumb, Latin's bass
    figures (after the clave's span is settled), and the rows of figures (group F).
@@ -778,8 +779,7 @@ it:
 
 5. Done (13 October 2026): the jazz ride, a time drum's figure (`Figures`), Jazz's; dark jazz's with its preset.
 6. Done (13 October 2026): the boogie, Blues', Rock's and Country's.
-7. **The alternating thumb** (#362): an arpeggio pattern, the thumb on root and fifth on the beats, the fingers between;
-   Folk's, Country's, the Power ballad's, Blues', Bossa nova's, Medieval's, and lyrical guitar's; asked.
+7. Done (13 October 2026): the alternating thumb; Bossa nova's batida, its fingers' own figure, left to its research.
 8. **Latin bass figures** (#360): the tumbao and bossa nova's bass as bass figures, data; asked with step 4's clave.
 
 **C. Two genres** (data, with the idioms of B):

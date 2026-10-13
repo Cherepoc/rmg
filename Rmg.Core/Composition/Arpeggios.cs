@@ -41,7 +41,13 @@ public enum ArpeggioPattern
     Pedal,
 
     /// <summary>The root on the beats and the chord's other notes up and down on the off-beats, a salsa pianist's montuno.</summary>
-    Montuno
+    Montuno,
+
+    /// <summary>
+    ///     The thumb on the beats, the root and the fifth by turns, and the fingers off them on the chord's notes above,
+    ///     a folk or a country guitarist's alternating thumb.
+    /// </summary>
+    AlternatingThumb
 }
 
 /// <summary>A tone laid on a broken chord's notes for the part breaking it alone, which the band's chord leaves out.</summary>
@@ -84,7 +90,8 @@ internal static class Arpeggios
         (ArpeggioPattern.Random, new ByConvention(0, 0.005, 1)),
         (ArpeggioPattern.UpTwoOctaves, new ByConvention(0, 0.005, 1)),
         (ArpeggioPattern.Pedal, new ByConvention(0, 0.01, 1)),
-        (ArpeggioPattern.Montuno, new ByConvention(0, 0.005, 1))
+        (ArpeggioPattern.Montuno, new ByConvention(0, 0.005, 1)),
+        (ArpeggioPattern.AlternatingThumb, new ByConvention(0, 0.005, 1))
     ];
 
     /// <summary>The colours a part breaking its chord lays on it, a genre's, which the songs never lay.</summary>
@@ -173,6 +180,7 @@ internal static class Arpeggios
         ArpeggioPattern.RootFifth => "Root and fifth",
         ArpeggioPattern.UpTwoOctaves => "Up two octaves",
         ArpeggioPattern.Pedal => "Pedal point",
+        ArpeggioPattern.AlternatingThumb => "Alternating thumb",
         _ => pattern.ToString()
     };
 
@@ -225,6 +233,11 @@ internal static class Arpeggios
             ArpeggioPattern.Montuno => onBeat
                 ? notes[low]
                 : notes[others[(place % Math.Max(1, 2 * others.Length - 2)) is var step && step < others.Length ? step : 2 * others.Length - 2 - step]],
+            // the thumb on the beat, the root on the even beats and the fifth on the odd, the fingers off it on the notes
+            // above the fifth by turns, or above the root where the fifth is the top
+            ArpeggioPattern.AlternatingThumb => onBeat
+                ? notes[(long)Math.Floor(position + 1e-9) % 2 == 0 ? low : fifth]
+                : notes[Enumerable.Range(0, count).Where(x => x > fifth).DefaultIfEmpty(count - 1).ToArray() is var upper ? upper[place / 2 % upper.Length] : 0],
             _ => throw new ArgumentOutOfRangeException(nameof(pattern), pattern, null)
         };
     }

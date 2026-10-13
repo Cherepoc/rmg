@@ -713,7 +713,7 @@
       "rhythm": {
         "rhythm": { "speed": 69, "fullness": 82 }
       },
-      "arpeggio": { "none": 100, "alberti": [40, 50, 50], "upDown": [30, 40, 40], "up": [20, 20, 30], "rootFifth": [0, 0, 20] },
+      "arpeggio": { "none": 100, "alberti": [40, 50, 50], "upDown": [30, 40, 40], "up": [20, 20, 30], "rootFifth": [0, 0, 20], "alternatingThumb": [60, 60, 50] },
       "effects": { "vibrato": [20, 50, 80], "bends": [0, 15, 40], "swell": [0, 10, 40], "tone": [10, 20, 30], "chorus": 0, "tape": 0, "pinch": 0, "dive": 0 },
       "solos": { "sections": [5, 10, 25], "trades": 0 },
       "strongEffect": { "none": [100, 100, 60], "echo": [0, 5, 25] },
@@ -777,7 +777,7 @@
       "rhythm": {
         "bass": { "speed": 76, "fineness": 25, "fullness": 82, "repetition": 82 }
       },
-      "arpeggio": { "none": 100, "rootFifth": [12, 18, 25], "upDown": [0, 0, 15] },
+      "arpeggio": { "none": 100, "rootFifth": [12, 18, 25], "upDown": [0, 0, 15], "alternatingThumb": [10, 10, 20] },
       "harmonyDevices": { "pedal": [0, 5, 10], "reharmonised": 0, "innerLine": 0 },
       "strongEffect": { "none": [100, 100, 40], "tremolo": [0, 12, 40], "echo": [0, 8, 30] },
       "soloAnswers": { "sections": [20, 50, 50] }
@@ -951,7 +951,7 @@
       "fills": { "amount": 40 },
       "dynamics": { "energy": 60, "contrast": 70, "lift": 70, "evenness": 75 },
       "phraseScheme": { "aaab": 100, "abab": [60, 60, 60], "aaaa": [40, 40, 30], "aaba": [40, 40, 40] },
-      "arpeggio": { "none": [40, 40, 50], "up": 100, "upDown": 60, "pairs": [20, 30, 30] },
+      "arpeggio": { "none": [40, 40, 50], "up": 100, "upDown": 60, "pairs": [20, 30, 30], "alternatingThumb": [20, 20, 20] },
       "colour": { "none": 100, "held": [20, 40, 50] },
       "articulation": { "letRing": [50, 70, 70], "legato": [0, 30, 40], "roll": [0, 10, 20], "stabs": 0 },
       "passingChords": { "chords": [0, 5, 5] },
@@ -1313,7 +1313,7 @@
       "doubling": { "harmony": [60, 70, 70], "octaves": [7, 11, 15], "riff": 0 },
       "lineScale": { "section": 100, "pentatonic": 40 },
       "melodyRange": { "wide": 40 },
-      "arpeggio": { "none": 100, "up": [10, 20, 30], "upDown": [10, 10, 20] },
+      "arpeggio": { "none": 100, "up": [10, 20, 30], "upDown": [10, 10, 20], "alternatingThumb": [20, 20, 20] },
       "articulation": { "legato": [50, 60, 70], "roll": [20, 30, 40] },
       "effects": { "vibrato": [20, 40, 60], "bends": [0, 10, 20], "swell": [10, 20, 40], "chorus": 0, "tone": 0, "tape": 0, "pinch": 0, "dive": 0 },
       "strongEffect": { "none": 100, "echo": [0, 10, 30] },
@@ -2097,6 +2097,7 @@
     "name": "Country",
     "description": "A fiddle, a steel-string guitar strummed, a banjo and a honky-tonk piano, plain triads moving by fourths and fifths, the bass on the root and the fifth, the snare on 2 and 4, major and Mixolydian.",
     "choices": {
+      "arpeggio": { "none": 100, "alternatingThumb": [40, 40, 40], "up": [10, 10, 20], "upDown": [10, 10, 20] },
       "sung": { "halves": [100, 80, 60] },
       "figure": { "bass": { "own": 100, "withKick": [20, 20, 15] } },
       "callAndResponse": { "sections": [10, 25, 35] },
