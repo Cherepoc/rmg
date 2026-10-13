@@ -47,7 +47,7 @@ public sealed class ScalesTest
         const int drawCount = 100_000;
         var context = new GenerationContext(1);
         var counts = Enumerable.Range(0, drawCount)
-            .Select(_ => Rmg.Core.Composition.Scales.Pick(context, unconventionality, Genre.None))
+            .Select(_ => Rmg.Core.Composition.Scales.Pick(context, unconventionality, Genre.None, default))
             .CountBy(x => x)
             .ToDictionary();
         var weightSum = AllScales.Sum(x => x.Weight.At(unconventionality));

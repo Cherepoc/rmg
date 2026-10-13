@@ -20,6 +20,11 @@ public sealed record Scale(string Name, ImmutableArray<int> Offsets, ByConventio
     /// <summary>How bright the scale sounds: the sum of its offsets, lydian's the highest and locrian's the lowest.</summary>
     public int Brightness => Offsets.Sum();
 
+    /// <summary>How dark it sounds, as a mood leans it: Dorian's 0, each step down the modes' order a third darker, Locrian 1 and Lydian -1.</summary>
+    public double Darkness => (DorianBrightness - Brightness) / 3.0;
+
+    private const int DorianBrightness = 36;
+
     /// <summary>How many of its notes differ from another scale of as many notes, on the same first note.</summary>
     public int Distance(Scale other)
     {
@@ -84,10 +89,11 @@ public static class Scales
     /// <summary>How much less likely a scale is for every note it changes beyond the first.</summary>
     public const double Closeness = 0.3;
 
-    /// <summary>A song's scale, by the scale facet of its unconventionality.</summary>
-    internal static Scale Pick(IGenerationContext context, double unconventionality, Genre genre)
+    /// <summary>A song's scale, by the scale facet of its unconventionality, the darker the darker its mood.</summary>
+    internal static Scale Pick(IGenerationContext context, double unconventionality, Genre genre, Mood mood)
     {
-        return context.Pick(ByConvention.Weigh(All.Select(x => (x, x.Weight)), unconventionality, genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name))));
+        return context.Pick(mood.Darker.Weigh(ByConvention.Weigh(All.Select(x => (x, x.Weight)), unconventionality, genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name))),
+            x => x.Darkness));
     }
 
     /// <summary>

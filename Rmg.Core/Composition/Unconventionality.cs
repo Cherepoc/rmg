@@ -130,6 +130,8 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
 /// </param>
 /// <param name="Genre">The genre the song's draws keep to (<see cref="Composition.Genre" />), what is given winning over it.</param>
 /// <param name="Length">How long the song is to play, in seconds, which its form leans to (<see cref="SongLength" />), and comes as near as it can.</param>
+/// <param name="Darkness">How dark the song's mood is, from -1 to 1 (<see cref="Mood" />), as given, in place of the drawn.</param>
+/// <param name="Intensity">How intense the song's mood is, from -1 to 1 (<see cref="Mood" />), as given, in place of the drawn.</param>
 public sealed record SongOverrides(
     Meter? Meter = null,
     double? Base = null,
@@ -143,7 +145,9 @@ public sealed record SongOverrides(
     Scale? Scale = null,
     double? Swing = null,
     Genre? Genre = null,
-    double? Length = null
+    double? Length = null,
+    double? Darkness = null,
+    double? Intensity = null
 )
 {
     public static SongOverrides None { get; } = new();
@@ -171,6 +175,10 @@ public sealed record SongOverrides(
             throw new ArgumentOutOfRangeException(nameof(DrumPieces), "Drums given are one or more of the drum pieces.");
         if (Length is <= 0 or double.NaN or double.PositiveInfinity)
             throw new ArgumentOutOfRangeException(nameof(Length), Length, "A length is a positive number of seconds.");
+        if (Darkness is < -1 or > 1 or double.NaN)
+            throw new ArgumentOutOfRangeException(nameof(Darkness), Darkness, "A mood is from -1 to 1.");
+        if (Intensity is < -1 or > 1 or double.NaN)
+            throw new ArgumentOutOfRangeException(nameof(Intensity), Intensity, "A mood is from -1 to 1.");
         if (DrumSetup is { } setup && !Enum.IsDefined(setup))
             throw new ArgumentOutOfRangeException(nameof(DrumSetup), setup, "A drum setup is one of the setups.");
     }

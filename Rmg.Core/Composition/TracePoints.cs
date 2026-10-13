@@ -357,6 +357,9 @@ internal static class TracePoints
     /// <summary>Whether a section's melody is sung in 8ths, no note of it shorter (a <c>bool</c>; <see cref="Composition.MelodyLayers.SungEighths" />).</summary>
     public const string SungEighths = "Sung eighths";
 
+    /// <summary>The song's mood (a <see cref="Composition.Mood" />).</summary>
+    public const string Mood = "Mood";
+
     /// <summary>Whether a section is one the riff's twin leads in (a <c>bool</c>; <see cref="Composition.LineDoubling.TwinLeadChance" />).</summary>
     public const string TwinLead = "Twin lead";
 

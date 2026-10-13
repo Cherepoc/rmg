@@ -135,6 +135,9 @@ public static class SongGenerator
     /// <summary>A length in a range of amounts (<see cref="GenreChoices.LengthOf" />), in seconds, drawn as a tempo is in its range.</summary>
     internal static double LengthIn(IGenerationContext context, (double From, double To, double Lean) range) => GenreChoices.LengthOf(Across(context, range));
 
+    /// <summary>A mood in a range of amounts (<see cref="Mood.OfAmount" />), drawn as a tempo is in its range.</summary>
+    internal static double MoodIn(IGenerationContext context, (double From, double To, double Lean) range) => Mood.OfAmount(Across(context, range));
+
     /// <summary>An amount in a range, leaning to its middle, as the mean of two draws across it does, or to an end by its lean.</summary>
     private static double Across(IGenerationContext context, (double From, double To, double Lean) range) =>
         range.From + (range.To - range.From) * Math.Pow((context.GenerateDouble() + context.GenerateDouble()) / 2, Math.Exp(-RangeLeanSkew * range.Lean));
@@ -252,5 +255,7 @@ internal enum SongStream
     CallAndResponse = 111,
     SoloAnswerVoicings = 112,
     SoloAnswerMotifs = 113,
-    EnsembleHits = 114
+    EnsembleHits = 114,
+    Darkness = 115,
+    Intensity = 116
 }

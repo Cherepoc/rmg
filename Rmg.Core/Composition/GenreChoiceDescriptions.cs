@@ -11,6 +11,8 @@ public static class GenreChoiceDescriptions
     {
         ["tempo"] = "How fast the song plays, in beats a minute: the range a song's tempo is drawn from, and whether it leans to the slow end or the fast.",
         ["length"] = "How long the song plays: the range its form is stretched or cut to, and whether it leans to the short end or the long.",
+        ["darkness"] = "How dark the songs' mood is, from the brightest to the darkest: the darker, the likelier the darker of the options it allows, a minor or a Phrygian mode over a major or a Lydian one.",
+        ["intensity"] = "How intense the songs' mood is, from the calmest to the fiercest: the fiercer, the likelier the fiercer of the options it allows.",
         ["meter"] = "How many beats a bar has and how they group: 4/4 for most songs, 3/4 and 6/8 for a waltz or a lilt, the odd meters for the wilder.",
         ["feel"] = "The song's feel: straight 8ths and 16ths for most songs, or triplets, quintuplets and groupings such as the tresillo's 3+3+2 for the wilder.",
         ["feelChances"] = "How often a song swings its 8ths or 16ths, and how often a section's drums go to half time, heavier, or double time, more urgent.",

@@ -136,6 +136,13 @@ internal sealed record SongDecisions(
         // its values read at its facets, a value's plain and wild ends leaning a plain and a wild song
         genre = genre.AtSong(songUnconventionality);
         StateTrace.RecordSong(TracePoints.SongUnconventionality, $"{songUnconventionality.Base:F2}", songUnconventionality);
+        // its mood, either drawn within the genre's span, at the song's unconventionality, or the songs' own, each from a
+        // sequence of its own, drawn when it is given too, so that the rest is as it was
+        double MoodOf(GenreChoice choice, SongStream stream) =>
+            SongGenerator.MoodIn(Stream(stream), genre.Range(choice, songUnconventionality.Base) ?? Mood.SongsSpan);
+        var drawnMood = new Mood(MoodOf(GenreChoices.Darkness, SongStream.Darkness), MoodOf(GenreChoices.Intensity, SongStream.Intensity));
+        var mood = new Mood(overrides.Darkness ?? drawnMood.Darkness, overrides.Intensity ?? drawnMood.Intensity);
+        StateTrace.RecordSong(TracePoints.Mood, $"{mood.Darkness:F2} {mood.Intensity:F2}", mood);
         var rhythmicUnconventionality = new RhythmicUnconventionality(songUnconventionality[Facet.Groove]) { GrooveHold = RhythmicUnconventionality.HoldOf(genre) };
         // a facet's value as the rhythm's unconventionality, for a choice that leans by it
         RhythmicUnconventionality Of(Facet facet) => new(songUnconventionality[facet]);
@@ -172,7 +179,7 @@ internal sealed record SongDecisions(
         var harmonyContext = Stream(SongStream.Harmony);
         var unconventionality = new HarmonicUnconventionality(songUnconventionality[Facet.Chords], genre);
         // drawn when it is given too, so that the rest is as it was
-        var scale = Scales.Pick(harmonyContext, songUnconventionality[Facet.Scale], genre);
+        var scale = Scales.Pick(harmonyContext, songUnconventionality[Facet.Scale], genre, mood);
         scale = overrides.Scale ?? scale;
         StateTrace.RecordSong(TracePoints.SongHarmony, $"{unconventionality.Chords:F2} {scale.Name}", (unconventionality, scale));
         // the feel the song plays in, straight or a tuplet, from a sequence of its own, by its feel facet

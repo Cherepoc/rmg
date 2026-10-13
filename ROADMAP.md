@@ -963,9 +963,14 @@ root degrees (♭II and ♭VI dark) and a key change up (bright), the register, 
 (warm pads against dark ones); **intensity**, the tempo within the genre's range, double kick, blast, double time and
 half time, fills, the kit, driven instruments, chugs and power chords, the bass in 16ths against 8ths, the dynamics.
 
-1. The mechanism without leans: the two values drawn, a genre's span of each (two range choices), the songs' own span
-   moderate, given values, traced; one helper leaning pools, chances and ranges; the corpus unchanged.
-2. Darkness's leans on the harmony (scales, chord shapes, root degrees, the cadence's raise), measured at the dark end,
+1. Done (14 October 2026), merged with step 2's first lean, as the mechanism alone changed nothing to hear: the two
+   values (`Mood`), each drawn from a stream of its own within a genre's span (`darkness`, `intensity`, range choices
+   from -100 to 100, the songs' own -60 to 60) or given (`SongOverrides`), traced; and the song's scale leaned by its
+   darkness, a scale's its distance from Dorian in the modes' order (`Scale.Darkness`): the songs' major, Lydian or
+   Mixolydian 73% at darkness -1, 47% at 0, 15% at 1, minor or darker 17%, 41%, 70%; drawn as the songs' own, as at 0
+   (46%, 41%); Pop 84% to 31% major, Heavy metal 81% to 95% minor; 21 of 256 corpus songs changed.
+2. Darkness's leans on the rest of the harmony: a section's scale, the chord shapes (their pick level first where a
+   genre has no pool, a lean of its own needed), the root degrees and the cadence's raise, measured at the dark end,
    the middle and the bright.
 3. Intensity's leans (tempo, drum figures and feels, the kit, the riff's articulation, bass figures, fills), measured:
    the median tempo, the double kick's share, the driven instruments'.

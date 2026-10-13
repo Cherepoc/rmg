@@ -65,6 +65,25 @@ public static class GenreChoices
         Scale = new RangeScale("seconds", ShortestLength, LongestLength, LengthOf, AmountOfLength)
     };
 
+    /// <summary>
+    ///     How dark the genre's songs are, a range of their moods (<see cref="Composition.Mood" />) from -100, the brightest,
+    ///     to 100, the darkest, the songs' own -60 to 60, and how a song's leans within it.
+    /// </summary>
+    public static GenreChoice Darkness { get; } = MoodRange("darkness", "Darkness");
+
+    /// <summary>How intense the genre's songs are, a range of their moods from -100, the calmest, to 100, the fiercest, as <see cref="Darkness" /> is.</summary>
+    public static GenreChoice Intensity { get; } = MoodRange("intensity", "Intensity");
+
+    private static GenreChoice MoodRange(string name, string label) => new(name, label, GenreChoiceKind.Range,
+    [
+        new("from", "From", Even(Composition.Mood.SongsSpan.From)),
+        new("to", "To", Even(Composition.Mood.SongsSpan.To)),
+        new("lean", "Lean", Even(0.5))
+    ])
+    {
+        Scale = new RangeScale("%", -100, 100, x => 100 * Composition.Mood.OfAmount(x), x => Composition.Mood.AmountOf(x / 100))
+    };
+
     /// <summary>The meter the song's bars are in (<see cref="Composition.Meter.Options" />).</summary>
     public static GenreChoice Meter { get; } = Pool("meter", "Meter",
         Composition.Meter.Options.Select(x => (Composition.Meter.NameOf(x.Meter), Composition.Meter.NameOf(x.Meter), x.Weight)));
@@ -689,7 +708,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
