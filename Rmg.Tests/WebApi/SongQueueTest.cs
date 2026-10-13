@@ -103,13 +103,13 @@ public sealed class SongQueueTest
         await Assert.That(await IsWaiting(second)).IsTrue();
     }
 
-    // a turn is handed over on another thread, so one given is waited for, generously, and one waiting is still so a
-    // moment later
-    // a turn arriving within ten seconds: given in milliseconds, its continuation may wait for a thread while the rest of
-    // the suite keeps every core busy
+    // a turn is handed over at once, but the song's wait for it ends on a thread of the pool, so one given is waited for,
+    // generously, and one waiting is still so a moment later
+    // a turn arriving within a minute: given in milliseconds, its continuation may wait well past ten seconds for a thread
+    // while the corpus's tests keep every core busy, and a turn never given costs the wait alone
     private static async Task<bool> IsGiven(Task<SongQueue.Turn> turn)
     {
-        return await Task.WhenAny(turn, Task.Delay(10_000)) == turn;
+        return await Task.WhenAny(turn, Task.Delay(60_000)) == turn;
     }
 
     private static async Task<bool> IsWaiting(Task<SongQueue.Turn> turn)

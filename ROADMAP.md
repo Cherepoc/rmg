@@ -610,7 +610,12 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   apart at offset 1000000 (seed 62 at 38, the chords' add9 over the bass's sus2) and at 816000000 (seed 5 at 173.5, the
   riff's six-nine over the chords' triad; seed 49 at 44, a cluster under the melody's triad; seed 52 at 36, a shell
   under it), each a stage giving a part a shape of its own, the next places to look the line chords, the riff's
-  appearance and the melody's stack.
+  appearance and the melody's stack. Probed on 14 October 2026: seed 62 at a million and seed 52 at 816000000 both in a polymeter's
+  section, whose copied notes take the shape of the first shaped note in their chord's span (`Polymeter.ShapeAt`),
+  the likeliest place; seed 5 after a reharmonisation; seed 49 the melody's triad over the chords' cluster. Failing
+  besides at 816000000, each as before 13 October 2026's changes: the rhythm part's chords as the chords play them
+  (seed 57 at 180), a chromatic passing chord a semitone from the next (seed 1 at 6), a palm-muted note's length, and
+  a fill decision recorded at bar 5 of a four-bar phrase (seed 6, a hook intro's song; the decisions' count right).
   **The held-out corpus** (offset 716000000) after the packages: 12 of 1581 tests fail, against 13 at the review's
   commit; four of those fixed by the packages, a dive's (the twin diving with its riff) the test's own. Two more were
   older behaviour the packages' tests now see: a djent breakdown at seed 48, section 7, in 15/16 (4+4+3+4), whose kick
