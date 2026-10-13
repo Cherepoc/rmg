@@ -89,11 +89,10 @@ public static class Scales
     /// <summary>How much less likely a scale is for every note it changes beyond the first.</summary>
     public const double Closeness = 0.3;
 
-    /// <summary>A song's scale, by the scale facet of its unconventionality, the darker the darker its mood.</summary>
-    internal static Scale Pick(IGenerationContext context, double unconventionality, Genre genre, Mood mood)
+    /// <summary>A song's scale, by the scale facet of its unconventionality.</summary>
+    internal static Scale Pick(IGenerationContext context, double unconventionality, Genre genre)
     {
-        return context.Pick(mood.Darker.Weigh(ByConvention.Weigh(All.Select(x => (x, x.Weight)), unconventionality, genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name))),
-            x => x.Darkness));
+        return context.Pick(ByConvention.Weigh(All.Select(x => (x, x.Weight)), unconventionality, genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name))));
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
@@ -25,9 +26,28 @@ public readonly record struct Mood(double Darkness, double Intensity)
     /// <summary>A mood's amount in a range (<see cref="OfAmount" />).</summary>
     public static double AmountOf(double mood) => (mood + 1) / 2;
 
-    /// <summary>The lean of options by how dark each is, from -1, bright, to 1, dark.</summary>
-    public Tilt Darker => Tilt.Of(Odds, Darkness);
+    /// <summary>How far a mood moves a range's lean, as its intensity moves a tempo toward the fast end of a genre's.</summary>
+    public const double RangeShift = 0.25;
 
-    /// <summary>The lean of options by how fierce each is, from -1, calm, to 1, fierce.</summary>
-    public Tilt Fiercer => Tilt.Of(Odds, Intensity);
+    /// <summary>
+    ///     The options a mood leans, by their choice: each option's lean by darkness and by intensity, from -1 to 1, 0 for
+    ///     none; a choice's options it does not name lean none; and whether a song of a genre that does not name the choice
+    ///     leans it as the songs have it, where its options' own amounts are the songs' draw, and not where the songs draw
+    ///     otherwise, as their kit by their drums' job. The scales by their darkness, Dorian's none, Lydian bright and
+    ///     Locrian dark (<see cref="Scale.Darkness" />); the fiercer, the likelier the power kit, double time, a riff that
+    ///     chugs or plays power chords, and the calmer the brushes, the jazz kit and half time; a tempo's range leaning to
+    ///     its fast end the fiercer.
+    /// </summary>
+    // built when first asked, as the choices it names take the songs' span of a mood from here
+    public static ImmutableArray<(GenreChoice Choice, Func<string, (double Darkness, double Intensity)> Lean, bool AsSongs)> Leans => field.IsDefault ? field =
+    [
+        (GenreChoices.Scale, name => (Scales.All.Single(x => GenreChoices.Name(x.Name) == name).Darkness, 0), true),
+        (GenreChoices.Kit, name => (0, name switch { "power" => 1, "room" => -0.3, "jazz" => -0.7, "brush" => -1, _ => 0 }), false),
+        (GenreChoices.FeelChances, name => (0, name switch { "doubleTime" => 1, "halfTime" => -0.5, _ => 0 }), true),
+        (GenreChoices.Riff, name => (0, name switch { "chugs" => 1, "powerChords" => 0.5, _ => 0 }), true),
+        (GenreChoices.Tempo, name => (0, name == "lean" ? 1 : 0), false)
+    ] : field;
+
+    /// <summary>How far an option's lean moves its odds under this mood, in log-odds.</summary>
+    public double LogOdds((double Darkness, double Intensity) lean) => Math.Log(Odds) * (lean.Darkness * Darkness + lean.Intensity * Intensity);
 }

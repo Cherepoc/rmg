@@ -22,14 +22,14 @@
       },
       {
         "seed": "9",
-        "at": 129.3,
+        "at": 131.2,
         "listen": [
           "Bass (Contrabass)"
         ]
       },
       {
         "seed": "H",
-        "at": 63.2,
+        "at": 62.3,
         "listen": [
           "Bass (Acoustic Grand Piano)"
         ]
@@ -43,14 +43,14 @@
       },
       {
         "seed": "L",
-        "at": 26,
+        "at": 26.3,
         "listen": [
           "Bass (Cello)"
         ]
       },
       {
         "seed": "N",
-        "at": 98,
+        "at": 99.3,
         "listen": [
           "Bass (Acoustic Grand Piano)"
         ]
@@ -73,7 +73,7 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 135.1,
+        "at": 139.3,
         "listen": [
           "Pad (String Ensemble 1)"
         ]
@@ -95,7 +95,7 @@
       },
       {
         "seed": "M",
-        "at": 119.2,
+        "at": 117.6,
         "listen": [
           "Bass (Contrabass)"
         ]
@@ -162,7 +162,7 @@
       },
       {
         "seed": "Y",
-        "at": 129.8,
+        "at": 128.6,
         "listen": [
           "Rhythm part (Electric Guitar (clean))"
         ]
@@ -198,7 +198,7 @@
     "seeds": [
       {
         "seed": "1",
-        "at": 26.3,
+        "at": 46,
         "listen": [
           "Rhythm part (Electric Guitar (clean))"
         ]
@@ -212,7 +212,7 @@
       },
       {
         "seed": "9",
-        "at": 7.6,
+        "at": 7.7,
         "listen": [
           "Bass (Electric Bass (finger))",
           "Chords (Electric Piano 2)",
@@ -220,10 +220,11 @@
         ]
       },
       {
-        "seed": "A",
-        "at": 124,
+        "seed": "D",
+        "at": 98.4,
         "listen": [
-          "Bass (Electric Bass (finger))"
+          "Bass (Electric Bass (finger))",
+          "Rhythm part (Electric Piano 1)"
         ]
       },
       {
@@ -236,7 +237,7 @@
       },
       {
         "seed": "J",
-        "at": 114,
+        "at": 112.6,
         "listen": [
           "Rhythm part (Electric Guitar (clean))"
         ]
@@ -299,7 +300,7 @@
       },
       {
         "seed": "M",
-        "at": 143.1,
+        "at": 140.8,
         "listen": [
           "Ride"
         ]
@@ -348,7 +349,7 @@
       },
       {
         "seed": "P",
-        "at": 349.7,
+        "at": 355.1,
         "listen": [
           "Ride"
         ]
@@ -415,7 +416,7 @@
       },
       {
         "seed": "M",
-        "at": 189.2,
+        "at": 186.8,
         "listen": [
           "Rhythm part (Acoustic Guitar (steel))",
           "Drums"
@@ -423,7 +424,7 @@
       },
       {
         "seed": "N",
-        "at": 46.2,
+        "at": 46.8,
         "listen": [
           "Melody (Electric Guitar (jazz))"
         ]
@@ -446,7 +447,7 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 104,
+        "at": 93.2,
         "listen": [
           "Melody (Acoustic Guitar (nylon))",
           "Cabasa"
@@ -454,11 +455,10 @@
       },
       {
         "seed": "5",
-        "at": 212,
+        "at": 102.7,
         "listen": [
           "Chords (Electric Guitar (clean))",
-          "Rhythm part (Acoustic Guitar (steel))",
-          "Melody (Acoustic Guitar (nylon))"
+          "Rhythm part (Acoustic Guitar (steel))"
         ]
       },
       {
@@ -471,8 +471,17 @@
         ]
       },
       {
+        "seed": "K",
+        "at": 123.2,
+        "listen": [
+          "Ride",
+          "Solo (Distortion Guitar)",
+          "Cabasa"
+        ]
+      },
+      {
         "seed": "b",
-        "at": 116,
+        "at": 117.3,
         "listen": [
           "Ride",
           "Clap"
@@ -483,15 +492,6 @@
         "at": 22.4,
         "listen": [
           "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "y",
-        "at": 147.6,
-        "listen": [
-          "Cabasa",
-          "Hi-Hat",
-          "Clap"
         ]
       }
     ]
@@ -512,7 +512,7 @@
     "seeds": [
       {
         "seed": "k",
-        "at": 139.4,
+        "at": 141.1,
         "listen": [
           "Melody (Electric Guitar (clean))"
         ]
@@ -526,14 +526,14 @@
       },
       {
         "seed": "1D",
-        "at": 0,
+        "at": 273.5,
         "listen": [
           "Rhythm part (Acoustic Guitar (steel))"
         ]
       },
       {
         "seed": "1S",
-        "at": 134.8,
+        "at": 133.1,
         "listen": [
           "Bass (Electric Bass (finger))"
         ]
@@ -591,21 +591,21 @@
       },
       {
         "seed": "H",
-        "at": 84.6,
+        "at": 83.8,
         "listen": [
           "Melody (Lead 1 (square))"
         ]
       },
       {
         "seed": "K",
-        "at": 11.7,
+        "at": 11.6,
         "listen": [
           "Solo (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "P",
-        "at": 153.3,
+        "at": 154.7,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]

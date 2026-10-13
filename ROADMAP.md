@@ -972,8 +972,14 @@ half time, fills, the kit, driven instruments, chugs and power chords, the bass 
 2. Darkness's leans on the rest of the harmony: a section's scale, the chord shapes (their pick level first where a
    genre has no pool, a lean of its own needed), the root degrees and the cadence's raise, measured at the dark end,
    the middle and the bright.
-3. Intensity's leans (tempo, drum figures and feels, the kit, the riff's articulation, bass figures, fills), measured:
-   the median tempo, the double kick's share, the driven instruments'.
+3. Done in part (14 October 2026), with the leans moved into one place, the song's genre leaned by its mood
+   (`Genre.AtMood`, `Mood.Leans`), its scale's lean there too, so that a section's scale leans as the song's: the
+   tempo within a genre's range (Heavy metal 126-142-156 at intensity -1, 0 and 1, Rock 112-125-137), double time
+   (Heavy metal 9%-24%-47% of sections) and half time against it, the riff's chugs (34%-57%-73%) and power chords,
+   the kit (the power kit fiercer, the brushes and the jazz kit calmer, where the genre names its kit, as the songs
+   draw theirs by their drums' job); the drawn songs' as at 0. Left: the drum figures (the double kick, the blast), the
+   bass figures, fills, driven instruments by their trait (the instrument choice nested by part), the songs' own tempo
+   (a dyadic draw, not a range).
 4. The sound's leans: instruments by their traits, the tone, the register.
 5. The genres' spans: Synthwave from dreamwave to darksynth, Drum and bass from liquid to dark, Heavy metal checked
    against gothic and power metal; asked, a genre's two ends.

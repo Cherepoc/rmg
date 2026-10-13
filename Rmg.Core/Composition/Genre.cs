@@ -165,6 +165,53 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
             : x.Value)
     };
 
+    /// <summary>
+    ///     The genre as a song of a mood takes it (<see cref="Mood.Leans" />): a pool's options weighed by their odds under
+    ///     the mood, the heaviest as heavy as it was; a chance's odds moved alike; a range's lean moved toward the end the
+    ///     mood leans to; a choice the genre does not name taken as the songs have it where its options' own amounts are the
+    ///     songs' draw, and left as it is where they are not; nothing added nor taken away, an option at none staying none.
+    /// </summary>
+    public Genre AtMood(Mood mood)
+    {
+        if (mood == default)
+            return this;
+        var choices = Choices;
+        foreach (var (choice, lean, asSongs) in Mood.Leans)
+        {
+            if (!choices.TryGetValue(choice.Name, out var options))
+            {
+                if (!asSongs)
+                    continue;
+                options = choice.Options.ToImmutableDictionary(x => x.Name, x => x.Own);
+            }
+            // a range's options it leans, its lean, as the songs have them where the genre names none
+            else if (choice.Kind == GenreChoiceKind.Range)
+                options = options.AddRange(choice.Options.Where(x => !options.ContainsKey(x.Name) && lean(x.Name) != default).Select(x => KeyValuePair.Create(x.Name, x.Own)));
+
+            ByConvention Each(ByConvention value, Func<double, double> at) => new(at(value.Plain), at(value.Tuned), at(value.Wild));
+            options = choice.Kind switch
+            {
+                GenreChoiceKind.Pool => Weighed(options, x => Math.Exp(mood.LogOdds(lean(x)))),
+                GenreChoiceKind.Chances => options.ToImmutableDictionary(x => x.Key, x => Each(x.Value, p => new Tilt(mood.LogOdds(lean(x.Key))).Chance(p, 1))),
+                GenreChoiceKind.Range => options.ToImmutableDictionary(x => x.Key,
+                    x => Each(x.Value, a => Math.Clamp(a + Mood.RangeShift * (lean(x.Key).Darkness * mood.Darkness + lean(x.Key).Intensity * mood.Intensity), 0, 1))),
+                _ => options
+            };
+            choices = choices.SetItem(choice.Name, options);
+        }
+
+        return this with { Choices = choices };
+
+        // a pool's weights by their factors, at every end, the heaviest of an end as heavy as before
+        static ImmutableDictionary<string, ByConvention> Weighed(ImmutableDictionary<string, ByConvention> pool, Func<string, double> factor)
+        {
+            double Scale(Func<ByConvention, double> end) =>
+                pool.Max(x => end(x.Value)) is var before and > 0 && pool.Max(x => end(x.Value) * factor(x.Key)) is var after and > 0 ? before / after : 1;
+            var (plain, tuned, wild) = (Scale(x => x.Plain), Scale(x => x.Tuned), Scale(x => x.Wild));
+            return pool.ToImmutableDictionary(x => x.Key, x => new ByConvention(x.Value.Plain * factor(x.Key) * plain, x.Value.Tuned * factor(x.Key) * tuned, x.Value.Wild * factor(x.Key) * wild));
+        }
+    }
+
     /// <summary>A value's shift, from -1, its least, through 0, as it is, to 1, its most.</summary>
     public double Shift(GenreChoice choice, string option)
     {
