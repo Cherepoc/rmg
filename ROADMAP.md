@@ -221,7 +221,7 @@ off) and its default by ratings, the ratings report, two toms at once, and Tooli
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
 ratings by conventionality once enough are in, continuously and never as a gate.
 
-**Next plan** (13 October 2026): *Planned: rules kept, four idioms, two genres, the club's devices* (*Open work*).
+**Next plan** (13 October 2026): *Planned: the order of work* (*Open work*).
 
 **Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough.
 
@@ -706,6 +706,30 @@ metal, Doom without the tuning a slow one; no sub-styles within a genre, a prese
 over still harmony; a slap bass doubling a distorted riff turning it to funk metal, so picked where it doubles; a
 narrow melody on a guitar possibly only dull, so asked before built.
 
+### Planned: the order of work
+
+Agreed 13 October 2026, the plans below in one order, each step through the implementation loop, deployed to test
+with its questions after each group:
+
+1. **The rules kept and the mismatches measured**: *Planned: rules kept…*'s group A (the scale rule and the shared
+   shape over 64 songs, the squelch, 12/8's backbeat, Latin's clave resting) with *Planned: the genres as their records
+   play them*'s group V (a long pattern's inner chords, the clave's span, the one drop, Funk's swing, Ska's skank,
+   Disco's octave bass, double time's hats, the minor cadences, the data errors).
+2. **The retunes of the genres researched with a search** (*…as their records play them*, group R): Rock, Punk, Heavy
+   metal, Thrash, Black metal, Symphonic metal, Djent, Nu metal, Doom metal, the Power ballad, House, Techno, IDM,
+   Hip-hop, Synthwave, Chiptune, Funk, Fusion, Classical; Jazz's tempo only after swing by tempo (step 4).
+3. **The research again** for the genres researched without a search (Reggae, Latin, Ambient, Folk, Dungeon synth,
+   Drum and bass, Soul, Pop, Trance, Trap, Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues, and the two
+   planned genres), in a session with its search budget, a few agents at a time with a limit of searches each; then
+   their retunes.
+4. **The idioms and the figures**: swing by tempo, then the jazz ride, the boogie, the alternating thumb, Latin's bass
+   figures (after the clave's span is settled), and the rows of figures (group F).
+5. **The two planned genres and the sung melody**: dark jazz and lyrical guitar, with the research's corrections (their
+   reports), the echo cascade on the rhythm part; the sung melody's 8ths cap (`sung.eighths`, *A melody sung rather
+   than played*), `pop-sung-lines` having kept the sung lines 4-0.
+6. **The devices**: group D's, with the club's and pop's (the kick-out, the breakdown chorus, the ostinato).
+7. **The new presets**: group P's, two at a time; power metal put off.
+
 ### Planned: rules kept, four idioms, two genres, the club's devices
 
 Planned 13 October 2026, reviewed the same day; each step through the implementation loop, a deploy to test with its
@@ -762,6 +786,76 @@ over a walking or busy bass doubles the low end, so where the bass is simple; th
 steady, so the four-on-the-floor genres first; the breakdown chorus is a ballad's and a pop song's, not a dance
 track's, which strips back already; the ostinato's clashes are the point in Techno and a mistake in Ambient, so by
 conventionality and genre.
+
+### Planned: the genres as their records play them
+
+Planned 13 October 2026 from research into every preset's defining records (39 reports, one per genre and the two
+planned, kept outside the repository; about half written without a web search, from encyclopaedia pages, tempo
+databases' estimates and memory). A finding is a hypothesis until the corpus shows it: each step measures first. A
+preset may name a device at its plain end (`GenrePresetsTest`), so a genre's convention that the songs leave to the
+wild end, a rock solo, metal's twin leads, a slow genre's half time, is data, not a breach of the curve. In order:
+
+**V. Suspected mismatches, measured first** (each a bug to fix or a value to retune, one step):
+
+1. A long pattern's inner chords: a 12-bar's bars 2, 3, 6 and 7 drawn by root motion alone, a blues opening I7 to II7
+   or VI7 possible; fix, should it show, a phrase's middle holding the chord it starts on, the IV in its second bar now
+   and then, for every 8-, 12- and 16-bar genre.
+2. Latin's clave over two bars against its half-note count (a one-bar clave in 16ths if so); Reggae's one drop, a drop
+   every four skanks rather than two; Funk's swing an 8th's shuffle above about 107, not a 16th's; Ska's skank onsets;
+   Disco's octave bass moving on weak notes only; double time's hats at 200 (the skank beat of Punk and Thrash).
+3. Minor cadences: Classical's ♭VII–i as often as V–i, and the Aeolian genres' (Dungeon synth, Orchestral's film side)
+   every minor V raised; Symphonic metal's `solos.trades` naming drum trades, a data error; Trap's verses for a voice
+   leaving out the beat's own loop; the echo never on the chords part (Lyrical guitar's cascade on the rhythm part).
+
+**R. Retunes by data** (a step per family, each with its questions; most presets set no length, and many tempo
+ranges miss their records): the metal family (Heavy metal's twin leads, gallop and faster ceiling, Thrash's double time
+and section tempo changes, Doom's chorused guitars and solos, Black metal's songs of five to seven minutes and triple
+meters, Djent's calm form, Nu metal's Phrygian dominant); rock and pop (Rock's quiet verses and slower floor, Punk's
+140-200, Pop's minor keys and loops, the Power ballad's solo nearly always and its key change rarer, Ska's 115-175);
+dance (House's seventh and ninth chords and Dorian, Techno's six-to-nine-minute tracks, Trance's stacked lead and
+breakdown, Drum and bass's drums-out ending, Synthwave's minor keys to 160, Trap's 16-bar sections, Hip-hop's acoustic
+kit); roots (Blues fewer minor songs, Country's breaks and shuffle, Folk's let ring and breaks, Soul's faster ceiling
+and plainer chords, Funk's vamps, Bossa nova's two-bar harmonic rhythm and pushes, Latin's pushes); and the rest
+(Classical's piano and slower floor, Orchestral's big ending and string ostinato, Ambient's long songs and still
+harmony, Medieval's dance tempos, Dungeon synth's loops, Chiptune's vibrato and looping form, Jazz, IDM, Fusion).
+
+**F. Figures as data** (rows of `Figures.All`, one step, then each genre's weight): a four-on-the-floor kick, the
+two-step kick, the snare on every beat, the traditional blast, the snare on the beats over a double kick, the surdo's
+kick (in the drum solos' feet already), the train beat, the offbeat skank, a pulse bass in 8ths and in 16ths, the
+Charleston comp, a one-bar clave, the conga's tumbao; beside the planned jazz ride. Checked first: the rhythm part
+reached by a figure, and figures outside 4/4 (a hand drum's in 6/8 and 3/4).
+
+**D. Devices** (each a step, by how many genres want it): a strophic form, verse after verse (Folk, Blues, Country), as
+data of `SongForms`; the bass stepping down through inversions (Classical, the Power ballad, Doom, Pop), the line
+cliché in the bass; the bass on the beat and the chords after it (a waltz, a march, the boom-chicka), an arpeggio
+pattern beside the alternating thumb; a drone under a whole section (Ambient, Medieval, Dungeon synth), the pedal
+widened; a section's energy choosing its guitars' muting (pop punk's verses) and figure (ska punk's choruses); swing
+by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's
+glide rate (Trap's 808 on a phrase's end, a whining lead); a run into a downbeat (a disco string run, a fanfare's
+pickup); two soloists trading (Thrash, power metal's duels); a section's abrupt change of tempo (Thrash); hat rolls
+anywhere in the bar (Trap); the polymeter's cell lengths by genre (Djent's 13 and 17); a frame-rate arpeggio
+(Chiptune); a post-chorus and long montuno sections (Pop, Latin); one part alone before the band (a keyboard intro).
+Confirmed by the research and planned already: the jazz ride, the boogie, the alternating thumb, the tumbao, the
+kick-out, the breakdown chorus, the ostinato, the tempo floor under 60, the brushes' swirl, scratches.
+
+**P. New presets** (data, each after its parent's retune, two at a time with questions). First, the genres the
+references asked for that no preset reaches: darksynth, a 16-bit game score (FM, not chip), cinematic piano, funk rock,
+jazz-funk and neo-soul, pop punk, the acoustic rock ballad, jazz-rock. Put off, by the owner's choice (13 October
+2026): power metal (progressive metal its wild end), which Symphonic metal cannot take without its orchestra, the
+snare on every beat over the double kick (group F) built meanwhile. Not planned: symphonic black metal and gothic
+metal. Later, by listening: psytrance, dark drum and bass, dub, Celtic, bluegrass, Latin jazz,
+modern pop, ska punk, epic trailer, G-funk, tavern, alternative, drill'n'bass, groove metal, cosy dungeon synth, delta
+blues, big band, dub techno, drill.
+
+Review: **overengineering**: most of it is data, the devices generalisations of mechanisms that exist (figures as rows,
+the pedal, the line cliché, the arpeggio patterns, `SongForms`, the solos' count, glide); thirty new presets is the real
+cost, each a page entry, a listening load and a drift to keep, so twelve at most first and the rest only as listening
+asks; a split where conventionality cannot reach a style (an era, a scene), never for a shade. **Musicality**: the
+records disagree within a genre and the reports with each other (Hip-hop's kit, Funk's place for its jazz-funk side,
+Classical against Orchestral), so a change that moves every song of a genre is asked before kept; longer songs need
+textures and forms that change, or they bore; tempo ranges widened at the ends, not the middle, so a genre keeps its
+centre; the mismatches of V may each be a reading of the code that measurement refutes. **Reliability**: half the
+reports had no search; their tempos and progressions are rechecked before a value moves.
 
 ### Planned: dark jazz
 
