@@ -46,36 +46,12 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("metal-twins", "Heavy metal's riff with its twin a third above, from the plainest songs on, and its melody harmonised: the twin-guitar sound, or a riff cluttered?",
-            "Heavy metal's riff twin 25-35-35 and harmonised melody 40-50-50, the genre's convention at its plain end.", "metal", [], new() { ["parts"] = new() { ["riffTwin"] = 0 } },
+        new("metal-twins-high", "Heavy metal's single-note riff harmonised by its twin a third above, both an octave up where the twin plays, as twin leads play up the neck: the twin-guitar sound, or a riff cluttered?",
+            "Heavy metal's riff twin 25-35-35, played an octave above its lowered riff, after metal-twins heard the twin in the low register as clutter 0 to 6.", "metal", [], new() { ["parts"] = new() { ["riffTwin"] = 0 } },
             x => x.Absent.Contains(TrackRole.RiffTwin) ? null : Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.RiffTwin))?.Select(n => (double?)n.Position).FirstOrDefault(), 1)),
-        new("thrash-skank", "Thrash's fast sections in double time, the kick on the beats and the snare on every offbeat, the hats in 8ths: the skank beat, or a scramble?",
-            "Thrash's double time 35-45-50, its time drum no finer than 8ths, against 10-20-30.", "thrash", [], new() { ["feelChances"] = new() { ["doubleTime"] = 15 } },
-            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == -1), 1)),
-        new("djent-calm", "Djent's quieter sections calm, a clean guitar letting chords ring and the drums in half time: the genre's ambient interludes, or the heaviness lost?",
-            "Djent's calm sections 10-20-30, where it had none.", "djent", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1)),
-        new("rock-quiet", "Rock's quieter sections calm, a clean guitar under the verse before the band crashes back in: the quiet-loud form, or the drive lost?",
-            "Rock's calm sections 0-20-35, where it had none.", "rock", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Calm), 1)),
-        new("house-sevenths", "House's chords minor sevenths and ninths, on a Rhodes, a piano or an organ, where they were sus and add9 chords on a polysynth: deep house, or a lounge?",
-            "House's seventh 100-100-70 and ninth 40-70-60 leading its chord shapes.", "electronic", [], new() { ["chordShape"] = new() { ["seventh"] = 20, ["ninth"] = 0, ["sus2"] = 60, ["add9"] = 60 } },
-            x => x.Absent.Contains(TrackRole.Chords) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Chords))?.Select(n => (double?)n.Position).FirstOrDefault()),
-        new("hiphop-kit", "Hip-hop's beat on an acoustic kit, its snare a real one, as a sampled break, where it was a TR-808's clap: boom bap, or a band?",
-            "Hip-hop's standard and room kits first, the TR-808 40-50-60, its acoustic snare 100 and claps 30-40-60.", "hipHop", [], new() { ["kit"] = new() { ["standard"] = 0, ["room"] = 0, ["tr808"] = 100 } },
-            x => x.Absent.Contains(TrackRole.Drum) ? null : (double?)x.Map.Sections[0].Start),
-        new("funk-swing", "Funk's 16ths swung lightly at every tempo, where above about 107 it swung its 8ths, a shuffle: the funk pocket, or a stiff groove?",
-            "Funk's 16ths swung, sixteenths 100 and swing 20, against the songs' 50 and 50.", "funk", [], new() { ["feelValues"] = new() { ["sixteenths"] = 50, ["swing"] = 50 } },
-            x => x.Swing.Delay > 0 ? (double?)x.Map.Sections[0].Start : null),
-        new("classical-cadence", "Classical's minor sections closing on V, V to i, where they closed on ♭VII or IV as often: a classical cadence, or a predictable one?",
-            "Classical's cadence degree leaning to the fifth, 100, and away from the seventh, 20.", "classical", [], new() { ["cadenceDegree"] = new() { ["fifth"] = 50, ["seventh"] = 50 } },
-            x => (double?)x.Map.Sections[0].Start),
-        new("jazz-ride", "Jazz's ride on the beats with the skip after 2 and 4, swung: the swing ride, or a metronome?",
-            "The swing ride as the time drum's figure, Jazz's 100 beside its own rhythm's 20-30-40; its own ride struck about once a bar before.", "jazz", ["Figures"], null,
-            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Time) == "swingRide"), 1)),
-        new("blues-boogie", "Blues' bass walking a boogie, root, third, fifth, sixth and seventh and back on the beats: the boogie, or a bass on rails?",
-            "The boogie, Blues' 30-40-50% of its sections, Rock's and Country's 10-15-20%.", "blues", [], new() { ["alternatingBass"] = new() { ["boogie"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Boogie, v => (bool)v!), 1))
+        new("folk-thumb", "Folk's guitar picking with an alternating thumb, the root and the fifth on the beats by turns and the strings above off them: a fingerpicker, or a machine?",
+            "The alternating thumb, Folk's 60-60-50 ahead of its Alberti.", "folk", [], new() { ["arpeggio"] = new() { ["alternatingThumb"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.Arpeggio, v => (ArpeggioPattern)v! == ArpeggioPattern.AlternatingThumb), 1))
 
     ];
 

@@ -17,7 +17,9 @@ namespace Rmg.Core.Composition;
 ///     the section, and in a plain song as in a wild one, a part playing one doubling at a time. Neither plainer nor
 ///     stranger, a doubling by another part does not lean by the song's unconventionality, but the twin's
 ///     interval, by the song's melody facet: a third or a sixth in a middling song, and the wilder the song, the oftener a
-///     fourth, a fifth, a second or a seventh.
+///     fourth, a fifth, a second or a seventh. A twin harmonises a lead line, up the neck: never a riff in power chords or
+///     chugs, and where a genre tunes its riff down, the riff and its twin play an octave up where the twin plays, where
+///     the songs' riffs do, rather than thirds in the mud.
 /// </summary>
 internal static class LineDoubling
 {
@@ -115,6 +117,7 @@ internal static class LineDoubling
     /// <param name="playsAFigure">Whether a part plays a figure in an appearance, by its place, which no doubling into it replaces (<see cref="Figures" />).</param>
     /// <param name="drivenRiff">Whether the riff plays on a driven guitar in a section, by its place among the song's sections, whose phrases the bass plays wherever it would rest in them.</param>
     /// <param name="blocks">A section's sequence of whether its harmonised melody plays in a block, by the section's place.</param>
+    /// <param name="twinRaise">How many octaves the riff and its twin play up where the twin plays, as many as the genre tunes its riff down.</param>
     /// <param name="genre">The genre whose chances of the doublings a section draws (<see cref="GenreChoices.Doubling" />).</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
@@ -130,6 +133,7 @@ internal static class LineDoubling
         Func<int, bool> twinRests,
         Func<int, TrackRole, bool> playsAFigure,
         Func<int, bool> drivenRiff,
+        int twinRaise,
         Genre genre
     )
     {
@@ -197,15 +201,21 @@ internal static class LineDoubling
                     .Where(x => Doubles(x.Position))
                     .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, step == 0 ? x.Value.GetStateValue(StateKinds.Alteration) : 0)
                         .With(CompositionStateKinds.Doubled, 1)
-                        .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0).ToTimelineItem(x.Position))
+                        .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0)
+                        .With(CompositionStateKinds.LineRaise, isTwin ? twinRaise : 0).ToTimelineItem(x.Position))
                     .Select(x => block ? x.Value.With(CompositionStateKinds.LineVoices, Math.Max(x.Value.GetStateValue(CompositionStateKinds.LineVoices), BlockVoices)).ToTimelineItem(x.Position) : x);
-                song = song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
+                var edits = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
                 {
                     [targetTrack] = notes => EventTimeline.Create(
                         notes.Duration,
                         notes.Where(x => !Doubles(x.Position)).Concat(doubled).OrderBy(x => x.Position)
                     )
-                });
+                };
+                // the riff up with its twin, as they play
+                if (isTwin && twinRaise > 0)
+                    edits[sourceTrack] = notes => EventTimeline.Create(notes.Duration,
+                        notes.Select(x => Doubles(x.Position) ? x.Value.With(CompositionStateKinds.LineRaise, twinRaise).ToTimelineItem(x.Position) : x));
+                song = song.MapTrackEvents(edits);
             }
         }
 

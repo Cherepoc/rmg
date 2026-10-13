@@ -1,8 +1,8 @@
 [
   {
-    "id": "metal-twins",
-    "question": "Heavy metal's riff with its twin a third above, from the plainest songs on, and its melody harmonised: the twin-guitar sound, or a riff cluttered?",
-    "decides": "Heavy metal's riff twin 25-35-35 and harmonised melody 40-50-50, the genre's convention at its plain end.",
+    "id": "metal-twins-high",
+    "question": "Heavy metal's single-note riff harmonised by its twin a third above, both an octave up where the twin plays, as twin leads play up the neck: the twin-guitar sound, or a riff cluttered?",
+    "decides": "Heavy metal's riff twin 25-35-35, played an octave above its lowered riff, after metal-twins heard the twin in the low register as clutter 0 to 6.",
     "genre": "metal",
     "without": {
       "skip": [],
@@ -17,6 +17,7 @@
         "seed": "I",
         "at": 8,
         "listen": [
+          "Riff (Overdriven Guitar)",
           "Riff's twin (Overdriven Guitar)"
         ]
       },
@@ -24,6 +25,7 @@
         "seed": "N",
         "at": 0,
         "listen": [
+          "Riff (Overdriven Guitar)",
           "Riff's twin (Overdriven Guitar)"
         ]
       },
@@ -31,20 +33,23 @@
         "seed": "r",
         "at": 316,
         "listen": [
+          "Riff (Overdriven Guitar)",
           "Riff's twin (Overdriven Guitar)"
         ]
       },
       {
         "seed": "u",
-        "at": 44.3,
+        "at": 0,
         "listen": [
-          "Riff (Overdriven Guitar)"
+          "Riff (Overdriven Guitar)",
+          "Riff's twin (Overdriven Guitar)"
         ]
       },
       {
         "seed": "z",
         "at": 0,
         "listen": [
+          "Riff (Overdriven Guitar)",
           "Riff's twin (Overdriven Guitar)"
         ]
       },
@@ -52,588 +57,68 @@
         "seed": "1p",
         "at": 240.6,
         "listen": [
+          "Riff (Overdriven Guitar)",
           "Riff's twin (Overdriven Guitar)"
         ]
       }
     ]
   },
   {
-    "id": "thrash-skank",
-    "question": "Thrash's fast sections in double time, the kick on the beats and the snare on every offbeat, the hats in 8ths: the skank beat, or a scramble?",
-    "decides": "Thrash's double time 35-45-50, its time drum no finer than 8ths, against 10-20-30.",
-    "genre": "thrash",
+    "id": "folk-thumb",
+    "question": "Folk's guitar picking with an alternating thumb, the root and the fifth on the beats by turns and the strings above off them: a fingerpicker, or a machine?",
+    "decides": "The alternating thumb, Folk's 60-60-50 ahead of its Alberti.",
+    "genre": "folk",
     "without": {
       "skip": [],
       "genre": {
-        "feelChances": {
-          "doubleTime": 15
+        "arpeggio": {
+          "alternatingThumb": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "0",
-        "at": 131.2,
+        "seed": "3",
+        "at": 114.9,
         "listen": [
-          "Kick",
-          "Acoustic Snare",
-          "Hi-Hat"
+          "Chords (Acoustic Guitar (steel))"
         ]
       },
-      {
-        "seed": "1",
-        "at": 24.1,
-        "listen": [
-          "Hi-Hat",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 12,
-        "listen": [
-          "Hi-Hat",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 138.7,
-        "listen": [
-          "Hi-Hat",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "I",
-        "at": 77.2,
-        "listen": [
-          "Acoustic Snare",
-          "Ride",
-          "Tom"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 126.3,
-        "listen": [
-          "Acoustic Snare",
-          "Hi-Hat"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "djent-calm",
-    "question": "Djent's quieter sections calm, a clean guitar letting chords ring and the drums in half time: the genre's ambient interludes, or the heaviness lost?",
-    "decides": "Djent's calm sections 10-20-30, where it had none.",
-    "genre": "djent",
-    "without": {
-      "skip": [],
-      "genre": {
-        "louderForms": {
-          "quieter": 0
-        }
-      }
-    },
-    "seeds": [
       {
         "seed": "5",
-        "at": 0,
+        "at": 52.2,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Chords (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "7",
-        "at": 108,
-        "listen": [
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "Y",
-        "at": 0,
-        "listen": [
-          "Bass (Electric Bass (pick))",
-          "Rhythm part (Electric Guitar (clean))",
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "l",
-        "at": 0,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Rhythm part (Electric Guitar (clean))",
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "o",
-        "at": 12.6,
-        "listen": [
-          "Solo (Electric Guitar (clean))",
-          "Melody (Lead 5 (charang))",
-          "Rhythm part (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "x",
-        "at": 92,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Rhythm part (Electric Guitar (clean))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "rock-quiet",
-    "question": "Rock's quieter sections calm, a clean guitar under the verse before the band crashes back in: the quiet-loud form, or the drive lost?",
-    "decides": "Rock's calm sections 0-20-35, where it had none.",
-    "genre": "rock",
-    "without": {
-      "skip": [],
-      "genre": {
-        "louderForms": {
-          "quieter": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "R",
-        "at": 0,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Hi-Hat",
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "Y",
-        "at": 0,
-        "listen": [
-          "Bass (Electric Bass (pick))",
-          "Riff (Distortion Guitar)",
-          "Melody (Harmonica)"
-        ]
-      },
-      {
-        "seed": "f",
-        "at": 0,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "m",
-        "at": 0,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Riff (Distortion Guitar)",
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "o",
-        "at": 20.2,
-        "listen": [
-          "Solo (Distortion Guitar)",
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "r",
-        "at": 0,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Chords (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "house-sevenths",
-    "question": "House's chords minor sevenths and ninths, on a Rhodes, a piano or an organ, where they were sus and add9 chords on a polysynth: deep house, or a lounge?",
-    "decides": "House's seventh 100-100-70 and ninth 40-70-60 leading its chord shapes.",
-    "genre": "electronic",
-    "without": {
-      "skip": [],
-      "genre": {
-        "chordShape": {
-          "seventh": 20,
-          "ninth": 0,
-          "sus2": 60,
-          "add9": 60
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "5",
-        "at": 118.2,
-        "listen": [
-          "Chords (Pad 3 (polysynth))"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 34.4,
-        "listen": [
-          "Chords (Pad 3 (polysynth))"
+          "Rhythm part (Banjo)"
         ]
       },
       {
         "seed": "B",
-        "at": 31.7,
+        "at": 116,
         "listen": [
-          "Chords (Pad 2 (warm))",
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 192.3,
-        "listen": [
-          "Chords (Pad 3 (polysynth))"
-        ]
-      },
-      {
-        "seed": "H",
-        "at": 521.2,
-        "listen": [
-          "Melody (Lead 2 (sawtooth))",
-          "Counter-melody (Lead 2 (sawtooth))"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 399.5,
-        "listen": [
-          "Bass (Synth Bass 2)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "hiphop-kit",
-    "question": "Hip-hop's beat on an acoustic kit, its snare a real one, as a sampled break, where it was a TR-808's clap: boom bap, or a band?",
-    "decides": "Hip-hop's standard and room kits first, the TR-808 40-50-60, its acoustic snare 100 and claps 30-40-60.",
-    "genre": "hipHop",
-    "without": {
-      "skip": [],
-      "genre": {
-        "kit": {
-          "standard": 0,
-          "room": 0,
-          "tr808": 100
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 130.1,
-        "listen": [
-          "Hi-Hat",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "B",
-        "at": 96.1,
-        "listen": [
-          "Hi-Hat",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 80,
-        "listen": [
-          "Electric Snare",
-          "Hi-Hat",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 0,
-        "listen": [
-          "Hi-Hat"
+          "Rhythm part (Acoustic Guitar (nylon))",
+          "Chords (Acoustic Guitar (steel))"
         ]
       },
       {
         "seed": "M",
-        "at": 33.6,
+        "at": 102.4,
         "listen": [
-          "Hi-Hat"
+          "Rhythm part (Acoustic Guitar (steel))"
         ]
       },
       {
         "seed": "N",
-        "at": 85.4,
+        "at": 54.3,
         "listen": [
-          "Hi-Hat"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "funk-swing",
-    "question": "Funk's 16ths swung lightly at every tempo, where above about 107 it swung its 8ths, a shuffle: the funk pocket, or a stiff groove?",
-    "decides": "Funk's 16ths swung, sixteenths 100 and swing 20, against the songs' 50 and 50.",
-    "genre": "funk",
-    "without": {
-      "skip": [],
-      "genre": {
-        "feelValues": {
-          "sixteenths": 50,
-          "swing": 50
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 114.1,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))",
-          "Chords (Electric Guitar (clean))",
-          "Bass (Synth Bass 1)"
+          "Chords (Acoustic Guitar (steel))",
+          "Rhythm part (Acoustic Guitar (nylon))"
         ]
       },
       {
-        "seed": "J",
-        "at": 160.8,
+        "seed": "W",
+        "at": 15.5,
         "listen": [
-          "Melody (Tenor Sax)"
-        ]
-      },
-      {
-        "seed": "K",
-        "at": 66.5,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))",
-          "Hi-Hat",
-          "Riff (Electric Guitar (muted))"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 38.2,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))",
-          "Bass (Slap Bass 2)"
-        ]
-      },
-      {
-        "seed": "X",
-        "at": 14.1,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))",
-          "Bass (Slap Bass 1)",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "s",
-        "at": 124.6,
-        "listen": [
-          "Kick",
-          "Bass (Electric Bass (finger))",
-          "Riff (Clavinet)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "classical-cadence",
-    "question": "Classical's minor sections closing on V, V to i, where they closed on ♭VII or IV as often: a classical cadence, or a predictable one?",
-    "decides": "Classical's cadence degree leaning to the fifth, 100, and away from the seventh, 20.",
-    "genre": "classical",
-    "without": {
-      "skip": [],
-      "genre": {
-        "cadenceDegree": {
-          "fifth": 50,
-          "seventh": 50
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "4",
-        "at": 93.8,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "7",
-        "at": 49.1,
-        "listen": [
-          "Melody (Oboe)",
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 118.9,
-        "listen": [
-          "Melody (Violin)"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 60.2,
-        "listen": [
-          "Melody (Clarinet)"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 19.2,
-        "listen": [
-          "Melody (Flute)",
-          "Chords (Acoustic Grand Piano)",
-          "Bass (Cello)"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 58.4,
-        "listen": [
-          "Melody (Clarinet)",
-          "Chords (Acoustic Grand Piano)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "jazz-ride",
-    "question": "Jazz's ride on the beats with the skip after 2 and 4, swung: the swing ride, or a metronome?",
-    "decides": "The swing ride as the time drum's figure, Jazz's 100 beside its own rhythm's 20-30-40; its own ride struck about once a bar before.",
-    "genre": "jazz",
-    "without": {
-      "skip": [
-        "Figures"
-      ],
-      "genre": {}
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 26.5,
-        "listen": [
-          "Hi-Hat",
-          "Ride"
-        ]
-      },
-      {
-        "seed": "3",
-        "at": 81.1,
-        "listen": [
-          "Hi-Hat",
-          "Ride"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 0,
-        "listen": [
-          "Ride",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 0,
-        "listen": [
-          "Hi-Hat",
-          "Ride"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 0,
-        "listen": [
-          "Ride",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "T",
-        "at": 24.2,
-        "listen": [
-          "Ride",
-          "Hi-Hat"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "blues-boogie",
-    "question": "Blues' bass walking a boogie, root, third, fifth, sixth and seventh and back on the beats: the boogie, or a bass on rails?",
-    "decides": "The boogie, Blues' 30-40-50% of its sections, Rock's and Country's 10-15-20%.",
-    "genre": "blues",
-    "without": {
-      "skip": [],
-      "genre": {
-        "alternatingBass": {
-          "boogie": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 2.7,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "1",
-        "at": 162.5,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 11.4,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 12.4,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 107.1,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 24.1,
-        "listen": [
-          "Bass (Electric Bass (finger))"
+          "Rhythm part (Acoustic Guitar (nylon))"
         ]
       }
     ]

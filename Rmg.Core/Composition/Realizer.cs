@@ -293,6 +293,10 @@ internal static class Realizer
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 
+        // a raised line's note and range an octave or more above the track's (CompositionStateKinds.LineRaise)
+        var raise = OctaveNoteCount * stateMap.GetStateValue(CompositionStateKinds.LineRaise);
+        range = (range.Low + raise, range.High + raise);
+
         // a line's note in the track's range, moved by octaves where its step lands outside it over a chord other than
         // the one it was placed over
         int InRange(int note) =>
@@ -304,7 +308,7 @@ internal static class Realizer
         // as its scale step above the chord's root and its alteration; the chords the whole chord, led from the one before
         ImmutableArray<int> notes = role switch
         {
-            _ when isLine => [InRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration))],
+            _ when isLine => [InRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration) + raise)],
             TrackRole.Chords or TrackRole.Rhythm or TrackRole.Pad => voiceLeader.Place(
                 [..chordSteps.Select(ToNote)],
                 ToNote(0),

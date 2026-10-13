@@ -332,6 +332,7 @@ internal static class SongStages
                                                           && (song.Sections[index].Form.Guitars.Contains(x.Key)
                                                               ? song.Sections[index].Form.Kind == SectionFormKind.Heavy
                                                               : InstrumentTraits.Has(riff.InstrumentCode, InstrumentTrait.Driven))),
+                Math.Max(0, -Registers.OctavesOf(song.Genre, TrackRole.Riff)),
                 song.Genre
             )
         };

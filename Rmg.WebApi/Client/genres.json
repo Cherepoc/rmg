@@ -605,7 +605,6 @@
       "passingKind": { "chromaticBelow": 100, "chromatic": 70, "dominant": 30 },
       "rootDegree": { "fourth": 70 },
       "sectionHome": { "tonic": 100, "fourth": [30, 40, 40], "fifth": 15, "relative": 5 },
-      "feelValues": { "sixteenths": 100, "swing": 20 },
       "feelChances": { "swing": [15, 35, 35], "halfTime": [0, 8, 8], "doubleTime": [0, 2, 2] },
       "sung": { "halves": [100, 80, 60] },
       "figure": { "bass": { "own": 100, "withKick": [15, 15, 10] } },

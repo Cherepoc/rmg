@@ -256,6 +256,15 @@ channel of its own; `rudiments`, Jazz's flams and drags; `phrase-length`, Orches
 three; and `short-bar`, Djent's sections ending on a bar cut short, which the loops' genres play none of now (Trance,
 Drum and bass, Trap, Disco, Funk, Ambient and Chiptune beside the five that named none), their sections square.
 
+Answered on 13 October 2026, the round of the order of work's steps 2 and 4: kept, `rock-quiet` and `djent-calm` (6 of
+6 each), `thrash-skank` and `hiphop-kit` (5 to 1 each), `blues-boogie` (4 to 1), `house-sevenths` (3 to 1), and, as the
+listener chose, `classical-cadence` and `jazz-ride` (3 to 3). Against: `funk-swing` (0 to 5), Funk's 16ths swung
+taken out, its swing the songs' own, a shuffle above about 107; and `metal-twins` (0 to 6), the twin a third above a
+riff in Heavy metal's lowered register, G2 to F3, heard as clutter: a twin harmonises a lead line, single notes up the
+neck, so where a genre tunes its riff down the riff and its twin play an octave up where the twin plays
+(`CompositionStateKinds.LineRaise`), Heavy metal's twin at 50-60-67 from 38-48-55, power chords and chugs twinned no
+more than before. Asked from 13 October 2026: `metal-twins-high`, the twin up the neck, and `folk-thumb`.
+
 Answered on 11 October 2026, late, the round of the plan of 11 October, and kept: `calm`, Black metal's calm sections
 (6 of 6); `techno-strip`, the dance tracks' stripped ending (6 of 6); `montuno`, Latin's (6 of 6); `djent-open`,
 Djent's drone with leaps (5 of 6); `appoggiatura`, the songs' own (5 of 6); `ballad`, its heavy chorus (5 of 6);
@@ -741,8 +750,8 @@ with its questions after each group:
    nearest the strong note before, in the chord's own scale; on its step in 92% of a boogie's strong notes after a
    chord's first (13% elsewhere), Blues' 30-40-50%, Rock's and Country's 10-15-20% (asked: `blues-boogie`). The
    alternating thumb (#362): an arpeggio pattern, the root and the fifth on the beats by turns and the notes above off
-   them, Folk's 60-60-50 ahead of its Alberti, Country's 40, the Power ballad's, Medieval's 20, Blues' 10-10-20; to ask
-   when the round has room (`folk-thumb`). Latin bass figures (#360): the tumbao, a salsa bar's 2-and and 4 in Latin's
+   them, Folk's 60-60-50 ahead of its Alberti, Country's 40, the Power ballad's, Medieval's 20, Blues' 10-10-20 (asked:
+   `folk-thumb`). Latin bass figures (#360): the tumbao, a salsa bar's 2-and and 4 in Latin's
    half-note count, 72% of its bass's notes on them (pushes and pickups the rest), and the bossa nova's bass on its
    surdo's 1, 2-and, 3 and 4-and, 96%; each its genre's 100 beside its own rhythm; to ask with Latin's and Bossa nova's
    research. The jazz ride (#349): the swing ride a time drum's figure, on the beats
