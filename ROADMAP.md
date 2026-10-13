@@ -774,11 +774,40 @@ with its questions after each group:
    and the skip after 2 and 4, swung by the song, Jazz's in 151 of its 421 sections, its ride struck 0.6-0.9 times on
    every beat and skip there where its own struck about once a bar (asked: `jazz-ride`). Left: the boogie, the alternating thumb, Latin's bass
    figures (after the clave's span is settled), and the rows of figures (group F).
-5. **The two planned genres and the sung melody**: dark jazz and lyrical guitar, with the research's corrections (their
+5. **Three new presets, now** (13 October 2026, the owner's choice), each from its parent's searched retune, data
+   alone where it can be, with a question on its defining trait:
+   - **Cinematic piano**, beside Classical: a piano melody over a piano ostinato (wide arpeggios, a cell repeated, the
+     riff's hook), strings swelling as a pad, add9, maj7, sus and quartal chords, major, natural minor and Lydian, the
+     IV–V–iii–vi motion, film forms, AABA with a big return and the last section lifted a key, no drums, 60 to 90 or a
+     bouncy 150. With it, **Classical renamed Chamber**, its label alone, its id kept for the links and the ratings
+     made with it: the classical period's chamber idiom (triads, Alberti, a cello's bass, V–I), the film and romantic
+     piano now Cinematic piano's.
+   - **Funk rock**, beside Funk: Funk's slap bass, 16th hats, ghosts, a muted 16th guitar and its vamps, with an
+     overdriven guitar riff and its chorus opening into big distorted chords (`louderForms.guitars`), power chords,
+     sevenths and 7♯9, minor pentatonic lines, the power or standard kit, a tight pocket, no horns nor keys, 88 to 110;
+     the muted guitar clean, never chugging (General MIDI's 28).
+   - **Jazz-funk**, between Funk and Fusion: maj7, m9, m11 and 6/9 chords, mediants and ii–V passing chords, an
+     electric piano and soft synth pads, a finger bass high and leading, a soft lead (flute, electric piano, synth), a
+     laid-back pocket, 75 to 100, 4/4 alone, short sung forms, few solos; its 16ths straight until asked, as Funk's
+     swung 16ths were heard worse (`funk-swing`, 0 to 5).
+   Measured by `GenreRetuneReportTest` against its parent's 64 songs; asked: `cinematic-pad` (the strings' pad),
+   `funkrock-chorus` (the distorted chorus) and `jazzfunk-chords` (its chords against Funk's ninths). Review:
+   **overengineering**: data, three presets beside the 38, no code but a device a preset finds missing (the bass
+   stepping down through inversions, group D, wanted by Cinematic piano, left to group D); funk rock the borderline,
+   which the mood might cover as a fierce Funk whose pool allowed a driven guitar, kept a preset by the owner's choice.
+   **Musicality**: Cinematic piano without its bass stepping down misses a signature, asked as it is; Funk rock's
+   driven guitar must not chug on the clean muted program, a rule already; Jazz-funk beside Soul, Funk and Fusion risks
+   a fourth shade of the same band, its harmony and its pocket what sets it apart, asked against Funk's; Chamber's
+   name narrower than its songs, a piano melody among them, which chamber music holds (a sonata with a cello).
+6. **The page's harmony line**: beside the key, its mode and the chord, the tempo and the meter as they play, from the
+   file's tempo and time-signature events (`harmony.js`), a section's own tempo and meter shown as they change; with
+   its page test.
+7. **The two planned genres and the sung melody**: dark jazz and lyrical guitar, with the research's corrections (their
    reports), the echo cascade on the rhythm part; the sung melody's 8ths cap (`sung.eighths`, *A melody sung rather
    than played*), `pop-sung-lines` having kept the sung lines 4-0.
-6. **The devices**: group D's, with the club's and pop's (the kick-out, the breakdown chorus, the ostinato).
-7. **The new presets**: group P's, two at a time; power metal put off.
+8. **The devices**: group D's, with the club's and pop's (the kick-out, the breakdown chorus, the ostinato).
+9. **The new presets**: group P's, two at a time, after the mood (*Planned: mood*), which covers jazz-rock and
+   darksynth, and mostly pop punk and the acoustic rock ballad, as shades of their parents; power metal put off.
 
 ### Planned: rules kept, four idioms, two genres, the club's devices
 
@@ -898,9 +927,13 @@ anywhere in the bar (Trap); the polymeter's cell lengths by genre (Djent's 13 an
 Confirmed by the research and planned already: the jazz ride, the boogie, the alternating thumb, the tumbao, the
 kick-out, the breakdown chorus, the ostinato, the tempo floor under 60, the brushes' swirl, scratches.
 
-**P. New presets** (data, each after its parent's retune, two at a time with questions). First, the genres the
-references asked for that no preset reaches: darksynth, a 16-bit game score (FM, not chip), cinematic piano, funk rock,
-jazz-funk and neo-soul, pop punk, the acoustic rock ballad, jazz-rock. Put off, by the owner's choice (13 October
+**P. New presets** (data, each after its parent's retune, two at a time with questions). Cinematic piano, funk rock
+and jazz-funk now (the order of work's step 5). Then, after the mood, the genres the references asked for that no
+preset reaches and the mood does not cover: a 16-bit game score (FM, not chip); darksynth, jazz-rock, pop punk and the
+acoustic rock ballad as the mood leaves them, a preset only where a fierce, a calm or a dark end of their parent falls
+short. Neither the mood nor a parent covers psytrance, dub, Celtic, bluegrass, G-funk, big band, Latin jazz, delta
+blues, modern pop or drill, an idiom of their own (instruments, form, groove, production); the mood covers dark drum
+and bass, drill'n'bass, epic trailer, cosy dungeon synth and tavern, and partly alternative. Put off, by the owner's choice (13 October
 2026): power metal (progressive metal its wild end), which Symphonic metal cannot take without its orchestra, the
 snare on every beat over the double kick (group F) built meanwhile. Not planned: symphonic black metal and gothic
 metal. Later, by listening: psytrance, dark drum and bass, dub, Celtic, bluegrass, Latin jazz,
