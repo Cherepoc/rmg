@@ -110,15 +110,18 @@ internal static class Articulations
                     pitches = octaved[i - 1] ? played[i - 2 < 0 ? 0 : i - 2] : [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
                     octaved[i] = !octaved[i - 1];
                 }
-                // a bass alternating the root and the fifth, every other strong note of a chord its fifth, below the note
-                // before where its range has it and above where not, as a country bass plays; but where it holds a pedal
-                if (part.Role == TrackRole.Bass && ownLine && !doubled && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1
-                    && state.GetStateValue(CompositionStateKinds.BassPedal) == 0)
+                // a bass on a cycle of its chord's steps, its strong notes after the first taking them by turns while the chord
+                // lasts, each nearest the strong note before, below where as near, in its range: the root and the fifth below
+                // it, as a country bass plays, or a boogie climbing and coming back; but where it holds a pedal
+                var cycle = section >= 0 ? song.Sections[section].BassCycle : [];
+                if (part.Role == TrackRole.Bass && ownLine && !doubled && !cycle.IsEmpty && strongPlaces[i] > 0 && cycle[strongPlaces[i] % cycle.Length] is var step and not 0
+                    && pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.BassPedal) == 0)
                 {
-                    var fifth = Realizer.GetChord(note.Value.State).Chord.GetPitch(4);
-                    var below = timeline[Array.LastIndexOf(strongPlaces, strongPlaces[i] - 1, i)].Value.Pitches.Min() - 1;
-                    var under = below - (below - fifth).Mod(12);
-                    pitches = [under >= bottom ? under : under + 12 <= top ? under + 12 : pitches[0]];
+                    var target = Realizer.GetChord(note.Value.State).Chord.GetPitch(step);
+                    var last = played[Array.LastIndexOf(strongPlaces, strongPlaces[i] - 1, i)].Min();
+                    var under = last - (last - target).Mod(12);
+                    var nearest = last - under <= under + 12 - last ? under : under + 12;
+                    pitches = [nearest >= bottom && nearest <= top ? nearest : nearest == under && under + 12 <= top ? under + 12 : nearest - 12 >= bottom ? nearest - 12 : pitches[0]];
                 }
                 // the stroke in beats at the tempo there
                 double Beats(double seconds) => seconds * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position));

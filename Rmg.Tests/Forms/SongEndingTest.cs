@@ -175,7 +175,7 @@ public sealed class SongEndingTest
             false,
             false,
             false,
-            false,
+            [],
             false,
             SectionForm.Own,
             0,

@@ -95,6 +95,19 @@ internal sealed class SectionGenerator
     public static Probabilities.ByConvention AlternatingBassChance { get; } = new(0, 0, 0);
 
     /// <summary>
+    ///     The chance a section's bass walks a boogie, its strong beats climbing the chord's steps and back while a chord
+    ///     lasts, as a blues, a rock and roll or a country bass does, a genre's that the songs never play
+    ///     (<see cref="GenreChoices.AlternatingBass" />).
+    /// </summary>
+    public static Probabilities.ByConvention BoogieChance { get; } = new(0, 0, 0);
+
+    /// <summary>The steps of the chord a bass alternating root and fifth plays on its strong beats, by turns.</summary>
+    public static ImmutableArray<int> RootAndFifth { get; } = [0, 4];
+
+    /// <summary>The steps of the chord a boogie's bass plays on its strong beats, by turns: root, third, fifth, sixth, seventh, and down again.</summary>
+    public static ImmutableArray<int> Boogie { get; } = [0, 2, 4, 5, 6, 5, 4, 2];
+
+    /// <summary>
     ///     The chance a section's riff drones, its weak notes on an open string, the key's own at the bottom of its range, and
     ///     its melody an octave or more above it, as a black metal, a folk metal or a djent riff leaps between the string and
     ///     the high frets; a genre's that the songs never play, and none where the riff chugs (<see cref="GenreChoices.Riff" />).
@@ -231,6 +244,10 @@ internal sealed class SectionGenerator
         var alternatingBass = Stream(sectionId, SectionStream.AlternatingBass)
             .TestProbability(AlternatingBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.AlternatingBass, "sections")));
         StateTrace.RecordSection(TracePoints.AlternatingBass, SectionTrace, sectionId, $"{alternatingBass}", alternatingBass);
+        // or walking a boogie, a genre's, from a sequence of its own, over the alternation
+        var boogie = Stream(sectionId, SectionStream.Boogie)
+            .TestProbability(BoogieChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.AlternatingBass, "boogie")));
+        StateTrace.RecordSection(TracePoints.Boogie, SectionTrace, sectionId, $"{boogie}", boogie);
         // its riff droning now and then, its weak notes on an open string and its melody above it, a genre's, from a sequence
         // of its own, where it does not chug
         var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone"))) && !chugs;
@@ -266,7 +283,7 @@ internal sealed class SectionGenerator
             powerChords && !drone,
             chugs,
             octaveBass,
-            alternatingBass,
+            boogie ? Boogie : alternatingBass ? RootAndFifth : [],
             breakdown,
             form,
             timeFeel,
@@ -843,7 +860,7 @@ internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool 
 /// <param name="ArrangementSeed">The seed of the sequences a later appearance draws its parts from.</param>
 /// <param name="Roles">What every track plays, by its number.</param>
 /// <param name="Meter">The meter the section's bars are in.</param>
-/// <param name="AlternatingBass">Whether its bass alternates the root and the fifth on its strong beats (<see cref="Articulations" />).</param>
+/// <param name="BassCycle">The steps of the chord its bass plays on its strong beats by turns while a chord lasts, root and fifth or a boogie's; none for its own line (<see cref="Articulations" />).</param>
 /// <param name="Breakdown">Whether the section is a heavy band's breakdown (<see cref="Breakdowns" />), which leaves its lines and pad out.</param>
 /// <param name="Form">What its guitars play as, calm or heavy, and the parts it leaves out wherever it plays (<see cref="SectionForm" />).</param>
 /// <param name="TimeFeel">How its drums keep time, 1 in half time, -1 in double time and 0 in the song's (<see cref="Groove.DrawTimeFeel" />).</param>
@@ -868,7 +885,7 @@ internal sealed record GeneratedSection(
     bool RiffPowerChords,
     bool Chugs,
     bool OctaveBass,
-    bool AlternatingBass,
+    ImmutableArray<int> BassCycle,
     bool Breakdown,
     SectionForm Form,
     int TimeFeel,
@@ -1080,5 +1097,6 @@ internal enum SectionStream
     SectionPool = 60,
     ArpeggioOrder = 61,
     Form = 62,
-    CalmArpeggio = 63
+    CalmArpeggio = 63,
+    Boogie = 64
 }

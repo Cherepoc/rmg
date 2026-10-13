@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "alternatingBass": { "sections": 0, "boogie": [10, 15, 20] },
       "callAndResponse": { "sections": [5, 10, 15] },
       "sung": { "halves": [100, 80, 60] },
       "figure": { "bass": { "own": 100, "withKick": [30, 30, 20] }, "ground": { "own": 100, "withRiff": [10, 20, 25] } },
@@ -679,7 +680,7 @@
       "sung": { "halves": [100, 80, 60] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 30], "threeBars": [0, 5, 20] },
       "dynamics": { "evenness": 40 },
-      "alternatingBass": { "sections": [20, 30, 40] },
+      "alternatingBass": { "sections": [20, 30, 40], "boogie": 0 },
       "ornaments": { "graces": [0, 50, 100], "turns": [0, 20, 60], "trills": [0, 25, 70] },
       "rootMotion": { "fifthDown": 70, "stepUp": 65, "fourthDown": 60 },
       "tempo": { "from": [79, 79, 65], "to": [130, 130, 150] },
@@ -725,6 +726,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "alternatingBass": { "sections": 0, "boogie": [30, 40, 50] },
       "sung": { "halves": [100, 80, 60] },
       "polymeter": { "sections": 0 },
       "sectionChanges": {},
@@ -2099,7 +2101,7 @@
       "figure": { "bass": { "own": 100, "withKick": [20, 20, 15] } },
       "callAndResponse": { "sections": [10, 25, 35] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 25] },
-      "alternatingBass": { "sections": [85, 75, 60] },
+      "alternatingBass": { "sections": [85, 75, 60], "boogie": [10, 15, 20] },
       "soloAnswers": { "sections": [20, 30, 40] },
       "stopTime": { "sections": [5, 10, 15] },
       "phrases": { "fourBars": 100, "eightBars": [40, 40, 50], "twelveBars": [5, 10, 15] },

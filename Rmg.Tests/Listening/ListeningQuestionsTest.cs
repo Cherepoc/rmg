@@ -46,9 +46,6 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("numetal-narrow", "Nu metal's melody kept to its narrowest, about eleven semitones a section rather than thirteen, nearer a voice half spoken: the style's delivery, or a duller tune?",
-            "Nu metal's, Thrash's, Punk's and Trap's melody range at 0, the mechanism's narrowest; a range of a fifth and repeated notes, code of their own, built only if narrower helps.", "nuMetal", [], new() { ["melodyRange"] = new() { ["wide"] = 50 } },
-            x => x.Absent.Contains(TrackRole.Melody) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Select(n => (double?)n.Position).FirstOrDefault()),
         new("metal-twins", "Heavy metal's riff with its twin a third above, from the plainest songs on, and its melody harmonised: the twin-guitar sound, or a riff cluttered?",
             "Heavy metal's riff twin 25-35-35 and harmonised melody 40-50-50, the genre's convention at its plain end.", "metal", [], new() { ["parts"] = new() { ["riffTwin"] = 0 } },
             x => x.Absent.Contains(TrackRole.RiffTwin) ? null : Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.RiffTwin))?.Select(n => (double?)n.Position).FirstOrDefault(), 1)),
@@ -75,7 +72,10 @@ public sealed class ListeningQuestionsTest
             x => (double?)x.Map.Sections[0].Start),
         new("jazz-ride", "Jazz's ride on the beats with the skip after 2 and 4, swung: the swing ride, or a metronome?",
             "The swing ride as the time drum's figure, Jazz's 100 beside its own rhythm's 20-30-40; its own ride struck about once a bar before.", "jazz", ["Figures"], null,
-            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Time) == "swingRide"), 1))
+            x => Before(x, FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(FigurePlayer.Time) == "swingRide"), 1)),
+        new("blues-boogie", "Blues' bass walking a boogie, root, third, fifth, sixth and seventh and back on the beats: the boogie, or a bass on rails?",
+            "The boogie, Blues' 30-40-50% of its sections, Rock's and Country's 10-15-20%.", "blues", [], new() { ["alternatingBass"] = new() { ["boogie"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.Boogie, v => (bool)v!), 1))
 
     ];
 

@@ -45,6 +45,9 @@ internal static class TracePoints
     /// <summary>Whether a section's bass alternates the root and the fifth (a <c>bool</c>; <see cref="Composition.SectionGenerator.AlternatingBassChance" />).</summary>
     public const string AlternatingBass = "Alternating bass";
 
+    /// <summary>Whether a section's bass walks a boogie (a <c>bool</c>; <see cref="Composition.SectionGenerator.BoogieChance" />).</summary>
+    public const string Boogie = "Boogie";
+
     /// <summary>A section's pedal's root, in steps above its home, none where it holds none (an <c>int?</c>).</summary>
     public const string SectionPedal = "Section pedal";
 

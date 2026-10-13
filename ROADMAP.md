@@ -573,8 +573,6 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   strong beat moved to a chord tone at the plain end, kept at the wild (Techno, Trance, House; Synthwave, IDM,
   Chiptune, Ambient, Dungeon synth, Orchestral lower); the scale rule checked against it first.
 - **Latin bass figures** (#360): the tumbao and bossa's bass as bass figures, data.
-- **The boogie** (#366): the alternating bass generalised to a cycle of the chord's degrees, root and fifth or
-  1–3–5–6–♭7–6–5–3 (Blues, Rock, Country), after the pedal's keep-out.
 - **The alternating thumb** (#362): an arpeggio pattern, the thumb alternating root and fifth on the beats (Folk,
   Country, Power ballad, Blues, Bossa nova, Medieval).
 - **The breakdown chorus** (#369): a `lastRepeat` option, the first pass at the thinnest texture, the second the full
@@ -690,8 +688,9 @@ keeps together. Each step through the implementation loop, with a listening ques
    (`MetalFamilyReportTest`), so the blues band heard is in the line's ♭3–4–♭5 motion, not its single notes. Left to
    listening: whether that motion, slow and stepwise, is the blues lick heard, and a held or bent ♭5 the doom way to
    play the scale; the question itself faint (0.12 to 0.18), so asked again over louder songs once reduced.
-6. Asked as `numetal-narrow` (band devices' step E): **a melody spoken rather than sung**, the range at its narrowest;
-   repeated notes and a range of a fifth left until it is answered, with *A melody sung rather than played* (*Genres*).
+6. **A melody spoken rather than sung**: `numetal-narrow` (band devices' step E) retired unanswered (13 October 2026),
+   two semitones of range alone too faint a question; asked again with the word rhythm of *A melody sung rather than
+   played* (*Genres*), repeated notes and a range of a fifth with it.
 
 Review: **overengineering**: the tuning one drawn floor, no strings or retuning per section; the accent tone an option
 of the riff's; the split data on the steps before it, Thrash without the accent tone and four bars only a fast Heavy
@@ -740,7 +739,10 @@ with its questions after each group:
 4. **The idioms and the figures**: done (13 October 2026), swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
-   heads harmonised and in blocks now and then. The jazz ride (#349): the swing ride a time drum's figure, on the beats
+   heads harmonised and in blocks now and then. The boogie (#366): the alternating bass a cycle of its chord's steps
+   (`SectionGenerator.BassCycle`), root and fifth or the boogie's root, third, fifth, sixth, seventh and back, each
+   nearest the strong note before, in the chord's own scale; on its step in 92% of a boogie's strong notes after a
+   chord's first (13% elsewhere), Blues' 30-40-50%, Rock's and Country's 10-15-20% (asked: `blues-boogie`). The jazz ride (#349): the swing ride a time drum's figure, on the beats
    and the skip after 2 and 4, swung by the song, Jazz's in 151 of its 421 sections, its ride struck 0.6-0.9 times on
    every beat and skip there where its own struck about once a bar (asked: `jazz-ride`). Left: the boogie, the alternating thumb, Latin's bass
    figures (after the clave's span is settled), and the rows of figures (group F).
@@ -775,8 +777,7 @@ it:
 **B. Four idioms** (each a step from a mechanism that exists):
 
 5. Done (13 October 2026): the jazz ride, a time drum's figure (`Figures`), Jazz's; dark jazz's with its preset.
-6. **The boogie** (#366): the alternating bass generalised to a cycle of the chord's degrees, root and fifth its
-   shortest, 1-3-5-6-flat 7-6-5-3 its longest, after the pedal's keep-out; Blues', Rock's, Country's; asked.
+6. Done (13 October 2026): the boogie, Blues', Rock's and Country's.
 7. **The alternating thumb** (#362): an arpeggio pattern, the thumb on root and fifth on the beats, the fingers between;
    Folk's, Country's, the Power ballad's, Blues', Bossa nova's, Medieval's, and lyrical guitar's; asked.
 8. **Latin bass figures** (#360): the tumbao and bossa nova's bass as bass figures, data; asked with step 4's clave.

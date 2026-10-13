@@ -41,7 +41,7 @@ public static class GenreChoiceDescriptions
         ["tension"] = "How often the melody's and the counter-melody's notes on a strong beat land on a tension, a note of the scale outside the chord, its ninth, eleventh or thirteenth, or a mode's flat second, rather than on the chord's, as a synth over a heavy band holds a note against it; the songs never hold one, though their appoggiaturas lean on one and resolve it.",
         ["melodyRange"] = "How far the melody roams: narrow, as a chant or a hook, or wide, as a jazz tune.",
         ["bass"] = "How much the bass leads into a new chord, walking its notes towards it, from never to as a walking jazz bass.",
-        ["alternatingBass"] = "How often a section's bass alternates the chord's root and its fifth on its strong beats while the chord lasts, the fifth below the root where it fits, as a country or a polka bass does.",
+        ["alternatingBass"] = "How often a section's bass alternates the chord's root and its fifth on its strong beats while the chord lasts, the fifth below the root where it fits, as a country or a polka bass does; and how often it walks a boogie instead, climbing the chord's root, third, fifth, sixth and seventh and back, as a blues or a rock and roll bass does.",
         ["octaveBass"] = "How often a section's bass bounces between a note and its octave, as disco and funk basses do.",
         ["glide"] = "How often the song's bass slides from note to note, as an 808 or an acid line does.",
         ["bassLanding"] = "What the bass lands on when the chord changes: the root, steadiest, the third or the fifth, lighter, or wherever its figure takes it.",

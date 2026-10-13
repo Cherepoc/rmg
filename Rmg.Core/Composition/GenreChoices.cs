@@ -389,8 +389,12 @@ public static class GenreChoices
     /// <summary>The chance a section's bass plays in octaves, its notes off the beat the note before an octave up (<see cref="SectionGenerator.OctaveBassChance" />).</summary>
     public static GenreChoice OctaveBass { get; } = Chances("octaveBass", "Octave bass", [("sections", "Sections in octaves", SectionGenerator.OctaveBassChance)]);
 
-    /// <summary>The chance a section's bass alternates the root and the fifth on its strong beats (<see cref="SectionGenerator.AlternatingBassChance" />).</summary>
-    public static GenreChoice AlternatingBass { get; } = Chances("alternatingBass", "Root and fifth", [("sections", "Sections alternating root and fifth", SectionGenerator.AlternatingBassChance)]);
+    /// <summary>
+    ///     The chance a section's bass alternates the root and the fifth on its strong beats, and walks a boogie
+    ///     (<see cref="SectionGenerator.AlternatingBassChance" />, <see cref="SectionGenerator.BoogieChance" />).
+    /// </summary>
+    public static GenreChoice AlternatingBass { get; } = Chances("alternatingBass", "The bass's cycle",
+        [("sections", "Sections alternating root and fifth", SectionGenerator.AlternatingBassChance), ("boogie", "Sections walking a boogie", SectionGenerator.BoogieChance)]);
 
     /// <summary>How wide the melody's range is, from 0, narrow as a hook's, through 50, as the songs have it, to 100, wide as a jazz tune's (<see cref="MelodyLayers.GenreRangeReach" />).</summary>
     public static GenreChoice MelodyRange { get; } = Values("melodyRange", "Melody's range", [("wide", "Wide")], Facet.Melody);
