@@ -1056,7 +1056,11 @@ implementation loop:
    64 songs each: the drums' share of sections, the beat's swing, the melody's repetition, the echo's share, the
    guitars' share of the parts; targets from that baseline. Asked: `lyrical-echo` (the delay against none) and
    `lyrical-beat` (the downtempo beat against a ballad's).
-2. **The echo cascade**, a device of its own, then the preset's: a fast piece of a guitar alone, about a minute, at
+2. Done (14 October 2026), its echo's kind: **the echo cascade**, the echo's kind a genre's pool (`echo`: a dotted 8th,
+   a quarter and an 8th, the songs' as likely as each other, and the cascade, a dotted 8th once, the GS delay's
+   feedback none and the note sent whole, a genre's alone), Lyrical guitar's 0-25-60, Ambient's and Synthwave's 0-5-10;
+   no corpus song changed; asked: `lyrical-cascade`. Left: the carrier's broken chords in even, short 8ths where it
+   carries a cascade, which a rhythm figure would play, by listening. As planned, a fast piece of a guitar alone, about a minute, at
    about 150, playing even 8ths, short and muted, its broken chords echoed once a dotted 8th later and almost as loud,
    so that the playing and the echo together sound an unbroken run of 16ths; a minor key's chords stepping down with
    their fifth in the bass (i, VII and VI as second inversions), arpeggios over the tonic, an add9 at the end. The

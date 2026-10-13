@@ -285,6 +285,7 @@ public static class Render
             Insertion = song.Draws?.Insertion,
             // the echo's length, the carrier's, every echoing part's and drum's alike
             Echo = notes.Values.SelectMany(x => x).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo)).FirstOrDefault(x => x > 0) is > 0 and var echo ? echo / 4.0 : null,
+            EchoOnce = notes.Values.SelectMany(x => x).Any(x => x.Value.State.GetStateValue(CompositionStateKinds.EchoOnce) > 0),
             Harmony = SongHarmony.Of(song, notes)
         };
     }

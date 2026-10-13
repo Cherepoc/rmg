@@ -33,6 +33,9 @@ internal static class ExpressionRender
 
     /// <summary>How much of an echoing part the delay takes.</summary>
     public const int DelaySend = 100;
+
+    /// <summary>How much of a cascade's note goes to the delay, all of it, its one repeat almost as loud as the note.</summary>
+    public const int CascadeSend = 127;
     public const int ChorusController = 93;
     public const int BrightnessController = 74;
     public const int ResonanceController = 71;
@@ -273,7 +276,7 @@ internal static class ExpressionRender
             }
 
             // an echo, the note sent to the delay, and none sent where the notes stop echoing
-            var sentDelay = state.GetStateValue(CompositionStateKinds.Echo) > 0 ? DelaySend : 0;
+            var sentDelay = state.GetStateValue(CompositionStateKinds.Echo) > 0 ? state.GetStateValue(CompositionStateKinds.EchoOnce) > 0 ? CascadeSend : DelaySend : 0;
             if (sentDelay != (delay ?? 0))
             {
                 delay = sentDelay;

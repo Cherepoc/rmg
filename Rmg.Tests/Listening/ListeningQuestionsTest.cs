@@ -74,7 +74,10 @@ public sealed class ListeningQuestionsTest
             x => (double?)x.Map.Sections[0].Start),
         new("lyrical-beat", "Lyrical guitar's downtempo beat swung lightly, as a hip-hop beat is, under the guitars: trip-hop, or lo-fi?",
             "Lyrical guitar's swing 40-50-40, against its beat straight as a ballad's.", "lyrical", [], new() { ["feelChances"] = new() { ["swing"] = 0 } },
-            x => x.Swing.Delay > 0 && !x.Absent.Contains(TrackRole.Drum) ? (double?)x.Map.Sections[0].Start : null)
+            x => x.Swing.Delay > 0 && !x.Absent.Contains(TrackRole.Drum) ? (double?)x.Map.Sections[0].Start : null),
+        new("lyrical-cascade", "Lyrical guitar's echo repeating each note once, a dotted 8th later and almost as loud, its broken chords running on as 16ths: a cascade, or a stutter?",
+            "The cascade, Lyrical guitar's 0-25-60 beside the dying echoes, against those alone.", "lyrical", [], new() { ["echo"] = new() { ["cascade"] = 0 } },
+            x => x.Rendered.EchoOnce ? (double?)x.Map.Sections[0].Start : null)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

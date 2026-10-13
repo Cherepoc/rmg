@@ -374,6 +374,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "echo": { "dottedEighth": 100, "quarter": 100, "eighth": 100, "cascade": [0, 5, 10] },
       "rootDegree": { "sixth": 75, "seventh": 70, "third": 65 },
       "sung": { "halves": [60, 50, 40] },
       "phraseBars": { "fourBars": 100 },
@@ -965,6 +966,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "echo": { "dottedEighth": 100, "quarter": 100, "eighth": 100, "cascade": [0, 5, 10] },
       "sung": { "halves": [30, 20, 10] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "phraseBars": { "fourBars": 100 },
@@ -1141,6 +1143,7 @@
     "name": "Lyrical guitar",
     "description": "Mellow, melancholic instrumental guitar: a dry jazz or nylon guitar's repeating melody over acoustic guitars' broken chords let ring, a simple bass, a heavy delay, a steady downtempo beat or none, a cello now and then, natural minor and Dorian with a Spanish colour, a distorted solo building at the end now and then, 76 to 95.",
     "choices": {
+      "echo": { "dottedEighth": 100, "quarter": 100, "eighth": 100, "cascade": [0, 25, 60] },
       "tempo": { "from": [76, 70, 70], "to": [90, 95, 150], "lean": 30 },
       "length": { "from": [180, 180, 60], "to": [360, 480, 600] },
       "meter": { "4/4": 100 },

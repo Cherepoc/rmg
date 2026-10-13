@@ -495,5 +495,63 @@
         ]
       }
     ]
+  },
+  {
+    "id": "lyrical-cascade",
+    "question": "Lyrical guitar's echo repeating each note once, a dotted 8th later and almost as loud, its broken chords running on as 16ths: a cascade, or a stutter?",
+    "decides": "The cascade, Lyrical guitar's 0-25-60 beside the dying echoes, against those alone.",
+    "genre": "lyrical",
+    "without": {
+      "skip": [],
+      "genre": {
+        "echo": {
+          "cascade": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "k",
+        "at": 139.4,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "14",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "1D",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "1S",
+        "at": 134.8,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "1p",
+        "at": 0,
+        "listen": [
+          "Melody (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "1u",
+        "at": 75.1,
+        "listen": [
+          "Melody (Acoustic Guitar (steel))"
+        ]
+      }
+    ]
   }
 ]

@@ -425,8 +425,29 @@ internal static class Expression
         return Enumerable.Range(0, offsets.Length).Any(i => chord.GetPitch(i).Mod(Realizer.OctaveNoteCount) == note.Pitches[0].Mod(Realizer.OctaveNoteCount));
     }
 
-    /// <summary>The delays an echo repeats after, in beats: a dotted 8th, a quarter, an 8th.</summary>
-    public static ImmutableArray<double> EchoDelays { get; } = [0.75, 1, 0.5];
+    /// <summary>
+    ///     How an echo repeats, its delay in beats, whether it repeats once, almost as loud, rather than dying away over
+    ///     several, and how likely each is: a dotted 8th, a quarter or an 8th as likely as each other, and the cascade, a
+    ///     dotted 8th once, whose repeats fill an 8ths' broken chords into a run of 16ths, a genre's alone
+    ///     (<see cref="GenreChoices.Echo" />).
+    /// </summary>
+    public static ImmutableArray<(EchoKind Kind, double Delay, bool Once, ByConvention Weight)> EchoKinds { get; } =
+    [
+        (EchoKind.DottedEighth, 0.75, false, new ByConvention(1, 1, 1)),
+        (EchoKind.Quarter, 1, false, new ByConvention(1, 1, 1)),
+        (EchoKind.Eighth, 0.5, false, new ByConvention(1, 1, 1)),
+        (EchoKind.Cascade, 0.75, true, new ByConvention(0, 0, 0))
+    ];
+
+    /// <summary>An echo's kind as a genre's page shows it.</summary>
+    public static string LabelOf(EchoKind kind) => kind switch
+    {
+        EchoKind.DottedEighth => "A dotted 8th",
+        EchoKind.Quarter => "A quarter",
+        EchoKind.Eighth => "An 8th",
+        EchoKind.Cascade => "A dotted 8th once, a cascade",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+    };
 
     /// <summary>A part's reverb, from 0 to 127, as a mix sets it by role, which a part strays from once for the song, by the sound facet (<see cref="ReverbSpread" />).</summary>
     public static int Reverb(TrackRole role) => role switch
@@ -573,7 +594,7 @@ internal static class Expression
 
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
         var backbeat = DrumGroups.Snare.Tracks.ToHashSet();
-        double? carrierDelay = null;
+        (double Delay, bool Once)? carrierEcho = null;
         // whether the song gives its parts tones at all, the genre's where it names it
         var songTone = toneStream.TestProbability(SongToneChance.At(songSound, genre.Chance(GenreChoices.Effects, "tone")));
         // and whether it plays off a tape, and how far its pitch drifts
@@ -633,9 +654,10 @@ internal static class Expression
             // them straight
             vibrates &= !echoes;
             bendsHere &= !echoes;
-            var delay = EchoDelays[part.GenerateInt(0, EchoDelays.Length)];
+            var echoKinds = ByConvention.Weigh(EchoKinds.Select(x => (x, x.Weight)), songSound, genre.Pool<EchoKind>(GenreChoices.Echo) is { } pool ? x => pool(x.Kind) : null);
+            var (_, delay, once, _) = echoKinds[Generators.WeightedIndex(echoKinds)(part)].Value;
             if (echoes)
-                carrierDelay = delay;
+                carrierEcho = (delay, once);
             var room = Reverb(role, genre);
             var reverb = (int)Math.Round(room + ReverbSpread.At(songSound) * (part.GenerateDouble() * 127 - room));
             var choruses = part.TestProbability((ChorusesClassically(program) ? ClassicChorusChance : ChorusChance).At(songSound)) & songChorus;
@@ -771,7 +793,7 @@ internal static class Expression
                     if (pumps)
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
                     if (echoes && (isLine || role == TrackRole.Rhythm))
-                        state = state.With(CompositionStateKinds.Echo, (int)Math.Round(delay * 4));
+                        state = state.With(CompositionStateKinds.Echo, (int)Math.Round(delay * 4)).With(CompositionStateKinds.EchoOnce, once ? 1 : 0);
                     if (gate != 0)
                         state = state.With(CompositionStateKinds.Gate, gate);
                     if (tone != 0)
@@ -863,10 +885,13 @@ internal static class Expression
 
         // and a backbeat drum, a snare's, where the rhythm part echoes, as a dub echoes its skank and its snare, every stroke
         // of it, as a drum's send to the delay is its note's, at the rhythm part's delay
-        if (carriers.TryGetValue(StrongEffect.Echo, out var echoing) && definitions[echoing].Role == TrackRole.Rhythm && carrierDelay is { } echoDelay)
+        if (carriers.TryGetValue(StrongEffect.Echo, out var echoing) && definitions[echoing].Role == TrackRole.Rhythm && carrierEcho is var (echoDelay, echoOnce))
             foreach (var track in backbeat.Where(result.ContainsKey))
                 result[track] = EventTimeline.Create(result[track].Duration,
-                    result[track].Select(x => (x.Value with { State = x.Value.State.With(CompositionStateKinds.Echo, (int)Math.Round(echoDelay * 4)) }).ToTimelineItem(x.Position)));
+                    result[track].Select(x => (x.Value with
+                    {
+                        State = x.Value.State.With(CompositionStateKinds.Echo, (int)Math.Round(echoDelay * 4)).With(CompositionStateKinds.EchoOnce, echoOnce ? 1 : 0)
+                    }).ToTimelineItem(x.Position)));
 
         return result.ToImmutable();
     }
@@ -880,3 +905,12 @@ internal sealed record SongEffects(bool Vibrato, bool Chorus, bool Swell, bool B
 ///     whatever part it names (<see cref="Expression.DrawSound" />).
 /// </summary>
 internal sealed record SongSound(SongEffects Effects, ImmutableDictionary<StrongEffect, int> Carriers);
+
+/// <summary>How an echo repeats (<see cref="Expression.EchoKinds" />).</summary>
+public enum EchoKind
+{
+    DottedEighth,
+    Quarter,
+    Eighth,
+    Cascade
+}

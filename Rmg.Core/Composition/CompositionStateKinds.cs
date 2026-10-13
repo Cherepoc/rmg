@@ -204,6 +204,9 @@ internal static class CompositionStateKinds
     // 1 for a line's note played in octaves by its own part, the note and the note an octave from it
     public static StateKind<int> Octave { get; } = StateKinds.CreateAdditive<int>(Prefix + "Octave", StateScope.Render);
 
+    // 1 for an echoing note repeated once, almost as loud, a cascade's, where an echo otherwise dies away over several
+    public static StateKind<int> EchoOnce { get; } = StateKinds.CreateAdditive<int>(Prefix + "EchoOnce", StateScope.Render);
+
     // how many octaves a line's note and its range sit above where its track places them: a harmonised riff's, up the neck
     public static StateKind<int> LineRaise { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineRaise", StateScope.Render);
 

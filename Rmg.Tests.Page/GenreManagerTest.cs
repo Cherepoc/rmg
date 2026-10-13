@@ -52,7 +52,9 @@ public sealed class GenreManagerTest(Site site)
 
         // duplicated, it opens in the editor in place of the window, and is saved (its name and keeping only once saved,
         // GenreEditorTest.APresetDuplicated_IsYours_UnderItsNameAndTheFirstNumberFree)
-        await manager.Locator("ul[aria-label='Presets'] li", new() { HasText = "Jazz" }).First.Locator("button", new() { HasText = "Duplicate" }).ClickAsync();
+        // Jazz by its name alone, as Dark jazz's holds it too
+        await manager.Locator("ul[aria-label='Presets'] li", new() { Has = page.Page.Locator(".genre-line-name", new() { HasTextRegex = new System.Text.RegularExpressions.Regex("^Jazz$") }) })
+            .Locator("button", new() { HasText = "Duplicate" }).ClickAsync();
         var editor = page.Page.Locator("dialog.genre-dialog");
         await page.Until(() => editor.IsVisibleAsync(), "the editor open");
         await Assert.That(await manager.IsVisibleAsync()).IsFalse();
