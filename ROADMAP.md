@@ -277,8 +277,8 @@ songs heard from where they first differed, its repeats. Now a question's songs 
 the sections its device plays in (`ListeningQuestionsTest`'s `In`); and a song with a twin draws a twin lead in each
 section (`doubling.twin`, 50, the twin genres'), the riff there in single notes, busier, played as the riff's soloist
 plays, its vibrato, bends and slides, the twin's alike, and the twin there alone: Heavy metal's twin sounding in 38 of
-its 41 songs with one (5), 7.1 notes a bar where it leads, 87% of its held notes with a vibrato. Asked from 13 October
-2026: `metal-twin-lead`. Failing at the corpus offset of a million before as after, to fix: a chugging riff on its
+its 41 songs with one (5), 7.1 notes a bar where it leads, 87% of its held notes with a vibrato. Answered on 13 October
+2026: `metal-twin-lead`, 6 of 6, heard good, kept. Failing at the corpus offset of a million before as after, to fix: a chugging riff on its
 pedal 74% against a bound of 75%.
 
 Answered on 11 October 2026, late, the round of the plan of 11 October, and kept: `calm`, Black metal's calm sections
