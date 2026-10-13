@@ -121,9 +121,9 @@ public sealed class FiguresTest
             foreach (var (span, bar, position) in Hits(song, tracks, Playing(song, player, name)))
             {
                 hits++;
-                // its 16th in the figure's two bars, counted from the song's first bar
+                // its 16th in the figure's bars, one or two, counted from the song's first bar
                 var index = barsBefore[span] + span.BarOf(bar);
-                var sixteenth = (position - bar) / 0.25 + index % 2 * 16;
+                var sixteenth = (position - bar) / 0.25 + index % (figure.Sixteenths / 16) * 16;
                 await Assert.That(figure.Onsets.Any(x => Math.Abs(x - sixteenth) < 0.1)).IsTrue().Because($"seed {song.Seed} at {position}, {name}");
             }
         }

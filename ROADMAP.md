@@ -581,7 +581,7 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   what Jazz's time already plays.
 - **The breakdown chorus** (#369): a `lastRepeat` option, the first pass at the thinnest texture, the second the full
   band (Pop, Power ballad, Soul, Country, Rock, Disco, Folk).
-- Found while fixing it: **Latin's clave** plays in 78 of its 299 sections (64 songs), the claves resting in the rest, though 187 draw it.
+- Found while fixing it:
   **A long lift moving notes outside its swell** (#224): a genre's long lift moves about a hundred notes of 64 songs
   outside the swell's bars by more than 0.01 of the velocity, through a stage that sets a part by the song as heard;
   `LiftTest` counts them.
@@ -743,8 +743,10 @@ it:
 3. Done (13 October 2026): 12/8's backbeat on 2 and 4, a bar of an even number of like groups past two felt in halves
    (`Meter.Levels`), the snare on its third dotted quarter 496 → 124 times in 64 Blues songs (Soul's 670 → 133), the rest
    fills and ghosts.
-4. **Latin's clave** resting in 221 of 299 sections that draw it: the cause found (the claves' part resting, a texture,
-   or the drum pieces), then the clave on wherever the section draws it.
+4. Done (13 October 2026): Latin's clave plays where it is drawn, 166 of 176 sections, the rest with their drums
+   resting (the 78 of 299 counted every section); 30 of its 64 songs have no claves at all, for its retune. Its clave
+   redrawn over a bar (`Figures.All`), a son clave counted in half notes, a salsa's beat, as the preset's tempo, chords
+   and montuno count them, where it ran over two at half its speed; to be heard in Latin's retune.
 
 **B. Four idioms** (each a step from a mechanism that exists):
 
