@@ -117,5 +117,63 @@
         ]
       }
     ]
+  },
+  {
+    "id": "funkrock-chorus",
+    "question": "Funk rock's louder sections opening into distorted guitars over the slap bass and the 16th groove: funk rock, or a funk band too loud?",
+    "decides": "Funk rock's heavy sections, louderForms.guitars 30-50-60, against its guitars clean throughout as Funk's.",
+    "genre": "funkRock",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "guitars": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "G",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 38.7,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 109.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 129.8,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 126.3,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      }
+    ]
   }
 ]

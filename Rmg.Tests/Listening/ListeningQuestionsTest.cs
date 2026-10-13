@@ -54,7 +54,11 @@ public sealed class ListeningQuestionsTest
         new("cinematic-pad", "Cinematic piano's strings swelling under the piano: a film score, or a piano drowned?",
             "Cinematic piano's string pad, 70-80-80 of its songs.", "filmPiano", [], new() { ["parts"] = new() { ["pad"] = 0 } },
             x => x.Absent.Contains(TrackRole.Pad) ? null : (double?)x.Map.Sections[0].Start)
-
+,
+        new("funkrock-chorus", "Funk rock's louder sections opening into distorted guitars over the slap bass and the 16th groove: funk rock, or a funk band too loud?",
+            "Funk rock's heavy sections, louderForms.guitars 30-50-60, against its guitars clean throughout as Funk's.", "funkRock", [], new() { ["louderForms"] = new() { ["guitars"] = 0 } },
+            x => FirstSection(x, TracePoints.SectionForm, v => (SectionFormKind)v! == SectionFormKind.Heavy),
+            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.SectionForm && t.Section == span.SectionId && (SectionFormKind)t.Value! == SectionFormKind.Heavy))
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

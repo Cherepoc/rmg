@@ -786,10 +786,10 @@ with its questions after each group:
      semitone or a tone below the last chord's landing, the root where none is, 21% of its chord arrivals a step down
      (Chamber's 11%), 237 descents of three chords or more in 64 songs (73); asked: `bass-step-down`, `cinematic-pad`.
      **Classical renamed Chamber**, its id and its name.
-   - **Funk rock**, beside Funk: Funk's slap bass, 16th hats, ghosts, a muted 16th guitar and its vamps, with an
-     overdriven guitar riff and its chorus opening into big distorted chords (`louderForms.guitars`), power chords,
-     sevenths and 7♯9, minor pentatonic lines, the power or standard kit, a tight pocket, no horns nor keys, 88 to 110;
-     the muted guitar clean, never chugging (General MIDI's 28).
+   - Done (14 October 2026): **Funk rock** (`funkRock`), beside Funk: its slap bass, ghosts in 75% of sections, a
+     muted 16th guitar never chugging, an overdriven riff and 25% of its sections heavy (Funk's none), power chords,
+     sevenths and 7♯9, guitar solos in 19% of sections, no horns, keys nor pad, the power kit, 91-101-109; asked:
+     `funkrock-chorus`.
    - **Jazz-funk**, between Funk and Fusion: maj7, m9, m11 and 6/9 chords, mediants and ii–V passing chords, an
      electric piano and soft synth pads, a finger bass high and leading, a soft lead (flute, electric piano, synth), a
      laid-back pocket, 75 to 100, 4/4 alone, short sung forms, few solos; its 16ths straight until asked, as Funk's
