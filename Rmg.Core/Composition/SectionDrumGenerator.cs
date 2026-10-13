@@ -12,6 +12,9 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal sealed class SectionDrumGenerator
 {
+    /// <summary>The shortest note the drum keeping time plays in double time, in beats: an 8th, its kick and snare doubling under it.</summary>
+    public const double DoubleTimeShortest = 0.5;
+
     private readonly SongTracks _tracks;
     private readonly Genre _genre;
     private readonly Func<int, double> _energy;
@@ -213,6 +216,9 @@ internal sealed class SectionDrumGenerator
                 .MergeWith(groupStateMap)
                 .MergeWith(sectionRoles[trackNumber])
                 .MergeWith(sectionStrokes.TryGetValue(trackNumber, out var stroke) ? DrumStrokes.At(StateDepths.Section, stroke) : StateMap.Default);
+        // in double time the kick and the snare double, the drum keeping time no finer than 8ths, as a skank beat's hats
+        foreach (var trackNumber in trackStateMaps.Keys.Where(x => timeFeel < 0 && DrumRoles.Of(trackStateMaps[x]) == DrumRole.Time).ToArray())
+            trackStateMaps[trackNumber] = trackStateMaps[trackNumber].With(CompositionStateKinds.ShortestNote, DoubleTimeShortest);
 
         // a drum out of the groove still has the state the drums share, with no notes, so that a note added later, such as
         // in a fill, plays as loud as the section, and its own rhythm's state, which a fill plays it by

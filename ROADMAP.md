@@ -803,9 +803,13 @@ wild end, a rock solo, metal's twin leads, a slow genre's half time, is data, no
    the progression's strictness easing by its facet (`Progressions.Strictness`, 0.85 in the middle). Left: a genre's
    own strictness, should a middling blues still wander (Blues' retune); 8-bar patterns left free, as a pop period's
    chords move.
-2. Latin's clave over two bars against its half-note count (a one-bar clave in 16ths if so); Reggae's one drop, a drop
-   every four skanks rather than two; Funk's swing an 8th's shuffle above about 107, not a 16th's; Ska's skank onsets;
-   Disco's octave bass moving on weak notes only; double time's hats at 200 (the skank beat of Punk and Thrash).
+2. Done (13 October 2026): measured, the code's fixed and the data's for the retunes (step 2). Latin's clave over a bar
+   (step 4's commit); double time's drum keeping time no finer than 8ths, Thrash's double-time hats in 16ths 53% → 0%
+   of their gaps (fills and rolls 1.4%), a skank beat's. For the retunes: Funk's swing an 8th's shuffle in 5 of its 11
+   swinging songs, none in 16ths (its `feelValues` to 16ths); Reggae's skank on all four offbeats at its slow count, four
+   to a drop where the records have two (its chords' and rhythm's period doubled, on 2 and 4); Disco's bass moving an
+   octave in 17% of its moves for octave bass in 60-70% of its sections (its bass in steady 8ths); Ska's skank right,
+   every offbeat at its 140-170.
 3. Minor cadences: Classical's ♭VII–i as often as V–i, and the Aeolian genres' (Dungeon synth, Orchestral's film side)
    every minor V raised; Symphonic metal's `solos.trades` naming drum trades, a data error; Trap's verses for a voice
    leaving out the beat's own loop; the echo never on the chords part (Lyrical guitar's cascade on the rhythm part).
