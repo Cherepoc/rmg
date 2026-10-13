@@ -369,5 +369,131 @@
         ]
       }
     ]
+  },
+  {
+    "id": "lyrical-echo",
+    "question": "Lyrical guitar's heavy delay on its acoustic guitars or its melody, each note repeated and dying away: the style's haze, or a blur?",
+    "decides": "Lyrical guitar's echo as its strong effect 60-70-80, against none.",
+    "genre": "lyrical",
+    "without": {
+      "skip": [],
+      "genre": {
+        "strongEffect": {
+          "echo": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 35.1,
+        "listen": [
+          "Melody (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "2",
+        "at": 187.2,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 36.4,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Drums"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 254.1,
+        "listen": [
+          "Drums"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 189.2,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Drums"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 46.2,
+        "listen": [
+          "Melody (Electric Guitar (jazz))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lyrical-beat",
+    "question": "Lyrical guitar's downtempo beat swung lightly, as a hip-hop beat is, under the guitars: trip-hop, or lo-fi?",
+    "decides": "Lyrical guitar's swing 40-50-40, against its beat straight as a ballad's.",
+    "genre": "lyrical",
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelChances": {
+          "swing": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 104,
+        "listen": [
+          "Melody (Acoustic Guitar (nylon))",
+          "Cabasa"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 212,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Melody (Acoustic Guitar (nylon))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 76.8,
+        "listen": [
+          "Hi-Hat",
+          "Melody (Acoustic Guitar (steel))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 116,
+        "listen": [
+          "Ride",
+          "Clap"
+        ]
+      },
+      {
+        "seed": "i",
+        "at": 22.4,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "y",
+        "at": 147.6,
+        "listen": [
+          "Cabasa",
+          "Hi-Hat",
+          "Clap"
+        ]
+      }
+    ]
   }
 ]

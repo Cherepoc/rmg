@@ -68,7 +68,13 @@ public sealed class ListeningQuestionsTest
             x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == 1), 1)),
         new("darkjazz-swing", "Dark jazz's 8ths swung lightly at 60 or so: a noir lounge, or a cheesy one?",
             "Dark jazz's swing 0-25-30, swung at 40, against straight.", "darkJazz", [], new() { ["feelChances"] = new() { ["swing"] = 0 } },
-            x => x.Swing.Delay > 0 ? (double?)x.Map.Sections[0].Start : null)
+            x => x.Swing.Delay > 0 ? (double?)x.Map.Sections[0].Start : null),
+        new("lyrical-echo", "Lyrical guitar's heavy delay on its acoustic guitars or its melody, each note repeated and dying away: the style's haze, or a blur?",
+            "Lyrical guitar's echo as its strong effect 60-70-80, against none.", "lyrical", [], new() { ["strongEffect"] = new() { ["echo"] = 0 } },
+            x => (double?)x.Map.Sections[0].Start),
+        new("lyrical-beat", "Lyrical guitar's downtempo beat swung lightly, as a hip-hop beat is, under the guitars: trip-hop, or lo-fi?",
+            "Lyrical guitar's swing 40-50-40, against its beat straight as a ballad's.", "lyrical", [], new() { ["feelChances"] = new() { ["swing"] = 0 } },
+            x => x.Swing.Delay > 0 && !x.Absent.Contains(TrackRole.Drum) ? (double?)x.Map.Sections[0].Start : null)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>
