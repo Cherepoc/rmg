@@ -917,6 +917,44 @@ textures and forms that change, or they bore; tempo ranges widened at the ends, 
 centre; the mismatches of V may each be a reading of the code that measurement refutes. **Reliability**: half the
 reports had no search; their tempos and progressions are rechecked before a value moves.
 
+### Planned: mood
+
+Agreed 13 October 2026, its order among the other plans to be settled. A song's mood, two values beside its
+unconventionality, each from -1 to 1 and drawn from a stream of its own within a genre's span, or given
+(`SongOverrides`): **darkness**, dark to bright, and **intensity**, calm to fierce, the two axes of valence and
+arousal, their quadrants sombre, menacing, serene and euphoric. Two, as the splits asked for need both: darksynth dark
+and fierce, dreamwave bright and calm, dark drum and bass against liquid dark and fierce, gothic metal dark and calm,
+power metal and pop punk bright and fierce; one axis, dark meaning fierce, misses gothic and power metal; a third, the
+sound or the era, is a preset's. Mood never adds an option nor takes one away: it leans the weights of those a
+genre's pool allows at the song's conventionality, an option's odds times a constant (a guess, about 4) to the power
+of its lean times the mood, a lean data on the option (`Tilt`), as energy leans.
+
+What each leans: **darkness**, the mode (Lydian, major, Mixolydian, Dorian, natural minor, harmonic minor, Phrygian,
+Locrian, brightest to darkest), the chord shapes (maj7, add9 and sus2 bright; diminished and tritone stacks dark), the
+root degrees (♭II and ♭VI dark) and a key change up (bright), the register, the tone, the instruments by their traits
+(warm pads against dark ones); **intensity**, the tempo within the genre's range, double kick, blast, double time and
+half time, fills, the kit, driven instruments, chugs and power chords, the bass in 16ths against 8ths, the dynamics.
+
+1. The mechanism without leans: the two values drawn, a genre's span of each (two range choices), the songs' own span
+   moderate, given values, traced; one helper leaning pools, chances and ranges; the corpus unchanged.
+2. Darkness's leans on the harmony (scales, chord shapes, root degrees, the cadence's raise), measured at the dark end,
+   the middle and the bright.
+3. Intensity's leans (tempo, drum figures and feels, the kit, the riff's articulation, bass figures, fills), measured:
+   the median tempo, the double kick's share, the driven instruments'.
+4. The sound's leans: instruments by their traits, the tone, the register.
+5. The genres' spans: Synthwave from dreamwave to darksynth, Drum and bass from liquid to dark, Heavy metal checked
+   against gothic and power metal; asked, a genre's two ends.
+6. The page: the two given by controls, with its tests.
+
+Review: **overengineering**: the cost is the lean data, two numbers an option, so ten or so choices whose meaning is
+plain, and instruments by trait, never by program; no new weighing, the leans `Tilt`'s and the spans range choices; a
+mood drifting by section left out, as section energy varies a song already. **Musicality**: at a middling mood the
+draws stay as uncorrelated as now, the coherence the ends'; the leans' strength measured at the ends before it is heard,
+too strong a cliché (every dark song Phrygian and fast), too weak unheard; intensity absolute and a section's energy
+relative, kept apart, so that a fierce song's quiet sections stay quiet; every preset drifting within its own options
+by the songs' own span, asked by family before any span is narrowed; whether the two hold apart in a genre (a bright,
+calm metal song a ballad) a question of each genre's span.
+
 ### Planned: dark jazz
 
 Planned 13 October 2026: a preset of slow, dark jazz, a noir lounge band played at a funeral's pace: a tenor sax or a
@@ -1294,8 +1332,6 @@ left:
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
-- **A song's mood** (P4): a value drawn per song that a preset's options lean dark or bright by, so that one preset
-  spans liquid and dark drum and bass coherently; a preset of each until a third genre asks for a span.
 - **The twin lead's share and busyness:** a twin leading half a twin song's sections (`doubling.twin` 50), its riff
   barely busier than elsewhere (7.1 notes a bar to 6.7, `LineDoubling.TwinLeadFullness` 0.3); heard good as it is (13
   October 2026), tuned only if listening asks.
