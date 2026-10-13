@@ -62,7 +62,13 @@ public sealed class ListeningQuestionsTest
         new("jazzfunk-chords", "Jazz-funk's chords, elevenths, 6/9 and thirteenths, mediants and applied chords on an electric piano, where Funk vamps on sevenths and ninths: jazz-funk, or a lounge?",
             "Jazz-funk's eleventh 50-60-70, sixNine 40 and thirteenth 20-30-40, its mediants and applied chords, against sevenths and ninths alone.", "jazzFunk", [],
             new() { ["chordShape"] = new() { ["eleventh"] = 0, ["sixNine"] = 0, ["thirteenth"] = 0 }, ["chordScales"] = new() { ["mediant"] = 0, ["applied"] = 0 } },
-            x => (double?)x.Map.Sections[0].Start)
+            x => (double?)x.Map.Sections[0].Start),
+        new("darkjazz-halftime", "Dark jazz's drums in half time, a snare every three seconds or so under the held chords: the funeral pace, or a song stalled?",
+            "Dark jazz's half time 0-70-80, against its drums at the written tempo.", "darkJazz", [], new() { ["feelChances"] = new() { ["halfTime"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.TimeFeel, v => (int)v! == 1), 1)),
+        new("darkjazz-swing", "Dark jazz's 8ths swung lightly at 60 or so: a noir lounge, or a cheesy one?",
+            "Dark jazz's swing 0-25-30, swung at 40, against straight.", "darkJazz", [], new() { ["feelChances"] = new() { ["swing"] = 0 } },
+            x => x.Swing.Delay > 0 ? (double?)x.Map.Sections[0].Start : null)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

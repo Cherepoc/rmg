@@ -242,5 +242,132 @@
         ]
       }
     ]
+  },
+  {
+    "id": "darkjazz-halftime",
+    "question": "Dark jazz's drums in half time, a snare every three seconds or so under the held chords: the funeral pace, or a song stalled?",
+    "decides": "Dark jazz's half time 0-70-80, against its drums at the written tempo.",
+    "genre": "darkJazz",
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelChances": {
+          "halfTime": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "D",
+        "at": 92,
+        "listen": [
+          "Ride",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 0,
+        "listen": [
+          "Acoustic Snare",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 22.9,
+        "listen": [
+          "Acoustic Snare",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 348.6,
+        "listen": [
+          "Ride",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 0,
+        "listen": [
+          "Kick",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 143.1,
+        "listen": [
+          "Ride"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "darkjazz-swing",
+    "question": "Dark jazz's 8ths swung lightly at 60 or so: a noir lounge, or a cheesy one?",
+    "decides": "Dark jazz's swing 0-25-30, swung at 40, against straight.",
+    "genre": "darkJazz",
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelChances": {
+          "swing": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 228.3,
+        "listen": [
+          "Hi-Hat",
+          "Bass (Acoustic Bass)",
+          "Melody (Vibraphone)"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 124,
+        "listen": [
+          "Bass (Fretless Bass)",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 0,
+        "listen": [
+          "Bass (Fretless Bass)",
+          "Kick",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "P",
+        "at": 349.7,
+        "listen": [
+          "Ride"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 184.9,
+        "listen": [
+          "Kick"
+        ]
+      },
+      {
+        "seed": "1O",
+        "at": 0,
+        "listen": [
+          "Bass (Contrabass)",
+          "Chords (Electric Piano 1)"
+        ]
+      }
+    ]
   }
 ]

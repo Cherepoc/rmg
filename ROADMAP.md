@@ -992,7 +992,10 @@ neighbours are Jazz (its band and its harmony), Ambient (its stillness) and Doom
 genre is data first (`Client/genres.json`): every step below a preset's values but the guarded ones, which are code
 only if listening asks. Each through the implementation loop:
 
-1. **The preset** (`darkJazz`, "Dark jazz"), data alone. Tempo 60-72, the half-time feel likely (`feelChances.halfTime`),
+1. Done (14 October 2026), with its research's corrections: **the preset** (`darkJazz`, "Dark jazz"), 61-66-69 written
+   with half time in 68% of its sections, felt about 30-35 (Doom's 65-74-81, Ambient's 65-73-81), 5:23-6:49-7:58, solos
+   in 4% of sections, no key changes, the line cliché over triads kept beside the sevenths, the melody resting whole
+   sections, brushes first; asked: `darkjazz-halftime`, `darkjazz-swing`. As planned: Tempo 60-72, the half-time feel likely (`feelChances.halfTime`),
    swing light or none; natural and harmonic minor, Dorian at the wild end, the Phrygian second as a colour; seventh,
    ninth and shell shapes (a minor key's seventh on its second degree is the half-diminished one); chords two bars or
    more (`harmonicRhythm.twoBars`), no turnarounds, passing chords or key changes; the electric piano's chords held
