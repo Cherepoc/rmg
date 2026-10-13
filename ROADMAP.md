@@ -221,6 +221,8 @@ off) and its default by ratings, the ratings report, two toms at once, and Tooli
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
 ratings by conventionality once enough are in, continuously and never as a gate.
 
+**Next plan** (13 October 2026): *Planned: rules kept, four idioms, two genres, the club's devices* (*Open work*).
+
 **Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough.
 
 **When the need shows** (P3), each by what listening says: the items left in the sections below, each marked P3, any
@@ -703,6 +705,63 @@ metal, Doom without the tuning a slow one; no sub-styles within a genre, a prese
 **Musicality**: a stretched guitar sample muddy below E2 by soundfont, so heard before tuned; dissonant accents only
 over still harmony; a slap bass doubling a distorted riff turning it to funk metal, so picked where it doubles; a
 narrow melody on a guitar possibly only dull, so asked before built.
+
+### Planned: rules kept, four idioms, two genres, the club's devices
+
+Planned 13 October 2026, reviewed the same day; each step through the implementation loop, a deploy to test with its
+questions (ten at most at once) after each group. In order, each group before the next because the later ones lean on
+it:
+
+**A. The rules kept** (the second corpus clean, so that a later failure there is new work's):
+
+1. **The scale rule and the shared chord shape over 64 songs** (#287, #296): each failure reproduced at the committed
+   code first (seeds 19 and 25 for the scale, 46 and the offset's 5 for the shape), then fixed where the rule breaks,
+   the tests run on 64 songs. A bug's cause not found in the step put off with what was ruled out.
+2. **The squelch at a million**: bisected (`git bisect` over the corpus's failing seed), fixed or its test given its
+   reason.
+3. **12/8's backbeat** (`Meter.Backbeats`): the snare's in 12/8 measured first (where it lands, 2, 3 and 4 or 2 and 4),
+   then on 2 and 4, Blues' and Soul's 12/8 songs changing; asked as `blues-12-8-backbeat`.
+4. **Latin's clave** resting in 221 of 299 sections that draw it: the cause found (the claves' part resting, a texture,
+   or the drum pieces), then the clave on wherever the section draws it.
+
+**B. Four idioms** (each a step from a mechanism that exists):
+
+5. **The jazz ride** (#349): what Jazz's time plays now measured, then the swing ride's skip note after 2 and 4 as a
+   time drum's figure (`Figures`), Jazz's and dark jazz's; asked as `jazz-ride`.
+6. **The boogie** (#366): the alternating bass generalised to a cycle of the chord's degrees, root and fifth its
+   shortest, 1-3-5-6-flat 7-6-5-3 its longest, after the pedal's keep-out; Blues', Rock's, Country's; asked.
+7. **The alternating thumb** (#362): an arpeggio pattern, the thumb on root and fifth on the beats, the fingers between;
+   Folk's, Country's, the Power ballad's, Blues', Bossa nova's, Medieval's, and lyrical guitar's; asked.
+8. **Latin bass figures** (#360): the tumbao and bossa nova's bass as bass figures, data; asked with step 4's clave.
+
+**C. Two genres** (data, with the idioms of B):
+
+9. **Dark jazz** (*Planned: dark jazz*), step 1, with the jazz ride on brushes; its guarded steps by listening.
+10. **Lyrical guitar** (*Planned: lyrical guitar*), steps 1 and 2: the preset, then the echo's kind and the cascade;
+    its guarded steps by listening.
+
+**D. The club's and pop's devices:**
+
+11. **The kick-out** (#353): a fill's rest, the kick (and a bass on the kick) out for a line's last beat or bar, the
+    hats and the clap on, landing on the downbeat; a fill option of House, Techno, Trance, Drum and bass, Trap, Hip-hop,
+    Disco, Synthwave and Pop, a held span of `Holds`; asked.
+12. **The breakdown chorus** (#369): a `lastRepeat` option, the last chorus's first pass at the thinnest texture and the
+    second the full band; Pop's, the Power ballad's, Soul's, Country's, Rock's, Disco's, Folk's; asked.
+13. **The ostinato** (#354): a riff held at its pitches over the chords, a clash on a strong beat moved to a chord's note
+    at the plain end and kept at the wild; the scale rule (step 1) settled first, as it is the rule the ostinato bends;
+    Techno's, Trance's, House's, and lower in Synthwave, IDM, Chiptune, Ambient, Dungeon synth and Orchestral; asked.
+
+Review: **overengineering**: each a generalisation of a mechanism that exists (stop time's holds, the alternating
+bass, an arpeggio pattern, figures, the echo), the genres data; the bugs fixed where the rule breaks, never by relaxing
+the rule; the ostinato's clash handled by the plain end's rule rather than a keep-out of its own; the false ending, the
+tape stop, imitation and two toms at once left out. Thirteen steps is a long plan: it stops for listening after each
+group, and a group's answers may reorder the next. **Musicality**: 12/8's backbeat changes how every 12/8 song grooves,
+so asked before kept; the jazz ride's skip note is Jazz's whole feel and easily stiff at 180, so measured against what
+the time plays now; the boogie a cliché at the plain end, so leaned to it rather than always; the alternating thumb
+over a walking or busy bass doubles the low end, so where the bass is simple; the kick-out works only where the kick is
+steady, so the four-on-the-floor genres first; the breakdown chorus is a ballad's and a pop song's, not a dance
+track's, which strips back already; the ostinato's clashes are the point in Techno and a mistake in Ambient, so by
+conventionality and genre.
 
 ### Planned: dark jazz
 
