@@ -144,8 +144,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
 
     /// <summary>
     ///     The meter's hierarchy, level by level, each level its nodes in 16ths, from the bar down to single 16ths: the
-    ///     bar, its groups, and every node split into the odd number of its steps first and in two after, as a grouped
-    ///     cycle splits (<see cref="ResolvedRhythm.SplitOf" />); a node of one 16th stays one on the levels below.
+    ///     bar, its halves where it is an even number of like groups past two, as 12/8 is felt as 4/4 in threes, its
+    ///     groups, and every node split into the odd number of its steps first and in two after, as a grouped cycle splits
+    ///     (<see cref="ResolvedRhythm.SplitOf" />); a node of one 16th stays one on the levels below.
     /// </summary>
     public ImmutableArray<ImmutableArray<(int Start, int Length)>> Levels => _levels ??= BuildLevels();
 
@@ -155,6 +156,8 @@ public sealed record Meter(ImmutableArray<int> Groups)
     {
         var levels = new List<ImmutableArray<(int Start, int Length)>> { ImmutableArray.Create((0, Sixteenths)) };
         var groups = Groups.Length > 1 ? Groups.Select((x, i) => (Groups.Take(i).Sum(), x)).ToImmutableArray() : Split(levels[0][0]);
+        if (Groups.Length > 2 && Groups.Length % 2 == 0 && Groups.Distinct().Count() == 1)
+            levels.Add([(0, Sixteenths / 2), (Sixteenths / 2, Sixteenths / 2)]);
         levels.Add(groups);
         while (levels[^1].Any(x => x.Length > 1))
             levels.Add([..levels[^1].SelectMany(x => x.Length > 1 ? Split(x) : ImmutableArray.Create(x))]);

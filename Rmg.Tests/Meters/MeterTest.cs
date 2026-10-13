@@ -150,4 +150,14 @@ public sealed class MeterTreeTest
         await Assert.That(plain.All(x => x == Meter.FourFour)).IsTrue();
         await Assert.That(wild.All(x => x != Meter.FourFour)).IsTrue();
     }
+
+    /// <summary>A bar of four like groups felt as 4/4 is, in halves: 12/8's backbeat on its second and fourth dotted quarters.</summary>
+    [Test]
+    public async Task TwelveEight_StrikesItsBackbeatOnTwoAndFour_AndIsStrongOnOneAndThree()
+    {
+        await Assert.That(Meter.TwelveEight.Backbeats).IsEquivalentTo([1.5, 4.5], CollectionOrdering.Matching);
+        await Assert.That(Meter.TwelveEight.Levels[1].Select(x => x.Start / 4.0).ToArray()).IsEquivalentTo([0.0, 3.0], CollectionOrdering.Matching);
+        await Assert.That(Meter.TwelveEight.PulseSixteenths).IsEqualTo(6);
+        await Assert.That(Meter.FourFour.Backbeats).IsEquivalentTo([1.0, 3.0], CollectionOrdering.Matching);
+    }
 }

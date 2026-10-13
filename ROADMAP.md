@@ -581,13 +581,7 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
   what Jazz's time already plays.
 - **The breakdown chorus** (#369): a `lastRepeat` option, the first pass at the thinnest texture, the second the full
   band (Pop, Power ballad, Soul, Country, Rock, Disco, Folk).
-- Found while fixing it: **12/8's backbeat** is the meter's half-cycle-late cycle (`Meter.Backbeats`), dotted quarters
-  2, 3 and 4, where a 12/8 backbeat is 2 and 4; the snare's own in 12/8 to be measured before the cycle's node changes.
-  **Latin's clave** plays in 78 of its 299 sections (64 songs), the claves resting in the rest, though 187 draw it.
-  **Two pitched parts on different chord shapes at once** (#296): at corpus offset 816000000, seed 5, beat 173.5,
-  the chords play a triad's shape and the riff a five-note one, each on its own note as the section made it, in a
-  section taking an inner line; neither the inner line, the polymeter, the mutations nor the figures write a shape,
-  so the riff's bar as an appearance redraws it is the next place to look.
+- Found while fixing it: **Latin's clave** plays in 78 of its 299 sections (64 songs), the claves resting in the rest, though 187 draw it.
   **A long lift moving notes outside its swell** (#224): a genre's long lift moves about a hundred notes of 64 songs
   outside the swell's bars by more than 0.01 of the velocity, through a stage that sets a part by the song as heard;
   `LiftTest` counts them.
@@ -746,8 +740,9 @@ it:
 2. Done (13 October 2026): the squelch at a million, the test's own: an ornament's quick notes and its held rest
    played from where its note starts, which the squelch opens on, its allowance of half a beat too short for a turn or
    a swung trill.
-3. **12/8's backbeat** (`Meter.Backbeats`): the snare's in 12/8 measured first (where it lands, 2, 3 and 4 or 2 and 4),
-   then on 2 and 4, Blues' and Soul's 12/8 songs changing; asked as `blues-12-8-backbeat`.
+3. Done (13 October 2026): 12/8's backbeat on 2 and 4, a bar of an even number of like groups past two felt in halves
+   (`Meter.Levels`), the snare on its third dotted quarter 496 → 124 times in 64 Blues songs (Soul's 670 → 133), the rest
+   fills and ghosts.
 4. **Latin's clave** resting in 221 of 299 sections that draw it: the cause found (the claves' part resting, a texture,
    or the drum pieces), then the clave on wherever the section draws it.
 
