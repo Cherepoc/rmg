@@ -236,9 +236,9 @@ internal sealed class LinePattern
 
     /// <summary>
     ///     A hooked section's repeated bars singing their letter's first bar's notes, each where the first played it in
-    ///     its pattern, where it fits the chord there as a restated phrase's does (<see cref="Restate" />), and a landing
-    ///     as it lands: a chorus's figure coming back as a tune, where a bar's figure otherwise comes back placed anew over
-    ///     its chord.
+    ///     its pattern and the same note of its figure, where it fits the chord there as a restated phrase's does (<see cref="Restate" />), and a landing
+    ///     as it lands: a chorus's figure coming back as a tune, and a riff's as a figure, where
+    ///     a bar's figure otherwise comes back placed anew over its chord.
     /// </summary>
     private static void Hook((LineNote Note, int Rank, int Pitch)[] notes, SongMap map, LineProfile profile, Func<int, bool> lands)
     {
@@ -260,7 +260,10 @@ internal sealed class LinePattern
             }
             if (bar == first || lands(i))
                 continue;
-            if (at.TryGetValue(Math.Round(position - (bar - first) * span.Meter.BarDuration, 6), out var source) && FitsHook(notes[i], notes[source].Pitch))
+            // the same note of the figure, so that a riff whose cycle is not its bar's, a polymeter's, keeps to its cycle
+            if (at.TryGetValue(Math.Round(position - (bar - first) * span.Meter.BarDuration, 6), out var source)
+                && notes[source].Note.State.GetStateValue(CompositionStateKinds.NoteKey) == notes[i].Note.State.GetStateValue(CompositionStateKinds.NoteKey)
+                && FitsHook(notes[i], notes[source].Pitch))
                 notes[i] = notes[i] with { Pitch = notes[source].Pitch };
         }
     }

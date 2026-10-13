@@ -173,13 +173,15 @@ public static class GenreChoices
 
     /// <summary>
     ///     The chances of a section's riff: in power chords, a perfect fifth over every note, as rock's riffs are, in
-    ///     palm-muted chugs, and with its weak notes on a drone (<see cref="SectionGenerator.PowerChordChance" />).
+    ///     palm-muted chugs, with its weak notes on a drone (<see cref="SectionGenerator.PowerChordChance" />), and a figure,
+    ///     its first bar's notes kept over the chords that follow (<see cref="SectionGenerator.RiffHookChance" />).
     /// </summary>
     public static GenreChoice Riff { get; } = Chances("riff", "Riff",
     [
         ("powerChords", "In power chords", SectionGenerator.PowerChordChance),
         ("chugs", "Palm-muted chugs", SectionGenerator.ChugChance),
-        ("drone", "Its weak notes on a drone", SectionGenerator.DroneChance)
+        ("drone", "Its weak notes on a drone", SectionGenerator.DroneChance),
+        ("hook", "A figure kept over the chords", SectionGenerator.RiffHookChance)
     ]);
 
     /// <summary>The chance a section's pattern turns around in its last bar, a V or a ii–V into its start, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Progressions.Turnaround" />).</summary>

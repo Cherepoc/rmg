@@ -265,6 +265,17 @@ neck, so where a genre tunes its riff down the riff and its twin play an octave 
 (`CompositionStateKinds.LineRaise`), Heavy metal's twin at 50-60-67 from 38-48-55, power chords and chugs twinned no
 more than before. Asked from 13 October 2026: `metal-twins-high`, the twin up the neck, and `folk-thumb`.
 
+Answered on 13 October 2026: `folk-thumb` (6 of 6) and `metal-twins-high` (4 to 2), both kept; but the twin still rarely
+interesting, its riff no figure: across a change of chord 8% of Heavy metal's riff notes kept the note a bar before (14%
+Rock's), each bar placed anew over its chord. Now a riff is a figure (`riff.hook`, 100-80-0 by the melody facet, every
+riff genre's), its repeated bars keeping their first bar's notes over the chords that follow where they fit, as a
+melody's hook does, the same note of the figure only, so that a polymeter's riff keeps to its cycle: kept across a
+change 32% (Heavy metal, Thrash 33%, Rock 41%, Funk 32%). Asked from 13 October 2026: `metal-twins-hook` and
+`rock-riff-hook`. Left, by what they say: the twin's sections played as a lead, the solo's expression on them, and
+the power chords handed to the rhythm guitar where the twin plays, so that twins sound in more than 5 of 128 of Heavy
+metal's songs. Failing at the corpus offset of a million before the hook as after it, to fix: a riff in power
+chords playing its twin (84 notes) and a chugging riff on its pedal 74% against a bound of 75%.
+
 Answered on 11 October 2026, late, the round of the plan of 11 October, and kept: `calm`, Black metal's calm sections
 (6 of 6); `techno-strip`, the dance tracks' stripped ending (6 of 6); `montuno`, Latin's (6 of 6); `djent-open`,
 Djent's drone with leaps (5 of 6); `appoggiatura`, the songs' own (5 of 6); `ballad`, its heavy chorus (5 of 6);

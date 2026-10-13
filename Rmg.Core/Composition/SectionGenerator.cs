@@ -114,6 +114,13 @@ internal sealed class SectionGenerator
     /// </summary>
     public static Probabilities.ByConvention DroneChance { get; } = new(0, 0, 0);
 
+    /// <summary>
+    ///     The chance a section's riff is a figure, its repeated bars keeping its first bar's notes over the chords that follow
+    ///     where they fit, rather than placed anew over each, by the melody facet: a convention, every time in a plain song and
+    ///     never in the wildest (<see cref="GenreChoices.Riff" />).
+    /// </summary>
+    public static Probabilities.ByConvention RiffHookChance { get; } = new(1, 0.8, 0);
+
     /// <summary>The chance a section's riff plays in power chords, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
     public static Probabilities.ByConvention PowerChordChance { get; } = new(0, 0, 0);
 
@@ -252,7 +259,9 @@ internal sealed class SectionGenerator
         // of its own, where it does not chug
         var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone"))) && !chugs;
         StateTrace.RecordSection(TracePoints.Drone, SectionTrace, sectionId, $"{drone}", drone);
-        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs, drone, form).ToArray();
+        var riffHook = Stream(sectionId, SectionStream.RiffHook).TestProbability(RiffHookChance.At(facets[Facet.Melody], _genre.Chance(GenreChoices.Riff, "hook")));
+        StateTrace.RecordSection(TracePoints.RiffHook, SectionTrace, sectionId, $"{riffHook}", riffHook);
+        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs, drone, riffHook, form).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
@@ -543,6 +552,7 @@ internal sealed class SectionGenerator
         bool powerChords,
         bool pedal,
         bool drone,
+        bool riffHook,
         SectionForm form
     )
     {
@@ -609,7 +619,8 @@ internal sealed class SectionGenerator
 
             // a line, placed with the song's, its pattern played twice as the section does, its figures played again as its
             // scheme has them: the bass leading and landing as its chords have it, the riff and the counter-melody leading
-            // into the chord changes by step now and then, each from a sequence of its own
+            // into the chord changes by step now and then, each from a sequence of its own; the riff's repeated bars on a
+            // hook as the section draws it, its first bar's notes kept over the chords that follow where they fit
             var role = _tracks.Definitions[trackNumber].Role;
             if (role is TrackRole.Bass or TrackRole.Riff or TrackRole.CounterMelody)
             {
@@ -627,7 +638,7 @@ internal sealed class SectionGenerator
                     ? [..harmonicRhythm.Changes.Select(x => (ChordArrival)barStateTimelineMap.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordArrival))]
                     : [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)];
                 var line = new SectionLine(trackNumber, profile, bars.Timeline.Repeat(2), Rebuilt, trackRhythm.Scheme.Across(meter.Phrases).Letters, harmonicRhythm, approaches, landings,
-                    profile.RegisterFreedom, StreamSeed(sectionId, improvisation), false);
+                    profile.RegisterFreedom, StreamSeed(sectionId, improvisation), role == TrackRole.Riff && riffHook);
                 yield return (trackNumber, bars with { Timeline = line.Appear(0, 0).Trim(meter.PatternDuration) }, line);
                 continue;
             }
@@ -1098,5 +1109,6 @@ internal enum SectionStream
     ArpeggioOrder = 61,
     Form = 62,
     CalmArpeggio = 63,
-    Boogie = 64
+    Boogie = 64,
+    RiffHook = 65
 }

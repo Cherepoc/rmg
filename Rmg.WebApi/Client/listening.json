@@ -1,124 +1,129 @@
 [
   {
-    "id": "metal-twins-high",
-    "question": "Heavy metal's single-note riff harmonised by its twin a third above, both an octave up where the twin plays, as twin leads play up the neck: the twin-guitar sound, or a riff cluttered?",
-    "decides": "Heavy metal's riff twin 25-35-35, played an octave above its lowered riff, after metal-twins heard the twin in the low register as clutter 0 to 6.",
+    "id": "metal-twins-hook",
+    "question": "Heavy metal's twin guitars on a figure, the riff keeping its first bar's notes over the chords that follow where they fit, harmonised a third above: twin leads, or a riff stuck?",
+    "decides": "Heavy metal's riff a figure, hook 100-80-0, against its notes placed anew over every chord.",
     "genre": "metal",
     "without": {
       "skip": [],
       "genre": {
-        "parts": {
-          "riffTwin": 0
+        "riff": {
+          "hook": 0
         }
       }
     },
     "seeds": [
       {
         "seed": "I",
-        "at": 8,
+        "at": 63.5,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Riff's twin (Overdriven Guitar)"
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
         "seed": "N",
-        "at": 0,
+        "at": 6,
         "listen": [
           "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
           "Riff's twin (Overdriven Guitar)"
         ]
       },
       {
         "seed": "r",
-        "at": 316,
+        "at": 320.3,
         "listen": [
+          "Bass (Electric Bass (pick))",
           "Riff (Overdriven Guitar)",
           "Riff's twin (Overdriven Guitar)"
         ]
       },
       {
         "seed": "u",
-        "at": 0,
+        "at": 276.6,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Riff's twin (Overdriven Guitar)"
+          "Bass (Electric Bass (pick))",
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
         "seed": "z",
-        "at": 0,
+        "at": 254.5,
         "listen": [
           "Riff (Overdriven Guitar)",
-          "Riff's twin (Overdriven Guitar)"
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
         "seed": "1p",
-        "at": 240.6,
+        "at": 177.6,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Riff's twin (Overdriven Guitar)"
+          "Bass (Electric Bass (pick))",
+          "Riff (Overdriven Guitar)"
         ]
       }
     ]
   },
   {
-    "id": "folk-thumb",
-    "question": "Folk's guitar picking with an alternating thumb, the root and the fifth on the beats by turns and the strings above off them: a fingerpicker, or a machine?",
-    "decides": "The alternating thumb, Folk's 60-60-50 ahead of its Alberti.",
-    "genre": "folk",
+    "id": "rock-riff-hook",
+    "question": "Rock's riff a figure, its first bar's notes kept over the chords that follow where they fit, its ends changing with them: a riff you remember, or a riff stuck?",
+    "decides": "The riff hook, every riff genre's 100-80-0, against the riff's notes placed anew over every chord.",
+    "genre": "rock",
     "without": {
       "skip": [],
       "genre": {
-        "arpeggio": {
-          "alternatingThumb": 0
+        "riff": {
+          "hook": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 114.9,
+        "seed": "2",
+        "at": 8.1,
         "listen": [
-          "Chords (Acoustic Guitar (steel))"
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 3.3,
+        "listen": [
+          "Riff (Distortion Guitar)"
         ]
       },
       {
         "seed": "5",
-        "at": 52.2,
+        "at": 76.8,
         "listen": [
-          "Rhythm part (Banjo)"
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
-        "seed": "B",
-        "at": 116,
+        "seed": "6",
+        "at": 44.2,
         "listen": [
-          "Rhythm part (Acoustic Guitar (nylon))",
-          "Chords (Acoustic Guitar (steel))"
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "M",
-        "at": 102.4,
+        "seed": "I",
+        "at": 38.9,
         "listen": [
-          "Rhythm part (Acoustic Guitar (steel))"
+          "Riff (Overdriven Guitar)",
+          "Riff's twin (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
         "seed": "N",
-        "at": 54.3,
+        "at": 16.5,
         "listen": [
-          "Chords (Acoustic Guitar (steel))",
-          "Rhythm part (Acoustic Guitar (nylon))"
-        ]
-      },
-      {
-        "seed": "W",
-        "at": 15.5,
-        "listen": [
-          "Rhythm part (Acoustic Guitar (nylon))"
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       }
     ]

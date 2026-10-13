@@ -354,6 +354,9 @@ internal static class TracePoints
     /// <summary>Whether a section's riff plays its weak notes on a drone (a <c>bool</c>; <see cref="Composition.SectionGenerator.DroneChance" />).</summary>
     public const string Drone = "Drone";
 
+    /// <summary>Whether a section's riff is a figure, its first bar's notes kept over the chords that follow (a <c>bool</c>; <see cref="Composition.SectionGenerator.RiffHookChance" />).</summary>
+    public const string RiffHook = "Riff hook";
+
     /// <summary>Whether a section's snare plays ghost notes (a <c>bool</c>; <see cref="Composition.Ghosts" />).</summary>
     public const string Ghosts = "Ghosts";
 

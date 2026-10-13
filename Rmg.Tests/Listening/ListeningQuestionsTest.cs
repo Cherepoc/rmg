@@ -46,12 +46,12 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("metal-twins-high", "Heavy metal's single-note riff harmonised by its twin a third above, both an octave up where the twin plays, as twin leads play up the neck: the twin-guitar sound, or a riff cluttered?",
-            "Heavy metal's riff twin 25-35-35, played an octave above its lowered riff, after metal-twins heard the twin in the low register as clutter 0 to 6.", "metal", [], new() { ["parts"] = new() { ["riffTwin"] = 0 } },
+        new("metal-twins-hook", "Heavy metal's twin guitars on a figure, the riff keeping its first bar's notes over the chords that follow where they fit, harmonised a third above: twin leads, or a riff stuck?",
+            "Heavy metal's riff a figure, hook 100-80-0, against its notes placed anew over every chord.", "metal", [], new() { ["riff"] = new() { ["hook"] = 0 } },
             x => x.Absent.Contains(TrackRole.RiffTwin) ? null : Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.RiffTwin))?.Select(n => (double?)n.Position).FirstOrDefault(), 1)),
-        new("folk-thumb", "Folk's guitar picking with an alternating thumb, the root and the fifth on the beats by turns and the strings above off them: a fingerpicker, or a machine?",
-            "The alternating thumb, Folk's 60-60-50 ahead of its Alberti.", "folk", [], new() { ["arpeggio"] = new() { ["alternatingThumb"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Arpeggio, v => (ArpeggioPattern)v! == ArpeggioPattern.AlternatingThumb), 1))
+        new("rock-riff-hook", "Rock's riff a figure, its first bar's notes kept over the chords that follow where they fit, its ends changing with them: a riff you remember, or a riff stuck?",
+            "The riff hook, every riff genre's 100-80-0, against the riff's notes placed anew over every chord.", "rock", [], new() { ["riff"] = new() { ["hook"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.RiffHook, v => (bool)v!), 1))
 
     ];
 
