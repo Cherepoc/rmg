@@ -711,8 +711,13 @@ with its questions after each group:
    shape over 64 songs, the squelch, 12/8's backbeat, Latin's clave resting) with *Planned: the genres as their records
    play them*'s group V (a long pattern's inner chords, the clave's span, the one drop, Funk's swing, Ska's skank,
    Disco's octave bass, double time's hats, the minor cadences, the data errors).
-2. **The retunes of the genres researched with a search** (*…as their records play them*, group R): Funk, Fusion,
-   Classical; Jazz's tempo only after swing by tempo (step 4). Done: House's chords minor sevenths and ninths on a
+2. Done (13 October 2026): **the retunes of the genres researched with a search** (*…as their records play them*,
+   group R), but Jazz's tempo, after swing by tempo (step 4). Funk's 16ths swung in all of its 25 swinging songs (5 of
+   11, the rest shuffling), its vamps, fewer fills, the bridge on IV, chromatic slides and the drums alone (asked:
+   `funk-swing`); Fusion's driven lead and violin, to 180, swells, a gliding fretless, 9/8, 5/8 and 11/8, 4:29-6:47
+   (2:34-6:52 before), a phaser or wah, pedals and vamps; Classical's minor cadences on V 61% (36%), from 66, a piano
+   melody, eight-bar phrases, appoggiaturas, 12/8 (asked: `classical-cadence`), its floor 60 until the tempo goes under
+   it (*Planned: dark jazz*'s step 2). Done: House's chords minor sevenths and ninths on a
    Rhodes, piano or organ, Dorian and major more, a shaker and the filter's sweep (asked: `house-sevenths`); Techno 6:27-
    8:18 (its songs 3:03-13:43 before, the report's claim of short ones refuted), Detroit's sevenths and Dorian, a shaker;
    IDM's double time 27% (10%), major 16% (6%), a piano, strings and acoustic kits, tape at its plain end; Hip-hop
@@ -821,8 +826,8 @@ wild end, a rock solo, metal's twin leads, a slow genre's half time, is data, no
    chords move.
 2. Done (13 October 2026): measured, the code's fixed and the data's for the retunes (step 2). Latin's clave over a bar
    (step 4's commit); double time's drum keeping time no finer than 8ths, Thrash's double-time hats in 16ths 53% → 0%
-   of their gaps (fills and rolls 1.4%), a skank beat's. For the retunes: Funk's swing an 8th's shuffle in 5 of its 11
-   swinging songs, none in 16ths (its `feelValues` to 16ths); Reggae's skank on all four offbeats at its slow count, four
+   of their gaps (fills and rolls 1.4%), a skank beat's. For the retunes: Funk's swing an 8th's shuffle in 6 of its 11
+   swinging songs, at 108-116 (its `feelValues` to 16ths); Reggae's skank on all four offbeats at its slow count, four
    to a drop where the records have two (its chords' and rhythm's period doubled, on 2 and 4); Disco's bass moving an
    octave in 17% of its moves for octave bass in 60-70% of its sections (its bass in steady 8ths); Ska's skank right,
    every offbeat at its 140-170.

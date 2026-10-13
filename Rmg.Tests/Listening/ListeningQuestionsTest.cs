@@ -66,7 +66,13 @@ public sealed class ListeningQuestionsTest
             x => x.Absent.Contains(TrackRole.Chords) ? null : x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Chords))?.Select(n => (double?)n.Position).FirstOrDefault()),
         new("hiphop-kit", "Hip-hop's beat on an acoustic kit, its snare a real one, as a sampled break, where it was a TR-808's clap: boom bap, or a band?",
             "Hip-hop's standard and room kits first, the TR-808 40-50-60, its acoustic snare 100 and claps 30-40-60.", "hipHop", [], new() { ["kit"] = new() { ["standard"] = 0, ["room"] = 0, ["tr808"] = 100 } },
-            x => x.Absent.Contains(TrackRole.Drum) ? null : (double?)x.Map.Sections[0].Start)
+            x => x.Absent.Contains(TrackRole.Drum) ? null : (double?)x.Map.Sections[0].Start),
+        new("funk-swing", "Funk's 16ths swung lightly at every tempo, where above about 107 it swung its 8ths, a shuffle: the funk pocket, or a stiff groove?",
+            "Funk's 16ths swung, sixteenths 100 and swing 20, against the songs' 50 and 50.", "funk", [], new() { ["feelValues"] = new() { ["sixteenths"] = 50, ["swing"] = 50 } },
+            x => x.Swing.Delay > 0 ? (double?)x.Map.Sections[0].Start : null),
+        new("classical-cadence", "Classical's minor sections closing on V, V to i, where they closed on ♭VII or IV as often: a classical cadence, or a predictable one?",
+            "Classical's cadence degree leaning to the fifth, 100, and away from the seventh, 20.", "classical", [], new() { ["cadenceDegree"] = new() { ["fifth"] = 50, ["seventh"] = 50 } },
+            x => (double?)x.Map.Sections[0].Start)
 
     ];
 

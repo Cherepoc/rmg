@@ -445,5 +445,136 @@
         ]
       }
     ]
+  },
+  {
+    "id": "funk-swing",
+    "question": "Funk's 16ths swung lightly at every tempo, where above about 107 it swung its 8ths, a shuffle: the funk pocket, or a stiff groove?",
+    "decides": "Funk's 16ths swung, sixteenths 100 and swing 20, against the songs' 50 and 50.",
+    "genre": "funk",
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelValues": {
+          "sixteenths": 50,
+          "swing": 50
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 114.1,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))",
+          "Chords (Electric Guitar (clean))",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 160.8,
+        "listen": [
+          "Melody (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "K",
+        "at": 66.5,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))",
+          "Hi-Hat",
+          "Riff (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 38.2,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))",
+          "Bass (Slap Bass 2)"
+        ]
+      },
+      {
+        "seed": "X",
+        "at": 14.1,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))",
+          "Bass (Slap Bass 1)",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "s",
+        "at": 124.6,
+        "listen": [
+          "Kick",
+          "Bass (Electric Bass (finger))",
+          "Riff (Clavinet)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "classical-cadence",
+    "question": "Classical's minor sections closing on V, V to i, where they closed on ♭VII or IV as often: a classical cadence, or a predictable one?",
+    "decides": "Classical's cadence degree leaning to the fifth, 100, and away from the seventh, 20.",
+    "genre": "classical",
+    "without": {
+      "skip": [],
+      "genre": {
+        "cadenceDegree": {
+          "fifth": 50,
+          "seventh": 50
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "4",
+        "at": 93.8,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 49.1,
+        "listen": [
+          "Melody (Oboe)",
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 118.9,
+        "listen": [
+          "Melody (Violin)"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 60.2,
+        "listen": [
+          "Melody (Clarinet)"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 19.2,
+        "listen": [
+          "Melody (Flute)",
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 58.4,
+        "listen": [
+          "Melody (Clarinet)",
+          "Chords (Acoustic Grand Piano)"
+        ]
+      }
+    ]
   }
 ]
