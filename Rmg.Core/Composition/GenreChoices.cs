@@ -466,12 +466,13 @@ public static class GenreChoices
     /// <summary>A last section that came back before played once more, as a last chorus (<see cref="SongForms.LastRepeatChance" />).</summary>
     public static GenreChoice LastRepeat { get; } = Chances("lastRepeat", "Last repeat", [("songs", "A last chorus played twice", SongForms.LastRepeatChance)]);
 
-    /// <summary>A line doubled: in octaves by its own part, the melody harmonised by the counter-melody, in three voices now and then, the bass with the riff (<see cref="LineDoubling" />).</summary>
+    /// <summary>A line doubled: in octaves by its own part, the melody harmonised by the counter-melody, in three voices now and then, the bass with the riff, the riff's twin leading a section (<see cref="LineDoubling" />).</summary>
     public static GenreChoice Doubling { get; } = Chances("doubling", "Doubling",
     [
         ("octaves", "Lines in octaves", LineDoubling.OctaveChance), ("harmony", "The melody harmonised", LineDoubling.HarmonyChance),
         ("riff", "The bass with the riff", LineDoubling.RiffChance),
-        ("block", "The melody harmonised in three voices", LineDoubling.BlockChance)
+        ("block", "The melody harmonised in three voices", LineDoubling.BlockChance),
+        ("twin", "Sections the riff's twin leads", LineDoubling.TwinLeadChance)
     ]);
 
     /// <summary>A part switching its instrument in a section (<see cref="InstrumentsOverTime" />).</summary>

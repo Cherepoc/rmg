@@ -412,6 +412,9 @@ internal sealed record SongDecisions(
         // whose answers are in its solos' vocabulary, each from a sequence of its own, by the melody facet, and the drummer by
         // the fills facet
         var soloing = solos.Values.SelectMany(x => x.Soloists);
+        // and the riff where its twin leads a section, played as the riff's solos are
+        if (sections.Any(x => x.TwinLead))
+            soloing = soloing.Append(TrackRole.Riff);
         if (!absent.Contains(TrackRole.Solo) && tracks.Definitions.Values.Any(x => x.Role == TrackRole.Solo))
             soloing = soloing.Append(TrackRole.Solo);
         var soloists = soloing.Distinct().ToDictionary(

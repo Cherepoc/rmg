@@ -17,8 +17,8 @@ namespace Rmg.Core.Composition;
 ///     the section, and in a plain song as in a wild one, a part playing one doubling at a time. Neither plainer nor
 ///     stranger, a doubling by another part does not lean by the song's unconventionality, but the twin's
 ///     interval, by the song's melody facet: a third or a sixth in a middling song, and the wilder the song, the oftener a
-///     fourth, a fifth, a second or a seventh. A twin harmonises a lead line, up the neck: never a riff in power chords or
-///     chugs, and where a genre tunes its riff down, the riff and its twin play an octave up where the twin plays, where
+///     fourth, a fifth, a second or a seventh. A twin harmonises a lead line, up the neck, in the sections it leads
+///     (<see cref="TwinLeadChance" />), and where a genre tunes its riff down, the riff and its twin play an octave up where the twin plays, where
 ///     the songs' riffs do, rather than thirds in the mud.
 /// </summary>
 internal static class LineDoubling
@@ -73,6 +73,16 @@ internal static class LineDoubling
     ];
 
 
+    /// <summary>
+    ///     The chance a section of a song with a twin is the twin's, a lead line: the riff in single notes, busier, played as a
+    ///     soloist plays, and its twin with it; a section that is not plays no twin. As often in a plain song as a wild one,
+    ///     as whether the song has a twin leans already (<see cref="SongParts.TwinChance" />).
+    /// </summary>
+    public static ByConvention TwinLeadChance { get; } = new(0.5, 0.5, 0.5);
+
+    /// <summary>How much fuller a twin lead's riff is than the song's, a lead line busier than a riff.</summary>
+    public const double TwinLeadFullness = 0.3;
+
     /// <summary>The chance a counter-melody doubling the melody plays it in the melody's sound, twin leads a third apart.</summary>
     public const double TwinTimbreChance = 0.5;
 
@@ -112,7 +122,7 @@ internal static class LineDoubling
     /// <param name="melody">The song's melody facet, which the steps lean by.</param>
     /// <param name="sound">The song's sound facet, which the octaves lean by.</param>
     /// <param name="energies">Every appearance's energy, by its place, which the octaves lean by too.</param>
-    /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords or chugs, which may make it power chords, by its place, which plays no twin.</param>
+    /// <param name="twinLeads">Whether an appearance is one its twin leads in, by its place, the only kind that plays a twin.</param>
     /// <param name="twinRests">Whether an appearance, by its place, leaves the riff's twin out, which then plays none of the riff.</param>
     /// <param name="playsAFigure">Whether a part plays a figure in an appearance, by its place, which no doubling into it replaces (<see cref="Figures" />).</param>
     /// <param name="drivenRiff">Whether the riff plays on a driven guitar in a section, by its place among the song's sections, whose phrases the bass plays wherever it would rest in them.</param>
@@ -129,7 +139,7 @@ internal static class LineDoubling
         Func<int, int, IGenerationContext> streams,
         Func<int, IGenerationContext> timbres,
         Func<int, IGenerationContext> blocks,
-        Func<int, bool> riffPowerChords,
+        Func<int, bool> twinLeads,
         Func<int, bool> twinRests,
         Func<int, TrackRole, bool> playsAFigure,
         Func<int, bool> drivenRiff,
@@ -167,10 +177,9 @@ internal static class LineDoubling
                 var step = context.Pick(ByConvention.Lean(steps, melody, intervals));
                 var events = song.TrackTimelineMap;
                 bool Plays(int track) => events[track].EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
-                // a riff in power chords plays no twin, whose third over a distorted fifth is mud, nor does an appearance that
-                // leaves the twin out, a calm section's
+                // a twin in the sections it leads alone, but an appearance that leaves it out, a calm section's
                 // nor into a part playing a figure there, the bass's rolling or offbeat rhythm, which it keeps as a pedal is kept
-                if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && (riffPowerChords(index) || twinRests(index)) || playsAFigure(index, target))
+                if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && (!twinLeads(index) || twinRests(index)) || playsAFigure(index, target))
                     continue;
 
                 StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));

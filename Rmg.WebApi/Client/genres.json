@@ -67,7 +67,7 @@
       },
       "arpeggio": { "none": 100, "up": [15, 15, 25], "upDown": [12, 12, 20], "pairs": [0, 3, 15], "rootFifth": [0, 0, 15] },
       "lastRepeat": { "songs": [20, 40, 40] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": [25, 35, 35], "riff": [50, 50, 50] }
+      "doubling": { "octaves": [7, 11, 15], "harmony": [25, 35, 35], "riff": [50, 50, 50], "twin": 50 }
     }
   },
   {
@@ -77,7 +77,7 @@
     "choices": {
       "figure": { "time": { "own": [20, 30, 40], "swingRide": 100 } },
       "length": { "from": [180, 200, 180], "to": [360, 420, 600] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": [100, 50, 0], "block": [0, 10, 25] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": [100, 50, 0], "block": [0, 10, 25], "twin": 50 },
       "vamp": { "sections": [0, 10, 25] },
       "sung": { "halves": [60, 40, 30] },
       "rudiments": { "flams": [0, 25, 60], "drags": [0, 40, 80] },
@@ -387,7 +387,7 @@
       },
       "sectionChanges": {},
       "lastRepeat": { "songs": [20, 40, 40] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": 35 },
+      "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": 35, "twin": 50 },
       "space": { "melody": 70, "pad": 70, "drum": 65, "chords": 60 }
     }
   },
@@ -542,7 +542,7 @@
     "choices": {
       "sung": { "halves": [100, 80, 60] },
       "callAndResponse": { "sections": [10, 30, 40] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50 },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50, "twin": 50 },
       "figure": { "claves": { "own": 5, "clave32": 60, "clave23": 30 }, "bass": { "own": [20, 30, 40], "tumbao": 100 } },
       "louderForms": { "guitars": 0 },
       "pins": { "time": [100, 100, 70], "ground": [80, 80, 50], "bass": [80, 80, 50] },
@@ -612,7 +612,7 @@
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": [0, 20, 50], "drags": [0, 30, 70] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60 },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60, "twin": 50 },
       "drumSetup": { "kit": 100, "kitAndPercussion": [20, 30, 40] },
       "ghosts": { "sections": [50, 70, 80] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 40, "tom": 50, "cymbal": 70, "tambourine": [30, 40, 50], "cowbell": [10, 20, 30], "conga": [10, 20, 30] },
@@ -1014,7 +1014,7 @@
       "ending": { "button": 100, "stop": [80, 80, 80], "ringOut": [60, 60, 60], "big": 70 },
       "levels": { "riff": 70, "drum": 65 },
       "dynamics": { "energy": 85, "contrast": 60, "evenness": 75 },
-      "doubling": { "octaves": [7, 11, 15], "harmony": [40, 50, 50], "riff": [90, 90, 80] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": [40, 50, 50], "riff": [90, 90, 80], "twin": 50 },
       "instrument": {
         "melody": { "lead5Charang": 100, "electricGuitarClean": [40, 40, 60], "lead2Sawtooth": [20, 20, 40] },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 80, "electricGuitarClean": [10, 20, 20] },
@@ -1095,7 +1095,7 @@
       "ending": { "button": 100, "stop": [80, 80, 80], "ringOut": [60, 60, 60], "big": 60 },
       "levels": { "riff": 70, "drum": 65 },
       "dynamics": { "energy": 90, "contrast": 50, "evenness": 80 },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 90, 80] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 90, 80], "twin": 50 },
       "instrument": {
         "melody": { "lead5Charang": 100, "distortionGuitar": 60, "lead2Sawtooth": [10, 20, 30] },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 50 },
@@ -1174,7 +1174,7 @@
       "ending": { "ringOut": 100, "button": 60, "stop": 40, "big": 50 },
       "levels": { "riff": 70, "drum": 65 },
       "dynamics": { "energy": 80, "contrast": 70, "evenness": 75 },
-      "doubling": { "octaves": [10, 15, 20], "harmony": [35, 45, 45], "riff": [90, 90, 80] },
+      "doubling": { "octaves": [10, 15, 20], "harmony": [35, 45, 45], "riff": [90, 90, 80], "twin": 50 },
       "instrument": {
         "melody": { "violin": 70, "lead6Voice": 100, "lead5Charang": 40, "flute": [0, 10, 20] },
         "chords": { "distortionGuitar": 100, "churchOrgan": [20, 30, 40], "overdrivenGuitar": 40 },
@@ -1253,7 +1253,7 @@
       "ending": { "ringOut": 100, "stop": 40, "button": 40, "big": 40 },
       "levels": { "riff": 70, "drum": 65, "bass": 60 },
       "dynamics": { "energy": 70, "contrast": 60, "evenness": 75 },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 90, 80] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 90, 80], "twin": 50 },
       "instrument": {
         "melody": { "overdrivenGuitar": 100, "electricGuitarClean": [30, 30, 40], "lead6Voice": [20, 30, 40] },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 60, "churchOrgan": [10, 20, 30] },
@@ -1309,7 +1309,7 @@
       "harmonyDevices": { "pedal": [60, 60, 50], "reharmonised": 0, "innerLine": 0 },
       "harmonicRhythm": { "twoBars": 100, "oneBar": [40, 40, 60] },
       "harmonyInterval": { "fourths": 100, "thirds": [30, 40, 60] },
-      "doubling": { "harmony": [60, 70, 70], "octaves": [7, 11, 15], "riff": 0 },
+      "doubling": { "harmony": [60, 70, 70], "octaves": [7, 11, 15], "riff": 0, "twin": 0 },
       "lineScale": { "section": 100, "pentatonic": 40 },
       "melodyRange": { "wide": 40 },
       "arpeggio": { "none": 100, "up": [10, 20, 30], "upDown": [10, 10, 20], "alternatingThumb": [20, 20, 20] },
@@ -1476,7 +1476,7 @@
       "drumSounds": { "china": 90 },
       "drumStrokes": { "china": 90 },
       "pins": { "backbeat": [80, 80, 60], "time": [70, 70, 50] },
-      "doubling": { "riff": [90, 90, 80], "octaves": [7, 11, 15], "harmony": 25 },
+      "doubling": { "riff": [90, 90, 80], "octaves": [7, 11, 15], "harmony": 25, "twin": 50 },
       "fills": { "amount": 60 },
       "stopTime": { "sections": [0, 5, 10] },
       "dynamics": { "energy": 80, "contrast": 60, "evenness": 85 },
@@ -1529,7 +1529,7 @@
       "vamp": { "sections": [40, 50, 50] },
       "riff": { "chugs": [80, 80, 70], "powerChords": [70, 70, 60], "hook": [100, 80, 0] },
       "register": { "riff": 0 },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 90, 80] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 90, 80], "twin": 50 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [30, 30, 50], "counterMelody": [20, 20, 30], "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [70, 70, 60], "solo": [0, 5, 20] },
       "voice": { "verses": [50, 60, 60] },
       "dynamics": { "energy": 70, "contrast": 85, "evenness": 75 },
@@ -1847,7 +1847,7 @@
     "choices": {
       "sung": { "halves": [100, 80, 60] },
       "ghosts": { "sections": [10, 20, 30] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50 },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50, "twin": 50 },
       "louderForms": { "guitars": 0, "quieter": 0 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 50, "tom": 50, "cymbal": 70 },
       "stopTime": { "sections": [5, 10, 15] },
@@ -1978,7 +1978,7 @@
       "harmonyDevices": { "reharmonised": [0, 25, 25], "innerLine": [0, 15, 30], "pedal": [10, 20, 30] },
       "insertion": { "none": 100, "phaser": [10, 20, 30], "wah": [5, 10, 20] },
       "length": { "from": [210, 240, 240], "to": [420, 480, 600] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [60, 60, 60], "block": [0, 0, 0] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [60, 60, 60], "block": [0, 0, 0], "twin": 0 },
       "glide": { "bass": [10, 20, 30] },
       "sung": { "halves": [30, 20, 10] },
       "ensembleHits": { "sections": [15, 25, 35] },
@@ -2037,7 +2037,7 @@
       "sung": { "halves": [100, 80, 60] },
       "callAndResponse": { "sections": [15, 40, 50] },
       "rudiments": { "flams": [0, 20, 50], "drags": [0, 25, 60] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60 },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 60, "twin": 0 },
       "louderForms": { "guitars": 0, "quieter": 0 },
       "ghosts": { "sections": [40, 55, 70] },
       "stopTime": { "sections": [5, 10, 15] },
@@ -2256,7 +2256,7 @@
       "drumPieces": { "tom": 100, "cymbal": 80, "acousticSnare": 50, "kick": [0, 20, 40], "triangle": 40 },
       "drumJob": { "marks": [80, 80, 50], "groove": [20, 20, 50] },
       "marks": { "often": 55, "swells": 70 },
-      "doubling": { "octaves": [20, 30, 40], "harmony": [20, 30, 30], "riff": 0 },
+      "doubling": { "octaves": [20, 30, 40], "harmony": [20, 30, 30], "riff": 0, "twin": 0 },
       "dynamics": { "energy": 50, "contrast": 90, "lift": 100, "evenness": 40 },
       "texture": { "build": 100, "steady": 60, "thin": 40, "alone": [20, 30, 40] },
       "effects": { "vibrato": [40, 60, 80], "swell": [30, 50, 70], "bends": [0, 0, 10], "chorus": 0, "tone": 0, "tape": 0, "pinch": 0, "dive": 0 },
@@ -2331,7 +2331,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 80, 60] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 80, 60], "twin": 50 },
       "length": { "from": [270, 270, 240], "to": [420, 450, 600] },
       "sung": { "halves": [30, 20, 10] },
       "turnaround": { "sections": 0 },

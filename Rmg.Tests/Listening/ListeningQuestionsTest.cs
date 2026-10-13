@@ -48,12 +48,10 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("metal-twins-hook", "Heavy metal's twin guitars on a figure, the riff keeping its first bar's notes over the chords that follow where they fit, harmonised a third above: twin leads, or a riff stuck?",
-            "Heavy metal's riff a figure, hook 100-80-0, against its notes placed anew over every chord.", "metal", [], new() { ["riff"] = new() { ["hook"] = 0 } },
-            x => x.Absent.Contains(TrackRole.RiffTwin) ? null : Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.RiffTwin))?.Select(n => (double?)n.Position).FirstOrDefault(), 1)),
-        new("rock-riff-hook", "Rock's riff a figure, its first bar's notes kept over the chords that follow where they fit, its ends changing with them: a riff you remember, or a riff stuck?",
-            "The riff hook, every riff genre's 100-80-0, against the riff's notes placed anew over every chord.", "rock", [], new() { ["riff"] = new() { ["hook"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.RiffHook, v => (bool)v!), 1))
+        new("metal-twin-lead", "Heavy metal's twin leads, a section's riff in single notes, busier, with vibrato and bends, its twin a third above, the chords to the rhythm guitar: twin leads, or a riff cluttered?",
+            "Heavy metal's twin leads, doubling.twin 50, against no twin and its riff in power chords as before.", "metal", [], new() { ["doubling"] = new() { ["twin"] = 0 } },
+            x => FirstSection(x, TracePoints.TwinLead, v => (bool)v!),
+            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.TwinLead && t.Section == span.SectionId && (bool)t.Value!))
 
     ];
 

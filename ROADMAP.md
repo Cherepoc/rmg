@@ -271,10 +271,15 @@ Rock's), each bar placed anew over its chord. Now a riff is a figure (`riff.hook
 riff genre's), its repeated bars keeping their first bar's notes over the chords that follow where they fit, as a
 melody's hook does, the same note of the figure only, so that a polymeter's riff keeps to its cycle: kept across a
 change 32% (Heavy metal, Thrash 33%, Rock 41%, Funk 32%). Asked from 13 October 2026: `metal-twins-hook` and
-`rock-riff-hook`. Left, by what they say: the twin's sections played as a lead, the solo's expression on them, and
-the power chords handed to the rhythm guitar where the twin plays, so that twins sound in more than 5 of 128 of Heavy
-metal's songs. Failing at the corpus offset of a million before the hook as after it, to fix: a riff in power
-chords playing its twin (84 notes) and a chugging riff on its pedal 74% against a bound of 75%.
+`rock-riff-hook`, kept (6 of 6, 5 to 1), but one song of each heard interesting, the one whose twin played a busy
+single-note line up the neck; the rest held chords a few notes a bar, and a figure's first statement went unheard, its
+songs heard from where they first differed, its repeats. Now a question's songs are heard from a pattern's start, in
+the sections its device plays in (`ListeningQuestionsTest`'s `In`); and a song with a twin draws a twin lead in each
+section (`doubling.twin`, 50, the twin genres'), the riff there in single notes, busier, played as the riff's soloist
+plays, its vibrato, bends and slides, the twin's alike, and the twin there alone: Heavy metal's twin sounding in 38 of
+its 41 songs with one (5), 7.1 notes a bar where it leads, 87% of its held notes with a vibrato. Asked from 13 October
+2026: `metal-twin-lead`. Failing at the corpus offset of a million before as after, to fix: a chugging riff on its
+pedal 74% against a bound of 75%.
 
 Answered on 11 October 2026, late, the round of the plan of 11 October, and kept: `calm`, Black metal's calm sections
 (6 of 6); `techno-strip`, the dance tracks' stripped ending (6 of 6); `montuno`, Latin's (6 of 6); `djent-open`,

@@ -708,10 +708,12 @@ internal static class Expression
                     var isSolo = note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;
                     // a solo's note plays as its soloist leans, its strength in place of the part's, and the more intense the
                     // solo there, the bigger and the oftener; whether it bends at all is the soloist's choice, not the song's,
-                    // which is the band's, but where it echoes
-                    var soloist = isSolo ? soloists.GetValueOrDefault(role) : null;
+                    // which is the band's, but where it echoes; and a twin lead's as the riff's soloist, its twin's alike, as it
+                    // draws as the riff does, at a middling intensity
+                    var leads = note.Value.State.GetStateValue(CompositionStateKinds.TwinLead) == 1;
+                    var soloist = isSolo ? soloists.GetValueOrDefault(role) : leads ? soloists[TrackRole.Riff] : null;
                     var bends = (soloist is null ? bendsHere : soloist.Bends && !echoes) && isLine && Bends(noteProgram);
-                    var intensity = Tilt.Of(SoloOdds, 2 * note.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0 - 1);
+                    var intensity = leads ? new Tilt(0) : Tilt.Of(SoloOdds, 2 * note.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0 - 1);
                     var soloLean = soloist is null ? lean : new Tilt(Tilt.Of(StrengthOdds, soloist.BendLean).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds + intensity.LogOdds);
                     // every note draws whether it bends, and how, so that the draws stay as they are
                     // a release bends into it now and then, the likelier the more intense, and slides into it never

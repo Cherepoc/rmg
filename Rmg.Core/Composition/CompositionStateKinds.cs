@@ -125,6 +125,9 @@ internal static class CompositionStateKinds
     // ones its melody an octave or more over it, as a black metal or a djent riff leaps between the string and the frets
     public static StateKind<int> LineDrone { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineDrone", StateScope.Render);
 
+    // 1 for a riff's note in a section its twin leads in, played as a soloist plays, its twin's too
+    public static StateKind<int> TwinLead { get; } = StateKinds.CreateAdditive<int>(Prefix + "TwinLead", StateScope.Render);
+
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 

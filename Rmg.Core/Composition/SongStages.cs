@@ -324,7 +324,7 @@ internal static class SongStages
                 (pair, section) => song.Stream(SongStream.LineDoubling, pair, section),
                 section => song.Stream(SongStream.TwinTimbres, section),
                 section => song.Stream(SongStream.BlockHarmony, section),
-                index => song.Sections[index].RiffPowerChords || song.Sections[index].Chugs,
+                index => song.Sections[index].TwinLead,
                 index => song.Sections[index].Resting.Contains(TrackRole.RiffTwin),
                 (index, role) => draft.Figures.GetValueOrDefault(song.Form.Map.Sections[index].SectionId)?.Keys.Any(x => Figures.RoleOf(x) == role) == true,
                 // as the section's form plays it, a heavy section's guitars driven and a calm one's clean

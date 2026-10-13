@@ -244,6 +244,13 @@ internal sealed class SectionGenerator
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
         var drums = _drums.GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads, sectionRoles, sectionStrokes, barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
         var (powerChords, chugs, octaveBass, hooks) = DrawDevices(sectionId, plan.Role, facets);
+        // a section its riff's twin leads in, in a song with a twin, from a sequence of its own: the riff in single notes, never
+        // in power chords nor chugs, but a breakdown's
+        var twinLead = Stream(sectionId, SectionStream.TwinLead).TestProbability(LineDoubling.TwinLeadChance.At(facets[Facet.Melody], _genre.Chance(GenreChoices.Doubling, "twin")))
+                       && !_absent.Contains(TrackRole.RiffTwin) && !breakdown;
+        StateTrace.RecordSection(TracePoints.TwinLead, SectionTrace, sectionId, $"{twinLead}", twinLead);
+        (powerChords, chugs) = (powerChords && !twinLead, chugs && !twinLead);
+        StateTrace.RecordSection(TracePoints.RiffPowerChords, SectionTrace, sectionId, $"{powerChords}", powerChords);
         // a breakdown's riff chugging on its pedal
         chugs |= breakdown;
         StateTrace.RecordSection(TracePoints.Chugs, SectionTrace, sectionId, $"{chugs}", chugs);
@@ -257,11 +264,11 @@ internal sealed class SectionGenerator
         StateTrace.RecordSection(TracePoints.Boogie, SectionTrace, sectionId, $"{boogie}", boogie);
         // its riff droning now and then, its weak notes on an open string and its melody above it, a genre's, from a sequence
         // of its own, where it does not chug
-        var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone"))) && !chugs;
+        var drone = Stream(sectionId, SectionStream.Drone).TestProbability(DroneChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "drone"))) && !chugs && !twinLead;
         StateTrace.RecordSection(TracePoints.Drone, SectionTrace, sectionId, $"{drone}", drone);
         var riffHook = Stream(sectionId, SectionStream.RiffHook).TestProbability(RiffHookChance.At(facets[Facet.Melody], _genre.Chance(GenreChoices.Riff, "hook")));
         StateTrace.RecordSection(TracePoints.RiffHook, SectionTrace, sectionId, $"{riffHook}", riffHook);
-        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs, drone, riffHook, form).ToArray();
+        var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs, drone, riffHook, twinLead, form).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
@@ -291,6 +298,7 @@ internal sealed class SectionGenerator
             // the power chords its riff plays, a drone's single notes none
             powerChords && !drone,
             chugs,
+            twinLead,
             octaveBass,
             boogie ? Boogie : alternatingBass ? RootAndFifth : [],
             breakdown,
@@ -419,7 +427,6 @@ internal sealed class SectionGenerator
     {
         // its riff in power chords, a genre's, which the songs never play, from a sequence of its own
         var powerChords = Stream(sectionId, SectionStream.PowerChords).TestProbability(PowerChordChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "powerChords")));
-        StateTrace.RecordSection(TracePoints.RiffPowerChords, SectionTrace, sectionId, $"{powerChords}", powerChords);
         // its guitars' and its picked bass's repeats palm-muted, a genre's, which the songs never play, from a sequence of its own
         var chugs = Stream(sectionId, SectionStream.Chugs).TestProbability(ChugChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "chugs")));
         // the bass in octaves now and then, a genre's the more, from a sequence of its own
@@ -553,6 +560,7 @@ internal sealed class SectionGenerator
         bool pedal,
         bool drone,
         bool riffHook,
+        bool twinLead,
         SectionForm form
     )
     {
@@ -573,7 +581,7 @@ internal sealed class SectionGenerator
 
             // each track from a sequence of its own
             var context = Stream(sectionId, SectionStream.PitchedTracks, trackNumber);
-            var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal, drone, form);
+            var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, pedal, drone, twinLead, form);
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
             {
                 yield return (trackNumber, GeneratePad(trackNumber, trackStateMap, barStateTimelineMap, harmonicRhythm, meter), null);
@@ -690,7 +698,7 @@ internal sealed class SectionGenerator
     ///     busyness, the melody's and the riff's line scales, the riff in power chords, the chords broken now and then, and
     ///     its fullness by the section's energy, over the section's state.
     /// </summary>
-    private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords, bool pedal, bool drone, SectionForm form)
+    private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords, bool pedal, bool drone, bool twinLead, SectionForm form)
     {
         // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
         // and is as busy as the section has it
@@ -719,6 +727,9 @@ internal sealed class SectionGenerator
                 sectionTrackLayer.Add(CompositionStateKinds.LineDrone, 1);
             else if (powerChords && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
                 sectionTrackLayer.Add(CompositionStateKinds.PowerChord, 1);
+            // a riff its twin leads with, busier, played as a soloist plays
+            if (twinLead && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
+                sectionTrackLayer.Add(CompositionStateKinds.TwinLead, 1).Add(CompositionStateKinds.Rhythm.Fullness, LineDoubling.TwinLeadFullness);
         }
         // a line's device's chance, as the part and the genre have it, by the section's melody facet
         void AddLine(StateKind<double> kind, ImmutableArray<(TrackRole Role, ByConvention Chance)> chances, GenreChoice? choice)
@@ -895,6 +906,7 @@ internal sealed record GeneratedSection(
     Meter Meter,
     bool RiffPowerChords,
     bool Chugs,
+    bool TwinLead,
     bool OctaveBass,
     ImmutableArray<int> BassCycle,
     bool Breakdown,
@@ -1110,5 +1122,6 @@ internal enum SectionStream
     Form = 62,
     CalmArpeggio = 63,
     Boogie = 64,
-    RiffHook = 65
+    RiffHook = 65,
+    TwinLead = 66
 }

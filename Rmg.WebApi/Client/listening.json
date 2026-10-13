@@ -1,129 +1,65 @@
 [
   {
-    "id": "metal-twins-hook",
-    "question": "Heavy metal's twin guitars on a figure, the riff keeping its first bar's notes over the chords that follow where they fit, harmonised a third above: twin leads, or a riff stuck?",
-    "decides": "Heavy metal's riff a figure, hook 100-80-0, against its notes placed anew over every chord.",
+    "id": "metal-twin-lead",
+    "question": "Heavy metal's twin leads, a section's riff in single notes, busier, with vibrato and bends, its twin a third above, the chords to the rhythm guitar: twin leads, or a riff cluttered?",
+    "decides": "Heavy metal's twin leads, doubling.twin 50, against no twin and its riff in power chords as before.",
     "genre": "metal",
     "without": {
       "skip": [],
       "genre": {
-        "riff": {
-          "hook": 0
+        "doubling": {
+          "twin": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "I",
-        "at": 62,
+        "seed": "7",
+        "at": 97.4,
         "listen": [
-          "Riff (Overdriven Guitar)"
+          "Riff (Distortion Guitar)",
+          "Riff's twin (Distortion Guitar)"
         ]
       },
       {
-        "seed": "N",
-        "at": 4.3,
+        "seed": "B",
+        "at": 176,
         "listen": [
           "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "Z",
+        "at": 100.8,
+        "listen": [
+          "Riff (Overdriven Guitar)",
           "Riff's twin (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "r",
-        "at": 316,
+        "seed": "a",
+        "at": 125.1,
         "listen": [
-          "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)",
-          "Riff's twin (Overdriven Guitar)"
+          "Riff (Distortion Guitar)",
+          "Riff's twin (Distortion Guitar)"
         ]
       },
       {
-        "seed": "u",
-        "at": 275.2,
+        "seed": "k",
+        "at": 2.4,
         "listen": [
-          "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)"
+          "Riff (Distortion Guitar)",
+          "Riff's twin (Distortion Guitar)"
         ]
       },
       {
         "seed": "z",
-        "at": 255.7,
+        "at": 61.3,
         "listen": [
           "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "1p",
-        "at": 175.5,
-        "listen": [
           "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "rock-riff-hook",
-    "question": "Rock's riff a figure, its first bar's notes kept over the chords that follow where they fit, its ends changing with them: a riff you remember, or a riff stuck?",
-    "decides": "The riff hook, every riff genre's 100-80-0, against the riff's notes placed anew over every chord.",
-    "genre": "rock",
-    "without": {
-      "skip": [],
-      "genre": {
-        "riff": {
-          "hook": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "2",
-        "at": 10,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "3",
-        "at": 0,
-        "listen": [
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 73.8,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 42.2,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "I",
-        "at": 37.1,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Riff's twin (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 14.9,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (pick))"
+          "Riff's twin (Overdriven Guitar)"
         ]
       }
     ]
