@@ -48,10 +48,12 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("metal-twin-lead", "Heavy metal's twin leads, a section's riff in single notes, busier, with vibrato and bends, its twin a third above, the chords to the rhythm guitar: twin leads, or a riff cluttered?",
-            "Heavy metal's twin leads, doubling.twin 50, against no twin and its riff in power chords as before.", "metal", [], new() { ["doubling"] = new() { ["twin"] = 0 } },
-            x => FirstSection(x, TracePoints.TwinLead, v => (bool)v!),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.TwinLead && t.Section == span.SectionId && (bool)t.Value!))
+        new("bass-step-down", "Cinematic piano's bass stepping down through the chords, a semitone or a tone at a time, the chords above it inverted: a film's piano, or a bass sliding off?",
+            "The bass's landing a step down, Cinematic piano's 100 beside the root's 70-60-60, against the root and the third alone.", "filmPiano", [], new() { ["bassLanding"] = new() { ["stepDown"] = 0 } },
+            x => (double?)x.Map.Sections[0].Start),
+        new("cinematic-pad", "Cinematic piano's strings swelling under the piano: a film score, or a piano drowned?",
+            "Cinematic piano's string pad, 70-80-80 of its songs.", "filmPiano", [], new() { ["parts"] = new() { ["pad"] = 0 } },
+            x => x.Absent.Contains(TrackRole.Pad) ? null : (double?)x.Map.Sections[0].Start)
 
     ];
 

@@ -1,64 +1,119 @@
 [
   {
-    "id": "metal-twin-lead",
-    "question": "Heavy metal's twin leads, a section's riff in single notes, busier, with vibrato and bends, its twin a third above, the chords to the rhythm guitar: twin leads, or a riff cluttered?",
-    "decides": "Heavy metal's twin leads, doubling.twin 50, against no twin and its riff in power chords as before.",
-    "genre": "metal",
+    "id": "bass-step-down",
+    "question": "Cinematic piano's bass stepping down through the chords, a semitone or a tone at a time, the chords above it inverted: a film's piano, or a bass sliding off?",
+    "decides": "The bass's landing a step down, Cinematic piano's 100 beside the root's 70-60-60, against the root and the third alone.",
+    "genre": "filmPiano",
     "without": {
       "skip": [],
       "genre": {
-        "doubling": {
-          "twin": 0
+        "bassLanding": {
+          "stepDown": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "7",
-        "at": 97.4,
+        "seed": "2",
+        "at": 4.9,
         "listen": [
-          "Riff (Distortion Guitar)",
-          "Riff's twin (Distortion Guitar)"
+          "Bass (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "B",
-        "at": 176,
+        "seed": "9",
+        "at": 129.3,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Chords (Distortion Guitar)"
+          "Bass (Contrabass)"
         ]
       },
       {
-        "seed": "Z",
-        "at": 100.8,
+        "seed": "H",
+        "at": 63.2,
         "listen": [
-          "Riff (Overdriven Guitar)"
+          "Bass (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "a",
-        "at": 125.1,
+        "seed": "J",
+        "at": 12.6,
         "listen": [
-          "Riff (Distortion Guitar)",
-          "Riff's twin (Distortion Guitar)"
+          "Bass (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "k",
-        "at": 2.4,
+        "seed": "L",
+        "at": 26,
         "listen": [
-          "Riff (Distortion Guitar)",
-          "Riff's twin (Distortion Guitar)"
+          "Bass (Cello)"
         ]
       },
       {
-        "seed": "z",
-        "at": 61.3,
+        "seed": "N",
+        "at": 98,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Riff's twin (Overdriven Guitar)"
+          "Bass (Acoustic Grand Piano)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cinematic-pad",
+    "question": "Cinematic piano's strings swelling under the piano: a film score, or a piano drowned?",
+    "decides": "Cinematic piano's string pad, 70-80-80 of its songs.",
+    "genre": "filmPiano",
+    "without": {
+      "skip": [],
+      "genre": {
+        "parts": {
+          "pad": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 135.1,
+        "listen": [
+          "Pad (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 0,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Pad (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 4.8,
+        "listen": [
+          "Pad (String Ensemble 2)"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 119.2,
+        "listen": [
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 0,
+        "listen": [
+          "Pad (String Ensemble 2)"
+        ]
+      },
+      {
+        "seed": "V",
+        "at": 133.1,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Acoustic Grand Piano)",
+          "Pad (String Ensemble 1)"
         ]
       }
     ]

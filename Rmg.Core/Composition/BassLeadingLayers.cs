@@ -43,7 +43,11 @@ internal static class BassLeadingLayers
 
     /// <summary>The arrivals' weights at the ends: the root a plain song's, the others leaning unconventional.</summary>
     public static ImmutableArray<(ChordArrival Arrival, ByConvention Weight)> ArrivalWeights { get; } =
-        [..Arrivals.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == ChordArrival.Root ? 0 : 1)))];
+    [
+        ..Arrivals.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == ChordArrival.Root ? 0 : 1))),
+        // a genre's alone, which the songs never play
+        (ChordArrival.StepDown, new ByConvention(0, 0, 0))
+    ];
 
     /// <summary>A landing as a genre's page shows it.</summary>
     public static string LabelOf(ChordArrival arrival) => arrival switch
@@ -52,6 +56,7 @@ internal static class BassLeadingLayers
         ChordArrival.Third => "The third",
         ChordArrival.Fifth => "The fifth",
         ChordArrival.Free => "Its figure's note",
+        ChordArrival.StepDown => "A step down",
         _ => throw new ArgumentOutOfRangeException(nameof(arrival), arrival, null)
     };
 
@@ -129,5 +134,11 @@ public enum ChordArrival
     Third = 2,
 
     /// <summary>The chord's fifth, for an inversion.</summary>
-    Fifth = 3
+    Fifth = 3,
+
+    /// <summary>
+    ///     The chord's note a semitone or a whole tone below the last chord's landing, an inversion where it is not the root, so that
+    ///     the bass steps down through the chords as a ballad's or a film piano's does; the root where none is.
+    /// </summary>
+    StepDown = 4
 }

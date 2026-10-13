@@ -34,6 +34,9 @@ internal sealed class Line
     private readonly (int Low, int High) _instrument;
 
     private int? _previous;
+
+    // the note the line last landed on a chord with, which a step down steps from
+    private int? _landed;
     private int _previousMove;
 
     // the way the melody goes, up (1) or down (-1): its last move's, which the next note goes on in or turns from, across
@@ -126,15 +129,21 @@ internal sealed class Line
         if (landing != ChordArrival.Free)
         {
             _echoRun = null;
+            // a step down, to the chord's note a semitone or a whole tone below the last chord's landing, where one is in
+            // range
+            var below = landing == ChordArrival.StepDown && _landed is { } last
+                ? chordToneClasses.Select(x => last - (last - x).Mod(OctaveNoteCount)).Where(x => last - x is 1 or 2 && x >= _low).Cast<int?>().Max()
+                : null;
             var landingStep = landing switch
             {
-                ChordArrival.Root => 0,
+                ChordArrival.Root or ChordArrival.StepDown => 0,
                 ChordArrival.Third => 2,
                 ChordArrival.Fifth => 4,
                 _ => throw new ArgumentOutOfRangeException(nameof(landing), landing, null)
             };
             var pitchClass = chord.GetPitch(landingStep).Mod(OctaveNoteCount);
-            note = GetNearest(Enumerable.Range(_low, _high - _low + 1).Where(x => x.Mod(OctaveNoteCount) == pitchClass).ToArray(), _previous ?? _middle + register * _profile.ContourShare);
+            note = below ?? GetNearest(Enumerable.Range(_low, _high - _low + 1).Where(x => x.Mod(OctaveNoteCount) == pitchClass).ToArray(), _previous ?? _middle + register * _profile.ContourShare);
+            _landed = note;
         }
         else if (echo != 0 && _heard.TryGetValue(echo, out var heard))
         {

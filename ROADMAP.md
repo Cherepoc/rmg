@@ -780,15 +780,12 @@ with its questions after each group:
    figures (after the clave's span is settled), and the rows of figures (group F).
 5. **Three new presets, now** (13 October 2026, the owner's choice), each from its parent's searched retune, data
    alone where it can be, with a question on its defining trait:
-   - **Cinematic piano**, beside Classical: a piano melody over a piano ostinato (wide arpeggios, a cell repeated, the
-     riff's hook), strings swelling as a pad, add9, maj7, sus and quartal chords, major, natural minor and Lydian, the
-     IV–V–iii–vi motion, film forms, AABA with a big return and the last section lifted a key, no drums, 60 to 90 or a
-     bouncy 150; and its missing device first, **the bass stepping down through inversions** (the line cliché in the
-     bass, a descending bass under held harmony: I, I/7, vi, vi/5, IV, IV/3, ii, V), a bass figure of a chord's
-     inversion chosen so the bass falls by step, a genre's chance by section, Cinematic piano's, Classical's, the Power
-     ballad's, Doom's and Pop's, taken from group D. With it, **Classical renamed Chamber**, its id and its label, the
-     live site having no genres yet: the classical period's chamber idiom (triads, Alberti, a cello's bass, V–I), the film and romantic
-     piano now Cinematic piano's.
+   - Done (14 October 2026): **Cinematic piano** (`filmPiano`), beside Chamber: a piano melody over a piano's arpeggios
+     two octaves wide, strings as a pad, add9, sus and seventh chords, major, minor and Lydian, AABA, a key's lift, no
+     drums, 68-81-94; with **the bass stepping down** (`bassLanding.stepDown`, a genre's alone): the chord's note a
+     semitone or a tone below the last chord's landing, the root where none is, 21% of its chord arrivals a step down
+     (Chamber's 11%), 237 descents of three chords or more in 64 songs (73); asked: `bass-step-down`, `cinematic-pad`.
+     **Classical renamed Chamber**, its id and its name.
    - **Funk rock**, beside Funk: Funk's slap bass, 16th hats, ghosts, a muted 16th guitar and its vamps, with an
      overdriven guitar riff and its chorus opening into big distorted chords (`louderForms.guitars`), power chords,
      sevenths and 7♯9, minor pentatonic lines, the power or standard kit, a tight pocket, no horns nor keys, 88 to 110;
