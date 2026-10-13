@@ -543,7 +543,7 @@
       "sung": { "halves": [100, 80, 60] },
       "callAndResponse": { "sections": [10, 30, 40] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50 },
-      "figure": { "claves": { "own": 5, "clave32": 60, "clave23": 30 } },
+      "figure": { "claves": { "own": 5, "clave32": 60, "clave23": 30 }, "bass": { "own": [20, 30, 40], "tumbao": 100 } },
       "louderForms": { "guitars": 0 },
       "pins": { "time": [100, 100, 70], "ground": [80, 80, 50], "bass": [80, 80, 50] },
       "push": { "sections": [10, 30, 40] },
@@ -2189,7 +2189,7 @@
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 80, "ride": 60, "cabasa": 70, "maracas": 60, "claves": 50, "conga": 30 },
       "drumStrokes": { "crossStick": 100 },
       "pins": { "backbeat": 90, "ground": 80 },
-      "figure": { "backbeat": { "own": 30, "bossaClave": 100 } },
+      "figure": { "backbeat": { "own": 30, "bossaClave": 100 }, "bass": { "own": [30, 40, 50], "bossaBass": 100 } },
       "feel": { "straight": 100 },
       "rhythm": {
         "ground": { "syncopation": 76, "fullness": 38 },

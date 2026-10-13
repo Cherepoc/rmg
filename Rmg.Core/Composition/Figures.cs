@@ -39,7 +39,7 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 ///     band's galloping riff, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a jazz drummer's ride,
 ///     on the beats and the skip after 2 and 4; a clave's three and two,
 ///     and the bossa nova's on the snare's stroke, its cross-stick; a trance's chords in 16ths, its arpeggio's steady run, and its bass
-///     rolling in the 16ths after the kick or on the offbeats. A section draws each player's, its own rhythm or one of its
+///     rolling in the 16ths after the kick or on the offbeats, a salsa's tumbao and the bossa nova's bass. A section draws each player's, its own rhythm or one of its
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
 ///     players play, a blast's or a breakbeat's, drawn by the first and played by both; the songs play their own rhythms
 ///     always. The player plays the figure in every bar it plays in, its own notes
@@ -82,6 +82,9 @@ internal static class Figures
         new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, null, 0, true),
         new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, null, 0, true),
         new("withKick", "With the kick, wherever it plays", FigurePlayer.Bass, [], 0, FigurePlayer.Ground, 0, false),
+        // a salsa's bass, counted in half notes as its clave is: each of its bars' 2-and and 4, anticipating the chord
+        new("tumbao", "The tumbao, a salsa bar's 2-and and 4, ahead of the chord", FigurePlayer.Bass, [3, 6, 11, 14], 16, null, 0, false),
+        new("bossaBass", "The bossa nova's bass, on 1, the 2-and, 3 and the 4-and, as its surdo", FigurePlayer.Bass, [0, 6, 8, 14], 16, null, 0, false),
         // a son clave counted in half notes, a salsa's beat, its two sides in a bar
         new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 3, 6, 10, 12], 16, null, 0, false),
         new("clave23", "The clave's 2-3", FigurePlayer.Claves, [2, 4, 8, 11, 14], 16, null, 0, false),

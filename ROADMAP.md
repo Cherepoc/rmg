@@ -572,7 +572,6 @@ Its idiom gaps accepted, each a plan to build after the packages, one mechanism 
 - **The ostinato** (#354): a riff option beside the drone, the riff held at its pitches over the chords, a clash on a
   strong beat moved to a chord tone at the plain end, kept at the wild (Techno, Trance, House; Synthwave, IDM,
   Chiptune, Ambient, Dungeon synth, Orchestral lower); the scale rule checked against it first.
-- **Latin bass figures** (#360): the tumbao and bossa's bass as bass figures, data.
 - **The breakdown chorus** (#369): a `lastRepeat` option, the first pass at the thinnest texture, the second the full
   band (Pop, Power ballad, Soul, Country, Rock, Disco, Folk).
 - Found while fixing it:
@@ -734,7 +733,7 @@ with its questions after each group:
    Drum and bass, Soul, Pop, Trance, Trap, Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues, and the two
    planned genres), in a session with its search budget, a few agents at a time with a limit of searches each; then
    their retunes.
-4. **The idioms and the figures**: done (13 October 2026), swing by tempo, a drawn swing's pair's second note never
+4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
    heads harmonised and in blocks now and then. The boogie (#366): the alternating bass a cycle of its chord's steps
@@ -743,7 +742,10 @@ with its questions after each group:
    chord's first (13% elsewhere), Blues' 30-40-50%, Rock's and Country's 10-15-20% (asked: `blues-boogie`). The
    alternating thumb (#362): an arpeggio pattern, the root and the fifth on the beats by turns and the notes above off
    them, Folk's 60-60-50 ahead of its Alberti, Country's 40, the Power ballad's, Medieval's 20, Blues' 10-10-20; to ask
-   when the round has room (`folk-thumb`). The jazz ride (#349): the swing ride a time drum's figure, on the beats
+   when the round has room (`folk-thumb`). Latin bass figures (#360): the tumbao, a salsa bar's 2-and and 4 in Latin's
+   half-note count, 72% of its bass's notes on them (pushes and pickups the rest), and the bossa nova's bass on its
+   surdo's 1, 2-and, 3 and 4-and, 96%; each its genre's 100 beside its own rhythm; to ask with Latin's and Bossa nova's
+   research. The jazz ride (#349): the swing ride a time drum's figure, on the beats
    and the skip after 2 and 4, swung by the song, Jazz's in 151 of its 421 sections, its ride struck 0.6-0.9 times on
    every beat and skip there where its own struck about once a bar (asked: `jazz-ride`). Left: the boogie, the alternating thumb, Latin's bass
    figures (after the clave's span is settled), and the rows of figures (group F).
@@ -780,7 +782,7 @@ it:
 5. Done (13 October 2026): the jazz ride, a time drum's figure (`Figures`), Jazz's; dark jazz's with its preset.
 6. Done (13 October 2026): the boogie, Blues', Rock's and Country's.
 7. Done (13 October 2026): the alternating thumb; Bossa nova's batida, its fingers' own figure, left to its research.
-8. **Latin bass figures** (#360): the tumbao and bossa nova's bass as bass figures, data; asked with step 4's clave.
+8. Done (13 October 2026): Latin bass figures.
 
 **C. Two genres** (data, with the idioms of B):
 

@@ -157,6 +157,36 @@ public sealed class FiguresTest
         await Assert.That(off / (double)notes).IsGreaterThan(0.8);
     }
 
+    /// <summary>
+    ///     A calibration: a tumbao's or a bossa nova's bass strikes on its figure's 16ths, but for the notes the stages after
+    ///     the figures place, a line's pickup or a push.
+    /// </summary>
+    [Test]
+    [Arguments("latin", "tumbao")]
+    [Arguments("bossa", "bossaBass")]
+    public async Task ALatinBass_StrikesOnItsFiguresSixteenths(string genre, string name)
+    {
+        var figure = Figures.All.Single(x => x.Player == FigurePlayer.Bass && x.Name == name);
+        var (notes, on) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        {
+            var bass = song.Track(TrackRole.Bass);
+            var playing = Playing(song, FigurePlayer.Bass, name);
+            foreach (var span in song.Map.Sections.Where(x => playing.Contains(x.SectionId) && x.Meter == Meter.FourFour))
+            foreach (var note in song.Song.Notes!.GetValueOrDefault(bass)?.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9) ?? [])
+            {
+                notes++;
+                var sixteenth = (note.Position - span.Start) % 4 / 0.25;
+                on += figure.Onsets.Any(x => Math.Abs(x - sixteenth) < 0.1) ? 1 : 0;
+            }
+        }
+
+        Console.WriteLine($"{genre}: of {notes} notes of its {name}, {on / (double)Math.Max(1, notes):P1} on its 16ths");
+        // measured 72% (Latin's, its pushes an eighth early and its pickups the rest) and 96% (Bossa nova's), October 2026
+        await Assert.That(notes).IsGreaterThan(200);
+        await Assert.That(on / (double)notes).IsGreaterThan(0.6);
+    }
+
     [Test]
     public async Task AFigureSeveralPlayersPlay_IsPlayedByAll_ABlastsKickWithItsSnareAndItsCymbal()
     {
