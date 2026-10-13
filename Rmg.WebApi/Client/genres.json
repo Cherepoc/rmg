@@ -2273,8 +2273,8 @@
     }
   },
   {
-    "id": "classical",
-    "name": "Classical",
+    "id": "chamber",
+    "name": "Chamber",
     "description": "Chamber music: a melody on violin, flute or clarinet over a piano's Alberti figure and a cello's bass, no drums, raised cadences and ornaments, phrases of four bars, AABA, ABA and a rondo, terraced dynamics, 80 to 140 in 4/4, 3/4 and 6/8.",
     "choices": {
       "appoggiatura": { "melody": [10, 20, 25], "counterMelody": [5, 10, 15] },
