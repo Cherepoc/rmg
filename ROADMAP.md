@@ -811,6 +811,10 @@ with its questions after each group:
    tempo groups (Jazz's ballads, mediums and burners, Rock's too), tempos over 240, a part's swing of its own (the ride
    harder than the soloist, the hats than the kick), the press roll into a solo, a hook shorter than its 16-bar verse,
    three verses (`vcvcvc`), an echo on a chord stab (before dub techno), parts muted in and out on a loop.
+   Doom 56-68-78 (65-74-81), from 45 at its plain end for funeral doom, opening on its riff alone oftener; Nu metal's
+   one loop of ♭III, ♭VI and ♭VII a chord a bar, a wah now and then; Djent from 90, a blast now and then, more hi-hat.
+   Left of their reports: a long instrumental stretch before the first vocal, stoner doom's wah and pentatonic riff
+   (by listening), the octave whammy squeal, a china on a cell's start, a kick moved off the snare.
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
