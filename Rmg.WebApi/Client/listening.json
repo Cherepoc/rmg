@@ -581,54 +581,52 @@
     "seeds": [
       {
         "seed": "T",
-        "at": 0,
+        "at": 18.1,
         "listen": [
           "Hi-Hat",
-          "Ride",
           "Chords (Pad 2 (warm))"
         ]
       },
       {
         "seed": "V",
-        "at": 39.4,
+        "at": 212.9,
         "listen": [
-          "Bass (Synth Bass 1)"
+          "Bass (Synth Bass 2)",
+          "Chords (Pad 2 (warm))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 57.7,
+        "listen": [
+          "Hi-Hat",
+          "Acoustic Snare",
+          "Kick"
         ]
       },
       {
         "seed": "12",
-        "at": 178.1,
+        "at": 67.3,
         "listen": [
           "Ride",
-          "Bass (Synth Bass 1)",
-          "Acoustic Snare"
+          "Hi-Hat",
+          "Kick"
         ]
       },
       {
         "seed": "1G",
-        "at": 1.6,
+        "at": 12.6,
         "listen": [
           "Hi-Hat",
           "Melody (Electric Piano 1)",
-          "Tom"
+          "Bass (Synth Bass 2)"
         ]
       },
       {
-        "seed": "1Q",
-        "at": 1.5,
+        "seed": "1k",
+        "at": 185.3,
         "listen": [
-          "Hi-Hat",
-          "Bass (Synth Bass 2)",
-          "Melody (Lead 6 (voice))"
-        ]
-      },
-      {
-        "seed": "1t",
-        "at": 18.3,
-        "listen": [
-          "Hi-Hat",
-          "Chords (Electric Piano 2)",
-          "Tom"
+          "Chords (Electric Piano 1)"
         ]
       }
     ]
