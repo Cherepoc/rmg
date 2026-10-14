@@ -899,6 +899,91 @@ with its questions after each group:
 9. **The new presets**: group P's, two at a time, after the mood (*Planned: mood*), which covers jazz-rock and
    darksynth, and mostly pop punk and the acoustic rock ballad, as shades of their parents; power metal put off.
 
+### Planned: the second order of work
+
+Planned 15 October 2026 by the owner's choice: the rules on the other corpora, the research's devices, the mood's
+leftovers, the engine's put-off features, the housekeeping and the carry-overs; no new presets for now. Each step
+through the implementation loop, measured before and after, its listening question once deployed. In order:
+
+**0. Chiptune's frame speed** (heard 15 October 2026: the notes too fast now and then). First the verdicts split by
+song (the events keep their seed; the verdicts endpoint sums them), so that the songs `chiptune-spread` was heard
+worse on are listened to and measured: their tempo, their chords' length and how many notes a cycle has. Then the
+speed by what they show: two frames each now, the research's preference; three, or a cycle no faster than a share of
+the chord's length, if the disliked songs are the fast or the four-note ones. Asked again over the same songs.
+
+**1. The rules on the other corpora** (each failure reproduced at the committed code first; a bug fixed where the rule
+breaks, a calibration widened by a sample):
+1. The shared chord shape: seed 62 at a million and seed 52 at 816000000 in a polymeter's section
+   (`Polymeter.ShapeAt`), seed 5 after a reharmonisation, seed 49 the melody's triad over the chords' cluster.
+2. Seed 21's bass at 816000000 a semitone over its chord's root (`LinePattern.Place`).
+3. The held-out corpus (716000000), its dozen failures sorted: the djent breakdown's silent kick pattern, the
+   polymeter's chords off its cell, and the nine older ones (a chromatic passing chord, a section's own key, a pushed
+   change, a strum, the inner line, a soloist's stacks, the family switch's share, the scale rule, the render's notes).
+4. The 816000000 corpus's older failures: the rhythm part's chords, a passing chord a semitone from the next, a
+   palm-muted note's length, a fill decision at bar 5 of a four-bar phrase.
+
+**2. The research's devices** (by how many genres want each, each a genre's data on a mechanism there already where it
+can be):
+1. A key change's interval a genre's (`keyChanges` beside where, a pool of steps: a semitone, a tone, a minor and a major
+   third, a fourth), Symphonic's lift by a third, Pop's semitone and tone.
+2. A section's home by the mode, the dominant in a major key and the relative major in a minor one, an option of
+   `sectionHome`, Chamber's and Orchestral's.
+3. The minor mediant, a minor chord a major third below or on a diminished seventh's roots, an option of `chordScales`
+   beside the major mediant, Black metal's, Doom's at its wild end.
+4. The pentatonic union, both thirds over a major pentatonic with the fourth and the flat seventh, a line scale of the
+   passing notes (`lineScale`), Rock's and Blues', a line's strong notes kept to the chord.
+5. The hook shorter than its verse, a role's length a genre's (`SectionLength`'s role plays), Hip-hop's 16-bar verse and
+   8-bar hook; three verses (`vcvcvc`), Hip-hop's form.
+6. Interlocking parts, a figure striking where another part does not (a follower's inverse, as the rolling bass answers
+   the kick), Funk's guitar against its clavinet; dead notes, a 16th chain's weak notes muted short and soft (an
+   articulation), Funk's bass and guitar.
+7. The tempo's groups, measured first: whether a genre's songs fall in its records' clusters (Jazz's ballads,
+   mediums and burners; Rock's and Synthwave's two) with the mood's intensity and the range's lean as they are; a
+   tempo pool of bands within the range only if not.
+8. The small ones, each data or a row: the punk beat's offset kick (a ground figure, checked against a transcription
+   first), the cymbal choke before a stop (an ensemble hit's crash cut short), the press roll into a solo (a fill's
+   kind before a soloed section), Chameleon's tresillo bass arpeggio with its chromatic walk-up (a bass figure), the
+   echo on a chord stab (the echo on a stabbing part, before dub techno), a part's own swing (the ride and the hats
+   swung harder than a soloist, a part's share of the song's swing).
+
+**3. The mood's leftovers:**
+1. The songs' own chord shapes leaned by darkness through their levels' pick (a level's darkness its shapes' mean), as
+   leaning the shapes themselves moved every song onto a pool's draw.
+2. The root degrees and the cadence's raise by darkness, the values' choices leaned as a range's are (♭VI and ♭II
+   darker, the raised leading tone brighter).
+3. Fills by intensity (their amount), and the songs' own tempo (the dyadic draw tilted to its fast end).
+4. The sound: instruments by their traits (warm, bright, dark), the register lower the darker, the tone.
+5. The other genres' spans, data, a genre's where its records reach a dark or a fierce end its middle does not.
+
+**4. The engine's put-off features:**
+1. The false ending: a drop's kind before the last repeat, the home chord hit, a beat or two of silence, the drums
+   counting back in (Rock, Metal, Punk, Blues, Soul, Funk, Ska).
+2. Two toms at once: a drum note's sound a list, a fill's wide window or a cascade's accent striking a rack and the floor.
+3. Rolls in 32nds: the figures' and the rolls' grid finer, IDM's at its wild end.
+4. Imitation: the counter-melody taking the melody's phrase a bar later, its clashes across a change of chord moved to
+   a chord's note.
+5. The tape stop: every pitched part bending down an octave over a slowing tempo into a drop or as the ending.
+
+**5. Housekeeping:** analytics written off the request; the tests that check less than their names; the drum solo's
+parameters passed with the song's decisions whole; the verdicts by song (step 0's).
+
+**6. The carry-overs:** a section's energy choosing a figure (Ska punk's choruses, as it chooses the chugs); the
+melody's run into a section, a fanfare's pickup (`lineRun`'s melody, Orchestral's and Symphonic's); the post-chorus
+quoting its chorus's chords and its second half, as a hook intro quotes the chorus.
+
+Review: **overengineering**: the tempo's groups may be what the range's lean and the mood already make, so measured
+before any code; the minor mediant, the home by the mode and the key change's interval are options of choices that
+exist; interlocking is the rolling bass's answer generalised, not a mechanism; the tape stop and imitation cost the most
+for the least (a tempo map and every channel's bends; a second line's clashes) and come last, cut if their reviews say
+so; a part's own swing touches the render's one swing and is kept to a share of it; the NES triangle left out, as
+General MIDI has no triangle wave. **Musicality**: the frame speed is the chip's character, so slowed only as far as
+the disliked songs show; the union scale clashes over a major chord's third, so passing notes only; the minor mediant
+is harsh outside its genres, a genre's alone; a key change by a third is abrupt, so on a section's start; the false
+ending wears thin, so rare; dead notes muddy a slow bass, so in 16ths only; the shapes' failures may be a polymeter
+copying a shape the band no longer plays, heard as a clash, so fixed before the devices that add chords. **Order**:
+the rules first, as the devices add chords and lines the rules must hold over; the mood's chord leans after the
+devices' chords; the engine last.
+
 ### Planned: rules kept, four idioms, two genres, the club's devices
 
 Planned 13 October 2026, reviewed the same day; each step through the implementation loop, a deploy to test with its
