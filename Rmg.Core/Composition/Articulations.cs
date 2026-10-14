@@ -19,6 +19,12 @@ internal static class Articulations
     /// <summary>The chance a part's broken chords are let ring to the chord's change, a genre's that the songs never play.</summary>
     public static ByConvention LetRingChance { get; } = new(0, 0, 0);
 
+    /// <summary>The chance a part plays its whole chords cycled at a sound chip's frame rate, a genre's that the songs never play.</summary>
+    public static ByConvention FrameChance { get; } = new(0, 0, 0);
+
+    /// <summary>How long a frame-rate arpeggio holds each of a chord's notes, in seconds: two frames of a console's sixty a second.</summary>
+    public const double FrameSeconds = 1 / 30.0;
+
     /// <summary>What a ringing note keeps out of: stop time and a part stopped by the form, whose silence it would fill.</summary>
     private const Hold RingsOutOf = Hold.Stop | Hold.Cut;
 
@@ -162,6 +168,13 @@ internal static class Articulations
                     position => holds.NextAfter(RingsOutOf, position, track));
             }
 
+        // and a part's whole chords cycled at the frame rate where it plays them so, a genre's, as a sound chip plays a chord
+        // on one voice, its own sequence drawn for every part that holds chords
+        foreach (var (track, timeline) in result.ToArray())
+            if (song.Tracks.Definitions[track].Role.PlaysChords()
+                && song.Stream(SongStream.FrameArpeggio, track).TestProbability(FrameChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "frames"))))
+                result[track] = Frames(timeline, position => Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)));
+
         return draft with { Notes = result.ToImmutable() };
     }
 
@@ -188,6 +201,26 @@ internal static class Articulations
             return end - note.Position > note.Value.Duration ? (note.Value with { Duration = end - note.Position }).ToTimelineItem(note.Position) : note;
         }));
     }
+
+    /// <summary>
+    ///     A part's whole chords cycled at the frame rate: each chord's notes in turn from its lowest up, a note every
+    ///     <see cref="FrameSeconds" />, for as long as the chord sounds, unstrummed.
+    /// </summary>
+    /// <param name="beatsPerSecond">The beats a second at a position, by the tempo there.</param>
+    internal static EventTimeline<RealizedNote> Frames(EventTimeline<RealizedNote> timeline, Func<double, double> beatsPerSecond) =>
+        EventTimeline.Create(timeline.Duration, timeline.SelectMany(note =>
+        {
+            if (note.Value.Pitches.Length < 2)
+                return [note];
+            var step = FrameSeconds * beatsPerSecond(note.Position);
+            var pitches = note.Value.Pitches.Order().ToArray();
+            var count = Math.Max(1, (int)Math.Ceiling(note.Value.Duration / step - 1e-9));
+            var state = note.Value.State.With(CompositionStateKinds.Strum, 0.0);
+            return Enumerable.Range(0, count).Select(k => (note.Value with
+            {
+                State = state, Pitches = [pitches[k % pitches.Length]], Duration = Math.Min(step, note.Value.Duration - k * step)
+            }).ToTimelineItem(note.Position + k * step));
+        }));
 
     /// <summary>The chance a line's part slurs its steps, by the sound facet: never in the plainest songs, which play every note as struck.</summary>
     public static ByConvention LegatoChance { get; } = new(0, 0.4, 0.6);

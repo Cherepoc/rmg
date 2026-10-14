@@ -259,5 +259,6 @@ internal enum SongStream
     Darkness = 115,
     Intensity = 116,
     BreakdownChorus = 117,
-    CounterRuns = 118
+    CounterRuns = 118,
+    FrameArpeggio = 119
 }
