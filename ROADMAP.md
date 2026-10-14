@@ -926,8 +926,9 @@ passing chord (seed 15 at 22), a filtered drop's band (seed 29 at 608), a sectio
 
 **2. The research's devices** (by how many genres want each, each a genre's data on a mechanism there already where it
 can be):
-1. A key change's interval a genre's (`keyChanges` beside where, a pool of steps: a semitone, a tone, a minor and a major
-   third, a fourth), Symphonic's lift by a third, Pop's semitone and tone.
+1. Done (15 October 2026): a key change's interval a genre's, `keyLift` (a lifted last section's step) and `sectionKey`
+   (a section's own key's), pools of the steps in semitones; Symphonic's lift by a third, 18 of 57 lifts, the songs'
+   never.
 2. A section's home by the mode, the dominant in a major key and the relative major in a minor one, an option of
    `sectionHome`, Chamber's and Orchestral's.
 3. The minor mediant, a minor chord a major third below or on a diminished seventh's roots, an option of `chordScales`

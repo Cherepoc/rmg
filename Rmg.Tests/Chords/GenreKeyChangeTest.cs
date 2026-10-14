@@ -24,4 +24,23 @@ public sealed class GenreKeyChangeTest
         // seen 53% to 62% against 22% to 36%, over three corpora's 64 songs
         await Assert.That(jazz).IsGreaterThan(own);
     }
+
+    /// <summary>
+    ///     Symphonic's last section lifted by a third now and then, its own pool's (`keyLift`), where the songs' lifts are a
+    ///     half or a whole step at the middle: each song lifting its last section, its sections in the song's key.
+    /// </summary>
+    [Test]
+    public async Task ASymphonicLift_RisesByAThirdNowAndThen_TheSongsNever()
+    {
+        int[] Lifts(Genre genre) => [..TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Scale, 0.5)), Genre: genre)))
+            .SelectMany(x => (ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!)
+            .Select(x => ((x.Semitones % 12) + 12) % 12)];
+        Genre Lifting(Genre genre) => genre with { Choices = genre.Choices.SetItem(GenreChoices.KeyChanges.Name, GenrePresets.With("symphonic", GenreChoices.KeyChanges, ("lastSection", 1), ("sections", 0), ("patterns", 0)).Choices[GenreChoices.KeyChanges.Name]) };
+        var symphonic = Lifts(Lifting(GenrePresets.Genre("symphonic")));
+        var own = Lifts(Lifting(Without("symphonic", GenreChoices.KeyLift.Name)));
+        bool Third(int step) => step is 3 or 4 or 8 or 9;
+        Console.WriteLine($"lifts by a third: Symphonic's {symphonic.Count(Third)} of {symphonic.Length}, with the songs' own steps {own.Count(Third)} of {own.Length}");
+        await Assert.That(symphonic.Count(Third)).IsGreaterThan(symphonic.Length / 10);
+        await Assert.That(own.Count(Third)).IsEqualTo(0);
+    }
 }

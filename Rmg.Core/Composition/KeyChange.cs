@@ -65,6 +65,9 @@ public sealed record KeyChange(double Position, int Semitones)
         ..new[] { 3, 4, 5, 6, 7, 8, 9, 10, 11 }.Select(x => (x, new ByConvention(0, 0, 1)))
     ];
 
+    /// <summary>A step as a genre names it, "semitones3".</summary>
+    public static string NameOf(int step) => $"semitones{step}";
+
     /// <summary>
     ///     The chance a section, but the song's first, plays in a key of its own, before its contrast leans it: none of the
     ///     plainest songs, few at the middle and every one at the wild end.
@@ -114,7 +117,7 @@ public sealed record KeyChange(double Position, int Semitones)
         {
             var drawing = sections(id);
             var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(SectionChance.At(unconventionality, ownKey), 1));
-            var step = drawing.Pick(ByConvention.Weigh(SectionSteps, unconventionality));
+            var step = drawing.Pick(ByConvention.Weigh(SectionSteps, unconventionality, genre.Pool<int>(GenreChoices.SectionKey, NameOf)));
             // the first section sets the song's key
             return hasOwn && id != sectionIds[0] ? step : 0;
         });
@@ -132,7 +135,7 @@ public sealed record KeyChange(double Position, int Semitones)
             var drawing = isLastSection ? context : places(index, pattern);
             var chance = isLastSection && cameBack ? LastSectionChance.At(unconventionality, lastSection) : ElsewhereChance.At(unconventionality, elsewhere);
             var isChanging = drawing.TestProbability(chance);
-            var step = drawing.Pick(ByConvention.Weigh(Steps, unconventionality));
+            var step = drawing.Pick(ByConvention.Weigh(Steps, unconventionality, genre.Pool<int>(GenreChoices.KeyLift, NameOf)));
             if (isChanging)
                 lift += step;
 
