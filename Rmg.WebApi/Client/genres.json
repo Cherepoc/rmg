@@ -668,6 +668,8 @@
       "length": { "from": [240, 240, 200], "to": [420, 420, 540] },
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },
       "callAndResponse": { "sections": [30, 45, 50] },
+      "sectionLength": { "bars8": [20, 20, 30], "bars16": 100, "bars32": [60, 60, 60] },
+      "vamp": { "sections": [10, 20, 30] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50, "twin": 50 },
       "figure": { "claves": { "own": 5, "clave32": 60, "clave23": 30 }, "bass": { "own": [20, 30, 40], "tumbao": 100 } },
       "louderForms": { "guitars": 0 },
