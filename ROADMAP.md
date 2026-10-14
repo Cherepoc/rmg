@@ -820,6 +820,11 @@ with its questions after each group:
    four on the floor now and then, to 145 at its middle; IDM 3:03-4:29-6:07, from a minute at its wild end, a fretless
    bass, no flams. Left of their reports: House's offbeat bass and congas, Synthwave's two tempo groups and darksynth's
    split, IDM's vignettes (a one-minute song as one section, untested).
+   Funk 3:22-4:05-4:56 (2:21-3:46-5:13), swung far less (its swing a shuffle of 8ths above 107), to 120, ♭VII; Fusion
+   major oftener, a fade, wordless voices; the Power ballad major first, the bass stepping down, the piano more, 3/4
+   now and then, from 55, a section in a key of its own now and then. Left of their reports: parts interlocking (one
+   playing the 16ths another leaves), dead notes in a 16th chain, a bass note pushed a 16th early, a wah on the bass;
+   the bass playing the head while a synth takes the bass line, a meter laid over another; a piano ballad preset.
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
