@@ -922,8 +922,9 @@ drum's figures outside 4/4.
 
 **D. Devices** (each a step, by how many genres want it): done (14 October 2026), a strophic form, verse after verse,
 four or six, `SongForms.Forms`' `vvvv` and `vvvvvv`, a genre's alone, Folk's 37, Blues' 35, Medieval's 28, Country's 26
-and Soul's 14 of 128 songs. Left: the bass on the beat and the chords after it (a waltz, a march, the boom-chicka), an arpeggio
-pattern beside the alternating thumb; a drone under a whole section (Ambient, Medieval, Dungeon synth), the pedal
+and Soul's 14 of 128 songs; and the boom-chicka, the bass's boom on 1 and 3 (`figure.bass.halves`) and the chords' chick
+on 2 and 4 (`figure.chords.backbeat`), Country's and Folk's 20-30-30. Left: the waltz and the march, figures outside
+4/4; a drone under a whole section (Ambient, Medieval, Dungeon synth), the pedal
 widened; a section's energy choosing its guitars' muting (pop punk's verses) and figure (ska punk's choruses); swing
 by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's
 glide rate (Trap's 808 on a phrase's end, a whining lead); a run into a downbeat (a disco string run, a fanfare's

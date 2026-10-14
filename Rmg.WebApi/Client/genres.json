@@ -863,6 +863,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
+      "figure": { "bass": { "own": 100, "halves": [20, 30, 30] }, "chords": { "own": 100, "backbeat": [20, 30, 30] } },
       "lastRepeat": { "breakdown": [10, 15, 15], "songs": [0, 25, 25] },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 30], "threeBars": [0, 5, 20] },
@@ -2343,7 +2344,7 @@
       "lastRepeat": { "breakdown": [10, 15, 15], "songs": [0, 25, 25] },
       "arpeggio": { "none": 100, "alternatingThumb": [40, 40, 40], "up": [10, 10, 20], "upDown": [10, 10, 20] },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
-      "figure": { "bass": { "own": 100, "withKick": [20, 20, 15] }, "backbeat": { "own": 100, "trainBeat": [10, 20, 30] } },
+      "figure": { "bass": { "own": 100, "withKick": [20, 20, 15], "halves": [20, 30, 30] }, "backbeat": { "own": 100, "trainBeat": [10, 20, 30] }, "chords": { "own": 100, "backbeat": [20, 30, 30] } },
       "callAndResponse": { "sections": [10, 25, 35] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 25] },
       "alternatingBass": { "sections": [85, 75, 60], "boogie": [10, 15, 20] },
