@@ -797,7 +797,14 @@ with its questions after each group:
    (`Articulations.Chugs`), to 220, an opening on the guitar's chords, fewer minor songs; Heavy metal's floor to 85,
    its tempo changing within a song oftener. Left of their reports: rock's pentatonic union scale, the 90s punk beat's
    offset kick, the reverse gallop and a bass gallop, Metal's plagal motion (low confidence), a riff's AAAB; and the
-   owner's call, a guitar solo in Rock's and Metal's plainest songs, which the curve rule leaves out.
+   owner's call, a guitar solo in Rock's and Metal's plainest songs, which the curve rule leaves out. Thrash opening on
+   its riff oftener (45-55-60, the bass or the drums now and then), 6/8 and a section's meter changing a little, the
+   reverse gallop (two 16ths and an 8th a beat, a riff's figure, Thrash's 10-15-20 and Heavy metal's 5-10-15);
+   Symphonic's chorus at the relative major oftener, sections in keys of their own, an intro on the pad or the piano;
+   Black metal's floor to 110 for its mid-paced songs, its riff's drone, an intro on the keyboard. Left of their
+   reports: the cymbal choke before a riff change; a key change's interval a genre's (a lift by a third, Symphonic's);
+   black metal's minor chords on chromatic roots, the ♭vi a major third below and the diminished seventh's roots,
+   which `chordScales.mediant` plays major; a power metal preset (put off).
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its

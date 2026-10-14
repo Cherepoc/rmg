@@ -1355,7 +1355,7 @@
       "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": {
         "ground": { "own": 100, "withRiff": 40, "doubleKick": [5, 15, 20] },
-        "riff": { "own": 100, "gallop": [45, 55, 55], "tremolo": [0, 5, 10] }
+        "riff": { "own": 100, "gallop": [45, 55, 55], "tremolo": [0, 5, 10], "reverseGallop": [5, 10, 15] }
       },
       "drumSounds": { "china": 70 },
       "drumStrokes": { "china": 70, "openHiHat": 85 },
@@ -1416,15 +1416,16 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "openingPart": { "riff": 85, "bass": 10, "drum": 10 },
       "soloShare": { "trading": 100, "together": [20, 30, 40] },
       "soloCount": { "one": 100, "two": [30, 50, 60], "three": 0 },
       "length": { "from": [210, 220, 180], "to": [360, 400, 520] },
-      "sectionChanges": { "tempo": [10, 20, 50], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": [0, 10, 30], "eased": 20 },
+      "sectionChanges": { "tempo": [10, 20, 50], "modulation": [0, 5, 50], "meter": [0, 8, 100], "shortBar": [0, 10, 30], "eased": 20 },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
       "melodyRange": { "wide": 0 },
       "rudiments": { "flams": [0, 35, 70], "drags": [0, 0, 20] },
       "pocket": { "laidBack": 10 },
-      "openingAlone": { "songs": [30, 40, 50] },
+      "openingAlone": { "songs": [45, 55, 60] },
       "breakdown": { "sections": [20, 30, 40] },
       "sticking": { "singles": 100, "doubles": 50, "handFoot": 70, "sixStroke": [10, 30, 40], "cascade": [40, 60, 80] },
       "drumSoloFeet": { "doubleKick": 100, "groove": 50 },
@@ -1438,7 +1439,7 @@
       "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": {
         "ground": { "own": 70, "withRiff": 100, "doubleKick": [20, 30, 40] },
-        "riff": { "own": 100, "gallop": [10, 15, 20], "tremolo": [20, 30, 40] }
+        "riff": { "own": 100, "gallop": [10, 15, 20], "tremolo": [20, 30, 40], "reverseGallop": [10, 15, 20] }
       },
       "drumSounds": { "china": 70 },
       "drumStrokes": { "china": 70, "openHiHat": 85 },
@@ -1447,7 +1448,7 @@
       "rootMotion": { "same": 75, "stepUp": 75, "stepDown": 60 },
       "rootDegree": { "second": 70, "sixth": 65 },
       "tempo": { "from": [150, 150, 130], "to": [220, 220, 240] },
-      "meter": { "4/4": 100, "6/8": [0, 0, 10], "7/8": [0, 0, 15] },
+      "meter": { "4/4": 100, "6/8": [0, 5, 15], "7/8": [0, 0, 15] },
       "scale": { "phrygian": 100, "naturalMinor": 90, "harmonicMinor": [0, 10, 20], "locrian": [0, 10, 30] },
       "chordShape": { "powerChord": 100, "triad": [5, 5, 10], "tritoneStack": [5, 10, 25], "smallCluster": [0, 5, 15] },
       "harmonicRhythm": { "twoBars": 100, "oneBar": 60 },
@@ -1500,6 +1501,7 @@
     "name": "Symphonic metal",
     "description": "Distorted guitars and a double kick under a choir, strings and a church organ, a soaring melody on a violin or a voice-like lead, harmonic minor's raised cadence, keyboard and guitar solos, a lifted last chorus.",
     "choices": {
+      "openingPart": { "riff": 50, "pad": 40, "chords": 10 },
       "soloShare": { "trading": 100, "together": [40, 50, 60] },
       "soloCount": { "one": 100, "two": [20, 40, 50], "three": 0 },
       "length": { "from": [220, 240, 200], "to": [360, 400, 540] },
@@ -1512,7 +1514,7 @@
       "drumSoloFeet": { "doubleKick": 100, "groove": 50 },
       "cadenceRaise": { "sections": [30, 40, 50] },
       "cadenceDegree": { "fifth": 70, "sixth": 60, "seventh": 55 },
-      "sectionHome": { "tonic": 100, "relative": 15, "fourth": 20, "fifth": 20 },
+      "sectionHome": { "tonic": 100, "relative": 40, "fourth": 20, "fifth": 20 },
       "passingChords": {},
       "chordScales": { "borrowed": [0, 5, 10], "applied": 0, "own": 0, "mediant": [0, 10, 15] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 70, "tom": 80, "cymbal": 100 },
@@ -1544,7 +1546,7 @@
       "stopTime": { "sections": [10, 20, 20] },
       "solos": { "sections": [10, 15, 30], "twins": [30, 40, 50], "trades": 0 },
       "soloists": { "solo": 100, "chords": [30, 40, 50], "riff": [10, 20, 30] },
-      "keyChanges": { "lastSection": [20, 30, 50], "sections": [0, 5, 30], "patterns": [0, 0, 30] },
+      "keyChanges": { "lastSection": [20, 30, 50], "sections": [5, 15, 40], "patterns": [0, 0, 30] },
       "effects": { "bends": [40, 70, 90], "vibrato": [40, 70, 100], "swell": [0, 10, 40], "pinch": [20, 40, 50], "dive": [20, 35, 50], "chorus": 0, "tone": 0, "tape": 0 },
       "strongEffect": { "none": 100 },
       "ending": { "ringOut": 100, "button": 60, "stop": 40, "big": 50 },
@@ -2918,6 +2920,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "openingPart": { "riff": 60, "pad": 40 },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 80, 60], "twin": 50 },
       "length": { "from": [270, 270, 240], "to": [420, 450, 600] },
       "sung": { "halves": [30, 20, 10], "eighths": [100, 80, 60] },
@@ -2935,7 +2938,7 @@
       "sectionHome": { "tonic": 100, "fourth": 20, "fifth": 15 },
       "planing": { "sections": [30, 40, 50], "modes": 0 },
       "alone": { "pad": 100, "rhythm": 60, "melody": 30, "chords": 20 },
-      "tempo": { "from": [140, 140, 110], "to": [210, 210, 230] },
+      "tempo": { "from": [110, 120, 95], "to": [210, 210, 230] },
       "meter": { "4/4": 100, "3/4": [15, 25, 35], "6/8": [10, 15, 25] },
       "feelChances": { "swing": 0, "halfTime": [20, 25, 30], "doubleTime": [5, 10, 15] },
       "scale": { "naturalMinor": 100, "phrygian": [40, 50, 60], "harmonicMinor": [30, 40, 50], "locrian": [0, 0, 20] },
@@ -2944,7 +2947,7 @@
       "rootDegree": { "second": 75, "fourth": 70, "fifth": 65, "sixth": 30, "seventh": 25 },
       "harmonicRhythm": { "oneBar": 100, "twoBars": [60, 60, 50], "halfBar": [10, 15, 20] },
       "riffScale": { "section": 100, "chromatic": [10, 20, 40] },
-      "riff": { "powerChords": [20, 20, 20], "chugs": [5, 5, 10], "hook": [100, 80, 0] },
+      "riff": { "powerChords": [20, 20, 20], "chugs": [5, 5, 10], "hook": [100, 80, 0], "drone": [10, 20, 30] },
       "figure": { "ground": { "own": 100, "doubleKick": [40, 50, 60], "blast": [100, 80, 60] }, "riff": { "own": [60, 50, 40], "tremolo": 100 } },
       "phraseScheme": { "aaaa": 100, "aaab": [40, 40, 50], "abab": [20, 20, 30] },
       "sectionLength": { "bars16": 100, "bars32": [60, 60, 60] },
