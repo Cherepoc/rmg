@@ -70,14 +70,15 @@ public sealed class InstrumentsOverTimeTest
     [Test]
     public async Task ASwitch_KeepsToTheFamily_ThePlainerTheOftener()
     {
-        (int, int) Share(double sound) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Kept(TestCorpus.Get(seed, Sound(sound)))).Aggregate((0, 0), (a, x) => (a.Item1 + x.Kept, a.Item2 + x.Switches));
+        (int, int) Share(double sound) => TestCorpus.InParallel(Enumerable.Range(0, 128), seed => Kept(TestCorpus.Get(seed, Sound(sound)))).Aggregate((0, 0), (a, x) => (a.Item1 + x.Kept, a.Item2 + x.Switches));
         var (middleKept, middle) = Share(0.6);
         var (wildKept, wild) = Share(1);
 
         Console.WriteLine($"switches keeping to the family: {middleKept / (double)middle:P1} of {middle} at 0.6, {wildKept / (double)wild:P1} of {wild} at the wild end");
         await Assert.That(middle).IsGreaterThan(20);
         await Assert.That(wild).IsGreaterThan(0);
-        // measured 57% to 60% at 0.6 against 31% to 33% at the wild end, at offsets 0 and a million
+        // measured over 128 songs 49% to 71% at 0.6 against 29% to 32% at the wild end, at offsets 0, a million, 716000000
+        // and 816000000 (over 64, 75 switches at 0.6 at 716000000 fell under the bound)
         await Assert.That(middleKept / (double)middle).IsGreaterThan(wildKept / (double)wild + 0.15);
     }
 

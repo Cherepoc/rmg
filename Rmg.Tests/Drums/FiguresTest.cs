@@ -16,16 +16,22 @@ public sealed class FiguresTest
     ];
 
     /// <summary>
-    ///     Every hit of the tracks given in the sections given, but a phrase's last bar, where a fill may take the drums, and
-    ///     a phrase's first beat, where the fill into it lands, with its section and its bar's start.
+    ///     Every hit of the tracks given in the sections given, but a phrase's last bar and the bar before any line the drums
+    ///     mark, an intro's window's end too, where a fill may take the drums, and a phrase's first beat, where the fill into
+    ///     it lands, with its section and its bar's start.
     /// </summary>
     /// <param name="window">Whether an intro's window before the first section, which plays its first bars, is walked too.</param>
-    private static IEnumerable<(SectionSpan Span, double Bar, double Position)> Hits(CorpusSong song, IReadOnlySet<int> tracks, IReadOnlySet<int> sections, bool window = false) =>
-        (window ? song.Map.PlayedSections : song.Map.Sections).Where(x => sections.Contains(x.SectionId)).SelectMany(span => song.Song.Notes!.Where(x => tracks.Contains(x.Key)).SelectMany(x => x.Value)
+    private static IEnumerable<(SectionSpan Span, double Bar, double Position)> Hits(CorpusSong song, IReadOnlySet<int> tracks, IReadOnlySet<int> sections, bool window = false)
+    {
+        // the lines the drums mark, an intro's window's end among them, where a fill may take the bar before
+        var lines = song.FillLines();
+        bool OnLine(double position) => lines.Any(l => Math.Abs(l - position) < 1e-6);
+        return (window ? song.Map.PlayedSections : song.Map.Sections).Where(x => sections.Contains(x.SectionId)).SelectMany(span => song.Song.Notes!.Where(x => tracks.Contains(x.Key)).SelectMany(x => x.Value)
             .Where(x => x.Position > span.Start + 1e-9 && x.Position < span.End - 1e-9
-                        && Math.Abs(Math.IEEERemainder(x.Position - span.Start, span.Meter.PhraseDuration)) > 1e-6)
+                        && Math.Abs(Math.IEEERemainder(x.Position - span.Start, span.Meter.PhraseDuration)) > 1e-6 && !OnLine(x.Position))
             .Select(x => (span, Bar: span.Start + Math.Floor((x.Position - span.Start) / span.Meter.BarDuration + 1e-9) * span.Meter.BarDuration, x.Position))
-            .Where(x => Math.Abs(Math.IEEERemainder(x.Bar + span.Meter.BarDuration - span.Start, span.Meter.PhraseDuration)) > 1e-6));
+            .Where(x => Math.Abs(Math.IEEERemainder(x.Bar + span.Meter.BarDuration - span.Start, span.Meter.PhraseDuration)) > 1e-6 && !OnLine(x.Bar + span.Meter.BarDuration)));
+    }
 
     /// <summary>
     ///     A calibration: the kick follows the riff's pattern before the lines are placed, which leave a few of the riff's

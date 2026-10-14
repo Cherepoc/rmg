@@ -911,16 +911,18 @@ through the implementation loop, measured before and after, its listening questi
 (`Articulations.FrameCycles`), a long one's notes slower in whole frames; asked again over the same songs:
 `chiptune-speed`.
 
-**1. The rules on the other corpora** (each failure reproduced at the committed code first; a bug fixed where the rule
-breaks, a calibration widened by a sample):
-1. The shared chord shape: seed 62 at a million and seed 52 at 816000000 in a polymeter's section
-   (`Polymeter.ShapeAt`), seed 5 after a reharmonisation, seed 49 the melody's triad over the chords' cluster.
-2. Seed 21's bass at 816000000 a semitone over its chord's root (`LinePattern.Place`).
-3. The held-out corpus (716000000), its dozen failures sorted: the djent breakdown's silent kick pattern, the
-   polymeter's chords off its cell, and the nine older ones (a chromatic passing chord, a section's own key, a pushed
-   change, a strum, the inner line, a soloist's stacks, the family switch's share, the scale rule, the render's notes).
-4. The 816000000 corpus's older failures: the rhythm part's chords, a passing chord a semitone from the next, a
-   palm-muted note's length, a fill decision at bar 5 of a four-bar phrase.
+**1. The rules on the other corpora**, done in part (15 October 2026): the shared chord shape clean at every offset, a
+polymeter's copy taking the shape struck latest at or before it in its chord's span; the scale rule clean, a bass's
+approach by the next chord's fifth only where the line's scale over its chord has it, a section pedal's notes exempt
+as a key change's; a part opening alone filled into in the second half of its bar at most and a silent start filled by
+the intro's first part alone; the clave test leaving out the bar before every line the drums mark, an intro's window's
+end too; the family switch's share over 128 songs. **1b. Left, each older than this plan, the next step of its own:**
+at 816000000, the rhythm part's realized note at a change keeping the chord before in its state (seed 57 at 180, its
+pitches the new chord's, its own state the new one's, so the realizer's merge), a chromatic passing chord a semitone
+from the next (seed 1 at 6), a fill decision recorded at bar 5 of a four-bar phrase, a palm-muted note's length; at
+716000000, the polymeter's chords off its cell (seed 26 at 248), a soloist's stack, a line's fall from the root, a
+passing chord (seed 15 at 22), a filtered drop's band (seed 29 at 608), a section's own key (seed 50), a pushed change
+(seed 58 at 224), the render's notes, a strum's direction (seed 15 at 148), and every chord note in its scale.
 
 **2. The research's devices** (by how many genres want each, each a genre's data on a mechanism there already where it
 can be):
