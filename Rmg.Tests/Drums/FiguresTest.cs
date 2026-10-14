@@ -187,6 +187,37 @@ public sealed class FiguresTest
         await Assert.That(on / (double)notes).IsGreaterThan(0.6);
     }
 
+    /// <summary>
+    ///     A calibration: a waltz, a Country song's in three, its chords striking on 2 and 3 and its bass on 1, but for the
+    ///     notes the stages after the figures place, a line's pickup or a push; and in no bar of four.
+    /// </summary>
+    [Test]
+    public async Task AWaltz_StrikesItsChordsOn2And3_AndItsBassOn1()
+    {
+        var (notes, on, waltzes) = (0, 0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("country"), Meter: Meter.ThreeFour))))
+        {
+            var playing = Playing(song, FigurePlayer.Chords, "waltz");
+            foreach (var span in song.Map.Sections.Where(x => playing.Contains(x.SectionId)))
+            {
+                await Assert.That(span.Meter.Groups.SequenceEqual(Meter.ThreeFour.Groups)).IsTrue().Because($"seed {song.Seed} section {span.SectionId}");
+                waltzes++;
+                foreach (var (role, onsets) in new[] { (TrackRole.Chords, new[] { 4, 8 }), (TrackRole.Bass, new[] { 0 }) })
+                foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Track(role))?.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9) ?? [])
+                {
+                    notes++;
+                    var sixteenth = (note.Position - span.Start) % span.Meter.BarDuration / 0.25;
+                    on += onsets.Any(x => Math.Abs(x - sixteenth) < 0.1) ? 1 : 0;
+                }
+            }
+        }
+
+        Console.WriteLine($"{waltzes} waltzing sections, {on / (double)Math.Max(1, notes):P1} of their {notes} notes on the waltz's beats");
+        // measured 79.3% of 2266 notes in 58 sections, October 2026
+        await Assert.That(waltzes).IsGreaterThan(10);
+        await Assert.That(on / (double)notes).IsGreaterThan(0.6);
+    }
+
     [Test]
     public async Task AFigureSeveralPlayersPlay_IsPlayedByAll_ABlastsKickWithItsSnareAndItsCymbal()
     {

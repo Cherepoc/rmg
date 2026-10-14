@@ -953,8 +953,9 @@ drum's figures outside 4/4.
 **D. Devices** (each a step, by how many genres want it): done (14 October 2026), a strophic form, verse after verse,
 four or six, `SongForms.Forms`' `vvvv` and `vvvvvv`, a genre's alone, Folk's 37, Blues' 35, Medieval's 28, Country's 26
 and Soul's 14 of 128 songs; and the boom-chicka, the bass's boom on 1 and 3 (`figure.bass.halves`) and the chords' chick
-on 2 and 4 (`figure.chords.backbeat`), Country's and Folk's 20-30-30. Left: the waltz and the march, figures outside
-4/4; a drone under a whole section, done (14 October 2026), the section pedal's place a genre's pool (`sectionPedal`):
+on 2 and 4 (`figure.chords.backbeat`), Country's and Folk's 20-30-30. The waltz, done (14 October 2026), a figure's own meter (`Figure.In`), the bass's oom on 1 and the chords' pah-pah on 2
+and 3 in three, Country's, Folk's, Celtic's and Bluegrass's, 79% of a waltzing section's notes on its beats; the march
+is the boom-chicka in four, as no genre plays 2/4. Left: a drone under a whole section, done (14 October 2026), the section pedal's place a genre's pool (`sectionPedal`):
 its home under the first phrase, its dominant under the last or a drone under the whole, Medieval's, Celtic's and
 Ambient's 60, Dungeon synth's 40, 37 of 69 of Medieval's pedalled sections droning (to ask: `medieval-drone`); a section's energy choosing its guitars' muting, done (14 October 2026), the chugs leaning to the quieter sections (`SectionGenerator.ChugCoupling`), Punk's 43% of its quieter sections against 17% of its louder, from 31% and 22%; left: its figure (ska punk's choruses); swing
 by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's
