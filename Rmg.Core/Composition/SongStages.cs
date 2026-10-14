@@ -32,6 +32,9 @@ internal sealed record SongDraft(
     /// <summary>A calling verse's halves, the melody's call and a part's answer, which the stages after keep out of (<see cref="Composition.CallAndResponse" />).</summary>
     public ImmutableArray<HeldSpan> Calls { get; init; } = [];
 
+    /// <summary>Where the drums take the kick out, which the bass leaves with it (<see cref="SongStages.KickOutBass" />).</summary>
+    public ImmutableArray<(double From, double To)> KickOuts { get; init; } = [];
+
     /// <summary>Where the drums fill, from a run's first note to its line, which the stages that play around a fill keep out of.</summary>
     public (double From, double To)[] FillSpans => [..Runs.Where(x => !x.Positions.IsEmpty).Select(x => (x.Positions.Min(), x.Line))];
 
@@ -142,6 +145,7 @@ internal static class SongStages
         new("Articulation", Articulations.Apply, CanSkip: true),
         new("Mix filter", Composition.MixFilter.Apply, CanSkip: true),
         new("Timing", Pocket.Apply, CanSkip: true),
+        new("Kick-out bass", KickOutBass, CanSkip: true),
         new("Expression", ExpressionStage, CanSkip: true),
         new("Hook intro", HookIntro, CanSkip: true),
         new("Silent start", Composition.SilentStart.Apply, CanSkip: true),
@@ -249,7 +253,9 @@ internal static class SongStages
         // the runs handed on to the lines' walks and the drums' touches, none where the drums mark the form, which plays none
         // a drum heard only where the groove is taken out, in stop time or a drum solo, which clears it, landed elsewhere
         var drumSolos = song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key]).Select(x => (x.Start, x.End, x.Meter.BarDuration));
-        return draft with { Timeline = fills.Generate(draft.Timeline, lines, song.Form.Map, [..stops, ..hits, ..drumSolos]), Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs };
+        var timeline = fills.Generate(draft.Timeline, lines, song.Form.Map, [..stops, ..hits, ..drumSolos]);
+        StateTrace.RecordSong(TracePoints.KickOuts, string.Join(", ", fills.KickOuts.Select(x => $"{x.From}-{x.To}")), fills.KickOuts.ToImmutableArray());
+        return draft with { Timeline = timeline, Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs, KickOuts = [..fills.KickOuts] };
     }
 
     /// <summary>A bigger section announced, the hi-hat opening and the snare on its head before it.</summary>
@@ -393,6 +399,25 @@ internal static class SongStages
     /// <summary>The notes, decided from the state of the whole song, in its order, none sounding into a stop.</summary>
     internal static SongDraft RealizeNotes(SongDecisions song, SongDraft draft) =>
         draft with { Notes = song.Form.Edits.CutNotes(Realizer.Realize(song.Tracks.Definitions, draft.Timeline, song.Form.Map.PlaceOf), song.Roles) };
+
+    /// <summary>
+    ///     The bass out with the kick where the drums take it out, the low end leaving together into the downbeat: its notes
+    ///     there taken out, and one sounding into the span ending where it starts.
+    /// </summary>
+    internal static SongDraft KickOutBass(SongDecisions song, SongDraft draft)
+    {
+        var notes = draft.Notes!;
+        foreach (var track in song.Roles.Where(x => x.Value == TrackRole.Bass).Select(x => x.Key).Where(notes.ContainsKey))
+        {
+            var timeline = notes[track];
+            foreach (var (from, to) in draft.KickOuts)
+                timeline = EventTimeline.Create(timeline.Duration, timeline.Where(x => x.Position < from - 1e-9 || x.Position >= to - 1e-9)
+                    .Select(x => x.Position < from - 1e-9 && x.Position + x.Value.Duration > from + 1e-9 ? (x.Value with { Duration = from - x.Position }).ToTimelineItem(x.Position) : x));
+            notes = notes.SetItem(track, timeline);
+        }
+
+        return draft with { Notes = notes };
+    }
 
     /// <summary>The parts' instruments over the song, switched and articulated by every section's sound facet.</summary>
     internal static SongDraft Instruments(SongDecisions song, SongDraft draft) =>

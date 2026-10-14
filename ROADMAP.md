@@ -876,8 +876,8 @@ it:
     the hats, the snare and the bass playing on into the downbeat (`GrooveTreatment.KickOut`, `kickOut.lines`, drawn
     only where a genre gives it a chance): House's, Techno's and Trance's 20-30-40 of fill lines, Drum and bass's,
     Trap's, Hip-hop's, Disco's, Synthwave's and Pop's 10-20-30, 4% to 12% of their lines; to ask when a round has room
-    (`house-kick-out`). Left: the bass on the kick out with it, which the research names (the bass not a drum a fill
-    clears).
+    (`house-kick-out`). The bass out with it, done (14 October 2026): a stage after the timing taking the bass's notes
+    out of every kick-out and ending one held into it where it starts, the low end leaving together.
 12. Done (14 October 2026): **the breakdown chorus**, `lastRepeat.breakdown`, a genre's, the last chorus played twice
     its first pass built up, the voice alone, the drums next, the full band by its end (the research's drop chorus),
     the second in full: the Power ballad's 30-40-40, Pop's and Soul's 20-25-25, Country's, Rock's, Disco's and Folk's

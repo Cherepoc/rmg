@@ -51,6 +51,9 @@ internal static class TracePoints
     /// <summary>Where a section holds its pedal, none where it holds none (a <see cref="Composition.PedalPlace" />?).</summary>
     public const string SectionPedal = "Section pedal";
 
+    /// <summary>Where the drums take the kick out, from a span's start to its line (an <c>ImmutableArray</c> of <c>(double From, double To)</c>).</summary>
+    public const string KickOuts = "Kick-outs";
+
     /// <summary>The part the song opens on alone, none where it opens otherwise (a <see cref="Songs.TrackRole" />?).</summary>
     public const string OpeningAlone = "Opening alone";
 

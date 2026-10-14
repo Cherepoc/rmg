@@ -507,6 +507,15 @@
     },
     "seeds": [
       {
+        "seed": "P",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Bass (Synth Bass 2)",
+          "Chords (Synth Brass 2)"
+        ]
+      },
+      {
         "seed": "V",
         "at": 3.2,
         "listen": [
@@ -525,15 +534,6 @@
         ]
       },
       {
-        "seed": "1G",
-        "at": 0,
-        "listen": [
-          "Hi-Hat",
-          "Bass (Synth Bass 2)",
-          "Melody (Lead 2 (sawtooth))"
-        ]
-      },
-      {
         "seed": "1L",
         "at": 0,
         "listen": [
@@ -545,8 +545,8 @@
         "seed": "1Q",
         "at": 3.7,
         "listen": [
-          "Bass (Synth Bass 2)",
           "Hi-Hat",
+          "Bass (Synth Bass 2)",
           "Chords (Electric Piano 2)"
         ]
       },

@@ -432,6 +432,8 @@ internal sealed class FillGenerator
         };
         foreach (var track in cleared)
             edits.Clear(track, from, line);
+        if (play.Treatment == GrooveTreatment.KickOut)
+            KickOuts.Add((from, line));
 
         PlayRun(edits, play, from, line, groove, rhythm, minNote, sectionId, meter);
         return span;
@@ -505,6 +507,9 @@ internal sealed class FillGenerator
 
     /// <summary>The runs the drums played into a change of section, for the pitched tracks to fill with (<see cref="LineFills" />).</summary>
     public List<PlayedRun> Runs { get; } = [];
+
+    /// <summary>Where the kick is taken out, from the span's start to its line, which the bass leaves with it (<see cref="SongStages.KickOutBass" />).</summary>
+    public List<(double From, double To)> KickOuts { get; } = [];
 
     /// <summary>The hits the drums land on at a line; a drum that plays there still, the edits made, keeps its note.</summary>
     private static void Land(
