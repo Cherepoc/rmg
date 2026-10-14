@@ -825,6 +825,11 @@ with its questions after each group:
    now and then, from 55, a section in a key of its own now and then. Left of their reports: parts interlocking (one
    playing the 16ths another leaves), dead notes in a 16th chain, a bass note pushed a 16th early, a wah on the bass;
    the bass playing the head while a synth takes the bass line, a meter laid over another; a piano ballad preset.
+   Chiptune 110 to 200 (Mega Man's 180, Mario's castle 200, Castlevania's 113), a game loop's length at its plain end,
+   a little Phrygian; Chamber 3:54-5:11-6:38 (2:18-2:48-3:56) as a movement plays, to 170, its sections at the
+   dominant oftener, the minuet's waltz, the bass in 8ths; Lyrical from 2:30. Left of their reports: the triangle's bass
+   (planned), a home chosen by the mode (the dominant in major, the relative major in minor), sonata form's
+   recapitulation, Lyrical's drums fewer (the owner's call: most of its records have no beat).
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
