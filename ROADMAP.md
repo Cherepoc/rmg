@@ -758,10 +758,14 @@ with its questions after each group:
    the tonic 86% (74%), 4:47 (3:12); Nu metal's ghosts 24% (none), Phrygian dominant and Dorian, 3:28; Doom's solos 15%
    (7%), calm 8% (4%), chorused guitars, 6:49. Asked: `metal-twins`, `thrash-skank`, `djent-calm`. Left: a section's
    tempo changed at once, not eased, Thrash's (the research's missing device).
-3. **The research again** for the genres researched without a search (Reggae, Latin, Ambient, Folk, Dungeon synth,
-   Drum and bass, Soul, Pop, Trance, Trap, Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues, and the two
-   planned genres), in a session with its search budget, a few agents at a time with a limit of searches each; then
-   their retunes.
+3. Done in part (14 October 2026): **the research again**, every genre researched without a search searched now (the
+   scratchpad's `*-searched.md`), and their retunes, a genre a step. Reggae: the records' fast count, 115-150 (68-91),
+   its chords' and rhythm part's skank a step slower, on 2 and 4 in 57% of their onsets (9%), the drop on 3 now one a
+   two skanks as the records', the drums and the bass resting less (45, 40) and the chords, the rhythm part and the
+   melody more, swung in about half, one-chord vamps, minor a little ahead, the riff a muted guitar the bass doubles,
+   less organ and ride, the filter's dips. Left: the other genres' retunes (Latin, Ambient, Folk, Dungeon synth, Drum
+   and bass, Soul, Pop, Trance, Trap, Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues), each its report's
+   findings; the presets their reports propose (Dub, Celtic, Psytrance, Bluegrass, a Renaissance preset).
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
