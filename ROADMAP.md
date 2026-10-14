@@ -784,8 +784,14 @@ with its questions after each group:
    into home, the ostinato on strings, trumpets and horns, 50 to 170; Blues kept to its twelve bars (`strictness`, a
    genre's value, the songs' at 50, Blues' 50-90-80, about 0.97 at its middle where the songs' 0.85), its chords a bar
    each, to 170, less minor, call and response at its plain end, the one-chord boogie, bends and wide vibrato, a solo
-   in most songs. Left: the presets the reports propose (Dub, Celtic, Psytrance, Bluegrass, a Renaissance preset,
-   modern pop, delta blues), each by listening.
+   in most songs. And the presets the reports propose, done (14 October 2026): the **16-bit game** (`fmGame`, a Mega
+   Drive's FM: slap and synth basses, a DX piano and FM brass, sevenths, sampled drums and orchestra hits, an echo on a
+   second channel, game loops fading, 116-138-155, about two and a half minutes), **Psytrance** (the rolling bass, one
+   chord, Phrygian dominant, the acid squelch, few pads, 141-147, 6:29-8:40), **Dub** (the riddim alone for long
+   stretches, the voices in fragments, echo leading, the filter, one riddim looped), **Celtic** (fiddle, flute and
+   pipes in unison, jigs and reels, Dorian and Mixolydian, drones, ornaments at its plain end, a bodhrán or no drums)
+   and **Bluegrass** (no drums, the banjo rolling, the mandolin's chop on 2 and 4, breaks passed round, ahead of the
+   beat). Left, by listening: a Renaissance preset, modern pop, delta blues.
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
