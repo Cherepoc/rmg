@@ -956,7 +956,7 @@ and Soul's 14 of 128 songs; and the boom-chicka, the bass's boom on 1 and 3 (`fi
 on 2 and 4 (`figure.chords.backbeat`), Country's and Folk's 20-30-30. Left: the waltz and the march, figures outside
 4/4; a drone under a whole section, done (14 October 2026), the section pedal's place a genre's pool (`sectionPedal`):
 its home under the first phrase, its dominant under the last or a drone under the whole, Medieval's, Celtic's and
-Ambient's 60, Dungeon synth's 40, 37 of 69 of Medieval's pedalled sections droning (to ask: `medieval-drone`); a section's energy choosing its guitars' muting (pop punk's verses) and figure (ska punk's choruses); swing
+Ambient's 60, Dungeon synth's 40, 37 of 69 of Medieval's pedalled sections droning (to ask: `medieval-drone`); a section's energy choosing its guitars' muting, done (14 October 2026), the chugs leaning to the quieter sections (`SectionGenerator.ChugCoupling`), Punk's 43% of its quieter sections against 17% of its louder, from 31% and 22%; left: its figure (ska punk's choruses); swing
 by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's
 glide rate, done (14 October 2026): `glide.lead` beside the bass's, Hip-hop's, Trance's and Synthwave's, and `glideRate`, the
 share of notes slid into, Trap's 808 sparing at 20, and the slide leaning to a leap and a phrase's last note, done (14 October 2026), three times the odds each (`Expression.GlideOdds`), a gliding bass sliding into 30% of its leaps and 16% of its steps; a run into a downbeat (a disco string run, a fanfare's

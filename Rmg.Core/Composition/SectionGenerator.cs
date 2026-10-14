@@ -85,6 +85,9 @@ internal sealed class SectionGenerator
     /// <summary>The chance a section's guitars and picked bass chug, their repeats palm-muted, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
     public static Probabilities.ByConvention ChugChance { get; } = new(0, 0, 0);
 
+    /// <summary>How far a section's energy leans its chugs, to the quieter sections (<see cref="SectionEnergy.Tilt" />).</summary>
+    public const double ChugCoupling = 0.4;
+
     /// <summary>The chance a section's bass plays in octaves, its notes off the beat the note before an octave up, as a disco or funk bass does, by the groove facet: rare in the songs.</summary>
     public static Probabilities.ByConvention OctaveBassChance { get; } = new(0, 0.05, 0.05);
 
@@ -427,8 +430,10 @@ internal sealed class SectionGenerator
     {
         // its riff in power chords, a genre's, which the songs never play, from a sequence of its own
         var powerChords = Stream(sectionId, SectionStream.PowerChords).TestProbability(PowerChordChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "powerChords")));
-        // its guitars' and its picked bass's repeats palm-muted, a genre's, which the songs never play, from a sequence of its own
-        var chugs = Stream(sectionId, SectionStream.Chugs).TestProbability(ChugChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "chugs")));
+        // its guitars' and its picked bass's repeats palm-muted, a genre's, which the songs never play, from a sequence of its own,
+        // the quieter the section the likelier, as a band mutes its verses and opens its choruses
+        var energy = _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy);
+        var chugs = Stream(sectionId, SectionStream.Chugs).TestProbability(SectionEnergy.Tilt(-energy, ChugCoupling).Chance(ChugChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "chugs")), 1));
         // the bass in octaves now and then, a genre's the more, from a sequence of its own
         var octaveBass = Stream(sectionId, SectionStream.OctaveBass).TestProbability(OctaveBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.OctaveBass, "sections")));
         StateTrace.RecordSection(TracePoints.OctaveBass, SectionTrace, sectionId, $"{octaveBass}", octaveBass);
