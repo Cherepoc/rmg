@@ -256,6 +256,11 @@ channel of its own; `rudiments`, Jazz's flams and drags; `phrase-length`, Orches
 three; and `short-bar`, Djent's sections ending on a bar cut short, which the loops' genres play none of now (Trance,
 Drum and bass, Trap, Disco, Funk, Ambient and Chiptune beside the five that named none), their sections square.
 
+Answered on 15 October 2026, accepted by the owner: `pop-post-chorus`, `medieval-drone`, `punk-drum-intro`,
+`ballad-piano-intro`, `punk-muted-verses`, `disco-run`, `latin-montuno` and `jazzfunk-chords`; `chiptune-frames` heard
+nice but not on every chord, the closer or more dissonant a chord's notes the worse cycled, a guess to settle (see
+*Chiptune's frame-rate arpeggio by its chord*).
+
 Answered on 14 October 2026, the round of the order of work's steps 5 to 8 and the mood, kept: `lyrical-echo` and
 `lyrical-cascade` (6 of 6 each), `darkjazz-halftime` and `dnb-dark` (5 to 1 each), `darkjazz-swing` (4, 2 unsure),
 `funkrock-chorus` (4 to 1), `synthwave-dark` (3 to 1, 2 the same); `bass-step-down`, heard against (1 to 5) and kept as
