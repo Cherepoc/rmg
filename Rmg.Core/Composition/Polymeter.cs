@@ -207,15 +207,20 @@ internal static class Polymeter
         var kicks = kickTracks.ToArray();
         var snares = snareTracks.ToArray();
         // the chord's shape at a place, as the pitched parts' notes there have it, all alike, so that a note played again at
-        // another place takes its chord's rather than the one it was struck in
+        // another place takes its chord's rather than the one it was struck in: the latest struck at or before it in its
+        // chord's span, as a chord held over bars may change its shape at a bar line, or the first after it where none was
         var changes = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         var shaped = song.TrackTimelineMap.Where(x => roles.TryGetValue(x.Key, out var role) && role != TrackRole.Drum).SelectMany(x => x.Value.EventTimeline)
-            .Where(x => !x.Value.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty).ToArray();
+            .Where(x => !x.Value.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty).OrderBy(x => x.Position).ToArray();
         StateMap? ShapeAt(double position)
         {
             var from = changes.LastOrDefault(x => x <= position + 1e-9);
             var to = changes.FirstOrDefault(x => x > position + 1e-9, double.PositiveInfinity);
-            return shaped.FirstOrDefault(x => x.IsWithin(from, to)).Value?.Subset(ShapeKinds);
+            var within = shaped.Where(x => x.IsWithin(from, to)).ToArray();
+            if (within.Length == 0)
+                return null;
+            var before = Array.FindLastIndex(within, x => x.Position <= position + 1e-9);
+            return within[Math.Max(before, 0)].Value.Subset(ShapeKinds);
         }
 
         TimelineItem<StateMap> PlayedAt(StateMap note, double position) =>
