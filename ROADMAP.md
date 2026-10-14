@@ -263,7 +263,9 @@ chords had two notes a tone or less apart (0-5-6, sus2, 0-1-7), 9% of its first 
 (`chip-arpeggio-searched.md`): the closeness, not the dissonance, two notes a tone apart alternating that fast heard
 as one warbling line, a trill, and chip musicians cycling triads, fifths and octaves, spreading a second wider. So a
 cycled chord's note a tone or less above the note below moves up an octave until none is (`Articulations.Spread`), a
-sus2 as root, fifth and ninth, every note kept; asked again over the same songs: `chiptune-spread`.
+sus2 as root, fifth and ninth, every note kept; asked again over the same songs: `chiptune-spread`. Asked with it from 15 October 2026, the queue: `cinematic-pad`, `lyrical-beat`,
+`dnb-two-step`, `soul-every-beat`, `disco-pulse`, `house-kick-out`, `ballad-breakdown`, `folk-waltz` (a page's patch
+reaches a figure, its choices flat there), and `latin-tumbao`, left to ask with Latin's research, done.
 
 Answered on 14 October 2026, the round of the order of work's steps 5 to 8 and the mood, kept: `lyrical-echo` and
 `lyrical-cascade` (6 of 6 each), `darkjazz-halftime` and `dnb-dark` (5 to 1 each), `darkjazz-swing` (4, 2 unsure),

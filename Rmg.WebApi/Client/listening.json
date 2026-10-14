@@ -56,5 +56,569 @@
         ]
       }
     ]
+  },
+  {
+    "id": "cinematic-pad",
+    "question": "Cinematic piano's strings holding the chords under the piano: a film score's bed, or a piano piece smothered?",
+    "decides": "Cinematic piano's pad, its strings at 70-80-80, against the piano, its bass and its counter-melody alone.",
+    "genre": "filmPiano",
+    "without": {
+      "skip": [],
+      "genre": {
+        "parts": {
+          "pad": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 139.3,
+        "listen": [
+          "Pad (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 0,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Pad (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 4.8,
+        "listen": [
+          "Pad (String Ensemble 2)"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 117.6,
+        "listen": [
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "V",
+        "at": 133.1,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Acoustic Grand Piano)",
+          "Pad (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 18.1,
+        "listen": [
+          "Pad (String Ensemble 1)",
+          "Melody (Acoustic Grand Piano)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lyrical-beat",
+    "question": "Lyrical guitar's slow swung beat under its guitars: a downtempo groove, or the haze broken up?",
+    "decides": "Lyrical guitar's drums, 95-75-40, against none, as most of its records play.",
+    "genre": "lyrical",
+    "without": {
+      "skip": [],
+      "genre": {
+        "parts": {
+          "drum": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Hi-Hat",
+          "Cabasa"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Chords (Electric Guitar (clean))",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Maracas",
+          "Cabasa"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 254.1,
+        "listen": [
+          "Guiro",
+          "Ride"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 0,
+        "listen": [
+          "Maracas",
+          "Hi-Hat",
+          "Rhythm part (Acoustic Guitar (nylon))"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 207.1,
+        "listen": [
+          "Ride",
+          "Maracas"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dnb-two-step",
+    "question": "Drum and bass's kick on 1 and the 3-and around the snare's 2 and 4, the two-step: rolling, or stiff?",
+    "decides": "The two-step, Drum and bass's figure.ground 50-60-60 beside its breakbeat, against those alone.",
+    "genre": "dnb",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.ground": {
+          "twoStep": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 138.9,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Hi-Hat",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 273.5,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 279.6,
+        "listen": [
+          "Hi-Hat",
+          "Tom",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 45.9,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 109.6,
+        "listen": [
+          "Acoustic Snare",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "X",
+        "at": 218.4,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "soul-every-beat",
+    "question": "Soul's snare on every beat, as a Motown record drives: a stomp, or a march?",
+    "decides": "The snare on every beat, Soul's figure.backbeat 20-30-30, against its backbeat.",
+    "genre": "soul",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.backbeat": {
+          "everyBeat": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 28,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 138,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 23.8,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "P",
+        "at": 26,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 57.7,
+        "listen": [
+          "Acoustic Snare",
+          "Clap"
+        ]
+      },
+      {
+        "seed": "X",
+        "at": 0,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disco-pulse",
+    "question": "Disco's bass pulsing in even 8ths on the root: the dance floor's drive, or a bass that never moves?",
+    "decides": "The bass's 8ths, Disco's figure.bass 40-50-50, against its own line.",
+    "genre": "disco",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "eighths": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 65.2,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 41,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 153.4,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 134.8,
+        "listen": [
+          "Bass (Slap Bass 1)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 42.1,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 31.7,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "house-kick-out",
+    "question": "House taking its kick and its bass out for a beat or a bar before a downbeat, the hats playing on: a lift, or a hole?",
+    "decides": "The kick-out, House's kickOut.lines 20-30-40, the bass out with it, against the kick playing through.",
+    "genre": "electronic",
+    "without": {
+      "skip": [],
+      "genre": {
+        "kickOut": {
+          "lines": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 141.2,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "4",
+        "at": 202.3,
+        "listen": [
+          "Electric Snare",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 290.2,
+        "listen": [
+          "Tom"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 166.3,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 103.5,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Tom"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 44.4,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Tom",
+          "Electric Snare"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ballad-breakdown",
+    "question": "The Power ballad's last chorus played twice, its first pass built up from the voice alone, the drums next, the band by its end: a ballad's climax, or a stall before it?",
+    "decides": "The breakdown chorus, the Power ballad's lastRepeat.breakdown 30-40-40, against its last chorus repeated whole.",
+    "genre": "ballad",
+    "without": {
+      "skip": [],
+      "genre": {
+        "lastRepeat": {
+          "breakdown": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "8",
+        "at": 293.9,
+        "listen": [
+          "Chords (Distortion Guitar)",
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Pad (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 229.4,
+        "listen": [
+          "Hi-Hat",
+          "Bass (Electric Bass (finger))",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "e",
+        "at": 226.9,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "11",
+        "at": 226,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Riff (Synth Brass 1)",
+          "Ride"
+        ]
+      },
+      {
+        "seed": "1V",
+        "at": 248.3,
+        "listen": [
+          "Ride",
+          "Acoustic Snare",
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1s",
+        "at": 207.5,
+        "listen": [
+          "Melody (Acoustic Grand Piano)",
+          "Pad (Pad 2 (warm))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "folk-waltz",
+    "question": "Folk in three, its bass on 1 and its chords on 2 and 3: a waltz, or an oompah band?",
+    "decides": "The waltz figure, Folk's chords' 50-60-60 and bass's 20-30-30 in a bar of three, against their own rhythms.",
+    "genre": "folk",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.chords": {
+          "waltz": 0
+        },
+        "figure.bass": {
+          "waltz": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 0,
+        "listen": [
+          "Chords (Dulcimer)"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 0,
+        "listen": [
+          "Chords (Reed Organ)"
+        ]
+      },
+      {
+        "seed": "V",
+        "at": 24.1,
+        "listen": [
+          "Chords (Reed Organ)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 4.4,
+        "listen": [
+          "Chords (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "z",
+        "at": 27,
+        "listen": [
+          "Melody (Whistle)"
+        ]
+      },
+      {
+        "seed": "1B",
+        "at": 36,
+        "listen": [
+          "Solo (Flute)",
+          "Chords (Acoustic Guitar (steel))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "latin-tumbao",
+    "question": "Latin's bass on the tumbao, each bar's 2-and and 4 ahead of the chord, where it played its own line: a salsa's bass, or one that never lands?",
+    "decides": "The tumbao, Latin's figure.bass 100 beside its own rhythm's 20-30-40, against its own alone; asked once Latin was researched and retuned.",
+    "genre": "latin",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "tumbao": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 55.4,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "1",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 5.6,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 180.6,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 283.1,
+        "listen": [
+          "Chords (Bright Acoustic Piano)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 37.3,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      }
+    ]
   }
 ]
