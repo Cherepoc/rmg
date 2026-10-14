@@ -30,8 +30,8 @@ internal sealed class SongFormGenerator
     // a drop's kind, silent or filtered, from a sequence of its own
     private readonly IGenerationContext _dropKindContext;
 
-    // the sequence whether the song opens on its riff alone is drawn from (FormLayers.RiffIntro)
-    private readonly IGenerationContext _riffContext;
+    // the sequence whether the song opens on one part alone, and which, is drawn from (FormLayers.OpeningAlone)
+    private readonly IGenerationContext _openingContext;
 
     // the genre whose intros and endings the song's are drawn among, where it names them
     private readonly Genre _genre;
@@ -54,22 +54,22 @@ internal sealed class SongFormGenerator
     // the sequence another intro is drawn from where the song has no chorus for its hook to quote (WithoutHook)
     private readonly IGenerationContext _hookContext;
 
-    // whether the song plays a riff, which it may open on alone
-    private readonly bool _playsRiff;
+    // the parts the song plays, one of which it may open on alone
+    private readonly IReadOnlySet<TrackRole> _playing;
 
     public SongFormGenerator(
         IGenerationContext context,
         IGenerationContext introContext,
         IGenerationContext dropContext,
         IGenerationContext dropKindContext,
-        IGenerationContext riffContext,
+        IGenerationContext openingContext,
         Genre genre,
         RhythmicUnconventionality songRhythm,
         IReadOnlyDictionary<int, TrackRole> roles,
         bool hasDrums,
         bool drumsKeepTime,
         IGenerationContext hookContext,
-        bool playsRiff,
+        IReadOnlySet<TrackRole> playing,
         Meter meter
     )
     {
@@ -77,14 +77,14 @@ internal sealed class SongFormGenerator
         _introContext = introContext;
         _dropContext = dropContext;
         _dropKindContext = dropKindContext;
-        _riffContext = riffContext;
+        _openingContext = openingContext;
         _genre = genre;
         _songRhythm = songRhythm;
         _roles = roles;
         _hasDrums = hasDrums;
         _drumsKeepTime = hasDrums && drumsKeepTime;
         _hookContext = hookContext;
-        _playsRiff = playsRiff;
+        _playing = playing;
         _meter = meter;
     }
 
@@ -110,12 +110,18 @@ internal sealed class SongFormGenerator
         // a song without drums that keep time has nobody to count it in, so it starts cold, drawn as it would be all the same
         if (intro == IntroKind.CountIn && !_drumsKeepTime)
             (intro, halfCountIn) = (IntroKind.Cold, false);
-        // or the riff alone opening it, the band coming in after it, a genre's, from a sequence of its own, over the
-        // window drawn for the entries or one of its own
-        var riffFirst = _riffContext.TestProbability(FormLayers.RiffIntro.At(_songRhythm.Value, _genre.Chance(GenreChoices.RiffIntro, "songs")))
-                        && _playsRiff;
-        if (riffFirst)
-            (intro, window, halfCountIn) = (IntroKind.Entries, intro == IntroKind.Entries ? window : _riffContext.Pick(FormLayers.IntroWindows), false);
+        // or one part alone opening it, the band coming in after it, a genre's, from a sequence of its own, over the
+        // window drawn for the entries or one of its own: among the parts the song plays, the drums where they keep time
+        TrackRole? first = null;
+        if (_openingContext.TestProbability(FormLayers.OpeningAlone.At(_songRhythm.Value, _genre.Chance(GenreChoices.OpeningAlone, "songs"))))
+        {
+            ImmutableArray<Weighted<TrackRole>> parts = [..ByConvention.Weigh(FormLayers.OpeningParts, _songRhythm.Value, _genre.Pool<TrackRole>(GenreChoices.OpeningPart))
+                .Where(x => _playing.Contains(x.Value) && (x.Value != TrackRole.Drum || _drumsKeepTime))];
+            first = parts.IsEmpty ? null : _openingContext.Pick(parts);
+        }
+
+        if (first is not null)
+            (intro, window, halfCountIn) = (IntroKind.Entries, intro == IntroKind.Entries ? window : _openingContext.Pick(FormLayers.IntroWindows), false);
 
         double held = 0, stop = 0;
         double ringOutBars = 0;
@@ -132,7 +138,7 @@ internal sealed class SongFormGenerator
             slowsDown = FormLayers.HoldsFinalChord(ending) && _context.TestProbability(FormLayers.RitardandoChance);
         }
 
-        return new FormPlan(intro, window, halfCountIn, riffFirst, ending, held, ringOutBars, stop, slowsDown, sectionIds[^1]);
+        return new FormPlan(intro, window, halfCountIn, first, ending, held, ringOutBars, stop, slowsDown, sectionIds[^1]);
     }
 
     /// <summary>
@@ -215,7 +221,7 @@ internal sealed class SongFormGenerator
             IntroKind.Hook => hook.Section.Timeline.Trim(hook.Section.Meter.PhraseDuration),
             _ => null
         };
-        ImmutableArray<IntroEntry> entries = plan.Intro == IntroKind.Entries ? DrawEntries(first, plan.Window, plan.RiffFirst) : [];
+        ImmutableArray<IntroEntry> entries = plan.Intro == IntroKind.Entries ? DrawEntries(first, plan.Window, plan.First) : [];
 
         // the first section starts after the intro's bars, and the ending after the last
         var origin = introBlock?.Duration ?? 0;
@@ -289,10 +295,12 @@ internal sealed class SongFormGenerator
                     edits.Clear(track, windowStart, windowStart + entry.Entry);
 
                 // where the first section's drums play, the line the window ends on, or a new one where no line is there,
-                // as where the section changes into one whose drums rest; in one whose drums rest, the parts simply come in
+                // as where the section changes into one whose drums rest; in one whose drums rest, the parts simply come in;
+                // no fill where the drums open the song alone for a bar, which a fill stopping them would leave silent
                 if (fillSections[0].HasDrums)
                 {
-                    var landing = new FillLine(windowEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true);
+                    var alone = plan.First == TrackRole.Drum && windowDuration <= first.Meter.BarDuration + 1e-9;
+                    var landing = new FillLine(windowEnd, fillSections[0], fillSections[0], 0, HasFill: !alone, IsLandingForced: true);
                     var windowLine = lines.Select((x, i) => (x, i)).FirstOrDefault(x => x.x.Position.IsEqualToByEpsilon(windowEnd), (null!, -1)).i;
                     if (windowLine >= 0)
                         lines[windowLine] = landing;
@@ -483,7 +491,7 @@ internal sealed class SongFormGenerator
     ///     number of them, at least one and one fewer than all, come in over the window, spread evenly from its start,
     ///     and the rest together at its end, so that the window never plays the whole band.
     /// </summary>
-    internal ImmutableArray<IntroEntry> DrawEntries(GeneratedSection first, IntroWindow window, bool riffFirst)
+    internal ImmutableArray<IntroEntry> DrawEntries(GeneratedSection first, IntroWindow window, TrackRole? opening)
     {
         var windowDuration = window.Bars * first.Meter.BarDuration;
         // but drums that only mark the form, which play in the sections alone
@@ -513,10 +521,9 @@ internal sealed class SongFormGenerator
                 order.Add(options[index].Value);
                 options.RemoveAt(index);
             }
-        // the riff first where the song opens on it, the rest in the order drawn
-        var riff = new IntroPart(TrackRole.Riff);
-        if (riffFirst && order.Remove(riff))
-            order.Insert(0, riff);
+        // the part the song opens on alone first, the drums' every one, the rest in the order drawn
+        var alone = order.Where(x => x.Role == opening).ToArray();
+        order = [..alone, ..order.Except(alone)];
 
         var inWindow = order.Count <= 1 ? order.Count : Generators.Int(1, order.Count)(_introContext);
         return
@@ -524,9 +531,9 @@ internal sealed class SongFormGenerator
             ..order.Select((part, i) => new IntroEntry(
                     part,
                     parts[part],
-                    // a riff opening the song alone for a bar at least
+                    // a part opening the song alone for a bar at least
                     Math.Max(i < inWindow ? Math.Floor(i * window.Bars / (double)inWindow) * first.Meter.BarDuration : windowDuration,
-                        riffFirst && i > 0 && order[0] == riff ? first.Meter.BarDuration : 0)
+                        alone.Length > 0 && part.Role != opening ? first.Meter.BarDuration : 0)
                 )
             )
         ];
@@ -731,6 +738,7 @@ internal sealed class SongFormGenerator
 /// <summary>What a song's form will be, decided before its sections.</summary>
 /// <param name="Window">Where the band comes in part by part, for an intro of entries.</param>
 /// <param name="HalfCountIn">Whether a count-in clicks only the last two beats.</param>
+/// <param name="First">The part the song opens on alone, the band coming in after it; none for a song opening otherwise.</param>
 /// <param name="Held">How long a button's final chord is held, in beats; 0 for a ringing ending's and an ending with none, open or fading.</param>
 /// <param name="RingOutBars">How many bars a ringing ending's final chord is held, in the last section's meter; 0 for any other ending.</param>
 /// <param name="Stop">How long the band is silent before a stopped ending's chord, in beats.</param>
@@ -740,7 +748,7 @@ internal sealed record FormPlan(
     IntroKind Intro,
     IntroWindow Window,
     bool HalfCountIn,
-    bool RiffFirst,
+    TrackRole? First,
     EndingKind Ending,
     double Held,
     double RingOutBars,

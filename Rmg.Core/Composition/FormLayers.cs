@@ -88,10 +88,19 @@ public readonly record struct IntroWindow(int Bars, bool IsBefore)
 internal static class FormLayers
 {
     /// <summary>
-    ///     The chance a song opens on its riff alone, the band coming in part by part after it, as a riff-driven band's
-    ///     song does, by its form facet: the songs' never; a genre's where it names it, in place of its other intro.
+    ///     The chance a song opens on one part alone, the band coming in part by part after it, as a riff-driven band's
+    ///     song does on its riff, by its form facet: the songs' never; a genre's where it names it, in place of its other intro.
     /// </summary>
-    public static ByConvention RiffIntro { get; } = new(0, 0, 0);
+    public static ByConvention OpeningAlone { get; } = new(0, 0, 0);
+
+    /// <summary>
+    ///     The part a song opening on one alone opens on, and how likely: its riff, or a genre's drums, bass, chords or pad,
+    ///     as a drummer counts in a groove or a pianist plays the first bars.
+    /// </summary>
+    public static ImmutableArray<(TrackRole Part, ByConvention Weight)> OpeningParts { get; } =
+    [
+        (TrackRole.Riff, new(1, 1, 1)), (TrackRole.Drum, new(0, 0, 0)), (TrackRole.Bass, new(0, 0, 0)), (TrackRole.Chords, new(0, 0, 0)), (TrackRole.Pad, new(0, 0, 0))
+    ];
 
     /// <summary>
     ///     The chance a lift the drums announce (<see cref="LiftCues" />) is built to and dropped at: the band growing

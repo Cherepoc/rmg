@@ -248,14 +248,14 @@ internal sealed record SongDecisions(
             Stream(SongStream.Intro),
             Stream(SongStream.Drops),
             Stream(SongStream.DropKind),
-            Stream(SongStream.RiffIntro),
+            Stream(SongStream.OpeningAlone),
             genre,
             Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
             !absent.Contains(TrackRole.Drum),
             drumJob == DrumJob.Groove,
             Stream(SongStream.HookIntro),
-            !absent.Contains(TrackRole.Riff),
+            SongParts.All.Except(absent).ToHashSet(),
             meter
         );
         var plan = formGenerator.Plan(sectionIds);
@@ -288,6 +288,7 @@ internal sealed record SongDecisions(
         var hook = SongFormGenerator.HookOf(sectionIds, structure.Roles, sectionMeters);
         if (plan.Intro == IntroKind.Hook && hook is null)
             plan = formGenerator.WithoutHook(plan);
+        StateTrace.RecordSong(TracePoints.OpeningAlone, $"{plan.First?.ToString() ?? "none"}", plan.First);
 
         // every section's drums, drawn before the sections are made, every drum of the song's groove in one of them at
         // least, from a stream of its own, where the song plays drums
@@ -357,9 +358,9 @@ internal sealed record SongDecisions(
             songUnconventionality[Facet.Form],
             absent
         );
-        // but the riff where the song opens on it alone, which plays from the start, its draws made all the same
-        if (plan.RiffFirst)
-            lateEntries = lateEntries.Remove(TrackRole.Riff);
+        // but the part the song opens on alone, which plays from the start, its draws made all the same
+        if (plan.First is { } opening)
+            lateEntries = lateEntries.Remove(opening);
         StateTrace.RecordSong(TracePoints.LateEntries, string.Join(", ", lateEntries.Select(x => $"{x.Key} at {x.Value}")), lateEntries);
         // every appearance's parts, a part held back yet soloing no sooner than it comes in
         IReadOnlyCollection<TrackRole>[] partsAt = [..played.Select((_, index) => SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray())];
@@ -401,8 +402,8 @@ internal sealed record SongDecisions(
                 index == 0 && plan.Intro == IntroKind.Entries,
                 solo,
                 [..lateEntries.Where(x => index < x.Value).Select(x => x.Key)],
-                // and the riff in the first where the song opens on it
-                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key), ..index == 0 && plan.RiffFirst ? [TrackRole.Riff] : Array.Empty<TrackRole>()],
+                // and the part the song opens on alone in the first
+                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key), ..index == 0 && plan.First is { } first ? [first] : Array.Empty<TrackRole>()],
                 breakdownChorus && index == sectionIds.Length - 1
             );
             // as loud as its energy's step from the section's, by the lift's measure of loudness, so that its last chorus

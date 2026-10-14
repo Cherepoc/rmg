@@ -48,8 +48,11 @@ internal static class TracePoints
     /// <summary>Whether a section's bass walks a boogie (a <c>bool</c>; <see cref="Composition.SectionGenerator.BoogieChance" />).</summary>
     public const string Boogie = "Boogie";
 
-    /// <summary>A section's pedal's root, in steps above its home, none where it holds none (an <c>int?</c>).</summary>
+    /// <summary>Where a section holds its pedal, none where it holds none (a <see cref="Composition.PedalPlace" />?).</summary>
     public const string SectionPedal = "Section pedal";
+
+    /// <summary>The part the song opens on alone, none where it opens otherwise (a <see cref="Songs.TrackRole" />?).</summary>
+    public const string OpeningAlone = "Opening alone";
 
     /// <summary>Whether a section moves a chromatic line inside its held chords (a <c>bool</c>).</summary>
     public const string InnerLine = "Inner line";

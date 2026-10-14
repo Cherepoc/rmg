@@ -966,7 +966,11 @@ duels; trading still rare (Thrash 6% of its pitched solos, Jazz 15%), as few son
 listening; a section's abrupt change of tempo (Thrash) done (14 October 2026), the ease into a change a genre's chance
 (`sectionChanges.eased`, the songs' 50), Thrash's 20; hat rolls anywhere in the bar (Trap), done (14 October 2026), a roll into any beat of its bar, the bar's end three
 times as likely, into the snare or mid-bar now and then as the research found; the polymeter's cell lengths by genre (Djent's 13 and 17); a frame-rate arpeggio
-(Chiptune); a post-chorus and long montuno sections (Pop, Latin); one part alone before the band (a keyboard intro).
+(Chiptune); a post-chorus and long montuno sections (Pop, Latin); one part alone before the band, done (14 October
+2026): the riff intro widened, `openingAlone` the chance and `openingPart` the part, the riff the songs', a genre's drums,
+bass, chords or pad: Rock's drums and chords beside its riff, Punk's drums (38 of 64 asked), Soul's, Funk's and Disco's
+drums and bass, the Ballad's piano (63 of 64 asked), the drums alone for a bar landing without a fill, whose stop would
+silence it (to ask: `ballad-piano-intro`, `punk-drum-intro`).
 Confirmed by the research and planned already: the jazz ride, the boogie, the alternating thumb, the tumbao, the
 kick-out, the breakdown chorus, the ostinato, the tempo floor under 60, the brushes' swirl, scratches.
 

@@ -186,8 +186,12 @@ public static class GenreChoices
     public static GenreChoice Intro { get; } = Pool("intro", "Intro",
         FormLayers.IntroWeights.Select(x => (Name(x.Intro.ToString()), FormLayers.LabelOf(x.Intro), x.Weight)));
 
-    /// <summary>The chance a song opens on its riff alone (<see cref="FormLayers.RiffIntro" />).</summary>
-    public static GenreChoice RiffIntro { get; } = Chances("riffIntro", "The riff opening the song", [("songs", "Songs opening on the riff alone", FormLayers.RiffIntro)]);
+    /// <summary>The chance a song opens on one part alone (<see cref="FormLayers.OpeningAlone" />).</summary>
+    public static GenreChoice OpeningAlone { get; } = Chances("openingAlone", "A part opening the song", [("songs", "Songs opening on one part alone", FormLayers.OpeningAlone)]);
+
+    /// <summary>The part a song opening on one alone opens on (<see cref="FormLayers.OpeningParts" />): its riff, or a genre's drums, bass, chords or pad.</summary>
+    public static GenreChoice OpeningPart { get; } = Pool("openingPart", "The part opening the song",
+        FormLayers.OpeningParts.Select(x => (Name(x.Part.ToString()), TrackRoles.LabelOf(x.Part), x.Weight)));
 
     /// <summary>How the song ends (<see cref="FormLayers.Endings" />).</summary>
     public static GenreChoice Ending { get; } = Pool("ending", "Ending",
@@ -730,7 +734,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, SoloCount, SoloShare, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, SoloCount, SoloShare, Soloists, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

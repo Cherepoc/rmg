@@ -425,7 +425,7 @@ public sealed class GenreTest
         await Assert.That(octaves).IsGreaterThan(0);
     }
 
-    /// <summary>A song of a preset that names its intros opens on one of them, a hook intro among them only where it names it; opening on the riff, its band entering, aside.</summary>
+    /// <summary>A song of a preset that names its intros opens on one of them, a hook intro among them only where it names it; opening on one part, its band entering, aside.</summary>
     [Test]
     public async Task ASongsIntro_IsOneItsGenreNames()
     {
@@ -436,8 +436,8 @@ public sealed class GenreTest
             foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))))
             {
                 var intro = song.Map.Intro;
-                var opensOnRiff = intro is { Kind: IntroKind.Entries, Entries: [{ Part.Role: TrackRole.Riff }, ..] };
-                await Assert.That(named.Contains(GenreChoices.Name(intro.Kind.ToString())) || opensOnRiff || intro.Kind == IntroKind.Cold && named.Count == 0)
+                var opensAlone = song.Trace.Single(x => x.Point == TracePoints.OpeningAlone).Value is not null && intro.Kind == IntroKind.Entries;
+                await Assert.That(named.Contains(GenreChoices.Name(intro.Kind.ToString())) || opensAlone || intro.Kind == IntroKind.Cold && named.Count == 0)
                     .IsTrue().Because($"{preset.Id} seed {song.Seed}: {intro.Kind}");
             }
         }
