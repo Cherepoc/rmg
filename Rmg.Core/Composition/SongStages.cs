@@ -186,7 +186,8 @@ internal static class SongStages
         var timeline = draft.Timeline.MergeStateTimelineMap(form.SongState)
             .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(preparedKeys, form.Map.Duration))
             .MergeStateTimelineMap(preparedRoots)
-            .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration, place => song.AppearanceStream(SongStream.TempoRamps, place)))
+            .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration, place => song.AppearanceStream(SongStream.TempoRamps, place),
+                SectionTempo.RampChance.At(song.Facets[Facet.Form], song.Genre.Chance(GenreChoices.SectionChanges, "eased"))))
             .MergeStateMap(song.CommonStateMap)
             .MergeStateMap(Groove.ToStateMap(song.Swing));
         return draft with { Timeline = timeline, Chains = chains };

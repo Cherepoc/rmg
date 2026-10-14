@@ -928,7 +928,8 @@ on 2 and 4 (`figure.chords.backbeat`), Country's and Folk's 20-30-30. Left: the 
 widened; a section's energy choosing its guitars' muting (pop punk's verses) and figure (ska punk's choruses); swing
 by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's
 glide rate (Trap's 808 on a phrase's end, a whining lead); a run into a downbeat (a disco string run, a fanfare's
-pickup); two soloists trading (Thrash, power metal's duels); a section's abrupt change of tempo (Thrash); hat rolls
+pickup); two soloists trading (Thrash, power metal's duels); a section's abrupt change of tempo (Thrash) done (14 October 2026), the ease into a change a genre's chance
+(`sectionChanges.eased`, the songs' 50), Thrash's 20; hat rolls
 anywhere in the bar (Trap); the polymeter's cell lengths by genre (Djent's 13 and 17); a frame-rate arpeggio
 (Chiptune); a post-chorus and long montuno sections (Pop, Latin); one part alone before the band (a keyboard intro).
 Confirmed by the research and planned already: the jazz ride, the boogie, the alternating thumb, the tumbao, the

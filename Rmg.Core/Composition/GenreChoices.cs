@@ -471,7 +471,8 @@ public static class GenreChoices
     public static GenreChoice SectionChanges { get; } = Chances("sectionChanges", "A section's own time",
         [
             ("tempo", "A section at a tempo of its own", Composition.SectionTempo.Chance), ("modulation", "A tempo by a metric ratio", Composition.SectionTempo.ModulationChance),
-            ("meter", "A section in a meter of its own", Composition.SectionMeter.Chance), ("shortBar", "A section's last bar cut short", Composition.ShortBars.Chance)
+            ("meter", "A section in a meter of its own", Composition.SectionMeter.Chance), ("shortBar", "A section's last bar cut short", Composition.ShortBars.Chance),
+            ("eased", "A change of tempo eased into, not taken at once", Composition.SectionTempo.RampChance)
         ]);
 
     /// <summary>A section's drums and bass in a cycle across the bar (<see cref="Composition.Polymeter" />).</summary>

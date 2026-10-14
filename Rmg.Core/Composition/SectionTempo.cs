@@ -96,8 +96,11 @@ internal static class SectionTempo
     /// </summary>
     public static ImmutableArray<double> MetricRatios { get; } = [1.5, 4 / 3.0, 2 / 3.0, 0.75];
 
-    /// <summary>The chance a change of tempo is eased into over the bar before, beat by beat, rather than taken at once.</summary>
-    public const double RampChance = 0.5;
+    /// <summary>
+    ///     The chance a change of tempo is eased into over the bar before, beat by beat, rather than taken at once, as likely
+    ///     in every song; a genre's that takes its changes at once the less, a thrash band's (<see cref="GenreChoices.SectionChanges" />).
+    /// </summary>
+    public static ByConvention RampChance { get; } = new(0.5, 0.5, 0.5);
 
 
     /// <summary>
@@ -105,7 +108,8 @@ internal static class SectionTempo
     ///     then, beat by beat, evenly in its ratio, but for a metric one; none for a song that keeps its tempo.
     /// </summary>
     /// <param name="ramps">A change's draws, by the place among the song's sections of the section it changes to.</param>
-    public static StateTimelineMap ToStateTimelineMap(ImmutableArray<double> tempos, SongMap map, double duration, Func<int, IGenerationContext> ramps)
+    /// <param name="easeChance">The chance a change is eased into, the song's (<see cref="RampChance" />).</param>
+    public static StateTimelineMap ToStateTimelineMap(ImmutableArray<double> tempos, SongMap map, double duration, Func<int, IGenerationContext> ramps, double easeChance)
     {
         // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (tempos.All(x => x == 1))
@@ -118,7 +122,7 @@ internal static class SectionTempo
             if (i > 0)
             {
                 var before = tempos[i - 1];
-                var eases = ramps(i).TestProbability(RampChance);
+                var eases = ramps(i).TestProbability(easeChance);
                 var ratio = next / before;
                 if (eases && Math.Abs(ratio - 1) > 1e-9 && !MetricRatios.Any(x => Math.Abs(x - ratio) < 1e-9))
                 {
