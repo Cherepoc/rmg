@@ -40,7 +40,7 @@ internal static class Articulations
     /// <summary>
     ///     The notes' articulations: in a section that chugs, a guitar's or a picked bass's note that repeats the one before
     ///     on a weak beat palm-muted, its accents and its moves ringing, as a chug riff mutes its eighths on the root and
-    ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments. And every chord a guitar
+    ///     rings its accent; the riff's, the rhythm part's, the chords' and the bass's, by their instruments, as a pop punk guitar mutes its verse's strums. And every chord a guitar
     ///     plays strummed, down and up in turn on the steps of its part's chords, a 16th at the finest, as quickly as the
     ///     song strums, and a piano's held
     ///     chord rolled upward where its part rolls, and the chords struck short where they stab; and a bass in
@@ -253,5 +253,5 @@ internal static class Articulations
 
 
     /// <summary>Whether a part chugs: the riff and its twin, the rhythm part or the bass, on a guitar or a picked bass.</summary>
-    internal static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Rhythm or TrackRole.Bass && InstrumentTraits.Has(program, InstrumentTrait.Chugs);
+    internal static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Rhythm or TrackRole.Chords or TrackRole.Bass && InstrumentTraits.Has(program, InstrumentTrait.Chugs);
 }

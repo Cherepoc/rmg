@@ -791,7 +791,13 @@ with its questions after each group:
    stretches, the voices in fragments, echo leading, the filter, one riddim looped), **Celtic** (fiddle, flute and
    pipes in unison, jigs and reels, Dorian and Mixolydian, drones, ornaments at its plain end, a bodhrán or no drums)
    and **Bluegrass** (no drums, the banjo rolling, the mandolin's chop on 2 and 4, breaks passed round, ahead of the
-   beat). Left, by listening: a Renaissance preset, modern pop, delta blues.
+   beat). Left, by listening: a Renaissance preset, modern pop, delta blues. The second round (14 October 2026),
+   searched: Rock 3:23-4:06-4:41 (1:50-3:06-4:36), to 180 and from 82, Mixolydian first, Dorian more, I-IV beside
+   IV-I; Punk's chugs up, a chord-playing guitar muting in a chugging section now as a pop punk verse strums
+   (`Articulations.Chugs`), to 220, an opening on the guitar's chords, fewer minor songs; Heavy metal's floor to 85,
+   its tempo changing within a song oftener. Left of their reports: rock's pentatonic union scale, the 90s punk beat's
+   offset kick, the reverse gallop and a bass gallop, Metal's plagal motion (low confidence), a riff's AAAB; and the
+   owner's call, a guitar solo in Rock's and Metal's plainest songs, which the curve rule leaves out.
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
