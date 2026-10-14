@@ -35,6 +35,7 @@ public static class GenreChoiceDescriptions
         ["passingChords"] = "How often a chord passes into the next through a chord between them, as the passing kind leads it, a jazz and soul colour.",
         ["planing"] = "How often a section slides its home chord's shape up and down by semitones, a modern, filmic colour, and how often its planed chords each take a mode of their own.",
         ["harmonyDevices"] = "Reharmonising a section when it comes back, a chromatic line moving inside a held chord, and a bass note held under a section's changing chords.",
+        ["sectionPedal"] = "Where a section's pedal holds: the home under its first phrase, the dominant under its last building into what follows, or the home droning under the whole of it.",
         ["loop"] = "How often a section plays the song's first section's chords again, as a beat loops one progression for the whole track.",
         ["ownMode"] = "The mode a chord takes on its own root, where it takes one: Lydian, Mixolydian and Dorian, a note from the plain scales, melodic minor and Phrygian stranger; a planed chord's quality is its mode's.",
         ["lineScale"] = "The scale the melody's and the riff's passing notes take: the key's, the pentatonic and blues scales for rock and blues, the jazz and symmetric ones for an outside sound.",

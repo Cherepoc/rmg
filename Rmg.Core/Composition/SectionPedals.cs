@@ -9,8 +9,8 @@ namespace Rmg.Core.Composition;
 internal static class SectionPedals
 {
     /// <summary>
-    ///     The bass holding a note: a section's own pedal now and then, its home under its appearances' first phrase or its
-    ///     dominant under their last, and the new key's dominant under the bar before a key change led into by a pedal,
+    ///     The bass holding a note: a section's own pedal now and then, its home under its appearances' first phrase, its
+    ///     dominant under their last or its home under the whole of them, a drone, and the new key's dominant under the bar before a key change led into by a pedal,
     ///     over whatever it doubles or walks there.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
@@ -21,14 +21,15 @@ internal static class SectionPedals
         // a section's home, which the bass's state holds over the progression's roots
         int Home(double position) => bassTrack.StateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
         // a section's pedal now and then, by its progression facet, from a sequence of its own: its home under its
-        // appearances' first phrase, or its dominant under their last, building into what follows
+        // appearances' first phrase, its dominant under their last, building into what follows, or a drone under the whole
         var pedalling = song.SectionIds.Distinct().ToDictionary(id => id, id =>
         {
             var context = song.Stream(SongStream.SectionPedal, id);
-            var pedals = context.TestProbability(Chance.At(song.SectionOf(id).Facets[Facet.Progression], song.Genre.Chance(GenreChoices.HarmonyDevices, "pedal")));
-            var root = context.Pick(Roots);
-            StateTrace.RecordSection(TracePoints.SectionPedal, SectionGenerator.SectionTrace, id, pedals ? $"{root}" : "none", pedals ? root : null);
-            return pedals ? root : (int?)null;
+            var progression = song.SectionOf(id).Facets[Facet.Progression];
+            var pedals = context.TestProbability(Chance.At(progression, song.Genre.Chance(GenreChoices.HarmonyDevices, "pedal")));
+            var place = context.Pick(ByConvention.Weigh(Places, progression, song.Genre.Pool<PedalPlace>(GenreChoices.SectionPedal)));
+            StateTrace.RecordSection(TracePoints.SectionPedal, SectionGenerator.SectionTrace, id, pedals ? $"{place}" : "none", pedals ? place : null);
+            return pedals ? place : (PedalPlace?)null;
         });
         // a pedal under chords that change, none under a vamp or a home held, which it would only flatten onto one note
         var common = draft.Timeline.CommonStateTimelineMap;
@@ -41,9 +42,9 @@ internal static class SectionPedals
 
         bool Changes(double from, double to) => common.GetStateTimeline(StateKinds.ChordChange).Any(x => x.Position > from + 1e-9 && x.Position < to - 1e-9 && Root(x.Position) != Root(from));
         var sections = song.Form.Map.Sections.Where(x => pedalling[x.SectionId] is not null)
-            .Select(x => (Phrase: x.Meter.PhraseDuration, Root: pedalling[x.SectionId]!.Value, Span: x))
-            .Select(x => (Start: x.Root == 0 ? x.Span.Start : x.Span.Start + Math.Floor((x.Span.Duration - 1e-9) / x.Phrase) * x.Phrase, End: x.Root == 0 ? Math.Min(x.Span.End, x.Span.Start + x.Phrase) : x.Span.End,
-                Home: Home(x.Span.Start), x.Root))
+            .Select(x => (Phrase: x.Meter.PhraseDuration, Place: pedalling[x.SectionId]!.Value, Span: x))
+            .Select(x => (Start: x.Place == PedalPlace.Dominant ? x.Span.Start + Math.Floor((x.Span.Duration - 1e-9) / x.Phrase) * x.Phrase : x.Span.Start,
+                End: x.Place == PedalPlace.Home ? Math.Min(x.Span.End, x.Span.Start + x.Phrase) : x.Span.End, Home: Home(x.Span.Start), Root: x.Place == PedalPlace.Dominant ? 4 : 0))
             .Where(x => Changes(x.Start, x.End))
             // in the key where it starts, a key change within the section's
             .Select(x => (x.Start, x.End, x.Start, x.Home + x.Root));
@@ -55,6 +56,27 @@ internal static class SectionPedals
     /// <summary>The chance a section holds a pedal under a phrase of its appearances, by its progression facet: never in the plainest songs.</summary>
     public static ByConvention Chance { get; } = new(0, 0.06, 0.15);
 
-    /// <summary>A section's pedal's root, in steps above its home, and how likely: the home, a tonic pedal under its first phrase, the likelier, and the dominant under its last.</summary>
-    public static ImmutableArray<Weighted<int>> Roots { get; } = [new(1, 0), new(0.6, 4)];
+    /// <summary>
+    ///     Where a section holds its pedal, and how likely: its home under its first phrase, the likelier, its dominant under its
+    ///     last, and its home under the whole of it, a drone, a genre's alone.
+    /// </summary>
+    public static ImmutableArray<(PedalPlace Place, ByConvention Weight)> Places { get; } =
+        [(PedalPlace.Home, new(1, 1, 1)), (PedalPlace.Dominant, new(0.6, 0.6, 0.6)), (PedalPlace.Drone, new(0, 0, 0))];
+
+    /// <summary>A place as a genre's page shows it.</summary>
+    public static string LabelOf(PedalPlace place) => place switch
+    {
+        PedalPlace.Home => "Its home under its first phrase",
+        PedalPlace.Dominant => "Its dominant under its last phrase",
+        PedalPlace.Drone => "Its home under the whole of it, a drone",
+        _ => throw new ArgumentOutOfRangeException(nameof(place), place, null)
+    };
+}
+
+/// <summary>Where a section holds its pedal (<see cref="SectionPedals.Places" />).</summary>
+public enum PedalPlace
+{
+    Home,
+    Dominant,
+    Drone
 }
