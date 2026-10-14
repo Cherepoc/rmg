@@ -777,8 +777,15 @@ with its questions after each group:
    its V raised, swung lightly at its plain end, distorted at its wild, the open hat, horn heads in octaves; Bossa nova's
    changes anticipated, its chords two bars, its bass calmer, root and fifth, 108-126-142, a record's length, tritones
    and flat ninths, little vibrato; Medieval faster for its dances, a hand-drum groove more often, refrain-first forms,
-   more 4/4, vamps on a drone, shawms, a sackbut and a cello. Left: the other genres' retunes (Disco, Country, Orchestral, Blues), each its report's
-   findings; the presets their reports propose (Dub, Celtic, Psytrance, Bluegrass, a Renaissance preset).
+   more 4/4, vamps on a drone, shawms, a sackbut and a cello. Disco's bass in steady 8ths, 114-122-128, Dorian
+   first, piano and clavinet, Latin percussion, its rhythm break, a 12-inch record's length, its tempo and meter held;
+   Country's fills answering the voice and its breaks, the shuffle, to 190 at its wild end, the II7, voices, AABA, less
+   Mixolydian, a stricter progression; Orchestral's big and button endings, its raise down (60-40-20), ♭VI and ♭VII
+   into home, the ostinato on strings, trumpets and horns, 50 to 170; Blues kept to its twelve bars (`strictness`, a
+   genre's value, the songs' at 50, Blues' 50-90-80, about 0.97 at its middle where the songs' 0.85), its chords a bar
+   each, to 170, less minor, call and response at its plain end, the one-chord boogie, bends and wide vibrato, a solo
+   in most songs. Left: the presets the reports propose (Dub, Celtic, Psytrance, Bluegrass, a Renaissance preset,
+   modern pop, delta blues), each by listening.
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its

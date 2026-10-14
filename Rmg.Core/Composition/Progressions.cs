@@ -162,6 +162,17 @@ internal static class Progressions
     public static ByConvention Strictness { get; } = new(1, 0.85, 0);
 
     /// <summary>
+    ///     A section's strictness at its progression facet, leaned by a genre's shift of it, from -1 to 1
+    ///     (<see cref="GenreChoices.Strictness" />): toward keeping every rule above 0, as a blues keeps its twelve bars, and
+    ///     toward none below it; the songs' at 0.
+    /// </summary>
+    public static double StrictnessOf(double progression, double shift)
+    {
+        var songs = Strictness.At(progression);
+        return shift >= 0 ? songs + shift * (1 - songs) : songs * (1 + shift);
+    }
+
+    /// <summary>
     ///     The roots of the chords, in steps above the section's home, from -3 to 3.
     /// </summary>
     /// <param name="count">How many chords the pattern has, at least two.</param>

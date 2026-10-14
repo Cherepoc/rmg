@@ -100,6 +100,9 @@ public static class GenreChoices
     /// <summary>How a genre leans the chord that leads home, by its degree, a modal band's ♭II, ♭VI or ♭VII rather than V (<see cref="Progressions.Generate(IGenerationContext, Scale, int, double, int, int, Func{int, double}, Func{int, double}, Func{int, double})" />).</summary>
     public static GenreChoice CadenceDegrees { get; } = Values("cadenceDegree", "The chord into home", Progressions.Degrees, Facet.Progression);
 
+    /// <summary>How closely a progression keeps to its rules, from 0, freer, through 50, as the songs keep them, to 100, every one, a blues' twelve bars (<see cref="Progressions.StrictnessOf" />).</summary>
+    public static GenreChoice Strictness { get; } = Values("strictness", "Progression's strictness", [("rules", "Keeping to its rules")], Facet.Progression);
+
     /// <summary>The chance a section's cadence raises its seventh, a minor key's major V leading home (<see cref="Progressions.CadenceRaise" />).</summary>
     public static GenreChoice CadenceRaise { get; } = Chances("cadenceRaise", "The leading tone raised", [("sections", "Sections whose cadence raises it", Progressions.CadenceRaise)]);
 
@@ -713,7 +716,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
