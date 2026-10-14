@@ -904,11 +904,13 @@ and plainer chords, Funk's vamps, Bossa nova's two-bar harmonic rhythm and pushe
 (Classical's piano and slower floor, Orchestral's big ending and string ostinato, Ambient's long songs and still
 harmony, Medieval's dance tempos, Dungeon synth's loops, Chiptune's vibrato and looping form, Jazz, IDM, Fusion).
 
-**F. Figures as data** (rows of `Figures.All`, one step, then each genre's weight): a four-on-the-floor kick, the
-two-step kick, the snare on every beat, the traditional blast, the snare on the beats over a double kick, the surdo's
-kick (in the drum solos' feet already), the train beat, the offbeat skank, a pulse bass in 8ths and in 16ths, the
-Charleston comp, a one-bar clave, the conga's tumbao; beside the planned jazz ride. Checked first: the rhythm part
-reached by a figure, and figures outside 4/4 (a hand drum's in 6/8 and 3/4).
+**F. Figures as data**: done (14 October 2026), rows of `Figures.All`: four on the floor (Reggae's and Pop's 10-20-30,
+18% of their sections, the louder the likelier), the two-step (Drum and bass's, 27%), the surdo's kick (Bossa nova's,
+29%), the snare on every beat (Soul's 31%, Symphonic's over its double kick 15%), the train beat (Country's 17%), the
+skank and the Charleston (Jazz's 13%) on the chords, the bass's pulse in 8ths and 16ths (Disco's 37%, Synthwave's 24%
+and 15%); the corpus unchanged. To ask when a round has room: `dnb-two-step`, `soul-every-beat`, `disco-pulse`. Not
+made: the traditional blast (the skank beat's double time plays it), the conga's tumbao (no player of its own), a hand
+drum's figures outside 4/4.
 
 **D. Devices** (each a step, by how many genres want it): a strophic form, verse after verse (Folk, Blues, Country), as
 data of `SongForms`; the bass on the beat and the chords after it (a waltz, a march, the boom-chicka), an arpeggio

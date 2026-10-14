@@ -39,7 +39,9 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 ///     band's galloping riff, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a jazz drummer's ride,
 ///     on the beats and the skip after 2 and 4; a clave's three and two,
 ///     and the bossa nova's on the snare's stroke, its cross-stick; a trance's chords in 16ths, its arpeggio's steady run, and its bass
-///     rolling in the 16ths after the kick or on the offbeats, a salsa's tumbao and the bossa nova's bass. A section draws each player's, its own rhythm or one of its
+///     rolling in the 16ths after the kick or on the offbeats, a salsa's tumbao and the bossa nova's bass; four on the floor,
+///     drum and bass's two-step, the surdo's kick, the snare on every beat, the train beat, the skank, the Charleston, and a
+///     bass's pulse in 8ths or 16ths. A section draws each player's, its own rhythm or one of its
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
 ///     players play, a blast's or a breakbeat's, drawn by the first and played by both; the songs play their own rhythms
 ///     always. The player plays the figure in every bar it plays in, its own notes
@@ -74,13 +76,29 @@ internal static class Figures
         new("blast", "A blast beat, a cymbal riding it on every 8th", FigurePlayer.Time, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
         // the swing ride, the skip played late by the song's swing
         new("swingRide", "The swing ride, on the beats and the skip after 2 and 4", FigurePlayer.Time, [0, 4, 6, 8, 12, 14], 16, null, 0, false),
+        // the kick on every beat, a dance track's, a reggae's steppers, a pop chorus's, the likelier the louder the section
+        new("fourOnTheFloor", "Four on the floor, the kick on every beat", FigurePlayer.Ground, [0, 4, 8, 12], 16, null, 1, false),
+        // drum and bass's, the kick on 1 and the 3-and around the snare's 2 and 4
+        new("twoStep", "The two-step, the kick on 1 and the 3-and", FigurePlayer.Ground, [0, 10], 16, null, 0, false),
+        // the bossa nova's surdo, on 1, the 2-and, 3 and the 4-and
+        new("surdo", "The surdo, on 1, the 2-and, 3 and the 4-and", FigurePlayer.Ground, [0, 6, 8, 14], 16, null, 0, false),
+        // the snare on every beat, Motown's, and a power metal band's over its double kick
+        new("everyBeat", "The snare on every beat", FigurePlayer.Backbeat, [0, 4, 8, 12], 16, null, 1, false),
+        // the country train beat, the snare in even 8ths
+        new("trainBeat", "The train beat, the snare in even 8ths", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 0, false),
         new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, null, 0, false),
         new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, null, 0, false),
         new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, null, 0, false),
         new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, null, 0, false),
         new("sixteenths", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, null, 0, false),
+        // a ska's or a reggae's chop on the 8ths' offbeats, and a swing band's Charleston comp, on 1 and the 2-and
+        new("skank", "The skank, on the 8ths' offbeats", FigurePlayer.Chords, [2, 6, 10, 14], 16, null, 0, false),
+        new("charleston", "The Charleston, on 1 and the 2-and", FigurePlayer.Chords, [0, 6], 16, null, 0, false),
         new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, null, 0, true),
         new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, null, 0, true),
+        // a pulse, the root hammered in even 8ths or 16ths, a disco's, a synthwave's, a darksynth's
+        new("eighths", "A pulse in even 8ths", FigurePlayer.Bass, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 0, false),
+        new("sixteenths", "A pulse in even 16ths", FigurePlayer.Bass, [..Enumerable.Range(0, 16)], 16, null, 0, false),
         new("withKick", "With the kick, wherever it plays", FigurePlayer.Bass, [], 0, FigurePlayer.Ground, 0, false),
         // a salsa's bass, counted in half notes as its clave is: each of its bars' 2-and and 4, anticipating the chord
         new("tumbao", "The tumbao, a salsa bar's 2-and and 4, ahead of the chord", FigurePlayer.Bass, [3, 6, 11, 14], 16, null, 0, false),

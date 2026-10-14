@@ -597,11 +597,11 @@
       },
       {
         "seed": "12",
-        "at": 183.6,
+        "at": 178.1,
         "listen": [
-          "Hi-Hat",
           "Ride",
-          "Bass (Synth Bass 1)"
+          "Bass (Synth Bass 1)",
+          "Acoustic Snare"
         ]
       },
       {
@@ -618,8 +618,8 @@
         "at": 1.5,
         "listen": [
           "Hi-Hat",
-          "Acoustic Snare",
-          "Bass (Synth Bass 2)"
+          "Bass (Synth Bass 2)",
+          "Melody (Lead 6 (voice))"
         ]
       },
       {
@@ -628,7 +628,7 @@
         "listen": [
           "Hi-Hat",
           "Chords (Electric Piano 2)",
-          "Acoustic Snare"
+          "Tom"
         ]
       }
     ]
