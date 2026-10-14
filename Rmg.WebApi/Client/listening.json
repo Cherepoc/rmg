@@ -21,10 +21,10 @@
         ]
       },
       {
-        "seed": "9",
-        "at": 131.2,
+        "seed": "C",
+        "at": 18.3,
         "listen": [
-          "Bass (Contrabass)"
+          "Bass (Acoustic Grand Piano)"
         ]
       },
       {
@@ -159,19 +159,18 @@
         ]
       },
       {
-        "seed": "D",
-        "at": 98.4,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Rhythm part (Electric Piano 1)"
-        ]
-      },
-      {
         "seed": "E",
         "at": 0,
         "listen": [
           "Rhythm part (Electric Piano 1)",
           "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 57.9,
+        "listen": [
+          "Rhythm part (Electric Piano 1)"
         ]
       },
       {
@@ -480,7 +479,7 @@
       },
       {
         "seed": "P",
-        "at": 180.2,
+        "at": 171.8,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
@@ -590,10 +589,10 @@
       },
       {
         "seed": "V",
-        "at": 212.9,
+        "at": 39.4,
         "listen": [
-          "Bass (Synth Bass 2)",
-          "Chords (Pad 2 (warm))"
+          "Chords (Pad 2 (warm))",
+          "Bass (Synth Bass 2)"
         ]
       },
       {
@@ -625,7 +624,7 @@
       },
       {
         "seed": "1k",
-        "at": 185.3,
+        "at": 149.6,
         "listen": [
           "Chords (Electric Piano 1)"
         ]

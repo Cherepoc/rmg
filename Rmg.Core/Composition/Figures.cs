@@ -148,7 +148,7 @@ internal static class Figures
     };
 
     /// <summary>A player's figure of the name, none for its own rhythm or one it does not play.</summary>
-    private static Figure? Of(FigurePlayer player, string name) => All.FirstOrDefault(x => x.Player == player && x.Name == name);
+    internal static Figure? Of(FigurePlayer player, string name) => All.FirstOrDefault(x => x.Player == player && x.Name == name);
 
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {

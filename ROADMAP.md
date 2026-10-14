@@ -1023,17 +1023,19 @@ half time, fills, the kit, driven instruments, chugs and power chords, the bass 
    darkness, a scale's its distance from Dorian in the modes' order (`Scale.Darkness`): the songs' major, Lydian or
    Mixolydian 73% at darkness -1, 47% at 0, 15% at 1, minor or darker 17%, 41%, 70%; drawn as the songs' own, as at 0
    (46%, 41%); Pop 84% to 31% major, Heavy metal 81% to 95% minor; 21 of 256 corpus songs changed.
-2. Darkness's leans on the rest of the harmony: a section's scale, the chord shapes (their pick level first where a
-   genre has no pool, a lean of its own needed), the root degrees and the cadence's raise, measured at the dark end,
-   the middle and the bright.
+2. Darkness's leans on the rest of the harmony: done in part (14 October 2026), the chord shapes by their darkness
+   (`ChordShape.Darkness`, Phrygian, diminished, flat-nine and minor-major dark, Lydian, six-nine, add9 and sixth
+   bright) where a genre names its pool; leaning the songs' own moved all 256 songs onto the pool's draw, so left for a
+   lean of the levels' own. Left: the songs' shapes, the root degrees and the cadence's raise.
 3. Done in part (14 October 2026), with the leans moved into one place, the song's genre leaned by its mood
    (`Genre.AtMood`, `Mood.Leans`), its scale's lean there too, so that a section's scale leans as the song's: the
    tempo within a genre's range (Heavy metal 126-142-156 at intensity -1, 0 and 1, Rock 112-125-137), double time
    (Heavy metal 9%-24%-47% of sections) and half time against it, the riff's chugs (34%-57%-73%) and power chords,
    the kit (the power kit fiercer, the brushes and the jazz kit calmer, where the genre names its kit, as the songs
    draw theirs by their drums' job), every part's driven instruments (the songs' 3%-7%-15% of their parts playing, Funk
-   rock's 28%-37%-46%); the drawn songs' as at 0. Left: the drum figures (the double kick, the blast), the bass
-   figures, fills, the songs' own tempo (a dyadic draw, not a range).
+   rock's 28%-37%-46%); the drawn songs' as at 0. The drum and bass figures, done (14 October 2026), by
+   the lean a loud section gives them (`Figure.EnergyLean`), where a genre names them. Left: fills, the songs' own tempo
+   (a dyadic draw, not a range).
 4. The sound's leans: instruments by their traits, the tone, the register.
 5. Done (14 October 2026): the genres' spans, Synthwave darkness -80 to 90 and intensity -70 to 80 (dreamwave to
    darksynth), Drum and bass -50 to 90 and -40 to 90 (liquid to dark), Heavy metal -70 to 70 and -60 to 80 (gothic and

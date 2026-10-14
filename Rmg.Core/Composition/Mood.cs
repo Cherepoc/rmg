@@ -35,8 +35,8 @@ public readonly record struct Mood(double Darkness, double Intensity)
     ///     leans it as the songs have it, where its options' own amounts are the songs' draw, and not where the songs draw
     ///     otherwise, as their kit by their drums' job. The scales by their darkness, Dorian's none, Lydian bright and
     ///     Locrian dark (<see cref="Scale.Darkness" />); the fiercer, the likelier the power kit, double time, a riff that
-    ///     chugs or plays power chords, a driven instrument, and the calmer the brushes, the jazz kit and half time; a tempo's range leaning to
-    ///     its fast end the fiercer.
+    ///     chugs or plays power chords, a driven instrument, a loud section's figure, and the calmer the brushes, the jazz kit and
+    ///     half time; a tempo's range leaning to its fast end the fiercer; a chord shape by its darkness.
     /// </summary>
     // built when first asked, as the choices it names take the songs' span of a mood from here
     public static ImmutableArray<(GenreChoice Choice, Func<string, (double Darkness, double Intensity)> Lean, bool AsSongs)> Leans => field.IsDefault ? field =
@@ -46,6 +46,12 @@ public readonly record struct Mood(double Darkness, double Intensity)
         (GenreChoices.FeelChances, name => (0, name switch { "doubleTime" => 1, "halfTime" => -0.5, _ => 0 }), true),
         (GenreChoices.Riff, name => (0, name switch { "chugs" => 1, "powerChords" => 0.5, _ => 0 }), true),
         (GenreChoices.Tempo, name => (0, name == "lean" ? 1 : 0), false),
+        // the chord shapes by their darkness, a Phrygian or a diminished chord the darker and a Lydian or a six-nine the
+        // brighter, where a genre names its pool, as the songs draw theirs by levels first
+        (GenreChoices.ChordShape, name => (ChordShapes.All.Single(x => GenreChoices.Name(x.Name) == name).Darkness, 0), false),
+        // every player's figures by how a loud section leans them, a double kick or four on the floor the fiercer
+        ..Enum.GetValues<FigurePlayer>().Select(player => (GenreChoices.Figures[player],
+            (Func<string, (double, double)>)(name => (0, Figures.Of(player, name)?.EnergyLean ?? 0)), false)),
         // every part's instruments, a driven one the fiercer
         ..GenreChoices.InstrumentPools.Select(x => (GenreChoices.Instruments[x.Role],
             (Func<string, (double, double)>)(name => (0, InstrumentTraits.Has(x.Pool.Everything.First(i => GenreChoices.Name(i.Name) == name).Program, InstrumentTrait.Driven) ? 1 : 0)),
