@@ -79,6 +79,10 @@ const BIT_COUNT = GIVEN.length + KEY_BITS + METER_BITS + MODE_BITS + PARTS.lengt
 // how many characters the fixed places take, behind the format's
 const FIXED_LENGTH = CHARACTER_COUNT + Math.ceil(BIT_COUNT / BITS_PER_CHARACTER);
 
+// and the mood behind them: its darkness's and its intensity's values and whether each is given, a character's two bits,
+// none in settings written before it, their mood drawn (the server's SongSettings.MoodLength)
+const MOOD_LENGTH = 3;
+
 const SEED_LENGTH = 11;
 
 function encode(number, length) {
@@ -165,13 +169,21 @@ export function formatSettings(settings) {
         write(part.instrument.value, PROGRAM_BITS);
     }
     bits.push(settings.drumPieces.isGiven, ...DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece)));
-    return FORMAT_CHARACTER + [...characters, ...packSwitches(bits)].map((x) => DIGITS[x]).join("");
+    const mood = [settings.darkness.value, settings.intensity.value, (settings.darkness.isGiven ? 1 : 0) + (settings.intensity.isGiven ? 2 : 0)];
+    if (mood.some((x) => !Number.isInteger(x) || x < 0 || x > LAST_STEP)) throw new RangeError("A mood does not fit in a character.");
+    return FORMAT_CHARACTER + [...characters, ...packSwitches(bits), ...mood].map((x) => DIGITS[x]).join("");
 }
 
 /** Reads settings, with no genre, or null for anything that is not settings of this format. */
 export function parseSettings(text) {
-    if (typeof text !== "string" || text[0] !== FORMAT_CHARACTER || text.length !== 1 + FIXED_LENGTH) return null;
-    const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
+    if (typeof text !== "string" || text[0] !== FORMAT_CHARACTER || (text.length !== 1 + FIXED_LENGTH && text.length !== 1 + FIXED_LENGTH + MOOD_LENGTH)) return null;
+    // its mood where it has one, as written, and drawn where it has none
+    const mood = [...text.slice(1 + FIXED_LENGTH)].map((x) => DIGITS.indexOf(x));
+    if (mood.length > 0 && (mood.slice(0, 2).some((x) => x < 0 || x > LAST_STEP) || mood[2] < 0 || mood[2] > 3)) return null;
+    const [darkness, intensity] = mood.length > 0
+        ? [{ isGiven: (mood[2] & 1) === 1, value: mood[0] }, { isGiven: (mood[2] & 2) === 2, value: mood[1] }]
+        : [{ isGiven: false, value: MIDDLE_STEP }, { isGiven: false, value: MIDDLE_STEP }];
+    const values = [...text.slice(1, 1 + FIXED_LENGTH)].map((x) => DIGITS.indexOf(x));
     // a value no more than the last step, and a character of bits no more than five of them, its padding zeros, so that
     // settings are written one way only, as the server reads them
     const used = BIT_COUNT - (FIXED_LENGTH - CHARACTER_COUNT - 1) * BITS_PER_CHARACTER;
@@ -206,6 +218,8 @@ export function parseSettings(text) {
         mode: { isGiven: isGiven[GIVEN.indexOf("mode")], value: mode },
         swing: { isGiven: isGiven[GIVEN.indexOf("swing")], value: swing },
         length: { isGiven: isGiven[GIVEN.indexOf("length")], value: length },
+        darkness,
+        intensity,
         parts: {},
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group, i) => [group, { volume: groupVolumes[i] }])),
         volume,
@@ -238,5 +252,8 @@ export function identityOf(settings) {
     values.push(...given.filter((x) => x.isGiven).map((x) => x.value));
     values.push(...PARTS.map((name) => PLAYS.indexOf(settings.parts[name].plays)));
     if (settings.drumPieces.isGiven) values.push(1, ...packSwitches(DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece))));
+    // and the mood where it is given, behind a 2, so that a song given none keeps the name it had before
+    const mood = [settings.darkness, settings.intensity];
+    if (mood.some((x) => x.isGiven)) values.push(2, ...packSwitches(mood.map((x) => x.isGiven)), ...mood.filter((x) => x.isGiven).map((x) => x.value));
     return values.map((x) => DIGITS[x]).join("").replace(/0+$/, "");
 }

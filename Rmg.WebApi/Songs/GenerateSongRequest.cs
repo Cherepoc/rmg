@@ -38,6 +38,8 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Mode">The scale the song starts in, on its key, by its place among the scales (<c>/api/songs/options</c>).</param>
 /// <param name="Swing">How much the song swings, from 0, straight, to 61, a triplet's swing, where its meter pairs its notes.</param>
 /// <param name="Length">How long the song is to play, by its step (<see cref="LengthScale" />), which its form comes as near as it can.</param>
+/// <param name="Darkness">How dark its mood is, from 0, the brightest, to 61, the darkest, the middle neither (<see cref="Mood" />).</param>
+/// <param name="Intensity">How intense its mood is, from 0, the calmest, to 61, the fiercest, the middle neither (<see cref="Mood" />).</param>
 /// <param name="GenreName">The genre's name, which a link to the song shows, up to 63 bytes (<see cref="Genres.GenreStore" />).</param>
 /// <param name="Skip">
 ///     Stages of the song left out, by their names (<see cref="SongGenerator.SkippableStages" />), as the page's listening
@@ -65,7 +67,9 @@ public sealed record GenerateSongRequest(
     IReadOnlyDictionary<string, IReadOnlyDictionary<string, JsonElement>>? Genre = null,
     int? Length = null,
     string? GenreName = null,
-    IReadOnlyList<string>? Skip = null
+    IReadOnlyList<string>? Skip = null,
+    int? Darkness = null,
+    int? Intensity = null
 )
 {
     /// <summary>A pan from -1, left, to 1, right, as its nearest step, the middle step in the middle.</summary>
@@ -99,7 +103,7 @@ public sealed record GenerateSongRequest(
         }
 
         if (!TryReadStep(Unconventionality, "Unconventionality", out error) || !TryReadStep(Volume, "Volume", out error) || !TryReadStep(Swing, "Swing", out error)
-            || !TryReadStep(Length, "Length", out error))
+            || !TryReadStep(Length, "Length", out error) || !TryReadStep(Darkness, "Darkness", out error) || !TryReadStep(Intensity, "Intensity", out error))
             return false;
 
         var facets = ImmutableDictionary.CreateBuilder<Facet, double>();
@@ -209,7 +213,9 @@ public sealed record GenerateSongRequest(
             Scale: Mode is { } mode ? Scales.All[mode] : null,
             Swing: Swing is { } swing ? StepScale.ToAmount(swing) : null,
             Genre: genre,
-            Length: Length is { } length ? LengthScale.Seconds(length) : null
+            Length: Length is { } length ? LengthScale.Seconds(length) : null,
+            Darkness: Darkness is { } darkness ? Mood.OfAmount(StepScale.ToAmount(darkness)) : null,
+            Intensity: Intensity is { } intensity ? Mood.OfAmount(StepScale.ToAmount(intensity)) : null
         );
         mix = new SongMix(StepScale.ToAmount(Volume ?? StepScale.Last), partMixes.ToImmutable(), groups.ToImmutable());
         return true;

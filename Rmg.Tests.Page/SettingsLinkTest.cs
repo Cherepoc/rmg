@@ -8,10 +8,10 @@ public sealed class SettingsLinkTest(Site site)
 {
     // settings with every field set apart from its neighbours, as the server writes them (Rmg.Tests'
     // SongSettingsTest.MixedText)
-    private const string MixedText = "Bz07ELSZgnu3jKoz0y8xGwOvWuetmsueo09IRajsBLDN261GK42IGM5GKAB0RPVR1EI49I1";
+    private const string MixedText = "Bz07ELSZgnu3jKoz0y8xGwOvWuetmsueo09IRajsBLDN261GK42IGM5GKAB0RPVR1EI49I1Co1";
 
     // what of them names the song, as the server works it out (SongSettingsTest.MixedIdentity)
-    private const string MixedIdentity = "BLD1z0ESgu32CK01201201119I496";
+    private const string MixedIdentity = "BLD1z0ESgu32CK01201201119I49621C";
 
     private static JsonElement Part(SongRequest request, string part) => request.Body.GetProperty("parts").GetProperty(part);
 

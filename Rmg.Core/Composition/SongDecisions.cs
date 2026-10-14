@@ -40,7 +40,8 @@ internal sealed record SongDecisions(
     Swing Swing,
     Scale Scale,
     DrumJob DrumJob,
-    SongSound Sound
+    SongSound Sound,
+    Mood Mood
 )
 {
     /// <summary>How loud and busy each appearance is meant to be, its section's own as it appears.</summary>
@@ -448,7 +449,7 @@ internal sealed record SongDecisions(
             // the song's effects, decided before its notes, the part playing its strong one among those it plays
             Expression.DrawSound(Stream(SongStream.Effects), songUnconventionality[Facet.Sound], genre, tracks.Definitions,
                 tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).Select(x => x.Key).ToHashSet(),
-                effect => SongGenerator.CreateStream(seed, SongStream.StrongEffects, (int)effect)));
+                effect => SongGenerator.CreateStream(seed, SongStream.StrongEffects, (int)effect)), mood);
     }
 
     /// <summary>

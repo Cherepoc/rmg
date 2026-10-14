@@ -28,7 +28,9 @@ public sealed class SongSettingsTest
         ],
         [..SongMix.DrumGroupNames.Select((_, i) => new DrumGroupSettings(i * 9))],
         50,
-        new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i % 3 == 0 || i == DrumPieces.All.Length - 1)])
+        new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i % 3 == 0 || i == DrumPieces.All.Length - 1)]),
+        new Setting(true, 12),
+        new Setting(false, 50)
     );
 
     /// <summary>Nothing given, everything at nothing.</summary>
@@ -44,14 +46,17 @@ public sealed class SongSettingsTest
         [..SongSettings.PartOrder.Select(_ => new PartSettings(0, new Setting(false, 0), 0, new Setting(false, 0)))],
         [..SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(0))],
         0,
-        DrawnPieces
+        DrawnPieces,
+        new Setting(false, 0),
+        new Setting(false, 0)
     );
 
     private static bool AreSame(SongSettings first, SongSettings second) =>
         first.Unconventionality == second.Unconventionality && first.Facets.SequenceEqual(second.Facets)
         && (first.Tempo, first.Key, first.Meter, first.Mode, first.Swing, first.Length) == (second.Tempo, second.Key, second.Meter, second.Mode, second.Swing, second.Length) && first.Parts.SequenceEqual(second.Parts)
         && first.DrumGroups.SequenceEqual(second.DrumGroups) && first.Volume == second.Volume
-        && first.DrumPieces.IsGiven == second.DrumPieces.IsGiven && first.DrumPieces.Pieces.SequenceEqual(second.DrumPieces.Pieces);
+        && first.DrumPieces.IsGiven == second.DrumPieces.IsGiven && first.DrumPieces.Pieces.SequenceEqual(second.DrumPieces.Pieces)
+        && (first.Darkness, first.Intensity) == (second.Darkness, second.Intensity);
 
     /// <summary>The settings name every facet and every part a song may have but the riff's twin, so that a link and an event carry each.</summary>
     [Test]
@@ -69,7 +74,7 @@ public sealed class SongSettingsTest
         {
             var text = settings.Format();
 
-            await Assert.That(text.Length).IsEqualTo(1 + SongSettings.FixedLength);
+            await Assert.That(text.Length).IsEqualTo(1 + SongSettings.FixedLength + SongSettings.MoodLength);
             // letters and digits alone, which a link carries and a chat's markdown leaves as they are
             await Assert.That(text.All(char.IsAsciiLetterOrDigit)).IsTrue();
             await Assert.That(AreSame(SongSettings.Parse(text)!, settings)).IsTrue();
@@ -97,14 +102,24 @@ public sealed class SongSettingsTest
     public async Task TheFormat_IsFixed()
     {
         // the page writes the same, so a change to either side shows here and in the page's check against it
-        await Assert.That(Silent.Format()).IsEqualTo("B" + new string('0', SongSettings.FixedLength));
+        await Assert.That(Silent.Format()).IsEqualTo("B" + new string('0', SongSettings.FixedLength + SongSettings.MoodLength));
         await Assert.That(Mixed.Format()).IsEqualTo(MixedText);
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "Bz07ELSZgnu3jKoz0y8xGwOvWuetmsueo09IRajsBLDN261GK42IGM5GKAB0RPVR1EI49I1";
+    public const string MixedText = "Bz07ELSZgnu3jKoz0y8xGwOvWuetmsueo09IRajsBLDN261GK42IGM5GKAB0RPVR1EI49I1Co1";
 
-    public const string MixedIdentity = "BLD1z0ESgu32CK01201201119I496";
+    public const string MixedIdentity = "BLD1z0ESgu32CK01201201119I49621C";
+
+    /// <summary>Settings written before the mood, without its characters, read as they were, their mood drawn.</summary>
+    [Test]
+    public async Task SettingsWrittenBeforeTheMood_ReadAsTheyWere_TheirMoodDrawn()
+    {
+        var old = MixedText[..^SongSettings.MoodLength];
+        var read = SongSettings.Parse(old)!;
+        await Assert.That(read.Darkness.IsGiven || read.Intensity.IsGiven).IsFalse();
+        await Assert.That(AreSame(read, Mixed with { Darkness = read.Darkness, Intensity = read.Intensity })).IsTrue();
+    }
 
     [Test]
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
@@ -134,7 +149,10 @@ public sealed class SongSettingsTest
         // a character of bits past V, five bits' most, and the last character's padding, past its one bit, set
         var bits = 1 + 39;
         await Assert.That(SongSettings.Parse(MixedText[..bits] + "W" + MixedText[(bits + 1)..])).IsNull();
-        await Assert.That(SongSettings.Parse(MixedText[..^1] + "3")).IsNull();
+        var padding = MixedText.Length - SongSettings.MoodLength - 1;
+        await Assert.That(SongSettings.Parse(MixedText[..padding] + "3" + MixedText[(padding + 1)..])).IsNull();
+        // and the mood's switches past their two bits
+        await Assert.That(SongSettings.Parse(MixedText[..^1] + "4")).IsNull();
         // and a character that is no digit
         await Assert.That(SongSettings.Parse(MixedText[..1] + "_" + MixedText[2..])).IsNull();
     }

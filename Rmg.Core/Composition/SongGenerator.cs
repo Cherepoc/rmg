@@ -94,7 +94,7 @@ public static class SongGenerator
 
         return new Song(songTrackNoteTimelineMap.Duration, song.Meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality,
             [..SongParts.All.Except(song.Absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], song.Scale, song.Swing, kit, room, insertion,
-            [..form.Map.Sections.Select((x, i) => (song.Structure.Roles[x.SectionId], song.Solos.TryGetValue(i, out var solo) ? solo.Soloists : []))]));
+            [..form.Map.Sections.Select((x, i) => (song.Structure.Roles[x.SectionId], song.Solos.TryGetValue(i, out var solo) ? solo.Soloists : []))], song.Mood));
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>

@@ -26,6 +26,8 @@ namespace Rmg.WebApi.Songs;
 /// <param name="DrumGroups">Every drum group's, in the order of <see cref="SongMix.DrumGroupNames" />.</param>
 /// <param name="Volume">How loud the whole song plays, from 0 to 61.</param>
 /// <param name="DrumPieces">The drum pieces given, as a set, or not; every piece in or out, in the order of <see cref="Core.Composition.DrumPieces.All" />.</param>
+/// <param name="Darkness">How dark its mood is, from 0 to 61, written behind the rest with <paramref name="Intensity" /> (<see cref="MoodLength" />).</param>
+/// <param name="Intensity">How intense its mood is, from 0 to 61.</param>
 public sealed record SongSettings(
     Setting Unconventionality,
     ImmutableArray<Setting> Facets,
@@ -38,7 +40,9 @@ public sealed record SongSettings(
     ImmutableArray<PartSettings> Parts,
     ImmutableArray<DrumGroupSettings> DrumGroups,
     int Volume,
-    DrumPieceSettings DrumPieces
+    DrumPieceSettings DrumPieces,
+    Setting Darkness,
+    Setting Intensity
 )
 {
     /// <summary>The format this writes, as its first character; one that is read differently takes the next.</summary>
@@ -72,6 +76,12 @@ public sealed record SongSettings(
 
     /// <summary>How many characters follow the format's.</summary>
     public static int FixedLength => CharacterCount + (BitCount + BitsPerCharacter - 1) / BitsPerCharacter;
+
+    /// <summary>
+    ///     How many characters the mood takes behind the fixed places, its darkness's and its intensity's values and whether
+    ///     each is given, a character's two bits: settings written before it have none, their mood drawn.
+    /// </summary>
+    public const int MoodLength = 3;
 
     /// <summary>How many bits a character carries, from 0 to V, of the 62 digits the whole of those 32 values can be.</summary>
     private const int BitsPerCharacter = 5;
@@ -113,6 +123,9 @@ public sealed record SongSettings(
 
         bits.AddRange([DrumPieces.IsGiven, ..DrumPieces.Pieces]);
         characters.AddRange(Pack(bits));
+        characters.AddRange([Darkness.Value, Intensity.Value, (Darkness.IsGiven ? 1 : 0) + (Intensity.IsGiven ? 2 : 0)]);
+        if (Darkness.Value is < 0 or > StepScale.Last || Intensity.Value is < 0 or > StepScale.Last)
+            throw new InvalidOperationException("A mood does not fit in a character.");
         return FormatCharacter + new string([..characters.Select(x => Base62.Digits[x])]);
     }
 
@@ -126,8 +139,18 @@ public sealed record SongSettings(
     /// <summary>Reads settings the page wrote, or none for anything that is not settings of this format.</summary>
     public static SongSettings? Parse(string? text)
     {
-        if (text is null || text.Length != 1 + FixedLength || text[0] != FormatCharacter)
+        if (text is null || text.Length != 1 + FixedLength && text.Length != 1 + FixedLength + MoodLength || text[0] != FormatCharacter)
             return null;
+
+        // its mood where it has one, a step and whether it is given for each, as written; drawn where it has none
+        var (darkness, intensity) = (new Setting(false, StepScale.Middle), new Setting(false, StepScale.Middle));
+        if (text.Length == 1 + FixedLength + MoodLength)
+        {
+            var mood = text[(1 + FixedLength)..].Select(x => Base62.Digits.IndexOf(x)).ToArray();
+            if (mood[..2].Any(x => x is < 0 or > StepScale.Last) || mood[2] is < 0 or > 3)
+                return null;
+            (darkness, intensity) = (new Setting((mood[2] & 1) == 1, mood[0]), new Setting((mood[2] & 2) == 2, mood[1]));
+        }
 
         var values = text[1..(1 + FixedLength)].Select(x => Base62.Digits.IndexOf(x)).ToArray();
         // a value no more than the last step, and a character of bits no more than five of them, its padding zeros, so
@@ -171,7 +194,7 @@ public sealed record SongSettings(
         var facets = given[1..^1].Select((value, i) => new Setting(isGiven[1 + i], value));
         return new SongSettings(new Setting(isGiven[0], given[0]), [..facets], new Setting(isGiven[^6], given[^1]), new Setting(isGiven[^5], key),
             new Setting(isGiven[^4], meter), new Setting(isGiven[^3], mode), new Setting(isGiven[^2], swing), new Setting(isGiven[^1], length), parts, groups, volume,
-            pieces);
+            pieces, darkness, intensity);
     }
 
     /// <summary>
@@ -198,7 +221,11 @@ public sealed record SongSettings(
             Given(Mode),
             Given(Swing),
             null,
-            Given(Length)
+            Given(Length),
+            null,
+            null,
+            Given(Darkness),
+            Given(Intensity)
         );
     }
 
@@ -218,6 +245,9 @@ public sealed record SongSettings(
             values.AddRange(Parts.Select(x => x.Plays));
             if (DrumPieces.IsGiven)
                 values.AddRange([1, ..Pack(DrumPieces.Pieces)]);
+            // and the mood where it is given, behind a 2, so that a song given none keeps the name it had before
+            if (Darkness.IsGiven || Intensity.IsGiven)
+                values.AddRange([2, ..Pack([Darkness.IsGiven, Intensity.IsGiven]), ..new[] { Darkness, Intensity }.Where(x => x.IsGiven).Select(x => x.Value)]);
 
             return new string([..values.Select(x => Base62.Digits[x])]).TrimEnd('0');
         }

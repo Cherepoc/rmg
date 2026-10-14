@@ -7,7 +7,7 @@ import { DRUM_GROUPS, FACETS, LAST_STEP, MIDDLE_STEP, PARTS } from "./settings.j
  */
 
 /** The values given or drawn whole, each by its value before the song is made: the middle of its steps, or the first. */
-const SCALARS = { unconventionality: MIDDLE_STEP, tempo: MIDDLE_STEP, key: 0, meter: 0, mode: 0, swing: 0, length: MIDDLE_STEP };
+const SCALARS = { unconventionality: MIDDLE_STEP, tempo: MIDDLE_STEP, key: 0, meter: 0, mode: 0, swing: 0, length: MIDDLE_STEP, darkness: MIDDLE_STEP, intensity: MIDDLE_STEP };
 
 /** Nothing given, every value in the middle and every part and drum group at its fullest, as a first visit starts. */
 export function defaultSettings() {

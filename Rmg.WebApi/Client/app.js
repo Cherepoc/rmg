@@ -1735,6 +1735,8 @@ const SETTING_NAMES = {
     mode: ["Mode", "The scale the song starts in, on its key: major, minor, a mode or a stranger scale. Its sections may change it, as its scale allows."],
     meter: ["Meter", "The beats of the first section's bars. Its later sections may change the meter, as its feel allows."],
     swing: ["Swing", "How late the second of every pair of notes plays: straight at the left, a triplet's swing at the right. A meter that does not pair its notes, such as 6/8, plays straight."],
+    darkness: ["Darkness", "How dark the song's mood is: bright at the left, dark at the right. The darker, the likelier its genre's darker options, a minor or a Phrygian mode over a major or a Lydian one."],
+    intensity: ["Intensity", "How intense the song's mood is: calm at the left, fierce at the right. The fiercer, the likelier its genre's fiercer options: a faster tempo, double time, driven guitars, chugs and the power kit."],
     length: ["Length", "How long the song plays, from half a minute to fifteen. Its form comes as near as it can, more and longer sections for a long song; a minute's song may run a little longer."],
     feel: ["Feel", "How the time moves: odd meters and meter changes, tuplets and polymeters, swing, and tempo changes between sections."],
     form: ["Form", "How the song is put together: its sections and their order, which parts play where, and its solos."],
@@ -1748,7 +1750,7 @@ const SETTING_NAMES = {
 };
 
 // a slider's two ends, where they are not the plain and the experimental
-const SCALE_ENDS = { tempo: ["Slow", "Fast"], swing: ["Straight", "Triplet"], length: ["Short", "Long"] };
+const SCALE_ENDS = { tempo: ["Slow", "Fast"], swing: ["Straight", "Triplet"], length: ["Short", "Long"], darkness: ["Bright", "Dark"], intensity: ["Calm", "Fierce"] };
 
 const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums", riff: "Riff", rhythm: "Rhythm", solo: "Soloist" };
 

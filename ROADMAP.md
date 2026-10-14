@@ -985,7 +985,9 @@ half time, fills, the kit, driven instruments, chugs and power chords, the bass 
    darksynth), Drum and bass -50 to 90 and -40 to 90 (liquid to dark), Heavy metal -70 to 70 and -60 to 80 (gothic and
    power metal's shades); asked: `synthwave-dark`, `dnb-dark`, the darkest songs against a neutral mood. Left: the
    other genres' spans, by listening.
-6. The page: the two given by controls, with its tests.
+6. Done (14 October 2026): the page, the two given by sliders among the settings (Bright to Dark, Calm to Fierce), asked
+   for and reported as drawn or given, a link's settings carrying them behind the rest (`SongSettings.MoodLength`), a
+   link written before read as it was, its mood drawn, a song's identity as before where no mood is given; `MoodTest`.
 
 Review: **overengineering**: the cost is the lean data, two numbers an option, so ten or so choices whose meaning is
 plain, and instruments by trait, never by program; no new weighing, the leans `Tilt`'s and the spans range choices; a

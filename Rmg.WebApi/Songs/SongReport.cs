@@ -22,6 +22,8 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Mode">The scale it starts in, by its place among the scales (<c>/api/songs/options</c>).</param>
 /// <param name="Swing">How much it swings, from 0, straight, to 61, a triplet's swing: 0 where its meter pairs no notes to swing.</param>
 /// <param name="Length">How long it plays, by its step (<see cref="LengthScale" />), the nearest to its length, given or not.</param>
+/// <param name="Darkness">How dark its mood is, from 0, the brightest, to 61, the darkest.</param>
+/// <param name="Intensity">How intense its mood is, from 0, the calmest, to 61, the fiercest.</param>
 /// <param name="Seconds">How long it plays, in seconds.</param>
 /// <param name="Sections">Every section it plays, in its order: where it starts, its role and the parts that solo it.</param>
 public sealed record SongReport(
@@ -36,6 +38,8 @@ public sealed record SongReport(
     Drawn<int> Mode,
     Drawn<int> Swing,
     Drawn<int> Length,
+    Drawn<int> Darkness,
+    Drawn<int> Intensity,
     double Seconds,
     ImmutableArray<SectionReport> Sections
 )
@@ -80,6 +84,8 @@ public sealed record SongReport(
             new Drawn<int>(Scales.All.IndexOf(draws.Scale), overrides.Scale is not null),
             new Drawn<int>(StepScale.ToStep(draws.SwingAmount), overrides.Swing is not null),
             new Drawn<int>(LengthScale.StepOf(rendered.Seconds), overrides.Length is not null),
+            new Drawn<int>(StepScale.ToStep(Mood.AmountOf(draws.Mood.Darkness)), overrides.Darkness is not null),
+            new Drawn<int>(StepScale.ToStep(Mood.AmountOf(draws.Mood.Intensity)), overrides.Intensity is not null),
             rendered.Seconds,
             [
                 ..song.Map!.Sections.Zip(draws.Appearances, (span, appearance) =>
