@@ -957,7 +957,8 @@ on 2 and 4 (`figure.chords.backbeat`), Country's and Folk's 20-30-30. Left: the 
 4/4; a drone under a whole section (Ambient, Medieval, Dungeon synth), the pedal
 widened; a section's energy choosing its guitars' muting (pop punk's verses) and figure (ska punk's choruses); swing
 by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's
-glide rate (Trap's 808 on a phrase's end, a whining lead); a run into a downbeat (a disco string run, a fanfare's
+glide rate, done (14 October 2026): `glide.lead` beside the bass's, Hip-hop's, Trance's and Synthwave's, and `glideRate`, the
+share of notes slid into, Trap's 808 sparing at 20 (left: a slide leaning to a phrase's end and a leap); a run into a downbeat (a disco string run, a fanfare's
 pickup); two soloists trading (Thrash, power metal's duels), done in part (14 October 2026): how many share a solo and how
 they share it genres' pools (`soloCount`, `soloShare`), Thrash's two at 30-50-60 trading, Jazz's trades, Symphonic's
 duels; trading still rare (Thrash 6% of its pitched solos, Jazz 15%), as few songs have two parts free to solo, by

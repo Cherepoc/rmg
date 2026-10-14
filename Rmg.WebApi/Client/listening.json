@@ -510,9 +510,9 @@
         "seed": "V",
         "at": 3.2,
         "listen": [
+          "Melody (Lead 2 (sawtooth))",
           "Chords (Synth Brass 1)",
-          "Bass (Synth Bass 2)",
-          "Melody (Lead 2 (sawtooth))"
+          "Bass (Synth Bass 2)"
         ]
       },
       {

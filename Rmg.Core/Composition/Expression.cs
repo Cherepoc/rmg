@@ -669,9 +669,12 @@ internal static class Expression
             var slideRate = SlideRate.At(songSound) * 2 * part.GenerateDouble();
             // a bass that glides, a genre's, into half the notes it may from the note before, as an 808's or an acid line's
             // does, on an instrument that bends; drawn whatever the genre, so that the part's other draws stay
-            var glides = part.TestProbability(GlideChance.At(songSound, genre.Chance(GenreChoices.Glide, "bass"))) && role == TrackRole.Bass && !echoes && Bends(program);
+            // and a lead that glides, a G-funk's or a trance's whining line, its own chance of the same draw, the share of
+            // notes either slides into a genre's (GenreChoices.GlideRate)
+            var glideOption = role switch { TrackRole.Bass => "bass", TrackRole.Melody => "lead", _ => null };
+            var glides = part.TestProbability(glideOption is null ? 0 : GlideChance.At(songSound, genre.Chance(GenreChoices.Glide, glideOption))) && glideOption is not null && !echoes && Bends(program);
             if (glides)
-                (slides, slideRate) = (true, GlideRate);
+                (slides, slideRate) = (true, genre.Names(GenreChoices.GlideRate) ? (genre.Shift(GenreChoices.GlideRate, "share") + 1) / 2 : GlideRate);
             // and from across a gap, into a short note too
             var (slideGap, shortestSlide) = glides ? (GlideGap, GlideShortest) : (SlideGap, ShortestShaped);
             // and how far its filter closes, and a wobble's cycle, drawn last, so that the part's other draws stay

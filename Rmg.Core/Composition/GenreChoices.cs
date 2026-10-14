@@ -431,7 +431,10 @@ public static class GenreChoices
     public static GenreChoice MelodyRange { get; } = Values("melodyRange", "Melody's range", [("wide", "Wide")], Facet.Melody);
 
     /// <summary>The chance a song's bass glides into its notes from the note before, an 808's or an acid line's (<see cref="Expression.GlideChance" />).</summary>
-    public static GenreChoice Glide { get; } = Chances("glide", "Glide", [("bass", "A gliding bass", Expression.GlideChance)]);
+    public static GenreChoice Glide { get; } = Chances("glide", "Glide", [("bass", "A gliding bass", Expression.GlideChance), ("lead", "A gliding lead", Expression.GlideChance)]);
+
+    /// <summary>How many of its notes a gliding part slides into, from 0, none, through 50, half, as the songs' do, to 100, every one it may (<see cref="Expression.GlideRate" />).</summary>
+    public static GenreChoice GlideRate { get; } = Values("glideRate", "Glide's share", [("share", "Notes slid into")], Facet.Sound);
 
     /// <summary>What the bass lands on in a new chord (<see cref="BassLeadingLayers.Arrivals" />): its root, its third, its fifth, or its figure's note.</summary>
     public static GenreChoice BassLanding { get; } = Pool("bassLanding", "Bass's landing",
@@ -724,7 +727,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, SoloCount, SoloShare, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, SoloCount, SoloShare, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

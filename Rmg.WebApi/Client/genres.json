@@ -378,6 +378,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "glide": { "lead": [0, 5, 15] },
       "kickOut": { "lines": [10, 20, 30] },
       "figure": { "bass": { "own": 100, "eighths": [30, 40, 50], "sixteenths": [10, 20, 30] } },
       "intensity": { "from": -70, "to": 80 },
@@ -457,6 +458,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
+      "glideRate": { "share": 30 },
       "kickOut": { "lines": [10, 20, 30] },
       "length": { "from": [180, 180, 120], "to": [300, 300, 330] },
       "mixFilter": { "opening": [10, 20, 30], "dips": [0, 5, 10], "closing": [0, 10, 20] },
@@ -473,7 +475,7 @@
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
       "voice": { "verses": [60, 70, 70] },
       "hatRolls": { "bars": [0, 3, 10] },
-      "glide": { "bass": [5, 10, 20] },
+      "glide": { "bass": [5, 10, 20], "lead": [5, 15, 25] },
       "sectionLength": { "bars8": [40, 40, 40], "bars16": 100, "bars32": [20, 20, 20] },
       "pins": { "ground": [90, 90, 70], "backbeat": [100, 100, 80] },
       "articulation": { "roll": [0, 20, 30], "legato": 0, "stabs": [10, 25, 35] },
@@ -2017,6 +2019,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "glideRate": { "share": 20 },
       "length": { "from": [150, 150, 120], "to": [250, 250, 300] },
       "sectionLength": { "bars16": 100, "bars8": [50, 50, 50], "bars32": [0, 10, 20] },
       "kickOut": { "lines": [10, 20, 30] },
@@ -2089,6 +2092,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "glide": { "lead": [0, 10, 20] },
       "length": { "from": [180, 210, 240], "to": [300, 360, 480] },
       "rests": { "drum": 65, "bass": 60 },
       "alone": { "pad": 100, "melody": 50, "chords": 40 },
