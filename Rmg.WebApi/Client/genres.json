@@ -1828,6 +1828,7 @@
       "meter": { "4/4": 100, "7/8": [0, 8, 25], "5/4": [0, 3, 10], "13/16": [0, 3, 10], "15/16": [0, 3, 10] },
       "feelChances": { "halfTime": [10, 15, 20], "doubleTime": [0, 5, 15], "swing": 0 },
       "polymeter": { "sections": [60, 70, 80] },
+      "polymeterCell": { "sixteenths3": [30, 20, 10], "sixteenths6": [30, 20, 10], "sixteenths5": [10, 20, 20], "sixteenths7": [10, 20, 20], "sixteenths9": [0, 10, 15], "sixteenths10": 0, "sixteenths11": [0, 10, 15], "sixteenths13": [20, 30, 30], "sixteenths15": [0, 10, 15], "sixteenths23": [0, 5, 10], "sixteenths17": [10, 20, 30] },
       "scale": { "phrygian": 100, "naturalMinor": 70, "locrian": [20, 30, 40], "harmonicMinor": [10, 20, 30], "hungarianMinor": [0, 0, 20], "lydian": [0, 10, 20], "major": [0, 0, 10] },
       "chordShape": { "powerChord": 100, "sus2": 30, "smallCluster": [20, 30, 40], "tritoneStack": [10, 20, 40], "add9": [20, 30, 40], "denseCluster": [0, 10, 30], "ninth": [0, 10, 30], "lydian": [0, 10, 20], "quartalTriad": [10, 20, 30] },
       "lineScale": { "section": 100, "pentatonic": 40, "octatonic": [0, 20, 40], "wholeTone": [0, 0, 20] },

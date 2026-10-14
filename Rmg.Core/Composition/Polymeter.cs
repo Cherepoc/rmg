@@ -39,8 +39,13 @@ internal static class Polymeter
         (11, new ByConvention(0, 0.03, 1)),
         (13, new ByConvention(0, 0.03, 1)),
         (15, new ByConvention(0, 0.03, 1)),
-        (23, new ByConvention(0, 0.03, 1))
+        (23, new ByConvention(0, 0.03, 1)),
+        // a genre's alone, as a band built on long odd cycles plays
+        (17, new ByConvention(0, 0, 0))
     ];
+
+    /// <summary>A cell's length as a genre names it, "sixteenths13".</summary>
+    public static string NameOf(int sixteenths) => $"sixteenths{sixteenths}";
 
     /// <summary>
     ///     The chance the bass, with a riff, plays the cycle with it, in unison: always at the plain end, which only a genre
@@ -141,7 +146,10 @@ internal static class Polymeter
                 continue;
 
             var bar = meters[id].Groups.Sum();
-            var lengths = Lengths.Where(x => bar % x.Sixteenths != 0).ToArray();
+            // the lengths as the genre weighs them, where it names them
+            var pool = genre.Pool<int>(GenreChoices.PolymeterCell, NameOf);
+            var weighed = pool is null ? Lengths : [..Lengths.Select(x => (x.Sixteenths, Weight: pool(x.Sixteenths) ?? new ByConvention(0, 0, 0)))];
+            var lengths = weighed.Where(x => bar % x.Sixteenths != 0).ToArray();
             // a bar both plain lengths divide, as 3/4's and 6/8's, plays the middle's at the plain end
             var length = context.Pick(ByConvention.WeighFilled(lengths, unconventionality));
             var hasRiff = !absent.Contains(TrackRole.Riff);
@@ -154,7 +162,7 @@ internal static class Polymeter
             var tails = context.TestProbability(TailChance.At(unconventionality));
             var repeats = context.Pick(Repeats.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
             // the lengths the section's end allows, none at the plain end but the plainest
-            var closing = Lengths.Where(x => x.Sixteenths != length && Drifts(length * repeats + x.Sixteenths, bar) && x.Weight.At(unconventionality) > 0).ToArray();
+            var closing = weighed.Where(x => x.Sixteenths != length && Drifts(length * repeats + x.Sixteenths, bar) && x.Weight.At(unconventionality) > 0).ToArray();
             var tail = closing.Length > 0 ? context.Pick(ByConvention.Weigh(closing, unconventionality)) : 0;
             ImmutableArray<int> cells = tails && tail > 0 ? [..Enumerable.Repeat(length, repeats), tail] : [length];
             var snare = context.TestProbability(SnareChance.At(unconventionality)) && kick;

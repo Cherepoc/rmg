@@ -965,7 +965,7 @@ they share it genres' pools (`soloCount`, `soloShare`), Thrash's two at 30-50-60
 duels; trading still rare (Thrash 6% of its pitched solos, Jazz 15%), as few songs have two parts free to solo, by
 listening; a section's abrupt change of tempo (Thrash) done (14 October 2026), the ease into a change a genre's chance
 (`sectionChanges.eased`, the songs' 50), Thrash's 20; hat rolls anywhere in the bar (Trap), done (14 October 2026), a roll into any beat of its bar, the bar's end three
-times as likely, into the snare or mid-bar now and then as the research found; the polymeter's cell lengths by genre (Djent's 13 and 17); a frame-rate arpeggio
+times as likely, into the snare or mid-bar now and then as the research found; the polymeter's cell lengths by genre, done (14 October 2026), `polymeterCell` a genre's pool of the lengths, 17 a genre's alone, Djent's 13 and 17 in 40 of its 141 cells; a frame-rate arpeggio
 (Chiptune); a post-chorus and long montuno sections (Pop, Latin); one part alone before the band, done (14 October
 2026): the riff intro widened, `openingAlone` the chance and `openingPart` the part, the riff the songs', a genre's drums,
 bass, chords or pad: Rock's drums and chords beside its riff, Punk's drums (38 of 64 asked), Soul's, Funk's and Disco's

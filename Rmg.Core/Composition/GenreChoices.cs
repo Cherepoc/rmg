@@ -499,6 +499,10 @@ public static class GenreChoices
     /// <summary>A section's drums and bass in a cycle across the bar (<see cref="Composition.Polymeter" />).</summary>
     public static GenreChoice Polymeter { get; } = Chances("polymeter", "Polymeter", [("sections", "Sections in a polymeter", Composition.Polymeter.Chance)]);
 
+    /// <summary>A polymeter's cells' lengths in 16ths (<see cref="Composition.Polymeter.Lengths" />): three against four and a dotted quarter the plainest, the odd ones wilder, 17 a genre's alone.</summary>
+    public static GenreChoice PolymeterCell { get; } = Pool("polymeterCell", "Polymeter's cell",
+        Composition.Polymeter.Lengths.Select(x => (Composition.Polymeter.NameOf(x.Sixteenths), $"{x.Sixteenths} 16ths", x.Weight)));
+
     /// <summary>The figures a player plays in place of its own rhythm, by the player, a genre's alone (<see cref="Composition.Figures" />).</summary>
     public static ImmutableDictionary<FigurePlayer, GenreChoice> Figures { get; } = Enum.GetValues<FigurePlayer>().ToImmutableDictionary(
         x => x,
@@ -735,7 +739,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, SoloCount, SoloShare, Soloists, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
-        SectionChanges, Polymeter, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
+        SectionChanges, Polymeter, PolymeterCell, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

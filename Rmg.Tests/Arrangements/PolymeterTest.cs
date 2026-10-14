@@ -159,6 +159,18 @@ public sealed class PolymeterTest
         }
     }
 
+    /// <summary>Djent's cycles in the cells it names, its long odd ones, 13 and 17, among them, which the songs' own reach rarely or never.</summary>
+    [Test]
+    public async Task DjentsPolymeters_PlayItsCells_ItsLongOddOnesAmongThem()
+    {
+        var plans = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("djent"))))
+            .SelectMany(x => x.PolymeterPlans.Values).ToArray();
+        var cells = plans.SelectMany(x => x.Cells).ToArray();
+        Console.WriteLine($"{plans.Length} polymeters, cells {string.Join(", ", cells.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}"))}");
+        await Assert.That(cells.All(x => x != 10)).IsTrue();
+        await Assert.That(cells.Count(x => x is 13 or 17)).IsGreaterThan(cells.Length / 10);
+    }
+
     [Test]
     public async Task ThePlainestSongs_PlayNoPolymeter()
     {
