@@ -90,7 +90,9 @@ public sealed class DropTest
     public async Task EveryDrop_TakesARiser_OnAChannelOfItsOwn_ItsPartPlayingOnOverAFilteredOne()
     {
         int silent = 0, filtered = 0, playingOn = 0;
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno"))));
+        // Techno's songs asked to drop at every lift, as its own drop seldom
+        var genre = GenrePresets.With("techno", GenreChoices.Drop, ("lifts", 1));
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
         foreach (var song in songs)
         {
             var risers = song.Rendered.Tracks.Where(x => x.IsRiser).ToArray();

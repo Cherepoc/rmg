@@ -805,6 +805,12 @@ with its questions after each group:
    reports: the cymbal choke before a riff change; a key change's interval a genre's (a lift by a third, Symphonic's);
    black metal's minor chords on chromatic roots, the ♭vi a major third below and the diminished seventh's roots,
    which `chordScales.mediant` plays major; a power metal preset (put off).
+   Jazz 5:19-7:05-8:35 (3:34-4:36-5:55), ballads from 55 and up-tempo to 240 at every end, more blues; Hip-hop's own
+   forms (verse and chorus, no pre-chorus), the upright bass, jazz guitar, organ and vibes, swung more; Techno's drops
+   fewer and filtered oftener, a ride, fewer leads, 128-136-142. Left of their reports: a tempo drawn from a genre's
+   tempo groups (Jazz's ballads, mediums and burners, Rock's too), tempos over 240, a part's swing of its own (the ride
+   harder than the soloist, the hats than the kick), the press roll into a solo, a hook shorter than its 16-bar verse,
+   three verses (`vcvcvc`), an echo on a chord stab (before dub techno), parts muted in and out on a loop.
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
