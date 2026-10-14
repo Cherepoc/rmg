@@ -18,15 +18,19 @@ internal static class HatRolls
     /// <summary>How fast a roll's notes come, a beat's worth of them, and how likely: 32nds, and 16th triplets the trap's other.</summary>
     public static ImmutableArray<Weighted<int>> Rates { get; } = [new(1, 8), new(1, 6)];
 
-    /// <summary>How long a roll lasts, in beats, at the bar's end, and how likely: its last beat, or the half of it.</summary>
+    /// <summary>How much likelier a roll ends with its bar than on another of its beats: three times, the bar's end most at home.</summary>
+    public const double BarEndOdds = 3;
+
+    /// <summary>How long a roll lasts, in beats, up to where it ends, and how likely: a beat, or the half of it.</summary>
     public static ImmutableArray<Weighted<double>> Lengths { get; } = [new(1, 1), new(1, 0.5)];
 
     /// <summary>How loud a roll's first note plays against its last, which is the hat's own.</summary>
     public const double From = 0.6;
 
     /// <summary>
-    ///     Hi-hat rolls, the trap's: now and then a bar's last beat, or its half, on the drums keeping time played as a roll of
-    ///     32nds or 16th triplets growing louder, each note the drum's own note there, where it plays and no fill does. A
+    ///     Hi-hat rolls, the trap's: now and then a beat of a bar, or its half, on the drums keeping time played as a roll of
+    ///     32nds or 16th triplets growing louder, into one of the bar's beats, its end the likeliest, into the snare or the
+    ///     next bar, each note the drum's own note there, where it plays and no fill does. A
     ///     bar's decision, a genre's, from a sequence of its own for each appearance. The drums keeping time are the song's,
     ///     as their roles are drawn for it, a wild section's redrawn roles aside.
     /// </summary>
@@ -43,12 +47,15 @@ internal static class HatRolls
             var context = song.AppearanceStream(SongStream.HatRolls, index);
             var chance = Chance.At(song.SectionOf(span.SectionId).Facets[Facet.Groove], song.Genre.Chance(GenreChoices.HatRolls, "bars"));
             // every bar, a short last one's too, the bar before the next section where a roll is most at home
-            foreach (var (_, _, end) in span.Bars)
+            foreach (var (_, start, end) in span.Bars)
             {
+                // the beats it may end on, a short bar's own, its end the likeliest
+                var beats = (int)Math.Max(1, Math.Round(end - start));
+                ImmutableArray<Weighted<double>> ends = [..Enumerable.Range(1, beats).Select(k => new Weighted<double>(k == beats ? BarEndOdds : 1, k == beats ? end : start + k))];
                 // drawn for every bar, so that the draws are as many
-                var (rolls1, rate, length) = (context.TestProbability(chance), context.Pick(Rates), context.Pick(Lengths));
+                var (rolls1, rate, length, into) = (context.TestProbability(chance), context.Pick(Rates), context.Pick(Lengths), context.Pick(ends));
                 if (rolls1)
-                    rolls.Add((end - length, end, rate));
+                    rolls.Add((into - length, into, rate));
             }
         }
 

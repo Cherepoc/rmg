@@ -962,8 +962,8 @@ pickup); two soloists trading (Thrash, power metal's duels), done in part (14 Oc
 they share it genres' pools (`soloCount`, `soloShare`), Thrash's two at 30-50-60 trading, Jazz's trades, Symphonic's
 duels; trading still rare (Thrash 6% of its pitched solos, Jazz 15%), as few songs have two parts free to solo, by
 listening; a section's abrupt change of tempo (Thrash) done (14 October 2026), the ease into a change a genre's chance
-(`sectionChanges.eased`, the songs' 50), Thrash's 20; hat rolls
-anywhere in the bar (Trap); the polymeter's cell lengths by genre (Djent's 13 and 17); a frame-rate arpeggio
+(`sectionChanges.eased`, the songs' 50), Thrash's 20; hat rolls anywhere in the bar (Trap), done (14 October 2026), a roll into any beat of its bar, the bar's end three
+times as likely, into the snare or mid-bar now and then as the research found; the polymeter's cell lengths by genre (Djent's 13 and 17); a frame-rate arpeggio
 (Chiptune); a post-chorus and long montuno sections (Pop, Latin); one part alone before the band (a keyboard intro).
 Confirmed by the research and planned already: the jazz ride, the boogie, the alternating thumb, the tumbao, the
 kick-out, the breakdown chorus, the ostinato, the tempo floor under 60, the brushes' swirl, scratches.
