@@ -338,6 +338,14 @@ internal static class Expression
 
     public const double GlideShortest = 0.25;
 
+    /// <summary>
+    ///     How much likelier a gliding part slides into a note for each thing that draws a slide, the odds' factor: a leap
+    ///     of <see cref="GlideLeap" /> semitones or more, and the phrase's last note, as a whining lead slides into where it lands.
+    /// </summary>
+    public const double GlideOdds = 3;
+
+    public const int GlideLeap = 5;
+
     /// <summary>How long a note must be for a bend or a slide on it to be heard, in beats: an 8th, a run's notes going by straight.</summary>
     public const double ShortestShaped = 0.5;
 
@@ -753,9 +761,6 @@ internal static class Expression
                     if (isRelease)
                         kind = drawing.Pick(ReleaseBends);
                     var size = drawing.Pick(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1));
-                    var slidesNow = drawing.TestProbability(soloist is null ? slideRate : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
-                    // and its vibrato, a note at a time, the wide likelier the more intense
-                    var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
                     // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches;
                     // the note before that a dive let go of unheard, and none from a dive, fallen away
                     var before = i - 1;
@@ -764,6 +769,13 @@ internal static class Expression
                     var from = before >= 0 && held[before] is null && timeline[before].Position + timeline[before].Value.Duration >= note.Position - slideGap
                         ? timeline[before].Value.Pitches[0] - note.Value.Pitches[0]
                         : 0;
+                    // a gliding part sliding the likelier into a leap and into its phrase's last note, before a rest or a new phrase
+                    var following = i + 1 < timeline.Count && timeline[i + 1].Position < span.End - 1e-9 ? timeline[i + 1] : (TimelineItem<RealizedNote>?)null;
+                    var ends = following is not { } after || after.Position >= note.Position + note.Value.Duration + 1 - 1e-9 || after.Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) > 0;
+                    var glideLean = glides ? Tilt.Of(GlideOdds, (Math.Abs(from) >= GlideLeap ? 1 : 0) + (ends ? 1 : 0)) : new Tilt(0);
+                    var slidesNow = drawing.TestProbability(soloist is null ? glideLean.Chance(slideRate, 1) : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
+                    // and its vibrato, a note at a time, the wide likelier the more intense
+                    var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
