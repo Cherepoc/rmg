@@ -250,7 +250,7 @@ public static class SongDescriptions
     private static string SwingName(Swing swing) =>
         swing.Delay == 0 ? "none" : $"swung {(swing.Period switch { 1 => "8ths", 0.5 => "16ths", 2 => "quarters", var p => $"pairs of {p:0.##} beats" })}, {swing.Delay:0.##} of a beat late";
 
-    private static string RoleName(SectionRole role) => role == SectionRole.PreChorus ? "Pre-chorus" : role.ToString();
+    private static string RoleName(SectionRole role) => role switch { SectionRole.PreChorus => "Pre-chorus", SectionRole.PostChorus => "Post-chorus", _ => role.ToString() };
 
     private static string PartName(TrackRole role) => role switch
     {

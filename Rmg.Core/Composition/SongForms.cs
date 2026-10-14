@@ -17,7 +17,10 @@ public enum SectionRole
     Intro,
 
     /// <summary>A section of its own material that closes the song, played once.</summary>
-    Outro
+    Outro,
+
+    /// <summary>A short section after the chorus on a hook of its own, the full band's, a pop song's bonus hook.</summary>
+    PostChorus
 }
 
 /// <summary>A song's sections in its order, and the role each plays.</summary>
@@ -90,7 +93,10 @@ internal static class SongForms
         new(0, Parse("VBVCV")),
         // and strophic, verse after verse, a ballad's or a blues', four or six, which songs never take but a genre may
         new(0, Parse("VVVV")),
-        new(0, Parse("VVVVVV"))
+        new(0, Parse("VVVVVV")),
+        // and with a post-chorus after every chorus, a pop song's bonus hook, which songs never take but a genre may
+        new(0, Parse("VCQVCQBCQ")),
+        new(0, Parse("VPCQVPCQBCQ"))
     ];
 
     /// <param name="context">The sequence the form is drawn from.</param>
@@ -145,7 +151,8 @@ internal static class SongForms
         SectionRole.PreChorus => 'p',
         SectionRole.Chorus => 'c',
         SectionRole.Bridge => 'b',
-        _ => throw new ArgumentOutOfRangeException(nameof(form), x, "A form is of verses, pre-choruses, choruses and bridges.")
+        SectionRole.PostChorus => 'q',
+        _ => throw new ArgumentOutOfRangeException(nameof(form), x, "A form is of verses, pre-choruses, choruses, post-choruses and bridges.")
     }));
 
     /// <summary>A form as a page shows it where room is short: its roles' letters, "VCVCBC".</summary>
@@ -154,7 +161,7 @@ internal static class SongForms
     /// <summary>A form as a page shows it: its roles in words, "Verse, chorus, verse, chorus, bridge, chorus".</summary>
     public static string LabelOf(ImmutableArray<SectionRole> form)
     {
-        var words = string.Join(", ", form.Select(x => x == SectionRole.PreChorus ? "pre-chorus" : x.ToString().ToLowerInvariant()));
+        var words = string.Join(", ", form.Select(x => x switch { SectionRole.PreChorus => "pre-chorus", SectionRole.PostChorus => "post-chorus", _ => x.ToString().ToLowerInvariant() }));
         return char.ToUpperInvariant(words[0]) + words[1..];
     }
 
@@ -168,6 +175,7 @@ internal static class SongForms
                 'P' => SectionRole.PreChorus,
                 'C' => SectionRole.Chorus,
                 'B' => SectionRole.Bridge,
+                'Q' => SectionRole.PostChorus,
                 _ => throw new ArgumentException($"No role is written '{x}'.", nameof(roles))
             })
         ];

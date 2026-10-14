@@ -9,6 +9,40 @@ namespace Rmg.Tests.SongStructures;
 /// </summary>
 public sealed class SongFormReportTest
 {
+    /// <summary>
+    ///     A song with a post-chorus plays it after every chorus, shorter than the chorus, as its role leans it, and on a hook
+    ///     as a chorus is.
+    /// </summary>
+    [Test]
+    public async Task APostChorus_FollowsEveryChorus_ShortAndOnAHook()
+    {
+        var genre = Rmg.Tests.Genres.GenrePresets.With("pop", GenreChoices.Form, ("vcqvcqbcq", 1), ("vpcvpcbc", 0), ("vcvcbc", 0), ("vpcvpcbcvpc", 0), ("cvcvbc", 0), ("vpcqvpcqbcq", 0));
+        var (posts, hooks) = (0, 0);
+        var (chorusBars, postBars) = (new List<double>(), new List<double>());
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+            var ids = structure.SectionIds;
+            if (!ids.Any(x => structure.Roles[x] == SectionRole.PostChorus))
+                continue;
+            for (var i = 0; i < ids.Length; i++)
+                if (structure.Roles[ids[i]] == SectionRole.Chorus)
+                    await Assert.That(i + 1 < ids.Length && structure.Roles[ids[i + 1]] == SectionRole.PostChorus).IsTrue().Because($"seed {song.Seed}");
+            var spans = song.Map.Sections;
+            chorusBars.AddRange(spans.Where(x => structure.Roles[x.SectionId] == SectionRole.Chorus).Select(x => x.Duration / x.Meter.BarDuration));
+            var post = spans.Where(x => structure.Roles[x.SectionId] == SectionRole.PostChorus).ToArray();
+            postBars.AddRange(post.Select(x => x.Duration / x.Meter.BarDuration));
+            posts++;
+            var postId = post[0].SectionId;
+            hooks += song.Trace.Any(x => x.Point == TracePoints.MelodyHook && x.Section == postId && (bool)x.Value!) ? 1 : 0;
+        }
+
+        Console.WriteLine($"{posts} songs with a post-chorus, {hooks} of them on a hook; a chorus {chorusBars.Average():0.0} bars, a post-chorus {postBars.Average():0.0}");
+        await Assert.That(postBars.Average()).IsLessThan(chorusBars.Average());
+        await Assert.That(posts).IsGreaterThan(16);
+        await Assert.That(hooks).IsGreaterThan(posts / 3);
+    }
+
     [Test]
     public async Task ASongOfAForm_PlaysASectionForEveryRole_NoneFollowingItself()
     {

@@ -47,7 +47,7 @@ internal static class Arrangement
         // a tune's roles keeping their melody, and an intro and an outro, mostly the band's, leaving it out the oftener
         var tune = Tilt.Of(TuneOdds, role switch
         {
-            SectionRole.Verse or SectionRole.PreChorus or SectionRole.Chorus => -1,
+            SectionRole.Verse or SectionRole.PreChorus or SectionRole.Chorus or SectionRole.PostChorus => -1,
             SectionRole.Intro or SectionRole.Outro => 1,
             _ => 0
         });

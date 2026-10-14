@@ -205,8 +205,8 @@ internal static class MelodyLayers
 
     /// <summary>
     ///     The chance a section's melody is on a hook, its repeated bars singing their first's notes (<c>LinePattern.Hook</c>),
-    ///     by its role: a chorus's, a convention, every time in the plainest songs and never in the wildest; another
-    ///     section's never, but by a genre's (<see cref="GenreChoices.Hook" />).
+    ///     by its role: a chorus's and a post-chorus's, a convention, every time in the plainest songs and never in the
+    ///     wildest; another section's never, but by a genre's (<see cref="GenreChoices.Hook" />).
     /// </summary>
-    public static ByConvention HookChanceOf(SectionRole role) => role == SectionRole.Chorus ? new ByConvention(1, 0.6, 0) : new ByConvention(0, 0, 0);
+    public static ByConvention HookChanceOf(SectionRole role) => role is SectionRole.Chorus or SectionRole.PostChorus ? new ByConvention(1, 0.6, 0) : new ByConvention(0, 0, 0);
 }

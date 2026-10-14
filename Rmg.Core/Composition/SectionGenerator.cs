@@ -439,7 +439,7 @@ internal sealed class SectionGenerator
         StateTrace.RecordSection(TracePoints.OctaveBass, SectionTrace, sectionId, $"{octaveBass}", octaveBass);
         // its melody on a hook now and then, a chorus by its role or any section by a genre's, from a sequence of its own
         var hooks = Stream(sectionId, SectionStream.Hook).TestProbability(MelodyLayers.HookChanceOf(role)
-            .At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, role == Composition.SectionRole.Chorus ? "choruses" : "sections")));
+            .At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, role is Composition.SectionRole.Chorus or Composition.SectionRole.PostChorus ? "choruses" : "sections")));
         StateTrace.RecordSection(TracePoints.MelodyHook, SectionTrace, sectionId, $"{hooks}", hooks);
         return (powerChords, chugs, octaveBass, hooks);
     }

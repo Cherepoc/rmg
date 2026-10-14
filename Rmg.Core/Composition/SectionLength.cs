@@ -37,7 +37,7 @@ internal static class SectionLength
         {
             SectionRole.Free => null,
             SectionRole.Verse or SectionRole.Chorus => 4,
-            SectionRole.PreChorus => 1,
+            SectionRole.PreChorus or SectionRole.PostChorus => 1,
             SectionRole.Bridge => 2,
             SectionRole.Intro or SectionRole.Outro => 1,
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A role with no length.")

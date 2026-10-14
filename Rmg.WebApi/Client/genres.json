@@ -1195,7 +1195,7 @@
       "harmonicRhythm": { "oneBar": 100, "twoBars": [40, 40, 40], "halfBar": [5, 10, 20] },
       "lineScale": { "section": 100, "pentatonic": [40, 40, 40] },
       "formChances": { "forms": [100, 95, 70] },
-      "form": { "vpcvpcbc": 100, "vcvcbc": 80, "vpcvpcbcvpc": 30, "cvcvbc": 20 },
+      "form": { "vpcvpcbc": 100, "vcvcbc": 80, "vpcvpcbcvpc": 30, "cvcvbc": 20, "vpcqvpcqbcq": 20, "vcqvcqbcq": 15 },
       "keyChanges": { "lastSection": [20, 30, 40], "sections": [0, 3, 20], "patterns": [0, 0, 20] },
       "lastRepeat": { "songs": [30, 40, 40], "breakdown": [20, 25, 25] },
       "hook": { "choruses": [80, 80, 60], "sections": [10, 20, 20] },

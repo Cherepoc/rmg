@@ -99,7 +99,7 @@ internal static class Solos
 
     /// <summary>
     ///     How a section's role leans it to a solo: a bridge the most, played as a solo in its place, a verse's changes
-    ///     after it, a chorus less, which is sung, and a pre-chorus the least, too short to solo over; a section with no
+    ///     after it, a chorus less, which is sung, and a pre-chorus and a post-chorus the least, too short to solo over; a section with no
     ///     role not at all.
     /// </summary>
     public static ImmutableDictionary<SectionRole, double> RoleLeans { get; } = new Dictionary<SectionRole, double>
@@ -110,7 +110,8 @@ internal static class Solos
         [SectionRole.Chorus] = -0.5,
         [SectionRole.Bridge] = 1,
         [SectionRole.Intro] = -1,
-        [SectionRole.Outro] = 0.5
+        [SectionRole.Outro] = 0.5,
+        [SectionRole.PostChorus] = -1
     }.ToImmutableDictionary();
 
     /// <summary>The odds a role leaning to a solo has, as the odds of 1.</summary>

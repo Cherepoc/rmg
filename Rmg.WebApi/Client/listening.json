@@ -444,16 +444,9 @@
     "seeds": [
       {
         "seed": "2",
-        "at": 110.8,
+        "at": 103.6,
         "listen": [
           "Melody (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "7",
-        "at": 140.4,
-        "listen": [
-          "Melody (Electric Guitar (clean))"
         ]
       },
       {
@@ -465,7 +458,7 @@
       },
       {
         "seed": "H",
-        "at": 0,
+        "at": 4.8,
         "listen": [
           "Melody (Lead 1 (square))"
         ]
@@ -479,8 +472,15 @@
         ]
       },
       {
+        "seed": "K",
+        "at": 149,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
         "seed": "P",
-        "at": 169.6,
+        "at": 180.2,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
