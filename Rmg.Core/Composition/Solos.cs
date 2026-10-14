@@ -116,7 +116,10 @@ internal static class Solos
     /// <summary>The odds a role leaning to a solo has, as the odds of 1.</summary>
     public const double RoleOdds = 3;
 
-    /// <summary>How many parts solo at once.</summary>
+    /// <summary>A count of soloists as a genre names it: "one", "two" or "three".</summary>
+    public static string CountName(int count) => count switch { 1 => "one", 2 => "two", 3 => "three", _ => throw new ArgumentOutOfRangeException(nameof(count), count, null) };
+
+    /// <summary>How many parts solo at once, a genre's pool where it names one, a thrash band's duel of two (<see cref="GenreChoices.SoloCount" />).</summary>
     public static ImmutableArray<(int Count, ByConvention Weight)> Counts { get; } =
     [
         (1, new ByConvention(1, 0.85, 1)),
@@ -204,8 +207,8 @@ internal static class Solos
         var isSolo = context.TestProbability(Tilt.Of(RoleOdds, RoleLeans[role]).Chance(Chance.At(facets[Facet.Form], genre.Chance(GenreChoices.Solos, "sections")), 1));
         var pool = genre.Pool<TrackRole>(GenreChoices.Soloists);
         var melody = facets[Facet.Melody];
-        var count = context.Pick(ByConvention.Weigh(Counts, melody));
-        var mode = context.Pick(ByConvention.Weigh(Modes, melody));
+        var count = context.Pick(ByConvention.Weigh(Counts, melody, genre.Pool<int>(GenreChoices.SoloCount, CountName)));
+        var mode = context.Pick(ByConvention.Weigh(Modes, melody, genre.Pool<SoloMode>(GenreChoices.SoloShare)));
         var step = Steps[context.GenerateInt(0, Steps.Length)];
         // whether the solo is the soloist's own line, drawn before the soloists, whose draws a part held back changes
         var isOwn = context.TestProbability(OwnChance.At(melody));

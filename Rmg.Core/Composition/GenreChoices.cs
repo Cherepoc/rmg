@@ -478,6 +478,14 @@ public static class GenreChoices
             ("eased", "A change of tempo eased into, not taken at once", Composition.SectionTempo.RampChance)
         ]);
 
+    /// <summary>How many parts share a solo, trading its phrases or playing it together (<see cref="Composition.Solos.Counts" />).</summary>
+    public static GenreChoice SoloCount { get; } = Pool("soloCount", "Soloists at once",
+        Composition.Solos.Counts.Select(x => (Composition.Solos.CountName(x.Count), x.Count == 1 ? "One" : x.Count == 2 ? "Two, a duel" : "Three", x.Weight)));
+
+    /// <summary>How several soloists share a solo: taking its phrases in turn, a duel or a jazz band's trades, or playing it together (<see cref="Composition.Solos.Modes" />).</summary>
+    public static GenreChoice SoloShare { get; } = Pool("soloShare", "A shared solo",
+        Composition.Solos.Modes.Select(x => (Name(x.Mode.ToString()), x.Mode == SoloMode.Trading ? "Trading phrases" : "Together", x.Weight)));
+
     /// <summary>A section's drums and bass in a cycle across the bar (<see cref="Composition.Polymeter" />).</summary>
     public static GenreChoice Polymeter { get; } = Chances("polymeter", "Polymeter", [("sections", "Sections in a polymeter", Composition.Polymeter.Chance)]);
 
@@ -716,7 +724,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, Hook, Riff, Solos, SoloCount, SoloShare, Soloists, DrumSoloFeet, Stickings, Intro, RiffIntro, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

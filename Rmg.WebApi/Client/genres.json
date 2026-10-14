@@ -75,6 +75,8 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "soloShare": { "trading": 100, "together": [5, 10, 20] },
+      "soloCount": { "one": 100, "two": [10, 20, 30], "three": [0, 5, 10] },
       "figure": { "time": { "own": [20, 30, 40], "swingRide": 100 }, "chords": { "own": 100, "charleston": [10, 20, 30] } },
       "length": { "from": [180, 200, 180], "to": [360, 420, 600] },
       "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": [100, 50, 0], "block": [0, 10, 25], "twin": 50 },
@@ -1317,6 +1319,7 @@
     "name": "Heavy metal",
     "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
+      "soloCount": { "one": 100, "two": [20, 30, 40], "three": 0 },
       "intensity": { "from": -60, "to": 80 },
       "darkness": { "from": -70, "to": 70 },
       "sectionChanges": { "tempo": [0, 10, 30], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": [0, 4, 50], "eased": 50 },
@@ -1401,6 +1404,8 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "soloShare": { "trading": 100, "together": [20, 30, 40] },
+      "soloCount": { "one": 100, "two": [30, 50, 60], "three": 0 },
       "length": { "from": [210, 220, 180], "to": [360, 400, 520] },
       "sectionChanges": { "tempo": [10, 20, 50], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": [0, 10, 30], "eased": 20 },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
@@ -1483,6 +1488,8 @@
     "name": "Symphonic metal",
     "description": "Distorted guitars and a double kick under a choir, strings and a church organ, a soaring melody on a violin or a voice-like lead, harmonic minor's raised cadence, keyboard and guitar solos, a lifted last chorus.",
     "choices": {
+      "soloShare": { "trading": 100, "together": [40, 50, 60] },
+      "soloCount": { "one": 100, "two": [20, 40, 50], "three": 0 },
       "length": { "from": [220, 240, 200], "to": [360, 400, 540] },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
       "rudiments": { "flams": [0, 35, 70], "drags": [0, 0, 20] },

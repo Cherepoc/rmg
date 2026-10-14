@@ -79,6 +79,8 @@ public static class GenreChoiceDescriptions
         ["riff"] = "How often a section's riff plays in power chords, how often its guitars and picked bass chug, their repeated notes palm-muted, and how often it drones, its weak notes on an open string and its melody leaping an octave or more above it, as a black metal, a folk metal or a djent riff does; and how often it is a figure, its first bar's notes kept over the chords that follow where they fit, rather than placed anew over each.",
         ["solos"] = "How often a section that comes back is played as a solo instead, and how often a solo trades with the drums, turn by turn, the band laying out for theirs, and how often a solo is played by two parts together a third apart, a twin-guitar break.",
         ["soloists"] = "Which part takes the solos: the solo part, a lead such as a sax or a guitar, or another part, even the drums.",
+        ["soloCount"] = "How many parts share a solo: one, or two or three taking its phrases in turn, a jazz band's trades or a thrash band's guitar duel, or playing it together.",
+        ["soloShare"] = "How several soloists share a solo: taking its phrases in turn, a duel or a jazz band's trades, or playing it together.",
         ["intro"] = "How the song starts: the whole band at once, a count-in, or the parts coming in one by one.",
         ["ending"] = "How the song ends: a short final hit, a ringing chord, a sudden stop, a fade, its parts dropping out one by one to the drums, or left open.",
         ["strongEffect"] = "The one bold effect a song may put on a part: an echo, a tremolo, a sweep from side to side, the pads and bass pumping to the kick, a synth's filter wobbling, squelching or opening, or a trance gate chopping a pad.",
