@@ -10,7 +10,13 @@ namespace Rmg.Tests.Forms;
 public sealed class DropTest
 {
     // the electronic songs, made once for the tests of this class
-    private static readonly Lazy<CorpusSong[]> Electronic = new(() => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic")))));
+    // House's songs asked to drop at every lift and silently, as its own drop seldom and filtered oftener
+    private static readonly Lazy<CorpusSong[]> Electronic = new(() =>
+    {
+        var genre = GenrePresets.With("electronic", GenreChoices.Drop, ("lifts", 1));
+        genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.DropKind.Name, GenrePresets.With("electronic", GenreChoices.DropKind, ("silent", 1), ("filtered", 0)).Choices[GenreChoices.DropKind.Name]) };
+        return TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
+    });
 
     [Test]
     public async Task ADrop_SilencesTheBand_ForTheBarBeforeIt_AndTheBandComesBackInItsFirstBar()

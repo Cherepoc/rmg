@@ -815,6 +815,11 @@ with its questions after each group:
    one loop of ♭III, ♭VI and ♭VII a chord a bar, a wah now and then; Djent from 90, a blast now and then, more hi-hat.
    Left of their reports: a long instrumental stretch before the first vocal, stoner doom's wah and pentatonic riff
    (by listening), the octave whammy squeal, a china on a cell's start, a kick moved off the snare.
+   House 5:38-6:33-7:21 (3:21-6:15-14:58), fewer drops and filtered oftener, a piano, an organ, a voice and an
+   electric piano over its square and saw leads, fewer leads, swung oftener; Synthwave 4:00-4:36-5:19 (2:06-3:26-4:40),
+   four on the floor now and then, to 145 at its middle; IDM 3:03-4:29-6:07, from a minute at its wild end, a fretless
+   bass, no flams. Left of their reports: House's offbeat bass and congas, Synthwave's two tempo groups and darksynth's
+   split, IDM's vignettes (a one-minute song as one section, untested).
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its

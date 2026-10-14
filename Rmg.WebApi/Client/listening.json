@@ -506,43 +506,17 @@
     },
     "seeds": [
       {
-        "seed": "P",
-        "at": 0,
-        "listen": [
-          "Hi-Hat",
-          "Bass (Synth Bass 2)",
-          "Chords (Synth Brass 2)"
-        ]
-      },
-      {
         "seed": "V",
-        "at": 3.2,
+        "at": 2.8,
         "listen": [
-          "Melody (Lead 2 (sawtooth))",
           "Chords (Synth Brass 1)",
-          "Bass (Synth Bass 2)"
-        ]
-      },
-      {
-        "seed": "13",
-        "at": 125.8,
-        "listen": [
-          "Hi-Hat",
-          "Solo (Lead 5 (charang))",
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
-        "seed": "1L",
-        "at": 0,
-        "listen": [
           "Bass (Synth Bass 2)",
           "Melody (Lead 2 (sawtooth))"
         ]
       },
       {
-        "seed": "1Q",
-        "at": 3.7,
+        "seed": "1G",
+        "at": 0,
         "listen": [
           "Hi-Hat",
           "Bass (Synth Bass 2)",
@@ -550,8 +524,33 @@
         ]
       },
       {
+        "seed": "1L",
+        "at": 16,
+        "listen": [
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "1Q",
+        "at": 3.3,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Hi-Hat",
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "22",
+        "at": 0,
+        "listen": [
+          "Hi-Hat",
+          "Rhythm part (Electric Piano 1)",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
         "seed": "23",
-        "at": 15.2,
+        "at": 33.6,
         "listen": [
           "Hi-Hat",
           "Pad (Pad 2 (warm))",
