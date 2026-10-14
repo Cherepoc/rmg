@@ -72,8 +72,23 @@
     },
     "seeds": [
       {
+        "seed": "8",
+        "at": 195.6,
+        "listen": [
+          "Riff (Electric Guitar (muted))",
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
         "seed": "G",
         "at": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 35.2,
         "listen": [
           "Rhythm part (Electric Guitar (muted))"
         ]
@@ -97,20 +112,6 @@
         "at": 109.9,
         "listen": [
           "Rhythm part (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "Y",
-        "at": 128.6,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "b",
-        "at": 126.3,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))"
         ]
       }
     ]
@@ -136,26 +137,33 @@
     },
     "seeds": [
       {
-        "seed": "1",
-        "at": 46,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 194.6,
+        "seed": "5",
+        "at": 103.9,
         "listen": [
           "Rhythm part (Electric Piano 1)"
         ]
       },
       {
+        "seed": "7",
+        "at": 226,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
         "seed": "9",
-        "at": 7.7,
+        "at": 7,
         "listen": [
           "Bass (Electric Bass (finger))",
-          "Chords (Electric Piano 2)",
+          "Chords (Clavinet)",
           "Melody (Flute)"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 151.2,
+        "listen": [
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
@@ -168,16 +176,10 @@
       },
       {
         "seed": "I",
-        "at": 57.9,
+        "at": 201.2,
         "listen": [
-          "Rhythm part (Electric Piano 1)"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 112.6,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))"
+          "Rhythm part (Electric Piano 1)",
+          "Bass (Synth Bass 1)"
         ]
       }
     ]
@@ -286,25 +288,26 @@
         ]
       },
       {
-        "seed": "P",
-        "at": 355.1,
+        "seed": "K",
+        "at": 228.1,
         "listen": [
-          "Ride"
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Contrabass)"
         ]
       },
       {
-        "seed": "S",
-        "at": 184.9,
+        "seed": "W",
+        "at": 444.4,
         "listen": [
+          "Ride",
           "Kick"
         ]
       },
       {
-        "seed": "1O",
-        "at": 0,
+        "seed": "i",
+        "at": 351.2,
         "listen": [
-          "Bass (Contrabass)",
-          "Chords (Electric Piano 1)"
+          "Solo (Tenor Sax)"
         ]
       }
     ]

@@ -830,6 +830,11 @@ with its questions after each group:
    dominant oftener, the minuet's waltz, the bass in 8ths; Lyrical from 2:30. Left of their reports: the triangle's bass
    (planned), a home chosen by the mode (the dominant in major, the relative major in minor), sonata form's
    recapitulation, Lyrical's drums fewer (the owner's call: most of its records have no beat).
+   Dark jazz swung oftener, the muted trumpet and synth strings more, its pedal oftener; Funk rock 3:40-4:24-5:03
+   (2:19-3:48-5:19), straight, the finger bass more; Jazz-funk 82-97-110 (79-89-96), 3:38-4:40-5:49, solos oftener,
+   clavinet, vibes, trumpet and tenor. Left of their reports: a drum part with no steady pulse, a whole-piece swell in
+   register, the brush swirl (put forward), the kill-switch stutter, Chameleon's tresillo bass arpeggio with chromatic
+   walk-ups, Jazz-funk's two strands along its conventionality. Every genre now has its searched report.
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
    retuned, 80-132-191 (100-135-165), its songs 3:36-6:07 (1:09-4:10), vamps, 3/4 and 6/8, the twelve-bar more, its
