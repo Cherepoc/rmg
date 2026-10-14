@@ -853,7 +853,9 @@ it:
     the second in full: the Power ballad's 30-40-40, Pop's and Soul's 20-25-25, Country's, Rock's, Disco's and Folk's
     10-15-15, 3 or 4 of 64 songs each, as many as repeat their last chorus allow; to ask when a round has room
     (`ballad-breakdown`).
-13. **The ostinato** (#354): a riff held at its pitches over the chords, a clash on a strong beat moved to a chord's note
+13. Mostly done (14 October 2026) by the riff's hook (`riff.hook`), a riff's figure kept at its pitches over the
+    chords where they fit; left of it, a clash on a strong beat kept at the wild end, by listening. As planned: the
+    ostinato (#354), a riff held at its pitches over the chords, a clash on a strong beat moved to a chord's note
     at the plain end and kept at the wild; the scale rule (step 1) settled first, as it is the rule the ostinato bends;
     Techno's, Trance's, House's, and lower in Synthwave, IDM, Chiptune, Ambient, Dungeon synth and Orchestral; asked.
 
@@ -918,8 +920,9 @@ and 15%); the corpus unchanged. To ask when a round has room: `dnb-two-step`, `s
 made: the traditional blast (the skank beat's double time plays it), the conga's tumbao (no player of its own), a hand
 drum's figures outside 4/4.
 
-**D. Devices** (each a step, by how many genres want it): a strophic form, verse after verse (Folk, Blues, Country), as
-data of `SongForms`; the bass on the beat and the chords after it (a waltz, a march, the boom-chicka), an arpeggio
+**D. Devices** (each a step, by how many genres want it): done (14 October 2026), a strophic form, verse after verse,
+four or six, `SongForms.Forms`' `vvvv` and `vvvvvv`, a genre's alone, Folk's 37, Blues' 35, Medieval's 28, Country's 26
+and Soul's 14 of 128 songs. Left: the bass on the beat and the chords after it (a waltz, a march, the boom-chicka), an arpeggio
 pattern beside the alternating thumb; a drone under a whole section (Ambient, Medieval, Dungeon synth), the pedal
 widened; a section's energy choosing its guitars' muting (pop punk's verses) and figure (ska punk's choruses); swing
 by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's

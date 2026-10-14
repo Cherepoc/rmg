@@ -87,7 +87,10 @@ internal static class SongForms
         // and ABA and a rondo, ABACA, a classical piece's, the A a verse, the B a bridge and the C a chorus, an episode of
         // its own, which songs never take but a genre may
         new(0, Parse("VBV")),
-        new(0, Parse("VBVCV"))
+        new(0, Parse("VBVCV")),
+        // and strophic, verse after verse, a ballad's or a blues', four or six, which songs never take but a genre may
+        new(0, Parse("VVVV")),
+        new(0, Parse("VVVVVV"))
     ];
 
     /// <param name="context">The sequence the form is drawn from.</param>
