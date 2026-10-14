@@ -66,7 +66,7 @@
         "bass": { "speed": 70, "fullness": 90, "repetition": 85 }
       },
       "arpeggio": { "none": 100, "up": [15, 15, 25], "upDown": [12, 12, 20], "pairs": [0, 3, 15], "rootFifth": [0, 0, 15] },
-      "lastRepeat": { "songs": [20, 40, 40] },
+      "lastRepeat": { "songs": [20, 40, 40], "breakdown": [10, 15, 15] },
       "doubling": { "octaves": [7, 11, 15], "harmony": [25, 35, 35], "riff": [50, 50, 50], "twin": 50 }
     }
   },
@@ -863,6 +863,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
+      "lastRepeat": { "breakdown": [10, 15, 15], "songs": [0, 25, 25] },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 30], "threeBars": [0, 5, 20] },
       "dynamics": { "evenness": 40 },
@@ -1064,7 +1065,7 @@
       "formChances": { "forms": [100, 95, 70] },
       "form": { "vpcvpcbc": 100, "vcvcbc": 80, "vpcvpcbcvpc": 30, "cvcvbc": 20 },
       "keyChanges": { "lastSection": [20, 30, 40], "sections": [0, 3, 20], "patterns": [0, 0, 20] },
-      "lastRepeat": { "songs": [30, 40, 40] },
+      "lastRepeat": { "songs": [30, 40, 40], "breakdown": [20, 25, 25] },
       "hook": { "choruses": [80, 80, 60], "sections": [10, 20, 20] },
       "pins": { "ground": [50, 50, 30], "backbeat": [90, 90, 60] },
       "intro": { "entries": 100, "cold": [40, 40, 40] },
@@ -1119,7 +1120,7 @@
       "formChances": { "forms": [100, 95, 70] },
       "form": { "vpcvpcbc": 100, "vcvcbc": 80, "vpcvpcbcvpc": 30, "cvcvbc": 20 },
       "keyChanges": { "lastSection": [15, 20, 30], "sections": [0, 3, 10], "patterns": [0, 0, 10] },
-      "lastRepeat": { "songs": [30, 40, 40] },
+      "lastRepeat": { "songs": [30, 40, 40], "breakdown": [30, 40, 40] },
       "hook": { "choruses": [80, 80, 60], "sections": [10, 20, 20] },
       "pins": { "ground": [50, 50, 30], "backbeat": [90, 90, 60] },
       "intro": { "entries": 100, "cold": [40, 40, 40] },
@@ -1867,7 +1868,7 @@
       "formChances": { "forms": [100, 90, 60] },
       "ending": { "fade": 100, "button": 40 },
       "intro": { "entries": 100, "cold": 30 },
-      "lastRepeat": { "songs": [30, 40, 40] },
+      "lastRepeat": { "songs": [30, 40, 40], "breakdown": [10, 15, 15] },
       "space": { "drum": 40, "bass": 30, "rhythm": 40 },
       "passingChords": {},
       "turnaround": {},
@@ -2302,7 +2303,7 @@
       "rootMotion": { "fifthDown": 80, "stepUp": 60 },
       "bass": { "leading": 70 },
       "keyChanges": { "lastSection": [30, 40, 60], "sections": [0, 8, 100], "patterns": 0 },
-      "lastRepeat": { "songs": [30, 40, 40] },
+      "lastRepeat": { "songs": [30, 40, 40], "breakdown": [20, 25, 25] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [60, 60, 70], "counterMelody": [50, 50, 60], "drum": 100, "riff": [40, 40, 50], "riffTwin": 0, "rhythm": [50, 50, 50], "solo": [10, 20, 50] },
       "instrument": {
         "melody": { "tenorSax": 80, "altoSax": 70, "electricPiano1": 60, "acousticGrandPiano": 60, "trumpet": 50, "electricGuitarClean": 40 },
@@ -2339,6 +2340,7 @@
     "name": "Country",
     "description": "A fiddle, a steel-string guitar strummed, a banjo and a honky-tonk piano, plain triads moving by fourths and fifths, the bass on the root and the fifth, the snare on 2 and 4, major and Mixolydian.",
     "choices": {
+      "lastRepeat": { "breakdown": [10, 15, 15], "songs": [0, 25, 25] },
       "arpeggio": { "none": 100, "alternatingThumb": [40, 40, 40], "up": [10, 10, 20], "upDown": [10, 10, 20] },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
       "figure": { "bass": { "own": 100, "withKick": [20, 20, 15] }, "backbeat": { "own": 100, "trainBeat": [10, 20, 30] } },

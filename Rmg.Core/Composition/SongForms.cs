@@ -50,6 +50,13 @@ internal static class SongForms
     public static ByConvention LastRepeatChance { get; } = new(0, 0.25, 0.25);
 
     /// <summary>
+    ///     The chance a last chorus played twice plays its first pass as a breakdown, built up from the voice alone, the drums
+    ///     next, the full band by its end, and the second in full, a pop or a ballad's drop chorus: a genre's that the songs
+    ///     never play (<see cref="GenreChoices.LastRepeat" />).
+    /// </summary>
+    public static ByConvention BreakdownChorusChance { get; } = new(0, 0, 0);
+
+    /// <summary>
     ///     The chances a song opens on an intro and closes on an outro of their own material, sections played once, by the
     ///     form facet: never in a plain song, which plays one of the forms as it is.
     /// </summary>

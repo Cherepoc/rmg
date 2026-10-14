@@ -335,6 +335,10 @@ internal sealed record SongDecisions(
         var repeats = Repeats(lastRepeatDrawn, fading);
         int[] played = [..sectionIds, ..(repeats ? [sectionIds[^1]] : Array.Empty<int>()), ..Enumerable.Repeat(sectionIds[^1], fading)];
         StateTrace.RecordSong(TracePoints.LastRepeat, $"{repeats}", repeats);
+        // and its first pass a breakdown now and then, a genre's, from a stream of its own
+        var breakdownChorus = Stream(SongStream.BreakdownChorus).TestProbability(SongForms.BreakdownChorusChance.At(songUnconventionality[Facet.Form], genre.Chance(GenreChoices.LastRepeat, "breakdown")))
+                              && repeats;
+        StateTrace.RecordSong(TracePoints.BreakdownChorus, $"{breakdownChorus}", breakdownChorus);
         // the later in the song, the more, and with the energy of its own place in the song against the section's average,
         // its parts only joining as it comes back
         double Place(int index) => played.Length > 1 ? index / (double)(played.Length - 1) : 0.5;
@@ -398,7 +402,8 @@ internal sealed record SongDecisions(
                 solo,
                 [..lateEntries.Where(x => index < x.Value).Select(x => x.Key)],
                 // and the riff in the first where the song opens on it
-                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key), ..index == 0 && plan.RiffFirst ? [TrackRole.Riff] : Array.Empty<TrackRole>()]
+                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key), ..index == 0 && plan.RiffFirst ? [TrackRole.Riff] : Array.Empty<TrackRole>()],
+                breakdownChorus && index == sectionIds.Length - 1
             );
             // as loud as its energy's step from the section's, by the lift's measure of loudness, so that its last chorus
             // plays the louder, and its energy the appearance's, which the fills and the lifts into it read

@@ -848,8 +848,11 @@ it:
     Trap's, Hip-hop's, Disco's, Synthwave's and Pop's 10-20-30, 4% to 12% of their lines; to ask when a round has room
     (`house-kick-out`). Left: the bass on the kick out with it, which the research names (the bass not a drum a fill
     clears).
-12. **The breakdown chorus** (#369): a `lastRepeat` option, the last chorus's first pass at the thinnest texture and the
-    second the full band; Pop's, the Power ballad's, Soul's, Country's, Rock's, Disco's, Folk's; asked.
+12. Done (14 October 2026): **the breakdown chorus**, `lastRepeat.breakdown`, a genre's, the last chorus played twice
+    its first pass built up, the voice alone, the drums next, the full band by its end (the research's drop chorus),
+    the second in full: the Power ballad's 30-40-40, Pop's and Soul's 20-25-25, Country's, Rock's, Disco's and Folk's
+    10-15-15, 3 or 4 of 64 songs each, as many as repeat their last chorus allow; to ask when a round has room
+    (`ballad-breakdown`).
 13. **The ostinato** (#354): a riff held at its pitches over the chords, a clash on a strong beat moved to a chord's note
     at the plain end and kept at the wild; the scale rule (step 1) settled first, as it is the rule the ostinato bends;
     Techno's, Trance's, House's, and lower in Synthwave, IDM, Chiptune, Ambient, Dungeon synth and Orchestral; asked.

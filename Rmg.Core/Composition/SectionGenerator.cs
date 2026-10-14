@@ -960,7 +960,8 @@ internal sealed record GeneratedSection(
         bool keepsTexture,
         SoloPlan? solo,
         ImmutableHashSet<TrackRole> held,
-        ImmutableHashSet<TrackRole> entering
+        ImmutableHashSet<TrackRole> entering,
+        bool breakdownChorus = false
     )
     {
         var drawn = appearance == 0
@@ -990,7 +991,7 @@ internal sealed record GeneratedSection(
         bool HasNotes(TrackRole role) => Roles.Any(x => x.Value == role && Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
         var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x) && HasNotes(x)).ToArray();
         var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing, Genre,
-            SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), DrumJob == DrumJob.Marks);
+            SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), DrumJob == DrumJob.Marks, breakdownChorus);
         ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
         // a breakdown played steady, its riff through
         if (keepsTexture || Breakdown)

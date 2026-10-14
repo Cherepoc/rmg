@@ -105,6 +105,9 @@ internal static class TracePoints
     /// <summary>Whether a song plays its last section once more (a <c>bool</c>).</summary>
     public const string LastRepeat = "Last repeat";
 
+    /// <summary>Whether the song's last chorus played twice plays its first pass built up from the voice alone (a <c>bool</c>; <see cref="Composition.SongForms.BreakdownChorusChance" />).</summary>
+    public const string BreakdownChorus = "Breakdown chorus";
+
     /// <summary>
     ///     A line's walk into a change of section with the drums' run (<see cref="Composition.LineFills" />): the line the
     ///     section changes at and the walk's notes' places (a tuple of a <c>double</c> and an array of <c>double</c>s).

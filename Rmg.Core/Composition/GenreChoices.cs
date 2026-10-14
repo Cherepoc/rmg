@@ -490,7 +490,8 @@ public static class GenreChoices
     public static GenreChoice CallAndResponse { get; } = Chances("callAndResponse", "Call and response", [("sections", "Verses calling and answered", Composition.CallAndResponse.Chance)]);
 
     /// <summary>A last section that came back before played once more, as a last chorus (<see cref="SongForms.LastRepeatChance" />).</summary>
-    public static GenreChoice LastRepeat { get; } = Chances("lastRepeat", "Last repeat", [("songs", "A last chorus played twice", SongForms.LastRepeatChance)]);
+    public static GenreChoice LastRepeat { get; } = Chances("lastRepeat", "Last repeat",
+        [("songs", "A last chorus played twice", SongForms.LastRepeatChance), ("breakdown", "Its first pass built up from the voice alone", SongForms.BreakdownChorusChance)]);
 
     /// <summary>A line doubled: in octaves by its own part, the melody harmonised by the counter-melody, in three voices now and then, the bass with the riff, the riff's twin leading a section (<see cref="LineDoubling" />).</summary>
     public static GenreChoice Doubling { get; } = Chances("doubling", "Doubling",

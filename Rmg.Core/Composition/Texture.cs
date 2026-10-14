@@ -62,6 +62,10 @@ internal static class Texture
     /// <param name="genre">The genre whose pool of textures it is drawn among, where it names one.</param>
     /// <param name="energy">The appearance's energy, which the textures of fewer parts lean against.</param>
     /// <param name="drumsMark">Whether the song's drums only mark its form, which leaves them no part to play alone.</param>
+    /// <param name="breakdown">
+    ///     Whether the appearance is a breakdown chorus, built up from the melody alone, the drums coming in next, in place of
+    ///     its drawn texture, every draw made all the same.
+    /// </param>
     public static (TextureKind Kind, ImmutableHashSet<TrackRole> Resting, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Draw(
         IGenerationContext context,
         double form,
@@ -69,13 +73,16 @@ internal static class Texture
         IReadOnlyCollection<TrackRole> playing,
         Genre genre,
         Tilt energy,
-        bool drumsMark
+        bool drumsMark,
+        bool breakdown = false
     )
     {
         var leans = Kinds.ToDictionary(x => x.Kind, x => x.EnergyLean);
         var kind = context.Pick(energy.Weigh(
             ByConvention.Weigh(Kinds.Select(x => (x.Kind, x.Weight)), form, genre.Pool<TextureKind>(GenreChoices.Texture)),
             x => leans[x]));
+        if (breakdown)
+            kind = TextureKind.Build;
         TrackRole[] pitched = [..playing.Where(x => x != TrackRole.Drum).Order()];
         // the order the pitched parts come in, drawn whatever the texture, each part's place from a sequence keyed by the
         // part, so that a part resting or held back leaves the others' places and the draws after as they were
@@ -102,6 +109,9 @@ internal static class Texture
         var drumsAt = context.GenerateInt(0, order.Length + 1);
         if (drumsMark)
             drumsAt = Math.Max(1, drumsAt);
+        // a breakdown chorus's voice alone first, the drums next
+        if (breakdown && order.Contains(TrackRole.Melody))
+            (order, drumsAt) = ([TrackRole.Melody, ..order.Where(x => x != TrackRole.Melody)], 1);
         ImmutableArray<ImmutableHashSet<TrackRole>> none = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, phrases)];
 
         switch (kind)

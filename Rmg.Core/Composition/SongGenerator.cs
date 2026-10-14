@@ -257,5 +257,6 @@ internal enum SongStream
     SoloAnswerMotifs = 113,
     EnsembleHits = 114,
     Darkness = 115,
-    Intensity = 116
+    Intensity = 116,
+    BreakdownChorus = 117
 }
