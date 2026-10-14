@@ -48,8 +48,8 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("chiptune-spread", "Chiptune's chords cycled very fast on one voice, a note a tone or less above another now moved up an octave first, as a sus2 to root, fifth and ninth: every chord a chip's chord now, or some still a buzz?",
-            "The frame-rate arpeggio spread (Articulations.Spread), Chiptune's articulation.frames 50-70-90, against whole chords; heard nice on 15 October 2026 but not on every chord, asked again over the same songs.", "chiptune", [], new() { ["articulation"] = new() { ["frames"] = 0 } },
+        new("chiptune-speed", "Chiptune's chords cycled on one voice, a chord held long now cycling three times at the most, its notes slower: a chip's chord on every chord now, or a broken chord where it buzzed?",
+            "The frame-rate arpeggio's cycles, at most Articulations.FrameCycles 3 a chord, against whole chords; heard worse on the long-held chords at two frames a note on 15 October 2026, asked again over the same songs.", "chiptune", [], new() { ["articulation"] = new() { ["frames"] = 0 } },
             x => Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Chords))?.Where(n => n.Value.Duration / Meter.BeatsPerSecond(x.Song.TrackEventStateTimelineMap.CommonStateTimelineMap
                 .GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(n.Position)) < Articulations.FrameSeconds + 1e-6).Select(n => (double?)n.Position).FirstOrDefault(), 1)),
         new("cinematic-pad", "Cinematic piano's strings holding the chords under the piano: a film score's bed, or a piano piece smothered?",

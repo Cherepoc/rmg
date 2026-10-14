@@ -905,11 +905,11 @@ Planned 15 October 2026 by the owner's choice: the rules on the other corpora, t
 leftovers, the engine's put-off features, the housekeeping and the carry-overs; no new presets for now. Each step
 through the implementation loop, measured before and after, its listening question once deployed. In order:
 
-**0. Chiptune's frame speed** (heard 15 October 2026: the notes too fast now and then). First the verdicts split by
-song (the events keep their seed; the verdicts endpoint sums them), so that the songs `chiptune-spread` was heard
-worse on are listened to and measured: their tempo, their chords' length and how many notes a cycle has. Then the
-speed by what they show: two frames each now, the research's preference; three, or a cycle no faster than a share of
-the chord's length, if the disliked songs are the fast or the four-note ones. Asked again over the same songs.
+**0. Chiptune's frame speed**, done (15 October 2026): the verdicts by song first (`SongVerdicts`), then
+`chiptune-spread` heard worse on three songs whose chords are held 0.33-0.47 s on the average, better on two whose are
+0.16-0.26 s: a held chord cycled at two frames a note is heard as a buzz. A chord cycles three times at the most now
+(`Articulations.FrameCycles`), a long one's notes slower in whole frames; asked again over the same songs:
+`chiptune-speed`.
 
 **1. The rules on the other corpora** (each failure reproduced at the committed code first; a bug fixed where the rule
 breaks, a calibration widened by a sample):

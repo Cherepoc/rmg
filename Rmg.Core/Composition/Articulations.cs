@@ -22,8 +22,17 @@ internal static class Articulations
     /// <summary>The chance a part plays its whole chords cycled at a sound chip's frame rate, a genre's that the songs never play.</summary>
     public static ByConvention FrameChance { get; } = new(0, 0, 0);
 
-    /// <summary>How long a frame-rate arpeggio holds each of a chord's notes, in seconds: two frames of a console's sixty a second.</summary>
-    public const double FrameSeconds = 1 / 30.0;
+    /// <summary>A console's frame, in seconds, a sixtieth, the step a frame-rate arpeggio's notes are held in whole frames of.</summary>
+    public const double Frame = 1 / 60.0;
+
+    /// <summary>How long a frame-rate arpeggio holds each of a chord's notes at the least, in seconds: two frames.</summary>
+    public const double FrameSeconds = 2 * Frame;
+
+    /// <summary>
+    ///     How many times a frame-rate arpeggio cycles through a chord at the most: a held chord's notes slowed to fit, in
+    ///     whole frames, as a long chord cycled at two frames a note is heard as a buzz rather than a chip's chord.
+    /// </summary>
+    public const int FrameCycles = 3;
 
     /// <summary>What a ringing note keeps out of: stop time and a part stopped by the form, whose silence it would fill.</summary>
     private const Hold RingsOutOf = Hold.Stop | Hold.Cut;
@@ -204,8 +213,9 @@ internal static class Articulations
 
     /// <summary>
     ///     A part's whole chords cycled at the frame rate: each chord's notes in turn from its lowest up, spread so that no two
-    ///     in turn are a tone or less apart (<see cref="Spread" />), a note every <see cref="FrameSeconds" />, for as long as
-    ///     the chord sounds, unstrummed.
+    ///     in turn are a tone or less apart (<see cref="Spread" />), a note every <see cref="FrameSeconds" /> or, in a chord
+    ///     held longer than <see cref="FrameCycles" /> cycles of it, slower in whole frames to cycle that often, for as long
+    ///     as the chord sounds, unstrummed.
     /// </summary>
     /// <param name="beatsPerSecond">The beats a second at a position, by the tempo there.</param>
     internal static EventTimeline<RealizedNote> Frames(EventTimeline<RealizedNote> timeline, Func<double, double> beatsPerSecond) =>
@@ -213,8 +223,10 @@ internal static class Articulations
         {
             if (note.Value.Pitches.Length < 2)
                 return [note];
-            var step = FrameSeconds * beatsPerSecond(note.Position);
             var pitches = Spread(note.Value.Pitches);
+            var seconds = note.Value.Duration / beatsPerSecond(note.Position);
+            var frames = Math.Max(FrameSeconds / Frame, Math.Floor(seconds / (pitches.Length * FrameCycles) / Frame));
+            var step = frames * Frame * beatsPerSecond(note.Position);
             var count = Math.Max(1, (int)Math.Ceiling(note.Value.Duration / step - 1e-9));
             var state = note.Value.State.With(CompositionStateKinds.Strum, 0.0);
             return Enumerable.Range(0, count).Select(k => (note.Value with
