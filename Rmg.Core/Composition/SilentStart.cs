@@ -5,7 +5,7 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     A song never silent at its start: where its first note comes a bar or more in, its parts resting through their first
-///     phrase's start, the earliest of its pitched parts that the intro does not bring in later comes in on its first beat, its first note held from there into
+///     phrase's start, the earliest of its pitched parts that the intro brings in first comes in on its first beat, its first note held from there into
 ///     where it was, a held chord rather than a line where one is near as early, as an ambient piece's pad opens it. A
 ///     stage of the song after it is put together (<see cref="SongStages" />).
 /// </summary>
@@ -21,10 +21,11 @@ internal static class SilentStart
         var first = notes.Values.Where(x => x.Count > 0).Select(x => x[0].Position).DefaultIfEmpty(0).Min();
         if (first < bar - 1e-9)
             return draft;
-        // the pitched parts by their first notes, a holder within a bar of the earliest before a line, none the intro brings
-        // in later
-        var later = song.Form.Map.Intro.Entries.Where(x => x.Entry > 1e-9).SelectMany(x => x.Tracks).ToHashSet();
-        var pitched = notes.Where(x => x.Value.Count > 0 && song.Tracks.Definitions[x.Key] is PitchInstrumentTrack && !later.Contains(x.Key)).ToArray();
+        // the pitched parts by their first notes, a holder within a bar of the earliest before a line: of an intro of
+        // entries, those it brings in first, as a song opening on one part alone opens on it, none another
+        var entries = song.Form.Map.Intro.Entries;
+        var firstIn = entries.IsDefaultOrEmpty ? null : entries.Where(x => x.Entry <= 1e-9).SelectMany(x => x.Tracks).ToHashSet();
+        var pitched = notes.Where(x => x.Value.Count > 0 && song.Tracks.Definitions[x.Key] is PitchInstrumentTrack && (firstIn is null || firstIn.Contains(x.Key))).ToArray();
         if (pitched.Length == 0)
             return draft;
         var earliest = pitched.Min(x => x.Value[0].Position);

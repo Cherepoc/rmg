@@ -176,7 +176,9 @@ public sealed class ScalesTest
             var isChromaticApproach = track.Role == TrackRole.Bass
                 && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9 && !(Pushes(x.Position) && Math.Abs(x.Position - (nextChange - Rmg.Core.Composition.Pushes.Early)) < 1e-3))
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
-            var isPedal = track.Role == TrackRole.Bass && pedals.Any(x => note.Position >= x.From - (Pushes(x.From) ? Rmg.Core.Composition.Pushes.Early : 0) - 0.2 && note.Position < x.To);
+            // a pedal holding its note over the chords, a key change's or a section's, as it holds it where it starts
+            var isPedal = track.Role == TrackRole.Bass && (pedals.Any(x => note.Position >= x.From - (Pushes(x.From) ? Rmg.Core.Composition.Pushes.Early : 0) - 0.2 && note.Position < x.To)
+                                                           || sounding?.Value.State.GetStateValue(CompositionStateKinds.BassPedal) > 0);
             // a line keeping a scale of its own, its ornaments' neighbours in it too
             var ownScale = sounding?.Value.State.GetStateValue(CompositionStateKinds.LineScale) > (int)LineScale.Pentatonic;
             if (isChromaticApproach || isPedal || ownScale || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End) || pinched.Any(x => Math.Abs(x - note.Position) < 1e-3) || planed.Any(x => Math.Abs(x - note.Position) < 1e-3))

@@ -296,11 +296,12 @@ internal sealed class SongFormGenerator
 
                 // where the first section's drums play, the line the window ends on, or a new one where no line is there,
                 // as where the section changes into one whose drums rest; in one whose drums rest, the parts simply come in;
-                // no fill where the drums open the song alone for a bar, which a fill stopping them would leave silent
+                // a fill in the second half of the bar at most where one part opens the song alone for a bar, which it has
+                // to itself until then, as a fill stopping drums that open alone would otherwise leave the bar silent
                 if (fillSections[0].HasDrums)
                 {
-                    var alone = plan.First == TrackRole.Drum && windowDuration <= first.Meter.BarDuration + 1e-9;
-                    var landing = new FillLine(windowEnd, fillSections[0], fillSections[0], 0, HasFill: !alone, IsLandingForced: true);
+                    var room = plan.First is not null && windowDuration <= first.Meter.BarDuration + 1e-9 ? first.Meter.BarDuration / 2 : double.PositiveInfinity;
+                    var landing = new FillLine(windowEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true, Room: room);
                     var windowLine = lines.Select((x, i) => (x, i)).FirstOrDefault(x => x.x.Position.IsEqualToByEpsilon(windowEnd), (null!, -1)).i;
                     if (windowLine >= 0)
                         lines[windowLine] = landing;

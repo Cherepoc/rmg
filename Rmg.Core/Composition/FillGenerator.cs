@@ -205,7 +205,7 @@ internal sealed class FillGenerator
         var play = line.HasFill ? DrawPlay(drummer, ending, tilt, direction, weight) : FillPlay.None;
         var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, meter);
         _lastRun = [];
-        var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId, meter);
+        var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId, meter, line.Room);
         // a run into a change of section, another appearance of the same section's too, which the lines walk with
         if (span > 0 && (line.Ending != line.Next || map is not null && map.Sections.Any(x => Math.Abs(x.Start - line.Position) < 1e-9)) && !_lastRun.IsEmpty)
             Runs.Add(new PlayedRun(line.Position, _lastRun, lift * ending.Rhythm.Coupling));
@@ -321,7 +321,7 @@ internal sealed class FillGenerator
     )
     {
         var edits = new TimelineEdits(_line, _meter, null);
-        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0, _meter);
+        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0, _meter, double.PositiveInfinity);
         return edits.ApplyTo(song);
     }
 
@@ -406,7 +406,8 @@ internal sealed class FillGenerator
         FillRhythm rhythm,
         double minNote,
         int sectionId,
-        Meter meter
+        Meter meter,
+        double room
     )
     {
         if (play.Span <= 0)
@@ -421,6 +422,8 @@ internal sealed class FillGenerator
         // bar long
         if (play.SpanShift != 0)
             span = span < meter.BarDuration ? Math.Max(rhythm.Push, span + play.SpanShift * rhythm.Push) : span - rhythm.Push;
+        // no further back than the line leaves it room
+        span = Math.Min(span, room);
         var from = line - span;
 
         var cleared = play.Treatment switch
@@ -570,13 +573,15 @@ internal sealed record PlayedRun(double Line, ImmutableArray<double> Positions, 
 /// <param name="Weight">How much the line weighs before the energy it leads into (<see cref="FillLayers.PhraseWeight" />).</param>
 /// <param name="HasFill">Whether a fill may play before it; none where the song's form has the drums wait.</param>
 /// <param name="IsLandingForced">Whether the drums always land on it, as where the band comes in.</param>
+/// <param name="Room">How far before it a fill may start at the most, in beats, as where one part opens the song alone.</param>
 internal sealed record FillLine(
     double Position,
     FillSection Ending,
     FillSection Next,
     double Weight,
     bool HasFill = true,
-    bool IsLandingForced = false
+    bool IsLandingForced = false,
+    double Room = double.PositiveInfinity
 );
 
 /// <summary>

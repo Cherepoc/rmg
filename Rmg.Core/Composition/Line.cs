@@ -278,7 +278,9 @@ internal sealed class Line
             ChordApproach.ScaleStep => ApproachByStep(chord, chordToneClasses, beatRank, note, next),
             ChordApproach.HalfStepBelow => root - 1,
             ChordApproach.HalfStepAbove => root + 1,
-            ChordApproach.Fifth => NearestOfClass(nextChord.GetPitch(4), root),
+            // the next chord's fifth where the line's scale over this chord has it, as a chromatic chord's may not, sounding
+            // before its chord over another; a step from the side the line comes from where not
+            ChordApproach.Fifth => InScale(chord, nextChord.GetPitch(4)) ? NearestOfClass(nextChord.GetPitch(4), root) : ApproachByStep(chord, chordToneClasses, beatRank, note, next),
             ChordApproach.Anticipation => root,
             _ => throw new ArgumentOutOfRangeException(nameof(approach), approach, null)
         };
@@ -292,6 +294,10 @@ internal sealed class Line
             approached -= OctaveNoteCount;
         return approached;
     }
+
+    /// <summary>Whether a note is in the scale the line keeps over a chord: its line scale's, or the chord's own scale's.</summary>
+    private bool InScale(ChordContext chord, int note) =>
+        (_classes ?? Enumerable.Range(0, Scales.StepCount).Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).ToHashSet()).Contains(note.Mod(OctaveNoteCount));
 
     /// <summary>The note of the given one's pitch class nearest the other, the lower on a tie.</summary>
     private static int NearestOfClass(int note, double other)
