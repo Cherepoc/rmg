@@ -769,7 +769,11 @@ with its questions after each group:
    fewer band parts and forms; Folk's open strings ringing, its breaks, drones, a piano, fewer drums. Dungeon synth 3:34-4:40-5:33, vamps and loops, a piano, more groove at its wild end; Drum and
    bass 4:20-5:13-5:59 at 170-174-177, its drums-out stripped ending, layered builds; Soul to 135, plainer at its
    plain end, clap, conga and tambourine, its lines kept off the wild scales, a riff intro, a single's length. Left:
-   the other genres' retunes (Pop, Trance, Trap, Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues), each its report's
+   Pop 97-116-130 (to 160 at its wild end, the report's 172 held back as frantic), more minor at its middle, loops,
+   3:13-3:36-4:09, fewer fades, drum machines and claps, half time, a synth bass and hooks; Trance 3:55-4:38-5:27, its
+   leads stacked, a breakdown's pad and melody alone, the offbeat bass first, less Phrygian (psytrance's), its kick a
+   little down; Trap's loop kept under its verses, 16-bar verses and 8-bar hooks, 2:46-3:15-3:49, more hat rolls,
+   brass and string stabs, an organ. Left: the other genres' retunes (Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues), each its report's
    findings; the presets their reports propose (Dub, Celtic, Psytrance, Bluegrass, a Renaissance preset).
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
