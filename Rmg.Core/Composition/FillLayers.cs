@@ -83,7 +83,10 @@ public enum GrooveTreatment
     ///     The drums stop, and the fill plays alone: a drum break where it runs, stop time where it keeps its strongest
     ///     notes, a break where it rests.
     /// </summary>
-    Stop
+    Stop,
+
+    /// <summary>The kick drops out, and the rest of the groove plays on into the line, a dance track's kick-out: a genre's alone.</summary>
+    KickOut
 }
 
 /// <summary>
@@ -144,7 +147,8 @@ internal static class FillLayers
     {
         [GrooveTreatment.Played] = 0,
         [GrooveTreatment.Keep] = 0,
-        [GrooveTreatment.Stop] = -1
+        [GrooveTreatment.Stop] = -1,
+        [GrooveTreatment.KickOut] = 0
     }.ToImmutableDictionary();
 
     /// <summary>
@@ -155,8 +159,18 @@ internal static class FillLayers
     {
         [GrooveTreatment.Played] = 0,
         [GrooveTreatment.Keep] = -0.25,
-        [GrooveTreatment.Stop] = -0.35
+        [GrooveTreatment.Stop] = -0.35,
+        [GrooveTreatment.KickOut] = 0
     }.ToImmutableDictionary();
+
+    /// <summary>
+    ///     The chance a fill's line takes the kick out in its place, the groove playing on without it into the downbeat, a
+    ///     dance track's, a genre's that the songs never play (<see cref="GenreChoices.KickOut" />).
+    /// </summary>
+    public static Probabilities.ByConvention KickOutChance { get; } = new(0, 0, 0);
+
+    /// <summary>The shortest a kick-out lasts, in beats: a beat, a bar or two at the longest as a fill's span.</summary>
+    public const double ShortestKickOut = 1;
 
     /// <summary>The chance a fill where the drums stop rests, playing nothing: a break.</summary>
     public const double StopRestChance = 0.5;

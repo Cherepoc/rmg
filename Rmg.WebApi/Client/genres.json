@@ -205,6 +205,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight or its 16ths lightly swung, 118 to 128, minor and Dorian, minor sevenths and ninths, piano, organ and Rhodes stabs, a shaker in 16ths, a drop into the chorus.",
     "choices": {
+      "kickOut": { "lines": [20, 30, 40] },
       "sung": { "halves": [40, 30, 20], "eighths": [80, 50, 30] },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
@@ -287,6 +288,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 130 to 145, the pads and bass pumping.",
     "choices": {
+      "kickOut": { "lines": [20, 30, 40] },
       "length": { "from": [360, 360, 300], "to": [540, 540, 600] },
       "sung": { "halves": [10, 10, 10], "eighths": [20, 10, 0] },
       "figure": { "bass": { "own": [40, 30, 30], "offbeat": 100 } },
@@ -374,6 +376,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "kickOut": { "lines": [10, 20, 30] },
       "figure": { "bass": { "own": 100, "eighths": [30, 40, 50], "sixteenths": [10, 20, 30] } },
       "intensity": { "from": -70, "to": 80 },
       "darkness": { "from": -80, "to": 90 },
@@ -452,6 +455,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
+      "kickOut": { "lines": [10, 20, 30] },
       "length": { "from": [180, 180, 120], "to": [300, 300, 330] },
       "mixFilter": { "opening": [10, 20, 30], "dips": [0, 5, 10], "closing": [0, 10, 20] },
       "sung": { "halves": [100, 80, 60], "eighths": [20, 10, 0] },
@@ -1040,6 +1044,7 @@
     "name": "Pop",
     "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus now and then lifted a key or played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, mostly major, 95 to 125.",
     "choices": {
+      "kickOut": { "lines": [10, 20, 30] },
       "figure": { "ground": { "own": 100, "fourOnTheFloor": [10, 20, 30] } },
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 5, 20] },
@@ -1809,6 +1814,7 @@
     "name": "Disco",
     "description": "The kick four on the floor, the open hi-hat off the beat, a bass in octaves, strings and horns, a clean guitar scratching 16ths, electric piano sevenths and ninths, minor and Dorian, 110 to 130.",
     "choices": {
+      "kickOut": { "lines": [10, 20, 30] },
       "figure": { "bass": { "own": 100, "eighths": [40, 50, 50] } },
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0 },
@@ -1873,6 +1879,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "kickOut": { "lines": [10, 20, 30] },
       "sung": { "halves": [100, 80, 60], "eighths": [20, 10, 0] },
       "melodyRange": { "wide": 0 },
       "figure": { "bass": { "own": [40, 50, 60], "withKick": [100, 80, 60] } },
@@ -1942,6 +1949,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "kickOut": { "lines": [20, 30, 40] },
       "sung": { "halves": [30, 30, 20], "eighths": [20, 10, 0] },
       "stopTime": { "sections": 0 },
       "ensembleHits": { "sections": 0 },
@@ -2010,6 +2018,7 @@
     "name": "Drum and bass",
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
+      "kickOut": { "lines": [10, 20, 30] },
       "intensity": { "from": -40, "to": 90 },
       "darkness": { "from": -50, "to": 90 },
       "sung": { "halves": [30, 30, 20], "eighths": [20, 10, 0] },

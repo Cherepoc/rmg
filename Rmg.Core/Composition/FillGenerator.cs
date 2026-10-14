@@ -258,6 +258,12 @@ internal sealed class FillGenerator
         if (span <= 0)
             return FillPlay.None;
 
+        // the kick taken out, a genre's, drawn only where the genre gives it a chance, so that every other line draws as it did
+        var kickOut = FillLayers.KickOutChance.At(rhythm.Value, _genre.Chance(GenreChoices.KickOut, "lines"));
+        if (kickOut > 0 && _line.TestProbability(kickOut))
+            // a beat at least, as a kick left out for less goes unheard
+            return new FillPlay(Math.Max(span, FillLayers.ShortestKickOut), GrooveTreatment.KickOut, FillRun.Rest, CreateLayer(drummer, rhythm, FillLayers.Fullness, Feels.Of(grooves.Source), section.Facets[Facet.Feel]), 0, false);
+
         // stopping is the unconventional treatment, and the quiet one
         var treatments = RhythmicUnconventionality.Weigh(FillLayers.Treatments, rhythm.Value);
         var treatment = _line.Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
@@ -421,6 +427,7 @@ internal sealed class FillGenerator
         {
             GrooveTreatment.Stop => _drumTracks,
             GrooveTreatment.Played => play.Run.Sounds.Select(x => x.Track).Distinct(),
+            GrooveTreatment.KickOut => _drumTracks.Where(x => x == DrumGroups.GetTrackNumber(DrumDefinitions.Kick)),
             _ => []
         };
         foreach (var track in cleared)

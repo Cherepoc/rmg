@@ -842,9 +842,12 @@ it:
 
 **D. The club's and pop's devices:**
 
-11. **The kick-out** (#353): a fill's rest, the kick (and a bass on the kick) out for a line's last beat or bar, the
-    hats and the clap on, landing on the downbeat; a fill option of House, Techno, Trance, Drum and bass, Trap, Hip-hop,
-    Disco, Synthwave and Pop, a held span of `Holds`; asked.
+11. Done (14 October 2026): **the kick-out**, a fill's treatment, the kick out for the fill's span, a beat at least,
+    the hats, the snare and the bass playing on into the downbeat (`GrooveTreatment.KickOut`, `kickOut.lines`, drawn
+    only where a genre gives it a chance): House's, Techno's and Trance's 20-30-40 of fill lines, Drum and bass's,
+    Trap's, Hip-hop's, Disco's, Synthwave's and Pop's 10-20-30, 4% to 12% of their lines; to ask when a round has room
+    (`house-kick-out`). Left: the bass on the kick out with it, which the research names (the bass not a drum a fill
+    clears).
 12. **The breakdown chorus** (#369): a `lastRepeat` option, the last chorus's first pass at the thinnest texture and the
     second the full band; Pop's, the Power ballad's, Soul's, Country's, Rock's, Disco's, Folk's; asked.
 13. **The ostinato** (#354): a riff held at its pitches over the chords, a clash on a strong beat moved to a chord's note
