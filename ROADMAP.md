@@ -773,7 +773,11 @@ with its questions after each group:
    3:13-3:36-4:09, fewer fades, drum machines and claps, half time, a synth bass and hooks; Trance 3:55-4:38-5:27, its
    leads stacked, a breakdown's pad and melody alone, the offbeat bass first, less Phrygian (psytrance's), its kick a
    little down; Trap's loop kept under its verses, 16-bar verses and 8-bar hooks, 2:46-3:15-3:49, more hat rolls,
-   brass and string stabs, an organ. Left: the other genres' retunes (Ska, Bossa nova, Medieval, Disco, Country, Orchestral, Blues), each its report's
+   brass and string stabs, an organ. Ska 126-146-161 (its wild end to 200), the cross-stick backbeat, more minor with
+   its V raised, swung lightly at its plain end, distorted at its wild, the open hat, horn heads in octaves; Bossa nova's
+   changes anticipated, its chords two bars, its bass calmer, root and fifth, 108-126-142, a record's length, tritones
+   and flat ninths, little vibrato; Medieval faster for its dances, a hand-drum groove more often, refrain-first forms,
+   more 4/4, vamps on a drone, shawms, a sackbut and a cello. Left: the other genres' retunes ( Bossa nova, Medieval, Disco, Country, Orchestral, Blues), each its report's
    findings; the presets their reports propose (Dub, Celtic, Psytrance, Bluegrass, a Renaissance preset).
 4. Done (13 October 2026): **the idioms and the figures**, swing by tempo, a drawn swing's pair's second note never
    under a tenth of a second (`Groove.ShortestSecondNote`), lighter the faster, nearly straight at 280; and Jazz then
