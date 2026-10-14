@@ -48,42 +48,10 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("pop-post-chorus", "Pop's post-chorus after every chorus, a short section on a hook of its own with the full band: a bonus hook, or the chorus overstaying?",
-            "Pop's forms with a post-chorus, vpcqvpcqbcq 20 and vcqvcqbcq 15, against its forms without.", "pop", [], new() { ["form"] = new() { ["vpcqvpcqbcq"] = 0, ["vcqvcqbcq"] = 0 } },
-            x => Before(x, x.Map.Sections.Where(s => ((SongStructure)x.Trace.Single(t => t.Point == TracePoints.SongForm).Value!).Roles[s.SectionId] == SectionRole.PostChorus)
-                .Select(s => (double?)s.Start).FirstOrDefault(), 2)),
-        new("medieval-drone", "Medieval's bass droning on the home note under a whole section while the chords move above it: pipes and a hurdy-gurdy, or a bass stuck?",
-            "The section pedal's drone, Medieval's 60 beside its home and dominant pedals, against those alone.", "medieval", [], new() { ["sectionPedal"] = new() { ["drone"] = 0 } },
-            // a song with a bass to hold it, which Medieval's may not have
-            x => x.Song.Notes!.ContainsKey(x.Track(TrackRole.Bass)) ? FirstSection(x, TracePoints.SectionPedal, v => v is PedalPlace.Drone) : null,
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.SectionPedal && t.Section == span.SectionId && t.Value is PedalPlace.Drone)),
-        new("punk-drum-intro", "Punk opening on its drums alone for a bar or more before the guitars crash in: a count into the song, or an empty start?",
-            "The drums as the part a song opens on alone, Punk's 40 beside its riff's 60 and its chords' 30, against those alone.", "punk", [], new() { ["openingPart"] = new() { ["drum"] = 0 } },
-            x => x.Trace.Single(t => t.Point == TracePoints.OpeningAlone).Value is TrackRole.Drum ? 0 : null),
-        new("ballad-piano-intro", "The Power ballad opening on its chords alone, a piano or a guitar, before the band comes in: a ballad's intro, or a slow start?",
-            "A song opening on one part alone, the Power ballad's 20-30-40 on its chords, against its other intros.", "ballad", [], new() { ["openingAlone"] = new() { ["songs"] = 0 } },
-            x => x.Trace.Single(t => t.Point == TracePoints.OpeningAlone).Value is TrackRole.Chords ? 0 : null),
-        new("punk-muted-verses", "Punk's guitars palm-muting their repeated strums in its quieter sections and opening up in the louder: pop punk's verse and chorus, or a choked guitar?",
-            "Punk's chugs 35-40-45, the chords' guitar muting with the riff's and leaning to the quieter sections, against every section open.", "punk", [], new() { ["riff"] = new() { ["chugs"] = 0 } },
-            x => FirstSection(x, TracePoints.Chugs, v => (bool)v!),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Chugs && t.Section == span.SectionId && (bool)t.Value!)),
-        new("disco-run", "Disco's strings sweeping up an octave in 16ths into a new section: a string section's run, or a scale exercise?",
-            "The counter-melody's run into a section, Disco's lineRun 30-40-50, against none.", "disco", [], new() { ["lineRun"] = new() { ["counterMelody"] = 0 } },
-            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.LineFill && t.Track == x.Track(TrackRole.CounterMelody))
-                .Select(t => (((double Line, double[] Positions))t.Value!)).Where(t => t.Positions.Length == LineFills.RunNotes).Select(t => (double?)t.Line).FirstOrDefault(), 1)),
-        new("chiptune-frames", "Chiptune's chords played as their notes cycled very fast on one voice, the sound chip's chord: an old console, or a buzz?",
-            "The frame-rate arpeggio, Chiptune's articulation.frames 50-70-90, against whole chords.", "chiptune", [], new() { ["articulation"] = new() { ["frames"] = 0 } },
+        new("chiptune-spread", "Chiptune's chords cycled very fast on one voice, a note a tone or less above another now moved up an octave first, as a sus2 to root, fifth and ninth: every chord a chip's chord now, or some still a buzz?",
+            "The frame-rate arpeggio spread (Articulations.Spread), Chiptune's articulation.frames 50-70-90, against whole chords; heard nice on 15 October 2026 but not on every chord, asked again over the same songs.", "chiptune", [], new() { ["articulation"] = new() { ["frames"] = 0 } },
             x => Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Chords))?.Where(n => n.Value.Duration / Meter.BeatsPerSecond(x.Song.TrackEventStateTimelineMap.CommonStateTimelineMap
-                .GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(n.Position)) < Articulations.FrameSeconds + 1e-6).Select(n => (double?)n.Position).FirstOrDefault(), 1)),
-        new("latin-montuno", "Latin's longer sections vamping on a chord or two under the call and response, as a salsa's montuno runs on: a montuno, or a section that never moves?",
-            "Latin's vamps 10-20-30 and its longer sections, bars32 60, against its sections changing chords as the songs' do.", "latin", [],
-            new() { ["vamp"] = new() { ["sections"] = 0 }, ["sectionLength"] = new() { ["bars32"] = 0 } },
-            x => FirstSection(x, TracePoints.Vamp, v => (bool)v!),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Vamp && t.Section == span.SectionId && (bool)t.Value!)),
-        new("jazzfunk-chords", "Jazz-funk's chords, elevenths, 6/9 and thirteenths, mediants and applied chords on an electric piano, where Funk vamps on sevenths and ninths: jazz-funk, or a lounge?",
-            "Jazz-funk's eleventh 50-60-70, sixNine 40 and thirteenth 20-30-40, its mediants and applied chords, against sevenths and ninths alone; asked again, too few answered.", "jazzFunk", [],
-            new() { ["chordShape"] = new() { ["eleventh"] = 0, ["sixNine"] = 0, ["thirteenth"] = 0 }, ["chordScales"] = new() { ["mediant"] = 0, ["applied"] = 0 } },
-            x => (double?)x.Map.Sections[0].Start, Heard: [5, 7, 9, 10, 14, 18])
+                .GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(n.Position)) < Articulations.FrameSeconds + 1e-6).Select(n => (double?)n.Position).FirstOrDefault(), 1))
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

@@ -203,8 +203,9 @@ internal static class Articulations
     }
 
     /// <summary>
-    ///     A part's whole chords cycled at the frame rate: each chord's notes in turn from its lowest up, a note every
-    ///     <see cref="FrameSeconds" />, for as long as the chord sounds, unstrummed.
+    ///     A part's whole chords cycled at the frame rate: each chord's notes in turn from its lowest up, spread so that no two
+    ///     in turn are a tone or less apart (<see cref="Spread" />), a note every <see cref="FrameSeconds" />, for as long as
+    ///     the chord sounds, unstrummed.
     /// </summary>
     /// <param name="beatsPerSecond">The beats a second at a position, by the tempo there.</param>
     internal static EventTimeline<RealizedNote> Frames(EventTimeline<RealizedNote> timeline, Func<double, double> beatsPerSecond) =>
@@ -213,7 +214,7 @@ internal static class Articulations
             if (note.Value.Pitches.Length < 2)
                 return [note];
             var step = FrameSeconds * beatsPerSecond(note.Position);
-            var pitches = note.Value.Pitches.Order().ToArray();
+            var pitches = Spread(note.Value.Pitches);
             var count = Math.Max(1, (int)Math.Ceiling(note.Value.Duration / step - 1e-9));
             var state = note.Value.State.With(CompositionStateKinds.Strum, 0.0);
             return Enumerable.Range(0, count).Select(k => (note.Value with
@@ -221,6 +222,34 @@ internal static class Articulations
                 State = state, Pitches = [pitches[k % pitches.Length]], Duration = Math.Min(step, note.Value.Duration - k * step)
             }).ToTimelineItem(note.Position + k * step));
         }));
+
+    /// <summary>
+    ///     How near two of a frame-rate arpeggio's notes may sound in turn, in semitones: a tone, which cycled that fast is
+    ///     heard as one line warbling, a trill, rather than a chord, where a third is heard as two notes.
+    /// </summary>
+    public const int FramesNearest = 2;
+
+    /// <summary>
+    ///     A chord's notes as a frame-rate arpeggio cycles them, from the lowest up, each a tone or less above the note below
+    ///     moved up an octave until none is, as a chip musician spreads a sus2 to root, fifth and ninth: every note kept.
+    /// </summary>
+    internal static int[] Spread(IEnumerable<int> chord)
+    {
+        var pitches = chord.Distinct().Order().ToList();
+        for (var i = 1; i < pitches.Count; i++)
+        {
+            if (pitches[i] - pitches[i - 1] > FramesNearest)
+                continue;
+            var moved = pitches[i] + 12;
+            pitches.RemoveAt(i);
+            // an octave up may land on another note, which the chord sounds already
+            if (!pitches.Contains(moved))
+                pitches.Insert(pitches.FindIndex(x => x > moved) is var at and >= 0 ? at : pitches.Count, moved);
+            i = 0;
+        }
+
+        return [..pitches];
+    }
 
     /// <summary>The chance a line's part slurs its steps, by the sound facet: never in the plainest songs, which play every note as struck.</summary>
     public static ByConvention LegatoChance { get; } = new(0, 0.4, 0.6);

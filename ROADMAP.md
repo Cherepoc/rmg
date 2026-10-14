@@ -258,8 +258,12 @@ Drum and bass, Trap, Disco, Funk, Ambient and Chiptune beside the five that name
 
 Answered on 15 October 2026, accepted by the owner: `pop-post-chorus`, `medieval-drone`, `punk-drum-intro`,
 `ballad-piano-intro`, `punk-muted-verses`, `disco-run`, `latin-montuno` and `jazzfunk-chords`; `chiptune-frames` heard
-nice but not on every chord, the closer or more dissonant a chord's notes the worse cycled, a guess to settle (see
-*Chiptune's frame-rate arpeggio by its chord*).
+nice but not on every chord, the closer or more dissonant a chord's notes the worse cycled: 21% of its asked songs'
+chords had two notes a tone or less apart (0-5-6, sus2, 0-1-7), 9% of its first 64's. Researched
+(`chip-arpeggio-searched.md`): the closeness, not the dissonance, two notes a tone apart alternating that fast heard
+as one warbling line, a trill, and chip musicians cycling triads, fifths and octaves, spreading a second wider. So a
+cycled chord's note a tone or less above the note below moves up an octave until none is (`Articulations.Spread`), a
+sus2 as root, fifth and ninth, every note kept; asked again over the same songs: `chiptune-spread`.
 
 Answered on 14 October 2026, the round of the order of work's steps 5 to 8 and the mood, kept: `lyrical-echo` and
 `lyrical-cascade` (6 of 6 each), `darkjazz-halftime` and `dnb-dark` (5 to 1 each), `darkjazz-swing` (4, 2 unsure),
