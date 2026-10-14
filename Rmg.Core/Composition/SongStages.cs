@@ -311,7 +311,12 @@ internal static class SongStages
         (timeline, _) = LineFills.Apply(timeline, bass.Key, (PitchInstrumentTrack)bass.Value, draft.Runs, place => song.Stream(SongStream.BassFills, place), map, LineFills.Bass, ImmutableHashSet<double>.Empty);
         (timeline, var melodyWalks) = LineFills.Apply(timeline, melody.Key, (PitchInstrumentTrack)melody.Value, draft.Runs, place => song.Stream(SongStream.MelodyFills, place), map, LineFills.Melody, ImmutableHashSet<double>.Empty);
         timeline = Place(timeline, counter, CounterLayers.Line);
-        (timeline, _) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, draft.Runs, place => song.Stream(SongStream.CounterFills, place), map, LineFills.CounterMelody, melodyWalks);
+        (timeline, var counterWalks) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, draft.Runs, place => song.Stream(SongStream.CounterFills, place), map, LineFills.CounterMelody, melodyWalks);
+        // and running into a change of section now and then, a genre's, the likelier the louder the section it runs into,
+        // where neither line walks
+        var changes = song.Form.Lines.Where(x => x.Ending != x.Next).Select(x => new PlayedRun(x.Position, [], (x.Next.Energy - x.Ending.Energy) * x.Ending.Rhythm.Coupling)).ToArray();
+        (timeline, _) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, changes, place => song.Stream(SongStream.CounterRuns, place), map,
+            LineFills.CounterRun with { Chance = LineFills.RunChance.At(song.Facets[Facet.Melody], song.Genre.Chance(GenreChoices.LineRun, "counterMelody")) }, melodyWalks.Union(counterWalks));
         timeline = Place(timeline, riff, RiffLayers.Line);
         return draft with { Timeline = timeline };
     }

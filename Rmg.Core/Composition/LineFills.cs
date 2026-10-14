@@ -16,7 +16,8 @@ namespace Rmg.Core.Composition;
 internal static class LineFills
 {
     /// <summary>How a line fills: how likely into a section of as much energy, whether only where it rests, at most how many notes, and how near before its walk its note before is, in bars.</summary>
-    public sealed record Way(double Chance, bool IntoRest, int MostNotes, int ReachBars);
+    /// <param name="Runs">Whether it runs an octave of the scale in 16ths into the note it lands on, rather than walking on the drums' rhythm.</param>
+    public sealed record Way(double Chance, bool IntoRest, int MostNotes, int ReachBars, bool Runs = false);
 
     /// <summary>The bass, walking with half the runs in place of its notes, a bar from its note before.</summary>
     public static Way Bass { get; } = new(0.5, false, int.MaxValue, 1);
@@ -32,6 +33,21 @@ internal static class LineFills
 
     /// <summary>The shortest a walk's note is, in beats: an 8th.</summary>
     public const double ShortestNote = 0.5;
+
+    /// <summary>
+    ///     The chance a line runs into a change of section, the likelier into a louder one, an octave of the scale in 16ths
+    ///     up into the note it lands on, as a disco string section sweeps into a chorus, a genre's that the songs never
+    ///     play (<see cref="GenreChoices.LineRun" />).
+    /// </summary>
+    public static ByConvention RunChance { get; } = new(0, 0, 0);
+
+    /// <summary>The counter-melody running into a section, over its own notes, from two bars of its note before, its chance a genre's.</summary>
+    public static Way CounterRun { get; } = new(0, false, RunNotes, 2, Runs: true);
+
+    /// <summary>A run's notes: an octave of the scale, 16ths apart.</summary>
+    public const int RunNotes = 7;
+
+    public const double RunStep = 0.25;
 
     /// <param name="streams">A run's own sequence, by its line's place (<see cref="SongMap.PlaceKey" />), so that the runs before it leave it.</param>
     /// <param name="taken">The lines another line walks into, which this one leaves to it.</param>
@@ -57,7 +73,8 @@ internal static class LineFills
             if (!streams(map.PlaceKey(run.Line, PlacesPerBeat)).TestProbability(Tilt.Of(SectionEnergy.HighOdds, run.Lift).Chance(way.Chance, 1)))
                 continue;
 
-            var positions = Thin(run.Positions).TakeLast(way.MostNotes).ToArray();
+            var sweeps = way.Runs;
+            var positions = sweeps ? [..Enumerable.Range(0, RunNotes).Select(k => run.Line - (RunNotes - k) * RunStep)] : Thin(run.Positions).TakeLast(way.MostNotes).ToArray();
             var from = positions[0];
             // from the last note in the scale before it, a note leading into the change by a half step giving way to the
             // walk, which leads there now
@@ -66,16 +83,18 @@ internal static class LineFills
             // where the line plays on either side, not into a section it rests in or out of one, and into its own rest
             // where it walks only there
             if (before < 0 || after < 0 || events[after].Position > run.Line + map.MeterAt(run.Line).BarDuration || events[before].Position < from - way.ReachBars * map.MeterAt(from).BarDuration
-                || way.IntoRest && events.Any(x => x.IsWithin(from, run.Line)) || taken.Contains(run.Line))
+                || !sweeps && way.IntoRest && events.Any(x => x.IsWithin(from, run.Line)) || taken.Contains(run.Line))
                 continue;
 
-            var start = Pitch(events[before]);
             var target = Pitch(events[after]);
+            // a run from the octave below the note it lands on, or above where the line's range has none below
+            var start = sweeps ? target - 12 >= low ? target - 12 : target + 12 : Pitch(events[before]);
             var scale = ScaleNotes(events[before], low, high);
-            var walk = Walk(scale, start, target, positions.Length);
+            // a run from its first note, the octave's, a walk from the note after the one before it
+            var walk = Walk(scale, sweeps ? start - Math.Sign(target - start) : start, target, positions.Length);
             var walked = positions.Zip(walk, (position, pitch) => (position, pitch)).Select((x, i) => Place(events[before], x.position, x.pitch, i)).ToArray();
             walkedInto.Add(run.Line);
-            StateTrace.RecordSection(TracePoints.LineFill, lineTrack, map.SectionAt(run.Line)?.SectionId ?? 0, $"{positions.Length} notes into {run.Line}", (run.Line, positions));
+            StateTrace.RecordSection(TracePoints.LineFill, lineTrack, map.SectionAt(run.Line)?.SectionId ?? 0, $"{positions.Length} notes into {run.Line}{(sweeps ? ", a run" : "")}", (run.Line, positions));
             // a note held into the rest let go where the walk starts, a line singing one note at a time
             var held = events[before].Value.GetStateValue(StateKinds.HeldDuration);
             if (held > from - events[before].Position)

@@ -959,8 +959,9 @@ its home under the first phrase, its dominant under the last or a drone under th
 Ambient's 60, Dungeon synth's 40, 37 of 69 of Medieval's pedalled sections droning (to ask: `medieval-drone`); a section's energy choosing its guitars' muting, done (14 October 2026), the chugs leaning to the quieter sections (`SectionGenerator.ChugCoupling`), Punk's 43% of its quieter sections against 17% of its louder, from 31% and 22%; left: its figure (ska punk's choruses); swing
 by tempo, the short note at least a tenth of a second (Jazz first, before the jazz ride); a lead's glide and a genre's
 glide rate, done (14 October 2026): `glide.lead` beside the bass's, Hip-hop's, Trance's and Synthwave's, and `glideRate`, the
-share of notes slid into, Trap's 808 sparing at 20, and the slide leaning to a leap and a phrase's last note, done (14 October 2026), three times the odds each (`Expression.GlideOdds`), a gliding bass sliding into 30% of its leaps and 16% of its steps; a run into a downbeat (a disco string run, a fanfare's
-pickup); two soloists trading (Thrash, power metal's duels), done in part (14 October 2026): how many share a solo and how
+share of notes slid into, Trap's 808 sparing at 20, and the slide leaning to a leap and a phrase's last note, done (14 October 2026), three times the odds each (`Expression.GlideOdds`), a gliding bass sliding into 30% of its leaps and 16% of its steps; a run into a downbeat, done in part (14 October 2026), the counter-melody's
+(`lineRun`), an octave of the scale in 16ths into a change of section, the likelier the louder, Disco's 30-40-50, 23
+runs in 64 songs asked to (left: a fanfare's pickup, the melody's); two soloists trading (Thrash, power metal's duels), done in part (14 October 2026): how many share a solo and how
 they share it genres' pools (`soloCount`, `soloShare`), Thrash's two at 30-50-60 trading, Jazz's trades, Symphonic's
 duels; trading still rare (Thrash 6% of its pitched solos, Jazz 15%), as few songs have two parts free to solo, by
 listening; a section's abrupt change of tempo (Thrash) done (14 October 2026), the ease into a change a genre's chance

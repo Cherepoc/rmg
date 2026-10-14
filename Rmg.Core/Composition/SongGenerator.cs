@@ -258,5 +258,6 @@ internal enum SongStream
     EnsembleHits = 114,
     Darkness = 115,
     Intensity = 116,
-    BreakdownChorus = 117
+    BreakdownChorus = 117,
+    CounterRuns = 118
 }

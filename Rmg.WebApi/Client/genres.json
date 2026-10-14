@@ -1963,6 +1963,7 @@
       "length": { "to": [300, 360, 480], "from": [200, 200, 180] },
       "alone": { "drum": 100, "bass": 40 },
       "texture": { "steady": [100, 82, 100], "build": [0, 10, 100], "thin": [10, 15, 25], "alone": [5, 10, 15] },
+      "lineRun": { "counterMelody": [30, 40, 50] },
       "kickOut": { "lines": [10, 20, 30] },
       "figure": { "bass": { "own": 100, "eighths": [40, 50, 50] } },
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },

@@ -35,6 +35,7 @@ public static class GenreChoiceDescriptions
         ["passingChords"] = "How often a chord passes into the next through a chord between them, as the passing kind leads it, a jazz and soul colour.",
         ["planing"] = "How often a section slides its home chord's shape up and down by semitones, a modern, filmic colour, and how often its planed chords each take a mode of their own.",
         ["harmonyDevices"] = "Reharmonising a section when it comes back, a chromatic line moving inside a held chord, and a bass note held under a section's changing chords.",
+        ["lineRun"] = "How often the counter-melody sweeps up an octave of the scale in 16ths into a section the drums fill into, as a disco string section runs into its chorus.",
         ["polymeterCell"] = "How long a polymeter's cell is, in 16ths, running against the bar: three or six the plainest, the odd lengths, five, seven, thirteen or seventeen, the wilder.",
         ["sectionPedal"] = "Where a section's pedal holds: the home under its first phrase, the dominant under its last building into what follows, or the home droning under the whole of it.",
         ["loop"] = "How often a section plays the song's first section's chords again, as a beat loops one progression for the whole track.",
