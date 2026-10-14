@@ -256,6 +256,16 @@ channel of its own; `rudiments`, Jazz's flams and drags; `phrase-length`, Orches
 three; and `short-bar`, Djent's sections ending on a bar cut short, which the loops' genres play none of now (Trance,
 Drum and bass, Trap, Disco, Funk, Ambient and Chiptune beside the five that named none), their sections square.
 
+Answered on 14 October 2026, the round of the order of work's steps 5 to 8 and the mood, kept: `lyrical-echo` and
+`lyrical-cascade` (6 of 6 each), `darkjazz-halftime` and `dnb-dark` (5 to 1 each), `darkjazz-swing` (4, 2 unsure),
+`funkrock-chorus` (4 to 1), `synthwave-dark` (3 to 1, 2 the same); `bass-step-down`, heard against (1 to 5) and kept as
+the owner chose, Cinematic piano accepted as it is; `pop-eighths` split (3 to 2) and kept, let go of as its songs now
+differ too little to ask again (0.06 on the average); `jazzfunk-chords`, two answers, asked again. Asked from 14 October
+2026: `pop-post-chorus`, `medieval-drone`, `punk-drum-intro`, `ballad-piano-intro`, `punk-muted-verses`, `disco-run`,
+`chiptune-frames`, `latin-montuno`, `jazzfunk-chords`; queued for room: `cinematic-pad`, `lyrical-beat`, `dnb-two-step`,
+`soul-every-beat`, `disco-pulse`, `house-kick-out`, `ballad-breakdown`, a waltz (once a page's patch reaches a figure's
+nested choice).
+
 Answered on 13 October 2026, the round of the order of work's steps 2 and 4: kept, `rock-quiet` and `djent-calm` (6 of
 6 each), `thrash-skank` and `hiphop-kit` (5 to 1 each), `blues-boogie` (4 to 1), `house-sevenths` (3 to 1), and, as the
 listener chose, `classical-cadence` and `jazz-ride` (3 to 3). Against: `funk-swing` (0 to 5), Funk's 16ths swung
