@@ -444,37 +444,41 @@ public static class EventStoreSummary
         return (version,
         [
             ..verdicts.Where(x => x.Version == version).GroupBy(x => x.Question).OrderBy(x => x.Key).Select(x => new QuestionVerdicts(x.Key,
-                x.Where(v => v.Choice == "with").Sum(v => v.Count), x.Where(v => v.Choice == "without").Sum(v => v.Count),
-                x.Where(v => v.Choice == "same").Sum(v => v.Count), x.Where(v => v.Choice == "unsure").Sum(v => v.Count)))
+                Of(x, "with"), Of(x, "without"), Of(x, "same"), Of(x, "unsure"),
+                [..x.GroupBy(v => v.Seed).OrderBy(s => s.Key, StringComparer.Ordinal).Select(s => new SongVerdicts(s.Key, Of(s, "with"), Of(s, "without"), Of(s, "same"), Of(s, "unsure")))]))
         ]);
+
+        static int Of(IEnumerable<(string Version, string Question, string Seed, string Choice, int Count)> given, string choice) => given.Where(v => v.Choice == choice).Sum(v => v.Count);
     }
 
     /// <summary>
-    ///     Every verdict of the listening mode, whenever given, by its version, question and choice, which its detail says as
-    ///     "question:choice": a visitor's latest on a question's song alone, as one goes back and gives it again.
+    ///     Every verdict of the listening mode, whenever given, by its version, question, song and choice, which its detail
+    ///     says as "question:choice": a visitor's latest on a question's song alone, as one goes back and gives it again.
     /// </summary>
-    private static List<(string Version, string Question, string Choice, int Count)> Verdicts(SqliteConnection connection)
+    private static List<(string Version, string Question, string Seed, string Choice, int Count)> Verdicts(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
         command.CommandText = $"""
-            SELECT version, detail, COUNT(*)
+            SELECT version, detail, seed, COUNT(*)
             FROM (
-                SELECT version, detail,
+                SELECT version, detail, seed,
                        ROW_NUMBER() OVER (PARTITION BY version, visitor, seed, substr(detail, 1, instr(detail, ':') - 1) ORDER BY id DESC) AS latest
                 FROM events
                 WHERE name = '{EventNames.Verdict}' AND version IS NOT NULL AND detail LIKE '%:%')
             WHERE latest = 1
-            GROUP BY version, detail
+            GROUP BY version, seed, detail
             """;
 
-        var verdicts = new List<(string, string, string, int)>();
+        var verdicts = new List<(string, string, string, string, int)>();
         using var reader = command.ExecuteReader();
         while (reader.Read())
         {
             var detail = reader.GetString(1);
             // the question up to its colon, as the query reads it, a verdict holding one (AnalyticsEndpoints.IsVerdict)
             var colon = detail.IndexOf(':');
-            verdicts.Add((reader.GetString(0), detail[..colon], detail[(colon + 1)..], reader.GetInt32(2)));
+            // the song by its seed as the page writes it, none where the verdict named none
+            var seed = reader.IsDBNull(2) ? "" : Base62.FromSeed(unchecked((ulong)reader.GetInt64(2)));
+            verdicts.Add((reader.GetString(0), detail[..colon], seed, detail[(colon + 1)..], reader.GetInt32(3)));
         }
 
         return verdicts;

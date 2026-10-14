@@ -65,7 +65,11 @@ public sealed record RatedGenre(string Genre, int Songs, int Likes, int Dislikes
 /// <param name="Without">How often the song without it was.</param>
 /// <param name="Same">How often the two were the same.</param>
 /// <param name="Unsure">How often the listener could not tell.</param>
-public sealed record QuestionVerdicts(string Question, int With, int Without, int Same, int Unsure);
+/// <param name="Songs">The same by the song heard, by its seed, so that the songs a device was heard worse on can be found.</param>
+public sealed record QuestionVerdicts(string Question, int With, int Without, int Same, int Unsure, IReadOnlyList<SongVerdicts> Songs);
+
+/// <param name="Seed">The song's seed, as the page writes it.</param>
+public sealed record SongVerdicts(string Seed, int With, int Without, int Same, int Unsure);
 
 /// <param name="Version">The latest songs' version a verdict was given in, which the verdicts are of; none for none.</param>
 /// <param name="Verdicts">The verdicts, by question.</param>

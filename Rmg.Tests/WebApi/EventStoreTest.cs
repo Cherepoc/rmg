@@ -429,6 +429,8 @@ public sealed class EventStoreTest : IDisposable
 
         var pushes = _store.LatestVerdicts().Verdicts.Single(x => x.Question == "pushes");
         await Assert.That((pushes.With, pushes.Without, pushes.Same)).IsEqualTo((1, 1, 1));
+        // and by the song heard, as the page writes its seed
+        await Assert.That(pushes.Songs.Select(x => (x.Seed, x.With, x.Without, x.Same))).IsEquivalentTo(new[] { ("3", 1, 1, 0), ("4", 0, 0, 1) }, CollectionOrdering.Matching);
     }
 
     [Test]
