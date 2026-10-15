@@ -49,6 +49,29 @@ public sealed class HarmonyRulesTest
         await Assert.That(vamping).IsGreaterThan(10);
     }
 
+    /// <summary>
+    ///     A section's home at the contrast, the classical form's, its fifth in a major key and its relative major in a minor
+    ///     one, a genre's naming it alone, the tonic where it keeps it.
+    /// </summary>
+    [Test]
+    public async Task AContrastHome_IsAMajorKeysFifth_AndAMinorKeysRelativeMajor()
+    {
+        var (major, minor) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With(GenreChoices.SectionHome, "contrast")))))
+        foreach (var home in song.Trace.Where(x => x.Point == TracePoints.SectionHome && (int)x.Value! != 0))
+        {
+            var scale = (Scale)song.Trace.Last(x => x.Point == TracePoints.SectionScale && x.Section == home.Section).Value!;
+            var isMinor = scale.Offsets[2] - scale.Offsets[0] == 3;
+            // a step from the tonic, from -3 to 3: a minor key's third up, a major key's fifth, a fourth down
+            await Assert.That((int)home.Value!).IsEqualTo(isMinor ? 2 : -3).Because($"seed {song.Seed}, section {home.Section}, {scale.Name}");
+            (major, minor) = isMinor ? (major, minor + 1) : (major + 1, minor);
+        }
+
+        Console.WriteLine($"sections at the contrast: {major} in a major key, {minor} in a minor one");
+        await Assert.That(major).IsGreaterThan(5);
+        await Assert.That(minor).IsGreaterThan(5);
+    }
+
     /// <summary>A genre's homes named the tonic alone keep every section's home on it.</summary>
     [Test]
     public async Task AGenresSectionHomes_KeepToItsPool()

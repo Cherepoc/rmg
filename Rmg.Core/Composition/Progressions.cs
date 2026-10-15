@@ -122,14 +122,16 @@ internal static class Progressions
 
     /// <summary>
     ///     The homes a section may have, as a genre names them, and how likely each is: the tonic itself most often, the
-    ///     relative key (the third degree of a minor scale, the sixth of a major one) sometimes, and IV or V now and then.
+    ///     relative key (the third degree of a minor scale, the sixth of a major one) sometimes, and IV or V now and then; and
+    ///     the classical form's contrast, a major key's fifth and a minor one's relative major, a genre's alone.
     /// </summary>
     public static ImmutableArray<(string Name, string Label, double Weight)> Homes { get; } =
     [
         ("tonic", "The tonic", 0.6),
         ("relative", "The relative key, a minor scale's third, a major one's sixth", 0.2),
         ("fourth", "The fourth", 0.1),
-        ("fifth", "The fifth", 0.1)
+        ("fifth", "The fifth", 0.1),
+        ("contrast", "The contrast, a major key's fifth, a minor one's relative major", 0)
     ];
 
     /// <summary>
@@ -141,7 +143,9 @@ internal static class Progressions
     public static int GenerateHome(IGenerationContext context, Scale scale, SectionRole role, Genre genre, double progression)
     {
         var relativeStep = GetQuality(scale.Offsets, 0) == TriadQuality.Minor ? 2 : 5;
-        int[] steps = [0, Normalize(relativeStep), Normalize(3), Normalize(4)];
+        // the contrast by the key's third, a minor one's relative major, a diminished tonic's too, a major one's fifth
+        var minorThird = scale.Offsets[2] - scale.Offsets[0] == 3;
+        int[] steps = [0, Normalize(relativeStep), Normalize(3), Normalize(4), Normalize(minorThird ? 2 : 4)];
         var pool = genre.Pool<string>(GenreChoices.SectionHome, x => x);
         // a genre's homes weighed as its pool keeps them, an end it leaves empty playing the nearer end's
         ImmutableArray<Weighted<int>> homes = pool is null

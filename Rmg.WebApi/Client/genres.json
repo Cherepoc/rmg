@@ -2773,6 +2773,7 @@
     "name": "Orchestral",
     "description": "Strings, horns and woodwinds over a contrabass, a harp's arpeggios, timpani and a cymbal marking the form, minor, major and harmonic minor, long crescendos into louder sections, parts entering one by one.",
     "choices": {
+      "sectionHome": { "tonic": 100, "contrast": [20, 30, 30], "relative": 20, "fourth": 10, "fifth": 10 },
       "cadenceDegree": { "seventh": 60, "sixth": 55 },
       "rootDegree": { "sixth": 65, "seventh": 65, "third": 55 },
       "cadenceRaise": { "sections": [60, 40, 20] },
@@ -2877,7 +2878,7 @@
     "description": "Chamber music: a melody on violin, flute or clarinet over a piano's Alberti figure and a cello's bass, no drums, raised cadences and ornaments, phrases of four bars, AABA, ABA and a rondo, terraced dynamics, 80 to 140 in 4/4, 3/4 and 6/8.",
     "choices": {
       "figure": { "chords": { "own": 100, "waltz": [20, 30, 30] }, "bass": { "own": 100, "waltz": [20, 30, 30], "eighths": [10, 15, 20] } },
-      "sectionHome": { "tonic": 100, "fifth": 40, "relative": 20, "fourth": 10 },
+      "sectionHome": { "tonic": 100, "contrast": 40, "relative": 10, "fourth": 10, "fifth": 5 },
       "appoggiatura": { "melody": [10, 20, 25], "counterMelody": [5, 10, 15] },
       "phrases": { "fourBars": 100, "eightBars": [50, 60, 60] },
       "cadenceDegree": { "fifth": 100, "seventh": 20 },

@@ -929,8 +929,8 @@ can be):
 1. Done (15 October 2026): a key change's interval a genre's, `keyLift` (a lifted last section's step) and `sectionKey`
    (a section's own key's), pools of the steps in semitones; Symphonic's lift by a third, 18 of 57 lifts, the songs'
    never.
-2. A section's home by the mode, the dominant in a major key and the relative major in a minor one, an option of
-   `sectionHome`, Chamber's and Orchestral's.
+2. Done (15 October 2026): a section's home by the mode, `sectionHome.contrast`, a major key's fifth and a minor
+   third's relative major, a genre's alone, Chamber's 40 and Orchestral's 20-30-30.
 3. The minor mediant, a minor chord a major third below or on a diminished seventh's roots, an option of `chordScales`
    beside the major mediant, Black metal's, Doom's at its wild end.
 4. The pentatonic union, both thirds over a major pentatonic with the fourth and the flat seventh, a line scale of the
