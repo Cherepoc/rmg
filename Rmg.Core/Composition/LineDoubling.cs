@@ -61,15 +61,23 @@ internal static class LineDoubling
     public static ByConvention RiffChance { get; } = new(1, 0.5, 0);
 
     /// <summary>
+    ///     The chance the counter-melody imitates the melody in a section, its phrase a bar later, an octave below, each note
+    ///     on the same step above the chord it falls on as the melody's above its own, as a canon moves with the harmony: a
+    ///     genre's alone.
+    /// </summary>
+    public static ByConvention ImitationChance { get; } = new(0, 0, 0);
+
+    /// <summary>
     ///     Who doubles whom, by how many scale steps, weighed by the song's melody facet, the chance of a section, alike at
     ///     every end, the option of <see cref="GenreChoices.Doubling" /> it is a genre's by, none for a twin, which doubles
-    ///     wherever it plays, and whether the target is the source's twin.
+    ///     wherever it plays, whether the target is the source's twin, and how many bars later it plays the source's notes.
     /// </summary>
-    public static ImmutableArray<(TrackRole Source, TrackRole Target, ImmutableArray<(int Step, ByConvention Weight)> Steps, ByConvention Chance, string? Option, bool IsTwin)> Pairs { get; } =
+    public static ImmutableArray<(TrackRole Source, TrackRole Target, ImmutableArray<(int Step, ByConvention Weight)> Steps, ByConvention Chance, string? Option, bool IsTwin, int Bars)> Pairs { get; } =
     [
-        (TrackRole.Melody, TrackRole.CounterMelody, [(2, Any), (-2, Any), (5, Any), (-5, Any), (3, Never), (-3, Never), (4, Never), (-4, Never)], HarmonyChance, "harmony", false),
-        (TrackRole.Riff, TrackRole.Bass, [(0, Any)], RiffChance, "riff", false),
-        (TrackRole.Riff, TrackRole.RiffTwin, TwinSteps, Any, null, true)
+        (TrackRole.Melody, TrackRole.CounterMelody, [(2, Any), (-2, Any), (5, Any), (-5, Any), (3, Never), (-3, Never), (4, Never), (-4, Never)], HarmonyChance, "harmony", false, 0),
+        (TrackRole.Riff, TrackRole.Bass, [(0, Any)], RiffChance, "riff", false, 0),
+        (TrackRole.Riff, TrackRole.RiffTwin, TwinSteps, Any, null, true, 0),
+        (TrackRole.Melody, TrackRole.CounterMelody, [(-7, Any)], ImitationChance, "imitation", false, 1)
     ];
 
 
@@ -150,11 +158,11 @@ internal static class LineDoubling
         var trackOf = roles.TrackOf();
         // the parts that double or are doubled in a section, by its place, which play no other doubling there
         var doubling = new HashSet<(int Track, int Section)>();
-        foreach (var ((source, target, steps, chance, option, isTwin), pair) in Pairs.Select((x, i) => (x, i)))
+        foreach (var ((source, target, steps, chance, option, isTwin, bars), pair) in Pairs.Select((x, i) => (x, i)))
         {
             // the pair's own steps leaned by a genre's intervals over the songs', so that a genre naming the songs' amounts
-            // plays as they do
-            var intervals = steps.Any(x => x.Step != 0) ? genre.Lean<int>(GenreChoices.HarmonyInterval, IntervalOf) : null;
+            // plays as they do, but an imitation's octave, which harmonises nothing
+            var intervals = bars == 0 && steps.Any(x => x.Step != 0) ? genre.Lean<int>(GenreChoices.HarmonyInterval, IntervalOf) : null;
             // a genre whose intervals keep none of the pair's never doubles it
             var allowed = intervals is null || steps.Any(x => intervals(x.Step) is not null);
             if (!trackOf.TryGetValue(source, out var sourceTrack) || !trackOf.TryGetValue(target, out var targetTrack))
@@ -182,7 +190,13 @@ internal static class LineDoubling
                 if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && (!twinLeads(index) || twinRests(index)) || playsAFigure(index, target))
                     continue;
 
-                StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));
+                // a section a pair doubles already, the counter-melody harmonising it, not imitated too
+                if (bars > 0 && doubling.Contains((targetTrack, index)))
+                    continue;
+                if (bars > 0)
+                    StateTrace.RecordSection(TracePoints.Imitation, targetTrack, span.SectionId, $"{source} {bars} bar later", bars);
+                else
+                    StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));
                 doubling.Add((sourceTrack, index));
                 doubling.Add((targetTrack, index));
                 // where the doubling part plays in the section, from its first note to its last, so that it joins no earlier
@@ -191,8 +205,10 @@ internal static class LineDoubling
                 var (from, to) = (own.Min(), own.Max());
                 // a counter-melody harmonising the melody in the melody's own sound now and then, as twin leads play, and in
                 // a block now and then, its notes stacking their chord's
-                var inTimbre = source == TrackRole.Melody && !isTwin && timbres(index).TestProbability(TwinTimbreChance);
-                var block = source == TrackRole.Melody && !isTwin && blocks(index).TestProbability(BlockChance.At(melody, genre.Chance(GenreChoices.Doubling, "block")));
+                var inTimbre = source == TrackRole.Melody && !isTwin && bars == 0 && timbres(index).TestProbability(TwinTimbreChance);
+                var block = source == TrackRole.Melody && !isTwin && bars == 0 && blocks(index).TestProbability(BlockChance.At(melody, genre.Chance(GenreChoices.Doubling, "block")));
+                // an imitation's notes the bars later it plays them
+                var delay = bars * span.Meter.BarDuration;
                 if (block)
                     StateTrace.RecordSection(TracePoints.BlockHarmony, targetTrack, span.SectionId, $"{step}", index);
                 // in every pattern the doubled part plays, its own kept where a texture rests the doubled part
@@ -207,11 +223,11 @@ internal static class LineDoubling
                 // in unison the source's alteration as it is, a chromatic riff's passing note too; a harmony a step away on the
                 // scale
                 var doubled = events[sourceTrack].EventTimeline
-                    .Where(x => Doubles(x.Position))
+                    .Where(x => Doubles(x.Position + delay))
                     .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, step == 0 ? x.Value.GetStateValue(StateKinds.Alteration) : 0)
                         .With(CompositionStateKinds.Doubled, 1)
                         .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0)
-                        .With(CompositionStateKinds.LineRaise, isTwin ? twinRaise : 0).ToTimelineItem(x.Position))
+                        .With(CompositionStateKinds.LineRaise, isTwin ? twinRaise : 0).ToTimelineItem(x.Position + delay))
                     .Select(x => block ? x.Value.With(CompositionStateKinds.LineVoices, Math.Max(x.Value.GetStateValue(CompositionStateKinds.LineVoices), BlockVoices)).ToTimelineItem(x.Position) : x);
                 var edits = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
                 {

@@ -971,13 +971,16 @@ can be):
    Power ballad calm (-80 to 40), Pop bright (darkness -80 to 40), Reggae bright and calm (-80 to 20 each); by listening.
 
 **4. The engine's put-off features:**
-1. The false ending: a drop's kind before the last repeat, the home chord hit, a beat or two of silence, the drums
-   counting back in (Rock, Metal, Punk, Blues, Soul, Funk, Ska).
-2. Two toms at once: a drum note's sound a list, a fill's wide window or a cascade's accent striking a rack and the floor.
-3. Rolls in 32nds: the figures' and the rolls' grid finer, IDM's at its wild end.
-4. Imitation: the counter-melody taking the melody's phrase a bar later, its clashes across a change of chord moved to
-   a chord's note.
-5. The tape stop: every pitched part bending down an octave over a slowing tempo into a drop or as the ending.
+1. Put off again (15 October 2026): the false ending, a harmony edit before the realizer for the home chord's hit, for
+   a gimmick that wears thin, kept rare even where it plays.
+2. Put off again: two toms at once, a drum note's sound a list, a render change, until listening asks for the weight.
+3. Done (15 October 2026): a drill, the hi-hat roll's speed a genre's pool (`hatRollRate`), 32nds and 16th triplets
+   as the songs', 64ths a genre's alone, IDM's 0-20-60.
+4. Done (15 October 2026): imitation, `doubling.imitation`, a doubling pair the bars later of its own, the counter-melody
+   taking the melody's phrase a bar later an octave below, each note on its step above the chord it falls on, so that it
+   moves with the harmony rather than clashing: Chamber's 15-25-35, Orchestral's 10-20-25, Medieval's 10-20-20; 50
+   sections of 32 Chamber songs asked to, every note a bar after the melody's (to ask: `chamber-imitation`).
+5. Put off again: the tape stop, a tempo map and every channel's bends together, the most cost for the least.
 
 **5. Housekeeping:** two page tests flaky now and then, each passing alone and three runs in a row after
 (`TheKeyAndChord_FollowTheBar_AsAHandDragsIt(True)`, `TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`);

@@ -54,6 +54,9 @@ internal static class TracePoints
     /// <summary>Where the drums take the kick out, from a span's start to its line (an <c>ImmutableArray</c> of <c>(double From, double To)</c>).</summary>
     public const string KickOuts = "Kick-outs";
 
+    /// <summary>A section whose counter-melody imitates the melody, how many bars later (an <c>int</c>, <see cref="Composition.LineDoubling.ImitationChance" />).</summary>
+    public const string Imitation = "Imitation";
+
     /// <summary>The part the song opens on alone, none where it opens otherwise (a <see cref="Songs.TrackRole" />?).</summary>
     public const string OpeningAlone = "Opening alone";
 

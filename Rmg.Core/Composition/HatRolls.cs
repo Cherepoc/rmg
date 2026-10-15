@@ -15,8 +15,20 @@ internal static class HatRolls
     /// <summary>The chance a bar's time drum rolls its last beat, a genre's that the songs never play (<see cref="GenreChoices.HatRolls" />).</summary>
     public static ByConvention Chance { get; } = new(0, 0, 0);
 
-    /// <summary>How fast a roll's notes come, a beat's worth of them, and how likely: 32nds, and 16th triplets the trap's other.</summary>
-    public static ImmutableArray<Weighted<int>> Rates { get; } = [new(1, 8), new(1, 6)];
+    /// <summary>
+    ///     How fast a roll's notes come, a beat's worth of them, and how likely: 32nds, and 16th triplets the trap's other;
+    ///     64ths, a drill, a genre's alone (<see cref="GenreChoices.HatRollRate" />).
+    /// </summary>
+    public static ImmutableArray<(int Rate, ByConvention Weight)> Rates { get; } = [(8, new(1, 1, 1)), (6, new(1, 1, 1)), (16, new(0, 0, 0))];
+
+    /// <summary>A rate as a genre names it.</summary>
+    public static string NameOf(int rate) => rate switch
+    {
+        8 => "thirtySeconds",
+        6 => "tripletSixteenths",
+        16 => "sixtyFourths",
+        _ => throw new ArgumentOutOfRangeException(nameof(rate), rate, null)
+    };
 
     /// <summary>How much likelier a roll ends with its bar than on another of its beats: three times, the bar's end most at home.</summary>
     public const double BarEndOdds = 3;
@@ -45,7 +57,9 @@ internal static class HatRolls
         foreach (var (span, index) in song.Form.Map.Sections.Select((x, i) => (x, i)))
         {
             var context = song.AppearanceStream(SongStream.HatRolls, index);
-            var chance = Chance.At(song.SectionOf(span.SectionId).Facets[Facet.Groove], song.Genre.Chance(GenreChoices.HatRolls, "bars"));
+            var groove = song.SectionOf(span.SectionId).Facets[Facet.Groove];
+            var chance = Chance.At(groove, song.Genre.Chance(GenreChoices.HatRolls, "bars"));
+            var rates = ByConvention.Weigh(Rates, groove, song.Genre.Pool<int>(GenreChoices.HatRollRate, NameOf));
             // every bar, a short last one's too, the bar before the next section where a roll is most at home
             foreach (var (_, start, end) in span.Bars)
             {
@@ -53,7 +67,7 @@ internal static class HatRolls
                 var beats = (int)Math.Max(1, Math.Round(end - start));
                 ImmutableArray<Weighted<double>> ends = [..Enumerable.Range(1, beats).Select(k => new Weighted<double>(k == beats ? BarEndOdds : 1, k == beats ? end : start + k))];
                 // drawn for every bar, so that the draws are as many
-                var (rolls1, rate, length, into) = (context.TestProbability(chance), context.Pick(Rates), context.Pick(Lengths), context.Pick(ends));
+                var (rolls1, rate, length, into) = (context.TestProbability(chance), context.Pick(rates), context.Pick(Lengths), context.Pick(ends));
                 if (rolls1)
                     rolls.Add((into - length, into, rate));
             }

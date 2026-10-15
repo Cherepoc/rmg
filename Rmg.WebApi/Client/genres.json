@@ -1707,7 +1707,7 @@
       "sectionPedal": { "home": 30, "dominant": 10, "drone": 60 },
       "harmonicRhythm": { "twoBars": 100, "oneBar": [40, 40, 60] },
       "harmonyInterval": { "fourths": 100, "thirds": [30, 40, 60] },
-      "doubling": { "harmony": [60, 70, 70], "octaves": [7, 11, 15], "riff": 0, "twin": 0 },
+      "doubling": { "harmony": [60, 70, 70], "octaves": [7, 11, 15], "riff": 0, "twin": 0, "imitation": [10, 20, 20] },
       "lineScale": { "section": 100, "pentatonic": 40 },
       "melodyRange": { "wide": 40 },
       "arpeggio": { "none": 100, "up": [10, 20, 30], "upDown": [10, 10, 20], "alternatingThumb": [20, 20, 20] },
@@ -2829,7 +2829,7 @@
       "drumPieces": { "tom": 100, "cymbal": 80, "acousticSnare": 50, "kick": [0, 20, 40], "triangle": 40 },
       "drumJob": { "marks": [80, 80, 50], "groove": [20, 20, 50] },
       "marks": { "often": 55, "swells": 70 },
-      "doubling": { "octaves": [20, 30, 40], "harmony": [20, 30, 30], "riff": 0, "twin": 0 },
+      "doubling": { "octaves": [20, 30, 40], "harmony": [20, 30, 30], "riff": 0, "twin": 0, "imitation": [10, 20, 25] },
       "dynamics": { "energy": 50, "contrast": 90, "lift": 100, "evenness": 40 },
       "texture": { "build": 100, "steady": 60, "thin": 40, "alone": [20, 30, 40] },
       "effects": { "vibrato": [40, 60, 80], "swell": [30, 50, 70], "bends": [0, 0, 10], "chorus": 0, "tone": 0, "tape": 0, "pinch": 0, "dive": 0 },
@@ -2888,6 +2888,7 @@
     "name": "Chamber",
     "description": "Chamber music: a melody on violin, flute or clarinet over a piano's Alberti figure and a cello's bass, no drums, raised cadences and ornaments, phrases of four bars, AABA, ABA and a rondo, terraced dynamics, 80 to 140 in 4/4, 3/4 and 6/8.",
     "choices": {
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [100, 50, 0], "twin": 50, "imitation": [15, 25, 35] },
       "figure": { "chords": { "own": 100, "waltz": [20, 30, 30] }, "bass": { "own": 100, "waltz": [20, 30, 30], "eighths": [10, 15, 20] } },
       "sectionHome": { "tonic": 100, "contrast": 40, "relative": 10, "fourth": 10, "fifth": 5 },
       "appoggiatura": { "melody": [10, 20, 25], "counterMelody": [5, 10, 15] },
@@ -3011,6 +3012,7 @@
     "name": "IDM",
     "description": "Warm and warped at its plainest, a slow swung breakbeat under detuned pads, an electric piano and a music box, sevenths and Dorian; wilder, an acid bass squelching and gliding, odd meters, tuplets and polymeters, and drums splintering into rolls.",
     "choices": {
+      "hatRollRate": { "thirtySeconds": 100, "tripletSixteenths": 50, "sixtyFourths": [0, 20, 60] },
       "rudiments": { "flams": 0, "drags": 0 },
       "length": { "from": [180, 150, 60], "to": [420, 480, 600] },
       "sung": { "halves": [10, 10, 10], "eighths": [20, 10, 0] },
