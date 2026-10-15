@@ -956,8 +956,9 @@ can be):
    the dub techno preset that wants it; a part's own swing, the render's one swing for every song.
 
 **3. The mood's leftovers:**
-1. The songs' own chord shapes leaned by darkness through their levels' pick (a level's darkness its shapes' mean), as
-   leaning the shapes themselves moved every song onto a pool's draw.
+1. Done (15 October 2026): the songs' own chord shapes leaned by darkness within the level drawn, the level's pick as it
+   was, the mood carried by the genre a song takes (`Genre.Mood`): a level's bright shapes 58% at darkness -1, 43% at
+   0, 29% at 1, the wildest level's dark ones 28%, 58%, 84%.
 2. The root degrees and the cadence's raise by darkness, the values' choices leaned as a range's are (♭VI and ♭II
    darker, the raised leading tone brighter).
 3. Fills by intensity (their amount), and the songs' own tempo (the dyadic draw tilted to its fast end).

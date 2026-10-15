@@ -32,11 +32,32 @@ public sealed class ChordShapesTest
     public async Task Pick_ResultsIn_ShapesOfTheUnconventionality_TheHeavierMoreOften()
     {
         var context = new GenerationContext(0);
-        var picks = Enumerable.Range(0, 10000).Select(_ => ChordShapes.Pick(context, 1)).ToArray();
+        var picks = Enumerable.Range(0, 10000).Select(_ => ChordShapes.Pick(context, 1, default)).ToArray();
 
         await Assert.That(picks.All(x => x.Unconventionality == 1)).IsTrue();
         // the seventh weighs 1 and the sixth 0.5
         await Assert.That(picks.Count(x => x.Name == "Seventh")).IsGreaterThan(picks.Count(x => x.Name == "Sixth") * 3 / 2);
+    }
+
+    /// <summary>
+    ///     A level's shapes leaned by the song's mood where no genre's pool weighs them: a bright mood's add9, sixth and sus2
+    ///     oftener than a dark one's, a dark mood's diminished and Phrygian chords oftener than a bright one's.
+    /// </summary>
+    [Test]
+    public async Task AMoodsDarkness_LeansALevelsShapes()
+    {
+        ChordShape[] Picks(int level, double darkness)
+        {
+            var context = new GenerationContext(0);
+            return [..Enumerable.Range(0, 10000).Select(_ => ChordShapes.Pick(context, level, new Mood(darkness, 0)))];
+        }
+
+        double Bright(ChordShape[] picks) => picks.Count(x => x.Darkness < 0) / (double)picks.Length;
+        double Dark(ChordShape[] picks) => picks.Count(x => x.Darkness > 0) / (double)picks.Length;
+        Console.WriteLine($"level 1, bright shapes: {Bright(Picks(1, -1)):P0} bright, {Bright(Picks(1, 0)):P0} middling, {Bright(Picks(1, 1)):P0} dark; level 4, dark shapes: {Dark(Picks(4, -1)):P0}, {Dark(Picks(4, 0)):P0}, {Dark(Picks(4, 1)):P0}");
+        await Assert.That(Bright(Picks(1, -1))).IsGreaterThan(Bright(Picks(1, 0)));
+        await Assert.That(Bright(Picks(1, 1))).IsLessThan(Bright(Picks(1, 0)));
+        await Assert.That(Dark(Picks(4, 1))).IsGreaterThan(Dark(Picks(4, -1)));
     }
 
     [Test]

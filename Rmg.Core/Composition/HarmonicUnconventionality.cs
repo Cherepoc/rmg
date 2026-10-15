@@ -25,13 +25,13 @@ public sealed record HarmonicUnconventionality(double Chords, Genre Genre)
     /// </summary>
     public Chord GenerateChord(IGenerationContext context)
     {
-        return Voice(context, ChordShapes.Pick(context, ChordShapes.Levels, Chords, Pool, isOwn: false));
+        return Voice(context, ChordShapes.Pick(context, ChordShapes.Levels, Chords, Pool, isOwn: false, Genre.Mood));
     }
 
     /// <summary>The home chord of a phrase, which stays plain for the release but in the wildest songs (<see cref="ChordShapes.HomeLevels" />).</summary>
     public Chord GenerateHomeChord(IGenerationContext context)
     {
-        return Voice(context, ChordShapes.Pick(context, ChordShapes.HomeLevels, Chords, Pool, isOwn: true));
+        return Voice(context, ChordShapes.Pick(context, ChordShapes.HomeLevels, Chords, Pool, isOwn: true, Genre.Mood));
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public sealed record HarmonicUnconventionality(double Chords, Genre Genre)
     /// </summary>
     public Chord GenerateCadenceChord(IGenerationContext context)
     {
-        return Voice(context, ChordShapes.PickCadence(context, Chords, Pool));
+        return Voice(context, ChordShapes.PickCadence(context, Chords, Pool, Genre.Mood));
     }
 
     private Chord Voice(IGenerationContext context, ChordShape shape)

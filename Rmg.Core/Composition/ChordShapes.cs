@@ -167,10 +167,11 @@ internal static class ChordShapes
     ///     and leaning a home's own (<see cref="ByConvention.Lean{T}" />), which stays plainer.
     /// </summary>
     /// <param name="isOwn">Whether the levels are a role's own, such as a home's, which the pool leans rather than sets.</param>
-    public static ChordShape Pick(IGenerationContext context, ImmutableArray<(int Level, ByConvention Weight)> levels, double unconventionality, GenrePool? pool, bool isOwn)
+    /// <param name="mood">The song's mood, which leans a level's shapes by their darkness where no pool weighs them.</param>
+    public static ChordShape Pick(IGenerationContext context, ImmutableArray<(int Level, ByConvention Weight)> levels, double unconventionality, GenrePool? pool, bool isOwn, Mood mood)
     {
         if (pool is null)
-            return Pick(context, context.Pick(ByConvention.Weigh(levels.Select(x => (x.Level, x.Weight)), unconventionality)));
+            return Pick(context, context.Pick(ByConvention.Weigh(levels.Select(x => (x.Level, x.Weight)), unconventionality)), mood);
 
         var shapes = levels.SelectMany(x => Shares(OfLevel(x.Level), x.Weight));
         return context.Pick(isOwn ? ByConvention.Lean(shapes, unconventionality, pool.Lean) : ByConvention.Weigh(shapes, unconventionality, pool.Middle));
@@ -185,7 +186,7 @@ internal static class ChordShapes
     ///     so that a metal cadence lands on its power chord or its triad, as the genre plays them, and never on a shape the
     ///     pool keeps rare.
     /// </summary>
-    public static ChordShape PickCadence(IGenerationContext context, double unconventionality, GenrePool? pool)
+    public static ChordShape PickCadence(IGenerationContext context, double unconventionality, GenrePool? pool, Mood mood)
     {
         if (pool is not null)
             return context.Pick(Tilt.Of(CadenceOdds, 1).Weigh(
@@ -193,7 +194,7 @@ internal static class ChordShapes
                 shape => CadenceShapes.Any(x => x.Value == shape) ? 1 : 0));
 
         var level = context.Pick(ByConvention.Weigh(CadenceLevels.Select(x => (x.Level, x.Weight)), unconventionality));
-        return level is { } strange ? Pick(context, strange) : PickCadence(context);
+        return level is { } strange ? Pick(context, strange, mood) : PickCadence(context);
     }
 
     /// <summary>Every shape's weight at each end: its group's times its share of the group, by its weight in it.</summary>
@@ -208,12 +209,16 @@ internal static class ChordShapes
     private static IEnumerable<Weighted<ChordShape>> OfLevel(int level) => ShapesByUnconventionality[level].Select(x => new Weighted<ChordShape>(x.Weight, x));
 
     /// <summary>A shape of the unconventionality, the heavier ones being more likely.</summary>
-    public static ChordShape Pick(IGenerationContext context, int unconventionality)
+    /// <param name="mood">The song's mood, a darker one leaning to the level's dark shapes and a brighter to its bright, as a genre's pool leans (<see cref="Mood.Leans" />).</param>
+    public static ChordShape Pick(IGenerationContext context, int unconventionality, Mood mood)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(unconventionality);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(unconventionality, MaxUnconventionality);
 
-        return ShapesByUnconventionality[unconventionality][ShapeIndexGenerators[unconventionality](context)];
+        var shapes = ShapesByUnconventionality[unconventionality];
+        return mood.Darkness == 0
+            ? shapes[ShapeIndexGenerators[unconventionality](context)]
+            : context.Pick([..shapes.Select(x => new Weighted<ChordShape>(x.Weight * Math.Exp(mood.LogOdds((x.Darkness, 0))), x))]);
     }
 
     /// <summary>A shape that ends a phrase with pull towards home, the heavier ones being more likely.</summary>

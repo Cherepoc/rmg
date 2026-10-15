@@ -93,6 +93,9 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
     /// <summary>No genre: every choice as the songs have it.</summary>
     public static Genre None { get; } = new(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty);
 
+    /// <summary>The song's mood it was leaned by (<see cref="AtMood" />), which a draw outside its choices leans by too, as the songs' chord shapes; a middling one where none.</summary>
+    public Mood Mood { get; init; }
+
     /// <summary>Whether it names the choice.</summary>
     public bool Names(GenreChoice choice) => Choices.ContainsKey(choice.Name);
 
@@ -200,7 +203,7 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
             choices = choices.SetItem(choice.Name, options);
         }
 
-        return this with { Choices = choices };
+        return this with { Choices = choices, Mood = mood };
 
         // a pool's weights by their factors, at every end, the heaviest of an end as heavy as before
         static ImmutableDictionary<string, ByConvention> Weighed(ImmutableDictionary<string, ByConvention> pool, Func<string, double> factor)
