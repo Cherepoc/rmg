@@ -14,13 +14,6 @@
     },
     "seeds": [
       {
-        "seed": "4",
-        "at": 0,
-        "listen": [
-          "Chords (Lead 1 (square))"
-        ]
-      },
-      {
         "seed": "8",
         "at": 0,
         "listen": [
@@ -36,21 +29,28 @@
       },
       {
         "seed": "F",
-        "at": 5.6,
+        "at": 5.3,
         "listen": [
           "Chords (Lead 2 (sawtooth))"
         ]
       },
       {
         "seed": "T",
-        "at": 8.6,
+        "at": 8.2,
+        "listen": [
+          "Chords (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 2.7,
         "listen": [
           "Chords (Lead 2 (sawtooth))"
         ]
       },
       {
         "seed": "d",
-        "at": 19.4,
+        "at": 18.7,
         "listen": [
           "Chords (Lead 2 (sawtooth))"
         ]
@@ -326,7 +326,7 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 65.2,
+        "at": 64.6,
         "listen": [
           "Bass (Electric Bass (finger))"
         ]
@@ -339,29 +339,29 @@
         ]
       },
       {
+        "seed": "D",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
         "seed": "E",
-        "at": 153.4,
+        "at": 152.1,
         "listen": [
           "Bass (Electric Bass (finger))"
         ]
       },
       {
         "seed": "F",
-        "at": 134.8,
+        "at": 132.6,
         "listen": [
           "Bass (Slap Bass 1)"
         ]
       },
       {
-        "seed": "I",
-        "at": 42.1,
-        "listen": [
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
         "seed": "N",
-        "at": 31.7,
+        "at": 31.4,
         "listen": [
           "Bass (Electric Bass (finger))"
         ]

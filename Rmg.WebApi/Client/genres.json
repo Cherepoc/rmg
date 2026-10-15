@@ -158,6 +158,8 @@
     "name": "Dark jazz",
     "description": "Slow, dark jazz, a noir lounge band at a funeral's pace: a tenor sax or a vibraphone holding long notes over an electric piano's held minor chords, an upright bass on the roots, brushes barely there, an organ, strings or a choir beneath, minutes on two or three chords, everything soft and in a hall, 40 to 76.",
     "choices": {
+      "intensity": { "from": -100, "to": 0 },
+      "darkness": { "from": 20, "to": 100 },
       "tempo": { "from": [40, 60, 60], "to": [50, 72, 76] },
       "length": { "from": [240, 300, 300], "to": [420, 540, 780] },
       "meter": { "4/4": 100, "3/4": [10, 15, 20] },
@@ -997,6 +999,8 @@
     "name": "Celtic",
     "description": "Irish and Scottish tunes: a fiddle, a flute or a whistle and the pipes playing jigs and reels in unison, a bouzouki or a guitar droning beneath, Dorian and Mixolydian, cuts and rolls, sets of tunes changing key, a bodhrán or no drums, 100 to 190.",
     "choices": {
+      "intensity": { "from": -80, "to": 80 },
+      "darkness": { "from": -80, "to": 80 },
       "length": { "from": [150, 150, 120], "to": [270, 300, 330] },
       "harmonyDevices": { "pedal": [30, 40, 50], "innerLine": 0, "reharmonised": 0 },
       "sectionPedal": { "home": 30, "dominant": 10, "drone": 60 },
@@ -1430,6 +1434,8 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "intensity": { "from": 0, "to": 100 },
+      "darkness": { "from": -20, "to": 100 },
       "openingPart": { "riff": 85, "bass": 10, "drum": 10 },
       "soloShare": { "trading": 100, "together": [20, 30, 40] },
       "soloCount": { "one": 100, "two": [30, 50, 60], "three": 0 },
@@ -1682,6 +1688,8 @@
     "name": "Medieval",
     "description": "Calm and modal: recorders, flutes and a fiddle over a lute and a harp, a choir and a drone, open fifths, a second voice in fourths and fifths, 3/4 and 6/8, slow, a tambourine, a triangle and a frame drum marking the form.",
     "choices": {
+      "intensity": { "from": -80, "to": 80 },
+      "darkness": { "from": -80, "to": 80 },
       "rootDegree": { "seventh": 70, "third": 40 },
       "vamp": { "sections": [20, 30, 40] },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
@@ -1748,6 +1756,8 @@
     "name": "Dungeon synth",
     "description": "Dark and slow: a harpsichord's ostinato under a celesta or a horn, synth strings, choirs and brass, minor and harmonic minor triads, drones and a deep reverb, a timpani and a snare's roll marking the form.",
     "choices": {
+      "intensity": { "from": -100, "to": 20 },
+      "darkness": { "from": 0, "to": 100 },
       "loop": { "sections": [30, 40, 40] },
       "vamp": { "sections": [15, 25, 35] },
       "length": { "from": [150, 180, 120], "to": [360, 420, 600] },
@@ -1810,6 +1820,8 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, now and then a clean lead floating over.",
     "choices": {
+      "intensity": { "from": -20, "to": 100 },
+      "darkness": { "from": -20, "to": 100 },
       "length": { "from": [210, 220, 180], "to": [360, 400, 480] },
       "sectionHome": { "tonic": 100, "relative": [10, 15, 20], "fourth": [0, 5, 10], "fifth": [0, 5, 10] },
       "voice": { "verses": [30, 40, 50] },
@@ -1900,6 +1912,8 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, the kick and the bass with it, a picked or clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "intensity": { "from": -20, "to": 100 },
+      "darkness": { "from": -20, "to": 100 },
       "insertion": { "none": 100, "wah": [0, 10, 20] },
       "loop": { "sections": [10, 25, 30] },
       "rootDegree": { "third": 60, "sixth": 65, "seventh": 65 },
@@ -1985,6 +1999,8 @@
     "name": "Disco",
     "description": "The kick four on the floor, the open hi-hat off the beat, a bass in octaves, strings and horns, a clean guitar scratching 16ths, electric piano sevenths and ninths, minor and Dorian, 110 to 130.",
     "choices": {
+      "intensity": { "from": -20, "to": 80 },
+      "darkness": { "from": -80, "to": 20 },
       "length": { "to": [300, 360, 480], "from": [200, 200, 180] },
       "alone": { "drum": 100, "bass": 40 },
       "texture": { "steady": [100, 82, 100], "build": [0, 10, 100], "thin": [10, 15, 25], "alone": [5, 10, 15] },
@@ -2057,6 +2073,8 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "intensity": { "from": -40, "to": 80 },
+      "darkness": { "from": 0, "to": 100 },
       "glideRate": { "share": 20 },
       "length": { "from": [150, 150, 120], "to": [250, 250, 300] },
       "sectionLength": { "bars16": 100, "bars8": [50, 50, 50], "bars32": [0, 10, 20] },
@@ -2130,6 +2148,8 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "intensity": { "from": -20, "to": 100 },
+      "darkness": { "from": -80, "to": 40 },
       "glide": { "lead": [0, 10, 20] },
       "length": { "from": [180, 210, 240], "to": [300, 360, 480] },
       "rests": { "drum": 65, "bass": 60 },
@@ -2721,6 +2741,8 @@
     "name": "Bossa nova",
     "description": "A nylon guitar's syncopated chords, a flute or a sax, major sevenths and ninths moving by ii-V, the snare's cross-stick on a brush kit, a shaker, soft and straight, 100 to 140.",
     "choices": {
+      "intensity": { "from": -100, "to": 20 },
+      "darkness": { "from": -80, "to": 20 },
       "harmonyDevices": { "pedal": [10, 20, 30], "innerLine": [20, 30, 40], "reharmonised": [0, 25, 25] },
       "length": { "from": [110, 120, 140], "to": [200, 240, 330] },
       "alternatingBass": { "sections": [30, 50, 50] },
@@ -3111,6 +3133,8 @@
     "name": "Chiptune",
     "description": "Square and saw waves on every part, as an old games console's sound chip plays them: chords broken into fast arpeggios, a pulse bass, a catchy hook repeated, a small electronic kit, straight, 110 to 190, a game loop or a few minutes long, major or minor.",
     "choices": {
+      "intensity": { "from": -20, "to": 100 },
+      "darkness": { "from": -80, "to": 40 },
       "length": { "from": [60, 70, 60], "to": [210, 270, 360] },
       "cadenceRaise": { "sections": [30, 40, 40] },
       "formChances": { "forms": [50, 30, 10] },

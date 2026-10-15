@@ -968,7 +968,10 @@ can be):
    of warmth and darkness first.
 5. Done (15 October 2026): the other genres' spans, Doom dark and calm (darkness 0 to 100, intensity -80 to 40),
    Black metal dark and fierce (20 to 100, 0 to 100), Punk fierce (intensity 0 to 100), Ambient calm (-100 to 0), the
-   Power ballad calm (-80 to 40), Pop bright (darkness -80 to 40), Reggae bright and calm (-80 to 20 each); by listening.
+   Power ballad calm (-80 to 40), Pop bright (darkness -80 to 40), Reggae bright and calm (-80 to 20 each); by listening. And
+   twelve more (15 October 2026): Thrash, Djent and Nu metal dark and fierce, Dark jazz and Dungeon synth dark and calm,
+   Trance, Disco and Chiptune bright and lively, Bossa nova bright and calm, Trap dark, Medieval and Celtic wide; to ask
+   when a round has room: `thrash-fierce` and `darkjazz-dark`, the songs at their span's end against a neutral mood.
 
 **4. The engine's put-off features:**
 1. Put off again (15 October 2026): the false ending, a harmony edit before the realizer for the home chord's hit, for
@@ -984,8 +987,9 @@ can be):
 
 **5. Housekeeping:** done in part (15 October 2026): the drag test's flake, a playing song crossing a change of chord
 between the last move and the let-go, its readout now checked for its form there (the paused one's as before); left,
-the seek test's flake (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), seen once, its message not
-kept, to read when it fails again. Analytics written off the request struck, as *Decided, and kept* has it; the tests that check less than their names; the drum solo's
+the seek test's flake (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`) and the length's
+(`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`), each seen once, their messages not kept, to read when they
+fail again. Analytics written off the request struck, as *Decided, and kept* has it; the tests that check less than their names; the drum solo's
 parameters passed with the song's decisions whole, done (15 October 2026), its stage taking them as every stage does;
 the verdicts by song (step 0's), done.
 
