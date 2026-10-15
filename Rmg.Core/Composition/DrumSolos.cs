@@ -150,6 +150,36 @@ internal static class DrumSolos
         public (int Phrase, SoloGesture Gesture, int Speed, Sticking Sticking, int At)? Motif { get; set; }
     }
 
+    /// <summary>The drum solos, the drummer's own, over the groove they quote, a stage of the song after it is put together (<see cref="SongStages" />).</summary>
+    internal static SongDraft Apply(SongDecisions song, SongDraft draft)
+    {
+        var holds = draft.Holds(song);
+        return draft with
+        {
+            Timeline = Play(
+                draft.Timeline,
+                song.Tracks.SongDrums,
+                song.Form.Map,
+                song.Solos,
+                song.Soloists.GetValueOrDefault(TrackRole.Drum),
+                index => song.AppearanceStream(SongStream.DrumSolo, index),
+                index => song.AppearanceStream(SongStream.DrumSoloStacks, index),
+                index => song.AppearanceStream(SongStream.DrumSoloFeet, index),
+                index => song.AppearanceStream(SongStream.DrumSoloPlayers, index),
+                index => song.AppearanceStream(SongStream.DrumSoloOstinato, index),
+                index => song.AppearanceStream(SongStream.DrumSoloStickings, index),
+                index => song.AppearanceStream(SongStream.DrumSoloMotifs, index),
+                index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
+                song.Form.Drops,
+                // where the form next stops the drums, which a drum solo keeps out of as every drum stage does
+                position => song.Tracks.Definitions.Where(x => x.Value is PercussionInstrumentTrack).Select(x => holds.NextAfter(Hold.Cut, position, x.Key)).DefaultIfEmpty(double.PositiveInfinity).Min(),
+                song.Genre,
+                song.Meter,
+                DrumSounds.OddsOf(song.Genre, GenreChoices.DrumSounds)
+            )
+        };
+    }
+
     /// <summary>
     ///     The song with every drum solo played, each from a sequence of its own by its appearance's place; the drums that
     ///     play in the section are its kit.
@@ -165,7 +195,7 @@ internal static class DrumSolos
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
     /// <param name="drops">Where the song drops, whose build a solo before it leaves to roll.</param>
     /// <param name="stopsAfter">Where the form next stops the drums after a position, a stop ending's silence, which a solo keeps out of.</param>
-    public static TrackEventStateTimelineMap<StateMap> Apply(
+    private static TrackEventStateTimelineMap<StateMap> Play(
         TrackEventStateTimelineMap<StateMap> song,
         IEnumerable<PercussionInstrumentDefinition> songDrums,
         SongMap map,

@@ -986,7 +986,8 @@ can be):
 between the last move and the let-go, its readout now checked for its form there (the paused one's as before); left,
 the seek test's flake (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), seen once, its message not
 kept, to read when it fails again. Analytics written off the request struck, as *Decided, and kept* has it; the tests that check less than their names; the drum solo's
-parameters passed with the song's decisions whole; the verdicts by song (step 0's).
+parameters passed with the song's decisions whole, done (15 October 2026), its stage taking them as every stage does;
+the verdicts by song (step 0's), done.
 
 **6. The carry-overs:** a section's energy choosing a figure (Ska punk's choruses, as it chooses the chugs); the
 melody's run into a section, a fanfare's pickup (`lineRun`'s melody, Orchestral's and Symphonic's); the post-chorus

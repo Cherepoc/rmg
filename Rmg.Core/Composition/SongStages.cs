@@ -124,7 +124,7 @@ internal static class SongStages
         new("Mutations", Composition.Mutations.Apply, CanSkip: true),
         new("Fills", Fills, CanSkip: false),
         new("Lift cues", LiftCues, CanSkip: true),
-        new("Drum solos", DrumSolos, CanSkip: true),
+        new("Drum solos", Composition.DrumSolos.Apply, CanSkip: true),
         new("Lines", Lines, CanSkip: false),
         new("Doubling", Doubling, CanSkip: true),
         new("Call and response", Composition.CallAndResponse.Apply, CanSkip: true),
@@ -261,36 +261,6 @@ internal static class SongStages
     /// <summary>A bigger section announced, the hi-hat opening and the snare on its head before it.</summary>
     internal static SongDraft LiftCues(SongDecisions song, SongDraft draft) =>
         draft with { Timeline = Composition.LiftCues.Apply(draft.Timeline, song.Form.Lines, song.Form.Map) };
-
-    /// <summary>The drum solos, the drummer's own, over the groove they quote.</summary>
-    internal static SongDraft DrumSolos(SongDecisions song, SongDraft draft)
-    {
-        var holds = draft.Holds(song);
-        return draft with
-        {
-            Timeline = Composition.DrumSolos.Apply(
-                draft.Timeline,
-                song.Tracks.SongDrums,
-                song.Form.Map,
-                song.Solos,
-                song.Soloists.GetValueOrDefault(TrackRole.Drum),
-                index => song.AppearanceStream(SongStream.DrumSolo, index),
-                index => song.AppearanceStream(SongStream.DrumSoloStacks, index),
-                index => song.AppearanceStream(SongStream.DrumSoloFeet, index),
-                index => song.AppearanceStream(SongStream.DrumSoloPlayers, index),
-                index => song.AppearanceStream(SongStream.DrumSoloOstinato, index),
-                index => song.AppearanceStream(SongStream.DrumSoloStickings, index),
-                index => song.AppearanceStream(SongStream.DrumSoloMotifs, index),
-                index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
-                song.Form.Drops,
-                // where the form next stops the drums, which a drum solo keeps out of as every drum stage does
-                position => song.Tracks.Definitions.Where(x => x.Value is PercussionInstrumentTrack).Select(x => holds.NextAfter(Hold.Cut, position, x.Key)).DefaultIfEmpty(double.PositiveInfinity).Min(),
-                song.Genre,
-                song.Meter,
-                DrumSounds.OddsOf(song.Genre, GenreChoices.DrumSounds)
-            )
-        };
-    }
 
     /// <summary>
     ///     The lines placed over the whole song, as they go on from section to section and lead into the next, a hook
