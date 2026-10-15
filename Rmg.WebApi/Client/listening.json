@@ -1,8 +1,8 @@
 [
   {
-    "id": "chiptune-speed",
-    "question": "Chiptune's chords cycled on one voice, a chord held long now cycling three times at the most, its notes slower: a chip's chord on every chord now, or a broken chord where it buzzed?",
-    "decides": "The frame-rate arpeggio's cycles, at most Articulations.FrameCycles 3 a chord, against whole chords; heard worse on the long-held chords at two frames a note on 15 October 2026, asked again over the same songs.",
+    "id": "chiptune-overlap",
+    "question": "Chiptune's chords cycled on one voice, each chord's cycle now stopping where the next chord starts and its broken chords no longer ringing over each other: a chip's chord on every chord now?",
+    "decides": "A cycle and a synth's broken chord ended at the part's next note, against whole chords; heard too fast on 15 October 2026 where chords struck in 16ths ran their cycles together.",
     "genre": "chiptune",
     "without": {
       "skip": [],
@@ -43,7 +43,7 @@
       },
       {
         "seed": "a",
-        "at": 2.7,
+        "at": 9.4,
         "listen": [
           "Chords (Lead 2 (sawtooth))"
         ]
@@ -58,566 +58,598 @@
     ]
   },
   {
-    "id": "cinematic-pad",
-    "question": "Cinematic piano's strings holding the chords under the piano: a film score's bed, or a piano piece smothered?",
-    "decides": "Cinematic piano's pad, its strings at 70-80-80, against the piano, its bass and its counter-melody alone.",
-    "genre": "filmPiano",
+    "id": "funk-dead-notes",
+    "question": "Funk's bass and guitar muting their 16ths between the 8ths, dead notes, short and soft: the funk's percussive chop, or notes swallowed?",
+    "decides": "Dead notes, Funk's articulation.deadNotes 40-50-60, against every note sounded.",
+    "genre": "funk",
     "without": {
       "skip": [],
       "genre": {
-        "parts": {
-          "pad": 0
+        "articulation": {
+          "deadNotes": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 139.3,
+        "seed": "5",
+        "at": 34.8,
         "listen": [
-          "Pad (String Ensemble 1)"
+          "Rhythm part (Clavinet)",
+          "Bass (Slap Bass 1)"
         ]
       },
       {
-        "seed": "9",
-        "at": 0,
+        "seed": "B",
+        "at": 7,
         "listen": [
-          "Chords (Acoustic Grand Piano)",
-          "Pad (String Ensemble 1)"
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "A",
-        "at": 4.8,
+        "seed": "H",
+        "at": 15,
         "listen": [
-          "Pad (String Ensemble 2)"
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "M",
-        "at": 117.6,
+        "seed": "R",
+        "at": 224.6,
         "listen": [
-          "Bass (Contrabass)"
+          "Rhythm part (Clavinet)"
         ]
       },
       {
-        "seed": "V",
-        "at": 133.1,
+        "seed": "T",
+        "at": 199.1,
         "listen": [
-          "Chords (Acoustic Grand Piano)",
-          "Bass (Acoustic Grand Piano)",
-          "Pad (String Ensemble 1)"
+          "Rhythm part (Clavinet)"
         ]
       },
       {
-        "seed": "Y",
-        "at": 18.1,
+        "seed": "U",
+        "at": 32.1,
         "listen": [
-          "Pad (String Ensemble 1)",
-          "Melody (Acoustic Grand Piano)"
+          "Rhythm part (Clavinet)"
         ]
       }
     ]
   },
   {
-    "id": "lyrical-beat",
-    "question": "Lyrical guitar's slow swung beat under its guitars: a downtempo groove, or the haze broken up?",
-    "decides": "Lyrical guitar's drums, 95-75-40, against none, as most of its records play.",
-    "genre": "lyrical",
+    "id": "chamber-imitation",
+    "question": "Chamber's counter-melody taking the melody's phrase a bar later, an octave below, as a canon: a conversation, or an echo that crowds?",
+    "decides": "Imitation, Chamber's doubling.imitation 15-25-35, against none.",
+    "genre": "chamber",
     "without": {
       "skip": [],
       "genre": {
-        "parts": {
-          "drum": 0
+        "doubling": {
+          "imitation": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "T",
+        "at": 229.3,
+        "listen": [
+          "Melody (Violin)",
+          "Counter-melody (Viola)"
+        ]
+      },
+      {
+        "seed": "Z",
+        "at": 191,
+        "listen": [
+          "Melody (Violin)",
+          "Counter-melody (Cello)"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 176,
+        "listen": [
+          "Melody (Flute)",
+          "Counter-melody (Viola)"
+        ]
+      },
+      {
+        "seed": "17",
+        "at": 102.7,
+        "listen": [
+          "Melody (Oboe)",
+          "Counter-melody (Cello)"
+        ]
+      },
+      {
+        "seed": "1M",
+        "at": 146.6,
+        "listen": [
+          "Melody (Flute)",
+          "Counter-melody (Cello)"
+        ]
+      },
+      {
+        "seed": "1o",
+        "at": 360.2,
+        "listen": [
+          "Melody (Clarinet)",
+          "Counter-melody (Cello)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "thrash-fierce",
+    "question": "Thrash at its fiercest and darkest, faster, double time and chugs the more, its fills busier: thrash at full tilt, or too much?",
+    "decides": "Thrash's mood spans, darkness -20 to 100 and intensity 0 to 100, the songs heard at their fiercest, against a neutral mood.",
+    "genre": "thrash",
+    "without": {
+      "skip": [],
+      "genre": {
+        "darkness": {
+          "from": 0,
+          "to": 0
+        },
+        "intensity": {
+          "from": 0,
+          "to": 0
         }
       }
     },
     "seeds": [
       {
         "seed": "1",
-        "at": 0,
+        "at": 51.4,
         "listen": [
-          "Bass (Electric Bass (finger))",
-          "Hi-Hat",
-          "Cabasa"
-        ]
-      },
-      {
-        "seed": "E",
-        "at": 0,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Chords (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))",
+          "Riff (Distortion Guitar)",
           "Hi-Hat"
         ]
       },
       {
         "seed": "J",
-        "at": 0,
+        "at": 252.2,
         "listen": [
-          "Rhythm part (Acoustic Guitar (steel))",
-          "Maracas",
-          "Cabasa"
+          "Riff (Distortion Guitar)",
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "L",
-        "at": 254.1,
+        "seed": "Z",
+        "at": 28.6,
         "listen": [
-          "Guiro",
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 153.8,
+        "listen": [
+          "Kick",
+          "Acoustic Snare",
+          "Tom"
+        ]
+      },
+      {
+        "seed": "i",
+        "at": 0,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "r",
+        "at": 117.9,
+        "listen": [
+          "Melody (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
           "Ride"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 0,
-        "listen": [
-          "Maracas",
-          "Hi-Hat",
-          "Rhythm part (Acoustic Guitar (nylon))"
-        ]
-      },
-      {
-        "seed": "W",
-        "at": 207.1,
-        "listen": [
-          "Ride",
-          "Maracas"
         ]
       }
     ]
   },
   {
-    "id": "dnb-two-step",
-    "question": "Drum and bass's kick on 1 and the 3-and around the snare's 2 and 4, the two-step: rolling, or stiff?",
-    "decides": "The two-step, Drum and bass's figure.ground 50-60-60 beside its breakbeat, against those alone.",
-    "genre": "dnb",
+    "id": "darkjazz-dark",
+    "question": "Dark jazz at its darkest and calmest, minor and darker chords, slower and sparer: the noir at its deepest, or just gloomy?",
+    "decides": "Dark jazz's mood spans, darkness 20 to 100 and intensity -100 to 0, the songs heard at their darkest, against a neutral mood.",
+    "genre": "darkJazz",
     "without": {
       "skip": [],
       "genre": {
-        "figure.ground": {
-          "twoStep": 0
+        "darkness": {
+          "from": 0,
+          "to": 0
+        },
+        "intensity": {
+          "from": 0,
+          "to": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 138.9,
+        "seed": "5",
+        "at": 11.2,
         "listen": [
-          "Bass (Synth Bass 1)",
-          "Hi-Hat",
-          "Kick"
+          "Chords (Drawbar Organ)",
+          "Counter-melody (Cello)",
+          "Bass (Fretless Bass)"
         ]
       },
       {
-        "seed": "6",
-        "at": 273.5,
+        "seed": "9",
+        "at": 41.7,
         "listen": [
-          "Bass (Synth Bass 1)",
-          "Acoustic Snare"
+          "Ride",
+          "Melody (Tenor Sax)",
+          "Chords (Vibraphone)"
         ]
       },
       {
-        "seed": "F",
-        "at": 279.6,
+        "seed": "E",
+        "at": 112.4,
         "listen": [
-          "Hi-Hat",
-          "Tom",
-          "Kick"
+          "Chords (Electric Piano 1)"
         ]
       },
       {
-        "seed": "H",
-        "at": 45.9,
+        "seed": "I",
+        "at": 7.2,
         "listen": [
-          "Acoustic Snare"
+          "Chords (Vibraphone)",
+          "Bass (Contrabass)",
+          "Melody (Muted Trumpet)"
         ]
       },
       {
-        "seed": "S",
-        "at": 109.6,
+        "seed": "L",
+        "at": 139.3,
         "listen": [
-          "Acoustic Snare",
-          "Kick"
+          "Melody (Tenor Sax)"
         ]
       },
       {
-        "seed": "X",
-        "at": 218.4,
+        "seed": "V",
+        "at": 239.4,
         "listen": [
-          "Acoustic Snare"
+          "Melody (Clarinet)"
         ]
       }
     ]
   },
   {
-    "id": "soul-every-beat",
-    "question": "Soul's snare on every beat, as a Motown record drives: a stomp, or a march?",
-    "decides": "The snare on every beat, Soul's figure.backbeat 20-30-30, against its backbeat.",
-    "genre": "soul",
+    "id": "jazz-bands",
+    "question": "Jazz's tempo drawn in its records' bands, a ballad, a medium or a burner, seldom between: jazz as its records run, or the in-between missed?",
+    "decides": "Jazz's tempoBand 31-44-31, ballads and burners among the mid-tempo songs, against the middle band alone.",
+    "genre": "jazz",
     "without": {
       "skip": [],
       "genre": {
-        "figure.backbeat": {
-          "everyBeat": 0
+        "tempoBand": {
+          "slow": 0,
+          "middle": 1,
+          "fast": 0
         }
       }
     },
     "seeds": [
       {
         "seed": "1",
-        "at": 28,
+        "at": 72.4,
         "listen": [
-          "Acoustic Snare"
+          "Bass (Drawbar Organ)",
+          "Chords (Electric Guitar (jazz))",
+          "Hi-Hat"
         ]
       },
-      {
-        "seed": "L",
-        "at": 138,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "O",
-        "at": 23.8,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "P",
-        "at": 26,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "W",
-        "at": 57.7,
-        "listen": [
-          "Acoustic Snare",
-          "Clap"
-        ]
-      },
-      {
-        "seed": "X",
-        "at": 0,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "disco-pulse",
-    "question": "Disco's bass pulsing in even 8ths on the root: the dance floor's drive, or a bass that never moves?",
-    "decides": "The bass's 8ths, Disco's figure.bass 40-50-50, against its own line.",
-    "genre": "disco",
-    "without": {
-      "skip": [],
-      "genre": {
-        "figure.bass": {
-          "eighths": 0
-        }
-      }
-    },
-    "seeds": [
       {
         "seed": "3",
-        "at": 64.6,
+        "at": 192.2,
         "listen": [
-          "Bass (Electric Bass (finger))"
+          "Bass (Acoustic Bass)",
+          "Drums",
+          "Chords (Vibraphone)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 0,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Bass (Acoustic Bass)",
+          "Solo (Alto Sax)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 0,
+        "listen": [
+          "Bass (Acoustic Bass)",
+          "Chords (Electric Piano 1)",
+          "Ride"
         ]
       },
       {
         "seed": "8",
-        "at": 41,
+        "at": 0,
         "listen": [
-          "Bass (Electric Bass (finger))"
+          "Chords (Electric Piano 1)",
+          "Bass (Acoustic Bass)"
         ]
       },
       {
         "seed": "D",
         "at": 0,
         "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "E",
-        "at": 152.1,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 132.6,
-        "listen": [
-          "Bass (Slap Bass 1)"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 31.4,
-        "listen": [
-          "Bass (Electric Bass (finger))"
+          "Bass (Acoustic Bass)",
+          "Chords (Acoustic Grand Piano)",
+          "Melody (Tenor Sax)"
         ]
       }
     ]
   },
   {
-    "id": "house-kick-out",
-    "question": "House taking its kick and its bass out for a beat or a bar before a downbeat, the hats playing on: a lift, or a hole?",
-    "decides": "The kick-out, House's kickOut.lines 20-30-40, the bass out with it, against the kick playing through.",
-    "genre": "electronic",
+    "id": "hiphop-hook",
+    "question": "Hip-hop's hook half as long as its verse, eight bars to its sixteen: a rap song's shape, or a chorus cut short?",
+    "decides": "Hip-hop's roleLength.chorus 25, against the songs' own length.",
+    "genre": "hipHop",
     "without": {
       "skip": [],
       "genre": {
-        "kickOut": {
-          "lines": 0
+        "roleLength": {
+          "chorus": 50
         }
       }
     },
     "seeds": [
       {
-        "seed": "1",
-        "at": 57,
-        "listen": [
-          "Bass (Synth Bass 1)",
-          "Electric Snare"
-        ]
-      },
-      {
         "seed": "3",
-        "at": 141.2,
+        "at": 176,
         "listen": [
-          "Bass (Synth Bass 1)",
-          "Kick"
+          "Hi-Hat",
+          "Melody (Electric Piano 1)",
+          "Riff (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "5",
-        "at": 232.1,
+        "at": 85.3,
         "listen": [
-          "Tom",
-          "Hi-Hat",
-          "Kick"
+          "Bass (Electric Bass (finger))",
+          "Melody (Acoustic Grand Piano)",
+          "Pad (Choir Aahs)"
         ]
       },
-      {
-        "seed": "A",
-        "at": 290.2,
-        "listen": [
-          "Tom"
-        ]
-      },
-      {
-        "seed": "E",
-        "at": 166.3,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "S",
-        "at": 44.4,
-        "listen": [
-          "Bass (Synth Bass 2)",
-          "Tom",
-          "Electric Snare"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "ballad-breakdown",
-    "question": "The Power ballad's last chorus played twice, its first pass built up from the voice alone, the drums next, the band by its end: a ballad's climax, or a stall before it?",
-    "decides": "The breakdown chorus, the Power ballad's lastRepeat.breakdown 30-40-40, against its last chorus repeated whole.",
-    "genre": "ballad",
-    "without": {
-      "skip": [],
-      "genre": {
-        "lastRepeat": {
-          "breakdown": 0
-        }
-      }
-    },
-    "seeds": [
       {
         "seed": "8",
-        "at": 297.4,
+        "at": 147.6,
         "listen": [
-          "Chords (Distortion Guitar)",
-          "Rhythm part (Acoustic Guitar (steel))",
+          "Hi-Hat",
+          "Chords (Drawbar Organ)",
           "Pad (String Ensemble 1)"
         ]
       },
       {
-        "seed": "L",
-        "at": 229.4,
+        "seed": "B",
+        "at": 16.9,
+        "listen": [
+          "Chords (String Ensemble 1)",
+          "Bass (Electric Bass (finger))",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 45.7,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 190.2,
         "listen": [
           "Hi-Hat",
-          "Bass (Electric Bass (finger))",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "e",
-        "at": 226.9,
-        "listen": [
-          "Chords (Acoustic Grand Piano)",
+          "Melody (Electric Piano 1)",
           "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "11",
-        "at": 228.9,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Riff (Synth Brass 1)",
-          "Ride"
-        ]
-      },
-      {
-        "seed": "1V",
-        "at": 229.7,
-        "listen": [
-          "Ride",
-          "Acoustic Snare",
-          "Rhythm part (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "1s",
-        "at": 211.2,
-        "listen": [
-          "Melody (Acoustic Grand Piano)",
-          "Pad (Pad 2 (warm))"
         ]
       }
     ]
   },
   {
-    "id": "folk-waltz",
-    "question": "Folk in three, its bass on 1 and its chords on 2 and 3: a waltz, or an oompah band?",
-    "decides": "The waltz figure, Folk's chords' 50-60-60 and bass's 20-30-30 in a bar of three, against their own rhythms.",
-    "genre": "folk",
+    "id": "symphonic-lift",
+    "question": "Symphonic's last section lifted by a third now and then, where a song lifts by a tone: an epic climax, or a jolt?",
+    "decides": "Symphonic's keyLift by a third, 5-10-20 each, against a half step or a tone.",
+    "genre": "symphonic",
     "without": {
       "skip": [],
       "genre": {
-        "figure.chords": {
-          "waltz": 0
-        },
-        "figure.bass": {
-          "waltz": 0
+        "keyLift": {
+          "semitones3": 0,
+          "semitones4": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "5",
-        "at": 0,
+        "seed": "H",
+        "at": 282.1,
         "listen": [
-          "Chords (Dulcimer)"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 0,
-        "listen": [
-          "Chords (Reed Organ)"
-        ]
-      },
-      {
-        "seed": "V",
-        "at": 24.1,
-        "listen": [
-          "Chords (Reed Organ)",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "d",
-        "at": 4.4,
-        "listen": [
-          "Chords (Acoustic Guitar (steel))"
-        ]
-      },
-      {
-        "seed": "z",
-        "at": 27,
-        "listen": [
-          "Melody (Whistle)"
-        ]
-      },
-      {
-        "seed": "1B",
-        "at": 36,
-        "listen": [
-          "Solo (Flute)",
-          "Chords (Acoustic Guitar (steel))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "latin-tumbao",
-    "question": "Latin's bass on the tumbao, each bar's 2-and and 4 ahead of the chord, where it played its own line: a salsa's bass, or one that never lands?",
-    "decides": "The tumbao, Latin's figure.bass 100 beside its own rhythm's 20-30-40, against its own alone; asked once Latin was researched and retuned.",
-    "genre": "latin",
-    "without": {
-      "skip": [],
-      "genre": {
-        "figure.bass": {
-          "tumbao": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 55.4,
-        "listen": [
+          "Riff (Distortion Guitar)",
+          "Chords (Church Organ)",
           "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "1",
-        "at": 0,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 5.6,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "7",
-        "at": 180.6,
-        "listen": [
-          "Bass (Acoustic Bass)"
         ]
       },
       {
         "seed": "J",
-        "at": 283.1,
+        "at": 320.3,
         "listen": [
-          "Chords (Bright Acoustic Piano)",
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Rhythm part (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 309.4,
+        "listen": [
+          "Rhythm part (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "17",
+        "at": 307.8,
+        "listen": [
+          "Rhythm part (Distortion Guitar)",
+          "Chords (Distortion Guitar)",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1E",
+        "at": 203.4,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "1O",
+        "at": 302,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)",
+          "Chords (Distortion Guitar)",
+          "Riff (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rock-union",
+    "question": "Rock's melody passing between the major and the minor third, the pentatonic union: a rock singer's bluesy line, or a wrong note?",
+    "decides": "The pentatonic union, Rock's lineScale.union 20-30-30, against its pentatonic and the section's.",
+    "genre": "rock",
+    "without": {
+      "skip": [],
+      "genre": {
+        "lineScale": {
+          "union": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 81.5,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 20.1,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 8.4,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 233.8,
+        "listen": [
+          "Counter-melody (Electric Guitar (clean))",
+          "Melody (Harmonica)"
+        ]
+      },
+      {
+        "seed": "U",
+        "at": 57.2,
+        "listen": [
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 130.4,
+        "listen": [
+          "Melody (Electric Piano 1)",
+          "Riff (Electric Guitar (muted))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "blackmetal-minor",
+    "question": "Black metal's major chords a third from home turned minor: the cold, minor-on-minor sound, or a sour chord?",
+    "decides": "The minor mediant, Black metal's chordScales.minorMediant 20-30-40, against its chords as the scale has them.",
+    "genre": "blackMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "chordScales": {
+          "minorMediant": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "F",
+        "at": 233.6,
+        "listen": [
+          "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (finger))"
         ]
       },
       {
         "seed": "S",
-        "at": 37.3,
+        "at": 25.1,
         "listen": [
-          "Bass (Electric Bass (finger))"
+          "Rhythm part (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "i",
+        "at": 122.1,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 65.3,
+        "listen": [
+          "Melody (French Horn)"
+        ]
+      },
+      {
+        "seed": "q",
+        "at": 15.7,
+        "listen": [
+          "Chords (Synth Strings 1)"
+        ]
+      },
+      {
+        "seed": "z",
+        "at": 274.6,
+        "listen": [
+          "Riff (Distortion Guitar)"
         ]
       }
     ]
