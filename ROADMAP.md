@@ -264,6 +264,10 @@ song d's chords struck in 16ths each kept its chord's length, 1.12 beats, its cy
 other. A cycle now stops at its part's next note, a broken chord's note on an instrument that holds its sound ends
 there too (`Articulations`, a piano's ringing kept), and no echo repeats a cycled note (`CompositionStateKinds.Cycled`),
 as the rhythm part may carry both; asked again: `chiptune-overlap`.
+Asked from 15 October 2026, the third round, the order of work's devices and the mood: `chiptune-overlap`,
+`funk-dead-notes`, `chamber-imitation`, `thrash-fierce`, `darkjazz-dark`, `jazz-bands` (against the middle band alone,
+the bands alike drawing the same songs), `hiphop-hook`, `symphonic-lift`, `rock-union` and `blackmetal-minor`, the last
+two differing little (0.15 and 0.28); none queued behind them.
 
 Answered on 15 October 2026, accepted by the owner: `pop-post-chorus`, `medieval-drone`, `punk-drum-intro`,
 `ballad-piano-intro`, `punk-muted-verses`, `disco-run`, `latin-montuno` and `jazzfunk-chords`; `chiptune-frames` heard
