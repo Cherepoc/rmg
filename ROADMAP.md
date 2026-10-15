@@ -966,7 +966,9 @@ can be):
 4. Put off: the sound. The register is leaned in octaves, the melody 85 at the brightest and 65 at the darkest with
    darkness's full lean and unmoved below an octave's, too coarse for a mood; instruments by trait and tone want traits
    of warmth and darkness first.
-5. The other genres' spans, data, a genre's where its records reach a dark or a fierce end its middle does not.
+5. Done (15 October 2026): the other genres' spans, Doom dark and calm (darkness 0 to 100, intensity -80 to 40),
+   Black metal dark and fierce (20 to 100, 0 to 100), Punk fierce (intensity 0 to 100), Ambient calm (-100 to 0), the
+   Power ballad calm (-80 to 40), Pop bright (darkness -80 to 40), Reggae bright and calm (-80 to 20 each); by listening.
 
 **4. The engine's put-off features:**
 1. The false ending: a drop's kind before the last repeat, the home chord hit, a beat or two of silence, the drums

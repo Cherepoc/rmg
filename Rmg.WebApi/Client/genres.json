@@ -547,6 +547,8 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
+      "intensity": { "from": -80, "to": 20 },
+      "darkness": { "from": -80, "to": 20 },
       "mixFilter": { "dips": [10, 25, 40], "opening": [5, 10, 20], "closing": [5, 10, 20] },
       "doubling": { "riff": [40, 50, 50], "octaves": [7, 11, 15], "harmony": 25, "block": 0, "twin": 50 },
       "vamp": { "sections": [15, 25, 30] },
@@ -1108,6 +1110,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "intensity": { "from": -100, "to": 0 },
       "loop": { "sections": [20, 30, 40] },
       "rootMotion": { "same": 75 },
       "vamp": { "sections": [25, 40, 50] },
@@ -1183,6 +1186,7 @@
     "name": "Pop",
     "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus now and then lifted a key or played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, mostly major, 95 to 125.",
     "choices": {
+      "darkness": { "from": -80, "to": 40 },
       "feelChances": { "swing": [0, 5, 10], "halfTime": [0, 10, 20], "doubleTime": [0, 2, 2] },
       "length": { "from": [180, 180, 165], "to": [250, 260, 300] },
       "loop": { "sections": [20, 30, 20] },
@@ -1238,6 +1242,7 @@
     "name": "Power ballad",
     "description": "Slow, 60 to 95, mostly in 4/4, now and then 12/8: a clean or acoustic guitar's broken chords let ring with sweet held tones, an overdriven lead singing the melody, a fingered bass and strings, sus2 and add9 chords, the band building section by section in a big room, a heavy chorus, a guitar solo, now and then the last chorus up a step, fading or ringing out.",
     "choices": {
+      "intensity": { "from": -80, "to": 40 },
       "bassLanding": { "root": 100, "third": [5, 5, 10], "fifth": [5, 5, 10], "free": [0, 10, 40], "stepDown": [30, 40, 40] },
       "harmonyDevices": { "reharmonised": [0, 25, 25], "innerLine": [15, 25, 30], "pedal": [0, 6, 15] },
       "sectionHome": { "tonic": 100, "relative": 45 },
@@ -1594,6 +1599,8 @@
     "name": "Doom metal",
     "description": "Slow and crushing: low power chords held and left to ring over a heavy, sparse beat, long stretches on one chord creeping by half steps, the tritone and Phrygian, an organ, a mournful lead, few solos, long songs.",
     "choices": {
+      "intensity": { "from": -80, "to": 40 },
+      "darkness": { "from": 0, "to": 100 },
       "sectionChanges": { "tempo": [0, 10, 20], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": [0, 4, 50], "eased": 50 },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
       "rudiments": { "flams": [0, 35, 70], "drags": [0, 0, 20] },
@@ -2391,6 +2398,7 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major, Mixolydian or minor, a count-in and a stop.",
     "choices": {
+      "intensity": { "from": 0, "to": 100 },
       "rootDegree": { "fourth": 70, "fifth": 65, "sixth": 60 },
       "push": { "sections": [10, 20, 25] },
       "lastRepeat": { "songs": [25, 40, 40] },
@@ -2936,6 +2944,8 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "intensity": { "from": 0, "to": 100 },
+      "darkness": { "from": 20, "to": 100 },
       "chordScales": { "applied": [0, 10, 10], "borrowed": [0, 12, 12], "own": [0, 0, 30], "mediant": 0, "dominant": 0, "minorMediant": [20, 30, 40] },
       "openingPart": { "riff": 60, "pad": 40 },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 80, 60], "twin": 50 },

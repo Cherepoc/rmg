@@ -448,7 +448,7 @@
     "seeds": [
       {
         "seed": "8",
-        "at": 293.9,
+        "at": 297.4,
         "listen": [
           "Chords (Distortion Guitar)",
           "Rhythm part (Acoustic Guitar (steel))",
@@ -474,7 +474,7 @@
       },
       {
         "seed": "11",
-        "at": 226,
+        "at": 228.9,
         "listen": [
           "Bass (Electric Bass (finger))",
           "Riff (Synth Brass 1)",
@@ -483,7 +483,7 @@
       },
       {
         "seed": "1V",
-        "at": 248.3,
+        "at": 229.7,
         "listen": [
           "Ride",
           "Acoustic Snare",
@@ -492,7 +492,7 @@
       },
       {
         "seed": "1s",
-        "at": 207.5,
+        "at": 211.2,
         "listen": [
           "Melody (Acoustic Grand Piano)",
           "Pad (Pad 2 (warm))"
