@@ -96,6 +96,8 @@ internal static class SongForms
         new(0, Parse("VVVVVV")),
         // and with a post-chorus after every chorus, a pop song's bonus hook, which songs never take but a genre may
         new(0, Parse("VCQVCQBCQ")),
+        // and three verses with their hooks, a rap song's, which songs never take but a genre may
+        new(0, Parse("VCVCVC")),
         new(0, Parse("VPCQVPCQBCQ"))
     ];
 

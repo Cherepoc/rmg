@@ -43,6 +43,34 @@ public sealed class SongFormReportTest
         await Assert.That(hooks).IsGreaterThan(posts / 3);
     }
 
+    /// <summary>
+    ///     Hip-hop's hook half its verse, its chorus's length halved (`roleLength.chorus` 25), and some of its songs three
+    ///     verses long (`vcvcvc`), against the same songs with the songs' own lengths.
+    /// </summary>
+    [Test]
+    public async Task AHipHopHook_IsShorterThanItsVerse_AndSomeSongsHaveThreeVerses()
+    {
+        (double Verse, double Chorus, int ThreeVerses) Measure(Rmg.Core.Composition.Genre genre)
+        {
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
+            double Bars(SectionRole role) => songs.SelectMany(song =>
+            {
+                var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+                return song.Map.Sections.Where(x => structure.Roles[x.SectionId] == role).Select(x => x.Duration / x.Meter.BarDuration);
+            }).DefaultIfEmpty(0).Average();
+            var three = songs.Count(song => ((SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!) is var structure
+                                            && structure.SectionIds.Count(x => structure.Roles[x] == SectionRole.Verse) >= 3);
+            return (Bars(SectionRole.Verse), Bars(SectionRole.Chorus), three);
+        }
+
+        var hipHop = Measure(Rmg.Tests.Genres.GenrePresets.Genre("hipHop"));
+        var own = Measure(Rmg.Tests.Genres.GenrePresets.Without("hipHop", GenreChoices.RoleLength.Name));
+        Console.WriteLine($"Hip-hop: a verse {hipHop.Verse:0.0} bars, a chorus {hipHop.Chorus:0.0}, {hipHop.ThreeVerses} of 64 songs three verses; with the songs' own lengths a verse {own.Verse:0.0}, a chorus {own.Chorus:0.0}");
+        await Assert.That(hipHop.Chorus).IsLessThan(hipHop.Verse * 0.8);
+        await Assert.That(hipHop.Chorus).IsLessThan(own.Chorus);
+        await Assert.That(hipHop.ThreeVerses).IsGreaterThan(5);
+    }
+
     [Test]
     public async Task ASongOfAForm_PlaysASectionForEveryRole_NoneFollowingItself()
     {

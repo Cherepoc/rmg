@@ -64,9 +64,15 @@ internal static class SectionLength
         return weights.Sum(x => x.Weight * x.Value) / weights.Sum(x => x.Weight);
     }
 
+    /// <summary>The roles whose length a genre may halve or double (<see cref="GenreChoices.RoleLength" />).</summary>
+    public static ImmutableArray<SectionRole> LengthRoles { get; } = [SectionRole.Verse, SectionRole.Chorus, SectionRole.Bridge];
+
     private static ImmutableArray<Weighted<int>> Weights(double unconventionality, SectionRole role, double lean, Genre genre)
     {
-        var rolePlays = GetRolePlays(role);
+        // the plays the role leans to, halved or doubled by a genre's, as a hip-hop hook is half its verse
+        var rolePlays = GetRolePlays(role) is { } plays && LengthRoles.Contains(role)
+            ? Math.Clamp((int)(plays * Math.Pow(2, Math.Round(2 * genre.Shift(GenreChoices.RoleLength, GenreChoices.Name(role.ToString()))))), Options[0].Plays, Options[^1].Plays)
+            : GetRolePlays(role);
         var weights = ByConvention.Weigh(Options, unconventionality, genre.Pool<int>(GenreChoices.SectionLength, NameOf));
         weights = Tilt.Of(RoleOdds, 1).Weigh(weights, plays => plays == rolePlays ? 1 : 0);
         return lean == 0 ? weights : Tilt.Of(LengthOdds, lean).Weigh(weights, plays => Math.Log2(plays) - 1);

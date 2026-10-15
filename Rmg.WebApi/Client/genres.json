@@ -462,7 +462,8 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
-      "form": { "vcvc": 100, "vcvcbc": [30, 30, 40], "cvcvbc": [10, 15, 20] },
+      "roleLength": { "chorus": 25 },
+      "form": { "vcvc": 100, "vcvcbc": [30, 30, 40], "cvcvbc": [10, 15, 20], "vcvcvc": [20, 30, 30] },
       "glideRate": { "share": 30 },
       "kickOut": { "lines": [10, 20, 30] },
       "length": { "from": [180, 180, 120], "to": [300, 300, 330] },

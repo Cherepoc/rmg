@@ -938,8 +938,9 @@ can be):
 4. Done (15 October 2026): the pentatonic union, `lineScale.union`, both thirds over the major pentatonic with the
    fourth and the flat seventh on the key's tonic, a line's passing notes', its strong beats on the chord as ever; Rock's
    20-30-30 and Blues' 10-20-20.
-5. The hook shorter than its verse, a role's length a genre's (`SectionLength`'s role plays), Hip-hop's 16-bar verse and
-   8-bar hook; three verses (`vcvcvc`), Hip-hop's form.
+5. Done (15 October 2026): a role's length a genre's, `roleLength` (verse, chorus, bridge), the length the role leans
+   to halved or doubled, Hip-hop's chorus at 25, 10.2 bars against its verse's 15.8 (14.6 and 14.1 as the songs'); three
+   verses, `vcvcvc`, a genre's form alone, Hip-hop's 20-30-30, 16 of 64 songs.
 6. Interlocking parts, a figure striking where another part does not (a follower's inverse, as the rolling bass answers
    the kick), Funk's guitar against its clavinet; dead notes, a 16th chain's weak notes muted short and soft (an
    articulation), Funk's bass and guitar.
