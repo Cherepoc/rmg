@@ -75,8 +75,8 @@ internal static class Articulations
                 continue;
             var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "roll")));
             // the chords struck short, stabs, a genre's, the chords' and the rhythm part's, a skank's chop
-            // its 16th chains' notes between the 8ths muted, a genre's, from a sequence of its own
-            var deadNotes = part.Role is TrackRole.Bass or TrackRole.Riff or TrackRole.Rhythm
+            // its 16th chains' notes between the 8ths muted, a genre's, a soloist's too, from a sequence of its own
+            var deadNotes = part.Role is TrackRole.Bass or TrackRole.Riff or TrackRole.Rhythm or TrackRole.Solo
                             && song.Stream(SongStream.DeadNotes, track).TestProbability(DeadNoteChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "deadNotes")));
             var stabs = part.Role.PlaysChords()
                         && song.Stream(SongStream.Stabs, track).TestProbability(StabChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "stabs")));
@@ -118,11 +118,12 @@ internal static class Articulations
                 var ownLine = state.GetStateValue(CompositionStateKinds.LineSolo) == 0;
                 if (Chugs(part.Role, program) && ownLine && section >= 0 && song.Sections[section].Chugs && (repeats || onPedal) && weak)
                     state = state.With(CompositionStateKinds.PalmMute, 1);
-                // a dead note: a 16th between the 8ths with a note a 16th before or after it, of the part's own line
+                // a dead note: a 16th between the 8ths with a note a 16th before or after it, of the part's own line or the
+                // solo it plays, ghosted as a soloist's run is
                 var between = Math.Abs((note.Position + Sixteenth) % (2 * Sixteenth)) < 1e-6;
                 var chained = i > 0 && Math.Abs(note.Position - timeline[i - 1].Position - Sixteenth) < 1e-6
                               || i + 1 < timeline.Count && Math.Abs(timeline[i + 1].Position - note.Position - Sixteenth) < 1e-6;
-                if (deadNotes && ownLine && between && chained)
+                if (deadNotes && between && chained)
                     state = state.With(CompositionStateKinds.PalmMute, 1);
                 // a bass in octaves, a note off the beat the note before it an octave away, up where its range has it and down
                 // where not, as a disco or a funk bass alternates them; but one leading into the next chord, and a section that
