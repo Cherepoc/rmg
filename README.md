@@ -18,11 +18,17 @@ a song with strong effects, one first and others beside it now and then (an echo
 a sweep, a pump, a synth's filter or a trance gate); a
 driven guitar's part is double-tracked, hard left and right.
 
-A genre leans a song's choices towards its idioms: a pool of options or a chance for each choice, at the plain end, the
-middle and the wild end, its reverb's room and an insertion effect among them. Thirty-two presets come with the page
-(Pop, Rock, Metal, Black metal, Nu metal, Djent, Punk, Ska, Jazz, Fusion, Soul, Funk, Disco, House, Techno, Trance,
-Synthwave, IDM, Drum and bass, Hip-hop, Trap, Reggae, Latin, Bossa nova, Folk, Country, Blues, Ambient, Medieval,
-Dungeon synth, Orchestral and Chiptune), and the page's editor makes and changes genres of one's own.
+A song has a mood too, beside its unconventionality: how dark it is, from bright to dark, and how intense, from calm
+to fierce, each drawn within a genre's span or given, leaning the options a genre allows (a darker song's scales and
+chords, a fiercer one's tempo, kit, fills and driven instruments).
+
+A genre leans a song's choices towards its idioms: a pool of options or a chance for each choice, at the plain end,
+the middle and the wild end, its reverb's room and an insertion effect among them. Forty-seven presets come with the
+page (16-bit game, Ambient, Black metal, Bluegrass, Blues, Bossa nova, Celtic, Chamber, Chiptune, Cinematic piano,
+Country, Dark jazz, Disco, Djent, Doom metal, Drum and bass, Dub, Dungeon synth, Folk, Funk, Funk rock, Fusion, Heavy
+metal, Hip-hop, House, IDM, Jazz, Jazz-funk, Latin, Lyrical guitar, Medieval, Nu metal, Orchestral, Pop, Power ballad,
+Psytrance, Punk, Reggae, Rock, Ska, Soul, Symphonic metal, Synthwave, Techno, Thrash metal, Trance and Trap), and the
+page's editor makes and changes genres of one's own.
 
 ## Requirements
 
@@ -129,8 +135,8 @@ internet connection.
 - **Playing.** The page loads a song and a soundfont as it opens, so you only need to press play. When a random song
   ends it plays another, unless the autoplay switch beside **Generate Next** is off. **Previous** and **Next** walk the
   list of songs so far, Next past the latest making a new one, and a seed typed under the downloads plays that song.
-- **Song settings.** How experimental the song is and every facet, the tempo, key and meter, every part (as drawn, in or
-  out) and the drums can be given or left to the song. Changing one remakes the song from the same seed, going on
+- **Song settings.** How experimental the song is and every facet, its mood (bright to dark, calm to fierce), the
+  tempo, key and meter, every part (as drawn, in or out) and the drums can be given or left to the song. Changing one remakes the song from the same seed, going on
   from the same place. What changes only how it sounds (a part's instrument, volume and pan, the drum groups, the
   volume) is heard at once. What each setting does is shown under the pointer.
 - **Genres.** A genre picked leans the songs to its idioms, and Any genre draws a preset for every new song, named
