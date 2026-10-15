@@ -40,7 +40,7 @@ public static class GenreChoiceDescriptions
         ["roleLength"] = "How long a verse, a chorus or a bridge leans to be against the songs' own: lower halves it, higher doubles it, as a rap song's hook is half its verse.",
         ["keyLift"] = "How far a key change lifts the song, in semitones: a half step or a whole step as a last chorus goes, a third for a symphonic band's climax.",
         ["sectionKey"] = "How far a section in a key of its own moves from the song's, in semitones: a fourth or a fifth most often, a tone or a third now and then.",
-        ["lineRun"] = "How often the counter-melody sweeps up an octave of the scale in 16ths into a section the drums fill into, as a disco string section runs into its chorus.",
+        ["lineRun"] = "How often the counter-melody sweeps up an octave of the scale in 16ths into a new section, as a disco string section runs into its chorus.",
         ["polymeterCell"] = "How long a polymeter's cell is, in 16ths, running against the bar: three or six the plainest, the odd lengths, five, seven, thirteen or seventeen, the wilder.",
         ["sectionPedal"] = "Where a section's pedal holds: the home under its first phrase, the dominant under its last building into what follows, or the home droning under the whole of it.",
         ["loop"] = "How often a section plays the song's first section's chords again, as a beat loops one progression for the whole track.",

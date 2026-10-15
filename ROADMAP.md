@@ -989,9 +989,15 @@ kept, to read when it fails again. Analytics written off the request struck, as 
 parameters passed with the song's decisions whole, done (15 October 2026), its stage taking them as every stage does;
 the verdicts by song (step 0's), done.
 
-**6. The carry-overs:** a section's energy choosing a figure (Ska punk's choruses, as it chooses the chugs); the
-melody's run into a section, a fanfare's pickup (`lineRun`'s melody, Orchestral's and Symphonic's); the post-chorus
-quoting its chorus's chords and its second half, as a hook intro quotes the chorus.
+**6. The carry-overs** (15 October 2026): a section's energy choosing a figure, built already, every figure leaned by
+its energy lean (`Figure.EnergyLean`), Ska punk's choruses a preset's data when it comes; a run's notes the scale's
+nearest under the note it lands on, a chord altered there no longer shortening its octave. Put off: the melody's run
+into a section, a fanfare's pickup, as a sung melody is reshaped after the lines, no note finer than an 8th, and a run's
+16ths collapse (72 72 72 72 74 74 74), to build with a run kept from the singing; the post-chorus quoting its chorus's
+chords and its second half, the hook intro's quote carried to a section every stage treats as its source.
+
+The P4 tests that check less than their names left: a passing chord's kind is not traced, so a tritone substitute is
+not told from a chromatic chord above.
 
 Review: **overengineering**: the tempo's groups may be what the range's lean and the mood already make, so measured
 before any code; the minor mediant, the home by the mode and the key change's interval are options of choices that

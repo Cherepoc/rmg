@@ -286,7 +286,7 @@ internal static class SongStages
         // where neither line walks
         var changes = song.Form.Lines.Where(x => x.Ending != x.Next).Select(x => new PlayedRun(x.Position, [], (x.Next.Energy - x.Ending.Energy) * x.Ending.Rhythm.Coupling)).ToArray();
         (timeline, _) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, changes, place => song.Stream(SongStream.CounterRuns, place), map,
-            LineFills.CounterRun with { Chance = LineFills.RunChance.At(song.Facets[Facet.Melody], song.Genre.Chance(GenreChoices.LineRun, "counterMelody")) }, melodyWalks.Union(counterWalks));
+            LineFills.Run with { Chance = LineFills.RunChance.At(song.Facets[Facet.Melody], song.Genre.Chance(GenreChoices.LineRun, "counterMelody")) }, melodyWalks.Union(counterWalks));
         timeline = Place(timeline, riff, RiffLayers.Line);
         return draft with { Timeline = timeline };
     }
