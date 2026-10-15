@@ -36,4 +36,36 @@ public sealed class ImitationTest
         await Assert.That(matched / (double)notes).IsGreaterThan(0.8);
         await Assert.That(TestCorpus.Range(32).Any(x => x.Trace.Any(t => t.Point == TracePoints.Imitation))).IsFalse();
     }
+
+    /// <summary>
+    ///     An imitation's notes rub against the melody playing on, a second or a seventh from its note, seldom: the melody's
+    ///     passing notes heard a bar later over another chord bend to its chord.
+    /// </summary>
+    [Test]
+    public async Task AnImitation_SeldomRubsAgainstTheMelody()
+    {
+        var genre = GenrePresets.With("chamber", GenreChoices.Doubling, ("imitation", 1));
+        var (notes, rubbing) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            var imitated = song.Trace.Where(x => x.Point == TracePoints.Imitation).Select(x => x.Section).ToHashSet();
+            if (imitated.Count == 0)
+                continue;
+            var melody = song.Song.Notes![song.Track(TrackRole.Melody)].ToArray();
+            foreach (var note in song.Song.Notes![song.Track(TrackRole.CounterMelody)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Doubled) > 0
+                                                                                                && song.Map.SectionAt(x.Position) is { } span && imitated.Contains(span.SectionId)))
+            {
+                var at = Array.FindLastIndex(melody, x => x.Position <= note.Position + 1e-9);
+                if (at < 0 || melody[at].Position + melody[at].Value.Duration <= note.Position + 1e-9)
+                    continue;
+                notes++;
+                rubbing += ((melody[at].Value.Pitches[0] - note.Value.Pitches[0]) % 12 + 12) % 12 is 1 or 2 or 10 or 11 ? 1 : 0;
+            }
+        }
+
+        // against the mechanism breaking (measured: 1.6% to 2.3% of the notes at offsets 0 and a million, 16% to 18% before they bent)
+        Console.WriteLine($"{rubbing} of {notes} imitated notes a second or a seventh from the melody's");
+        await Assert.That(notes).IsGreaterThan(500);
+        await Assert.That(rubbing / (double)notes).IsLessThan(0.08);
+    }
 }

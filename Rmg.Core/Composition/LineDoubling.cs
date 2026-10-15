@@ -229,6 +229,8 @@ internal static class LineDoubling
                         .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0)
                         .With(CompositionStateKinds.LineRaise, isTwin ? twinRaise : 0).ToTimelineItem(x.Position + delay))
                     .Select(x => block ? x.Value.With(CompositionStateKinds.LineVoices, Math.Max(x.Value.GetStateValue(CompositionStateKinds.LineVoices), BlockVoices)).ToTimelineItem(x.Position) : x);
+                if (bars > 0)
+                    doubled = Answering(doubled, events[sourceTrack], events[targetTrack], song.CommonStateTimelineMap);
                 var edits = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
                 {
                     [targetTrack] = notes => EventTimeline.Create(
@@ -305,5 +307,36 @@ internal static class LineDoubling
         }
 
         return song;
+    }
+
+    /// <summary>
+    ///     An imitation's notes over the line they imitate as it plays on: a note a second or a seventh from the leader's
+    ///     note there, as the leader's passing note heard a bar later over another chord rubs, moved to the nearest of its
+    ///     chord's notes that is neither, and left out where none is, as a canon's answer bends to its leader.
+    /// </summary>
+    private static IEnumerable<TimelineItem<StateMap>> Answering(IEnumerable<TimelineItem<StateMap>> notes, EventStateTimelineMap<StateMap> leader,
+        EventStateTimelineMap<StateMap> follower, StateTimelineMap common)
+    {
+        var leading = leader.EventTimeline.ToArray();
+        StateMap Heard(StateMap note, EventStateTimelineMap<StateMap> track, double position) =>
+            StateMap.Aggregate([note, track.GetEffectiveStateMapAt(position), common.GetEffectiveStateMapAt(position)]);
+        static bool Rubs(int step, int against) => (step - against).Mod(Scales.StepCount) is 1 or 6;
+        foreach (var note in notes)
+        {
+            var at = Array.FindLastIndex(leading, x => x.Position <= note.Position + 1e-9);
+            var heard = Heard(note.Value, follower, note.Position);
+            var own = heard.GetStateValue(StateKinds.ScaleStep);
+            var against = at < 0 ? (int?)null : Heard(leading[at].Value, leader, note.Position).GetStateValue(StateKinds.ScaleStep);
+            if (against is not { } other || !Rubs(own, other))
+            {
+                yield return note;
+                continue;
+            }
+
+            var chord = Realizer.GetChordNotes(heard).Steps.Select(x => x.Mod(Scales.StepCount)).ToHashSet();
+            var moves = new[] { -1, 1, -2, 2 }.Where(x => chord.Contains((own + x).Mod(Scales.StepCount)) && !Rubs(own + x, other)).ToArray();
+            if (moves.Length > 0)
+                yield return note.Value.With(StateKinds.ScaleStep, note.Value.GetStateValue(StateKinds.ScaleStep) + moves[0]).ToTimelineItem(note.Position);
+        }
     }
 }
