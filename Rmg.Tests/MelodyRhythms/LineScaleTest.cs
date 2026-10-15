@@ -24,6 +24,8 @@ public sealed class LineScaleTest
         await Assert.That(LineScales.Classes(LineScale.WholeTone, g)!.Order()).IsEquivalentTo(new[] { 1, 3, 5, 7, 9, 11 }, CollectionOrdering.Matching);
         await Assert.That(LineScales.Classes(LineScale.Blues, g)!.Order()).IsEquivalentTo(new[] { 0, 1, 2, 5, 7, 10 }, CollectionOrdering.Matching);
         await Assert.That(LineScales.Classes(LineScale.Chromatic, g)!.Count).IsEqualTo(12);
+        // the pentatonic union on the key's tonic, C's, both thirds, whatever chord it is over
+        await Assert.That(LineScales.Classes(LineScale.Union, g)!.Order()).IsEquivalentTo(new[] { 0, 2, 3, 4, 5, 7, 9, 10 }, CollectionOrdering.Matching);
         // harmonic minor has two tritones, and its pentatonic line keeps all of it
         await Assert.That(LineScales.Classes(LineScale.Pentatonic, On(0, [0, 2, 3, 5, 7, 8, 11]))).IsNull();
     }

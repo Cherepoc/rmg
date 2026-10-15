@@ -28,7 +28,13 @@ public enum LineScale
     Octatonic,
 
     /// <summary>All twelve notes.</summary>
-    Chromatic
+    Chromatic,
+
+    /// <summary>
+    ///     The pentatonic union on the key's tonic, both thirds over the major pentatonic with the fourth and the flat seventh,
+    ///     as a rock melody bends between its major and minor third: a genre's alone.
+    /// </summary>
+    Union
 }
 
 /// <summary>
@@ -47,7 +53,8 @@ internal static class LineScales
         (LineScale.MelodicMinor, new ByConvention(0, 0.005, 1)),
         (LineScale.WholeTone, new ByConvention(0, 0.005, 1)),
         (LineScale.Octatonic, new ByConvention(0, 0.005, 1)),
-        (LineScale.Chromatic, new ByConvention(0, 0.005, 1))
+        (LineScale.Chromatic, new ByConvention(0, 0.005, 1)),
+        (LineScale.Union, new ByConvention(0, 0, 0))
     ];
 
     /// <summary>A line's scale as a genre's page shows it.</summary>
@@ -60,6 +67,7 @@ internal static class LineScales
         LineScale.WholeTone => "Whole-tone",
         LineScale.Octatonic => "Octatonic",
         LineScale.Chromatic => "Chromatic",
+        LineScale.Union => "Pentatonic union",
         _ => throw new ArgumentOutOfRangeException(nameof(scale), scale, null)
     };
 
@@ -67,6 +75,9 @@ internal static class LineScales
 
     /// <summary>The major and the minor pentatonic, in semitones above their tonic.</summary>
     private static readonly ImmutableArray<int> MajorPentatonic = [0, 2, 4, 7, 9], MinorPentatonic = [0, 3, 5, 7, 10];
+
+    /// <summary>The pentatonic union, in semitones above the key's tonic.</summary>
+    private static readonly ImmutableArray<int> UnionOffsets = [0, 2, 3, 4, 5, 7, 9, 10];
 
     private static readonly ImmutableDictionary<LineScale, ImmutableArray<int>> OffsetsFromRoot = new Dictionary<LineScale, ImmutableArray<int>>
     {
@@ -88,7 +99,8 @@ internal static class LineScales
     /// <summary>
     ///     The pitch classes the line takes over the chord, or none for all of the section's scale: a pentatonic line's the
     ///     key's own pentatonic, major where the mode's third is and minor where it is not, kept to the scale's notes, all of
-    ///     the scale where it has more than one tritone, as harmonic minor; and any other's notes on the chord's root.
+    ///     the scale where it has more than one tritone, as harmonic minor; the pentatonic union on the key's tonic; and any
+    ///     other's notes on the chord's root.
     /// </summary>
     public static IReadOnlySet<int>? Classes(LineScale scale, ChordContext chord)
     {
@@ -106,6 +118,8 @@ internal static class LineScales
                 var major = classes.Contains((tonic + 4).Mod(OctaveNoteCount));
                 return (major ? MajorPentatonic : MinorPentatonic).Select(x => (tonic + x).Mod(OctaveNoteCount)).Where(classes.Contains).ToHashSet();
             }
+            case LineScale.Union:
+                return UnionOffsets.Select(x => (chord.Tonic + x).Mod(OctaveNoteCount)).ToHashSet();
             default:
                 return OffsetsFromRoot[scale].Select(x => (chord.Root + x).Mod(OctaveNoteCount)).ToHashSet();
         }

@@ -935,8 +935,9 @@ can be):
    by the minor mode moving the fewest steps, Black metal's 20-30-40, Doom's at its wild end; nearly all on ♭III, as a
    minor key's ♭VI turned minor would lower the key's own tonic, which a chord's scale never moves (the research's ♭vi
    left, with the diminished seventh's roots, should listening miss them).
-4. The pentatonic union, both thirds over a major pentatonic with the fourth and the flat seventh, a line scale of the
-   passing notes (`lineScale`), Rock's and Blues', a line's strong notes kept to the chord.
+4. Done (15 October 2026): the pentatonic union, `lineScale.union`, both thirds over the major pentatonic with the
+   fourth and the flat seventh on the key's tonic, a line's passing notes', its strong beats on the chord as ever; Rock's
+   20-30-30 and Blues' 10-20-20.
 5. The hook shorter than its verse, a role's length a genre's (`SectionLength`'s role plays), Hip-hop's 16-bar verse and
    8-bar hook; three verses (`vcvcvc`), Hip-hop's form.
 6. Interlocking parts, a figure striking where another part does not (a follower's inverse, as the rolling bass answers
@@ -969,7 +970,9 @@ can be):
    a chord's note.
 5. The tape stop: every pitched part bending down an octave over a slowing tempo into a drop or as the ending.
 
-**5. Housekeeping:** analytics written off the request; the tests that check less than their names; the drum solo's
+**5. Housekeeping:** two page tests flaky now and then, each passing alone and three runs in a row after
+(`TheKeyAndChord_FollowTheBar_AsAHandDragsIt(True)`, `TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`);
+analytics written off the request; the tests that check less than their names; the drum solo's
 parameters passed with the song's decisions whole; the verdicts by song (step 0's).
 
 **6. The carry-overs:** a section's energy choosing a figure (Ska punk's choruses, as it chooses the chugs); the
