@@ -147,7 +147,9 @@ choice and every stage of the family. The id is `device-<family>`. For every dev
   bugs a second corpus found were two devices meeting: a push moving a polymeter's cycle, a doubling silencing its
   part where a texture rested the doubled one, a drop landing on a section that builds.
 - **As it sounds.** What the device does to the music, whether a player would do it so, and where its amounts would
-  sound wrong. Where a rule the code or the music states settles it (notes against the chord, a device playing where
+  sound wrong; with the parts it sounds against, from `run/sounding.txt` and the primer's musicality lines: a device
+  that copies or moves notes (doubling, imitation, quotes, polymeters) judged where its notes land, against the line
+  still playing there. Where a rule the code or the music states settles it (notes against the chord, a device playing where
   its doc says it does not), it is a mistake. Otherwise it is `kind: "taste"` with a proposed listening question (see
   the primer's output): at most three for the family, ranked (`listen.rank`), the coverage check refusing more.
 - **Worth keeping.** Whether the device earns its place, from the review folder's `ledger.md` (written by
@@ -173,7 +175,8 @@ A reviewer per cluster of genre presets, the id `genre-<cluster>`, every preset 
 apart from the others is part of what it must play. Read `run/every-chance.txt` (every chances option's three ends by
 preset, `*` marking the songs' own amounts a preset inherits), `run/genre-devices.txt` (how often each preset plays
 each device, measured), `run/every-preset.txt` (what each preset's songs draw at the plain end, the middle and the wild
-end), and each preset in `Client/genres.json` with its description, every choice it names read against `GenreChoices`
+end), `run/sounding.txt` (how each preset's parts sound together: a note held into its part's next, a semitone between
+parts, its own notes' and a doubling's, a strong note off its chord or on a chord's missing third), and each preset in `Client/genres.json` with its description, every choice it names read against `GenreChoices`
 and the code of the devices it switches on or leaves. Then, for each genre of the cluster:
 
 - **Inherited where it does not belong.** A device the genre plays by the songs' own amounts (`*`) that its style would
@@ -189,6 +192,11 @@ and the code of the devices it switches on or leaves. Then, for each genre of th
 - **Its conventionality.** The plain end the genre's most typical song, the middle a good one of it, the wild end still
   the genre: a device that should be the genre's plainest habit left to its wild end, or a wild device leaking into
   its plain end.
+- **Its song-wide settings at their ends.** The darkness, the intensity and the facets given at each end
+  (`SongOverrides`), the songs compared on what the setting names, the same seeds at either end: a brighter song's major
+  chords, a fiercer one's tempo and density. A setting whose ends a genre plays alike is a `mistake` with its numbers
+  (Trap at darkness -1 and 1, 64% and 66% of its chords minor, every scale minor), its cause read where the setting
+  leans (a pool naming no option at that end, a lean too small to hear), not a listening question first.
 - **Gaps, on a full review only.** An idiom the cluster's players use that the engine has no device for: a bass
   figure, a comping pattern, a form, a drum habit. At most two for the cluster, each a finding of
   `category: "idiom-gap"`, ranked by how many presets would play it, in this cluster and any other (name them all): a
@@ -200,7 +208,7 @@ and the code of the devices it switches on or leaves. Then, for each genre of th
 
 What is a mistake and what is taste:
 
-- A **mistake** (`kind: "mistake"`) quotes a measured number from the three reports, with the report, the preset and
+- A **mistake** (`kind: "mistake"`) quotes a measured number from the four reports, with the report, the preset and
   the end it was read at, against what the preset's own description or the style's plain convention settles: the
   description names a room kit and the wild end plays the standard kit in 82% of songs. A mistake has no listening
   question; the verifiers check its number. A mistake without a number is not one.

@@ -68,7 +68,7 @@ $S/scripts/runs.sh <repo> $R
 
 It builds and runs the reports' smoke test first, stopping where it fails: the review measures with the reports, and
 one that has rotted is fixed before any reviewer reads its numbers (a review once spent its first package mending
-them). Then the suite at the review's offsets and the three preset reports, one at a time under the memory cap, every
+them). Then the suite at the review's offsets and the four preset reports (the fourth, `sounding.txt`, how the parts sound together), one at a time under the memory cap, every
 failure run again alone at its offset, and every failure a finding (`findings/run-<offset>.json`) with its seed and
 offset: category `run` for the verifiers to trace, or `flaky` where it passed alone, a test racing under the suite's
 load rather than a song breaking it. Then the device ledger, from the reports:
@@ -204,7 +204,13 @@ package's commit with `status.py $R package <package> <commit> "<songs changed>"
 `status.py $R check <package>` passes.
 
 - A finding of **taste** is not a fix: it becomes a listening question (`ListeningQuestionsTest`, `?listen=`), its
-  change made only once the user has heard it. Ask the first-ranked first, a round of ten at most, the answers
+  change made only once the user has heard it. A question's song without changes the device alone: a patch on an option
+  no other device shares (one switching the band's dead notes off asks nothing of a soloist's), never a pool emptied
+  (refused) nor its weights made even (most songs then draw the same), so that what is heard apart is the device.
+  `Write` prints how far its songs differ; one under about 0.1 is not asked, as listeners have not told such apart.
+  That measure counts the notes that differ, not the quality asked of them: a question of a colour, a mood or a
+  brightness, measures the colour first (a song's major chords at each end), as songs a mood moved by its draws alone
+  were measured apart and heard the same. Ask the first-ranked first, a round of ten at most, the answers
   collected from the test instance's dashboard (`/admin/api/summary`, its `verdicts`) before the next; a question
   needing code has it built only when its round comes. A question not asked by the record stays open in it, not
   queued in the roadmap unasked. A **mistake** is fixed.

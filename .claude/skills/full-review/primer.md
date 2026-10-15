@@ -64,7 +64,11 @@ Doc comments are dense English prose describing the music. The style is delibera
 4. **Optimization:**
    - Hot paths in generation and rendering: per-note or per-bar loops doing O(n) scans inside O(n) loops, repeated LINQ re-enumeration, repeated allocation, `ToArray`/`ToList` in loops, repeated `GetEffectiveStateMapAt` or `Where(...).Any` on whole timelines, recomputing what could be cached.
    - Estimate the cost: how often the code runs, per song or per note. Ignore one-offs.
-5. **Musicality:** a rule that would make something sound wrong, or what a real player or producer would do differently. Be concrete.
+5. **Musicality:** a rule that would make something sound wrong, or what a real player or producer would do differently. Be concrete. And how the parts sound together, which no rule of a note against its own chord sees; `run/sounding.txt` measures each preset's:
+   - a chord's note taken from the chord's own notes (`Realizer.GetChordNotes`), never a fixed scale step that assumes a triad: a sus, power or shell chord has no third, and a step of 2 above its root plays the third it leaves out (a bass's inversions did, 13% of Chamber's bass over a sus4);
+   - a line copied or moved in time (a doubling, an imitation, a quote, a polymeter's copy, a hook intro) judged against what sounds where it lands, the line it copies playing on there too, not only against the chord there (an imitation's notes a bar late rubbed against the melody, 16-18% of them);
+   - a note's length against its part's next note, on an instrument that does not ring on: one held into the next overlaps itself (chords struck in 16ths kept their source chord's length, their cycles running together);
+   - anything reading the chord, the key or the harmony at a time, over a span no pitched part plays in (a drums' intro, a break, stop time): what it reads there.
 6. **Dead code and stale docs:** unused members, parameters always passed the same value, comments that no longer describe the code.
 7. **Tests** (when your slice is tests):
    - A test that holds only for the corpus's own songs (see *Tests* above).

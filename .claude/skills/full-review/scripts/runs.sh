@@ -1,6 +1,6 @@
 #!/bin/bash
 # The review's runs, one at a time under the memory cap: the build, the suite at each of the review's offsets
-# (review.json, from offsets.py), the three preset reports, and every run's failures as findings; first the reports'
+# (review.json, from offsets.py), the four preset reports, and every run's failures as findings; first the reports'
 # smoke test, as the review measures with them, and each failure run again alone, one passing alone flaky.
 #
 #   runs.sh <repo> <review folder>             # the review's runs, before the reviewers
@@ -15,7 +15,8 @@ cd "$repo"
 cap dotnet build Rmg.slnx -c Release --nologo -v quiet > "$R/run/build.txt" 2>&1 || { echo "build failed: $R/run/build.txt"; exit 1; }
 # the review's instruments first: a report that no longer runs is fixed before any reviewer reads its numbers
 if [ "$mode" != --holdout ]; then
-  cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/GenreDevicesReportTest/TheReports_MeasureASongOfEveryPreset*" > "$R/run/smoke.txt" 2>&1 \
+  { cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/GenreDevicesReportTest/TheReports_MeasureASongOfEveryPreset*" \
+      && cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/SoundingReportTest/TheReport_MeasuresASongOfEveryPreset"; } > "$R/run/smoke.txt" 2>&1 \
     || { echo "the reports' smoke test fails: fix the review's instruments first ($R/run/smoke.txt)"; exit 1; }
 fi
 if [ "$mode" = --holdout ]; then
@@ -38,4 +39,6 @@ done
 cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_EveryChance" --output detailed > "$R/run/every-chance.txt" 2>&1
 cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/GenreDevicesReportTest/*" --output detailed > "$R/run/genre-devices.txt" 2>&1
 cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_ChoicesByEnd" --output detailed > "$R/run/every-preset.txt" 2>&1
+# how the parts sound together: a note held into its part's next, a semitone between parts, a strong note off its chord
+cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/SoundingReportTest/Report" --output detailed > "$R/run/sounding.txt" 2>&1
 echo "runs done: $R/run"
