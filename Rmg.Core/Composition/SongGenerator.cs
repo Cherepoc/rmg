@@ -132,6 +132,17 @@ public static class SongGenerator
         return Math.Round(tempo * Meter.BaseTempo) / Meter.BaseTempo;
     }
 
+    /// <summary>
+    ///     The bands of a genre's tempo range, its slow, middle and fast thirds, a song's drawn in one of them where the genre
+    ///     weighs them, as a jazz record is a ballad, a medium or a burner and seldom between: a genre's alone.
+    /// </summary>
+    public static ImmutableArray<(TempoBand Band, ByConvention Weight)> TempoBands { get; } =
+        [(TempoBand.Slow, new(0, 0, 0)), (TempoBand.Middle, new(0, 0, 0)), (TempoBand.Fast, new(0, 0, 0))];
+
+    /// <summary>A range of amounts narrowed to one of its thirds, its lean kept.</summary>
+    internal static (double From, double To, double Lean) InBand((double From, double To, double Lean) range, TempoBand band) =>
+        (range.From + (range.To - range.From) * (int)band / 3, range.From + (range.To - range.From) * ((int)band + 1) / 3, range.Lean);
+
     /// <summary>A length in a range of amounts (<see cref="GenreChoices.LengthOf" />), in seconds, drawn as a tempo is in its range.</summary>
     internal static double LengthIn(IGenerationContext context, (double From, double To, double Lean) range) => GenreChoices.LengthOf(Across(context, range));
 
@@ -261,5 +272,14 @@ internal enum SongStream
     BreakdownChorus = 117,
     CounterRuns = 118,
     FrameArpeggio = 119,
-    DeadNotes = 120
+    DeadNotes = 120,
+    TempoBand = 121
+}
+
+/// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>
+public enum TempoBand
+{
+    Slow,
+    Middle,
+    Fast
 }

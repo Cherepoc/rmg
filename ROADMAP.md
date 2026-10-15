@@ -945,9 +945,10 @@ can be):
    the 8ths in a chain muted short and soft as a palm-muted note is, Funk's 40-50-60, Funk rock's 20-30-40, Jazz-funk's
    10-20-30 of its parts (to ask: `funk-dead-notes`). Put off: interlocking parts, the rhythm part's figure striking
    where the chords' does not, as the rhythm part is no figure's player and would need its turn after the chords'.
-7. The tempo's groups, measured first: whether a genre's songs fall in its records' clusters (Jazz's ballads,
-   mediums and burners; Rock's and Synthwave's two) with the mood's intensity and the range's lean as they are; a
-   tempo pool of bands within the range only if not.
+7. Done (15 October 2026), measured first: Jazz's songs spread evenly over 60-220, its records in three groups with
+   a gap at 100-120. A genre's tempo in bands, `tempoBand`, the slow, middle and fast thirds of its range, a song's in
+   one: Jazz's 31-44-31, above 180 25% (12%), below 90 31% (16%), 100-120 10% (18%); Synthwave's two groups 45-10-45.
+   Rock's fast group left to its range.
 8. The small ones, each data or a row: the punk beat's offset kick (a ground figure, checked against a transcription
    first), the cymbal choke before a stop (an ensemble hit's crash cut short), the press roll into a solo (a fill's
    kind before a soloed section), Chameleon's tresillo bass arpeggio with its chromatic walk-up (a bass figure), the

@@ -77,6 +77,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "tempoBand": { "slow": 31, "middle": 44, "fast": 31 },
       "soloShare": { "trading": 100, "together": [5, 10, 20] },
       "soloCount": { "one": 100, "two": [10, 20, 30], "three": [0, 5, 10] },
       "figure": { "time": { "own": [20, 30, 40], "swingRide": 100 }, "chords": { "own": 100, "charleston": [10, 20, 30] } },
@@ -381,6 +382,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "tempoBand": { "slow": 45, "middle": 10, "fast": 45 },
       "length": { "from": [200, 210, 180], "to": [330, 360, 420] },
       "glide": { "lead": [0, 5, 15] },
       "kickOut": { "lines": [10, 20, 30] },

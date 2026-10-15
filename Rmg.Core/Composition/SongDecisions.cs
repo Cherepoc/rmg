@@ -199,7 +199,11 @@ internal sealed record SongDecisions(
         StateTrace.RecordSong(TracePoints.Meter, meter.ToString(), meter);
 
         // the song's key and tempo, drawn before its form, which how long the song plays takes after
-        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), songUnconventionality[Facet.Feel], overrides, genre);
+        // the band of a genre's tempo range the song plays in, where the genre weighs them, from a sequence of its own
+        TempoBand? band = genre.Pool<TempoBand>(GenreChoices.TempoBand) is { } bands
+            ? Stream(SongStream.TempoBand).Pick(ByConvention.Weigh(SongGenerator.TempoBands, songUnconventionality[Facet.Feel], bands))
+            : null;
+        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), songUnconventionality[Facet.Feel], overrides, genre, band);
         // a length given leans the form to it, by how long an appearance of each role plays on the average at the tempo
         var tempo = commonStateMap.GetStateValue(StateKinds.Tempo);
         double SecondsOf(double beats) => beats * Meter.SecondsPerBeat(tempo);
@@ -481,13 +485,14 @@ internal sealed record SongDecisions(
 
     /// <summary>The song's key and tempo, drawn, and replaced where given, so that giving one leaves every other draw as it was.</summary>
     /// <param name="feel">The feel facet of the song's unconventionality, by which a genre's range of tempos is eased between its ends.</param>
-    private static StateMap CreateCommonStateMap(IGenerationContext context, double feel, SongOverrides overrides, Genre genre)
+    /// <param name="band">The third of the genre's tempo range the song plays in; none for the whole of it.</param>
+    private static StateMap CreateCommonStateMap(IGenerationContext context, double feel, SongOverrides overrides, Genre genre, TempoBand? band)
     {
         var drawn = new StateMapBuilder(Layers.Song, perTrack: false)
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
             // the dyadic draw of the tempo, or, where a genre gives a range of it, a tempo in the range at the song's feel,
             // leaning to its middle, or to an end as the genre has it
-            .Add(StateKinds.Tempo, genre.Range(GenreChoices.Tempo, feel) is { } range ? c => SongGenerator.TempoIn(c, range) : SongGenerator.TempoGenerator)
+            .Add(StateKinds.Tempo, genre.Range(GenreChoices.Tempo, feel) is { } range ? c => SongGenerator.TempoIn(c, band is { } b ? SongGenerator.InBand(range, b) : range) : SongGenerator.TempoGenerator)
             .AddNoteDurationLayer()
             .ToStateMap(context);
         if (overrides.Key is { } key)
