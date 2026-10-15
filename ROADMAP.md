@@ -274,6 +274,10 @@ against the melody playing on, 16-18% of its notes a second or a seventh from it
 their chord that is neither or left out, 2%. Asked from 16 October 2026, the fourth round: `chamber-canon` (the
 imitation again), `medieval-canon`, `ballad-step-down`, `jazzfunk-tresillo`, `trance-bright` and `trap-dark`; IDM's
 64th rolls left unasked, differing too little to hear (0.04).
+Answered on 16 October 2026, the fourth round: accepted, `medieval-canon`, `ballad-step-down`, `jazzfunk-tresillo`;
+`chamber-canon`'s song 2b still dissonant, on its sus4 chords alone and not only in the imitation, the bass's inversions
+on a sus chord's missing third (*Over a sus4, the third*); `trance-bright` and `trap-dark` not told apart from their
+neutral songs, nor Trap's ends from each other (*Planned: a mood every genre plays*).
 
 Answered on 15 October 2026, accepted by the owner: `pop-post-chorus`, `medieval-drone`, `punk-drum-intro`,
 `ballad-piano-intro`, `punk-muted-verses`, `disco-run`, `latin-montuno` and `jazzfunk-chords`; `chiptune-frames` heard
@@ -602,6 +606,58 @@ plain or wild the songs are.
 ## Open work
 
 Each item with its plan, and what it waits for.
+
+### Planned: a mood every genre plays, and a soloist's ghosts
+
+Planned 16 October 2026 from listening: `trance-bright` and `trap-dark` heard as their neutral songs, and Trap at full
+brightness as at full darkness. The mood leans only the options a genre's pool names (`Mood.Leans`: the scale and the
+chord shapes by darkness), by odds of 4 at its ends, and Trap's scales are all minor: at darkness -1 and 1, 64% and 66%
+of its chords minor, 23% and 26% major, its scales minor either way (Dorian 7 songs and 1 of 64); Trance's major songs
+31 and 4 of 64, but its major chords 33% and 28%. `HeardDifference` measured the questions' songs apart (0.35 and
+1.07), notes the mood's draws moved, not how bright they sound: a mood's question wants a measure of brightness first.
+Not implemented; the review's plan, each step through the implementation loop:
+
+1. **A measure of brightness**, a report: a song's chord time on major chords, on minor and on diminished, its scale's
+   darkness, by genre at darkness -1, 0 and 1, the same seeds; the target, every genre's major share at least 20 points
+   apart between its ends, and Trap's and Trance's audible by listening.
+2. **The chords' degrees leaning by darkness**, the step put off from the mood's first plan: a progression's chord on
+   a degree weighed by its chord's quality as the scale has it, major the brighter, minor and diminished the darker, by
+   `Mood.Odds`, in every genre's scale without an option added: a minor key's ♭III, ♭VI and ♭VII the brighter, its i,
+   iv and v the darker, a major key's vi, ii and iii the darker. One mechanism over every pool; the largest audible
+   lever inside one scale.
+3. **A given mood at its end reaching past a minor-only pool**, as a supplied conventionality of 0 or 1 is the plainest
+   or the wildest: a mood given at -1 or 1 (`SongOverrides`) letting the scale choice take the nearest scale the pool
+   lacks at that end (a minor-only genre's Dorian or major, a major-only genre's minor), drawn songs keeping to the
+   pool. Questioned in review: it bends *a genre's pool keeps to the options it names*, so only a given end, never a
+   drawn mood, and only the scale.
+4. **The sound by darkness**, if 2 and 3 are not heard enough: a synth's and a pad's filter closed the darker, its room
+   longer, the chords' voicing centred a few semitones lower, never an octave (the register lean dropped on 15 October
+   for moving in octaves).
+
+Review. *Overengineering*: one lean of the degrees' weights, no table of progressions by mood; step 3 a rule at the
+given ends alone, not a second pool; step 4 only on measurement. *Musicality*: a bright minor song is its relative
+major's chords (♭VI-♭VII-i) and a dark major song leans on vi and the minor iv, as players hear them; a bright trap in
+major is a real sound, melodic trap; the Phrygian ♭II the darkest; the risk, a dark major song's chords turning so
+minor that its key no longer sounds major, so the degrees lean by the odds and never leave the scale. Then
+`trap-bright` asked again, at the ends, against each other.
+
+**A soloist's ghosts** (16 October 2026, from listening, `funk-dead-notes`: dead notes useful in any solo that plays
+percussively, never in its fast tremolos). Now a Funk-family soloist mutes its 16ths between the 8ths by the band's
+rule (`Articulations`), a pedal's repeated notes among them. The plan: decided where the solo is written
+(`SoloLines`), where its gesture is known, the Solo part out of `Articulations`: in a lick, the percussive gesture, at
+16ths or slower, not a pedal shape, an unaccented note now and then muted, never a run, a held note, a release or
+anything faster; in every genre, a genre option `articulation.soloGhosts` the songs play, Funk's leaning it more, so
+that a question can switch it apart from the band's; a stream of its own per soloist. Reviewed: no state kind and no
+table of instruments; a piano's ghost only a soft short note, accepted; a twin lead mutes as its riff does; measured
+by soloist, the chance lowered where a soloist's vocabulary of licks mutes 10% of its notes or more; then
+`solo-ghosts` asked.
+
+**Over a sus4, the third** (16 October 2026, song 2b of `chamber-canon` heard dissonant on its sus4 chords). The bass
+landed its inversions on the scale's third whatever the chord, 13.1% of its notes over a sus4 its missing third, a
+semitone or a tone under its fourth; now a landing on a note its chord leaves out takes the root, 3.5%, its walks'
+passing notes, as over a major triad its fourth (7.7% weak, 2.4% strong). Left: the counter-melody's weak notes over a
+sus4 its third 12.3% (5.0% a triad's fourth), likely its harmony a third from the melody's fifth by the scale; to
+measure by doubling and, if so, a harmonised note its chord leaves out moved to the chord's.
 
 ### From the review of 10 October
 
