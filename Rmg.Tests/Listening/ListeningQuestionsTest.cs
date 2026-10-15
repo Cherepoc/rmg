@@ -48,41 +48,32 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("chiptune-overlap", "Chiptune's chords cycled on one voice, each chord's cycle now stopping where the next chord starts and its broken chords no longer ringing over each other: a chip's chord on every chord now?",
-            "A cycle and a synth's broken chord ended at the part's next note, against whole chords; heard too fast on 15 October 2026 where chords struck in 16ths ran their cycles together.", "chiptune", [], new() { ["articulation"] = new() { ["frames"] = 0 } },
-            x => Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Chords))?.Where(n => n.Value.State.GetStateValue(CompositionStateKinds.Cycled) > 0).Select(n => (double?)n.Position).FirstOrDefault(), 1)),
-        new("funk-dead-notes", "Funk's bass and guitar muting their 16ths between the 8ths, dead notes, short and soft: the funk's percussive chop, or notes swallowed?",
-            "Dead notes, Funk's articulation.deadNotes 40-50-60, against every note sounded.", "funk", [], new() { ["articulation"] = new() { ["deadNotes"] = 0 } },
-            x => x.Song.Notes!.Values.SelectMany(n => n).Any(n => n.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0) ? (double?)x.Map.Sections[0].Start : null),
-        new("chamber-imitation", "Chamber's counter-melody taking the melody's phrase a bar later, an octave below, as a canon: a conversation, or an echo that crowds?",
-            "Imitation, Chamber's doubling.imitation 15-25-35, against none.", "chamber", [], new() { ["doubling"] = new() { ["imitation"] = 0 } },
+        new("chamber-canon", "Chamber's counter-melody taking the melody's phrase a bar later, an octave below, its notes that rubbed against the melody now bent to their chord: a conversation now?",
+            "Imitation, Chamber's doubling.imitation 15-25-35, against none; heard out of place on 16 October 2026 where the melody's passing notes a bar later rubbed against it, 16-18% of its notes, now 2%.", "chamber", [],
+            new() { ["doubling"] = new() { ["imitation"] = 0 } },
             x => Before(x, FirstSection(x, TracePoints.Imitation, _ => true), 1),
             In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Imitation && t.Section == span.SectionId)),
-        new("thrash-fierce", "Thrash at its fiercest and darkest, faster, double time and chugs the more, its fills busier: thrash at full tilt, or too much?",
-            "Thrash's mood spans, darkness -20 to 100 and intensity 0 to 100, the songs heard at their fiercest, against a neutral mood.", "thrash", [],
+        new("medieval-canon", "Medieval's counter-melody taking the melody's phrase a bar later, an octave below, as a round: an old round's answer, or a crowd?",
+            "Imitation, Medieval's doubling.imitation 10-20-20, against none.", "medieval", [], new() { ["doubling"] = new() { ["imitation"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.Imitation, _ => true), 1),
+            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Imitation && t.Section == span.SectionId)),
+        new("ballad-step-down", "The Power ballad's bass stepping down into its chords, a chord's note a step below the last: the ballad's walk down, or a wandering bass?",
+            "The bass stepping down, the Power ballad's bassLanding.stepDown 30-40-40, against the root.", "ballad", [], new() { ["bassLanding"] = new() { ["stepDown"] = 0 } },
+            x => Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Bass))?.Where(n => (ChordArrival)n.Value.State.GetStateValue(StateKinds.ChordArrival) == ChordArrival.StepDown)
+                .Select(n => (double?)n.Position).FirstOrDefault(), 2)),
+        new("jazzfunk-tresillo", "Jazz-funk's bass on the tresillo, 3+3+2 in each half bar: the groove's push, or a Latin bass in the wrong song?",
+            "The tresillo, Jazz-funk's figure.bass.tresillo 20-30-30, against its own line and the kick's.", "jazzFunk", [], new() { ["figure.bass"] = new() { ["tresillo"] = 0 } },
+            x => FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tresillo"),
+            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Figures && t.Section == span.SectionId
+                                                    && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tresillo")),
+        new("trance-bright", "Trance at its brightest and liveliest, major and brighter chords, faster and busier: the euphoric peak, or too sweet?",
+            "Trance's mood spans, darkness -80 to 40 and intensity -20 to 100, the songs heard at their brightest, against a neutral mood.", "trance", [],
             new() { ["darkness"] = new() { ["from"] = 0, ["to"] = 0 }, ["intensity"] = new() { ["from"] = 0, ["to"] = 0 } },
-            x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!).Intensity > 0.5 ? (double?)x.Map.Sections[0].Start : null),
-        new("darkjazz-dark", "Dark jazz at its darkest and calmest, minor and darker chords, slower and sparer: the noir at its deepest, or just gloomy?",
-            "Dark jazz's mood spans, darkness 20 to 100 and intensity -100 to 0, the songs heard at their darkest, against a neutral mood.", "darkJazz", [],
+            x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!) is { Darkness: < -0.4, Intensity: > 0.4 } ? (double?)x.Map.Sections[0].Start : null),
+        new("trap-dark", "Trap at its darkest, minor and darker chords: the menace it is known for, or just gloomy?",
+            "Trap's mood spans, darkness 0 to 100 and intensity -40 to 80, the songs heard at their darkest, against a neutral mood.", "trap", [],
             new() { ["darkness"] = new() { ["from"] = 0, ["to"] = 0 }, ["intensity"] = new() { ["from"] = 0, ["to"] = 0 } },
-            x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!).Darkness > 0.6 ? (double?)x.Map.Sections[0].Start : null),
-        new("jazz-bands", "Jazz's tempo drawn in its records' bands, a ballad, a medium or a burner, seldom between: jazz as its records run, or the in-between missed?",
-            "Jazz's tempoBand 31-44-31, ballads and burners among the mid-tempo songs, against the middle band alone.", "jazz", [], new() { ["tempoBand"] = new() { ["slow"] = 0, ["middle"] = 1, ["fast"] = 0 } },
-            x => (double?)x.Map.Sections[0].Start),
-        new("hiphop-hook", "Hip-hop's hook half as long as its verse, eight bars to its sixteen: a rap song's shape, or a chorus cut short?",
-            "Hip-hop's roleLength.chorus 25, against the songs' own length.", "hipHop", [], new() { ["roleLength"] = new() { ["chorus"] = 50 } },
-            x => Before(x, x.Map.Sections.Where(s => ((SongStructure)x.Trace.Single(t => t.Point == TracePoints.SongForm).Value!).Roles[s.SectionId] == SectionRole.Chorus).Select(s => (double?)s.Start).FirstOrDefault(), 2)),
-        new("symphonic-lift", "Symphonic's last section lifted by a third now and then, where a song lifts by a tone: an epic climax, or a jolt?",
-            "Symphonic's keyLift by a third, 5-10-20 each, against a half step or a tone.", "symphonic", [], new() { ["keyLift"] = new() { ["semitones3"] = 0, ["semitones4"] = 0 } },
-            x => ((ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!) is var changes && changes.Any(c => ((c.Semitones % 12) + 12) % 12 is 3 or 4 or 8 or 9) ? Before(x, LastKeyChange(x), 2) : null),
-        new("rock-union", "Rock's melody passing between the major and the minor third, the pentatonic union: a rock singer's bluesy line, or a wrong note?",
-            "The pentatonic union, Rock's lineScale.union 20-30-30, against its pentatonic and the section's.", "rock", [], new() { ["lineScale"] = new() { ["union"] = 0 } },
-            x => FirstSection(x, TracePoints.LineScale, v => (LineScale)v! == LineScale.Union),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.LineScale && t.Section == span.SectionId && (LineScale)t.Value! == LineScale.Union)),
-        new("blackmetal-minor", "Black metal's major chords a third from home turned minor: the cold, minor-on-minor sound, or a sour chord?",
-            "The minor mediant, Black metal's chordScales.minorMediant 20-30-40, against its chords as the scale has them.", "blackMetal", [], new() { ["chordScales"] = new() { ["minorMediant"] = 0 } },
-            x => x.Trace.Where(t => t.Point == TracePoints.ChordScales).Any(t => ((ImmutableArray<ChordScale>)t.Value!).Any(c => c.Kind == ChordScaleKind.MinorMediant))
-                ? FirstSection(x, TracePoints.ChordScales, v => ((ImmutableArray<ChordScale>)v!).Any(c => c.Kind == ChordScaleKind.MinorMediant)) : null)
+            x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!).Darkness > 0.6 ? (double?)x.Map.Sections[0].Start : null)
     ];
 
     /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>

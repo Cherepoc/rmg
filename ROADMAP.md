@@ -264,10 +264,16 @@ song d's chords struck in 16ths each kept its chord's length, 1.12 beats, its cy
 other. A cycle now stops at its part's next note, a broken chord's note on an instrument that holds its sound ends
 there too (`Articulations`, a piano's ringing kept), and no echo repeats a cycled note (`CompositionStateKinds.Cycled`),
 as the rhythm part may carry both; asked again: `chiptune-overlap`.
-Asked from 15 October 2026, the third round, the order of work's devices and the mood: `chiptune-overlap`,
-`funk-dead-notes`, `chamber-imitation`, `thrash-fierce`, `darkjazz-dark`, `jazz-bands` (against the middle band alone,
-the bands alike drawing the same songs), `hiphop-hook`, `symphonic-lift`, `rock-union` and `blackmetal-minor`, the last
-two differing little (0.15 and 0.28); none queued behind them.
+Answered on 16 October 2026, the third round, accepted by the owner: `chiptune-overlap`, `thrash-fierce`, `jazz-bands`
+(against the middle band alone), `hiphop-hook`, `symphonic-lift`, `rock-union`; `funk-dead-notes` heard very nice, useful
+in solos most of all, so a soloist ghosts them too (`Articulations`, the Solo part and a line played as a solo, Funk's
+soloist 12% of its notes, Funk rock's 9%), unasked, a page's patch reaching no part alone; `darkjazz-dark` and
+`blackmetal-minor` not told apart, too subtle, and let go of, kept as they are; `chamber-imitation` heard out of place
+now and then (song 2b): its chords were the chords playing, but the melody's passing notes heard a bar later rubbed
+against the melody playing on, 16-18% of its notes a second or a seventh from it, now moved to the nearest note of
+their chord that is neither or left out, 2%. Asked from 16 October 2026, the fourth round: `chamber-canon` (the
+imitation again), `medieval-canon`, `ballad-step-down`, `jazzfunk-tresillo`, `trance-bright` and `trap-dark`; IDM's
+64th rolls left unasked, differing too little to hear (0.04).
 
 Answered on 15 October 2026, accepted by the owner: `pop-post-chorus`, `medieval-drone`, `punk-drum-intro`,
 `ballad-piano-intro`, `punk-muted-verses`, `disco-run`, `latin-montuno` and `jazzfunk-chords`; `chiptune-frames` heard
