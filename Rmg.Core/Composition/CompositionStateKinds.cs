@@ -207,6 +207,9 @@ internal static class CompositionStateKinds
     // 1 for an echoing note repeated once, almost as loud, a cascade's, where an echo otherwise dies away over several
     public static StateKind<int> EchoOnce { get; } = StateKinds.CreateAdditive<int>(Prefix + "EchoOnce", StateScope.Render);
 
+    // 1 for a note of a chord cycled at a sound chip's frame rate, which no echo repeats, as its cycle would blur
+    public static StateKind<int> Cycled { get; } = StateKinds.CreateAdditive<int>(Prefix + "Cycled", StateScope.Render);
+
     // how many octaves a line's note and its range sit above where its track places them: a harmonised riff's, up the neck
     public static StateKind<int> LineRaise { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineRaise", StateScope.Render);
 

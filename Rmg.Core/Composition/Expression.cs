@@ -807,7 +807,8 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Tremolo, note.Value.Duration >= 1 - 1e-9 ? tremolo : 0).With(CompositionStateKinds.AutoPan, sweeps);
                     if (pumps)
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
-                    if (echoes && (isLine || role == TrackRole.Rhythm))
+                    // but a chord cycled at the frame rate, whose cycle an echo would blur
+                    if (echoes && (isLine || role == TrackRole.Rhythm) && note.Value.State.GetStateValue(CompositionStateKinds.Cycled) == 0)
                         state = state.With(CompositionStateKinds.Echo, (int)Math.Round(delay * 4)).With(CompositionStateKinds.EchoOnce, once ? 1 : 0);
                     if (gate != 0)
                         state = state.With(CompositionStateKinds.Gate, gate);

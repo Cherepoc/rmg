@@ -45,6 +45,32 @@ public sealed class FrameArpeggioTest
         await Assert.That(cycled.Length).IsLessThanOrEqualTo(Math.Max(3 * Articulations.FrameCycles + 3, (int)Math.Ceiling(beats / Articulations.FrameSeconds)));
     }
 
+    /// <summary>
+    ///     Chiptune's chords part never overlapping itself, a cycled chord's notes and a broken chord's on its square or saw
+    ///     ending where the part's next starts, so that no two cycles run together nor broken notes smear; and no echo on a
+    ///     cycled note, which would blur its cycle (heard 15 October 2026: cycles running together read as too fast).
+    /// </summary>
+    [Test]
+    public async Task AChipsChords_NeverOverlapThemselves_AndACycledNoteNeverEchoes()
+    {
+        var checkedNotes = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("chiptune")))))
+        {
+            if (!song.Song.Notes!.TryGetValue(song.Track(TrackRole.Chords), out var notes))
+                continue;
+            var single = notes.Where(x => x.Value.Pitches.Length == 1).ToArray();
+            foreach (var (note, next) in single.Zip(single.Skip(1)))
+            {
+                checkedNotes++;
+                await Assert.That(note.Position + note.Value.Duration).IsLessThanOrEqualTo(next.Position + 1e-6).Because($"seed {song.Seed} at {note.Position}");
+            }
+
+            await Assert.That(notes.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.Cycled) > 0 && x.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0)).IsFalse().Because($"seed {song.Seed}");
+        }
+
+        await Assert.That(checkedNotes).IsGreaterThan(1000);
+    }
+
     /// <summary>A chord's notes spread before they are cycled, none a tone or less above the one below, every note kept in its pitch class: a sus2 as root, fifth and ninth.</summary>
     [Test]
     [Arguments(new[] { 60, 62, 67 }, new[] { 60, 67, 74 })]

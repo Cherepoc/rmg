@@ -217,8 +217,12 @@ internal static class Articulations
         return EventTimeline.Create(timeline.Duration, notes.Select((note, i) =>
         {
             var program = InstrumentsOverTime.ProgramOf(note.Value.State, own);
-            if (!rings(note.Position) || note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 || note.Value.Pitches.Length != 1
-                || !InstrumentTraits.Rings(program)
+            var broken = note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0 && note.Value.Pitches.Length == 1;
+            // a broken chord's note on an instrument that holds its sound ends where the part's next starts, as an
+            // arpeggiator's notes do, which held on would smear into a cluster
+            if (broken && !InstrumentTraits.Rings(program) && i + 1 < notes.Length && notes[i + 1].Position - note.Position < note.Value.Duration - 1e-9)
+                return (note.Value with { Duration = notes[i + 1].Position - note.Position }).ToTimelineItem(note.Position);
+            if (!rings(note.Position) || !broken || !InstrumentTraits.Rings(program)
                 || i + 1 < notes.Length && notes[i + 1].Position - note.Position < RingsFrom - 1e-9)
                 return note;
             var change = changes.FirstOrDefault(x => x > note.Position + 1e-9, timeline.Duration);
@@ -236,16 +240,20 @@ internal static class Articulations
     /// </summary>
     /// <param name="beatsPerSecond">The beats a second at a position, by the tempo there.</param>
     internal static EventTimeline<RealizedNote> Frames(EventTimeline<RealizedNote> timeline, Func<double, double> beatsPerSecond) =>
-        EventTimeline.Create(timeline.Duration, timeline.SelectMany(note =>
+        EventTimeline.Create(timeline.Duration, timeline.SelectMany((struck, i) =>
         {
-            if (note.Value.Pitches.Length < 2)
-                return [note];
+            if (struck.Value.Pitches.Length < 2)
+                return [struck];
+            // cycled until the part's next note at the latest, so that two chords' cycles never run together
+            var note = i + 1 < timeline.Count && timeline[i + 1].Position - struck.Position < struck.Value.Duration - 1e-9
+                ? (struck.Value with { Duration = timeline[i + 1].Position - struck.Position }).ToTimelineItem(struck.Position)
+                : struck;
             var pitches = Spread(note.Value.Pitches);
             var seconds = note.Value.Duration / beatsPerSecond(note.Position);
             var frames = Math.Max(FrameSeconds / Frame, Math.Floor(seconds / (pitches.Length * FrameCycles) / Frame));
             var step = frames * Frame * beatsPerSecond(note.Position);
             var count = Math.Max(1, (int)Math.Ceiling(note.Value.Duration / step - 1e-9));
-            var state = note.Value.State.With(CompositionStateKinds.Strum, 0.0);
+            var state = note.Value.State.With(CompositionStateKinds.Strum, 0.0).With(CompositionStateKinds.Cycled, 1);
             return Enumerable.Range(0, count).Select(k => (note.Value with
             {
                 State = state, Pitches = [pitches[k % pitches.Length]], Duration = Math.Min(step, note.Value.Duration - k * step)
