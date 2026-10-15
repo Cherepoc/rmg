@@ -26,7 +26,10 @@ public enum ChordScaleKind
     Own,
 
     /// <summary>A minor chord a third from the home turned major, Mixolydian on its root, moving on as it likes: a film's or a pop song's III or VI.</summary>
-    Mediant
+    Mediant,
+
+    /// <summary>A major chord a third from the home turned minor, Aeolian on its root: a black metal band's ♭vi or ♭iii.</summary>
+    MinorMediant
 }
 
 /// <summary>
@@ -70,6 +73,15 @@ public static class ChordScales
     ///     as an applied dominant does only before a root a fifth below: never at the plain end, a convention by the middle.
     /// </summary>
     public static ByConvention Mediant { get; } = new(0, 0.1, 0.1);
+
+    /// <summary>
+    ///     The chance a major chord a third from the home, ♭III or ♭VI of a minor key, turns minor, its third lowered, as a
+    ///     black metal band's chords move in minor triads: a genre's that the songs never play, drawn only where it gives a chance.
+    /// </summary>
+    public static ByConvention MinorMediant { get; } = new(0, 0, 0);
+
+    /// <summary>The minor modes a minor mediant takes, the fewest steps moved first: melodic minor, Dorian, Aeolian.</summary>
+    private static readonly Scale[] MinorModes = [Scales.MelodicMinor, Scales.Dorian, Scales.NaturalMinor];
 
     /// <summary>The chance a chord but the home sounds in a mode of its own on its root, by the progression facet: a wild song's alone.</summary>
     public static ByConvention Own { get; } = new(0, 0, 0.3);
@@ -123,6 +135,7 @@ public static class ChordScales
         ImmutableArray<int> progression, int? cadenceRaised, bool dominants, double unconventionality, Genre genre)
     {
         var mediant = Mediant.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "mediant"));
+        var minorMediant = MinorMediant.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "minorMediant"));
         var own = Own.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "own"));
         var applied = Applied.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "applied"));
         var borrowing = Borrowed.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "borrowed"));
@@ -159,6 +172,8 @@ public static class ChordScales
                 var ownsScale = ownContext.TestProbability(own);
                 var ownScale = OwnScale(root);
                 var mediates = mediantContext.TestProbability(mediant);
+                // drawn only where a genre gives it a chance, so that the songs draw as they did
+                var mediatesMinor = minorMediant > 0 && mediantContext.TestProbability(minorMediant);
                 var applies = context.TestProbability(applied);
                 var borrows = context.TestProbability(borrowing);
                 if (Mod(root) == 0)
@@ -181,6 +196,11 @@ public static class ChordScales
                 if (mediates && Mod(root) is 2 or 5
                     && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Mediant) is { } major && major.Steps.Moves(Mod(home + root + 2)))
                     return major;
+                // a major chord a third from the home turned minor, its third lowered, by the minor mode that moves the fewest
+                // steps, as a minor key's ♭VI would lower its tonic, which the key keeps
+                if (mediatesMinor && Mod(root) is 2 or 5
+                    && MinorModes.Select(x => Toward(scale.Offsets, home + root, x.Offsets, ChordScaleKind.MinorMediant)).FirstOrDefault(x => x is not null && x.Steps.Moves(Mod(home + root + 2))) is { } minor)
+                    return minor;
                 if (borrowed is not null && borrows
                     && Heard(Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed), home + root) is { } lent
                     && !(resolving && lent.Steps.Moves(Mod(home + root))))

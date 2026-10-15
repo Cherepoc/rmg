@@ -27,7 +27,7 @@ public static class GenreChoiceDescriptions
         ["cadenceRaise"] = "How often a minor key's cadence raises its seventh, its chord on the fifth turned major to lead home as classical music does; a modal band's never.",
         ["sectionHome"] = "The key a section's chords move around: the song's tonic, its relative key (a minor song's major third, as a chorus lifts into it), or its fourth or fifth. A dark genre stays on its minor tonic.",
         ["rootMotion"] = "How the chords move from one to the next: by fifths for jazz's ii–V, by fourths for rock's IV–I, by steps and thirds for pop's loops. Above the middle a move is likelier, below rarer.",
-        ["chordScales"] = "Chords that borrow notes from outside the key: a dominant leading into a chord, a chord from the parallel minor or major, the blues' every chord a dominant, a chord on a scale of its own, a mode's colour, or a chromatic mediant, iii or vi turned major.",
+        ["chordScales"] = "Chords that borrow notes from outside the key: a dominant leading into a chord, a chord from the parallel minor or major, the blues' every chord a dominant, a chord on a scale of its own, a mode's colour, a chromatic mediant, iii or vi turned major, or a minor one, ♭III or ♭VI turned minor.",
         ["harmonicRhythm"] = "How often the chords change: two a bar for busy harmony, one a bar for most songs, one every two bars for a loop or a groove.",
         ["vamp"] = "How often a section sits on one chord the whole way through, as a funk band or a techno track does.",
         ["turnaround"] = "How often a section's last bar leads back to its start through V, or ii–V, as jazz and the blues do.",

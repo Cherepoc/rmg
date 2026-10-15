@@ -61,4 +61,31 @@ public sealed class MediantTest
                 await Assert.That(mediants / (double)thirds).IsBetween(0.02, 0.4);
         }
     }
+
+    /// <summary>
+    ///     A minor mediant (<see cref="ChordScales.MinorMediant" />): Black metal's ♭III turned minor (its ♭VI would lower the key's tonic), its third lowered,
+    ///     on a third from the home alone; the songs' never, as they give it no chance.
+    /// </summary>
+    [Test]
+    public async Task AMinorMediant_IsAThirdFromHomeTurnedMinor_BlackMetals()
+    {
+        var minors = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
+        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.ChordScales))
+        {
+            var roots = (ImmutableArray<int>)song.Trace.Last(x => x.Point == TracePoints.Progression && x.Section == entry.Section).Value!;
+            foreach (var (root, scale) in roots.Zip((ImmutableArray<ChordScale>)entry.Value!).Where(x => x.Second.Kind == ChordScaleKind.MinorMediant))
+            {
+                minors++;
+                await Assert.That(((root % 7) + 7) % 7 is 2 or 5).IsTrue().Because($"seed {song.Seed} section {entry.Section}");
+                await Assert.That(scale.Steps.Lowered).IsNotEqualTo(0).Because($"seed {song.Seed} section {entry.Section}");
+            }
+        }
+
+        var own = TestCorpus.Range(64).SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.ChordScales)).SelectMany(x => (ImmutableArray<ChordScale>)x.Value!);
+        Console.WriteLine($"{minors} minor mediants in 64 Black metal songs");
+        // measured 16 at 20-30-40 (7 at 10-20-30), nearly all on ♭III, as a minor key's ♭VI would lower its tonic
+        await Assert.That(minors).IsGreaterThan(4);
+        await Assert.That(own.Any(x => x.Kind == ChordScaleKind.MinorMediant)).IsFalse();
+    }
 }

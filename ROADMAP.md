@@ -931,8 +931,10 @@ can be):
    never.
 2. Done (15 October 2026): a section's home by the mode, `sectionHome.contrast`, a major key's fifth and a minor
    third's relative major, a genre's alone, Chamber's 40 and Orchestral's 20-30-30.
-3. The minor mediant, a minor chord a major third below or on a diminished seventh's roots, an option of `chordScales`
-   beside the major mediant, Black metal's, Doom's at its wild end.
+3. Done (15 October 2026): the minor mediant, `chordScales.minorMediant`, a major chord a third from home turned minor
+   by the minor mode moving the fewest steps, Black metal's 20-30-40, Doom's at its wild end; nearly all on ♭III, as a
+   minor key's ♭VI turned minor would lower the key's own tonic, which a chord's scale never moves (the research's ♭vi
+   left, with the diminished seventh's roots, should listening miss them).
 4. The pentatonic union, both thirds over a major pentatonic with the fourth and the flat seventh, a line scale of the
    passing notes (`lineScale`), Rock's and Blues', a line's strong notes kept to the chord.
 5. The hook shorter than its verse, a role's length a genre's (`SectionLength`'s role plays), Hip-hop's 16-bar verse and

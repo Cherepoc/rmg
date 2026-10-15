@@ -1603,7 +1603,7 @@
       "cadenceDegree": { "second": 65, "sixth": 65, "seventh": 55 },
       "sectionHome": { "tonic": 100, "relative": 15, "fourth": 20, "fifth": 20 },
       "passingChords": {},
-      "chordScales": { "borrowed": [0, 5, 10], "applied": 0, "own": 0, "mediant": [0, 10, 15] },
+      "chordScales": { "borrowed": [0, 5, 10], "applied": 0, "own": 0, "mediant": [0, 10, 15], "minorMediant": [0, 5, 10] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 70, "tom": 80, "cymbal": 100 },
       "alone": { "riff": 100, "rhythm": 60, "bass": 30 },
       "texture": { "steady": 100, "build": [30, 40, 50], "alone": [10, 15, 25] },
@@ -2933,6 +2933,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "chordScales": { "applied": [0, 10, 10], "borrowed": [0, 12, 12], "own": [0, 0, 30], "mediant": 0, "dominant": 0, "minorMediant": [20, 30, 40] },
       "openingPart": { "riff": 60, "pad": 40 },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 80, 60], "twin": 50 },
       "length": { "from": [270, 270, 240], "to": [420, 450, 600] },
