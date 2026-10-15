@@ -90,6 +90,8 @@ You review one concern across the whole codebase rather than one slice.
 
 12. **architecture**, on a full review only, as described in *The architecture reviewer* below.
 
+13. **foundations**, on a full review only, as described in *The foundations reviewer* below.
+
 ## The architecture reviewer
 
 One reviewer, the id `architecture`, on a full review only, as a design changes more slowly than the deltas between
@@ -130,6 +132,49 @@ review whose designs are right proposes nothing, and says so in `slice_notes`.
 
 Its proposals are not verified: each is critically reviewed by the main agent as the implementation loop reviews a
 plan, and an accepted one goes to `ROADMAP.md` as a plan, a rejected one to `decided.md` with its reason.
+
+## The foundations reviewer
+
+One reviewer, the id `foundations`, on a full review only. The architecture reviewer asks whether the code's design is
+right; this one asks whether a model the generator makes music with is: the rhythm (dyadic ranks and their thresholds,
+and the figures that stand in for them), the melody (line profiles, contour, phrases), the harmony (levels, progressions,
+chord scales), the form, the voicing (`Realizer`), the mood and the conventionality's leans, the layered state as a way
+of deciding. Each asked whether it can express what the genres' players play, or keeps needing a way round.
+
+It works from evidence, never from a model read as more elegant:
+
+- **The ways round.** What stands in for a model where it cannot express an idiom: hand-written figures in place of
+  generated rhythms (`Figures`, counted), stages of a single device, genre data patching around a lean, special cases a
+  model's doc admits. A model that keeps needing them is the strongest signal, counted by the git history of each.
+- **What listening said.** Verdicts and ratings (`ROADMAP.md`'s *Listening*, the dashboard's) traced to a model rather
+  than to a device's amounts: a setting heard to do nothing (the mood leaning only a genre's own pool), a device heard
+  wrong for a reason the model makes.
+- **What the genres cannot play.** The roadmap's idioms the engine lacks, the genre research's reports (outside the
+  repository, the review's folder naming where), the idiom gaps past reviews proposed.
+- **What the songs measure.** The reports in `run/` (`genre-devices.txt`, `sounding.txt`, `every-preset.txt`) and the
+  explicit report tests: syncopation, evenness, repetition, register, against what the style's records do.
+- **What was decided.** `ROADMAP.md`'s *Parked* and *Decided, and kept*, and `decided.md`: an alternative parked or
+  decided against (patterns by measured features, euclidean patterns, a library of idioms, drums generated together)
+  is proposed again only with what has changed since, said.
+
+It writes **at most two proposals**, the strongest first, each a finding of `category: "foundation"`, `severity` by
+what the current model costs the music, `file` and `line` the model's centre, with these fields beside the usual ones:
+
+- `"cost"`: what the model cannot express, by number: the ways round and their commits, the verdicts, the idioms.
+- `"alternative"`: the other model, concretely, as rules a person could follow by hand: what it decides from what, its
+  plain and wild ends, how a genre's data leans it. Algorithmic and explainable, as CLAUDE.md's principles want:
+  **no machine learning**, no model trained on data, no corpus of other music.
+- `"experiment"`: the smallest thing that would decide it by ear: the alternative built for one part in one genre as a
+  genre option beside the current model, measured on the reports, and asked as a listening question against it. Not a
+  migration: one follows, reviewed as a plan, only once listening prefers the alternative there.
+- `"keeps"`: what the current model does well that the alternative must keep (its meters, its conventionality's ends,
+  its streams), and the listening verdicts tuned on it that a change would put at risk.
+- `"decided"`: the entry on the same model, if any, and what has changed since.
+
+Name overengineering and musicality in each: a model more layered for its own sake, or one that sounds no better, is
+not proposed. There is no quota: a review whose models serve the music proposes nothing, and says so in
+`slice_notes`. Its proposals are not verified: each is reviewed by the main agent as the implementation loop reviews a
+plan, an accepted one going to `ROADMAP.md` as its experiment, a rejected one to `decided.md` with its reason.
 
 ## The device families
 

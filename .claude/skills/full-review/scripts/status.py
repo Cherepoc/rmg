@@ -10,8 +10,8 @@ the record written from them. A finding is looked up here, never in merged.json,
     python3 status.py <review> summary                       # by package: counts by status, commits, songs, what is not fixed
     python3 status.py <review> record <out.md>               # the record's totals and tables
 
-A status starts with one of: fixed, partly, decided, kept, taste, roadmap (an architecture proposal accepted as a
-plan), open; the rest says how, where and why. A finding of taste waits in the listening queue, the package
+A status starts with one of: fixed, partly, decided, kept, taste, roadmap (an architecture or foundations proposal
+accepted as a plan), open; the rest says how, where and why. A finding of taste waits in the listening queue, the package
 `listening`, given its status when it is planned: "open: to ask" where it can be asked as the code is, "open: needs
 code" where a question needs code first, "taste: asked in <commit> (?listen=x)" once asked; a status is a status, so
 `check` passes on the queue however long it waits. Writes

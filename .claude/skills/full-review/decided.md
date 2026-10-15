@@ -4,6 +4,11 @@ Findings raised before and decided against, or kept on purpose, with the reason.
 unless the code it names has changed since in a way that undoes the reason, and then says so. Added to as findings are
 rejected while fixing: the place, what was decided, why.
 
+## Standing
+
+- No machine learning: no model trained on data and no corpus of other music. The generator is rules a person can
+  follow, leaned by data; a proposal of another model proposes rules (16 October 2026, the owner).
+
 ## From the review of 9 October 2026
 
 ### Generation

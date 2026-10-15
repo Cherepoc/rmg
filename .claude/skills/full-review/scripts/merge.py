@@ -21,6 +21,7 @@ from load import findings, overlap, review
 # proposals reviewed as plans, not findings to fix: each in a section of its own, outside the areas' tables
 PLANS = {
     'architecture': ('Architecture proposals', 'Another design for a thing the code does, from the architecture reviewer'),
+    'foundation': ('Foundations proposals', 'Another model for a thing the generator does, its experiment to hear, from the foundations reviewer'),
     'idiom-gap': ('Idiom gaps', 'A device the engine lacks that genres\' players use, from the genre clusters'),
 }
 

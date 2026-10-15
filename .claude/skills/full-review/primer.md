@@ -108,7 +108,7 @@ Write one JSON file, the path given in your task, with this shape:
     {
       "file": "<repo-relative path>",
       "line": 42,
-      "category": "correctness|principles|overengineering|optimization|musicality|dead-code|stale-doc|tests|security|web|genre-fit|cut|idiom-gap|architecture",
+      "category": "correctness|principles|overengineering|optimization|musicality|dead-code|stale-doc|tests|security|web|genre-fit|cut|idiom-gap|architecture|foundation",
       "severity": "high|medium|low",
       "summary": "<one sentence>",
       "evidence": "<the code quoted, a few lines>",
@@ -124,8 +124,8 @@ Write one JSON file, the path given in your task, with this shape:
 }
 ```
 
-`kind` and `listen` go on `musicality`, `genre-fit` and `cut` findings alone (`cut`, `idiom-gap` and `architecture` are
-the musical and architecture reviewers' own, as `angles.md` says). A **mistake** is wrong by a rule the code or the
+`kind` and `listen` go on `musicality`, `genre-fit` and `cut` findings alone (`cut`, `idiom-gap`, `architecture` and
+`foundation` are the musical, architecture and foundations reviewers' own, as `angles.md` says). A **mistake** is wrong by a rule the code or the
 music states: notes against the chord, a device playing where its doc says it does not, a plain end playing a wild
 thing. A **taste** is a judgement of how it sounds, which no reviewer can hear: it is fixed only after a listener
 hears it, so give it a `listen` the page's listening mode could ask (a genre where the device plays, the question, what

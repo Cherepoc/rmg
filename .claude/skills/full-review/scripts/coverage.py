@@ -4,7 +4,8 @@
 
 Prints the slices and angles done and missing, the findings by severity, every file not accounted for or not read in
 full, every device a device family's reviewer did not account for, every preset a genre cluster's reviewer did not, a
-musical reviewer proposing more than three listening questions, three cuts or two idiom gaps, and invalid JSON. Exits 1 while any of these is left.
+musical reviewer proposing more than three listening questions, three cuts or two idiom gaps, an architecture
+reviewer more than three proposals or a foundations reviewer more than two, and invalid JSON. Exits 1 while any of these is left.
 """
 import collections, json, os, sys
 
@@ -91,6 +92,15 @@ for a in angles:
         for what, n in counts.items():
             if n > CAPS[what]:
                 gaps.append((a, f'{n} {what} findings', f'more than {CAPS[what]}: keep those ranked first'))
+# the design reviewers' proposals, the strongest first: three of another design, two of another model
+for a, category, cap in (('angle-architecture', 'architecture', 3), ('angle-foundations', 'foundation', 2)):
+    if a in angles:
+        try:
+            n = sum(1 for f in json.load(open(os.path.join(findings, a + '.json'))).get('findings', []) if f.get('category') == category)
+        except Exception:
+            continue
+        if n > cap:
+            gaps.append((a, f'{n} {category} proposals', f'more than {cap}: keep the strongest'))
 
 print(f"slices: {len(done)} of {len(manifest)} done; angles: {len(angles)} done ({', '.join(a[6:] for a in angles)})")
 print(f"findings by severity: {dict(severities)}")

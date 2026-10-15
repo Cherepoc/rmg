@@ -22,9 +22,9 @@ delta reads enough.
 **One agent at a time.** Launch an agent, wait for its notification, check that its file exists and parses, then launch
 the next. Run several at once only where the user asked for it, and as many as they said.
 
-A full run is about 40 slices (about half of them the tests), 9 angles and the architecture reviewer, 6 device families
+A full run is about 40 slices (about half of them the tests), 9 angles, the architecture and the foundations reviewers, 6 device families
 and 7 genre clusters, about 25 verifier batches, and three runs of the suite; a delta run has as many slices as changed
-files fill, and no architecture reviewer. Confirm with the user before starting where they did not ask for the review by
+files fill, and neither design reviewer. Confirm with the user before starting where they did not ask for the review by
 name, and ask: delta or full, whether to include the tests, which model the agents use (the current one by default: the
 user chose it over a faster one), and whether to run agents one at a time (the default) or several.
 
@@ -108,6 +108,12 @@ reviewers below take:
 "`architecture`", as `angles.md`'s *architecture reviewer* describes: at most three proposals of another design, each
 with what the current one has cost by the records' numbers and measurements, its migration and what it deletes. Run it
 last of the reviewers, so that this review's runs are in `$R/run/`.
+
+**The foundations reviewer**, on a full review only, the prompt of a cross-cutting reviewer with angle 13,
+"`foundations`", as `angles.md`'s *foundations reviewer* describes: at most two proposals of another model the generator
+makes music with (its rhythm, melody, harmony, form, voicing), each from counted evidence and with the experiment that
+would decide it by ear, one part in one genre as a genre option asked against the current model; never machine
+learning. Run it after the architecture reviewer, so that it reads the runs and that reviewer's proposals.
 
 **A device reviewer per family** (form, harmony, lines, drums, solos, sound), as `angles.md`'s *device families*
 describe, its devices in `$R/devices/<family>.txt`, the ledger in `$R/ledger.md`, its output
@@ -222,7 +228,7 @@ package's commit with `status.py $R package <package> <commit> "<songs changed>"
   without, the device is taken out, its code, its choice, its tests and its presets' amounts, as a commit of its own
   that counts the songs it changes; where they hear it earn its place, it goes to `decided.md` as kept, so that no
   review proposes the cut again.
-- An **architecture proposal** or an **idiom gap** is not a package's fix: review each as the implementation loop
+- An **architecture proposal**, a **foundations proposal** or an **idiom gap** is not a package's fix: review each as the implementation loop
   reviews a plan (overengineering and musicality named; for a gap, one mechanism over a case each) and give the user
   the verdict. An accepted one goes to `ROADMAP.md` as a
   plan (`status.py set "roadmap: <its entry>"`), a rejected one to `decided.md` with its reason (`set "decided: ..."`).
