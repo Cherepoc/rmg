@@ -4,7 +4,7 @@ namespace Rmg.Tests.Page;
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class HarmonyTest(Site site)
 {
-    private const string Shown = @"^[A-G][♯♭]? [A-Z][a-z]+( [a-z]+)* · [A-G][♯♭]?\S* · \d+ BPM · \d+/\d+$";
+    private const string Shown = @"^[A-G][♯♭]? [A-Z][a-z]+( [a-z]+)* · ([A-G][♯♭]?\S*|N\.C\.) · \d+ BPM · \d+/\d+$";
 
     [Test]
     public async Task TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek()

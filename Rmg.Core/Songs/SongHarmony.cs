@@ -7,7 +7,7 @@ namespace Rmg.Core.Songs;
 /// <summary>
 ///     A song's harmony as it plays: at every change of chord, the key and the mode it is in there, such as "A Dorian", and
 ///     the chord, such as "Dm7", each named by the part that plays it, its root as the part has it whatever note it puts
-///     lowest; a change no pitched part plays over left out, the chord before held.
+///     lowest; a span no pitched part plays in, as a drums' intro, no chord (<see cref="NoChord" />), as a lead sheet marks it.
 /// </summary>
 public static class SongHarmony
 {
@@ -22,6 +22,9 @@ public static class SongHarmony
         TrackRole.Chords, TrackRole.Pad, TrackRole.Rhythm, TrackRole.Melody, TrackRole.Bass, TrackRole.Riff, TrackRole.CounterMelody, TrackRole.Solo,
         TrackRole.RiffTwin
     ];
+
+    /// <summary>The chord of a span no pitched part plays in.</summary>
+    public const string NoChord = "N.C.";
 
     /// <param name="Position">Where it starts, in beats.</param>
     /// <param name="Key">The key and the mode there, such as "A Dorian".</param>
@@ -52,13 +55,14 @@ public static class SongHarmony
             // the first note of a part that plays the chord, of the first part that does, a broken chord's one note too, its
             // state the chord's: one struck in the chord's span, or one held into it
             var note = parts.Select(x => NoteAt(x.Notes, x.Starts, start, end)).FirstOrDefault(x => x is not null);
-            if (note is null)
-                continue;
+            var name = NoChord;
+            if (note is not null)
+            {
+                var (chord, _, classes) = Realizer.GetChordNotes(note.State);
+                var root = chord.Root.Mod(12);
+                name = ChordNames.KeyNames[root] + ChordNames.Of(classes.Select(x => (x - root).Mod(12)).ToHashSet()).Suffix;
+            }
 
-            var state = note.State;
-            var (chord, _, classes) = Realizer.GetChordNotes(state);
-            var root = chord.Root.Mod(12);
-            var name = ChordNames.KeyNames[root] + ChordNames.Of(classes.Select(x => (x - root).Mod(12)).ToHashSet()).Suffix;
             // the key and the mode the song is in there, as every part shares them, a key change's and a section's own scale
             // among them, not a line's own scale or a chord's
             var shared = common.GetEffectiveStateMapAt(Math.Clamp(start, sections.Start, sections.End));

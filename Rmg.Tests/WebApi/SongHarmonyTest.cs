@@ -40,8 +40,9 @@ public sealed class SongHarmonyTest
     }
 
     /// <summary>
-    ///     Every song names its key and mode and a chord from its first pitched note on, in order, a change apart from the
-    ///     one before, and its file marks each where it is.
+    ///     Every song names its key and mode and a chord from its start, no chord where no pitched part plays, as a drums'
+    ///     intro, and a chord wherever one does, in order, a change apart from the one before, and its file marks each where
+    ///     it is.
     /// </summary>
     [Test]
     public async Task EverySongsHarmony_NamesAKeyAndAChord_InOrder_MarkedInItsFile()
@@ -50,9 +51,11 @@ public sealed class SongHarmonyTest
         {
             var harmony = song.Rendered.Harmony;
             await Assert.That(harmony.Length).IsGreaterThan(0).Because($"seed {song.Seed}");
-            // from where the first pitched part plays at the latest, a song that opens on its drums alone none before
+            // from the start, no chord there where the first pitched note comes after its span, a song that opens on its
+            // drums alone
             var first = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack && x.Value.Count > 0).Min(x => x.Value[0].Position);
-            await Assert.That(harmony[0].Position).IsLessThanOrEqualTo(first + 1e-9).Because($"seed {song.Seed}");
+            await Assert.That(harmony[0].Position).IsEqualTo(0).Because($"seed {song.Seed}");
+            await Assert.That(harmony[0].Chord == SongHarmony.NoChord).IsEqualTo(harmony.Length > 1 && first >= harmony[1].Position - 1e-9).Because($"seed {song.Seed}");
             foreach (var (before, after) in harmony.Zip(harmony.Skip(1)))
             {
                 await Assert.That(after.Position).IsGreaterThan(before.Position).Because($"seed {song.Seed}");
@@ -62,7 +65,7 @@ public sealed class SongHarmonyTest
             foreach (var change in harmony)
             {
                 await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(change.Key, "^[A-G][♯♭]? [A-Z][a-z]+( [a-z]+)*$")).IsTrue().Because($"seed {song.Seed}: {change.Key}");
-                await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(change.Chord, "^[A-G][♯♭]?")).IsTrue().Because($"seed {song.Seed}: {change.Chord}");
+                await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(change.Chord, @"^([A-G][♯♭]?|N\.C\.$)")).IsTrue().Because($"seed {song.Seed}: {change.Chord}");
             }
 
             using var stream = new MemoryStream();
