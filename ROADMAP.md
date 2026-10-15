@@ -615,31 +615,41 @@ chord shapes by darkness), by odds of 4 at its ends, and Trap's scales are all m
 of its chords minor, 23% and 26% major, its scales minor either way (Dorian 7 songs and 1 of 64); Trance's major songs
 31 and 4 of 64, but its major chords 33% and 28%. `HeardDifference` measured the questions' songs apart (0.35 and
 1.07), notes the mood's draws moved, not how bright they sound: a mood's question wants a measure of brightness first.
-Not implemented; the review's plan, each step through the implementation loop:
+Not implemented. Rewritten the same day from the owner's proposal, one scale of mood every genre shares: at a level of
+mood every genre takes comparable scales and chords, a genre leaning only to a level of its own, so that Black metal
+given its brightest plays bright and is heard so. Reviewed against a strict reading, one palette for every genre at
+every mood, which would cost a genre its harmonic taste inside its own span (Blues' Mixolydian and its blues scale and
+Pop's major alike at one darkness); kept, the blend below. Each step through the implementation loop:
 
-1. **A measure of brightness**, a report: a song's chord time on major chords, on minor and on diminished, its scale's
-   darkness, by genre at darkness -1, 0 and 1, the same seeds; the target, every genre's major share at least 20 points
-   apart between its ends, and Trap's and Trance's audible by listening.
-2. **The chords' degrees leaning by darkness**, the step put off from the mood's first plan: a progression's chord on
-   a degree weighed by its chord's quality as the scale has it, major the brighter, minor and diminished the darker, by
+1. **A measure of brightness**, a report: a song's chord time on major chords, on minor and on diminished, and its
+   scale's darkness, by genre at darkness -1, 0 and 1 given, the same seeds; the targets, every genre's major share at
+   least 20 points apart between its ends, and the songs whose mood is drawn moving little.
+2. **The chords' degrees leaning by darkness**, put off from the mood's first plan: a progression's chord on a degree
+   weighed by its chord's quality as the scale has it, major the brighter, minor and diminished the darker, by
    `Mood.Odds`, in every genre's scale without an option added: a minor key's ♭III, ♭VI and ♭VII the brighter, its i,
-   iv and v the darker, a major key's vi, ii and iii the darker. One mechanism over every pool; the largest audible
-   lever inside one scale.
-3. **A given mood at its end reaching past a minor-only pool**, as a supplied conventionality of 0 or 1 is the plainest
-   or the wildest: a mood given at -1 or 1 (`SongOverrides`) letting the scale choice take the nearest scale the pool
-   lacks at that end (a minor-only genre's Dorian or major, a major-only genre's minor), drawn songs keeping to the
-   pool. Questioned in review: it bends *a genre's pool keeps to the options it names*, so only a given end, never a
-   drawn mood, and only the scale.
-4. **The sound by darkness**, if 2 and 3 are not heard enough: a synth's and a pad's filter closed the darker, its room
-   longer, the chords' voicing centred a few semitones lower, never an octave (the register lean dropped on 15 October
-   for moving in octaves).
+   iv and v the darker, a major key's vi, ii and iii the darker. What makes a mood heard inside a genre's span.
+3. **A mood past a genre's span reaching the songs' own options**, the farther the more: inside its span (its
+   `darkness` from and to) a genre's pool as it is, leaned by the mood; past it the songs' own options blended in,
+   none at the span's edge and wholly at the end beyond it, then leaned by the mood, as `ByConvention.Filled` plays the
+   songs' options at an end a genre allows none at. On the darkness's choices alone, the scale and the chord shapes,
+   by the darkness every option has already (`Scale.Darkness`, `ChordShape.Darkness`): no table of moods, no data per
+   genre. A drawn mood keeps inside its span, so a genre's drawn songs change only by step 2; a given one past it is
+   heard (*Drawn or given*). CLAUDE.md's *a genre's pool keeps to the options it names* amended: a mood past a genre's
+   span reaches the songs' own options, the farther the more.
+4. **The sound by darkness**, only if 2 and 3 are not heard enough: a synth's and a pad's filter closed the darker,
+   its room longer, the chords' voicing centred a few semitones lower, never an octave.
 
-Review. *Overengineering*: one lean of the degrees' weights, no table of progressions by mood; step 3 a rule at the
-given ends alone, not a second pool; step 4 only on measurement. *Musicality*: a bright minor song is its relative
-major's chords (♭VI-♭VII-i) and a dark major song leans on vi and the minor iv, as players hear them; a bright trap in
-major is a real sound, melodic trap; the Phrygian ♭II the darkest; the risk, a dark major song's chords turning so
-minor that its key no longer sounds major, so the degrees lean by the odds and never leave the scale. Then
-`trap-bright` asked again, at the ends, against each other.
+Review. *Overengineering*: one lean of the degrees' weights and one blend by the distance past the span, both on
+values the options carry already; the intensity left out of the blend, as its kit and instruments past a span would
+swap a genre's sound (brushes in Black metal) where its tempo, fills and density are heard in every genre already;
+step 4 only on measurement. *Musicality*: the ends are sounds of their own, a bright black metal tremolo-picked in
+major, a melodic trap in major, a dark trance; a bright minor song plays its relative major's chords (♭VI-♭VII-i), a
+dark major song vi and the minor iv; the genre's instruments, drums, rhythm and form kept, heard in another colour.
+Risks: Locrian at the dark end, its tonic diminished, kept off a plain song by its conventionality's plain weight of
+0, so plain dark stops at Phrygian; the exotic scales' darkness (harmonic minor, Phrygian dominant, whole tone) set
+by rule, to check by ear before the ends are trusted; a dark major song turning so minor its key is lost, the degrees
+leaning by the odds and never leaving the scale. Then `trap-ends` asked, Trap's brightest against its darkest, and a
+genre past its span (Black metal at its brightest) against its own.
 
 **A soloist's ghosts** (16 October 2026, from listening, `funk-dead-notes`: dead notes useful in any solo that plays
 percussively, never in its fast tremolos). Now a Funk-family soloist mutes its 16ths between the 8ths by the band's
