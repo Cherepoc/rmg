@@ -142,6 +142,9 @@ internal sealed class Line
                 _ => throw new ArgumentOutOfRangeException(nameof(landing), landing, null)
             };
             var pitchClass = chord.GetPitch(landingStep).Mod(OctaveNoteCount);
+            // an inversion on a note its chord leaves out, a sus chord's third, on its root instead
+            if (chordToneClasses.Count > 0 && !chordToneClasses.Contains(pitchClass))
+                pitchClass = chord.GetPitch(0).Mod(OctaveNoteCount);
             note = below ?? GetNearest(Enumerable.Range(_low, _high - _low + 1).Where(x => x.Mod(OctaveNoteCount) == pitchClass).ToArray(), _previous ?? _middle + register * _profile.ContourShare);
             _landed = note;
         }

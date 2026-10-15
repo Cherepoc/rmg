@@ -3,6 +3,7 @@ using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
+using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Bass;
 
@@ -63,5 +64,26 @@ public sealed class BassLeadingTest
         }
 
         await Assert.That(landings).IsGreaterThan(0);
+    }
+
+    /// <summary>A bass's inversion, its first note on a new chord, lands on a note of the chord, but on a pedal, which holds its note across the chords, and on a chord's one note that leads into the next, a sus chord's root where the third it lands on is left out.</summary>
+    [Test]
+    public async Task ABassInversion_LandsOnANoteOfItsChord()
+    {
+        var (landings, sus) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("chamber")))))
+        foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Bass)].Where(x => (ChordArrival)x.Value.State.GetStateValue(StateKinds.ChordArrival) is ChordArrival.Third or ChordArrival.Fifth
+                                                                                      && song.ChordChanges.Any(c => Math.Abs(c - x.Position) < 1e-9)
+                                                                                      && x.Value.State.GetStateValue(CompositionStateKinds.BassPedal) == 0
+                                                                                      && x.Value.State.GetStateValue(StateKinds.ChordApproach) == 0))
+        {
+            var (chord, _, classes) = Realizer.GetChordNotes(note.Value.State);
+            landings++;
+            sus += classes.Count(x => ((x - chord.Root) % 12 + 12) % 12 is 3 or 4) == 0 ? 1 : 0;
+            await Assert.That(classes.Contains(note.Value.Pitches[0] % 12)).IsTrue().Because($"seed {song.Seed} at {note.Position}");
+        }
+
+        Console.WriteLine($"{landings} inversions, {sus} on chords without a third");
+        await Assert.That(sus).IsGreaterThan(0);
     }
 }
