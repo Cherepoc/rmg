@@ -28,4 +28,28 @@ public sealed class MoodLeansTest
         var (fierce, calm) = (new Mood(0, 1), new Mood(0, -1));
         await Assert.That(Ratio(metal, fierce, "figure.ground", "doubleKick", Figures.Own)).IsGreaterThan(Ratio(metal, calm, "figure.ground", "doubleKick", Figures.Own));
     }
+
+    /// <summary>A value leaned as a range's lean is: fills the more the fiercer, the songs' own amount too.</summary>
+    [Test]
+    public async Task AMood_LeansAValue_FillsByIntensity()
+    {
+        double Value(Mood mood, string choice, string option) => Genre.None.AtMood(mood).Choices[choice][option].Tuned;
+        await Assert.That(Value(new Mood(0, 1), "fills", "amount")).IsGreaterThan(Value(new Mood(0, -1), "fills", "amount"));
+    }
+
+    /// <summary>
+    ///     A report: the same songs' drum fills at the calmest and the fiercest mood (measured 19, 30 and 44 hits a song), and
+    ///     their melody's average pitch at the brightest and the darkest, which a register leaned in octaves moved too far.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task Report()
+    {
+        double Fills(double intensity) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Intensity: intensity)))
+            .Average(x => x.Trace.Count(t => t.Point == TracePoints.Fill && t.Value is HitKind.Fill));
+        double Pitch(double darkness) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Darkness: darkness)))
+            .SelectMany(x => x.Song.Notes!.TryGetValue(x.Track(Rmg.Core.Songs.TrackRole.Melody), out var melody) ? melody.AsEnumerable() : []).Average(x => x.Value.Pitches[0]);
+        Console.WriteLine($"fill hits a song: {Fills(-1):F0} calm, {Fills(0):F0} middling, {Fills(1):F0} fierce; the melody's pitch: {Pitch(-1):F1} bright, {Pitch(0):F1} middling, {Pitch(1):F1} dark");
+        await Task.CompletedTask;
+    }
 }

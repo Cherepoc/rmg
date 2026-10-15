@@ -187,8 +187,8 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
                     continue;
                 options = choice.Options.ToImmutableDictionary(x => x.Name, x => x.Own);
             }
-            // a range's options it leans, its lean, as the songs have them where the genre names none
-            else if (choice.Kind == GenreChoiceKind.Range)
+            // a range's options it leans, its lean, as the songs have them where the genre names none, and a value's alike
+            else if (choice.Kind is GenreChoiceKind.Range or GenreChoiceKind.Values)
                 options = options.AddRange(choice.Options.Where(x => !options.ContainsKey(x.Name) && lean(x.Name) != default).Select(x => KeyValuePair.Create(x.Name, x.Own)));
 
             ByConvention Each(ByConvention value, Func<double, double> at) => new(at(value.Plain), at(value.Tuned), at(value.Wild));
@@ -196,7 +196,7 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
             {
                 GenreChoiceKind.Pool => Weighed(options, x => Math.Exp(mood.LogOdds(lean(x)))),
                 GenreChoiceKind.Chances => options.ToImmutableDictionary(x => x.Key, x => Each(x.Value, p => new Tilt(mood.LogOdds(lean(x.Key))).Chance(p, 1))),
-                GenreChoiceKind.Range => options.ToImmutableDictionary(x => x.Key,
+                GenreChoiceKind.Range or GenreChoiceKind.Values => options.ToImmutableDictionary(x => x.Key,
                     x => Each(x.Value, a => Math.Clamp(a + Mood.RangeShift * (lean(x.Key).Darkness * mood.Darkness + lean(x.Key).Intensity * mood.Intensity), 0, 1))),
                 _ => options
             };

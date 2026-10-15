@@ -959,10 +959,13 @@ can be):
 1. Done (15 October 2026): the songs' own chord shapes leaned by darkness within the level drawn, the level's pick as it
    was, the mood carried by the genre a song takes (`Genre.Mood`): a level's bright shapes 58% at darkness -1, 43% at
    0, 29% at 1, the wildest level's dark ones 28%, 58%, 84%.
-2. The root degrees and the cadence's raise by darkness, the values' choices leaned as a range's are (♭VI and ♭II
-   darker, the raised leading tone brighter).
-3. Fills by intensity (their amount), and the songs' own tempo (the dyadic draw tilted to its fast end).
-4. The sound: instruments by their traits (warm, bright, dark), the register lower the darker, the tone.
+2. Put off (15 October 2026): the root degrees and the cadence's raise by darkness, as a degree's darkness is the
+   mode's (♭VI major in minor), a fixed lean guesswork, the scale carrying the song's darkness already.
+3. Done (15 October 2026): fills by intensity, the mood leaning a genre's values as a range's lean (`Genre.AtMood`),
+   19, 30 and 44 fill hits a song at intensity -1, 0 and 1; the songs' own tempo put off, a dyadic draw, not a range.
+4. Put off: the sound. The register is leaned in octaves, the melody 85 at the brightest and 65 at the darkest with
+   darkness's full lean and unmoved below an octave's, too coarse for a mood; instruments by trait and tone want traits
+   of warmth and darkness first.
 5. The other genres' spans, data, a genre's where its records reach a dark or a fierce end its middle does not.
 
 **4. The engine's put-off features:**

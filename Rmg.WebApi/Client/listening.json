@@ -383,6 +383,14 @@
     },
     "seeds": [
       {
+        "seed": "1",
+        "at": 57,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Electric Snare"
+        ]
+      },
+      {
         "seed": "3",
         "at": 141.2,
         "listen": [
@@ -391,10 +399,11 @@
         ]
       },
       {
-        "seed": "4",
-        "at": 202.3,
+        "seed": "5",
+        "at": 232.1,
         "listen": [
-          "Electric Snare",
+          "Tom",
+          "Hi-Hat",
           "Kick"
         ]
       },
@@ -410,14 +419,6 @@
         "at": 166.3,
         "listen": [
           "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 103.5,
-        "listen": [
-          "Bass (Synth Bass 1)",
-          "Tom"
         ]
       },
       {

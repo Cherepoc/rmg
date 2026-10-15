@@ -36,7 +36,8 @@ public readonly record struct Mood(double Darkness, double Intensity)
     ///     otherwise, as their kit by their drums' job. The scales by their darkness, Dorian's none, Lydian bright and
     ///     Locrian dark (<see cref="Scale.Darkness" />); the fiercer, the likelier the power kit, double time, a riff that
     ///     chugs or plays power chords, a driven instrument, a loud section's figure, and the calmer the brushes, the jazz kit and
-    ///     half time; a tempo's range leaning to its fast end the fiercer; a chord shape by its darkness.
+    ///     half time; a tempo's range leaning to its fast end the fiercer; a chord shape by its darkness; fills the more the
+    ///     fiercer, a value as a range's lean.
     /// </summary>
     // built when first asked, as the choices it names take the songs' span of a mood from here
     public static ImmutableArray<(GenreChoice Choice, Func<string, (double Darkness, double Intensity)> Lean, bool AsSongs)> Leans => field.IsDefault ? field =
@@ -46,6 +47,8 @@ public readonly record struct Mood(double Darkness, double Intensity)
         (GenreChoices.FeelChances, name => (0, name switch { "doubleTime" => 1, "halfTime" => -0.5, _ => 0 }), true),
         (GenreChoices.Riff, name => (0, name switch { "chugs" => 1, "powerChords" => 0.5, _ => 0 }), true),
         (GenreChoices.Tempo, name => (0, name == "lean" ? 1 : 0), false),
+        // fills the more the fiercer, a value moved as a range's lean is
+        (GenreChoices.Fills, name => (0, 1), true),
         // the chord shapes by their darkness, a Phrygian or a diminished chord the darker and a Lydian or a six-nine the
         // brighter, where a genre names its pool, as the songs draw theirs by levels first
         (GenreChoices.ChordShape, name => (ChordShapes.All.Single(x => GenreChoices.Name(x.Name) == name).Darkness, 0), false),
