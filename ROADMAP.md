@@ -982,9 +982,10 @@ can be):
    sections of 32 Chamber songs asked to, every note a bar after the melody's (to ask: `chamber-imitation`).
 5. Put off again: the tape stop, a tempo map and every channel's bends together, the most cost for the least.
 
-**5. Housekeeping:** two page tests flaky now and then, each passing alone and three runs in a row after
-(`TheKeyAndChord_FollowTheBar_AsAHandDragsIt(True)`, `TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`);
-analytics written off the request; the tests that check less than their names; the drum solo's
+**5. Housekeeping:** done in part (15 October 2026): the drag test's flake, a playing song crossing a change of chord
+between the last move and the let-go, its readout now checked for its form there (the paused one's as before); left,
+the seek test's flake (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), seen once, its message not
+kept, to read when it fails again. Analytics written off the request struck, as *Decided, and kept* has it; the tests that check less than their names; the drum solo's
 parameters passed with the song's decisions whole; the verdicts by song (step 0's).
 
 **6. The carry-overs:** a section's energy choosing a figure (Ska punk's choruses, as it chooses the chugs); the

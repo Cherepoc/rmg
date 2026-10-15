@@ -88,10 +88,14 @@ public sealed class HarmonyTest(Site site)
         var after = (await harmony.TextContentAsync())!;
         Console.WriteLine($"seen while dragging: {string.Join(" | ", seen)}; let go of: {after}");
         // it changed as the bar moved, and shows the place it is let go of, its key and chord, as a playing song's tempo may
-        // step on between the last move and the let-go
+        // step on between the last move and the let-go; a playing song's may cross a change of chord there too, so it shows
+        // a key and chord, where it is let go the seek bar's place below
         static string KeyAndChord(string shown) => string.Join(" · ", shown.Split(" · ").Take(2));
         await Assert.That(seen.Distinct().Count()).IsGreaterThan(1);
-        await Assert.That(KeyAndChord(after)).IsEqualTo(KeyAndChord(seen[^1]));
+        if (playing)
+            await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(after, Shown)).IsTrue().Because(after);
+        else
+            await Assert.That(KeyAndChord(after)).IsEqualTo(KeyAndChord(seen[^1]));
         // and the song goes on from there, not from its start, whether or not the player had it yet
         await Task.Delay(SongPage.PastRemake);
         await Assert.That(double.Parse(await page.Page.Locator("#seek").InputValueAsync(), System.Globalization.CultureInfo.InvariantCulture)).IsGreaterThan(0.8);
