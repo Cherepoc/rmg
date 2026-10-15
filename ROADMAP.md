@@ -941,9 +941,10 @@ can be):
 5. Done (15 October 2026): a role's length a genre's, `roleLength` (verse, chorus, bridge), the length the role leans
    to halved or doubled, Hip-hop's chorus at 25, 10.2 bars against its verse's 15.8 (14.6 and 14.1 as the songs'); three
    verses, `vcvcvc`, a genre's form alone, Hip-hop's 20-30-30, 16 of 64 songs.
-6. Interlocking parts, a figure striking where another part does not (a follower's inverse, as the rolling bass answers
-   the kick), Funk's guitar against its clavinet; dead notes, a 16th chain's weak notes muted short and soft (an
-   articulation), Funk's bass and guitar.
+6. Done in part (15 October 2026): dead notes, `articulation.deadNotes`, a bass's, riff's or rhythm part's 16ths between
+   the 8ths in a chain muted short and soft as a palm-muted note is, Funk's 40-50-60, Funk rock's 20-30-40, Jazz-funk's
+   10-20-30 of its parts (to ask: `funk-dead-notes`). Put off: interlocking parts, the rhythm part's figure striking
+   where the chords' does not, as the rhythm part is no figure's player and would need its turn after the chords'.
 7. The tempo's groups, measured first: whether a genre's songs fall in its records' clusters (Jazz's ballads,
    mediums and burners; Rock's and Synthwave's two) with the mood's intensity and the range's lean as they are; a
    tempo pool of bands within the range only if not.
