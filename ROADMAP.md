@@ -949,11 +949,11 @@ can be):
    a gap at 100-120. A genre's tempo in bands, `tempoBand`, the slow, middle and fast thirds of its range, a song's in
    one: Jazz's 31-44-31, above 180 25% (12%), below 90 31% (16%), 100-120 10% (18%); Synthwave's two groups 45-10-45.
    Rock's fast group left to its range.
-8. The small ones, each data or a row: the punk beat's offset kick (a ground figure, checked against a transcription
-   first), the cymbal choke before a stop (an ensemble hit's crash cut short), the press roll into a solo (a fill's
-   kind before a soloed section), Chameleon's tresillo bass arpeggio with its chromatic walk-up (a bass figure), the
-   echo on a chord stab (the echo on a stabbing part, before dub techno), a part's own swing (the ride and the hats
-   swung harder than a soloist, a part's share of the song's swing).
+8. The small ones: done (15 October 2026), the tresillo, a bass figure on 3+3+2 in each half bar, Jazz-funk's
+   20-30-30, 96% of its notes on its 16ths. Put off, each with its reason: the punk beat's offset kick, until a
+   transcription confirms where it falls; the cymbal choke before a stop, with the ensemble hits' crash, left to
+   listening; the press roll into a solo, a fill of its own kind before a soloed section; the echo on a chord stab, with
+   the dub techno preset that wants it; a part's own swing, the render's one swing for every song.
 
 **3. The mood's leftovers:**
 1. The songs' own chord shapes leaned by darkness through their levels' pick (a level's darkness its shapes' mean), as

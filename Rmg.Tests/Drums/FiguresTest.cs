@@ -164,12 +164,13 @@ public sealed class FiguresTest
     }
 
     /// <summary>
-    ///     A calibration: a tumbao's or a bossa nova's bass strikes on its figure's 16ths, but for the notes the stages after
+    ///     A calibration: a tumbao's, a bossa nova's or a tresillo's bass strikes on its figure's 16ths, but for the notes the stages after
     ///     the figures place, a line's pickup or a push.
     /// </summary>
     [Test]
     [Arguments("latin", "tumbao")]
     [Arguments("bossa", "bossaBass")]
+    [Arguments("jazzFunk", "tresillo")]
     public async Task ALatinBass_StrikesOnItsFiguresSixteenths(string genre, string name)
     {
         var figure = Figures.All.Single(x => x.Player == FigurePlayer.Bass && x.Name == name);
@@ -188,7 +189,8 @@ public sealed class FiguresTest
         }
 
         Console.WriteLine($"{genre}: of {notes} notes of its {name}, {on / (double)Math.Max(1, notes):P1} on its 16ths");
-        // measured 72% (Latin's, its pushes an eighth early and its pickups the rest) and 96% (Bossa nova's), October 2026
+        // measured 72% (Latin's, its pushes an eighth early and its pickups the rest), 96% (Bossa nova's) and 96% (Jazz-funk's
+        // tresillo), October 2026
         await Assert.That(notes).IsGreaterThan(200);
         await Assert.That(on / (double)notes).IsGreaterThan(0.6);
     }

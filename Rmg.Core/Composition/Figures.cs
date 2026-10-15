@@ -52,7 +52,7 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 ///     band's galloping riff and its reverse gallop, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a jazz drummer's ride,
 ///     on the beats and the skip after 2 and 4; a clave's three and two,
 ///     and the bossa nova's on the snare's stroke, its cross-stick; a trance's chords in 16ths, its arpeggio's steady run, and its bass
-///     rolling in the 16ths after the kick or on the offbeats, a salsa's tumbao and the bossa nova's bass; four on the floor,
+///     rolling in the 16ths after the kick or on the offbeats, a salsa's tumbao, the bossa nova's bass and the tresillo; four on the floor,
 ///     drum and bass's two-step, the surdo's kick, the snare on every beat, the train beat, the skank, the Charleston, a
 ///     bass's pulse in 8ths or 16ths, and the boom-chicka, the bass on 1 and 3 and the chords on 2 and 4. A section draws each player's, its own rhythm or one of its
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
@@ -123,6 +123,8 @@ internal static class Figures
         // a salsa's bass, counted in half notes as its clave is: each of its bars' 2-and and 4, anticipating the chord
         new("tumbao", "The tumbao, a salsa bar's 2-and and 4, ahead of the chord", FigurePlayer.Bass, [3, 6, 11, 14], 16, null, 0, false),
         new("bossaBass", "The bossa nova's bass, on 1, the 2-and, 3 and the 4-and, as its surdo", FigurePlayer.Bass, [0, 6, 8, 14], 16, null, 0, false),
+        // the tresillo, 3+3+2 in each half of the bar, a jazz-funk vamp's bass arpeggio
+        new("tresillo", "The tresillo, 3+3+2 in each half bar", FigurePlayer.Bass, [0, 3, 6, 8, 11, 14], 16, null, 0, false),
         // a son clave counted in half notes, a salsa's beat, its two sides in a bar
         new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 3, 6, 10, 12], 16, null, 0, false),
         new("clave23", "The clave's 2-3", FigurePlayer.Claves, [2, 4, 8, 11, 14], 16, null, 0, false),

@@ -885,7 +885,7 @@
       "sectionHome": { "tonic": 100, "fourth": [30, 40, 40], "fifth": 15, "relative": 5 },
       "feelChances": { "swing": 0, "halfTime": [0, 5, 5], "doubleTime": 0 },
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },
-      "figure": { "bass": { "own": 100, "withKick": [15, 15, 10] } },
+      "figure": { "bass": { "own": 100, "withKick": [15, 15, 10], "tresillo": [20, 30, 30] } },
       "callAndResponse": { "sections": [10, 30, 40] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
       "phraseBars": { "fourBars": 100 },
