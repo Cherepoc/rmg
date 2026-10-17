@@ -67,10 +67,11 @@ public static class SongParts
                 }
             )
             .ToImmutableHashSet());
-        // where every part would be out, those drawn out come in but those the genre leaves out, as a song needs a part
-        // to play, and every one where the genre leaves out all; only every part given out leaves none
+        // where every part would be out, those drawn out come in but those the genre leaves out, and those the song's facets
+        // allow none of, a plain song's soloist and twin, as a song needs a part to play, and every one where that leaves
+        // none; only every part given out leaves none
         if (absent.Count == All.Length)
-            absent = WithTwins([..GivenOut(given).Union(All.Where(x => IsLeftOut(x, genre) && !(given?.GetValueOrDefault(x) ?? false)))]);
+            absent = WithTwins([..GivenOut(given).Union(All.Where(x => (IsLeftOut(x, genre) || Chance(x, facets, genre) <= 0) && !(given?.GetValueOrDefault(x) ?? false)))]);
         if (absent.Count == All.Length)
             absent = GivenOut(given);
         if (absent.Count == All.Length)

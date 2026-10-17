@@ -176,7 +176,7 @@ internal static class Figures
             var context = song.Stream(SongStream.Figures, id);
             // a figure of its own shape in a bar of its meter alone, a steady one in any
             var meter = song.SectionMeters[id];
-            var energy = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling);
+            var energy = section.EnergyTilt;
             var figures = new Dictionary<FigurePlayer, Figure?>();
             foreach (var player in players)
             {

@@ -285,13 +285,13 @@ internal sealed record SongDecisions(
             PhraseBars = PhraseLengths.Draw(SongGenerator.CreateStream(seed, SongStream.SectionPhraseBars, x.Key), songUnconventionality[Facet.Form], genre, x.Value.Phrases)
         });
         StateTrace.RecordSong(TracePoints.SectionMeter, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
-        // an intro's entries over the first section's first phrase, as long as its phrase is
-        if (plan.Intro == IntroKind.Entries && !plan.Window.IsBefore)
-            plan = plan with { Window = plan.Window with { Bars = sectionMeters[sectionIds[0]].PhraseBars } };
         // a hook intro where the song has a chorus to quote, and where it has none another of the genre's intros
         var hook = SongFormGenerator.HookOf(sectionIds, structure.Roles, sectionMeters);
         if (plan.Intro == IntroKind.Hook && hook is null)
             plan = formGenerator.WithoutHook(plan);
+        // an intro's entries over the first section's first phrase, as long as its phrase is, one taken in a hook's place too
+        if (plan.Intro == IntroKind.Entries && !plan.Window.IsBefore)
+            plan = plan with { Window = plan.Window with { Bars = sectionMeters[sectionIds[0]].PhraseBars } };
         StateTrace.RecordSong(TracePoints.OpeningAlone, $"{plan.First?.ToString() ?? "none"}", plan.First);
 
         // every section's drums, drawn before the sections are made, every drum of the song's groove in one of them at

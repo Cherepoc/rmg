@@ -110,7 +110,8 @@ internal static class Texture
         if (drumsMark)
             drumsAt = Math.Max(1, drumsAt);
         // a breakdown chorus's voice alone first, the drums next
-        if (breakdown && order.Contains(TrackRole.Melody))
+        var voiceFirst = breakdown && order.Contains(TrackRole.Melody);
+        if (voiceFirst)
             (order, drumsAt) = ([TrackRole.Melody, ..order.Where(x => x != TrackRole.Melody)], 1);
         ImmutableArray<ImmutableHashSet<TrackRole>> none = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, phrases)];
 
@@ -119,12 +120,13 @@ internal static class Texture
             case TextureKind.Build or TextureKind.Thin when phrases >= 2 && order.Length >= 2:
             {
                 // phrase p plays the first of the order, a share more every phrase, the parts over the phrases rounded up, to
-                // all by the last; a build's drums among them,
-                // a thinning's playing through, as the drums never stop within a section
+                // all by the last, a breakdown chorus's voice alone in the first and the rest over the others; a build's
+                // drums among them, a thinning's playing through, as the drums never stop within a section
                 TrackRole[] parts = kind == TextureKind.Build && playing.Contains(TrackRole.Drum) ? [..order.Take(drumsAt), TrackRole.Drum, ..order.Skip(drumsAt)] : order;
-                var silent = Enumerable.Range(0, phrases)
-                    .Select(phrase => parts.Skip((int)Math.Ceiling((phrase + 1) * parts.Length / (double)phrases)).ToImmutableHashSet())
-                    .ToArray();
+                int Playing(int phrase) => voiceFirst
+                    ? 1 + (int)Math.Ceiling(phrase * (parts.Length - 1) / (double)(phrases - 1))
+                    : (int)Math.Ceiling((phrase + 1) * parts.Length / (double)phrases);
+                var silent = Enumerable.Range(0, phrases).Select(phrase => parts.Skip(Playing(phrase)).ToImmutableHashSet()).ToArray();
                 if (kind == TextureKind.Thin)
                     Array.Reverse(silent);
                 return (kind, ImmutableHashSet<TrackRole>.Empty, [..silent]);

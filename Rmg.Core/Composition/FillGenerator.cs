@@ -601,7 +601,14 @@ internal sealed record FillLine(
     bool HasFill = true,
     bool IsLandingForced = false,
     double Room = double.PositiveInfinity
-);
+)
+{
+    /// <summary>The lift into the section the line starts (<see cref="FillSection.LiftInto" />).</summary>
+    public double Lift => Ending.LiftInto(Next);
+
+    /// <summary>Whether the line leads into another section louder enough to be lifted into, as its cues, drops and hits are (<see cref="LiftCues.Threshold" />).</summary>
+    public bool Lifts => Ending != Next && Lift > LiftCues.Threshold;
+}
 
 /// <summary>
 ///     A section as the fills see it: where it is, how far its rhythm strays, the drums' feel before its lines, and its
@@ -627,6 +634,9 @@ internal sealed record FillSection(
 {
     /// <summary>How far the section's fills stray from convention, which their choices lean by.</summary>
     public RhythmicUnconventionality Fills => new(Facets[Facet.Fills]);
+
+    /// <summary>The lift into a section after it, the energy's rise as far as its rhythm follows it, which the band grows louder by and its cues mark.</summary>
+    public double LiftInto(FillSection next) => (next.Energy - Energy) * Rhythm.Coupling;
 }
 
 /// <summary>

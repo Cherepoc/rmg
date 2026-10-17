@@ -109,7 +109,8 @@ internal static class Articulations
                 var state = note.Value.State;
                 // the appearance it plays as, an intro's and the ending's too
                 var section = song.Form.Map.PlayAt(note.Position)?.Index ?? -1;
-                var repeats = i > 0 && timeline[i - 1].Value.Pitches.SequenceEqual(note.Value.Pitches);
+                // a repeat of the note before as it is played, a bass cycle's step or an octave taken
+                var repeats = i > 0 && played[i - 1].SequenceEqual(note.Value.Pitches);
                 var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
                 // by the instrument playing the note, a switched one's
                 var program = InstrumentsOverTime.ProgramOf(state, part.InstrumentCode);

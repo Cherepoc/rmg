@@ -18,7 +18,7 @@ internal static class SectionEnergy
     /// <summary>How far the song's energy spreads either way, which moves all its sections alike.</summary>
     public const double Song = 0.25;
 
-    /// <summary>The step of the section that recurs most over the song's average, and less of the others in proportion.</summary>
+    /// <summary>The step of the section whose recurrence is furthest from the song's average, up for the most recurrent, down for the rarest, and less of the others in proportion.</summary>
     public const double Recurrence = 0.5;
 
     /// <summary>The step of a section at the song's end, and less the earlier it plays, down to its negative at the start.</summary>

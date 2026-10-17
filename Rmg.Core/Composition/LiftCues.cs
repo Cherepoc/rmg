@@ -26,7 +26,7 @@ internal static class LiftCues
     /// <summary>The song with the drums' cues played into every section louder enough than the one before.</summary>
     public static TrackEventStateTimelineMap<StateMap> Apply(TrackEventStateTimelineMap<StateMap> song, IEnumerable<FillLine> lines, SongMap map)
     {
-        foreach (var line in lines.Where(x => x.Ending != x.Next && (x.Next.Energy - x.Ending.Energy) * x.Ending.Rhythm.Coupling > Threshold))
+        foreach (var line in lines.Where(x => x.Lifts))
         {
             StateTrace.RecordSection(TracePoints.LiftCue, FillGenerator.DrumsTrace, line.Next.SectionId, $"into {line.Position}", line.Position);
             song = song.MapTrackEvents(Cues.Select(x => (Track: DrumGroups.GetTrackNumber(x.Drum), x.Drum, x.Sound, x.WholeBar)).Where(x => song.TrackTimelineMap.ContainsKey(x.Track)).ToDictionary(

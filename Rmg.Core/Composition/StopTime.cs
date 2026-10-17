@@ -45,7 +45,7 @@ internal static class StopTime
         var stops = song.SectionIds.Distinct().ToDictionary(id => id, id =>
         {
             var section = song.SectionOf(id);
-            var chance = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling)
+            var chance = section.EnergyTilt
                 .Chance(Chance.At(section.Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "sections")), EnergyLean);
             return song.Stream(SongStream.StopTime, id).TestProbability(chance);
         });

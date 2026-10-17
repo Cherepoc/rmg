@@ -106,7 +106,7 @@ internal static class DrumMarks
         foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
         {
             var section = song.SectionOf(span.SectionId);
-            var energy = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling);
+            var energy = section.EnergyTilt;
             var plays = Plays(span);
             // the section's places, each at its strongest: its start, its phrases' and its chords' changes
             var phrase = span.Meter.PhraseDuration;

@@ -93,7 +93,7 @@ internal static class Mutations
             ];
             var groove = section.Facets[Facet.Groove];
             var context = song.AppearanceStream(SongStream.Mutations, index);
-            var chance = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling).Chance(Chance.At(groove, song.Genre.Chance(GenreChoices.Mutation, "bars")), 1);
+            var chance = section.EnergyTilt.Chance(Chance.At(groove, song.Genre.Chance(GenreChoices.Mutation, "bars")), 1);
             var anchored = context.TestProbability(KeepsAnchors.At(groove));
             var edits = new List<Mutation>();
             var made = 0;

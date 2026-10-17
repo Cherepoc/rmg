@@ -37,8 +37,9 @@ internal static class SectionMeter
         {
             var drawing = sections(id);
             var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(Chance.At(unconventionality, genre.Chance(GenreChoices.SectionChanges, "meter")), 1));
-            // the first section sets the song's meter
-            if (!hasOwn || id == sectionIds[0] || options.Length == 0)
+            // the first section sets the song's meter, as does a section with no other its facet allows, as a plain 4/4 song's
+            // allows none where a genre gives it a chance and names no meters
+            if (!hasOwn || id == sectionIds[0] || options.Length == 0 || pool is null && options.All(x => x.Weight.At(unconventionality) <= 0))
                 return song;
 
             // another of the options the facet allows, drawn from the section's own sequence, whose draws touch no other's

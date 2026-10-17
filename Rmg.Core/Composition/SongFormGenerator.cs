@@ -20,11 +20,10 @@ internal sealed class SongFormGenerator
     // the sequence an intro's entries are drawn from, apart from the rest of the form
     private readonly IGenerationContext _introContext;
 
-
-    // the sequence whether a lift is built to and dropped at is drawn from (FormLayers.Drop)
     // how finely a line's place keys its drop's sequences
     private const int LinePlacesPerBeat = 48;
 
+    // the sequence whether a lift is built to and dropped at is drawn from (FormLayers.Drop)
     private readonly IGenerationContext _dropContext;
 
     // a drop's kind, silent or filtered, from a sequence of its own
@@ -88,18 +87,20 @@ internal sealed class SongFormGenerator
         _meter = meter;
     }
 
+    /// <summary>A plan whose hook has no chorus to quote with another of the genre's intros, from a sequence of its own, a count-in where the drums keep time, half of one now and then.</summary>
+    public FormPlan WithoutHook(FormPlan plan)
+    {
+        ImmutableArray<Weighted<IntroKind>> others = [..FormLayers.WeighIntros(_songRhythm.Value, _genre).Where(x => x.Value != IntroKind.Hook && (x.Value != IntroKind.CountIn || _drumsKeepTime))];
+        var intro = others.IsEmpty ? IntroKind.Cold : _hookContext.Pick(others);
+        // a count-in taken in the hook's place clicking its last two beats as one drawn so would
+        return plan with { Intro = intro, HalfCountIn = _hookContext.TestProbability(FormLayers.HalfCountInChance) && intro == IntroKind.CountIn };
+    }
+
     /// <summary>
     ///     What the song's form will be, decided before its sections: its intro and ending, and how they play. The song's
     ///     last section then leads home to the tonic, where the ending lands.
     /// </summary>
     /// <param name="sectionIds">The sections in the song's order.</param>
-    /// <summary>A plan whose hook has no chorus to quote with another of the genre's intros, from a sequence of its own, a count-in where the drums keep time.</summary>
-    public FormPlan WithoutHook(FormPlan plan)
-    {
-        ImmutableArray<Weighted<IntroKind>> others = [..FormLayers.WeighIntros(_songRhythm.Value, _genre).Where(x => x.Value != IntroKind.Hook && (x.Value != IntroKind.CountIn || _drumsKeepTime))];
-        return plan with { Intro = others.IsEmpty ? IntroKind.Cold : _hookContext.Pick(others) };
-    }
-
     public FormPlan Plan(IReadOnlyList<int> sectionIds)
     {
         var intro = _context.Pick(FormLayers.WeighIntros(_songRhythm.Value, _genre));
@@ -391,15 +392,18 @@ internal sealed class SongFormGenerator
         if (plan.Ending == EndingKind.Strip)
         {
             var stripStart = end - 2 * last.PatternDuration;
-            var bars = (int)Math.Round((end - stripStart) / last.BarDuration);
             var final = sections[^1];
             // the solo part, whose notes are played later over the melody's, heard where the melody is
-            bool Heard(TrackRole role) => role == TrackRole.Solo ? _roles.Values.Contains(role) && Heard(TrackRole.Melody) : !final.Resting.Contains(role) && final.Roles.Any(x => x.Value == role && final.Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
-            TrackRole[] parts = [.._roles.Values.Select(x => x.Source()).Where(x => x != TrackRole.Drum && Heard(x)).Distinct().OrderBy(x => x).OrderBy(_ => _context.GenerateDouble())];
+            bool Heard(TrackRole role) => role == TrackRole.Solo ? _roles.Values.Contains(role) && Heard(TrackRole.Melody) : !final.Resting.Contains(role) && final.HasNotes(role);
+            // each part's place in the order from a draw of its own, so that a part resting there leaves the others' places
+            var order = _context.GenerateSeed();
+            TrackRole[] parts = [.._roles.Values.Select(x => x.Source()).Where(x => x != TrackRole.Drum && Heard(x)).Distinct().OrderBy(x => new GenerationContext(Seeds.Derive(order, (long)x)).GenerateDouble())];
             var leaving = Heard(TrackRole.Drum) ? parts.Length : Math.Max(0, parts.Length - 1);
+            // on the bar lines of the appearances it covers, a short bar's among them
+            double[] barLines = [..map.Sections.Where(x => x.End > stripStart + 1e-9).SelectMany(x => Enumerable.Range(0, x.BarCount).Select(b => x.Bar(b).Start)).Where(x => x >= stripStart - 1e-9 && x < end - 1e-9)];
             for (var i = 0; i < leaving; i++)
             {
-                var exit = stripStart + (i + 1) * bars / (leaving + 1) * last.BarDuration;
+                var exit = barLines[(i + 1) * barLines.Length / (leaving + 1)];
                 foreach (var (track, role) in _roles.Where(x => x.Value.Source() == parts[i]))
                     edits.Rest(track, role, exit, end);
 
@@ -427,7 +431,7 @@ internal sealed class SongFormGenerator
             var place = map.PlaceKey(line.Position, LinePlacesPerBeat);
             var dropping = new GenerationContext(Seeds.Derive(dropSeed, place)).TestProbability(drop);
             var kind = new GenerationContext(Seeds.Derive(kindSeed, place)).Pick(kinds);
-            if (line.Ending == line.Next || line.Position >= end || (line.Next.Energy - line.Ending.Energy) * line.Ending.Rhythm.Coupling <= LiftCues.Threshold || !dropping)
+            if (!line.Lifts || line.Position >= end || !dropping)
                 continue;
             // but where the band does not come back on it, the section's first bar leaving every pitched part out, as a
             // texture building it up does
@@ -441,14 +445,7 @@ internal sealed class SongFormGenerator
             // the drums' hits kept for their fill, every other part, a soloist's too, kept out of it once the lines walk
             // into the section
             foreach (var (track, role) in _roles.Where(_ => kind == DropKind.Silent))
-            {
-                if (tracks.Contains(track))
-                    edits.Clear(track, gap, line.Position);
-                if (role == TrackRole.Drum)
-                    edits.Cut(track, gap);
-                else
-                    edits.Silence(track, gap, line.Position);
-            }
+                edits.Rest(track, role, gap, line.Position);
 
             // the build: the song's snare rolling over the bars before the silent one, its notes twice as fast each bar and
             // louder as it goes, within the section
@@ -513,23 +510,21 @@ internal sealed class SongFormGenerator
         // every part that plays comes in: those the rhythm weighs first, then those it gives none, by their own weights
         var playing = FormLayers.IntroParts.Where(x => parts.ContainsKey(x.Part)).ToArray();
         var weighed = playing.Where(x => RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean).At(_songRhythm.Value) > 0).ToArray();
-        var order = new List<IntroPart>();
-        foreach (var options in new[]
-                 {
-                     weighed.Length == 0 ? [] : ByConvention.Weigh(weighed.Select(x => (x.Part, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))), _songRhythm.Value).ToList(),
-                     playing.Except(weighed).Select(x => new Weighted<IntroPart>(x.Weight, x.Part)).ToList()
-                 })
-            while (options.Count > 0)
-            {
-                var index = Generators.WeightedIndex([..options])(_introContext);
-                order.Add(options[index].Value);
-                options.RemoveAt(index);
-            }
+        // in an order by weight, each part's place from a draw of its own, so that a part resting in the window leaves the
+        // others' places as they were
+        var (orderSeed, countSeed) = (_introContext.GenerateSeed(), _introContext.GenerateSeed());
+        double Key(Weighted<IntroPart> x) =>
+            Math.Pow(new GenerationContext(Seeds.Derive(orderSeed, (long)x.Value.Role * 16 + (x.Value.DrumRole is { } drum ? (long)drum + 1 : 0))).GenerateDouble(), 1 / x.Weight);
+        List<IntroPart> order =
+        [
+            ..(weighed.Length == 0 ? [] : ByConvention.Weigh(weighed.Select(x => (x.Part, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))), _songRhythm.Value)).OrderByDescending(Key).Select(x => x.Value),
+            ..playing.Except(weighed).Select(x => new Weighted<IntroPart>(x.Weight, x.Part)).OrderByDescending(Key).Select(x => x.Value)
+        ];
         // the part the song opens on alone first, the drums' every one, the rest in the order drawn
         var alone = order.Where(x => x.Role == opening).ToArray();
         order = [..alone, ..order.Except(alone)];
 
-        var inWindow = order.Count <= 1 ? order.Count : Generators.Int(1, order.Count)(_introContext);
+        var inWindow = order.Count <= 1 ? order.Count : Generators.Int(1, order.Count)(new GenerationContext(countSeed));
         return
         [
             ..order.Select((part, i) => new IntroEntry(
@@ -693,7 +688,7 @@ internal sealed class SongFormGenerator
         for (var i = 0; i < changes.Count; i++)
         {
             var (position, ending, next) = changes[i];
-            var lift = (next.Energy - ending.Energy) * ending.Rhythm.Coupling;
+            var lift = ending.LiftInto(next);
             if (position >= end || lift <= 0)
                 continue;
 

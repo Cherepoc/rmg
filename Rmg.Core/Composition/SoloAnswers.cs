@@ -88,6 +88,8 @@ internal static class SoloAnswers
             var onsets = melody.Select(x => x.Position).Append(span.End).ToArray();
             // every gap's test drawn before any line, so that a line's draws leave which gaps are answered
             var gaps = Enumerable.Range(0, onsets.Length - 1).Select(_ => context.TestProbability(GapChance)).ToArray();
+            // and every gap's line from sequences of its own, by its place, so that a gap passed over leaves the others' lines
+            var (lineSeed, voicingSeed, motifSeed) = (context.GenerateSeed(), voicing.GenerateSeed(), motifs.GenerateSeed());
             for (var i = 0; i + 1 < onsets.Length; i++)
             {
                 var answered = gaps[i];
@@ -101,7 +103,7 @@ internal static class SoloAnswers
 
                 var gap = span with { Start = start, Duration = end - start };
                 // its strong beats on its section's bars
-                var (line, _) = SoloLines.Generate(context, voicing, motifs, gap, gap.Duration, span.Start, answerer, true, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
+                var (line, _) = SoloLines.Generate(new GenerationContext(Seeds.Derive(lineSeed, i)), new GenerationContext(Seeds.Derive(voicingSeed, i)), new GenerationContext(Seeds.Derive(motifSeed, i)), gap, gap.Duration, span.Start, answerer, true, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
                 var lift = Solos.Lift(
                     Realizer.GetNoteStates(EventStateTimelineMap.Create(song.Duration, EventTimeline.Create(song.Duration, line), track.StateTimelineMap), definitions[soloTrack], song.CommonStateTimelineMap).ToArray(),
                     heard - Quieter);

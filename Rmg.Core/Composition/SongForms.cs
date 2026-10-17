@@ -60,8 +60,8 @@ internal static class SongForms
     public static ByConvention BreakdownChorusChance { get; } = new(0, 0, 0);
 
     /// <summary>
-    ///     The chances a song opens on an intro and closes on an outro of their own material, sections played once, by the
-    ///     form facet: never in a plain song, which plays one of the forms as it is.
+    ///     The chance a song opens on an intro of its own material, a section played once, by the form facet: never in a
+    ///     plain song, which plays one of the forms as it is.
     /// </summary>
     public static ByConvention IntroChance { get; } = new(0, 0.3, 0.3);
 

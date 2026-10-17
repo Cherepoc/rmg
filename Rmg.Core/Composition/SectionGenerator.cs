@@ -933,6 +933,12 @@ internal sealed record GeneratedSection(
     /// <summary>Whether the drums play in the section, rather than rest for a breakdown.</summary>
     public bool HasDrums => !Resting.Contains(TrackRole.Drum);
 
+    /// <summary>How the section's energy leans its energy-led chances, as far as its rhythm follows it (<see cref="SectionEnergy.Tilt" />).</summary>
+    public Tilt EnergyTilt => SectionEnergy.Tilt(Energy, Rhythm.Coupling);
+
+    /// <summary>Whether a part has notes in the section, as the riff's twin, the solo part or a line whose patterns came out empty have none.</summary>
+    public bool HasNotes(TrackRole role) => Roles.Any(x => x.Value == role && Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
+
     /// <summary>The play of the pattern the drums come in at, a build bringing them in late; 0 where they play from the start.</summary>
     public int DrumsFrom => PhraseSilent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max();
 
@@ -972,9 +978,11 @@ internal sealed record GeneratedSection(
         bool breakdownChorus = false
     )
     {
+        // the appearance's energy, the section's and its step, leaning its rests and its texture
+        var tilt = SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling);
         var drawn = appearance == 0
             ? Resting
-            : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent, Genre, Facets[Facet.Form])
+            : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), tilt, Role, Absent, Genre, Facets[Facet.Form])
                 .Intersect(before);
         // a breakdown's lines and pad out every time; and a calm section's guitars but the one breaking its chords, the first
         // section's too, which an intro of entries builds up, a part coming in late coming in at the next appearance, and the
@@ -994,12 +1002,10 @@ internal sealed record GeneratedSection(
         if (Silent())
             resting = resting.Intersect(Absent);
         // how the parts come in over its phrases, from a sequence of its own, by the form facet
-        // of the parts that have notes in the section, so that a part alone is never one that has none, such as the riff's
-        // twin, the solo part or a line whose patterns came out empty
-        bool HasNotes(TrackRole role) => Roles.Any(x => x.Value == role && Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
+        // of the parts that have notes in the section, so that a part alone is never one that has none
         var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x) && HasNotes(x)).ToArray();
         var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing, Genre,
-            SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), DrumJob == DrumJob.Marks, breakdownChorus);
+            tilt, DrumJob == DrumJob.Marks, breakdownChorus);
         ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
         // a breakdown played steady, its riff through
         if (keepsTexture || Breakdown)
