@@ -68,7 +68,7 @@ public sealed class SoloTest
     [Test]
     public async Task ASolo_IsPlayedByItsSoloists_TheMelodyResting_AndADrumSolo_ByTheDrumsAlone()
     {
-        var checkedSolos = 0;
+        var (checkedSolos, drumSolos) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
         foreach (var (index, solo) in song.Solos)
         {
@@ -83,6 +83,7 @@ public sealed class SoloTest
             {
                 foreach (var part in Enum.GetValues<TrackRole>().Where(x => x != TrackRole.Drum))
                     await Assert.That(Notes(part)).IsEqualTo(0).Because($"seed {song.Seed}, {part} in a drum solo");
+                drumSolos++;
             }
             else
             {
@@ -95,6 +96,7 @@ public sealed class SoloTest
         }
 
         await Assert.That(checkedSolos).IsGreaterThan(10);
+        await Assert.That(drumSolos).IsGreaterThan(0);
     }
 
     private static SongOverrides Facets(double form, double melody) =>
@@ -176,10 +178,11 @@ public sealed class SoloTest
             foreach (var (start, end, _, gesture) in segments)
             {
                 var played = notes.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).ToArray();
-                // a run up or down the scale, the others leaping by their figures
+                // a run up or down the scale, a step of it at most three semitones, harmonic minor's augmented second, the
+                // others leaping by their figures
                 if (gesture == SoloGesture.Run && shapes.GetValueOrDefault(Math.Round(start, 6)) == SoloShape.Scale && scaleRuns++ >= 0)
                     foreach (var (a, b) in played.Zip(played.Skip(1)))
-                        await Assert.That(Math.Abs(b.Value.Pitches[0] - a.Value.Pitches[0])).IsLessThanOrEqualTo(4).Because($"seed {song.Seed} at {b.Position}");
+                        await Assert.That(Math.Abs(b.Value.Pitches[0] - a.Value.Pitches[0])).IsLessThanOrEqualTo(3).Because($"seed {song.Seed} at {b.Position}");
                 if (gesture == SoloGesture.Held && played.Length > 0)
                 {
                     held++;

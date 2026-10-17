@@ -184,13 +184,13 @@ internal static class Solos
     /// <param name="roles">Every appearance's role in the song's form.</param>
     /// <param name="melody">Every appearance's melody facet.</param>
     /// <param name="parts">The parts the song has.</param>
-    /// <param name="breaksDown">Whether each appearance breaks down, which no solo plays over (<see cref="Breakdowns" />).</param>
+    /// <param name="keepsOut">Whether each appearance plays no solo, a breakdown (<see cref="Breakdowns" />) or a calm section.</param>
     public static ImmutableArray<SoloPlan?> WithSoloist(IGenerationContext context, IReadOnlyList<SoloPlan?> solos, IReadOnlyList<SectionRole> roles, IReadOnlyList<double> melody,
-        IReadOnlyCollection<TrackRole> parts, IReadOnlyList<bool> breaksDown)
+        IReadOnlyCollection<TrackRole> parts, IReadOnlyList<bool> keepsOut)
     {
         var own = context.GenerateDouble();
-        // a later appearance by its role's lean, never one that breaks down
-        Weighted<int>[] places = [..Enumerable.Range(1, Math.Max(0, solos.Count - 1)).Where(i => !breaksDown[i]).Select(i => new Weighted<int>(Math.Pow(RoleOdds, RoleLeans[roles[i]]), i))];
+        // a later appearance by its role's lean, never one that plays no solo
+        Weighted<int>[] places = [..Enumerable.Range(1, Math.Max(0, solos.Count - 1)).Where(i => !keepsOut[i]).Select(i => new Weighted<int>(Math.Pow(RoleOdds, RoleLeans[roles[i]]), i))];
         var place = places.Length > 0 ? context.Pick([..places]) : 0;
         if (place == 0 || !parts.Contains(TrackRole.Solo) || !parts.Contains(TrackRole.Melody) || solos[place]?.IsDrumSolo == true)
             return [..solos];
@@ -224,11 +224,13 @@ internal static class Solos
             candidates.RemoveAll(x => x.Part == soloist);
         }
 
-        if (!isSolo || index == 0 || soloists.Count == 0 || !parts.Contains(TrackRole.Melody) && !soloists.Contains(TrackRole.Drum))
+        if (!isSolo || index == 0 || soloists.Count == 0)
             return null;
-
-        // the drums solo alone
-        return soloists.Contains(TrackRole.Drum) ? new SoloPlan([TrackRole.Drum], SoloMode.Trading, 0, false) : new SoloPlan([..soloists], mode, step, isOwn);
+        // the drums solo where they alone are drawn, and leave the solo to the others where others are
+        if (soloists is [TrackRole.Drum])
+            return new SoloPlan([TrackRole.Drum], SoloMode.Trading, 0, false);
+        soloists.Remove(TrackRole.Drum);
+        return parts.Contains(TrackRole.Melody) ? new SoloPlan([..soloists], mode, step, isOwn) : null;
     }
 
     /// <summary>

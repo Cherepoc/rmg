@@ -72,8 +72,8 @@ internal sealed record Soloist(
     /// </summary>
     public static ByConvention ApproachChance { get; } = new(0, 0.5, 0.5);
 
-    /// <summary>The chance a soloist plays its held notes, licks and quotes in octaves, its runs alone, by the melody facet: never at the plain end.</summary>
-    public static ByConvention OctaveChance { get; } = new(0, 0.1, 0.2);
+    /// <summary>The chance a soloist plays its held notes, licks and quotes in octaves, its runs alone, by the melody facet: never at the plain end, and as often at the wild end as in the middle, a colour no wilder there.</summary>
+    public static ByConvention OctaveChance { get; } = new(0, 0.1, 0.1);
 
     /// <summary>
     ///     How often a soloist on an instrument that plays chords stacks a gesture, about which each draws its own: a
@@ -91,9 +91,9 @@ internal sealed record Soloist(
 
     /// <summary>
     ///     The chance a soloist planes its chords, their shape moved with its line note for note rather than the band's chord
-    ///     under it, as a pianist moves fourths in parallel: never at the plain end.
+    ///     under it, as a pianist moves fourths in parallel: never at the plain end, and every time at the wild.
     /// </summary>
-    public static ByConvention PlaneChance { get; } = new(0, 0.15, 0.6);
+    public static ByConvention PlaneChance { get; } = new(0, 0.15, 1);
 
     /// <summary>
     ///     How often a soloist that bends bends a note it holds, an 8th or longer, by the sound facet: a third of them in the
@@ -109,12 +109,13 @@ internal sealed record Soloist(
 
     /// <summary>
     ///     The wildest speeds, 32nds in sextuplets and 64ths, of the wild end alone, as a shredder's, each by a chance of its
-    ///     own, drawn after the rest of the vocabulary so that it stays as it was.
+    ///     own, drawn after the rest of the vocabulary so that it stays as it was, every wild soloist's to play as fast as
+    ///     its notes a second allow (<see cref="MaxNotesASeconds" />).
     /// </summary>
     public static ImmutableArray<(int NotesABeat, ByConvention Chance)> FastestSpeedChances { get; } =
     [
-        (12, new ByConvention(0, 0, 0.5)),
-        (16, new ByConvention(0, 0, 0.35))
+        (12, new ByConvention(0, 0, 1)),
+        (16, new ByConvention(0, 0, 1))
     ];
 
     /// <summary>
@@ -143,7 +144,7 @@ internal sealed record Soloist(
     /// <summary>How many beats the soloist may play a speed at in one run: its stamina at its fastest, the longer the slower.</summary>
     public double BeatsAt(int notesABeat) => Stamina * Speeds[^1] / notesABeat;
 
-    /// <summary>The speeds a soloist may run at, in notes a beat, each by a chance of its own: 8ths and 16ths always, triplets, sextuplets and 32nds the wilder.</summary>
+    /// <summary>The speeds a soloist may run at, in notes a beat, each by a chance of its own: 8ths always, 16ths but for one middling soloist in ten, triplets, sextuplets and 32nds the wilder.</summary>
     public static ImmutableArray<(int NotesABeat, ByConvention Chance)> SpeedChances { get; } =
     [
         (2, new ByConvention(1, 1, 1)),

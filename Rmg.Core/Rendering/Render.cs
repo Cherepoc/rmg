@@ -131,8 +131,9 @@ public static class Render
                     // softer; the one place a plugin's output would play it as its keyswitch or controller instead
                     if (note.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0)
                         (duration, velocity) = (Math.Max(MutedFloor, duration * MutedShare), velocity * MutedVelocity);
-                    // a slurred note as General MIDI can play it, which has no legato: struck softer, the note before reaching it
-                    if (note.Value.State.GetStateValue(CompositionStateKinds.Legato) > 0)
+                    // a slurred note as General MIDI can play it, which has no legato: struck softer, the note before reaching it,
+                    // but a soloist's, whose margin over the band was set before its notes were slurred
+                    if (note.Value.State.GetStateValue(CompositionStateKinds.Legato) > 0 && note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
                         velocity *= SlurredVelocity;
                     // a strummed chord's strings struck one after another, down from the lowest or up from the highest, the up
                     // stroke a touch softer and thinner, a full chord's lowest string missed as the hand comes up

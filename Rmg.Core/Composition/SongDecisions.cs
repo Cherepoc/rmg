@@ -368,19 +368,21 @@ internal sealed record SongDecisions(
         StateTrace.RecordSong(TracePoints.LateEntries, string.Join(", ", lateEntries.Select(x => $"{x.Key} at {x.Value}")), lateEntries);
         // every appearance's parts, a part held back yet soloing no sooner than it comes in
         IReadOnlyCollection<TrackRole>[] partsAt = [..played.Select((_, index) => SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray())];
+        // no solo over a breakdown, whose band rests to its chugs, nor over a calm section, whose guitars rest to its broken
+        // chords, nor over a breakdown chorus, built up from the voice
+        bool PlaysNoSolo(int index) => generateSection(played[index]) is { Breakdown: true } or { Form.Kind: SectionFormKind.Calm } || breakdownChorus && index == sectionIds.Length - 1;
         // a later appearance played as a solo now and then, each from a sequence of its own, by the section's facets, and
-        // one the soloist's where the song has it
+        // one the soloist's where the song has it, in an appearance that plays one
         var drawnSolos = Composition.Solos.WithSoloist(
             Stream(SongStream.SoloistSolo),
             [..played.Select((id, index) => Composition.Solos.Draw(SongGenerator.CreateStream(seed, SongStream.Solos, AppearanceKey(played, index)), index, structure.Roles[id], generateSection(id).Facets, partsAt[index], genre))],
             [..played.Select(id => structure.Roles[id])],
             [..played.Select(id => generateSection(id).Facets[Facet.Melody])],
             [..SongParts.All.Except(absent)],
-            [..played.Select(id => generateSection(id).Breakdown)]
+            [..played.Select((_, index) => PlaysNoSolo(index))]
         );
-        // and no solo over a breakdown, whose band rests to its chugs, nor over a calm section, whose guitars rest to its broken
-        // chords, the appearance played as it is, its draws made all the same
-        drawnSolos = [..drawnSolos.Select((x, index) => generateSection(played[index]) is { Breakdown: true } or { Form.Kind: SectionFormKind.Calm } ? null : x)];
+        // and none drawn where it plays none, the appearance played as it is, its draws made all the same
+        drawnSolos = [..drawnSolos.Select((x, index) => PlaysNoSolo(index) ? null : x)];
         // a pitched solo trading with the drums now and then, each from a sequence of its own
         drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTrade(SongGenerator.CreateStream(seed, SongStream.SoloTrades, AppearanceKey(played, index)), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
