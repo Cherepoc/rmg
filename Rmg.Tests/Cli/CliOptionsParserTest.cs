@@ -15,7 +15,7 @@ public sealed class CliOptionsParserTest
 
         await Assert.That(result.Error).IsNull();
         await Assert.That(result.ShowHelp).IsFalse();
-        await Assert.That(result.Options).IsEqualTo(new CliOptions(CliOptionsParser.DefaultOutputDirectory, 1, DefaultSeed));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions(CliOptionsParser.DefaultOutputDirectory, 1, DefaultSeed, null));
     }
 
     [Test]
@@ -54,7 +54,7 @@ public sealed class CliOptionsParserTest
     {
         var result = Parse("--output", "out", "--count", "5", "--seed", "12");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 64));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 64, null));
     }
 
     [Test]
@@ -62,7 +62,7 @@ public sealed class CliOptionsParserTest
     {
         var result = Parse("-o", "out", "-n", "5", "-s", "12");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 64));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 64, null));
     }
 
     [Test]
@@ -70,7 +70,7 @@ public sealed class CliOptionsParserTest
     {
         var result = Parse("--output=some dir/x", "--count=3", "--seed=a8");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("some dir/x", 3, 2240));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("some dir/x", 3, 2240, null));
     }
 
     [Test]

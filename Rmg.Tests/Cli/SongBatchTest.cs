@@ -28,7 +28,7 @@ public sealed class SongBatchTest
         static (double, int)[] Notes(Song song) => [..song.Notes!.SelectMany(x => x.Value.Select(n => (Math.Round(n.Position, 6), n.Value.Pitches[0])))];
         var metal = Rmg.WebApi.Genres.GenrePresetFile.Genre(Rmg.WebApi.Genres.GenrePresetFile.All.Single(x => x.Id == "metal"));
         var asked = SongBatch.Generator(new CliOptions("out", 1, 0, "metal"))(5);
-        var own = SongBatch.Generator(new CliOptions("out", 1, 0))(5);
+        var own = SongBatch.Generator(new CliOptions("out", 1, 0, null))(5);
 
         await Assert.That(Notes(asked)).IsEquivalentTo(Notes(SongGenerator.GenerateSong(5, new SongOverrides(Genre: metal))), CollectionOrdering.Matching);
         await Assert.That(Notes(own)).IsEquivalentTo(Notes(SongGenerator.GenerateSong(5)), CollectionOrdering.Matching);
@@ -81,7 +81,7 @@ public sealed class SongBatchTest
         var directory = CreateTempDirectory();
         try
         {
-            var options = new CliOptions(directory, 3, 99);
+            var options = new CliOptions(directory, 3, 99, null);
             var output = new StringWriter();
             var error = new StringWriter();
 
@@ -109,7 +109,7 @@ public sealed class SongBatchTest
         try
         {
             var exitCode = SongBatch.Run(
-                new CliOptions(directory, 1, 5),
+                new CliOptions(directory, 1, 5, null),
                 SongGenerator.GenerateSong,
                 new StringWriter(),
                 new StringWriter()
@@ -130,7 +130,7 @@ public sealed class SongBatchTest
         var directory = CreateTempDirectory();
         try
         {
-            await Assert.That(SongBatch.Run(new CliOptions(directory, 2, 5), SongGenerator.GenerateSong, new StringWriter(), new StringWriter())).IsEqualTo(0);
+            await Assert.That(SongBatch.Run(new CliOptions(directory, 2, 5, null), SongGenerator.GenerateSong, new StringWriter(), new StringWriter())).IsEqualTo(0);
 
             await Assert.That(Directory.GetFiles(directory).Length).IsEqualTo(2);
             foreach (var file in Directory.GetFiles(directory))
@@ -152,8 +152,8 @@ public sealed class SongBatchTest
         var directory2 = CreateTempDirectory();
         try
         {
-            SongBatch.Run(new CliOptions(directory1, 3, 2024), SongGenerator.GenerateSong, new StringWriter(), new StringWriter());
-            SongBatch.Run(new CliOptions(directory2, 3, 2024), SongGenerator.GenerateSong, new StringWriter(), new StringWriter());
+            SongBatch.Run(new CliOptions(directory1, 3, 2024, null), SongGenerator.GenerateSong, new StringWriter(), new StringWriter());
+            SongBatch.Run(new CliOptions(directory2, 3, 2024, null), SongGenerator.GenerateSong, new StringWriter(), new StringWriter());
 
             var files1 = Directory.GetFiles(directory1).Order().ToArray();
             var files2 = Directory.GetFiles(directory2).Order().ToArray();
@@ -177,7 +177,7 @@ public sealed class SongBatchTest
         {
             var output = new StringWriter();
 
-            SongBatch.Run(new CliOptions(directory, 1, 31337), SongGenerator.GenerateSong, output, new StringWriter());
+            SongBatch.Run(new CliOptions(directory, 1, 31337, null), SongGenerator.GenerateSong, output, new StringWriter());
 
             await Assert.That(output.ToString().Contains(Rmg.Core.Base62.FromSeed(31337))).IsTrue();
         }
@@ -198,7 +198,7 @@ public sealed class SongBatchTest
             var error = new StringWriter();
 
             var exitCode = SongBatch.Run(
-                new CliOptions(directory, 3, 11),
+                new CliOptions(directory, 3, 11, null),
                 seed => seed == failingSeed
                     ? throw new InvalidOperationException("boom")
                     : SongGenerator.GenerateSong(seed),
@@ -234,7 +234,7 @@ public sealed class SongBatchTest
             var error = new StringWriter();
 
             var exitCode = SongBatch.Run(
-                new CliOptions(filePath, 1, 1),
+                new CliOptions(filePath, 1, 1, null),
                 SongGenerator.GenerateSong,
                 new StringWriter(),
                 error

@@ -6,4 +6,4 @@ namespace Rmg;
 ///     Seed of the randomizer that produces the seed of every song, so one value reproduces the whole batch.
 /// </param>
 /// <param name="Genre">The id of the page's preset the songs are made in, such as "rock"; none for the songs' own.</param>
-public sealed record CliOptions(string OutputDirectory, int Count, ulong Seed, string? Genre = null);
+public sealed record CliOptions(string OutputDirectory, int Count, ulong Seed, string? Genre);

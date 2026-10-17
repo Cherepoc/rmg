@@ -541,6 +541,9 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
   (the tritone substitute's dominant, the half-diminished's whole step); the melody's joins at every pattern; the
   busyness reports' facets read from the trace; the MIDI file parsed for its program changes; the stages' hand-offs,
   each read after it is made.
+- **A song's tempo below 60 on the page** (P4, #411): a genre's range reaches 40, but a song's tempo is reported and
+  given by the request's scale, 60 to 240 in 62 steps, so a song drawn at 40 shows 60 and given its tempo is made again
+  at 60; the scale's low end moved to 40 changes what every link's tempo step means, a decision of the links' first.
 - **The page's song as it was made** (P4, #328): the events, a rating, the link and a download's name read the settings
   the song on the page was made with, kept as it arrives and moved by a change of its mix alone, never by a change that
   remakes it before the remake arrives, or for good where it fails.
