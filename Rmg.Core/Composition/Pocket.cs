@@ -32,7 +32,8 @@ internal static class Pocket
 
     /// <summary>
     ///     Every note played off the beat as its part's role has it (<see cref="OffsetOf" />), as much as the song's feel
-    ///     facet plays it and a genre's pocket moves it, laid back or tight.
+    ///     facet plays it and a genre's pocket moves it, laid back or tight; but stop time and its ensemble hits, the band
+    ///     striking together, and a bass on the kick's figure in the kick's place.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
@@ -42,6 +43,8 @@ internal static class Pocket
         var notes = SongStages.NotesOf(draft);
         var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var result = notes.ToBuilder();
+        // but stop time's hits and the ensemble hits, the band striking together
+        var holds = draft.Holds(song);
         foreach (var (track, timeline) in notes)
         {
             // a drum by its role in the song's groove, whatever a section makes of it
@@ -53,7 +56,7 @@ internal static class Pocket
                                               && draft.Figures.GetValueOrDefault(span.SectionId)?.GetValueOrDefault(FigurePlayer.Bass) is { } figure
                                               && Figures.Of(FigurePlayer.Bass, figure)?.Follows == FigurePlayer.Ground;
             // in beats at the tempo where the note plays
-            double Beats(double position) => (WithKick(position) ? onKick : offset) * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position));
+            double Beats(double position) => holds.At(Hold.Stop, position) ? 0 : (WithKick(position) ? onKick : offset) * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position));
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select(note => offset == 0 || Beats(note.Position) == 0
                 ? note
                 : (note.Value with { State = note.Value.State.With(CompositionStateKinds.TimingOffset, Beats(note.Position)) }).ToTimelineItem(note.Position)));

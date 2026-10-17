@@ -237,6 +237,8 @@ internal static class Figures
         // what a figure that follows a player strikes with: its tracks, the riff's the bass's where the song has no riff
         int[] Followed(FigurePlayer player) => player == FigurePlayer.Riff && tracks[player].Length == 0 && TrackOf(TrackRole.Bass) is { } bass ? [bass] : tracks[player];
 
+        // the parts the form stops, a stop ending's silence, which no figure strikes into
+        var holds = draft.Holds(song);
         // the players in turn by what they follow: the kick with the riff as its figure plays it, the bass around the kick
         // as its figure plays it
         foreach (var turn in Turns)
@@ -268,6 +270,7 @@ internal static class Figures
                                     ? [..Enumerable.Range(0, span.Meter.Sixteenths).Where(x => x % figure.Step == 0).Select(x => bar + x * 0.25)]
                                     : [..figure.Onsets.Select(x => x - (barsBefore[span] + index) % (figure.Sixteenths / span.Meter.Sixteenths) * span.Meter.Sixteenths)
                                         .Where(x => x >= 0 && x < span.Meter.Sixteenths).Select(x => bar + x * 0.25)];
+                            onsets = [..onsets.Where(x => !holds.At(Hold.Cut, x, track))];
                             // in a bar both play, each struck as the player's own note at or before it was; one around the kick
                             // where the kick plays, the player's own rhythm where it rests; and no drum's of fixed onsets in half
                             // or double time, whose figure is the drum's own rhythm stretched or pressed, as the time feel

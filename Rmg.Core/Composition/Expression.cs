@@ -578,7 +578,7 @@ internal static class Expression
     /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
     /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
     /// <param name="cuts">Where a part's notes end as the band stops, by its track, which a gated part's held chords end by.</param>
-    /// <param name="stopTime">The spans played in stop time, whose hits a gated part plays as they are.</param>
+    /// <param name="holds">What the song holds: its stop time, whose hits a gated part plays as they are and the riff's dive keeps out of.</param>
     /// <param name="drawsAs">The track a part draws as, the riff's for its twin, whose bends, vibrato, pinches, tone and dive are the riff's as it plays the riff's line.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
         ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
@@ -599,7 +599,7 @@ internal static class Expression
         Genre genre,
         IReadOnlyList<double> changes,
         Func<int, IReadOnlyList<double>> cuts,
-        IReadOnlyList<(double Start, double End)> stopTime,
+        Holds holds,
         SectionSpan introSource,
         Func<int, int> drawsAs
     )
@@ -607,7 +607,7 @@ internal static class Expression
         var ((songVibrato, songChorus, songSwell, songBends, _, _), carriers) = songEffects;
         // a gated part holding its chords, which the gate chops in time, where it plays at all
         if (carriers.TryGetValue(StrongEffect.Gate, out var gated) && notes.TryGetValue(gated, out var gatedNotes))
-            notes = notes.SetItem(gated, GatedChords.Hold(gatedNotes, map, changes, cuts(gated), stopTime,
+            notes = notes.SetItem(gated, GatedChords.Hold(gatedNotes, map, changes, cuts(gated), [..holds.Of(Hold.Stop).Select(x => (x.Start, x.End))],
                 note => InstrumentTraits.Has(ProgramOf(note, ((PitchInstrumentTrack)definitions[gated]).InstrumentCode), InstrumentTrait.Decays)));
 
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
@@ -863,7 +863,7 @@ internal static class Expression
                     // the riff's longest note of its last bar before a louder section diving into it, where the song dives, the
                     // riff letting go of its notes after it, as a guitarist leaves the riff for the bar
                     if (songDives && !echoes && role.Source() is TrackRole.Riff && !isSolo && Pinches(noteProgram) && note.Value.Pitches.Length <= 2
-                        && note.Position >= span.LastBar - 1e-9 && LongestOfBar(timeline, i, span)
+                        && note.Position >= span.LastBar - 1e-9 && LongestOfBar(timeline, i, span) && !holds.Meets(Hold.Stop, span.LastBar, span.End)
                         && index + 1 < energies.Count && energies[index + 1] > energies[index]
                         && note.Value.Duration >= 1 && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
                         && state.GetStateValue(CompositionStateKinds.Pinch) == 0 && Pinching(note.Position, 1).TestProbability(DiveChance))

@@ -114,6 +114,9 @@ internal sealed class Holds(ImmutableArray<HeldSpan> spans)
     public double NextAfter(Hold kinds, double position, int? track = null) =>
         spans.Where(x => Matches(x, kinds, track) && x.Start > position + 1e-9).Select(x => x.Start).DefaultIfEmpty(double.PositiveInfinity).Min();
 
+    /// <summary>The stretches of a kind given, the band's and a track's own where one is asked of, in the song's order.</summary>
+    public IEnumerable<HeldSpan> Of(Hold kinds, int? track = null) => spans.Where(x => Matches(x, kinds, track)).OrderBy(x => x.Start);
+
     private static bool Matches(HeldSpan span, Hold kinds, int? track) => (span.Kind & kinds) != 0 && (span.Track is null || track is null || span.Track == track);
 }
 
@@ -506,7 +509,7 @@ internal static class SongStages
                 song.Genre,
                 [..draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)],
                 song.Form.Edits.CutsOf,
-                [..draft.Stopped.Select(x => (x.Start, x.End))],
+                draft.Holds(song),
                 song.IntroSource,
                 song.DrawsAs
             )
