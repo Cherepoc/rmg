@@ -98,7 +98,7 @@ internal static class StopTime
         // but in a calling verse, whose answer stop time would cut to a hit a bar
         var holds = draft.Holds(song);
         // and no hits in a section running a polymeter, whose cycle runs to its end
-        var hitBars = song.EnsembleHits.Where(x => !holds.Meets(KeepsOutOf, x.Start, x.End) && !(song.Form.Map.SectionAt(x.Start) is { } span && draft.Polymeters.Contains(span.SectionId))).ToImmutableArray();
+        var hitBars = song.EnsembleHits.Where(x => !holds.Meets(KeepsOutOf | Hold.Polymeter, x.Start, x.End)).ToImmutableArray();
         var phrases = song.StopTime.Where(x => !holds.Meets(KeepsOutOf, x.Start, x.End)).Concat(hitBars).ToImmutableArray();
         // whether a section is stopped wherever it plays, as it is played: a phrase drawn that nothing carries is not
         void Record(Func<(double Start, double End, double BarDuration), bool> played)

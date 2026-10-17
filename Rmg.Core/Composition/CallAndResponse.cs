@@ -39,7 +39,8 @@ internal static class CallAndResponse
         // every calling appearance's phrases, each split at its half, but in a solo, and answered by the first part that
         // plays its own line in its second half; a phrase none answers, or whose melody does not call, left whole, as the
         // melody cut there would leave a gap
-        var halves = song.Form.Map.Sections.Where((x, i) => calling[x.SectionId] && !song.Solos.ContainsKey(i))
+        var holds = draft.Holds(song);
+        var halves = song.Form.Map.Sections.Where(x => calling[x.SectionId] && !holds.Meets(Hold.Solo, x.Start, x.End))
             .SelectMany(span => Enumerable.Range(0, (int)Math.Ceiling(span.Duration / span.Meter.PhraseDuration - 1e-9))
                 .Select(p => span.Start + p * span.Meter.PhraseDuration)
                 .Select(start => (Start: start, Half: start + span.Meter.PhraseBars / 2 * span.Meter.BarDuration, End: Math.Min(start + span.Meter.PhraseDuration, span.End))))

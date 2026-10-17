@@ -43,7 +43,8 @@ internal sealed record SongDraft(
 
     /// <summary>
     ///     What the song holds, which a stage keeps out of by the kinds it names (<see cref="Hold" />): what the stages wrote
-    ///     (<see cref="Held" />), a fill and a kick-out, a drop's build, its stop time as played, its drum solos and trades,
+    ///     (<see cref="Held" />), a fill, a kick-out and a polymeter's sections, a drop's build, its stop time as played, its
+    ///     solos and its drum solos and trades,
     ///     a calling verse's call and answer, and where the form stops a part (<see cref="TimelineEdits.StopsOf" />).
     /// </summary>
     public Holds Holds(SongDecisions song) => new(
@@ -53,6 +54,7 @@ internal sealed record SongDraft(
         ..Stopped.Select(x => new HeldSpan(Hold.Stop, x.Start, x.End, null)),
         ..song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key])
             .Select(x => new HeldSpan(Hold.DrumSolo, x.Start, x.End, null)),
+        ..song.Solos.Keys.Select(x => song.Form.Map.Sections[x]).Select(x => new HeldSpan(Hold.Solo, x.Start, x.End, null)),
         ..song.Tracks.Definitions.Keys.SelectMany(track => song.Form.Edits.StopsOf(track).Select(x => new HeldSpan(Hold.Cut, x.From, x.To, track))),
         ..Calls
     ]);
@@ -84,7 +86,13 @@ internal enum Hold
     KickOut = 64,
 
     /// <summary>The snare rolling into a drop, faster each bar.</summary>
-    Build = 128
+    Build = 128,
+
+    /// <summary>A solo, every one, a pitched part's or the drums'.</summary>
+    Solo = 256,
+
+    /// <summary>A section running a figure across its bar lines, its cycle kept (<see cref="SongDraft.Polymeters" />).</summary>
+    Polymeter = 512
 }
 
 /// <summary>A stretch the song holds, of a kind, a part's own or the whole band's.</summary>
@@ -239,6 +247,7 @@ internal static class SongStages
         return draft with
         {
             Polymeters = [..polymeters.Keys],
+            Held = [..draft.Held, ..song.Form.Map.Sections.Where(x => polymeters.ContainsKey(x.SectionId)).Select(x => new HeldSpan(Hold.Polymeter, x.Start, x.End, null))],
             Timeline = Composition.Polymeter.Apply(
                 draft.Timeline,
                 song.Playing,

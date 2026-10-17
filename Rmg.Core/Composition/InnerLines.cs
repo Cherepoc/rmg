@@ -47,7 +47,8 @@ internal static class InnerLines
         // every chord held long enough in a section that takes the line, but in a solo, and in a hook intro, the chorus's
         // first phrase, as the chorus takes it: where it starts and ends
         var map = song.Form.Map;
-        List<(double Start, double End, Meter Meter)> spans = [..map.Sections.Where((x, i) => lining[x.SectionId] && !song.Solos.ContainsKey(i)).Select(x => (x.Start, x.End, x.Meter))];
+        var holds = draft.Holds(song);
+        List<(double Start, double End, Meter Meter)> spans = [..map.Sections.Where(x => lining[x.SectionId] && !holds.Meets(Hold.Solo, x.Start, x.End)).Select(x => (x.Start, x.End, x.Meter))];
         // a chord's bars counted from its section's start, a hook intro's from the song's
         if (map.Intro.Kind == IntroKind.Hook && song.FirstChorus is var (chorus, chorusIndex)
             && lining[chorus.SectionId] && !song.Solos.ContainsKey(chorusIndex))

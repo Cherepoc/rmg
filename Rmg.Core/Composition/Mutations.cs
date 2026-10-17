@@ -77,6 +77,7 @@ internal static class Mutations
         var played = drums.ToDictionary(x => x, x => timelines[x].EventTimeline.ToList());
         var any = false;
         var claves = DrumGroups.GetTrackNumber(DrumDefinitions.Claves);
+        var holds = draft.Holds(song);
         foreach (var (span, index) in song.Form.Map.Sections.Select((x, i) => (x, i)))
         {
             var section = song.SectionOf(span.SectionId);
@@ -84,7 +85,7 @@ internal static class Mutations
             var figures = draft.Figures.GetValueOrDefault(span.SectionId, ImmutableDictionary<FigurePlayer, string>.Empty);
             // a player playing a figure, or one a figure follows, as a bass with the kick
             bool Fixed(FigurePlayer player) => figures.ContainsKey(player) || figures.Any(x => Figures.Of(x.Key, x.Value)?.Follows == player);
-            int[] own = draft.Polymeters.Contains(span.SectionId) ? [] :
+            int[] own = holds.Meets(Hold.Polymeter, span.Start, span.End) ? [] :
             [
                 ..drums.Where(x => !section.Bindings.ContainsKey(x) && !section.Bindings.ContainsValue(x) && !(Fixed(FigurePlayer.Ground) && kicks.Contains(x))
                                    && !(Fixed(FigurePlayer.Backbeat) && snares.Contains(x)) && !(Fixed(FigurePlayer.Time) && timekeepers.Contains(x))
