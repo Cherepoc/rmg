@@ -1347,7 +1347,7 @@
   {
     "id": "metal",
     "name": "Heavy metal",
-    "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
+    "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4 or on 3 in its half-time sections, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
       "soloCount": { "one": 100, "two": [20, 30, 40], "three": 0 },
       "intensity": { "from": -60, "to": 80 },
@@ -1642,7 +1642,7 @@
       "lineScale": { "section": 100, "pentatonic": [40, 40, 40], "blues": [20, 20, 30], "octatonic": [0, 5, 20] },
       "riffScale": { "section": 100, "blues": [0, 10, 25], "chromatic": [10, 20, 40] },
       "riff": { "powerChords": [90, 90, 80], "chugs": [20, 20, 20], "hook": [100, 80, 0] },
-      "feelChances": { "swing": [0, 10, 20], "halfTime": [10, 20, 30], "doubleTime": [10, 15, 25] },
+      "feelChances": { "swing": [0, 10, 20], "halfTime": [10, 20, 30], "doubleTime": [0, 15, 25] },
       "pins": { "ground": [80, 80, 50], "backbeat": [70, 70, 40] },
       "fills": { "amount": 40 },
       "stopTime": { "sections": [5, 10, 15] },
