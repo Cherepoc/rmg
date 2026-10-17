@@ -258,7 +258,7 @@ internal sealed class SongTracks
         // every pitched part within its instrument's range, and the melody over the chords (Registers)
         foreach (var (track, pitched) in definitions.Where(x => x.Value is PitchInstrumentTrack).Select(x => (x.Key, (PitchInstrumentTrack)x.Value)).ToArray())
             definitions[track] = Registers.WithinInstrument(pitched, genre);
-        (definitions[MelodyTrack], definitions[ChordsTrack]) = Registers.Apart((PitchInstrumentTrack)definitions[MelodyTrack], (PitchInstrumentTrack)definitions[ChordsTrack]);
+        (definitions[MelodyTrack], definitions[ChordsTrack]) = Registers.Apart((PitchInstrumentTrack)definitions[MelodyTrack], (PitchInstrumentTrack)definitions[ChordsTrack], genre);
 
         // the drums share the rhythm-related state
         var drumsShared = LayerStates.CreateTrackLayer(groupContext, Layers.DrumGroup, StateMap.Default, _ => Level(TrackRole.Drum), rhythmicUnconventionality.Lean(RhythmLayers.DrumGroup));

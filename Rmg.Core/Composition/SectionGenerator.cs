@@ -216,7 +216,8 @@ internal sealed class SectionGenerator
             1
         );
         var barStateTimelineMap = _generators(meter).Bars.Generate(Stream(sectionId, SectionStream.BarStates), scale, progression, harmonicRhythm, chordScales, shifts, planes, unconventionality, bassLeading, facets);
-        var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
+        // a bar's aim each bar, as the phrase ends are read, where two bars aim alike as where they do not
+        var contour = Enumerable.Range(0, meter.PatternBarCount).Select(bar => barStateTimelineMap.GetEffectiveStateMapAt(bar * meter.BarDuration).GetStateValue(CompositionStateKinds.LineRegister)).ToImmutableArray();
         StateTrace.RecordSection(TracePoints.MelodyContour, SectionTrace, sectionId, string.Join(", ", contour), contour);
         ImmutableArray<int> phraseEnds = [..Enumerable.Range(0, meter.PatternBarCount).Select(bar => barStateTimelineMap.GetEffectiveStateMapAt(bar * meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd))];
         StateTrace.RecordSection(TracePoints.MelodyPhraseEnds, SectionTrace, sectionId, string.Join(", ", phraseEnds), phraseEnds);

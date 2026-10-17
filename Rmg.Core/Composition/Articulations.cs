@@ -75,9 +75,10 @@ internal static class Articulations
                 continue;
             var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "roll")));
             // the chords struck short, stabs, a genre's, the chords' and the rhythm part's, a skank's chop
-            // its 16th chains' notes between the 8ths muted, a genre's, a soloist's too, from a sequence of its own
-            var deadNotes = part.Role is TrackRole.Bass or TrackRole.Riff or TrackRole.Rhythm or TrackRole.Solo
-                            && song.Stream(SongStream.DeadNotes, track).TestProbability(DeadNoteChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "deadNotes")));
+            // its 16th chains' notes between the 8ths muted, a genre's, a soloist's too, from a sequence of its own, a twin's
+            // as its riff's, whose notes it plays
+            var deadNotes = part.Role.Source() is TrackRole.Bass or TrackRole.Riff or TrackRole.Rhythm or TrackRole.Solo
+                            && song.Stream(SongStream.DeadNotes, song.DrawsAs(track)).TestProbability(DeadNoteChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "deadNotes")));
             var stabs = part.Role.PlaysChords()
                         && song.Stream(SongStream.Stabs, track).TestProbability(StabChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "stabs")));
             var (bottom, top) = Realizer.GetRange(part);

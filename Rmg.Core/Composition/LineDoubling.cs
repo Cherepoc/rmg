@@ -263,7 +263,9 @@ internal static class LineDoubling
                         continue;
 
                     StateTrace.RecordSection(TracePoints.RiffBass, bassTrack, span.SectionId, $"{start}", (index, start));
-                    filled.AddRange(riff.Select(x => x.Value.With(CompositionStateKinds.SoundsAs, 0).With(CompositionStateKinds.Doubled, 1).ToTimelineItem(x.Position)));
+                    filled.AddRange(riff.Select(x => x.Value.With(CompositionStateKinds.SoundsAs, 0).With(CompositionStateKinds.Doubled, 1)
+                        // in its own register, never the twin's raise the riff took
+                        .With(CompositionStateKinds.LineRaise, 0).ToTimelineItem(x.Position)));
                 }
 
                 if (filled.Count > 0)
@@ -277,8 +279,7 @@ internal static class LineDoubling
         // the pairs'
         foreach (var (role, place) in OctaveRoles.Select(x => (x, OctavePlaces + (int)x)))
         {
-            // a riff harmonised by its twin is doubled already, everywhere
-            if (!trackOf.TryGetValue(role, out var track) || role == TrackRole.Riff && trackOf.ContainsKey(TrackRole.RiffTwin))
+            if (!trackOf.TryGetValue(role, out var track))
                 continue;
 
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))

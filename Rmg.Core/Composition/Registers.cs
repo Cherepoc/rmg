@@ -53,14 +53,16 @@ public static class Registers
 
     /// <summary>
     ///     The melody and the chords placed apart, the melody's singable middle a fourth or more above the chords' middle, each
-    ///     moved by an octave within its instrument, the one further from where it sits best first; as they were where they
-    ///     are apart or cannot be.
+    ///     moved by an octave within its instrument, as far as a genre's register moved it (<see cref="WithinInstrument" />),
+    ///     the one further from where it sits best first; as they were where they are apart or cannot be.
     /// </summary>
-    public static (PitchInstrumentTrack Melody, PitchInstrumentTrack Chords) Apart(PitchInstrumentTrack melody, PitchInstrumentTrack chords)
+    public static (PitchInstrumentTrack Melody, PitchInstrumentTrack Chords) Apart(PitchInstrumentTrack melody, PitchInstrumentTrack chords, Genre genre)
     {
+        var highest = OctavesOf(melody.InstrumentCode).High + OctavesOf(genre, melody.Role);
+        var lowest = OctavesOf(chords.InstrumentCode).Low + OctavesOf(genre, chords.Role);
         for (var move = 0; move < Moves && MiddleOfMelody(melody) < MiddleOf(chords) + MelodyOverChords; move++)
         {
-            var (up, down) = (melody.MaxOctaveOffset < OctavesOf(melody.InstrumentCode).High, chords.MinOctaveOffset > OctavesOf(chords.InstrumentCode).Low);
+            var (up, down) = (melody.MaxOctaveOffset < highest, chords.MinOctaveOffset > lowest);
             // the one further below or above where it sits best, as far as its instrument lets it
             if (up && (!down || MelodyCentre - MiddleOfMelody(melody) >= MiddleOf(chords) - ChordsCentre))
                 melody = Moved(melody, melody.MinOctaveOffset + 1, melody.MaxOctaveOffset + 1);

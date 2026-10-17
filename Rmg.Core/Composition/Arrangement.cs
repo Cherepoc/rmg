@@ -76,7 +76,7 @@ internal static class Arrangement
     /// </summary>
     public static ImmutableHashSet<TrackRole> KeepingHarmony(ImmutableHashSet<TrackRole> resting, ImmutableHashSet<TrackRole> absent)
     {
-        var others = Rests.Any(x => x.Part is not (TrackRole.Bass or TrackRole.Chords) && !resting.Contains(x.Part));
+        var others = Rests.Any(x => x.Part is not (TrackRole.Bass or TrackRole.Chords) && !resting.Contains(x.Part) && !absent.Contains(x.Part));
         return resting.Contains(TrackRole.Chords) && (resting.Contains(TrackRole.Bass) || !others) && !absent.Contains(TrackRole.Chords)
             ? resting.Remove(TrackRole.Chords)
             : resting;
