@@ -447,6 +447,10 @@ internal sealed class FillGenerator
             KickOuts.Add((from, line));
 
         PlayRun(edits, play, from, line, groove, rhythm, minNote, sectionId, meter);
+        // a fill where it plays a run or stops the groove, a break whose run rests among them, which the stages that play
+        // around a fill keep out of; a kick-out alone, its groove playing on, is a kick-out's
+        if (play.Treatment == GrooveTreatment.Stop || !_lastRun.IsEmpty)
+            Spans.Add((from, line));
         return span;
     }
 
@@ -518,6 +522,9 @@ internal sealed class FillGenerator
 
     /// <summary>The runs the drums played into a change of section, for the pitched tracks to fill with (<see cref="LineFills" />).</summary>
     public List<PlayedRun> Runs { get; } = [];
+
+    /// <summary>Where the drums fill, from the fill's start to its line, every line's, which the stages that play around a fill keep out of (<see cref="Hold.Fill" />).</summary>
+    public List<(double From, double To)> Spans { get; } = [];
 
     /// <summary>Where the kick is taken out, from the span's start to its line, which the bass leaves with it (<see cref="SongStages.KickOutBass" />).</summary>
     public List<(double From, double To)> KickOuts { get; } = [];

@@ -177,7 +177,7 @@ internal static class StopTime
             return (false, 0, [], false);
         }
 
-        // the drums' fills out of it, from a run's first note to its line, which go on as a drummer fills into the next
+        // the drums' fills out of it, from a fill's start to its line, which go on as a drummer fills into the next
         // section, a drum never heard otherwise landing there, and the bass walking with them in a phrase's last half bar
         var fills = draft.FillSpans
             // and the last half bar of every phrase, the drums leading the band back in, with the fill its line draws there

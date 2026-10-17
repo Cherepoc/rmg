@@ -35,16 +35,21 @@ internal sealed record SongDraft(
     /// <summary>Where the drums take the kick out, which the bass leaves with it (<see cref="SongStages.KickOutBass" />).</summary>
     public ImmutableArray<(double From, double To)> KickOuts { get; init; } = [];
 
-    /// <summary>Where the drums fill, from a run's first note to its line, which the stages that play around a fill keep out of.</summary>
-    public (double From, double To)[] FillSpans => [..Runs.Where(x => !x.Positions.IsEmpty).Select(x => (x.Positions.Min(), x.Line))];
+    /// <summary>The stretches the stages have made that the others keep out of, each written by the stage that made it: a fill, a kick-out.</summary>
+    public ImmutableArray<HeldSpan> Held { get; init; } = [];
+
+    /// <summary>Where the drums fill, from a fill's start to its line, which the stages that play around a fill keep out of.</summary>
+    public (double From, double To)[] FillSpans => [..Held.Where(x => x.Kind == Hold.Fill).Select(x => (x.Start, x.End))];
 
     /// <summary>
-    ///     What the song holds, which a stage keeps out of by the kinds it names (<see cref="Hold" />): the drums' fills, its
-    ///     stop time as played, its drum solos and trades, and where the form stops a part (<see cref="TimelineEdits.StopsOf" />).
+    ///     What the song holds, which a stage keeps out of by the kinds it names (<see cref="Hold" />): what the stages wrote
+    ///     (<see cref="Held" />), a fill and a kick-out, a drop's build, its stop time as played, its drum solos and trades,
+    ///     a calling verse's call and answer, and where the form stops a part (<see cref="TimelineEdits.StopsOf" />).
     /// </summary>
     public Holds Holds(SongDecisions song) => new(
     [
-        ..FillSpans.Select(x => new HeldSpan(Hold.Fill, x.From, x.To, null)),
+        ..Held,
+        ..song.Form.Builds.Select(x => new HeldSpan(Hold.Build, x.From, x.To, null)),
         ..Stopped.Select(x => new HeldSpan(Hold.Stop, x.Start, x.End, null)),
         ..song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key])
             .Select(x => new HeldSpan(Hold.DrumSolo, x.Start, x.End, null)),
@@ -73,7 +78,13 @@ internal enum Hold
     Call = 16,
 
     /// <summary>A calling verse's second half, a part's answer.</summary>
-    Answer = 32
+    Answer = 32,
+
+    /// <summary>The kick taken out before a line, the groove playing on.</summary>
+    KickOut = 64,
+
+    /// <summary>The snare rolling into a drop, faster each bar.</summary>
+    Build = 128
 }
 
 /// <summary>A stretch the song holds, of a kind, a part's own or the whole band's.</summary>
@@ -255,7 +266,18 @@ internal static class SongStages
         var drumSolos = song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key]).Select(x => (x.Start, x.End, x.Meter.BarDuration));
         var timeline = fills.Generate(draft.Timeline, lines, song.Form.Map, [..stops, ..hits, ..drumSolos]);
         StateTrace.RecordSong(TracePoints.KickOuts, string.Join(", ", fills.KickOuts.Select(x => $"{x.From}-{x.To}")), fills.KickOuts.ToImmutableArray());
-        return draft with { Timeline = timeline, Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs, KickOuts = [..fills.KickOuts] };
+        return draft with
+        {
+            Timeline = timeline,
+            Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs,
+            KickOuts = [..fills.KickOuts],
+            Held =
+            [
+                ..draft.Held,
+                ..(song.DrumJob == DrumJob.Marks ? [] : fills.Spans).Select(x => new HeldSpan(Hold.Fill, x.From, x.To, null)),
+                ..fills.KickOuts.Select(x => new HeldSpan(Hold.KickOut, x.From, x.To, null))
+            ]
+        };
     }
 
     /// <summary>A bigger section announced, the hi-hat opening and the snare on its head before it.</summary>

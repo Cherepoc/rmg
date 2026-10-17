@@ -415,6 +415,7 @@ internal sealed class SongFormGenerator
         // the snare a build rolls on: the song's electric or acoustic snare, or its clap
         var snare = FormLayers.BuildRollDrums.Select(DrumGroups.GetTrackNumber).FirstOrDefault(tracks.Contains, -1);
         var drops = new HashSet<double>();
+        var builds = new List<(double From, double To)>();
         var filtered = new HashSet<double>();
         var kinds = ByConvention.Weigh(FormLayers.DropKinds, _songRhythm.Value, _genre.Pool<DropKind>(GenreChoices.DropKind));
         // every line's drop and its kind from sequences of its own, by its place, drawn before any line is passed over, so
@@ -457,6 +458,8 @@ internal sealed class SongFormGenerator
             // the snare rolling into the drop whether the drums played the bars before it or not, as a dance track's build
             // brings the drums back over a breakdown
             if (snare >= 0)
+                builds.Add((rollFrom, gap));
+            if (snare >= 0)
                 for (var (barStart, step) = (gap - FormLayers.BuildRollBars * bar, FormLayers.BuildRollStart); barStart < gap - 1e-9; barStart += bar, step /= 2)
                 for (var hit = 0; hit < (int)Math.Round(bar / step); hit++)
                 {
@@ -482,7 +485,7 @@ internal sealed class SongFormGenerator
             changes.Insert(0, (origin, fillSections[hook.Index], fillSections[0]));
         songState = songState.MergeWith(CreateLifts(changes, end, drops, Math.Pow(FormLayers.GenreLiftReach, _genre.Shift(GenreChoices.Dynamics, "lift")), map.BarBefore));
 
-        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState, [..drops.Order()], [..filtered.Order()]);
+        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState, [..drops.Order()], [..filtered.Order()], [..builds]);
     }
 
     /// <summary>
@@ -765,6 +768,7 @@ internal sealed record FormPlan(
 /// <param name="SongState">How the song's state changes over it, over its own, such as the tempo slowing before an ending, or the band fading out.</param>
 /// <param name="Drops">Where a lift drops, the band silent for the bar before it, in the song's order (<see cref="FormLayers.Drop" />).</param>
 /// <param name="FilteredDrops">The drops whose bar before the band plays on through the whole mix filtered, rather than silent (<see cref="FormLayers.DropKinds" />).</param>
+/// <param name="Builds">Where the snare rolls into a drop, which the stages that play around a fill keep out of (<see cref="Hold.Build" />).</param>
 internal sealed record SongAssembly(
     SongMap Map,
     ImmutableArray<TrackEventStateTimelineMap<StateMap>> Blocks,
@@ -772,5 +776,6 @@ internal sealed record SongAssembly(
     TimelineEdits Edits,
     StateTimelineMap SongState,
     ImmutableArray<double> Drops,
-    ImmutableArray<double> FilteredDrops
+    ImmutableArray<double> FilteredDrops,
+    ImmutableArray<(double From, double To)> Builds
 );

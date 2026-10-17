@@ -10,7 +10,7 @@ namespace Rmg.Core.Composition;
 internal static class HatRolls
 {
     /// <summary>What a hat roll keeps out of: a fill, stop time, a drum solo and the hats stopped by the form.</summary>
-    private const Hold KeepsOutOf = Hold.Fill | Hold.Stop | Hold.DrumSolo | Hold.Cut;
+    private const Hold KeepsOutOf = Hold.Fill | Hold.Build | Hold.Stop | Hold.DrumSolo | Hold.Cut;
 
     /// <summary>The chance a bar's time drum rolls its last beat, a genre's that the songs never play (<see cref="GenreChoices.HatRolls" />).</summary>
     public static ByConvention Chance { get; } = new(0, 0, 0);
