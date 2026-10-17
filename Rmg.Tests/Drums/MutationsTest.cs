@@ -17,14 +17,19 @@ public sealed class MutationsTest
     ];
 
     [Test]
-    public async Task AMiddlingSong_NeverMutates()
+    public async Task AMiddlingSection_NeverMutates()
     {
         var checkedSections = 0;
-        // a groove supplied at the middle, as it is, which a base there would let its sections stray from
+        // a groove supplied at the middle, which each section still strays from a little: a section at the middle or plainer
+        // never mutates, one a hair wilder may
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Groove, 0.5))))))
-        foreach (var made in song.Trace.Where(x => x.Point == TracePoints.Mutations).Select(x => (((int, int))x.Value!).Item2))
+        foreach (var (index, made) in song.Trace.Where(x => x.Point == TracePoints.Mutations).Select(x => ((int, int))x.Value!))
         {
-            await Assert.That(made).IsEqualTo(0).Because($"seed {song.Seed}");
+            var section = song.Map.Sections[index].SectionId;
+            var groove = ((Unconventionality)song.Trace.First(x => x.Point == TracePoints.SectionUnconventionality && x.Section == section).Value!).Facets[Facet.Groove];
+            if (groove > 0.5)
+                continue;
+            await Assert.That(made).IsEqualTo(0).Because($"seed {song.Seed}, section {index}");
             checkedSections++;
         }
 

@@ -86,12 +86,11 @@ internal static class Ghosts
                         if (draws[k] < (near ? nearChance : farChance))
                             played.Add((loudest.Value with
                             {
-                                Velocity = Render.ScaleLoudness(loudest.Value.Velocity, Loudness),
                                 // on the drum's head, never a cross-stick's click
                                 Pitches = [DrumGroups.GetDrum(track).Sounds[0].Code],
                                 Duration = Math.Min(loudest.Value.Duration, Length),
                                 State = loudest.Value.State.With(CompositionStateKinds.BeatRank, weakest)
-                            }).ToTimelineItem(at));
+                            }).WithVelocity(Render.ScaleLoudness(loudest.Value.Velocity, Loudness)).ToTimelineItem(at));
                     }
                 }
             }

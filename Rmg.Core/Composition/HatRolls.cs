@@ -90,11 +90,8 @@ internal static class HatRolls
                     continue;
                 rolled.RemoveAll(x => x.IsWithin(from, to));
                 var count = (int)Math.Round((to - from) * rate);
-                rolled.AddRange(Enumerable.Range(0, count).Select(k => (own.Value with
-                {
-                    Velocity = Render.ScaleLoudness(own.Value.Velocity, From + (1 - From) * k / Math.Max(1, count - 1)),
-                    Duration = Math.Min(own.Value.Duration, 1.0 / rate)
-                }).ToTimelineItem(from + k / (double)rate)));
+                rolled.AddRange(Enumerable.Range(0, count).Select(k => (own.Value with { Duration = Math.Min(own.Value.Duration, 1.0 / rate) })
+                    .WithVelocity(Render.ScaleLoudness(own.Value.Velocity, From + (1 - From) * k / Math.Max(1, count - 1))).ToTimelineItem(from + k / (double)rate)));
             }
 
             result[track] = EventTimeline.Create(timeline.Duration, rolled.OrderBy(x => x.Position));

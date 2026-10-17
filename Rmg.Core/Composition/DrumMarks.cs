@@ -130,7 +130,7 @@ internal static class DrumMarks
                     swelled = Math.Abs(at - span.Start) < 1e-9 ? drum : swelled;
                 }
                 else if (hits && plays)
-                    marks[drum].Add((typical[drum] with { Velocity = Render.ScaleLoudness(typical[drum].Velocity, loudness) }).ToTimelineItem(at));
+                    marks[drum].Add(typical[drum].WithVelocity(Render.ScaleLoudness(typical[drum].Velocity, loudness)).ToTimelineItem(at));
             }
 
             // a roll into the section on the beat before it, where the drums play the section, but on a drum swelling into it
@@ -165,6 +165,6 @@ internal static class DrumMarks
             : 1 - (1 - RollFrom) * (at - peak) / after;
         // a roll with nothing after its peak ending before it, on the section's first strike
         for (var at = peak - before; at < peak + after + 1e-9 && (after > 0 || at < peak - 1e-9); at += 1 / (rate * Loudness(at)))
-            yield return (note with { Velocity = Render.ScaleLoudness(note.Velocity, Loudness(at)), Duration = Math.Min(note.Duration, 1.0 / rate) }).ToTimelineItem(at);
+            yield return (note with { Duration = Math.Min(note.Duration, 1.0 / rate) }).WithVelocity(Render.ScaleLoudness(note.Velocity, Loudness(at))).ToTimelineItem(at);
     }
 }

@@ -20,17 +20,19 @@ public sealed class DoublingTest
         foreach (var song in TestCorpus.Range(128))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Doubles))
         foreach (var (track, doubling) in ((ImmutableDictionary<int, Doubling>)entry.Value!).Where(x => x.Value.Binding != DrumBinding.Figure))
-        // but a section in stop time, whose drums keeping time play on through the stops where the lead is left out
-        foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section && !InStopTime(song, x.SectionId)))
+        // but a section in stop time, whose drums keeping time play on through the stops where the lead is left out, and an
+        // appearance of a drum solo, whose strokes are the drummer's own
+        foreach (var span in song.Map.Sections.Where((x, i) => x.SectionId == entry.Section && !InStopTime(song, x.SectionId)
+                                                               && !song.Trace.Any(t => t.Point == TracePoints.DrumSolo && ((DrumSolo)t.Value!).Index == i)))
         {
             // the groove's notes, but in the last bar of a phrase, where a fill may take the lead's notes into its run, as an
-            // intro's window ends on a phrase, and at a phrase's first beat, where a call may land with the band, pushed an
-            // 8th early now and then
+            // intro's window ends on a phrase, from an 8th before it, where a push strikes its first beat's change, and at a
+            // phrase's first beat, where a call may land with the band, pushed an 8th early now and then
             bool InFillBar(double position)
             {
                 var phrase = span.Meter.PhraseDuration;
                 var inPhrase = (position - span.Start) % phrase;
-                return inPhrase >= phrase - FillBars(span.Meter) || inPhrase < 0.5;
+                return inPhrase >= phrase - FillBars(span.Meter) - Pushes.Early - 1e-9 || inPhrase < 0.5;
             }
             // a drum the song never plays has no notes
             double[] Groove(int t) => [..song.Song.Notes!.GetValueOrDefault(t, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0))

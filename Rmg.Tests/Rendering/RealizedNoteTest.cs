@@ -54,12 +54,16 @@ public sealed class RealizedNoteTest
                 : x.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0
                     ? x.Value.Pitches.Length == 2 && Math.Abs(x.Value.Pitches[1] - x.Value.Pitches[0]) == 12 || x.Value.Pitches.Length == 1
                     : x.Value.Pitches.Length == 1)).IsTrue();
-            await Assert.That(notes[corpusSong.Track(TrackRole.Bass)].All(x => x.Value.Pitches.Length == 1)).IsTrue();
+            // and the bass's single, but in octaves where it solos so, its own note first and the octave above it
+            foreach (var note in notes[corpusSong.Track(TrackRole.Bass)].Where(x => x.Value.Pitches.Length != 1))
+                await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0 && note.Value.Pitches.Length == 2 && Math.Abs(note.Value.Pitches[1] - note.Value.Pitches[0]) == 12)
+                    .IsTrue().Because($"seed {corpusSong.Seed}, the bass at {note.Position}");
             // the chords stacked, in the songs together, as a song's chords may be broken throughout
             stacked += notes.GetValueOrDefault(corpusSong.Track(TrackRole.Chords))?.Count(x => x.Value.Pitches.Length > 1) ?? 0;
             // every note keeps the state it was decided from, a drum's struck as hard whatever its sound
-            await Assert.That(notes.All(track => track.Value.All(x => x.Value.State.GetStateValue(StateKinds.Velocity).IsEqualToByEpsilon(x.Value.Velocity))))
-                .IsTrue();
+            foreach (var (track, note) in notes.SelectMany(t => t.Value.Where(x => !x.Value.State.GetStateValue(StateKinds.Velocity).IsEqualToByEpsilon(x.Value.Velocity)).Select(x => (t.Key, x))))
+                await Assert.That(note.Value.Velocity).IsEqualTo(note.Value.State.GetStateValue(StateKinds.Velocity))
+                    .Because($"seed {corpusSong.Seed}, track {track} ({corpusSong.Song.TrackDefinitions[track].Role}) at {note.Position}");
         }
 
         await Assert.That(stacked).IsGreaterThan(0);

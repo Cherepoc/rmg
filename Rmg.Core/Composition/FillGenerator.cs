@@ -57,6 +57,9 @@ internal sealed class FillGenerator
     private readonly HashSet<int> _filled = [];
     private readonly List<(double Position, int SectionId, bool IsPercussionOnly, ImmutableArray<RunSound> Sounds)> _landings = [];
 
+    // every line the drums mark, landed on or not, where a drum that never sounded lands where no landing fits it
+    private readonly List<(double Position, int SectionId, bool IsPercussionOnly)> _lines = [];
+
     /// <param name="songRhythm">How far the song's rhythm strays, which makes a drummer's signature likelier.</param>
     /// <param name="meter">The meter the song's bars are in.</param>
     /// <param name="unheard">The sequence a drum of the fills and landings that never sounded lands from, by its track, so that another drum heard or not leaves it (<see cref="LandTheUnheard" />).</param>
@@ -118,8 +121,9 @@ internal sealed class FillGenerator
     ///     fills and landings, such as a vibraslap, which a cymbal outweighs, or one of the groove that the song's form left
     ///     out of every section that had it (<see cref="DrumCoverage" />). It lands on its loudest sound, so that the one
     ///     note tells, as an open hi-hat or a ride's bell, with a landing of its role, as a vibraslap with a crash, or with
-    ///     any where none is, into a section it fits, a drum of the kit not into one of percussion only, drawn from a
-    ///     sequence of its own, so that a drum the song has is heard.
+    ///     any where none is, into a section it fits, a drum of the kit not into one of percussion only, or on any line
+    ///     into such a section where no landing fits it, drawn from a sequence of its own, so that a drum the song has is
+    ///     heard.
     /// </summary>
     private void LandTheUnheard(TrackEventStateTimelineMap<StateMap> song, TimelineEdits edits, IReadOnlyList<(double Start, double End, double BarDuration)> stops)
     {
@@ -131,9 +135,12 @@ internal sealed class FillGenerator
                 continue;
 
             var sound = sounds.MaxBy(x => drum.Sounds.First(y => y.Code == x.Code).Loudness)!;
-            var fits = _landings.Where(x => (!x.IsPercussionOnly || drum.Family.HasFlag(DrumFamily.Percussion)) && !Stopped(x.Position)).ToArray();
+            bool Fits(double position, bool isPercussionOnly) => (!isPercussionOnly || drum.Family.HasFlag(DrumFamily.Percussion)) && !Stopped(position);
+            var fits = _landings.Where(x => Fits(x.Position, x.IsPercussionOnly)).ToArray();
             var withRole = fits.Where(x => x.Sounds.Any(y => y.Role == sound.Role)).ToArray();
-            var landings = withRole.Length > 0 ? withRole : fits;
+            // or any line it fits, a drum of the kit where every landing was the percussion's
+            var landings = withRole.Length > 0 ? withRole : fits.Length > 0 ? fits
+                : [.._lines.Where(x => Fits(x.Position, x.IsPercussionOnly)).Select(x => (x.Position, x.SectionId, x.IsPercussionOnly, ImmutableArray<RunSound>.Empty))];
             if (landings.Length == 0)
                 continue;
 
@@ -226,6 +233,7 @@ internal sealed class FillGenerator
         var isEarly = _landing.TestProbability(GetChance(drummer, FillRarity.EarlyLanding, fills)) && line.HasFill && span > 0 && !line.IsLandingForced;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
+        _lines.Add((line.Position, line.Next.SectionId, line.Next.IsPercussionOnly));
         if (!landing.IsEmpty)
         {
             _landings.Add((landingPosition, line.Next.SectionId, line.Next.IsPercussionOnly, landing));

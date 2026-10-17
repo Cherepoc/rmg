@@ -81,11 +81,8 @@ internal static class GatedChords
                 var strokes = decays(note)
                     ? Enumerable.Range(1, (int)Math.Ceiling((end - section.Start) / bar)).Select(x => section.Start + x * bar).Where(x => x > start + Epsilon && x < end - Epsilon).Prepend(start).ToArray()
                     : [start];
-                held.AddRange(strokes.Select((x, i) => (note with
-                {
-                    Duration = (i + 1 < strokes.Length ? strokes[i + 1] : end) - x,
-                    Velocity = i == 0 ? note.Velocity : Render.ScaleLoudness(note.Velocity, RestrikeVelocity)
-                }).ToTimelineItem(x)));
+                held.AddRange(strokes.Select((x, i) => (note with { Duration = (i + 1 < strokes.Length ? strokes[i + 1] : end) - x })
+                    .WithVelocity(i == 0 ? note.Velocity : Render.ScaleLoudness(note.Velocity, RestrikeVelocity)).ToTimelineItem(x)));
             }
         }
 

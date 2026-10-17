@@ -406,6 +406,16 @@ internal static class Expression
 
     public static ByConvention SwellChance { get; } = new(0, 0.05, 0.3);
 
+    /// <summary>The widest a bend goes, in semitones: a step and a half or two whole steps, never a fourth.</summary>
+    public const int WidestBend = 4;
+
+    /// <summary>
+    ///     A bend's semitones to the scale note the given steps away, one step where two would bend past
+    ///     <see cref="WidestBend" />, as over an altered step's gap of three semitones beside a whole step.
+    /// </summary>
+    internal static int BendDistance(RealizedNote note, int steps) =>
+        ScaleDistance(note, steps) is var distance && Math.Abs(distance) > WidestBend && Math.Abs(steps) > 1 ? ScaleDistance(note, Math.Sign(steps)) : distance;
+
     /// <summary>
     ///     The semitones from a note to the scale note the given scale steps above it, or below for fewer than none, by
     ///     the scale at the note, as its line was placed in: a note off the scale counts the nearest scale note beyond it as
@@ -795,8 +805,8 @@ internal static class Expression
                     else if (bends && bendsNow && shaped)
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
                         {
-                            BendKind.BendAndRelease or BendKind.PrebendRelease => ScaleDistance(note.Value, size),
-                            BendKind.Scoop or BendKind.FallOff or BendKind.ReleaseAndBend => ScaleDistance(note.Value, -size),
+                            BendKind.BendAndRelease or BendKind.PrebendRelease => BendDistance(note.Value, size),
+                            BendKind.Scoop or BendKind.FallOff or BendKind.ReleaseAndBend => BendDistance(note.Value, -size),
                             _ => 0
                         });
                     // a soloist attacks its notes rather than swell into them
@@ -892,9 +902,8 @@ internal static class Expression
                     ? (x.Value with
                     {
                         State = state,
-                        Duration = held[i] ?? x.Value.Duration,
-                        Velocity = x.Value.Velocity + accents[i]
-                    }).ToTimelineItem(x.Position)
+                        Duration = held[i] ?? x.Value.Duration
+                    }).WithVelocity(x.Value.Velocity + accents[i]).ToTimelineItem(x.Position)
                     : x).Where((_, i) => !dropped[i])
             );
         }

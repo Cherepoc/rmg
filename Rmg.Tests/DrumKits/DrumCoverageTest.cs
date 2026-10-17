@@ -72,12 +72,13 @@ public sealed class DrumCoverageTest
     public async Task ASongWithDrums_PlaysEveryDrumItHas_InItsGroove_ItsFills_OrItsLandings()
     {
         var songs = TestCorpus.Range(256).Where(x => x.Song.Draws!.Parts.Contains(TrackRole.Drum)).ToArray();
-        var silent = songs.Count(song => song.Song.TrackDefinitions.Keys
+        var silent = songs.SelectMany(song => song.Song.TrackDefinitions.Keys
             .Where(song.IsDrum)
-            .Any(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0));
+            .Where(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0)
+            .Select(x => $"seed {song.Seed}, {DrumGroups.GetDrum(x).Name}")).ToArray();
 
         // a drum the form leaves out of every section that has it landing once after all (82% of these songs had a drum
         // never heard before every drum was given a section and a landing)
-        await Assert.That(silent).IsEqualTo(0);
+        await Assert.That(silent).IsEmpty().Because(string.Join("; ", silent));
     }
 }

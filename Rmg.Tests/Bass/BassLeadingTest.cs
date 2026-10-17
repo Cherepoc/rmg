@@ -66,7 +66,7 @@ public sealed class BassLeadingTest
         await Assert.That(landings).IsGreaterThan(0);
     }
 
-    /// <summary>A bass's inversion, its first note on a new chord, lands on a note of the chord, but on a pedal, which holds its note across the chords, and on a chord's one note that leads into the next, a sus chord's root where the third it lands on is left out.</summary>
+    /// <summary>A bass's inversion, its first note on a new chord, lands on a note of the chord, but on a pedal, which holds its note across the chords, on an inner line's step, a voice above the root it holds moving, and on a chord's one note that leads into the next, a sus chord's root where the third it lands on is left out.</summary>
     [Test]
     public async Task ABassInversion_LandsOnANoteOfItsChord()
     {
@@ -75,7 +75,9 @@ public sealed class BassLeadingTest
         foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Bass)].Where(x => (ChordArrival)x.Value.State.GetStateValue(StateKinds.ChordArrival) is ChordArrival.Third or ChordArrival.Fifth
                                                                                       && song.ChordChanges.Any(c => Math.Abs(c - x.Position) < 1e-9)
                                                                                       && x.Value.State.GetStateValue(CompositionStateKinds.BassPedal) == 0
-                                                                                      && x.Value.State.GetStateValue(StateKinds.ChordApproach) == 0))
+                                                                                      && x.Value.State.GetStateValue(StateKinds.ChordApproach) == 0
+                                                                                      // nor an inner line's step, a voice above the root the bass holds moving
+                                                                                      && x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) == 0))
         {
             var (chord, _, classes) = Realizer.GetChordNotes(note.Value.State);
             landings++;
