@@ -238,6 +238,7 @@ internal static class Polymeter
             var bound = bindings(span.SectionId).Where(x => kicks.Contains(x.Value)).Select(x => x.Key).ToHashSet();
             var tracks = plan.Parts.Where(trackOf.ContainsKey).Select(x => trackOf[x]).Concat(plan.Kick ? kicks.Concat(bound) : []).Distinct().Where(song.TrackTimelineMap.ContainsKey);
             var longest = plan.Longest * Sixteenth;
+            var shortest = plan.Cells.Min() * Sixteenth;
             var frame = plan.Patterns == Plan.Section ? span.Duration : span.Meter.PatternDuration * plan.Patterns;
 
             // every frame's cells across the section: the frame's start and end, and the cell's start and length
@@ -265,11 +266,12 @@ internal static class Polymeter
                 foreach (var frameCells in Cells().GroupBy(c => (c.Start, c.End)))
                 {
                     var (start, end) = frameCells.Key;
-                    // a part with no note of its own in the first cell, a bass under a busy riff, starts every cell with its
-                    // first note in the frame, so that it plays the cycle rather than nothing; a drum accenting the kick too,
-                    // on the cell's start, where the kick's cycle strikes
+                    // a part with no note of its own in the first cell, a bass under a busy riff or one coming in late, starts
+                    // every cell with its first note in the frame, so that it plays the cycle rather than nothing, as where its
+                    // first note falls past every cell's end; a drum accenting the kick too, on the cell's start, where the
+                    // kick's cycle strikes
                     var first = notes.Where(x => x.IsWithin(start, start + longest)).ToArray();
-                    if (first.Length == 0)
+                    if (!first.Any(x => x.Position - start < shortest - 1e-9))
                         first = [..notes.Where(x => x.IsWithin(start, end)).Take(1).Select(x => x.Value.ToTimelineItem(start))];
                     foreach (var (_, _, at, length) in frameCells)
                         played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => PlayedAt(x.Value, x.Position - start + at))

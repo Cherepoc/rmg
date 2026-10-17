@@ -112,15 +112,16 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     }
 
     /// <summary>
-    ///     The section whose bars a position is counted in: the one it is in, the first before it and the last after
-    ///     it; none for a song of no sections.
+    ///     The section whose bars a position is counted in: the one it is in, the first before it, counted back in the
+    ///     meter of the section an intro plays as (<see cref="PlayingAt" />), a hook's its chorus's, and the last after it;
+    ///     none for a song of no sections.
     /// </summary>
     private SectionSpan? BarsAt(double position)
     {
         if (Sections.IsEmpty)
             return null;
 
-        return SectionAt(position) ?? (position < Origin ? Sections[0] : Sections[^1]);
+        return SectionAt(position) ?? (position < Origin ? Sections[0] with { Meter = (PlayingAt(position)?.Span ?? Sections[0]).Meter } : Sections[^1]);
     }
 
     /// <summary>

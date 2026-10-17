@@ -310,8 +310,7 @@ trace at the committed code before blaming a change:
 
 - **At offset 816000000:** the rhythm part's realized note at a change keeping the chord before in its state (seed 57
   at 180, its pitches the new chord's, so the realizer's merge); a chromatic passing chord a semitone from the next
-  (seed 1 at 6); a fill decision recorded at bar 5 of a four-bar phrase (seed 6, a hook intro's song); a palm-muted
-  note's length; seed 21's bass at 90 landing a semitone over its chord's root, placed so by `LinePattern.Place`;
+  (seed 1 at 6); a palm-muted note's length; seed 21's bass at 90 landing a semitone over its chord's root, placed so by `LinePattern.Place`;
   shapes apart (seed 5 at 173.5 after a reharmonisation, seed 49 at 44 the melody's triad over the chords' cluster).
 - **At offset 716000000:** a polymeter's chords off its cell (seed 26 at 248, 6-16th cells); a soloist's stacks; a
   line's fall from the root; a passing chord (seed 15 at 22, seed 4 at 2); a filtered drop's band (seed 29 at 608); a

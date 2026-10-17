@@ -26,9 +26,9 @@ public sealed class FilterTest
         var (filtered, closing) = (0, 0);
         foreach (var song in Songs(effect))
         {
-            // one part, its two takes where it is doubled
+            // one part, its two takes where it is doubled, a riff's twin with its riff
             var moved = song.Rendered.Tracks.Where(x => x.Controllers.Any(c => c.Controller == ExpressionRender.BrightnessController)).ToArray();
-            await Assert.That(moved.Select(x => x.Role).Distinct().Count()).IsLessThanOrEqualTo(1);
+            await Assert.That(moved.Select(x => x.Role.Source()).Distinct().Count()).IsLessThanOrEqualTo(1);
             if (moved.Length == 0)
                 continue;
             filtered++;

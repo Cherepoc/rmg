@@ -138,15 +138,14 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     public SongMap Map => Song.Map!;
 
     /// <summary>
-    ///     The sections where the song plays them, and before them a hook intro, its chorus's first phrase quoted (<see cref="IntroKind.Hook" />),
-    ///     as the span its chorus would be there.
+    ///     The sections where the song plays them, and before them a hook intro, its chorus's first phrase quoted
+    ///     (<see cref="IntroKind.Hook" />), or an intro of entries' window, each as the span its source would be there
+    ///     (<see cref="SongMap.Plays" />), but the ending.
     /// </summary>
-    public SectionSpan[] PlayedSpans => field ??= Map.Intro.Kind == IntroKind.Hook && Map.Origin > 0
-        ? [Map.PlayAt(0)!.Value.Played with { Duration = Map.Origin }, ..Map.Sections]
-        : [..Map.Sections];
+    public SectionSpan[] PlayedSpans => field ??= [..Map.Plays.Where(x => !x.IsEnding).Select(x => x.Span)];
 
-    /// <summary>The span a position plays in, a hook intro's among them (<see cref="PlayedSpans" />); none for an intro of another kind or the ending.</summary>
-    public SectionSpan? SpanAt(double position) => position < Map.Origin - 1e-9 ? PlayedSpans.FirstOrDefault(x => x.Start < 1e-9 && x.End > position) : Map.SectionAt(position);
+    /// <summary>The span a position plays in as a section, a hook intro's and an intro of entries' window among them (<see cref="SongMap.Plays" />); none for an intro of another kind or the ending.</summary>
+    public SectionSpan? SpanAt(double position) => Map.PlayingAt(position) is { IsEnding: false } play ? play.Span : null;
 
     /// <summary>The parts the song leaves out (<see cref="SongParts" />).</summary>
     public ImmutableHashSet<TrackRole> Absent => field ??= (ImmutableHashSet<TrackRole>)Trace.Single(x => x.Point == TracePoints.SongParts).Value!;
