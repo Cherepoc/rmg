@@ -218,7 +218,7 @@ internal static class ChordShapes
         var shapes = ShapesByUnconventionality[unconventionality];
         return mood.Darkness == 0
             ? shapes[ShapeIndexGenerators[unconventionality](context)]
-            : context.Pick([..shapes.Select(x => new Weighted<ChordShape>(x.Weight * Math.Exp(mood.LogOdds((x.Darkness, 0))), x))]);
+            : context.Pick([..shapes.Select(x => new Weighted<ChordShape>(mood.Tilt((x.Darkness, 0)).Weigh(x.Weight, 1), x))]);
     }
 
     /// <summary>A shape that ends a phrase with pull towards home, the heavier ones being more likely.</summary>

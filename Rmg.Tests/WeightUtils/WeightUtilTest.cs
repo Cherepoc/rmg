@@ -5,60 +5,35 @@ namespace Rmg.Tests.WeightUtils;
 public sealed class WeightUtilTest
 {
     [Test]
-    public async Task CreateGeometricRankWeightFunc_AtOffset_ResultsIn_MaxWeight()
+    public async Task CreateGeometricRankWeightFunc_AtOffset_ResultsIn_1()
     {
-        var func = WeightUtil.CreateGeometricRankWeightFunc(2, 1, 5, 0.5);
-
-        await Assert.That(func(2)).IsEqualTo(5);
+        await Assert.That(WeightUtil.CreateGeometricRankWeightFunc(2, 0.5)(2)).IsEqualTo(1);
     }
 
     [Test]
-    [Arguments(3, 3)]
-    [Arguments(1, 3)]
-    [Arguments(4, 2)]
-    [Arguments(0, 2)]
+    [Arguments(3, 0.5)]
+    [Arguments(1, 0.5)]
+    [Arguments(4, 0.25)]
+    [Arguments(0, 0.25)]
     public async Task CreateGeometricRankWeightFunc_DecaysGeometricallyWithDistanceFromOffset(int rank, double expected)
     {
-        var func = WeightUtil.CreateGeometricRankWeightFunc(2, 1, 5, 0.5);
-
-        await Assert.That(func(rank)).IsEqualTo(expected);
+        await Assert.That(WeightUtil.CreateGeometricRankWeightFunc(2, 0.5)(rank)).IsEqualTo(expected);
     }
 
     [Test]
-    public async Task CreateGeometricRankWeightFunc_ZeroMultiplier_ResultsIn_MinWeightAwayFromOffset()
+    public async Task CreateGeometricRankWeightFunc_ZeroMultiplier_WeighsTheOffsetAlone()
     {
-        var func = WeightUtil.CreateGeometricRankWeightFunc(0, 1, 5, 0);
+        var func = WeightUtil.CreateGeometricRankWeightFunc(0, 0);
 
-        await Assert.That(func(0)).IsEqualTo(5);
-        await Assert.That(func(1)).IsEqualTo(1);
-        await Assert.That(func(-3)).IsEqualTo(1);
+        await Assert.That(func(0)).IsEqualTo(1);
+        await Assert.That(func(1)).IsEqualTo(0);
+        await Assert.That(func(-3)).IsEqualTo(0);
     }
 
     [Test]
-    public async Task CreateGeometricRankWeightFunc_EqualMinAndMax_ResultsIn_ConstantWeight()
+    public async Task CreateGeometricRankWeightFunc_NegativeMultiplier_ResultsIn_ThrownException()
     {
-        var func = WeightUtil.CreateGeometricRankWeightFunc(0, 2, 2, 0.5);
-
-        await Assert.That(func(0)).IsEqualTo(2);
-        await Assert.That(func(5)).IsEqualTo(2);
-    }
-
-    [Test]
-    public async Task CreateGeometricRankWeightFunc_NegativeArguments_ResultsIn_ThrownException()
-    {
-        await Assert.That(() => { WeightUtil.CreateGeometricRankWeightFunc(0, -1, 1, 0.5); })
-            .Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => { WeightUtil.CreateGeometricRankWeightFunc(0, 0, -1, 0.5); })
-            .Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => { WeightUtil.CreateGeometricRankWeightFunc(0, 0, 1, -0.5); })
-            .Throws<ArgumentOutOfRangeException>();
-    }
-
-    [Test]
-    public async Task CreateGeometricRankWeightFunc_MaxBelowMin_ResultsIn_ThrownException()
-    {
-        await Assert.That(() => { WeightUtil.CreateGeometricRankWeightFunc(0, 5, 1, 0.5); })
-            .Throws<ArgumentOutOfRangeException>();
+        await Assert.That(() => { WeightUtil.CreateGeometricRankWeightFunc(0, -0.5); }).Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]

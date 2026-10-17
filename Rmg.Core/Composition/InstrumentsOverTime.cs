@@ -121,7 +121,7 @@ internal static class InstrumentsOverTime
     ///     each section and part drawing from a sequence of its own.
     /// </summary>
     /// <param name="sound">Every section's sound facet, by its place among the song's sections.</param>
-    /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
+    /// <param name="streams">A part's sequence in a section, by the section and the part's track, a riff's twin's its riff's.</param>
     /// <param name="families">A part's draw of whether a switch keeps to its family, by the section and the part's track.</param>
     /// <param name="genre">
     ///     The genre whose pools of the roles' instruments a switch keeps to, and an articulation too, a variant, where the
@@ -138,8 +138,6 @@ internal static class InstrumentsOverTime
     )
     {
         var result = notes.ToBuilder();
-        // a twin plays as its riff does, drawing from the riff's sequences
-        var riffTrack = definitions.FirstOrDefault(x => x.Value is PitchInstrumentTrack { Role: TrackRole.Riff }).Key;
         foreach (var (track, definition) in definitions.Where(x => x.Value is PitchInstrumentTrack && notes.ContainsKey(x.Key)))
         {
             var pitched = (PitchInstrumentTrack)definition;
@@ -147,14 +145,14 @@ internal static class InstrumentsOverTime
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 // a section plays as it did the time before, so that a chorus comes back in the instrument it switched to
-                var context = streams(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track);
+                var context = streams(span.SectionId, track);
                 var switches = context.TestProbability(SwitchChance.At(sound[index], genre.Chance(GenreChoices.InstrumentSwitches, "sections")));
                 var role = RoleOf(pitched.Role);
                 var pool = PoolOf(pitched.Role.Source(), sound[index], genre);
                 var weight = pool ?? role?.Own(sound[index]);
                 double Weight(RoleInstrument instrument) => weight!(instrument);
                 // within the family where it keeps to it and the role has another of it, or to any other of the role's
-                var keeps = families(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track).TestProbability(FamilyChance.At(sound[index]));
+                var keeps = families(span.SectionId, track).TestProbability(FamilyChance.At(sound[index]));
                 var family = FamilyOf(pitched.InstrumentCode);
                 var kin = role?.Of(pool).Where(x => x.Program != pitched.InstrumentCode && family.Contains(x.Program) && Weight(x) > 0).ToArray() ?? [];
                 var switched = role is null ? pitched.InstrumentCode

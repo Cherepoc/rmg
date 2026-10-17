@@ -16,7 +16,7 @@ public static class SongGenerator
     // the song's speed as a multiple of 120 BPM, from 90 to about 175 BPM: 120 itself is the likeliest, and the finer
     // a multiplier's fraction, the less likely it is
     internal static readonly Func<IGenerationContext, double> TempoGenerator = Generators.DyadicMultiplier(
-        WeightUtil.CreateGeometricRankWeightFunc(0, 0, 1.0, 0.75),
+        WeightUtil.CreateGeometricRankWeightFunc(0, 0.75),
         4,
         0.75,
         1.5

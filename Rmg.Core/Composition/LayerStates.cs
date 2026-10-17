@@ -6,7 +6,7 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     The state that the layers of a song, from the song down to a bar, each draw a part of: the rhythm settings, the
-///     note-to-note walk of the pitch offsets, and the note durations. Every layer draws the same states with the same
+///     note-to-note walk of a drum's articulation, which of its sounds it plays, and the note durations. Every layer draws the same states with the same
 ///     generators, so they are drawn here, in one order, which the song's seed depends on.
 /// </summary>
 internal static class LayerStates
@@ -20,7 +20,7 @@ internal static class LayerStates
 
     /// <summary>Which entry of the chord pool a layer moves the pick to: 0 mostly, then 1 either way, then 2.</summary>
     public static readonly Func<IGenerationContext, int> ChordPoolIndex =
-        Generators.Rank(WeightUtil.CreateGeometricRankWeightFunc(0, 0, 1.0, 0.5), -2, 2);
+        Generators.Rank(WeightUtil.CreateGeometricRankWeightFunc(0, 0.5), -2, 2);
 
     /// <summary>The chords a layer adds to the pool: two, of its unconventionality.</summary>
     public static Func<IGenerationContext, ImmutableArray<Chord>> CreateChordPool(HarmonicUnconventionality unconventionality)

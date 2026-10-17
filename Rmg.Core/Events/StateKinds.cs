@@ -26,8 +26,9 @@ public static class StateKinds
     // a bar whose first chord plays as drawn, in its own register, and not led from the chord before; each such bar
     // has its own number, so that bars in a row are told apart
     public static readonly StateKind<int> ChordVoicingReset = CreateAdditive<int>("ChordVoicingReset", StateScope.Render);
-    // where a section's chords change: at each chord's start, its number in the pattern, from 1, so that the lines lead
-    // into and land on every change of chord (LinePattern.Place)
+    // where a section's chords change: at each chord's start, a number that tells it from the chord before, its number in
+    // the pattern from 1, an inner line's quarter adding a mark of its own under a held chord (InnerLines), compared and
+    // never indexed, so that the lines lead into and land on every change of chord (LinePattern.Place)
     public static readonly StateKind<int> ChordChange = CreateAdditive<int>("ChordChange", StateScope.Render);
     // how a bar's last bass note leads into the next chord (a ChordApproach), and what its first note of a new chord
     // plays (a ChordArrival)

@@ -89,7 +89,7 @@ internal sealed class FillGenerator
 
     /// <param name="song">The song's sections and its intro and ending, put one after another.</param>
     /// <param name="lines">Every line the drums mark, in the song's order.</param>
-    /// <param name="map">Where the song's parts are; none for a song that starts with its first section.</param>
+    /// <param name="map">Where the song's parts are.</param>
     /// <param name="stops">Where the song takes the drums' groove out, its stop time and its drum solos, so that a drum heard only there is not.</param>
     public TrackEventStateTimelineMap<StateMap> Generate(
         TrackEventStateTimelineMap<StateMap> song,
@@ -219,7 +219,7 @@ internal sealed class FillGenerator
         _lastRun = [];
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId, meter, line.Room);
         // a run into a change of section, another appearance of the same section's too, which the lines walk with
-        if (span > 0 && (line.Ending != line.Next || map is not null && map.Sections.Any(x => Math.Abs(x.Start - line.Position) < 1e-9)) && !_lastRun.IsEmpty)
+        if (span > 0 && (line.Ending != line.Next || map.Sections.Any(x => Math.Abs(x.Start - line.Position) < 1e-9)) && !_lastRun.IsEmpty)
             Runs.Add(new PlayedRun(line.Position, _lastRun, lift * ending.Rhythm.Coupling));
 
         // the drums land after they stopped, as they come back, and always where the song's form marks the line,

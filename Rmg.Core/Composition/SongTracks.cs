@@ -41,6 +41,10 @@ internal sealed class SongTracks
 
     public ImmutableSortedDictionary<int, IInstrumentTrack> Definitions { get; }
 
+    /// <summary>The song's drums of a role, by their tracks, as the song draws their roles, not a section's.</summary>
+    public IEnumerable<int> DrumsOf(DrumRole role) =>
+        Definitions.Where(x => x.Value is PercussionInstrumentTrack definition && DrumRoles.Of(definition.StateMap) == role).Select(x => x.Key);
+
     /// <summary>What the song's drums are: the drum kit, the kit with some percussion, or percussion alone.</summary>
     public DrumSetup DrumSetup { get; }
 

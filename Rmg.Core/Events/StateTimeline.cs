@@ -308,7 +308,7 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
                 startItemCheck = !stateKind.CheckValueIsDefault(item.Value);
             }
 
-            if (!startItemCheck || !previousItemCheck || item.Position < 0 || item.Position >= duration)
+            if (!startItemCheck || !previousItemCheck || item.Position >= duration)
                 return true;
         }
 

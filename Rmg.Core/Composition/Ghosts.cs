@@ -37,8 +37,7 @@ internal static class Ghosts
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var notes = SongStages.NotesOf(draft);
-        var snares = notes.Keys.Where(x => song.Tracks.Definitions[x] is PercussionInstrumentTrack definition && DrumRoles.Of(definition.StateMap) == DrumRole.Backbeat
-                                           && DrumGroups.SnareHeads.Contains(x)).ToArray();
+        var snares = song.Tracks.DrumsOf(DrumRole.Backbeat).Where(x => notes.ContainsKey(x) && DrumGroups.SnareHeads.Contains(x)).ToArray();
         // every section's draw of each 16th of its bar, none where it does not ghost, drawn for every section so that the
         // draws are as many
         var ghosting = song.SectionIds.Distinct().ToDictionary(id => id, id =>

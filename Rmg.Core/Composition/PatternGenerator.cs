@@ -49,11 +49,6 @@ internal sealed class PatternGenerator
     /// <param name="trackStateMaps">Every track's state in the section.</param>
     /// <param name="barDrums">How the drums play the bars of a letter: the bars a track sits out, keeping its state there with no notes, and the strokes it changes to.</param>
     /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the pattern.</param>
-    /// <param name="answer">
-    ///     For a track that answers its pattern, as the melody does, how its answer plays: the pattern's bars again,
-    ///     of the same bar patterns, a bar as the question's did or, drawing its rhythm afresh, of the same settings on
-    ///     another rhythm, and the phrase ending where the answer has it; none for no answer.
-    /// </param>
     /// <param name="context">The section's random sequence.</param>
     public GeneratedBars GenerateBars(
         IGenerationContext context,
@@ -63,12 +58,11 @@ internal sealed class PatternGenerator
         ImmutableDictionary<int, Doubling> doubles,
         ImmutableDictionary<int, int> feelLeads,
         StateTimelineMap barStateTimelineMap,
-        SectionRhythm sectionRhythm,
-        MelodyAnswer? answer
+        SectionRhythm sectionRhythm
     )
     {
         var seeds = DrawSeeds(context, trackStateMaps.Keys, sectionRhythm.Scheme);
-        return BuildBars(seeds, sectionId, trackStateMaps, barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, answer, []);
+        return BuildBars(seeds, sectionId, trackStateMaps, barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, null, []);
     }
 
     /// <summary>
@@ -470,7 +464,7 @@ internal sealed class PatternGenerator
         return DyadicRankThresholdPattern.Create(
             _context,
             seed,
-            WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, fullness),
+            WeightUtil.CreateGeometricRankWeightFunc(rankOffset, fullness),
             new DyadicTimelineDescriptor(_meter.BarDuration, _meter.GetCycles(period, phase), maxRank),
             variation
         );

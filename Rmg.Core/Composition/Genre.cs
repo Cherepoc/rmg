@@ -99,13 +99,13 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
     /// <summary>Whether it names the choice.</summary>
     public bool Names(GenreChoice choice) => Choices.ContainsKey(choice.Name);
 
+    /// <summary>The pool of a choice of an enum's members, each option named as the member is (<see cref="GenreChoices.Name" />).</summary>
+    public Func<T, ByConvention?>? Pool<T>(GenreChoice choice) where T : struct, Enum => Pool<T>(choice, x => GenreChoices.Name(x.ToString()));
+
     /// <summary>
     ///     The pool of a choice, every option's weights at its ends by the option's name, none for one it leaves out; none
     ///     where the genre does not name the choice, which is then as the songs have it.
     /// </summary>
-    /// <summary>The pool of a choice of an enum's members, each option named as the member is (<see cref="GenreChoices.Name" />).</summary>
-    public Func<T, ByConvention?>? Pool<T>(GenreChoice choice) where T : struct, Enum => Pool<T>(choice, x => GenreChoices.Name(x.ToString()));
-
     /// <param name="name">An option's name, as the choice gives it.</param>
     public Func<T, ByConvention?>? Pool<T>(GenreChoice choice, Func<T, string> name)
     {
@@ -194,10 +194,10 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
             ByConvention Each(ByConvention value, Func<double, double> at) => new(at(value.Plain), at(value.Tuned), at(value.Wild));
             options = choice.Kind switch
             {
-                GenreChoiceKind.Pool => Weighed(options, x => Math.Exp(mood.LogOdds(lean(x)))),
-                GenreChoiceKind.Chances => options.ToImmutableDictionary(x => x.Key, x => Each(x.Value, p => new Tilt(mood.LogOdds(lean(x.Key))).Chance(p, 1))),
+                GenreChoiceKind.Pool => Weighed(options, x => mood.Tilt(lean(x)).Odds),
+                GenreChoiceKind.Chances => options.ToImmutableDictionary(x => x.Key, x => Each(x.Value, p => mood.Tilt(lean(x.Key)).Chance(p, 1))),
                 GenreChoiceKind.Range or GenreChoiceKind.Values => options.ToImmutableDictionary(x => x.Key,
-                    x => Each(x.Value, a => Math.Clamp(a + Mood.RangeShift * (lean(x.Key).Darkness * mood.Darkness + lean(x.Key).Intensity * mood.Intensity), 0, 1))),
+                    x => Each(x.Value, a => Math.Clamp(a + Mood.RangeShift * mood.Lean(lean(x.Key)), 0, 1))),
                 _ => options
             };
             choices = choices.SetItem(choice.Name, options);

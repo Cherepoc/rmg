@@ -25,13 +25,15 @@ public sealed class SongGeneratorSilentBarTest
             context,
             1,
             _ => 1e-4,
-            new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2)
+            new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2),
+            variation: 1
         );
         var notePattern = DyadicRankItemPattern<StateMap>.Create(
             context,
             rhythmPattern,
             _ => (_, _) => BarStateMap,
-            1
+            1,
+            (_, _, values) => values
         );
 
         await Assert.That(notePattern.GeneratedTimeline.Count == 0).IsTrue();

@@ -546,6 +546,11 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
   remakes it before the remake arrives, or for good where it fails.
 - **The fine-tune window's drag** (P4, #335): a range's band drawn again whole at every pointer move, a canvas rasterised
   and encoded each time; profiled on a phone first, then its edges alone while dragging and the shading on letting go.
+- **Helpers the review of 16 October 2026 left** (P4): the chord span around a place, its start and its end, one
+  helper over the common map's changes by binary search, each caller keeping its own clamp, in place of sixteen reads
+  and seven spellings of the end (#111); a song's tracks and notes by a part, `Song.Tracks(role)` and `NotesOf(role)`,
+  for the descriptions, the harmony and some 25 tests (#188); the articulation walk, which only the drums read, built for
+  them alone, when the songs are redrawn for another reason, as it changes every song's draws (#100).
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than

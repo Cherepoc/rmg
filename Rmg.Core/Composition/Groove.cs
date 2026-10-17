@@ -63,7 +63,7 @@ internal static class Groove
     /// </summary>
     public static ByConvention SwingChance { get; } = new(0, 0.2, 0.2);
 
-    /// <summary>The lightest swing, as a part of the triplet's; the heaviest is the triplet's, the second note of a pair a third late.</summary>
+    /// <summary>The lightest swing, as a part of the triplet's; the heaviest is the triplet's, the second note of a pair at two thirds of the pair.</summary>
     public const double LightestSwing = 0.3;
 
     /// <summary>
@@ -106,7 +106,7 @@ internal static class Groove
         if (given is { } amountGiven)
             (swings, amount) = (amountGiven > 0, amountGiven);
 
-        // a triplet's swing plays the pair's second note a third of the pair late of its middle, at two thirds
+        // a triplet's swing plays the pair's second note a sixth of the pair late of its middle, at two thirds
         return swings && meter.Pairs(period) ? new Swing(amount * period / 6, period) : Swing.None;
     }
 

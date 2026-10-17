@@ -8,7 +8,7 @@ public sealed class DyadicRankThresholdPatternTest
     private const double BarDuration = 4;
 
     private static Func<int, double> Weights(int rankOffset, double fullness) =>
-        WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, fullness);
+        WeightUtil.CreateGeometricRankWeightFunc(rankOffset, fullness);
 
     private static double[] Positions(DyadicRankThresholdPattern pattern) =>
         [..pattern.OutcomeRankTimeline.Select(x => x.Position)];
@@ -21,7 +21,8 @@ public sealed class DyadicRankThresholdPatternTest
             new GenerationContext(0),
             1,
             Weights(0, 1),
-            new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2)
+            new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2),
+            variation: 1
         );
 
         await Assert.That(Positions(pattern)).IsEquivalentTo(Enumerable.Range(0, 16).Select(x => x * 0.25).ToArray(), CollectionOrdering.Matching);
@@ -84,7 +85,7 @@ public sealed class DyadicRankThresholdPatternTest
                 .Select(x => x.Position)
                 .ToArray();
 
-            var pattern = DyadicRankThresholdPattern.Create(new GenerationContext(0), seed, weights, descriptor);
+            var pattern = DyadicRankThresholdPattern.Create(new GenerationContext(0), seed, weights, descriptor, variation: 1);
 
             await Assert.That(Positions(pattern)).IsEquivalentTo(expected, CollectionOrdering.Matching).Because($"seed {seed}");
         }

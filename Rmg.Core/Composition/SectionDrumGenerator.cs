@@ -245,6 +245,6 @@ internal sealed class SectionDrumGenerator
         if (trackStateMaps.Count == 0)
             yield break;
 
-        yield return _patterns(meter).GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, null);
+        yield return _patterns(meter).GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm);
     }
 }

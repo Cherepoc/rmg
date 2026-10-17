@@ -49,7 +49,7 @@ internal static class HatRolls
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var notes = SongStages.NotesOf(draft);
-        var times = notes.Keys.Where(x => song.Tracks.Definitions[x] is PercussionInstrumentTrack definition && DrumRoles.Of(definition.StateMap) == DrumRole.Time).ToArray();
+        var times = song.Tracks.DrumsOf(DrumRole.Time).Where(notes.ContainsKey).ToArray();
         if (times.Length == 0)
             return draft;
 

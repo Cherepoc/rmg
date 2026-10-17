@@ -128,7 +128,7 @@ internal static class StopTime
             ? [..kicks.SelectMany(k => notes[k]).Where(x => x.Position >= at - 1e-9 && x.Position < end - 1e-9).Select(x => x.Position).Distinct().Order()]
             : [at];
         var lines = notes.Where(x => song.Tracks.Definitions[x.Key].Role.Sings()).SelectMany(x => x.Value).ToArray();
-        var times = notes.Keys.Where(x => song.Tracks.Definitions[x] is PercussionInstrumentTrack definition && DrumRoles.Of(definition.StateMap) == DrumRole.Time).ToHashSet();
+        var times = song.Tracks.DrumsOf(DrumRole.Time).Where(notes.ContainsKey).ToHashSet();
         // every stopped bar's carrier: the lines, or the drums keeping time; a phrase with a bar neither carries played as it
         // was, stop time being the phrase's device
         var carriers = new Dictionary<double, Carrier>();

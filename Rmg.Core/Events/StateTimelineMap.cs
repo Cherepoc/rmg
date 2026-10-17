@@ -141,8 +141,6 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
         // value misses where a layer comes in or goes without changing it
         if (StateTrace.IsExplaining)
             return ReadAt(position);
-        if (position < StateMapEventTimeline[0].Position)
-            return StateMap.Default;
 
         var index = StateMapEventTimeline.ToImmutableArray().GetIndexAtFloor(position);
         return StateMapEventTimeline[index].Value;

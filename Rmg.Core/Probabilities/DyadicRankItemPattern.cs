@@ -19,18 +19,17 @@ public sealed class DyadicRankItemPattern<T>
 
     /// <param name="drawFunc">Draws a beat's values, in the order of the beats, from the pattern's own sequence.</param>
     /// <param name="generationSeed">The seed of the pattern's own sequence.</param>
-    /// <param name="complete">Makes a beat's item of its values, at its position; none keeps the values.</param>
+    /// <param name="complete">Makes a beat's item of its values, at its position.</param>
     public static DyadicRankItemPattern<T> Create(
         IGenerationContext context,
         DyadicRankThresholdPattern rhythmPattern,
         Func<IGenerationContext, Func<double, KeptBeat, T>> drawFunc,
         ulong generationSeed,
-        Func<double, KeptBeat, T, T>? complete = null
+        Func<double, KeptBeat, T, T> complete
     )
     {
         var seededContext = context.CreateContext(generationSeed);
         var draw = drawFunc(seededContext);
-        complete ??= (_, _, values) => values;
         // every beat's values by its cycle and its place in it
         var drawn = new Dictionary<(int Cycle, int Slot), T>();
         var itemTimeline = rhythmPattern.OutcomeTimeline.MapValues((position, beat) =>

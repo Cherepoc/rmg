@@ -30,7 +30,7 @@ public sealed class DyadicRankThresholdPattern
         ulong generationSeed,
         Func<int, double> rankWeightFunc,
         DyadicTimelineDescriptor descriptor,
-        double variation = 1
+        double variation
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegative(variation);

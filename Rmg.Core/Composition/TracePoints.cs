@@ -274,8 +274,9 @@ internal static class TracePoints
     public const string SongRhythm = "Song rhythm";
 
     /// <summary>
-    ///     The key changes led into by a chain of chords: each change's place and its chain's chords' starts (an
-    ///     <c>ImmutableArray</c> of tuples of a <c>double</c> and an <c>ImmutableArray</c> of <c>double</c>s).
+    ///     The key changes led into by a chain of chords: each change's place, its chain's chords' starts and how it is led
+    ///     into (an <c>ImmutableArray</c> of tuples of a <c>double</c>, an <c>ImmutableArray</c> of <c>double</c>s and a
+    ///     <see cref="Composition.KeyChange.Device" />).
     /// </summary>
     public const string KeyPreparation = "Key preparation";
 

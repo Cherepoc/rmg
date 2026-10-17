@@ -40,9 +40,6 @@ internal sealed class SongFormGenerator
     // what every track plays, by its number, so that the form can bring in or leave out the drums or the bass
     private readonly IReadOnlyDictionary<int, TrackRole> _roles;
 
-    // the meter the song's bars are in, which an ending's lengths are counted in
-    private readonly Meter _meter;
-
     // whether the song has drums, which a landing on the final chord plays
     private readonly bool _hasDrums;
 
@@ -68,8 +65,7 @@ internal sealed class SongFormGenerator
         bool hasDrums,
         bool drumsKeepTime,
         IGenerationContext hookContext,
-        IReadOnlySet<TrackRole> playing,
-        Meter meter
+        IReadOnlySet<TrackRole> playing
     )
     {
         _context = context;
@@ -84,7 +80,6 @@ internal sealed class SongFormGenerator
         _drumsKeepTime = hasDrums && drumsKeepTime;
         _hookContext = hookContext;
         _playing = playing;
-        _meter = meter;
     }
 
     /// <summary>A plan whose hook has no chorus to quote with another of the genre's intros, from a sequence of its own, a count-in where the drums keep time, half of one now and then.</summary>

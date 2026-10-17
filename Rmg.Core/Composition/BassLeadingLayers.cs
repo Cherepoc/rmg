@@ -6,8 +6,9 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     How much the bass leads into the next chord, drawn by layer: the bass instrument sets where the song starts,
 ///     and a section moves it. The amount sets, bar by bar, how often its last note before a change leads into it (see
-///     <c>StateKinds.ChordApproach</c>); what it lands on in the new chord leans by the section's conventionality alone
-///     (<see cref="Arrivals" />, <c>StateKinds.ChordArrival</c>).
+///     <c>StateKinds.ChordApproach</c>); what it lands on in the new chord leans by the section's conventionality, among
+///     a genre's landings where it names them (<see cref="Arrivals" />, <c>StateKinds.ChordArrival</c>,
+///     <see cref="GenreChoices.BassLanding" />).
 /// </summary>
 internal static class BassLeadingLayers
 {

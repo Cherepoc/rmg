@@ -259,8 +259,7 @@ internal sealed record SongDecisions(
             !absent.Contains(TrackRole.Drum),
             drumJob == DrumJob.Groove,
             Stream(SongStream.HookIntro),
-            SongParts.All.Except(absent).ToHashSet(),
-            meter
+            SongParts.All.Except(absent).ToHashSet()
         );
         var plan = formGenerator.Plan(sectionIds);
         // a section in a meter of its own now and then, a chorus the likelier, each drawing from a stream of its own

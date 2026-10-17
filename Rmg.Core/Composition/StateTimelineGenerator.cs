@@ -10,8 +10,8 @@ public interface IStateTimelineGenerator
 }
 
 /// <summary>
-///     Generates a state timeline that takes a new value at the start of every step. The values are drawn fresh for
-///     every step, or picked from a pool drawn beforehand, so that some of them come back.
+///     Generates a state timeline that takes a new value at the start of every step, picked from a pool drawn
+///     beforehand, so that some of them come back.
 /// </summary>
 public sealed class StateTimelineGenerator<T> : IStateTimelineGenerator
     where T : notnull
@@ -40,7 +40,7 @@ public sealed class StateTimelineGenerator<T> : IStateTimelineGenerator
 
     public double StepDuration { get; }
 
-    /// <summary>How many values the steps pick from; 0 draws a fresh value for every step.</summary>
+    /// <summary>How many values the steps pick from, one at the least.</summary>
     public int PoolSize { get; }
 
     /// <summary>The layer the values belong to, such as the bar, which a <see cref="StateTrace" /> records.</summary>
@@ -63,7 +63,7 @@ public sealed class StateTimelineGenerator<T> : IStateTimelineGenerator
             items[i] = valueGenerator(context).ToTimelineItem(i * StepDuration);
 
         var timeline = StateTimeline.Create(duration, StateKind, items);
-        return Layer is null ? timeline : timeline.WithLayer(Layer);
+        return timeline.WithLayer(Layer);
     }
 }
 

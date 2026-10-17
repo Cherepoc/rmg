@@ -50,7 +50,6 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Me
         : Period / Math.Pow(2, Math.Max(0, Math.Round(Math.Log2(Period / 0.5))));
 
     /// <summary>A note of a rank of the cycle, in beats: the cycle split first, in three for a grouped one (<see cref="ResolvedRhythm.SplitOf" />), then halved.</summary>
-    /// <summary>The note a rank plays, a grouped cycle's split in three first.</summary>
     public double NoteAt(int rank) => rank == 0 ? Period : Period / ResolvedRhythm.SplitOf(Period) / Math.Pow(2, rank - 1);
 
     /// <param name="groove">The state of the groove's rhythm.</param>
@@ -97,7 +96,7 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Me
         var pattern = DyadicRankThresholdPattern.Create(
             context,
             seed,
-            WeightUtil.CreateGeometricRankWeightFunc(Math.Min(Rhythm.RankOffset, maxRank), 0, 1, Rhythm.Fullness),
+            WeightUtil.CreateGeometricRankWeightFunc(Math.Min(Rhythm.RankOffset, maxRank), Rhythm.Fullness),
             new DyadicTimelineDescriptor(Meter.BarDuration, Meter.GetCycles(Period, Phase), maxRank),
             Rhythm.Variation
         );

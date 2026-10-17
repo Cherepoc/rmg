@@ -61,6 +61,9 @@ public readonly record struct Mood(double Darkness, double Intensity)
             true))
     ] : field;
 
-    /// <summary>How far an option's lean moves its odds under this mood, in log-odds.</summary>
-    public double LogOdds((double Darkness, double Intensity) lean) => Math.Log(Odds) * (lean.Darkness * Darkness + lean.Intensity * Intensity);
+    /// <summary>How far this mood leans an option of a lean, its darkness's and its intensity's together, from -1 to 1 at its ends.</summary>
+    public double Lean((double Darkness, double Intensity) lean) => lean.Darkness * Darkness + lean.Intensity * Intensity;
+
+    /// <summary>How this mood moves the odds of an option of a lean, by its odds to the power of the lean (<see cref="Lean" />).</summary>
+    public Tilt Tilt((double Darkness, double Intensity) lean) => Probabilities.Tilt.Of(Odds, Lean(lean));
 }

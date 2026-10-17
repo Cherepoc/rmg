@@ -46,7 +46,8 @@ public sealed class DyadicRankItemPatternTest
                 new GenerationContext(1),
                 Riff(1),
                 _ => (_, _) => ++draws,
-                1
+                1,
+                (_, _, kept) => kept
             )
             .GeneratedTimeline;
 
@@ -65,7 +66,7 @@ public sealed class DyadicRankItemPatternTest
             var rhythm = DyadicRankThresholdPattern.Create(new GenerationContext(3), (ulong)seed, _ => 0.6, new DyadicTimelineDescriptor(4, 1, 0, 2, 4, 2), 0.5);
             var draws = 0;
             // every beat's value by its place, a cycle a beat long, and the rhythm's beats, which say where each repeats from
-            var values = DyadicRankItemPattern<int>.Create(new GenerationContext(1), rhythm, _ => (_, _) => ++draws, 1).GeneratedTimeline
+            var values = DyadicRankItemPattern<int>.Create(new GenerationContext(1), rhythm, _ => (_, _) => ++draws, 1, (_, _, kept) => kept).GeneratedTimeline
                 .ToDictionary(x => Math.Round(x.Position, 6), x => x.Value);
             foreach (var beat in rhythm.OutcomeTimeline.Where(x => x.Value.IsRepeated))
             {

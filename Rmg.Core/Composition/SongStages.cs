@@ -436,8 +436,9 @@ internal static class SongStages
                 song.Tracks.Definitions,
                 song.Form.Map,
                 [..song.Sections.Select(x => x.Facets[Facet.Sound])],
-                (section, track) => song.Stream(SongStream.InstrumentsOverTime, section, track),
-                (section, track) => song.Stream(SongStream.InstrumentFamilies, section, track),
+                // a twin as its riff, drawing from the riff's sequences
+                (section, track) => song.Stream(SongStream.InstrumentsOverTime, section, song.DrawsAs(track)),
+                (section, track) => song.Stream(SongStream.InstrumentFamilies, section, song.DrawsAs(track)),
                 song.Genre
             )
         };

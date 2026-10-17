@@ -161,7 +161,8 @@ internal static class LineDoubling
         foreach (var ((source, target, steps, chance, option, isTwin, bars), pair) in Pairs.Select((x, i) => (x, i)))
         {
             // the pair's own steps leaned by a genre's intervals over the songs', so that a genre naming the songs' amounts
-            // plays as they do, but an imitation's octave, which harmonises nothing
+            // plays as they do, but an imitation's octave, which harmonises nothing, and the bass with the riff in unison,
+            // which no interval of a genre's moves
             var intervals = bars == 0 && steps.Any(x => x.Step != 0) ? genre.Lean<int>(GenreChoices.HarmonyInterval, IntervalOf) : null;
             // a genre whose intervals keep none of the pair's never doubles it
             var allowed = intervals is null || steps.Any(x => intervals(x.Step) is not null);
@@ -179,7 +180,7 @@ internal static class LineDoubling
             {
                 var context = streams(pair, index);
                 var isDoubled = context.TestProbability(chance.At(melody, option is null ? null : genre.Chance(GenreChoices.Doubling, option)));
-                // the bass with the riff in unison, which no interval of a genre's moves
+                // the pair's draws made all the same, but a pair a genre's intervals all leave out never doubling
                 if (!allowed)
                     continue;
                 var step = context.Pick(ByConvention.Lean(steps, melody, intervals));
