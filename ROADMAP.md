@@ -20,7 +20,6 @@ is removed once it is built, its leftovers kept under *Open work*.
    with its reason; no new presets until the owner asks (15 October 2026).
 7. **Parked** (P4): kept for their reasons, not planned.
 
-
 ## Listening
 
 What listening is to settle: each a question, its measure, what it decides, and where the page's listening mode asks
