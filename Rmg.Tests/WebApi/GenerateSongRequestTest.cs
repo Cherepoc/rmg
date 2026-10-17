@@ -76,7 +76,7 @@ public sealed class GenerateSongRequestTest
     }
 
     [Test]
-    [Arguments(0, 60.0)]
+    [Arguments(0, 40.0)]
     [Arguments(31, 120.0)]
     [Arguments(61, 240.0)]
     public async Task ATempoStep_IsGivenAsItsTempo(int step, double beatsAMinute)

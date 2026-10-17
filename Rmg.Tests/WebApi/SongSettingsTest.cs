@@ -122,17 +122,38 @@ public sealed class SongSettingsTest
     }
 
     [Test]
-    public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
+    public async Task ATempoStep_RunsFrom40Through120To240BeatsAMinute_EveryStepOfASideFasterByTheSame()
     {
-        await Assert.That(TempoScale.Multiplier(0) * Meter.BaseTempo).IsEqualTo(60).Within(1e-9);
+        await Assert.That(TempoScale.Multiplier(0) * Meter.BaseTempo).IsEqualTo(40).Within(1e-9);
         await Assert.That(TempoScale.Multiplier(StepScale.Middle) * Meter.BaseTempo).IsEqualTo(120).Within(1e-9);
         await Assert.That(TempoScale.Multiplier(TempoScale.Steps - 1) * Meter.BaseTempo).IsEqualTo(240).Within(1e-9);
-        var ratios = Enumerable.Range(1, TempoScale.Steps - 1).Select(x => TempoScale.Multiplier(x) / TempoScale.Multiplier(x - 1)).ToArray();
-        await Assert.That(ratios.Min()).IsGreaterThan(1.02);
-        await Assert.That(ratios.Max()).IsLessThan(1.025);
+        // a like ratio on each side of the middle: about 3.6% below it, 2.3% above
+        double[] Ratios(int from, int to) => [..Enumerable.Range(from, to - from).Select(x => TempoScale.Multiplier(x) / TempoScale.Multiplier(x - 1))];
+        foreach (var side in new[] { Ratios(1, StepScale.Middle + 1), Ratios(StepScale.Middle + 1, TempoScale.Steps) })
+            await Assert.That(side.Max() - side.Min()).IsLessThan(1e-9);
+        await Assert.That(Ratios(1, 2)[0]).IsEqualTo(Math.Pow(3, 1.0 / StepScale.Middle)).Within(1e-9);
         // and every step its own nearest
         foreach (var step in Enumerable.Range(0, TempoScale.Steps))
             await Assert.That(TempoScale.StepOf(TempoScale.Multiplier(step))).IsEqualTo(step);
+    }
+
+    /// <summary>A song a genre draws below 60, Dark jazz's plainest at 40 to 50, reported at its own tempo's step, a step's ratio from it at most, so that giving it plays it as heard.</summary>
+    [Test]
+    public async Task ASlowSong_IsReportedAtItsOwnTempo()
+    {
+        var slow = 0;
+        foreach (var seed in Enumerable.Range(0, 16))
+        {
+            var song = Rmg.Core.Composition.SongGenerator.GenerateSong((ulong)seed, new SongOverrides(Base: 0, Genre: Genres.GenrePresets.Genre("darkJazz")));
+            var tempo = song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo);
+            if (tempo * Meter.BaseTempo >= 60)
+                continue;
+            slow++;
+            var reported = TempoScale.Multiplier(SongReport.Of(song, Rmg.Core.Rendering.Render.RenderSong(song), SongOverrides.None).Tempo.Value);
+            await Assert.That(Math.Abs(Math.Log(reported / tempo))).IsLessThan(Math.Log(3) / StepScale.Middle).Because($"seed {seed}");
+        }
+
+        await Assert.That(slow).IsGreaterThan(0);
     }
 
     [Test]

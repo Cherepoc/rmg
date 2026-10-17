@@ -110,7 +110,7 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
   may be given in or out (`plays`), an instrument (General MIDI 0-127), a volume and a pan; `drumGroups` gives the
   drum groups' volumes, `drumPieces` gives the drum pieces the song
   plays, by name, which make its setup, and `key`, `tempo` and `meter` give those (the tempo by its step from 0 to 61,
-  60 to 240 beats a minute with 120 at 31, and the meter by its place in `GET /api/songs/options`). A genre (`genre`, by
+  40 to 240 beats a minute with 120 at 31, and the meter by its place in `GET /api/songs/options`). A genre (`genre`, by
   the names of `GET /api/genres/choices`) gives a choice's amounts in whole numbers, one alike at every end or three, at
   the plain end, the middle and the wild end. The response carries the seed (`X-Song-Seed`), the songs' version
   (`X-Song-Version`), the key the genre is kept by (`X-Genre-Key`) and everything the song drew or was given, with every
