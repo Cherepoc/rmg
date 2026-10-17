@@ -212,8 +212,7 @@ internal static class LineDoubling
                 if (block)
                     StateTrace.RecordSection(TracePoints.BlockHarmony, targetTrack, span.SectionId, $"{step}", index);
                 // in every pattern the doubled part plays, its own kept where a texture rests the doubled part
-                var patterns = Enumerable.Range(0, (int)Math.Ceiling(span.Duration / span.Meter.PatternDuration - 1e-9))
-                    .Select(k => (Start: span.Start + k * span.Meter.PatternDuration, End: Math.Min(span.End, span.Start + (k + 1) * span.Meter.PatternDuration)))
+                var patterns = span.Patterns.Select(p => (p.Start, p.End))
                     .Where(p => events[sourceTrack].EventTimeline.Any(x => x.IsWithin(p.Start, p.End)))
                     .ToArray();
                 // but from the doubling part's walk into the next section on, which it plays as its own, as LineFills placed it

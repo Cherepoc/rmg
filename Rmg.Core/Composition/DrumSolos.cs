@@ -355,9 +355,8 @@ internal static class DrumSolos
                     var (footTrack, footSound) = feetPattern == SoloFeet.HatFoot
                         ? (hat, DrumDefinitions.HiHat.GetArticulationIndex(DrumSounds.PedalHiHat))
                         : (kick!.Track, kick.Articulation);
-                    var bar = whole.Meter.BarDuration;
-                    for (var at = whole.Start + Math.Floor((start - whole.Start) / bar + 1e-9) * bar; at < end - 1e-9; at += bar)
-                    foreach (var onset in OnsetsOf(feetPattern).Select(x => at + x * 0.25).Where(x => x >= start - 1e-9 && x < end - 1e-9))
+                    foreach (var bar in whole.Bars.Where(x => x.End > start + 1e-9 && x.Start < end - 1e-9))
+                    foreach (var onset in OnsetsOf(feetPattern).Select(x => bar.Start + x * 0.25).Where(x => x >= start - 1e-9 && x < end - 1e-9))
                         edits.Hit(footTrack, onset, TimeLoudness, footSound, whole.SectionId, HitKind.DrumSolo);
                 }
 

@@ -107,7 +107,7 @@ internal static class DrumMarks
             // the section's places, each at its strongest: its start, its phrases' and its chords' changes
             var phrase = span.Meter.PhraseDuration;
             var places = new SortedDictionary<double, int> { [span.Start] = 0 };
-            for (var at = span.Start + phrase; at < span.End - 1e-9; at += phrase)
+            foreach (var (_, at, _) in span.Phrases.Skip(1))
                 places.TryAdd(at, 1);
             foreach (var at in changes.Where(x => x > span.Start + 1e-9 && x < span.End - 1e-9))
                 places.TryAdd(at, 2);

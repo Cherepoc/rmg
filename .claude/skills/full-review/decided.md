@@ -93,3 +93,9 @@ rejected while fixing: the place, what was decided, why.
   refused, the presets' 100s taken out (#61, #339).
 - The heavy presets' half and double time as their records tuned them (Heavy metal, Thrash, Symphonic, Black metal):
   the kick's steady figure plays through them; only the descriptions set right (#367, #369, #398).
+- Walks of stretches that are no map unit kept by hand: a polymeter's frames (whole sections or several patterns),
+  stop time's phrases, the fill lines of `FillGenerator.GetSectionLines` (fill sections, which have no spans); and the
+  map-less place of `TimelineEdits` and `Song`, which the fill tests' songs without a map need (#48, #106, #164,
+  #170, #171).
+- Tests counting a section's bars, phrases or patterns from its start in its own meter, which the map answers alike,
+  left as they are where they hold for a short last bar too (#221, #244, #247, #264, #273, #278, #288, #303).

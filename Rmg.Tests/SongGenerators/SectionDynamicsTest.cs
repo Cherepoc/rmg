@@ -127,12 +127,7 @@ public sealed class SectionDynamicsTest
     }
 
     /// <summary>The bars of a section where it plays, but the last of each phrase.</summary>
-    private static IEnumerable<double> Bars(SectionSpan span)
-    {
-        for (var bar = 0; bar * span.Meter.BarDuration < span.Duration; bar++)
-            if (bar % span.Meter.PhraseBars != span.Meter.PhraseBars - 1)
-                yield return span.Start + bar * span.Meter.BarDuration;
-    }
+    private static IEnumerable<double> Bars(SectionSpan span) => span.Bars.Where(x => x.Index % span.Meter.PhraseBars != span.Meter.PhraseBars - 1).Select(x => x.Start);
 
     private static double[] MeasureBar(Song song, IReadOnlyDictionary<int, Core.Events.EventTimeline<RealizedNote>> notes, double start, Meter meter)
     {

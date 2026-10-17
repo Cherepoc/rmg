@@ -23,11 +23,10 @@ public sealed class CallAndResponseTest
             var melody = notes[song.Track(TrackRole.Melody)];
             var answerers = new[] { TrackRole.Riff, TrackRole.CounterMelody }.Select(x => notes.GetValueOrDefault(song.Track(x))).ToArray();
             foreach (var span in song.Map.Sections.Where(x => calling.Contains(x.SectionId) && !song.IsSolo(x)))
-            for (var start = span.Start; start < span.End - 1e-9; start += span.Meter.PhraseDuration)
+            foreach (var (_, start, end) in span.Phrases)
             {
                 phrases++;
                 var half = start + span.Meter.PhraseBars / 2 * span.Meter.BarDuration;
-                var end = Math.Min(start + span.Meter.PhraseDuration, span.End);
                 // a phrase cut, its melody singing in the second half in the song never calling and not in this one, but its
                 // walk into the next section
                 bool Late(Rmg.Core.Events.EventTimeline<RealizedNote> line) =>

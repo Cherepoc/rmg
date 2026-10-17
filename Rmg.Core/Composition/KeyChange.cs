@@ -259,8 +259,7 @@ public sealed record KeyChange(double Position, int Semitones)
             // the section the change ends, and its last pattern, counted from its start in its own meter, a short last bar's
             // cut among it
             var section = map.Sections.LastOrDefault(x => x.Start < change - 1e-9);
-            var patternStart = section is null ? Math.Max(0, change - map.Meter.PatternDuration)
-                : section.Start + Math.Floor((change - section.Start - 1e-9) / section.Meter.PatternDuration) * section.Meter.PatternDuration;
+            var patternStart = section is null ? Math.Max(0, change - map.Meter.PatternDuration) : section.Patterns.Last(x => x.Start < change - 1e-9).Start;
             // the chords of the pattern before, after any change before it
             var since = Math.Max(i > 0 ? changes[i - 1].Position : 0, patternStart);
             var chords = chordStarts.Where(x => x > since + 1e-9 && x < change - 1e-9).TakeLast(length).ToArray();

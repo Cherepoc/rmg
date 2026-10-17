@@ -43,9 +43,9 @@ internal static class SectionPedals
         bool Changes(double from, double to) => common.GetStateTimeline(StateKinds.ChordChange).Any(x => x.Position > from + 1e-9 && x.Position < to - 1e-9 && Root(x.Position) != Root(from));
         // the sections and an intro that plays as one, not the ending's final chord
         var sections = song.Form.Map.Plays.Where(x => !x.IsEnding).Select(x => x.Span).Where(x => pedalling[x.SectionId] is not null)
-            .Select(x => (Phrase: x.Meter.PhraseDuration, Place: pedalling[x.SectionId]!.Value, Span: x))
-            .Select(x => (Start: x.Place == PedalPlace.Dominant ? x.Span.Start + Math.Floor((x.Span.Duration - 1e-9) / x.Phrase) * x.Phrase : x.Span.Start,
-                End: x.Place == PedalPlace.Home ? Math.Min(x.Span.End, x.Span.Start + x.Phrase) : x.Span.End, Home: Home(x.Span.Start), Root: x.Place == PedalPlace.Dominant ? 4 : 0))
+            .Select(x => (Place: pedalling[x.SectionId]!.Value, Span: x))
+            .Select(x => (Start: x.Place == PedalPlace.Dominant ? x.Span.Phrases.Last().Start : x.Span.Start,
+                End: x.Place == PedalPlace.Home ? x.Span.Phrases.First().End : x.Span.End, Home: Home(x.Span.Start), Root: x.Place == PedalPlace.Dominant ? 4 : 0))
             .Where(x => Changes(x.Start, x.End))
             // in the key where it starts, a key change within the section's
             .Select(x => (x.Start, x.End, x.Start, x.Home + x.Root));

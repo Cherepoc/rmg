@@ -95,17 +95,14 @@ internal static class Mutations
             var context = song.AppearanceStream(SongStream.Mutations, index);
             var chance = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling).Chance(Chance.At(groove, song.Genre.Chance(GenreChoices.Mutation, "bars")), 1);
             var anchored = context.TestProbability(KeepsAnchors.At(groove));
-            var barLength = span.Meter.BarDuration;
-            var bars = span.BarCount;
             var edits = new List<Mutation>();
             var made = 0;
-            for (var bar = 1; bar < bars; bar++)
+            foreach (var (bar, start, barEnd) in span.Bars.Skip(1))
             {
                 if (bar % span.Meter.PhraseBars == 0 && context.TestProbability(SnapBack.At(groove)))
                     edits.Clear();
-                var start = span.Start + bar * barLength;
                 // the bar as long as it is, a short last bar's (ShortBars)
-                var length = Math.Min(barLength, span.End - start);
+                var length = barEnd - start;
                 var count = context.TestProbability(chance) ? context.TestProbability(SecondEdit) ? 2 : 1 : 0;
                 // the edits kept from the bars before laid first, and every new edit drawn on what they leave, those that find
                 // something to edit made

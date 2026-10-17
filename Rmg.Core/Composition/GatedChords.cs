@@ -51,7 +51,7 @@ internal static class GatedChords
             // the next beat of the bar at or after a position
             double Beat(double position)
             {
-                var start = section.Start + Math.Floor((position - section.Start + Epsilon) / bar) * bar;
+                var start = section.Bar(section.BarOf(position)).Start;
                 return section.Meter.Pulses.Select(x => start + x).Append(start + bar).First(x => x >= position - Epsilon);
             }
 

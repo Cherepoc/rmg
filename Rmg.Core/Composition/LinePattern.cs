@@ -256,7 +256,7 @@ internal sealed class LinePattern
                 continue;
             var position = notes[i].Note.Position;
             var pattern = span.Start + span.PatternOf(position) * span.Meter.PatternDuration;
-            var bar = (int)Math.Floor((position - pattern) / span.Meter.BarDuration + 1e-9);
+            var bar = map.PlaceOf(position).PatternBar;
             if (!firsts.TryGetValue((pattern, letter), out var first))
             {
                 firsts[(pattern, letter)] = bar;

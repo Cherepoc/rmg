@@ -90,11 +90,9 @@ public sealed class DrumPresenceTest
 
                 // every phrase's bars of its letter, but each phrase's last, where a fill may play it
                 var letters = schemes[entry.Section];
-                var bars = Enumerable.Range(0, span.BarCount).Where(x => letters[x % letters.Length] == letter && x % letters.Length < letters.Length - 1);
-                foreach (var bar in bars)
+                foreach (var (_, start, end) in span.Bars.Where(x => letters[x.Index % letters.Length] == letter && x.Index % letters.Length < letters.Length - 1))
                 {
-                    var start = span.Start + bar * span.Meter.BarDuration;
-                    await Assert.That(notes.Count(x => x.Position >= start && x.Position < start + span.Meter.BarDuration)).IsEqualTo(0);
+                    await Assert.That(notes.Count(x => x.Position >= start && x.Position < end)).IsEqualTo(0);
                     checkedBars++;
                 }
             }

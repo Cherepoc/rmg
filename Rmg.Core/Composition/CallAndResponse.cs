@@ -41,9 +41,7 @@ internal static class CallAndResponse
         // melody cut there would leave a gap
         var holds = draft.Holds(song);
         var halves = song.Form.Map.Sections.Where(x => calling[x.SectionId] && !holds.Meets(Hold.Solo, x.Start, x.End))
-            .SelectMany(span => Enumerable.Range(0, (int)Math.Ceiling(span.Duration / span.Meter.PhraseDuration - 1e-9))
-                .Select(p => span.Start + p * span.Meter.PhraseDuration)
-                .Select(start => (Start: start, Half: start + span.Meter.PhraseBars / 2 * span.Meter.BarDuration, End: Math.Min(start + span.Meter.PhraseDuration, span.End))))
+            .SelectMany(span => span.Phrases.Select(p => (p.Start, Half: p.Start + span.Meter.PhraseBars / 2 * span.Meter.BarDuration, p.End)))
             .Select(x => (x.Start, x.Half, x.End, Answerer: answerers.Where(track => Plays(track, x.Half, x.End)).Select(track => (int?)track).FirstOrDefault()))
             .Where(x => x.Answerer is not null && Plays(melodyTrack, x.Start, x.Half))
             .ToArray();

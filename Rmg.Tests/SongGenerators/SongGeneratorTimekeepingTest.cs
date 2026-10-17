@@ -26,10 +26,13 @@ public sealed class SongGeneratorTimekeepingTest
             var ownFeels = corpusSong.Trace.Where(x => x.Point == TracePoints.Feel && x.Track == SectionGenerator.SectionTrace).Select(x => x.Section).ToHashSet();
 
             foreach (var span in corpusSong.Map.Sections.Where(x => x.Meter.Groups.Length == 2 && x.Meter.Groups[0] == x.Meter.Groups[1] && !ownFeels.Contains(x.SectionId)))
-            foreach (var bar in track.EventTimeline.Where(x => x.Position >= span.Start && x.Position < span.End).GroupBy(x => (int)((x.Position - span.Start) / span.Meter.BarDuration)))
+            // its whole bars, by the map, a short last one's halves not the full bar's
+            foreach (var (_, start, end) in span.Bars.Where(x => x.End - x.Start >= span.Meter.BarDuration - 1e-9))
             {
-                var (length, half) = (span.Meter.BarDuration, span.Meter.BarDuration / 2);
-                var positions = bar.Select(x => Math.Round((x.Position - span.Start) % length, 3)).ToArray();
+                var half = span.Meter.BarDuration / 2;
+                var positions = track.EventTimeline.Where(x => x.Position >= start && x.Position < end).Select(x => Math.Round(x.Position - start, 3)).ToArray();
+                if (positions.Length == 0)
+                    continue;
                 var first = positions.Where(x => x < half).ToArray();
                 var second = positions.Where(x => x >= half).Select(x => Math.Round(x - half, 3)).ToArray();
                 bars++;
