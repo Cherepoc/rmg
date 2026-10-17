@@ -117,7 +117,7 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
 /// <param name="Tempo">The tempo given, as a multiple of <see cref="Composition.Meter.BaseTempo" />, which need not be one the song may draw.</param>
 /// <param name="Key">The key given, as semitones above C, from 0 to 11.</param>
 /// <param name="Base">The song's unconventionality's base, from 0 to 1, which its facets are drawn around.</param>
-/// <param name="Facets">Facets set outright, from 0 to 1, over those drawn.</param>
+/// <param name="Facets">Facets set outright, from 0 to 1, over those drawn: the song's, its sections straying a little around each as around a drawn one, but at an end.</param>
 /// <param name="Parts">The parts given in the song (true) or out of it (false) (<see cref="SongParts" />).</param>
 /// <param name="DrumSetup">The drums the song plays: the kit, the kit and percussion, or percussion.</param>
 /// <param name="DrumPieces">

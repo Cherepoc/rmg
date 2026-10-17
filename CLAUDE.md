@@ -61,9 +61,10 @@
   mechanism on and off rather than one genre's songs with another's, as a few songs otherwise decide the share.
 - **Drawn or given.** A value the song draws, such as its unconventionality, follows the generator's taste, which may
   keep songs away from the ends; a value supplied in its place (`SongOverrides`) is used as given, a facet set outright
-  as it is and a base as the centre its facets and sections stray around, so that a supplied 0 or 1 is the plainest or
-  the wildest song. Every such value draws from a stream of its own, so that supplying one leaves the rest of the song
-  as the seed made it.
+  as the song's, its sections straying a little around it as around a drawn one, and a base as the centre its facets
+  and sections stray around, so that a supplied 0 or 1, which nothing strays from, is the plainest or the wildest
+  song. Every such value draws from a stream of its own, so that supplying one leaves the rest of the song as the seed
+  made it.
 - **No silent defaults** in wiring: a missing argument or entry fails.
 - **The page is tested in a browser** (`Rmg.Tests.Page`): a change to `Rmg.WebApi/Client/` runs those tests, and a new
   behaviour of the page gets one there, rather than being tried by hand in Chrome, which is for looking at the page.
