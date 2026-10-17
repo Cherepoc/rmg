@@ -127,12 +127,12 @@ internal static class Expression
         CompositionStateKinds.FilterDepth
     ];
 
-    /// <summary>A note in the steady sound of another's state, a tremolo's on a held note alone, as everywhere.</summary>
-    private static StateMap Steady(RealizedNote note, StateMap source)
-    {
-        var state = note.State.MergeWith(source.Subset(SteadyKinds));
-        return note.Duration >= 1 - 1e-9 ? state : state.With(CompositionStateKinds.Tremolo, 0);
-    }
+    /// <summary>
+    ///     A note in the steady sound of another's state, a tremolo's on a held note alone, as everywhere, at the part's own
+    ///     depth, whatever the length of the note it copies.
+    /// </summary>
+    private static StateMap Steady(RealizedNote note, StateMap source, int tremolo) =>
+        note.State.MergeWith(source.Subset(SteadyKinds)).With(CompositionStateKinds.Tremolo, note.Duration >= 1 - 1e-9 ? tremolo : 0);
 
     /// <summary>Whether a strong effect is played only by a part it suits: a filter's, a synth's, and a gate's, held chords'.</summary>
     private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect == StrongEffect.Gate;
@@ -887,14 +887,14 @@ internal static class Expression
                 && Enumerable.Range(0, timeline.Count).FirstOrDefault(i => states[i] is not null && introSource.IsWithin(timeline[i].Position), firstPlayed) is var sourced)
                 for (var i = 0; i < timeline.Count && timeline[i].Position < map.Origin - 1e-9; i++)
                     if (states[i] is null)
-                        states[i] = Steady(timeline[i].Value, states[sourced]!);
+                        states[i] = Steady(timeline[i].Value, states[sourced]!, tremolo);
 
             // the ending's notes, the final chord, in the sound the last section left the part in: its sends, its tone, its
             // tape and its steady effects, none of a note's own gestures
             if (Array.FindLastIndex(states, x => x is not null) is var lastPlayed and >= 0 && timeline[lastPlayed].Position >= map.Sections[^1].Start - 1e-9)
                 for (var i = lastPlayed + 1; i < timeline.Count; i++)
                     if (states[i] is null && timeline[i].Position >= map.Ending.Start - 1e-9)
-                        states[i] = Steady(timeline[i].Value, states[lastPlayed]!);
+                        states[i] = Steady(timeline[i].Value, states[lastPlayed]!, tremolo);
 
             result[track] = EventTimeline.Create(
                 timeline.Duration,

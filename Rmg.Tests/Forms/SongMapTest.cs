@@ -84,4 +84,41 @@ public sealed class SongMapTest
             await Assert.That(map.Ending.Duration > 0).IsEqualTo(FormLayers.HasFinalChord(map.Ending.Kind));
         }
     }
+
+    /// <summary>
+    ///     What plays as a section, over the corpus's songs: an intro of entries or a hook first, as the section it is made
+    ///     of, from the song's start to the first section; every section as itself; the ending last, as the last section,
+    ///     over its own bars; and a position in any of them playing as that one.
+    /// </summary>
+    [Test]
+    public async Task ThePlays_AreTheSections_AnIntroAndTheEnding_AsTheirSources()
+    {
+        var (intros, endings) = (0, 0);
+        foreach (var song in TestCorpus.Range(64))
+        {
+            var map = song.Map;
+            var plays = map.Plays.ToArray();
+            var playsIntro = map.Origin > 1e-9 && (map.Intro.Kind == IntroKind.Hook || map.Window is not null);
+            await Assert.That(plays.Length).IsEqualTo(map.Sections.Length + (playsIntro ? 1 : 0) + (map.Ending.Duration > 1e-9 ? 1 : 0)).Because($"seed {song.Seed}");
+            if (playsIntro)
+            {
+                intros++;
+                await Assert.That(plays[0].Span.SectionId).IsEqualTo(map.Sections[plays[0].Index].SectionId).Because($"seed {song.Seed}");
+                await Assert.That((plays[0].Span.Start, plays[0].Span.End)).IsEqualTo((0.0, map.Origin)).Because($"seed {song.Seed}");
+            }
+
+            if (map.Ending.Duration > 1e-9)
+            {
+                endings++;
+                await Assert.That(plays[^1] is { IsEnding: true } ending && ending.Index == map.Sections.Length - 1 && Math.Abs(ending.Span.Start - map.Ending.Start) < 1e-9)
+                    .IsTrue().Because($"seed {song.Seed}");
+            }
+
+            foreach (var play in plays)
+                await Assert.That(map.PlayingAt(play.Span.Start + 1e-6)?.Span.Start).IsEqualTo(play.Span.Start).Because($"seed {song.Seed} at {play.Span.Start}");
+        }
+
+        await Assert.That(intros).IsGreaterThan(0);
+        await Assert.That(endings).IsGreaterThan(0);
+    }
 }

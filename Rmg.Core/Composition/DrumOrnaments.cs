@@ -57,9 +57,9 @@ internal static class DrumOrnaments
             result[track] = EventTimeline.Create(notes[track].Duration, notes[track].Select(note =>
             {
                 var position = note.Position;
-                // the snare's head in a section, a count-in's clicks aside, out of stop time and of a drum solo, whose strokes are
-                // the drummer's own
-                if (note.Value.Pitches is not [var code] || code != head || map.SectionAt(position) is not { } section || holds.At(KeepsOutOf, position, track))
+                // the snare's head where the song plays as a section, an intro of entries' window and the ending among them, out
+                // of stop time and of a drum solo, whose strokes are the drummer's own
+                if (note.Value.Pitches is not [var code] || code != head || map.PlayingAt(position) is not { Span: var section } || holds.At(KeepsOutOf, position, track))
                     return note;
                 // in a fill on an 8th, its accents, and elsewhere on its bar's backbeat
                 var inFill = holds.At(Hold.Fill, position);

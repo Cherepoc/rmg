@@ -66,6 +66,40 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     }
 
     /// <summary>
+    ///     Every stretch the song plays as a section, each with the place of the section it plays as and that section's
+    ///     span moved there, whose bars count from its start: an intro played as a section (a hook's chorus, an intro of
+    ///     entries' window, the first section's first bars), every section, and the ending, the last section's bars counted
+    ///     on, marked as such so that a stage that leaves a final chord alone may keep out of it. A stage of the sections
+    ///     walks these, so that what is made from a section is treated as its source is.
+    /// </summary>
+    public IEnumerable<(int Index, SectionSpan Span, bool IsEnding)> Plays
+    {
+        get
+        {
+            if (Sections.IsEmpty)
+                yield break;
+            if (Origin > 1e-9 && (Intro.Kind == IntroKind.Hook || Window is not null))
+                yield return (Intro.Kind == IntroKind.Hook ? Intro.Source : 0, Sections[Intro.Kind == IntroKind.Hook ? Intro.Source : 0] with { Start = 0, Duration = Origin, Cut = 0 }, false);
+            for (var i = 0; i < Sections.Length; i++)
+                yield return (i, Sections[i], false);
+            if (Ending.Duration > 1e-9)
+                yield return (Sections.Length - 1, Sections[^1] with { Start = Ending.Start, Duration = Ending.Duration, Cut = 0 }, true);
+        }
+    }
+
+    /// <summary>The stretch a position plays in as a section (<see cref="Plays" />); none in an intro of its own, a count-in's or a cold one's.</summary>
+    public (int Index, SectionSpan Span, bool IsEnding)? PlayingAt(double position)
+    {
+        if (Sections.IsEmpty)
+            return null;
+        if (position < Origin - 1e-9)
+            return Plays.First() is var intro && intro.Span.IsWithin(position) && (Intro.Kind == IntroKind.Hook || Window is not null) ? intro : null;
+        if (SectionAt(position) is { } span)
+            return (IndexAt(position + 1e-9), span, false);
+        return Ending.Duration > 1e-9 && position < Ending.Start + Ending.Duration - 1e-9 ? Plays.Last() : null;
+    }
+
+    /// <summary>
     ///     A place's key, by the section it is in or after, the intro's for none, and how far into it, in places a beat:
     ///     a stream keyed by it stays as it was where something before the section moves, such as an intro's length or a
     ///     short bar.

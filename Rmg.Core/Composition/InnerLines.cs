@@ -44,15 +44,16 @@ internal static class InnerLines
             && notes.All(note => note.GetStateValue(StateKinds.ChordNotePitchOffsets) is { IsEmpty: false } heights
                                  && heights.Any(IsRoot) && heights.All(x => IsRoot(x) || x * Realizer.OctaveNoteCount < Highest));
         static bool IsRoot(double height) => Math.Abs(height - Math.Round(height)) < 1e-9;
-        // every chord held long enough in a section that takes the line, but in a solo, and in a hook intro, the chorus's
-        // first phrase, as the chorus takes it: where it starts and ends
+        // every chord held long enough in a section that takes the line, and in an intro that plays as one, a hook's or an
+        // intro of entries' window, as its source takes it, but in a solo, its source's: where it starts and ends, its bars
+        // counted from its own start
         var map = song.Form.Map;
         var holds = draft.Holds(song);
-        List<(double Start, double End, Meter Meter)> spans = [..map.Sections.Where(x => lining[x.SectionId] && !holds.Meets(Hold.Solo, x.Start, x.End)).Select(x => (x.Start, x.End, x.Meter))];
-        // a chord's bars counted from its section's start, a hook intro's from the song's
-        if (map.Intro.Kind == IntroKind.Hook && song.FirstChorus is var (chorus, chorusIndex)
-            && lining[chorus.SectionId] && !song.Solos.ContainsKey(chorusIndex))
-            spans.Insert(0, (0, map.Origin, chorus.Meter));
+        List<(double Start, double End, Meter Meter)> spans =
+        [
+            ..map.Plays.Where(x => !x.IsEnding && lining[x.Span.SectionId] && !holds.Meets(Hold.Solo, map.Sections[x.Index].Start, map.Sections[x.Index].End))
+                .Select(x => (x.Span.Start, x.Span.End, x.Span.Meter))
+        ];
         var held = spans
             .SelectMany(span => changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9)
                 .Select(x => (Start: x, End: Math.Min(changes.FirstOrDefault(c => c > x + 1e-9, span.End), span.End), span.Meter, Origin: span.Start))

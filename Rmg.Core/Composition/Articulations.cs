@@ -185,7 +185,7 @@ internal static class Articulations
         // and a part's broken chords let ring where it lets them, its own sequence drawn for every part that holds chords,
         // and in a calm section always (SectionForm)
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
-        bool Calm(double position) => song.Form.Map.SectionAt(position) is { } span && song.SectionOf(span.SectionId).Form.Kind == SectionFormKind.Calm;
+        bool Calm(double position) => song.Form.Map.PlayingAt(position) is { Span: var span } && song.SectionOf(span.SectionId).Form.Kind == SectionFormKind.Calm;
         // but never into the silence of stop time or a stop the form makes, which a ringing note would fill
         var holds = draft.Holds(song);
         foreach (var (track, timeline) in result.ToArray())

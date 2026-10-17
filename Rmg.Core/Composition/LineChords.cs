@@ -38,7 +38,8 @@ internal static class LineChords
 
         // the places a line stacks on, a section's start or every bar's downbeat, and how many notes it stacks there
         var landings = new Dictionary<double, int>();
-        foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
+        // the sections and an intro that plays as one, as its source, not the ending's final chord
+        foreach (var (index, span, _) in map.Plays.Where(x => !x.IsEnding))
         {
             var context = streams(index);
             var stacks = context.TestProbability(way.Chance);

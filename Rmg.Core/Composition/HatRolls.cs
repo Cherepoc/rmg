@@ -54,7 +54,8 @@ internal static class HatRolls
             return draft;
 
         var rolls = new List<(double From, double To, int Rate)>();
-        foreach (var (span, index) in song.Form.Map.Sections.Select((x, i) => (x, i)))
+        // the sections and an intro of entries' window, which plays as the first, its own sequence the first's
+        foreach (var (index, span, _) in song.Form.Map.Plays.Where(x => !x.IsEnding))
         {
             var context = song.AppearanceStream(SongStream.HatRolls, index);
             var groove = song.SectionOf(span.SectionId).Facets[Facet.Groove];

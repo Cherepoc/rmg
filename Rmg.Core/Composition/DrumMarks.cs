@@ -94,6 +94,8 @@ internal static class DrumMarks
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         // where the drums play in a section, which they mark only there
         bool Plays(SectionSpan span) => drums.Any(x => notes[x].Any(n => n.IsWithin(span.Start, span.End)));
+        // where the drums play at a place, the ending's as its own
+        bool PlaysAt(double at) => map.PlayingAt(at) is { } play && Plays(play.Span);
         var often = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.Marks, "often"));
         var swells = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.Marks, "swells"));
         var marks = marking.ToDictionary(x => x, _ => new List<TimelineItem<RealizedNote>>());
@@ -109,8 +111,16 @@ internal static class DrumMarks
                 places.TryAdd(at, 1);
             foreach (var at in changes.Where(x => x > span.Start + 1e-9 && x < span.End - 1e-9))
                 places.TryAdd(at, 2);
+            // and the ending, which plays as the last section, its phrases and its chords' changes too
             if (index == map.Sections.Length - 1 && map.Ending.Duration > 0)
-                places.TryAdd(map.Ending.Start, 0);
+            {
+                var ending = map.Plays.Last().Span;
+                places.TryAdd(ending.Start, 0);
+                for (var at = ending.Start + phrase; at < ending.End - 1e-9; at += phrase)
+                    places.TryAdd(at, 1);
+                foreach (var at in changes.Where(x => x > ending.Start + 1e-9 && x < ending.End - 1e-9))
+                    places.TryAdd(at, 2);
+            }
 
             // a section's start and the ending swelling, from a sequence of the section's own, so that the strikes' draws stay
             var swelling = song.AppearanceStream(SongStream.DrumMarks, index);
@@ -124,12 +134,13 @@ internal static class DrumMarks
                 var (chance, loudness) = Places[strength];
                 var (hits, drum) = (striking.TestProbability(often.Chance(energy.Chance(chance, 1), 1)), marking[striking.GenerateInt(0, marking.Length)]);
                 var (swell, swellRate) = (swelling.TestProbability(swells.Chance(SwellChance, 1)), swelling.Pick(RollRates));
-                if (hits && plays && strength == 0 && swell && at >= SwellBeats)
+                var here = at < span.End - 1e-9 ? plays : PlaysAt(at);
+                if (hits && here && strength == 0 && swell && at >= SwellBeats)
                 {
                     marks[drum].AddRange(Roll(typical[drum], at, SwellBeats, SwellBeats, swellRate));
                     swelled = Math.Abs(at - span.Start) < 1e-9 ? drum : swelled;
                 }
-                else if (hits && plays)
+                else if (hits && here)
                     marks[drum].Add(typical[drum].WithVelocity(Render.ScaleLoudness(typical[drum].Velocity, loudness)).ToTimelineItem(at));
             }
 

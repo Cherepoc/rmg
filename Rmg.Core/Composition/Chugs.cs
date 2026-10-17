@@ -22,8 +22,8 @@ internal static class Chugs
         if (!draft.Timeline.TrackTimelineMap.TryGetValue(riff, out var track) || !song.Sections.Any(x => x.Chugs))
             return draft;
 
-        // the sections, and an intro's window before the first, as the first
-        var spans = song.Form.Map.PlayedSections.Select(span => (span, song.Sections[span == song.Form.Map.Window ? 0 : song.Form.Map.Sections.IndexOf(span)])).Where(x => x.Item2.Chugs).ToArray();
+        // the sections, and what plays as one, an intro's window or a hook as its source and the ending as the last
+        var spans = song.Form.Map.Plays.Select(x => (span: x.Span, song.Sections[x.Index])).Where(x => x.Item2.Chugs).ToArray();
         var notes = track.EventTimeline;
         // how many notes a beat the riff plays in each span, over the bars it plays in, a texture, a late entry or a call
         // and response resting it in the others
