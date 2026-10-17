@@ -298,6 +298,10 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   offsets ranks the seven modes but makes Hungarian and melodic minor as bright as Mixolydian and harmonic minor as
   dark as Dorian, so a dark mood and a loud section's brighter scale misjudge them; its third first, minor against
   major, the sum breaking ties, measured on `MoodReportTest.Ends` before and after.
+- **The swing's clamp at a section's own tempo** (#64): the pair's second note kept to 0.1 s at the song's tempo, so a
+  section a fifth to a half faster (`SectionTempo`, 4% of sections at the middle) may play it near 0.07 s; the swing
+  is song-wide state, and a clamp per section a swing of the section's own, put off until a fast swung section is
+  heard rushed.
 
 ### Older rule failures
 

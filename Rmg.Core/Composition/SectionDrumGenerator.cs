@@ -85,7 +85,7 @@ internal sealed class SectionDrumGenerator
                 DrumGroups.GetTrackNumber(x.Value),
                 // up to the rank of the role the lead leads in the section, not its main one's
                 DrumRoles.DoublingRanks[kit.Leads.First(l => l.Value == x.Value).Key],
-                _trackStream(sectionId, SectionStream.DrumBindings, DrumGroups.GetTrackNumber(x.Key)).Pick(ByConvention.Weigh(x.Key.Bindings.Select(b => (b.Value, RhythmicUnconventionality.WeightEnds(b.Weight, b.Value == DrumBinding.Figure ? 1 : 0))), rhythm.Value))
+                _trackStream(sectionId, SectionStream.DrumBindings, DrumGroups.GetTrackNumber(x.Key)).Pick(ByConvention.Weigh(x.Key.Bindings, rhythm.Value))
             )
         );
         StateTrace.RecordSection(TracePoints.Doubles, SectionGenerator.SectionTrace, sectionId, string.Join(", ", kit.Doubles.Select(x => $"{x.Key.Name} on {x.Value.Name}")), doubles);
@@ -97,7 +97,7 @@ internal sealed class SectionDrumGenerator
             var track = DrumGroups.GetTrackNumber(drum);
             if (doubles.TryGetValue(track, out var doubling))
                 feelLeads[track] = doubling.Lead;
-            else if (kit.Leads.GetValueOrDefault(drum.MainRole) is { } lead && _trackStream(sectionId, SectionStream.DrumFeels, track).TestProbability(RhythmicUnconventionality.Ends(DrumKitGenerator.FeelChance, -1).At(rhythm.Value)))
+            else if (kit.Leads.GetValueOrDefault(drum.MainRole) is { } lead && _trackStream(sectionId, SectionStream.DrumFeels, track).TestProbability(DrumKitGenerator.OnTheLeadsFeel.At(rhythm.Value)))
                 feelLeads[track] = DrumGroups.GetTrackNumber(lead);
         }
 

@@ -12,6 +12,22 @@ public sealed class PolymeterTest
         TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.Always(GenreChoices.Polymeter, "sections"))));
 
     [Test]
+    public async Task AGenreNamingOnlyCellsItsBarDivides_PlaysTheSongsCells()
+    {
+        // 3/4's twelve 16ths, which a cell of three or six divides
+        var choices = ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+            .Add(GenreChoices.Polymeter.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("sections", new(1, 1, 1)))
+            .Add(GenreChoices.PolymeterCell.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty
+                .Add(Polymeter.NameOf(3), new(1, 1, 1)).Add(Polymeter.NameOf(6), new(1, 1, 1)))
+            .Add(GenreChoices.Meter.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("3/4", new(1, 1, 1)));
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: new Genre(choices))));
+        var plans = songs.SelectMany(song => song.Map.Sections.Where(x => song.PolymeterPlans.ContainsKey(x.SectionId)).Select(x => (song.PolymeterPlans[x.SectionId], Bar: x.Meter.Groups.Sum()))).ToArray();
+        foreach (var (plan, bar) in plans)
+            await Assert.That(bar % plan.Sixteenths).IsNotEqualTo(0);
+        await Assert.That(plans.Length).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task APolymetricPart_PlaysItsCycleCellByCellAcrossTheBars_FromEveryFramesStart_EachCellItsFirstsMotifCut()
     {
         var (checkedSections, composite, frames) = (0, 0, 0);

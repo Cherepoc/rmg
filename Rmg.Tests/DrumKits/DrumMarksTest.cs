@@ -71,9 +71,10 @@ public sealed class DrumMarksTest
         await Assert.That(Heard(notes.First())).IsEqualTo(Math.Max(Heard(peak) * DrumMarks.RollFrom, 0.2)).Within(1e-3);
         await Assert.That(notes.All(x => Math.Abs(x.Position - 8) <= DrumMarks.SwellBeats + 1e-9)).IsTrue();
         var (rise, fall) = (notes.TakeWhile(x => x.Position <= peak.Position).ToArray(), notes.SkipWhile(x => x.Position < peak.Position).ToArray());
-        // louder and closer up to the peak, softer and further apart after it
-        await Assert.That(rise.Zip(rise.Skip(1)).All(x => x.Second.Value.Velocity > x.First.Value.Velocity)).IsTrue();
-        await Assert.That(fall.Zip(fall.Skip(1)).All(x => x.Second.Value.Velocity < x.First.Value.Velocity)).IsTrue();
+        // louder and closer up to the peak, softer and further apart after it, but where the scale's softest holds two alike
+        bool Softest(TimelineItem<RealizedNote> x) => Heard(x) <= 0.2 + 1e-3;
+        await Assert.That(rise.Zip(rise.Skip(1)).All(x => x.Second.Value.Velocity > x.First.Value.Velocity || Softest(x.First))).IsTrue();
+        await Assert.That(fall.Zip(fall.Skip(1)).All(x => x.Second.Value.Velocity < x.First.Value.Velocity || Softest(x.Second))).IsTrue();
         var gaps = notes.Zip(notes.Skip(1)).Select(x => x.Second.Position - x.First.Position).ToArray();
         await Assert.That(gaps[0]).IsGreaterThan(gaps[rise.Length - 1]);
         await Assert.That(gaps[^1]).IsGreaterThan(gaps[rise.Length - 1]);

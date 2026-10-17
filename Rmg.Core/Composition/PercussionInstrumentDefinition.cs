@@ -19,7 +19,7 @@ public sealed class PercussionInstrumentDefinition
         ImmutableArray<Weighted<DrumRole>> roles = default,
         double doubling = 0,
         DrumFamily family = DrumFamily.Kit,
-        ImmutableArray<Weighted<DrumBinding>> bindings = default,
+        ImmutableArray<(DrumBinding Binding, ByConvention Weight)> bindings = default,
         double doublingOdds = 1
     )
     {
@@ -54,10 +54,10 @@ public sealed class PercussionInstrumentDefinition
     public double DoublingOdds { get; }
 
     /// <summary>
-    ///     How likely each way the drum is bound to a lead it doubles is (<see cref="DrumBinding" />), before a section
-    ///     leans it; none for a drum that never doubles.
+    ///     How likely each way the drum is bound to a lead it doubles is (<see cref="DrumBinding" />), by the section's
+    ///     rhythmic unconventionality; none for a drum that never doubles.
     /// </summary>
-    public ImmutableArray<Weighted<DrumBinding>> Bindings { get; }
+    public ImmutableArray<(DrumBinding Binding, ByConvention Weight)> Bindings { get; }
 
     /// <summary>The families the drum plays in, the drum kit, the percussion or both.</summary>
     public DrumFamily Family { get; }

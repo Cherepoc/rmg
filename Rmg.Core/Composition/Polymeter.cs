@@ -149,7 +149,10 @@ internal static class Polymeter
             // the lengths as the genre weighs them, where it names them
             var pool = genre.Pool<int>(GenreChoices.PolymeterCell, NameOf);
             var weighed = pool is null ? Lengths : [..Lengths.Select(x => (x.Sixteenths, Weight: pool(x.Sixteenths) ?? new ByConvention(0, 0, 0)))];
-            var lengths = weighed.Where(x => bar % x.Sixteenths != 0).ToArray();
+            // the lengths that divide no bar, the songs' where the genre names none of them, as a meter of its own may leave
+            var lengths = weighed.Where(x => bar % x.Sixteenths != 0 && x.Weight is not { Plain: 0, Tuned: 0, Wild: 0 }).ToArray() is { Length: > 0 } kept
+                ? kept
+                : [..Lengths.Where(x => bar % x.Sixteenths != 0)];
             // a bar both plain lengths divide, as 3/4's and 6/8's, plays the middle's at the plain end
             var length = context.Pick(ByConvention.WeighFilled(lengths, unconventionality));
             var hasRiff = !absent.Contains(TrackRole.Riff);

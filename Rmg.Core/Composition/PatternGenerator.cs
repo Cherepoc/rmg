@@ -584,6 +584,15 @@ internal readonly record struct ResolvedRhythm(
         return rank;
     }
 
+    /// <summary>
+    ///     The finest rank of a cycle whose notes are no shorter than a note: its first split's parts (<see cref="SplitOf" />)
+    ///     halving as far as they stay as long, the cycle alone where even they are shorter.
+    /// </summary>
+    /// <param name="period">The cycle, in beats.</param>
+    /// <param name="note">The shortest note, in beats.</param>
+    public static int NoteRankLimit(double period, double note) =>
+        period / SplitOf(period) < note - 1e-9 ? 0 : (int)Math.Floor(Math.Log2(period / SplitOf(period) / note) + 1e-9) + 1;
+
     /// <summary>A straight rhythm of a beat, down to 16ths, for a section whose drums play nothing.</summary>
     public static StateMap DefaultState { get; } = StateMap.FromStates(
         [
@@ -617,13 +626,13 @@ internal readonly record struct ResolvedRhythm(
 
         // a bar pattern's to its limit, and a fill's as fine as its shortest note; a grouped cycle's no finer than the grid
         var maxRankLimit = minNote is { } note
-            ? Math.Max(0, (int)Math.Floor(Math.Log2(periodValue * Meter.ReferenceBar / note) + 1e-9))
+            ? NoteRankLimit(periodValue * Meter.ReferenceBar, note)
             : MaxRankLimit;
         if (IsGrouped(periodValue * Meter.ReferenceBar))
             maxRankLimit = Math.Min(maxRankLimit, GridRankLimit(periodValue * Meter.ReferenceBar));
         // and no finer than the part's shortest note, where it keeps to one
         if (stateMap.GetStateValue(CompositionStateKinds.ShortestNote) is > 0 and var shortest)
-            maxRankLimit = Math.Min(maxRankLimit, Math.Max(0, (int)Math.Floor(Math.Log2(periodValue * Meter.ReferenceBar / shortest) + 1e-9)));
+            maxRankLimit = Math.Min(maxRankLimit, NoteRankLimit(periodValue * Meter.ReferenceBar, shortest));
         var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
             .BounceInBounds(0, maxRankLimit);
 

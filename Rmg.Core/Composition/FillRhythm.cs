@@ -61,7 +61,7 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Me
     {
         var rhythm = ResolvedRhythm.Of(groove.MergeWith(layer), minNote);
         // no finer than the tempo allows, nor, for a grouped cycle, than the grid
-        var noteLimit = Math.Max(0, (int)Math.Floor(Math.Log2(rhythm.Period / minNote) + 1e-9));
+        var noteLimit = ResolvedRhythm.NoteRankLimit(rhythm.Period, minNote);
         return new FillRhythm(rhythm, ResolvedRhythm.IsGrouped(rhythm.Period) ? Math.Min(noteLimit, ResolvedRhythm.GridRankLimit(rhythm.Period)) : noteLimit, meter);
     }
 

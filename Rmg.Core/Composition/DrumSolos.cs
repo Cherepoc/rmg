@@ -407,8 +407,10 @@ internal static class DrumSolos
 
                             var limbs = LimbsOf(sticking);
                             var positions = SoloLines.Positions(start, end, rhythm, speedOf).Select(x => x + (displaced ? 0.25 : 0)).Where(x => x < end - 1e-9).ToArray();
-                            // a run walks the toms to their other end, a lick rocks between two of them
+                            // a run walks the toms to their other end, a lick rocks between two of them, inward from the lowest,
+                            // as the gesture played has it, a motif's restated
                             var step = at < toms.Length / 2 ? 1 : -1;
+                            var rock = at == toms.Length - 1 ? -1 : 1;
                             var rights = 0;
                             for (var i = 0; i < positions.Length; i++)
                             {
@@ -420,8 +422,8 @@ internal static class DrumSolos
                                     sound = kick!;
                                 else if (limb is 'R' or 'T' && toms.Length > 0)
                                 {
-                                    sound = toms[gesture == SoloGesture.Lick ? Math.Clamp(at + rights % 2, 0, toms.Length - 1) : at];
-                                    if (gesture == SoloGesture.Run)
+                                    sound = toms[rhythm == SoloGesture.Lick ? Math.Clamp(at + rock * (rights % 2), 0, toms.Length - 1) : at];
+                                    if (rhythm == SoloGesture.Run)
                                     {
                                         if (at + step < 0 || at + step >= toms.Length)
                                             step = -step;
@@ -448,7 +450,7 @@ internal static class DrumSolos
                         case SoloGesture.Run:
                         case SoloGesture.Lick:
                         {
-                            // round the scale to its other end, the way it heads the more intense the lower
+                            // round the scale to its other end
                             player.Cursor = goesOn && player.Cursor is not null ? player.Cursor : new SoloLines.CellCursor(player.At);
                             var heading = player.At < scale.Length / 2 ? scale.Length - 1 : 0;
                             var positions = SoloLines.Positions(start, end, gesture, speed);

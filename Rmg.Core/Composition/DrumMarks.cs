@@ -56,7 +56,7 @@ internal static class DrumMarks
     /// <summary>How many notes a beat of a roll plays, and how likely: 16ths and 32nds.</summary>
     public static ImmutableArray<Weighted<int>> RollRates { get; } = [new(1, 4), new(1, 8)];
 
-    /// <summary>How loud a roll's first and last notes play against its peak, the drum's typical note, and how fast, against its rate there.</summary>
+    /// <summary>How loud a roll's first and last notes play against its peak, the drum's typical note, and how fast, halfway from it to its rate there.</summary>
     public const double RollFrom = 0.3;
 
     /// <summary>The chance a section's start or the ending, where it is marked, swells instead of being struck once.</summary>
@@ -87,8 +87,12 @@ internal static class DrumMarks
             return Unmarked();
         var count = Math.Min(context.Pick(Counts), drums.Length);
         var marking = drums.OrderBy(_ => context.GenerateDouble()).Take(count).ToArray();
-        // every drum's typical note, the middle of its notes by loudness, which its marks play as
-        var typical = marking.ToDictionary(x => x, x => notes[x].OrderBy(n => n.Value.Velocity).ElementAt(notes[x].Count / 2).Value);
+        // every drum's typical note in a section, the middle of its notes there by loudness, which its marks play as, so
+        // that they keep the section's loudness, the song's where it plays none there
+        static RealizedNote Middle(TimelineItem<RealizedNote>[] of) => of.OrderBy(n => n.Value.Velocity).ElementAt(of.Length / 2).Value;
+        var songs = marking.ToDictionary(x => x, x => Middle([..notes[x]]));
+        RealizedNote Typical(int drum, SectionSpan span) =>
+            notes[drum].Where(n => n.IsWithin(span.Start, span.End)).ToArray() is { Length: > 0 } own ? Middle(own) : songs[drum];
 
         var map = song.Form.Map;
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
@@ -137,17 +141,20 @@ internal static class DrumMarks
                 var here = at < span.End - 1e-9 ? plays : PlaysAt(at);
                 if (hits && here && strength == 0 && swell && at >= SwellBeats)
                 {
-                    marks[drum].AddRange(Roll(typical[drum], at, SwellBeats, SwellBeats, swellRate));
+                    marks[drum].AddRange(Roll(Typical(drum, span), at, SwellBeats, SwellBeats, swellRate));
                     swelled = Math.Abs(at - span.Start) < 1e-9 ? drum : swelled;
                 }
                 else if (hits && here)
-                    marks[drum].Add(typical[drum].WithVelocity(Render.ScaleLoudness(typical[drum].Velocity, loudness)).ToTimelineItem(at));
+                {
+                    var note = Typical(drum, span);
+                    marks[drum].Add(note.WithVelocity(Render.ScaleLoudness(note.Velocity, loudness)).ToTimelineItem(at));
+                }
             }
 
             // a roll into the section on the beat before it, where the drums play the section, but on a drum swelling into it
             var (rolls, rate, roller) = (rolling.TestProbability(often.Chance(energy.Chance(RollChance, 1), 1)), rolling.Pick(RollRates), marking[rolling.GenerateInt(0, marking.Length)]);
             if (rolls && plays && span.Start >= 1 && swelled != roller)
-                marks[roller].AddRange(Roll(typical[roller], span.Start, 1, 0, rate));
+                marks[roller].AddRange(Roll(Typical(roller, span), span.Start, 1, 0, rate));
         }
 
         var result = notes.ToBuilder();
@@ -166,8 +173,9 @@ internal static class DrumMarks
 
     /// <summary>
     ///     A roll peaking at a place: growing from <see cref="RollFrom" /> of its drum's note to the whole of it over the
-    ///     beats before, and fading as far over the beats after, its notes the quicker the louder, at its rate at the peak;
-    ///     a roll into a section all growth, a swell both.
+    ///     beats before, and fading as far over the beats after, its notes the quicker the louder, at its rate at the peak
+    ///     and two-thirds of it at its softest, so that a roll a beat long still rolls; a roll into a section all growth, a
+    ///     swell both.
     /// </summary>
     internal static IEnumerable<TimelineItem<RealizedNote>> Roll(RealizedNote note, double peak, double before, double after, int rate)
     {
@@ -175,7 +183,7 @@ internal static class DrumMarks
             ? RollFrom + (1 - RollFrom) * (before > 0 ? (at - (peak - before)) / before : 1)
             : 1 - (1 - RollFrom) * (at - peak) / after;
         // a roll with nothing after its peak ending before it, on the section's first strike
-        for (var at = peak - before; at < peak + after + 1e-9 && (after > 0 || at < peak - 1e-9); at += 1 / (rate * Loudness(at)))
+        for (var at = peak - before; at < peak + after + 1e-9 && (after > 0 || at < peak - 1e-9); at += 2.0 / (rate * (1 + Loudness(at))))
             yield return (note with { Duration = Math.Min(note.Duration, 1.0 / rate) }).WithVelocity(Render.ScaleLoudness(note.Velocity, Loudness(at))).ToTimelineItem(at);
     }
 }

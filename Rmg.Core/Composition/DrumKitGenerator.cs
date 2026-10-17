@@ -124,10 +124,11 @@ internal static class DrumKitGenerator
     public const double AccentShare = 0.5;
 
     /// <summary>
-    ///     The chance a drum that colours a section plays on the feel of the lead of its main role, with no lean; the less
-    ///     conventional the section, the likelier it crosses it, a tuplet against the lead's for the whole section.
+    ///     The chance a drum that colours a section plays on the feel of the lead of its main role, conventional: always in
+    ///     the plainest section, and the less conventional the section, the likelier it crosses it, a tuplet against the
+    ///     lead's for the whole section.
     /// </summary>
-    public const double FeelChance = 0.85;
+    public static ByConvention OnTheLeadsFeel { get; } = RhythmicUnconventionality.Ends(0.85, -1);
 
     /// <summary>The roles a section has a lead for, in the order it draws them.</summary>
     public static ImmutableArray<DrumRole> LeadRoles { get; } = [DrumRole.Ground, DrumRole.Backbeat, DrumRole.Time];

@@ -21,9 +21,14 @@ internal static class DrumDefinitions
     private static ImmutableArray<Weighted<DrumRole>> Plays(DrumRole main, params (DrumRole Role, double Affinity)[] others) =>
         [new(1, main), ..others.Select(x => new Weighted<DrumRole>(x.Affinity, x.Role))];
 
-    // how likely a drum that doubles a lead is to double it, to accent it, or to play a figure of its own on its feel
-    private static ImmutableArray<Weighted<DrumBinding>> Binds(double doubles, double accents, double figures) =>
-        [new(doubles, DrumBinding.Double), new(accents, DrumBinding.Accent), new(figures, DrumBinding.Figure)];
+    // how likely a drum that doubles a lead is to double it, to accent it, or to play a figure of its own on its feel, in
+    // a middling section, and at the ends: a figure of its own leaning unconventional, never in the plainest section
+    private static ImmutableArray<(DrumBinding Binding, ByConvention Weight)> Binds(double doubles, double accents, double figures) =>
+    [
+        (DrumBinding.Double, RhythmicUnconventionality.WeightEnds(doubles, 0)),
+        (DrumBinding.Accent, RhythmicUnconventionality.WeightEnds(accents, 0)),
+        (DrumBinding.Figure, RhythmicUnconventionality.WeightEnds(figures, 1))
+    ];
 
     public static PercussionInstrumentDefinition Kick { get; } = new("Kick", [35, 36], 1.0, roles: Plays(DrumRole.Ground, (DrumRole.Time, 0.01)));
 
@@ -159,7 +164,7 @@ internal static class DrumDefinitions
 
     // the calls grate in a groove of any length, so they play only bound to a lead, a share of its strongest beats, or
     // as a landing (DrumGroups.Calls): the triangle on the timekeeper's beats, the cuica a squeak on the backbeat now and
-    // then, the whistle only where a section lands
+    // then, the whistle only where a section lands; a kit's alone, as a section of percussion only binds no drum to a lead
     public static PercussionInstrumentDefinition Triangle { get; } = new(
         "Triangle",
         [80, 81],

@@ -86,10 +86,12 @@ internal static class HatRolls
             var rolled = timeline.ToList();
             foreach (var (from, to, rate) in rolls)
             {
-                // the drum's note where the roll starts, which every note of it plays, where it plays there
+                // the drum's note where the roll starts, which every note of it plays, where it plays there, on its stroke,
+                // never an accent's or a cue's open hat
                 var own = timeline.FirstOrDefault(x => x.IsWithin(from, to));
                 if (own.Value is null)
                     continue;
+                own = (own.Value with { Pitches = [DrumGroups.GetDrum(track).Sounds[0].Code] }).ToTimelineItem(own.Position);
                 rolled.RemoveAll(x => x.IsWithin(from, to));
                 var count = (int)Math.Round((to - from) * rate);
                 rolled.AddRange(Enumerable.Range(0, count).Select(k => (own.Value with { Duration = Math.Min(own.Value.Duration, 1.0 / rate) })

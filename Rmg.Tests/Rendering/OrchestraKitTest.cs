@@ -5,7 +5,7 @@ using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Rendering;
 
-/// <summary>The orchestra kit as a timpanist plays it: its timpani on the chord's root or fifth, its hi-hats the kit's own, wherever the kit that plays is the orchestra's.</summary>
+/// <summary>The orchestra kit as a timpanist plays it: its timpani on the chord's root or fifth, its hi-hats and its ride the kit's own, wherever the kit that plays is the orchestra's.</summary>
 public sealed class OrchestraKitTest
 {
     [Test]
@@ -37,7 +37,7 @@ public sealed class OrchestraKitTest
     [Test]
     public async Task AKitGivenInTheMix_IsPlayedAsItIs()
     {
-        var (hats, tuned) = (0, 0);
+        var (hats, rides, tuned) = (0, 0, 0);
         var orchestra = new Rmg.Core.Rendering.SongMix(1, System.Collections.Immutable.ImmutableDictionary<Rmg.Core.Songs.TrackRole, Rmg.Core.Rendering.PartMix>.Empty
             .Add(Rmg.Core.Songs.TrackRole.Drum, new Rmg.Core.Rendering.PartMix(48, 1, null)), System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Rendering.DrumGroupMix>.Empty);
         foreach (var song in TestCorpus.Range(16).Where(x => x.Song.Draws?.Kit != 48))
@@ -52,6 +52,8 @@ public sealed class OrchestraKitTest
                 var pitch = note.Value.Offset;
                 // the hi-hats on the kit's own, every note in the timpani's range a timpani tuned
                 hats += pitch is >= 27 and <= 29 ? 1 : 0;
+                // the ride on the kit's ride beside them, its crashed stroke alone on the concert cymbal
+                rides += pitch == 30 ? 1 : 0;
                 if (pitch is >= 41 and <= 53 && chords.TryGetValue(Math.Round(note.Position, 6), out var chord))
                 {
                     tuned++;
@@ -62,5 +64,6 @@ public sealed class OrchestraKitTest
 
         await Assert.That(tuned).IsGreaterThan(0);
         await Assert.That(hats).IsGreaterThan(0);
+        await Assert.That(rides).IsGreaterThan(0);
     }
 }

@@ -34,8 +34,12 @@ internal sealed class FillGenerator
     /// <summary>The stream of the line's landing, apart from its fill's, whose draws vary with the fill; the line's own until a line is marked.</summary>
     private IGenerationContext _landing;
 
-    // the landing's stream within the line's
+    /// <summary>The stream of the line's kick-out, apart from its fill's, so that a genre's chance of it leaves the fills as they were; the line's own until a line is marked.</summary>
+    private IGenerationContext _kickOut;
+
+    // the landing's and the kick-out's streams within the line's
     private const int LandingStream = 1;
+    private const int KickOutStream = 2;
     private readonly RhythmicUnconventionality _songRhythm;
     private readonly ImmutableArray<int> _drumTracks;
 
@@ -70,7 +74,7 @@ internal sealed class FillGenerator
         _genre = genre;
         _unheard = unheard;
         _context = context;
-        (_line, _landing) = (context, context);
+        (_line, _landing, _kickOut) = (context, context, context);
         _songRhythm = songRhythm;
         _drumTracks = [..tracks.SongDrums.Select(DrumGroups.GetTrackNumber)];
         _sounds = new FillSounds(tracks.SongDrums, DrumSounds.OddsOf(genre, GenreChoices.DrumSounds));
@@ -98,7 +102,7 @@ internal sealed class FillGenerator
         // starts at, before any slowing into the ending
         var tempo = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         double MinNote(double line) =>
-            FillLayers.MinNoteSeconds * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(map.SectionAt(line - 1e-9)?.Start ?? 0));
+            FillLayers.MinNoteSeconds * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(map.SectionAt(line - 1e-6)?.Start ?? 0));
 
         var drummer = Drummer.Generate(_context, _songRhythm.Value);
         var edits = new TimelineEdits(_context, _meter, map);
@@ -107,7 +111,8 @@ internal sealed class FillGenerator
         foreach (var line in lines)
         {
             var key = map.PlaceKey(line.Position, LinePlacesPerBeat);
-            (_line, _landing) = (new GenerationContext(Seeds.Derive(lineSeed, key)), new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, key), LandingStream)));
+            (_line, _landing, _kickOut) = (new GenerationContext(Seeds.Derive(lineSeed, key)), new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, key), LandingStream)),
+                new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, key), KickOutStream)));
             MarkLine(song, edits, line, MinNote(line.Position), drummer, map);
         }
 
@@ -266,9 +271,8 @@ internal sealed class FillGenerator
         if (span <= 0)
             return FillPlay.None;
 
-        // the kick taken out, a genre's, drawn only where the genre gives it a chance, so that every other line draws as it did
-        var kickOut = FillLayers.KickOutChance.At(rhythm.Value, _genre.Chance(GenreChoices.KickOut, "lines"));
-        if (kickOut > 0 && _line.TestProbability(kickOut))
+        // the kick taken out, a genre's, from a stream of its own
+        if (_kickOut.TestProbability(FillLayers.KickOutChance.At(rhythm.Value, _genre.Chance(GenreChoices.KickOut, "lines"))))
             // a beat at least, as a kick left out for less goes unheard
             return new FillPlay(Math.Max(span, FillLayers.ShortestKickOut), GrooveTreatment.KickOut, FillRun.Rest, CreateLayer(drummer, rhythm, FillLayers.Fullness, Feels.Of(grooves.Source), section.Facets[Facet.Feel]), 0, false);
 

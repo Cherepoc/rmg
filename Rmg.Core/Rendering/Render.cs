@@ -59,13 +59,13 @@ public static class Render
     private static readonly IReadOnlyDictionary<int, int> OrchestraHiHats = new Dictionary<int, int> { [42] = 27, [44] = 28, [46] = 29 };
 
     /// <summary>
-    ///     A drum's note as the orchestra kit plays it: its cymbals on the kit's concert cymbals, the crash and the china
-    ///     the crash's, the ride and its bell the ride's; its hi-hats the kit's own; and any other in the timpani's range a timpani on the chord's root
+    ///     A drum's note as the orchestra kit plays it: its crash and its china on the kit's concert cymbal, the ride and its
+    ///     bell on the kit's ride, beside its hi-hats; its hi-hats the kit's own; and any other in the timpani's range a timpani on the chord's root
     ///     or fifth there, the nearest to the note, as a timpanist tunes to the key rather than to a drum's fixed note.
     /// </summary>
     private static int InOrchestra(int code, StateMap state)
     {
-        const int lowest = 41, highest = 53, crash = 57, ride = 59;
+        const int lowest = 41, highest = 53, crash = 57, ride = 30;
         if (code is 49 or 52)
             return crash;
         if (code is 51 or 53)
@@ -113,7 +113,8 @@ public static class Render
             var group = song.TrackDefinitions[trackNumber] is PercussionInstrumentTrack && !mix.DrumGroups.IsEmpty
                 ? mix.DrumGroups.GetValueOrDefault(DrumGroups.GroupOf(DrumGroups.GetDrum(trackNumber)).Name)
                 : null;
-            if (trackNotes.Count == 0)
+            // a drum's group the mix leaves out not written, as a part left out is not
+            if (trackNotes.Count == 0 || group?.Volume == 0)
                 continue;
             // as the kit that plays is, a kit the mix gives in place of the drawn
             if (isPercussion && (mix.Of(TrackRole.Drum)?.Instrument ?? song.Draws?.Kit) == OrchestraKit)
