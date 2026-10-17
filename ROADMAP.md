@@ -8,16 +8,17 @@ is removed once it is built, its leftovers kept under *Open work*.
 
 1. **Now** (P1): *Planned: a mood every genre plays* (*Open work*), its brightness measured first; then a soloist's
    ghosts and the counter-melody's third over a sus4 beside it.
-2. **The rules on the other corpora** (P1, *Older rule failures*): the failures older than the second order of work,
+2. **The review of 16 October 2026** (P1, *Open work*): its packages, the failing tests first at the review's commit.
+3. **The rules on the other corpora** (P1, *Older rule failures*): the failures older than the second order of work,
    each traced at the committed code first.
-3. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
+4. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked).
-4. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
+5. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.
-5. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
+6. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
    with its reason; no new presets until the owner asks (15 October 2026).
-6. **Parked** (P4): kept for their reasons, not planned.
+7. **Parked** (P4): kept for their reasons, not planned.
 
 The owner's calls waiting: a guitar solo in Rock's and Metal's plainest songs, which the curve rule leaves out.
 
@@ -259,6 +260,37 @@ passing notes, as over a major triad its fourth (7.7% weak, 2.4% strong). Left: 
 sus4 its third 12.3% (5.0% a triad's fourth), likely its harmony a third from the melody's fifth by the scale; to
 measure by doubling and, if so, a harmonised note its chord leaves out moved to the chord's.
 
+### From the review of 16 October 2026
+
+The review's fixes are its plan (outside the repository, `rmg-reviews/2026-10-16/plan/plan.md`); its three architecture
+proposals are packages there, the holds written by their makers, the pulse on a place and one list of plays. What it
+proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
+
+- **Figures as chances** (the foundations reviewer, #39): a figure given as the per-slot chances of its part's own
+  rhythm, exact at the plain end and loosened toward the wild, a clave or the swing ride strict at every end, in place
+  of the onsets laid over a player after assembly; so that any part a genre's rhythm reaches may name a figure, and a
+  figure varies as a player varies it. The experiment first, the corpus unchanged: Latin's tumbao as chances beside
+  the tumbao laid, measured (notes on the figure, bars identical to it) and asked as `latin-tumbao-varied`; a
+  migration planned only once listening prefers it; planned as package 03b of the review's plan. The library of idioms parked in September is built, beside the
+  engine; this puts it inside. Risk: the listening verdicts tuned on exact figures.
+- **Waiting on figures as chances**, as each needs a player the figures do not reach: the conga's tumbao (#354, twelve
+  presets name the conga), the reggae organ bubble on the pad (#355, Reggae, Dub, Ska), the boogie comp on the rhythm
+  part (#340, Rock, Blues, Country, Punk, Funk rock; the bass's boogie steps shared).
+- **Figures as they are:** the thrash or skank beat, the snare on every 8th's offbeat over the kick on the beats, a
+  backbeat figure (#370, Thrash, Punk, Black metal, Ska, Metal); the arpeggiated bass, the bass breaking its own
+  chord over `Realizer.GetChordNotes`, beside the octave bass (#402, Chiptune, the 16-bit game, Synthwave, Disco).
+- **Form:** the turnaround intro, the first section's last phrase as an intro played as that section (`PlayAt`)
+  (#363, Blues, Jazz, Soul, Country and five more); the AABB tune form, two forms of `SongForms.Forms` at weight 0 for
+  a genre to take (#360, Celtic, Bluegrass, Medieval, Folk, Chamber); the last chorus up an octave, a chance of
+  `lastRepeat` on the line raise the twin uses (#366); the tag ending, an `EndingKind` repeating the last bars with the
+  cadence turned away by the turnaround's kinds (#342), after the others.
+- **Lines and harmony:** the prepared suspension, an option of the appoggiatura holding the line's note over the change
+  (#395, nine presets); the hemiola, a cadence's two bars in a meter of their own as the short bar is (#396), later.
+- **Drums and sound:** the sub drop, the bass's root falling an octave on a drop's first beat by the riff's dive
+  (#381, the ten presets with drops); a pocket ahead of the beat, the pocket's lean below zero (#387, Bluegrass, Punk,
+  Thrash); the chopped loop, `Mutations`' swap and ratchet laid on a looping section's pitched parts (#352, Hip-hop,
+  Trap, IDM, House, Techno, Drum and bass).
+
 ### Older rule failures
 
 Rules that fail on other songs than the corpus's own, each older than the second order of work (15 October 2026), to
@@ -274,6 +306,15 @@ trace at the committed code before blaming a change:
   section's own key (seed 50); a pushed change (seed 58 at 192 and 224); a strum's direction (seed 15 at 148); the inner
   line; every chord note in its scale; the render's notes; a djent breakdown in 15/16 whose kick pattern plays no note
   (seed 48, section 7), so the kick with the riff has nothing to lay on.
+- **From the review of 16 October 2026,** both failing at its commit already:
+  - **At offset 942000000:** seed 5's bass at 552 plays F#, the fifth of its Bb chord raised, its own alteration +1,
+    where the raised step (G minor's F#) ended at 550. The note is an anticipation (`ChordApproach.Anticipation`) and a
+    key preparation leads into 558: likely the line placed against the chord before the change, then read against the
+    next.
+  - **At offset 619000000:** seed 47's shapes apart at 256 and 400. Every part sounds the same chord (pitch classes 2,
+    5, 10), but the chords and the melody write its third in semitones (5/12 of an octave) where the bass and the pad
+    write it in scale steps (2/7), on a chord approached a semitone below (`ChordApproach` 2). The same kind as seed 5
+    at 173.5 above: one stage rewriting a chord's offsets on some parts only.
 - **A long lift moving notes outside its swell** (#224): about a hundred notes of 64 songs moved outside the swell's
   bars by more than 0.01 of the velocity, through a stage that sets a part by the song as heard (`LiftTest`).
 - **Two page tests seen failing once each,** their messages not kept: the seek readout's

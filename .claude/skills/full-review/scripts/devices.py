@@ -20,30 +20,32 @@ stages = [name for name, _ in declared]
 FAMILIES = {
     'form': {
         'choices': 'tempo length meter formChances form phrases phraseBars sectionLength phraseScheme texture alone loop drop dropKind breakdown stopTime '
-                   'push intro riffIntro ending lastRepeat sectionChanges parts dynamics voice space rests',
+                   'push intro openingAlone openingPart ensembleHits ending lastRepeat sectionChanges parts roleLength dynamics voice space rests '
+                   'tempoBand intensity',
         'stages': 'Stop time|Pushes|Silent start|Lift cues|Risers|Key changes|Hook intro',
     },
     'harmony': {
         'choices': 'rootMotion rootDegree cadenceDegree cadenceRaise sectionHome chordScales ownMode passingChords passingKind planing harmonyDevices '
-                   'turnaround vamp keyChanges harmonicRhythm scale chordShape colour arpeggio gateParts harmonyInterval',
+                   'turnaround vamp keyChanges keyLift sectionKey sectionPedal harmonicRhythm scale chordShape colour arpeggio gateParts '
+                   'harmonyInterval strictness darkness',
         'stages': 'Reharmonisation|Inner lines|Pedal|Line chords',
     },
     'lines': {
         'choices': 'bass octaveBass alternatingBass bassLanding glide melodyRange lineScale riffScale riff register doubling ornaments tension '
-                   'inversion hook appoggiatura callAndResponse',
-        'stages': 'Lines|Doubling|Chugs|Ornaments|Notes|Call and response',
+                   'hook appoggiatura callAndResponse sung glideRate lineRun',
+        'stages': 'Lines|Doubling|Chugs|Ornaments|Notes|Call and response|Kick-out bass',
     },
     'drums': {
         'choices': 'fills pocket grooveHold pins mutation ghosts rudiments hatRolls drumSounds drumStrokes drumJob marks kit drumSetup drumPieces '
-                   'polymeter polymeterFrame feel feelChances feelValues ghostNotes',
+                   'polymeter polymeterCell feel feelChances feelValues ghostNotes hatRollRate kickOut',
         'stages': 'Polymeter|Figures|Mutations|Fills|Drum marks|Hat rolls|Ghosts|Drum ornaments|Timing',
     },
     'solos': {
-        'choices': 'solos soloists drumSoloFeet sticking soloAnswers',
+        'choices': 'solos soloists soloCount soloShare drumSoloFeet sticking soloAnswers',
         'stages': 'Solos|Drum solos|Solo answers',
     },
     'sound': {
-        'choices': 'effects strongEffect pinchSound louderForms instrumentSwitches room insertion pan mixFilter levels articulation',
+        'choices': 'effects strongEffect echo louderForms instrumentSwitches room insertion pan mixFilter levels articulation',
         'stages': 'Instruments|Articulation|Mix filter|Expression',
     },
 }
@@ -67,12 +69,13 @@ stale += [f'stage {x}' for d in FAMILIES.values() for x in d['stages'].split('|'
 # the genre presets by cluster of styles, a genre-fit reviewer each: the neighbours a preset is told apart from
 CLUSTERS = {
     'rock-pop': 'rock pop ballad punk',
-    'heavy': 'metal nuMetal djent blackMetal',
-    'blues-jazz': 'blues jazz fusion soul',
-    'groove': 'funk disco latin bossa reggae ska',
-    'club': 'electronic techno trance dnb idm',
-    'beats': 'hipHop trap synthwave chiptune',
-    'acoustic': 'folk country medieval classical orchestral dungeon ambient',
+    'heavy': 'metal nuMetal djent blackMetal thrash doom symphonic',
+    'blues-jazz': 'blues jazz fusion soul darkJazz jazzFunk',
+    'groove': 'funk funkRock disco latin bossa reggae dub ska',
+    'club': 'electronic techno trance psytrance dnb idm',
+    'beats': 'hipHop trap synthwave chiptune fmGame',
+    'folk': 'folk country celtic bluegrass medieval lyrical',
+    'concert': 'orchestral chamber filmPiano dungeon ambient',
 }
 presets = re.findall(r'^    "id": "(\w+)"', open(os.path.join(root, 'Rmg.WebApi/Client/genres.json')).read(), re.M)
 clusters = {c: [p for p in names.split() if p in presets] for c, names in CLUSTERS.items()}

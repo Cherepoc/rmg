@@ -37,7 +37,7 @@ for o in $offsets; do
 done
 [ "$mode" = --holdout ] && exit 0
 cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_EveryChance" --output detailed > "$R/run/every-chance.txt" 2>&1
-cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/GenreDevicesReportTest/*" --output detailed > "$R/run/genre-devices.txt" 2>&1
+cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/GenreDevicesReportTest/Report" --output detailed > "$R/run/genre-devices.txt" 2>&1
 cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_ChoicesByEnd" --output detailed > "$R/run/every-preset.txt" 2>&1
 # how the parts sound together: a note held into its part's next, a semitone between parts, a strong note off its chord
 cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/SoundingReportTest/Report" --output detailed > "$R/run/sounding.txt" 2>&1

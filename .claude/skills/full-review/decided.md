@@ -82,3 +82,10 @@ rejected while fixing: the place, what was decided, why.
 - The polymeter's frame (`polymeterFrame`), the melody's inversion (`inversion`) and the pinch's squeal (`pinchSound`) cut on listening: not told apart, heard worse in 5 of 6, and General MIDI's harmonics preferred. Not proposed again.
 - A part's tone closes 16 steps at its deepest (`Expression.ToneReach`), short of the filter's reach of 24, as the brightness's floor at 40 is where instruments fall nearly silent: not raised to 24, though listening on 8 October asked for more, which would leave a deep tone no room for a filter; whether the tone earns its place is a listening question (#28).
 - 12/8's backbeat is the meter's half-cycle-late cycle (`Meter.Backbeats`), dotted quarters 2, 3 and 4; the heavy figure's added backbeat follows it, as the snare's own backbeat does, until the cycle is measured (roadmap).
+
+## From the review of 16 October 2026
+
+- A part's rhythm leaned by a leader's onsets (foundations proposal #99): rejected for now. It would order the pitched
+  parts' generation within a section for a lean that a figure followed at a loose strictness gives, once figures are
+  chances (the roadmap's experiment); taken up again only if that experiment is built and an interlocking part is still
+  out of reach, with a measure of onsets struck together.

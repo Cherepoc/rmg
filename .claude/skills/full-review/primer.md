@@ -35,6 +35,8 @@ RMG (`/home/glyge/Projects/sw/rmg`) is a random music generator in C# .NET 10 wi
 `Unconventionality` runs from 0 (plainest) to 1 (wildest), per facet: Feel, Groove, Chords, Progression, Melody, Form, Sound, Fills, Scale.
 - Choices lean through `ByConvention(plain, tuned, wild)` and `Tilt`.
 - A genre (`Genre`, from `Client/genres.json`, choices declared in `GenreChoices`) overrides options.
+- The mood (`Mood`): darkness and intensity, each from -1 to 1, drawn within a genre's span or given, beside the unconventionality. It never adds or removes an option: it leans the weights of those a genre's pool allows, by each option's lean in `Mood.Leans`, as energy leans. A choice the mood should lean and `Mood.Leans` does not name, or a lean applied by hand elsewhere, is a finding.
+- Figures (`Figures`) are data: a player's hand-written figure (four on the floor, the skank, the tresillo, the waltz, the boom-chicka, the jazz ride, the bass on the kick) with its genres' amounts and its energy lean; a figure written as a case in a stage, where the table would hold it, is a finding.
 
 ### Streams
 Every decision draws from its own seeded stream (`SongStream`, `SectionStream`, `Seeds.Derive`). Adding a draw to an existing stream changes every later draw, so the corpus fingerprint (`CorpusFingerprintTest`) guards against that.

@@ -62,7 +62,10 @@ def cell(text):
 
 if os.path.exists(report):
     lines = open(report, encoding='utf-8', errors='ignore').read().splitlines()
-    columns = (len(lines[0]) - LABEL) // CELL
+    # the test runner's progress lines come before the table: start at its header
+    lines = lines[next(k for k, line in enumerate(lines) if line.split()[:1] == ['none']):]
+    # counted on a row of numbers, as a long preset name runs into the next in the header
+    columns = (len(lines[1]) - LABEL + CELL - 1) // CELL
     if columns != len(presets) + 1:
         raise SystemExit(f"{report} has {columns - 1} presets' columns, genres.json {len(presets)}: run the report again")
     measures = {m for ms in measure_of.values() for m in ms}

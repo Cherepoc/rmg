@@ -23,7 +23,7 @@ delta reads enough.
 the next. Run several at once only where the user asked for it, and as many as they said.
 
 A full run is about 40 slices (about half of them the tests), 9 angles, the architecture and the foundations reviewers, 6 device families
-and 7 genre clusters, about 25 verifier batches, and three runs of the suite; a delta run has as many slices as changed
+and 8 genre clusters, about 25 verifier batches, and three runs of the suite; a delta run has as many slices as changed
 files fill, and neither design reviewer. Confirm with the user before starting where they did not ask for the review by
 name, and ask: delta or full, whether to include the tests, which model the agents use (the current one by default: the
 user chose it over a faster one), and whether to run agents one at a time (the default) or several.
