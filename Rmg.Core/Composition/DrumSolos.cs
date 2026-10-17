@@ -154,9 +154,9 @@ internal static class DrumSolos
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var holds = draft.Holds(song);
-        return draft with
-        {
-            Timeline = Play(
+        // where the drums solo, the turns they play, which the drum stages after keep out of
+        var soloed = new List<(double From, double To)>();
+        var timeline = Play(
                 draft.Timeline,
                 song.Tracks.SongDrums,
                 song.Form.Map,
@@ -175,9 +175,10 @@ internal static class DrumSolos
                 position => song.Tracks.Definitions.Where(x => x.Value is PercussionInstrumentTrack).Select(x => holds.NextAfter(Hold.Cut, position, x.Key)).DefaultIfEmpty(double.PositiveInfinity).Min(),
                 song.Genre,
                 song.Meter,
-                DrumSounds.OddsOf(song.Genre, GenreChoices.DrumSounds)
-            )
-        };
+                DrumSounds.OddsOf(song.Genre, GenreChoices.DrumSounds),
+                soloed
+            );
+        return draft with { Timeline = timeline, Held = [..draft.Held, ..soloed.Select(x => new HeldSpan(Hold.DrumSolo, x.From, x.To, null))] };
     }
 
     /// <summary>
@@ -213,7 +214,8 @@ internal static class DrumSolos
         Func<double, double> stopsAfter,
         Genre genre,
         Meter meter,
-        Func<int, double> odds
+        Func<int, double> odds,
+        List<(double From, double To)> soloed
     )
     {
         if (drummer is null)
@@ -316,6 +318,7 @@ internal static class DrumSolos
             // a trade whose drums' turns fall in the bar the fill plays alone leaves them none
             if (played.Length == 0)
                 continue;
+            soloed.AddRange(played.Select(x => (x.Start, x.End)));
             StateTrace.RecordSection(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId,
                 $"{played.Length} segments, {soloists.Count} soloists {mode}{(feetTracks.Count > 0 ? ", the feet keeping time" : "")}",
                 new DrumSolo(index, played, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered));

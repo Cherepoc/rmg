@@ -29,7 +29,7 @@ RMG (`/home/glyge/Projects/sw/rmg`) is a random music generator in C# .NET 10 wi
 `SongMap.PlayAt` gives the appearance a position plays as: an intro made from a section plays as that section, a hook intro as its chorus, the ending as the last section. A stage that reads a section's decisions at a position asks it, never the section the position merely falls in.
 
 ### What the song holds
-`SongDraft.Holds(song)` lists the stretches the song holds (`HeldSpan`, by kind `Hold`: a fill, stop time as played, a drum solo, a part cut by the form, a call and its answer), and a stage keeps out of the kinds it names (`Holds.Meets`, `At`, `NextAfter`). A stage that makes such a stretch writes it there; a stage keeping out of a stretch by a list of its own, or one making a stretch others should keep out of without writing it, is a finding.
+`SongDraft.Holds(song)` lists the stretches the song holds (`HeldSpan`, by kind `Hold`: every fill, a kick-out, a drop's build, stop time as played and its ensemble hits, a solo, a drum solo's turns, a polymeter's sections, a part cut by the form, a call and its answer), and a stage keeps out of the kinds it names (`Holds.Meets`, `At`, `NextAfter`, `Of`). A stage that makes such a stretch writes it to `SongDraft.Held` (the fills, the kick-outs, the polymeter, the drum solos do); the form's own (a build, a cut) come from the assembly. A stage keeping out of a stretch by a list of its own, or one making a stretch others should keep out of without writing it, is a finding; `HoldsTest` checks the drum stages that add notes against the holds.
 
 ### Conventionality
 `Unconventionality` runs from 0 (plainest) to 1 (wildest), per facet: Feel, Groove, Chords, Progression, Melody, Form, Sound, Fills, Scale.

@@ -13,7 +13,7 @@ namespace Rmg.Core.Composition;
 /// <param name="Runs">The drums' runs, which the fills play, the lines walk with and the stages that play around a fill keep out of (<see cref="FillSpans" />).</param>
 /// <param name="Chains">How each key change is led into, which the bass's pedal holds under and the reharmonisation and the inner lines keep the chords of (<see cref="SongStages.KeyChanges" />).</param>
 /// <param name="Figures">Every section's figures, by its id and the player, which a mutating groove leaves as they are and a doubling does not replace (<see cref="Composition.Figures" />).</param>
-/// <param name="Polymeters">The sections a figure runs across the bar lines in, which the figures, the pushes and a mutating groove keep to (<see cref="SongStages.Polymeter" />).</param>
+/// <param name="Polymeters">The sections a figure runs across the bar lines in, which the figures keep to and the pushes, a mutating groove, stop time's hits and the ghosts keep out of, held as <see cref="Hold.Polymeter" /> (<see cref="SongStages.Polymeter" />).</param>
 internal sealed record SongDraft(
     TrackEventStateTimelineMap<StateMap> Timeline,
     ImmutableSortedDictionary<int, EventTimeline<RealizedNote>>? Notes,
@@ -24,8 +24,9 @@ internal sealed record SongDraft(
 )
 {
     /// <summary>
-    ///     Where the song plays in stop time as stop time played it, its phrases that a part carries, none before it or where
-    ///     it is left out: the stages after it keep to these, the stages before it to the phrases drawn (<see cref="SongDecisions.StopTime" />).
+    ///     Where the song plays in stop time as stop time played it, its phrases and bars of ensemble hits that a part
+    ///     carries, none before it or where it is left out: the stages after it keep to these, the stages before it to the
+    ///     phrases drawn (<see cref="SongDecisions.StopTime" />).
     /// </summary>
     public ImmutableArray<(double Start, double End, double BarDuration)> Stopped { get; init; } = [];
 
@@ -52,8 +53,6 @@ internal sealed record SongDraft(
         ..Held,
         ..song.Form.Builds.Select(x => new HeldSpan(Hold.Build, x.From, x.To, null)),
         ..Stopped.Select(x => new HeldSpan(Hold.Stop, x.Start, x.End, null)),
-        ..song.Solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).Select(x => song.Form.Map.Sections[x.Key])
-            .Select(x => new HeldSpan(Hold.DrumSolo, x.Start, x.End, null)),
         ..song.Solos.Keys.Select(x => song.Form.Map.Sections[x]).Select(x => new HeldSpan(Hold.Solo, x.Start, x.End, null)),
         ..song.Tracks.Definitions.Keys.SelectMany(track => song.Form.Edits.StopsOf(track).Select(x => new HeldSpan(Hold.Cut, x.From, x.To, track))),
         ..Calls
@@ -67,10 +66,10 @@ internal enum Hold
     /// <summary>The drums' fill, from its first note to its line.</summary>
     Fill = 1,
 
-    /// <summary>Stop time, as it played.</summary>
+    /// <summary>Stop time, as it played, and a section's bar of ensemble hits.</summary>
     Stop = 2,
 
-    /// <summary>A drum solo, or a solo the drums trade.</summary>
+    /// <summary>A drum solo, or the drums' turns of a solo they trade, as the drum solos played them.</summary>
     DrumSolo = 4,
 
     /// <summary>A part stopped by the form: a stop ending, a stripped ending's exits, a silent drop.</summary>

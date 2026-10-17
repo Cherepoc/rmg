@@ -57,8 +57,10 @@ internal static class CallAndResponse
         void Rest(TrackRole role, Func<double, bool> rests, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>? own = null)
         {
             Edit(song.Track(role).Key, own ?? (notes => EventTimeline.Create(notes.Duration, notes.Where(x => !IsOwn(x) || !rests(x.Position)))));
+            // a part doubling it resting with it, but its copy of a walk the part keeps, as the melody keeps its walk
             foreach (var target in LineDoubling.Pairs.Where(x => x.Source == role && song.Playing.Values.Contains(x.Target)).Select(x => song.Track(x.Target).Key))
-                Edit(target, notes => EventTimeline.Create(notes.Duration, notes.Where(x => IsOwn(x) || !rests(x.Position))));
+                Edit(target, notes => EventTimeline.Create(notes.Duration, notes.Where(x => IsOwn(x) || !rests(x.Position)
+                                                                                           || own is not null && x.Value.GetStateValue(CompositionStateKinds.Walk) != 0)));
         }
 
         // the melody's first half, its last note held to the half, and its walk into the next section; a part doubling it

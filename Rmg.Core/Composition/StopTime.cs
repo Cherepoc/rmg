@@ -198,7 +198,8 @@ internal static class StopTime
                 .Select(x => (x.Note!.Value.Value with { Duration = Math.Min(x.Note.Value.Value.Duration, Hit) }).ToTimelineItem(x.At))).ToArray();
             // a hit bar's own notes given up for those struck, the drums' but on a hit, and a note held into it ending at its start
             bool IsHitBar(double at) => hitStarts.Contains(Math.Round(at, 6));
-            double? HeldInto(TimelineItem<RealizedNote> note) => role == TrackRole.Drum ? null : hitBars
+            // a note held into a struck phrase, stop time's or a bar of hits, ending at its first hit
+            double? HeldInto(TimelineItem<RealizedNote> note) => role == TrackRole.Drum ? null : phrases
                 .Where(b => note.Position < b.Start - 1e-9 && note.Position + note.Value.Duration > b.Start + 1e-6 && Place(b.Start, track).In && !Fills(b.Start))
                 .Select(b => (double?)b.Start).FirstOrDefault();
             result[track] = EventTimeline.Create(timeline.Duration, timeline
