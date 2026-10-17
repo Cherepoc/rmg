@@ -85,9 +85,10 @@ public sealed class GenreRhythmReportTest
                          (RhythmPart.Time, [("speed", 1), ("offbeat", 0.75), ("fineness", 0), ("fullness", 1), ("repetition", 1)]))),
                      ("a walking bass, every beat", Of(
                          (RhythmPart.Bass, [("speed", 1), ("fineness", 0), ("fullness", 1)]))),
-                     ("busy 16ths: time finer, the bass syncopated and fine", Of(
-                         (RhythmPart.Time, [("fineness", 1), ("fullness", 1)]),
-                         (RhythmPart.Bass, [("syncopation", 1), ("fineness", 1), ("fullness", 0.75)])))
+                     // a genre's fineness moves a part coarser alone, its finest the songs' own (GenreRhythm.Of)
+                     ("busy: time full, the bass syncopated and fuller", Of(
+                         (RhythmPart.Time, [("fullness", 1)]),
+                         (RhythmPart.Bass, [("syncopation", 1), ("fullness", 0.75)])))
                  })
             Report(name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => Falls(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))));
         await Task.CompletedTask;

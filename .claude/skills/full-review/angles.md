@@ -238,8 +238,9 @@ and the code of the devices it switches on or leaves. Then, for each genre of th
   the genre: a device that should be the genre's plainest habit left to its wild end, or a wild device leaking into
   its plain end.
 - **Its song-wide settings at their ends.** The darkness and the intensity (`Mood`; the preset's `darkness` and `intensity` spans), and the facets given at each end
-  (`SongOverrides`), the songs compared on what the setting names, the same seeds at either end: a brighter song's major
-  chords, a fiercer one's tempo and density. A setting whose ends a genre plays alike is a `mistake` with its numbers
+  (`SongOverrides`), the songs compared on what the setting names, the same seeds at either end (`run/mood.txt`: its
+  major chords and scales' darkness at darkness -1, 0 and 1, its tempo and notes a second at intensity -1, 0 and 1): a
+  brighter song's major chords, a fiercer one's tempo and density. A setting whose ends a genre plays alike is a `mistake` with its numbers
   (Trap at darkness -1 and 1, 64% and 66% of its chords minor, every scale minor), its cause read where the setting
   leans (a pool naming no option at that end, a lean too small to hear), not a listening question first.
 - **Gaps, on a full review only.** An idiom the cluster's players use that the engine has no device for: a bass

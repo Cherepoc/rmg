@@ -18,13 +18,14 @@ public sealed class SwingTempoTest
     }
 
     [Test]
-    public async Task ADrawnSwing_LeavesItsSecondNoteATenthOfASecond_TheFasterTheLighter()
+    public async Task ADrawnSwing_LeavesItsSecondNoteATenthOfASecond()
     {
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz"))));
         var swung = songs.Select(x => (Song: x, Second: SecondNote(x))).Where(x => x.Second is not null).ToArray();
         var tempos = swung.Select(x => x.Song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(0) * Meter.BaseTempo).ToArray();
         Console.WriteLine($"{swung.Length} of 64 swung; the second note {swung.Min(x => x.Second!.Value) * 1000:0} ms at the shortest; " +
-                          $"the delay as the triplet's share {string.Join(" ", swung.Zip(tempos).OrderBy(x => x.Second).Take(8).Select(x => $"{x.Second}:{6 * x.First.Song.Swing.Delay / x.First.Song.Swing.Period:0.00}@{x.Second:0}"))}");
+                          $"the fastest, their tempo, the delay as the triplet's share and the second note: {string.Join(" ", swung.Zip(tempos).OrderByDescending(x => x.Second).Take(8)
+                              .Select(x => $"{x.Second:0} bpm {6 * x.First.Song.Swing.Delay / x.First.Song.Swing.Period:0.00} {x.First.Second!.Value * 1000:0} ms"))}");
         await Assert.That(swung.Length).IsGreaterThan(16);
         foreach (var (song, second) in swung)
             await Assert.That(second!.Value).IsGreaterThanOrEqualTo(Groove.ShortestSecondNote - 1e-9).Because($"seed {song.Seed}");

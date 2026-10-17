@@ -37,12 +37,12 @@ public sealed class GenreIdiomsReportTest
         bool HitsAt(int[] tracks, double position) => tracks.Any(t => notes[t].Any(x => Math.Abs(x.Position - position) < 0.05));
         // its groove's bars: where the drums play, but a phrase's last, where a fill does
         var drums = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack && notes.ContainsKey(x.Key)).Select(x => x.Key).ToArray();
-        bool DrumsPlay(double start) => drums.Any(t => notes[t].Any(x => x.Position >= start - 1e-9 && x.Position < start + 4 - 1e-9));
-        // its whole bars, a short last one left out
-        var bars = common.SelectMany(x => Enumerable.Range(0, (int)Math.Floor(x.Duration / x.Meter.BarDuration + 1e-9))
-                .Where(b => b % x.Meter.PhraseBars != x.Meter.PhraseBars - 1)
-                .Select(b => x.Start + b * x.Meter.BarDuration))
+        bool DrumsPlay(Span bar) => drums.Any(t => notes[t].Any(x => x.Position >= bar.Start - 1e-9 && x.Position < bar.End - 1e-9));
+        // its whole bars, each phrase's last and a short last one left out, by the map
+        var bars = common.SelectMany(span => span.Phrases.SelectMany(phrase =>
+                span.Bars.Where(bar => bar.Start >= phrase.Start - 1e-9 && bar.End <= phrase.End + 1e-9 && bar.End - bar.Start >= span.Meter.BarDuration - 1e-9).SkipLast(1)))
             .Where(DrumsPlay)
+            .Select(x => x.Start)
             .ToArray();
         var (kicks, snares) = (Tracks(DrumGroups.Kick), Tracks(DrumGroups.Snare).Concat(DrumGroups.AllDrums.Where(x => x.Name == "Clap").Select(DrumGroups.GetTrackNumber).Where(notes.ContainsKey)).ToArray());
         // the drums keeping time, as their song gives them the role

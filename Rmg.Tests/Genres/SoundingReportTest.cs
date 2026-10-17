@@ -24,7 +24,8 @@ public sealed class SoundingReportTest
         static int Class(int pitch) => (pitch % 12 + 12) % 12;
         double Share(int count, int of) => of > 0 ? count / (double)of : double.NaN;
 
-        // a note held past its part's next, on an instrument that stops its note at the next, not one ringing on
+        // a note held past its part's next, on an instrument that stops its note at the next, not one ringing on, a pitch of
+        // it the next does not strike again, as a restruck key stops the held one in the file (Midi.TrimOverlaps)
         var (stopping, overlapping) = (0, 0);
         foreach (var (definition, notes, _) in parts)
             for (var i = 0; i + 1 < notes.Length; i++)
@@ -32,7 +33,7 @@ public sealed class SoundingReportTest
                 if (InstrumentTraits.Rings(InstrumentsOverTime.ProgramOf(notes[i].Value.State, definition.InstrumentCode)) || notes[i + 1].Position - notes[i].Position < 1e-9)
                     continue;
                 stopping++;
-                overlapping += notes[i].Position + notes[i].Value.Duration > notes[i + 1].Position + 1e-6 ? 1 : 0;
+                overlapping += notes[i].Position + notes[i].Value.Duration > notes[i + 1].Position + 1e-6 && notes[i].Value.Pitches.Except(notes[i + 1].Value.Pitches).Any() ? 1 : 0;
             }
 
         // every strong note against the other parts' notes sounding at its start, and against its own chord
@@ -42,7 +43,11 @@ public sealed class SoundingReportTest
         {
             var sounding = parts.Where(x => x.Definition != definition).SelectMany(x =>
             {
-                var at = Array.FindLastIndex(x.Starts, s => s <= note.Position + 1e-9);
+                // the last note starting at or before it, the starts in order
+                var found = Array.BinarySearch(x.Starts, note.Position + 1e-9);
+                var at = (found >= 0 ? found : ~found) - 1;
+                while (at + 1 < x.Starts.Length && x.Starts[at + 1] <= note.Position + 1e-9)
+                    at++;
                 return at >= 0 && x.Notes[at].Position + x.Notes[at].Value.Duration > note.Position + 1e-6 ? x.Notes[at].Value.Pitches : [];
             }).ToArray();
             // a semitone apart, but a chord's own notes, a major seventh's from its root
@@ -80,6 +85,8 @@ public sealed class SoundingReportTest
         var measures = TestCorpus.InParallel(Enumerable.Range(0, genres.Length), i => Measure(TestCorpus.Get(0, new SongOverrides(Genre: genres[i])))).ToArray();
         await Assert.That(measures.All(x => x.Keys.ToHashSet().SetEquals(measures[0].Keys))).IsTrue();
         await Assert.That(measures.Any(x => x.Values.Any(double.IsFinite))).IsTrue();
+        // each a share, where it measures anything
+        await Assert.That(measures.SelectMany(x => x.Values).Where(double.IsFinite).All(x => x is >= 0 and <= 1)).IsTrue();
     }
 
     [Test]

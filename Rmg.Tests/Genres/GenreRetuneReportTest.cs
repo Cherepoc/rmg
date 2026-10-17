@@ -24,8 +24,10 @@ public sealed class GenreRetuneReportTest
         int SectionsWith(string point, Func<object?, bool> holds) => songs.Sum(s => s.Map.Sections.Count(x => s.Trace.Any(t => t.Point == point && t.Section == x.SectionId && holds(t.Value))));
         int SongsWith(string point, Func<object?, bool> holds) => songs.Count(s => s.Trace.Any(t => t.Point == point && holds(t.Value)));
         string Figure(FigurePlayer player, string name) => $"{Pct(SectionsWith(TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(player) == name), sections.Length):0}%";
-        var scales = songs.SelectMany(s => s.Trace.Where(t => t.Point == TracePoints.SectionScale).Select(t => ((Scale)t.Value!).Name)).GroupBy(x => x).OrderByDescending(x => x.Count()).Take(4).ToArray();
-        var scaleTotal = Math.Max(1, scales.Sum(x => x.Count()) );
+        // the four commonest scales, as shares of every section's scale
+        var allScales = songs.SelectMany(s => s.Trace.Where(t => t.Point == TracePoints.SectionScale).Select(t => ((Scale)t.Value!).Name)).ToArray();
+        var scales = allScales.GroupBy(x => x).OrderByDescending(x => x.Count()).Take(4).ToArray();
+        var scaleTotal = Math.Max(1, allScales.Length);
         Console.WriteLine($"{genre}: length {seconds[6]:0}-{seconds[32]:0}-{seconds[57]:0} s, tempo {tempos[6]:0}-{tempos[32]:0}-{tempos[57]:0}; " +
                           $"parts: riff twin {Pct(songs.Count(x => !x.Absent.Contains(TrackRole.RiffTwin)), 64):0}%, counter-melody {Pct(songs.Count(x => !x.Absent.Contains(TrackRole.CounterMelody)), 64):0}%, solo part {Pct(songs.Count(x => !x.Absent.Contains(TrackRole.Solo)), 64):0}%, drums {Pct(songs.Count(x => !x.Absent.Contains(TrackRole.Drum)), 64):0}%; " +
                           $"sections: solos {Pct(sections.Count(x => x.Song.IsSolo(x.Span)), sections.Length):0}%, double time {Pct(SectionsWith(TracePoints.TimeFeel, v => (int)v! == -1), sections.Length):0}%, half time {Pct(SectionsWith(TracePoints.TimeFeel, v => (int)v! == 1), sections.Length):0}%, " +

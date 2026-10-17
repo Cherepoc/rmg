@@ -19,6 +19,10 @@ public sealed class GenreDevicesReportTest
     {
         double Sections(string point, Func<object?, bool> plays) =>
             song.Trace.Where(x => x.Point == point).Select(x => plays(x.Value) ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average();
+        // a section's own harmony, as it plays: a looping section plays the first section's, whatever it drew
+        var looping = song.Trace.Where(x => x.Point == TracePoints.Loop && (bool)x.Value!).Select(x => x.Section).ToHashSet();
+        double Harmony(string point, Func<object?, bool> plays) =>
+            song.Trace.Where(x => x.Point == point && !looping.Contains(x.Section)).Select(x => plays(x.Value) ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average();
         var scales = song.Trace.Where(x => x.Point == TracePoints.ChordScales).SelectMany(x => (ImmutableArray<ChordScale>)x.Value!).ToArray();
         double Chords(ChordScaleKind kind) => scales.Length > 0 ? scales.Count(x => x.Kind == kind) / (double)scales.Length : double.NaN;
         var chordNotes = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.ToArray() ?? [];
@@ -26,6 +30,10 @@ public sealed class GenreDevicesReportTest
         var lines = new[] { song.Track(TrackRole.Melody), song.Track(TrackRole.CounterMelody), song.Track(TrackRole.Riff), song.Track(TrackRole.Solo) }
             .SelectMany(x => song.Song.Notes!.GetValueOrDefault(x) ?? EventTimeline.Create<RealizedNote>(0, [])).ToArray();
         double Lines(Func<RealizedNote, bool> plays) => lines.Length > 0 ? lines.Count(x => plays(x.Value)) / (double)lines.Length : double.NaN;
+        // the line parts' notes as they are placed, those leaning on a tension and those landing on one
+        var devices = song.Trace.Where(x => x.Point == TracePoints.LineDevices).Select(x => ((int Leans, int Tense, int Notes))x.Value!).ToArray();
+        double Placed(Func<(int Leans, int Tense, int Notes), int> plays) => devices.Sum(x => x.Notes) is var all and > 0 ? devices.Sum(plays) / (double)all : double.NaN;
+        var bassNotes = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass))?.ToArray() ?? [];
         var lifts = song.Trace.Count(x => x.Point == TracePoints.LiftCue);
         var sections = song.Song.Map!.Sections.ToArray();
         var polymeters = (System.Collections.IDictionary)song.Trace.Single(x => x.Point == TracePoints.Polymeter).Value!;
@@ -43,12 +51,12 @@ public sealed class GenreDevicesReportTest
             ["chords of four notes or more"] = chords.Length > 0 ? chords.Count(x => x.Value.Pitches.Select(p => p % 12).Distinct().Count() >= 4) / (double)chords.Length : double.NaN,
             ["chords parts arpeggiated"] = Sections(TracePoints.Arpeggio, x => (ArpeggioPattern)x! != ArpeggioPattern.None),
             ["sections with a passing chord"] = Sections(TracePoints.HarmonicRhythm, x => ((HarmonicRhythm)x!).Passing.Length > 0),
-            ["sections turned around"] = Sections(TracePoints.Turnaround, x => (((bool, bool Changes))x!).Changes),
-            ["sections planing"] = Sections(TracePoints.Planing, x => x is not null),
+            ["sections turned around"] = Harmony(TracePoints.Turnaround, x => (((bool, bool Changes))x!).Changes),
+            ["sections planing"] = Harmony(TracePoints.Planing, x => x is not null),
             ["sections with an inner line"] = sections.Length > 0
                 ? sections.Average(span => chordNotes.Any(n => span.IsWithin(n.Position) && n.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0) ? 1.0 : 0)
                 : double.NaN,
-            ["sections over a pedal"] = Sections(TracePoints.SectionPedal, x => x is not null),
+            ["sections over a pedal"] = sections.Length > 0 ? sections.Average(span => bassNotes.Any(n => span.IsWithin(n.Position) && n.Value.State.GetStateValue(CompositionStateKinds.BassPedal) > 0) ? 1.0 : 0) : double.NaN,
             ["songs reharmonising"] = song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is null ? 0 : 1,
             ["songs changing key"] = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).IsEmpty ? 0 : 1,
             ["sections in stop time"] = Sections(TracePoints.StopTime, x => (bool)x!),
@@ -106,16 +114,16 @@ public sealed class GenreDevicesReportTest
             ["songs ornamenting their lines"] = ((ImmutableArray<Ornament>)song.Trace.Single(x => x.Point == TracePoints.Ornaments).Value!).IsEmpty ? 0 : 1,
             ["parts' sections in a scale of their own"] = Sections(TracePoints.LineScale, x => (LineScale)x! != LineScale.Section),
             ["sections harmonising in three voices"] = sections.Length == 0 ? double.NaN : song.Trace.Count(x => x.Point == TracePoints.BlockHarmony) / (double)sections.Length,
-            ["line notes leaning"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.LineAppoggiatura) > 0),
-            ["line notes on a tension"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.LineTension) > 0),
+            ["line notes leaning"] = Placed(x => x.Leans),
+            ["line notes on a tension"] = Placed(x => x.Tense),
             ["melody notes stacked"] = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Melody))?.ToArray() is { Length: > 0 } melody
                 ? melody.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1) / (double)melody.Length
                 : double.NaN,
-            ["sections vamping"] = Sections(TracePoints.Vamp, x => (bool)x!),
+            ["sections vamping"] = Harmony(TracePoints.Vamp, x => (bool)x!),
             ["sections looping"] = Sections(TracePoints.Loop, x => (bool)x!),
             ["sections raising the cadence"] = Sections(TracePoints.CadenceRaise, x => (((int?, bool Raised))x!).Raised),
-            ["sections at home off the tonic"] = Sections(TracePoints.SectionHome, x => (int)x! != 0),
-            ["sections changing chords every two bars"] = Sections(TracePoints.HarmonicRhythm, x => ((HarmonicRhythm)x!).Bars >= 2),
+            ["sections at home off the tonic"] = Harmony(TracePoints.SectionHome, x => (int)x! != 0),
+            ["sections changing chords every two bars"] = Harmony(TracePoints.HarmonicRhythm, x => ((HarmonicRhythm)x!).Bars >= 2),
             ["songs opening on the hook"] = song.Song.Map!.Intro.Kind == IntroKind.Hook ? 1 : 0,
             ["songs opening on one part"] = song.Trace.Single(x => x.Point == TracePoints.OpeningAlone).Value is not null ? 1 : 0,
             ["songs counted in"] = song.Song.Map!.Intro.Kind == IntroKind.CountIn ? 1 : 0,
@@ -137,8 +145,25 @@ public sealed class GenreDevicesReportTest
             ["songs with an insertion effect"] = song.Song.Draws!.Insertion is null ? 0 : 1,
             ["songs with a drum solo"] = song.Solos.Values.Any(x => x.IsDrumSolo) ? 1 : 0,
             ["solos trading with the drums"] = song.Solos.Count > 0 ? song.Solos.Values.Average(x => x.TradesWithDrums ? 1.0 : 0) : double.NaN,
-            ["solos twinned"] = song.Solos.Count > 0 ? song.Solos.Values.Average(x => x.Mode == SoloMode.Together ? 1.0 : 0) : double.NaN,
+            ["solos twinned"] = song.Solos.Count > 0 ? song.Solos.Values.Average(x => x.Soloists.Length > 1 && x.Mode == SoloMode.Together ? 1.0 : 0) : double.NaN,
             ["drum solos whose feet keep time"] = song.Trace.Where(x => x.Point == TracePoints.DrumSolo).Select(x => ((DrumSolo)x.Value!).Feet ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
+            ["sections struck in ensemble hits"] = Sections(TracePoints.EnsembleHits, x => !((ImmutableArray<double>)x!).IsEmpty),
+            ["phrase lines kicked out"] = song.Trace.Count(x => x.Point == TracePoints.FillDecision) is var lines2 and > 0
+                ? (song.Trace.SingleOrDefault(x => x.Point == TracePoints.KickOuts)?.Value is ImmutableArray<(double, double)> kickOuts ? kickOuts.Length : 0) / (double)lines2
+                : double.NaN,
+            ["bars with a hat roll"] = sections.Sum(x => x.Bars.Count()) is var bars and > 0
+                ? (song.Trace.SingleOrDefault(x => x.Point == TracePoints.HatRolls)?.Value is ImmutableArray<(double, double, int)> rolls ? rolls.Length : 0) / (double)bars
+                : double.NaN,
+            ["sections the twin leads"] = Sections(TracePoints.TwinLead, x => (bool)x!),
+            ["sections the counter-melody imitates"] = sections.Length == 0 ? double.NaN : song.Trace.Count(x => x.Point == TracePoints.Imitation) / (double)sections.Length,
+            ["changes of section run into"] = song.Song.Map!.Sections.Length > 1
+                ? song.Trace.Count(x => x.Point == TracePoints.LineFill && x.Track == song.Track(TrackRole.CounterMelody) && ((ValueTuple<double, double[]>)x.Value!).Item2.Length == LineFills.RunNotes)
+                  / (double)(song.Song.Map!.Sections.Length - 1)
+                : double.NaN,
+            ["sections sung in 8ths"] = Sections(TracePoints.SungEighths, x => (bool)x!),
+            ["sections whose bass walks a boogie"] = Sections(TracePoints.Boogie, x => (bool)x!),
+            ["songs building their last chorus"] = (bool)song.Trace.Single(x => x.Point == TracePoints.BreakdownChorus).Value! ? 1 : 0,
+            ["songs pinning a part to its figure"] = ((System.Collections.ICollection)song.Trace.Single(x => x.Point == TracePoints.PinnedDrums).Value!).Count > 0 ? 1 : 0,
             ["phrase lines filled"] = song.Trace.Where(x => x.Point == TracePoints.FillDecision).Select(x => ((FillDecision)x.Value!).Span > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["unconventionality"] = song.Song.Draws!.Unconventionality.Base
         };
@@ -174,8 +199,21 @@ public sealed class GenreDevicesReportTest
         ["sections broken down"] = "breakdown", ["sections cut short"] = "sectionChanges", ["sections in phrases of three or six"] = "phraseBars",
         ["drops filtered"] = "dropKind", ["appearances of one part alone"] = "alone", ["songs whose mix is filtered"] = "mixFilter",
         ["songs in a genre's room"] = "room", ["songs with an insertion effect"] = "insertion", ["songs with a drum solo"] = "soloists",
-        ["solos trading with the drums"] = "soloists", ["solos twinned"] = "solos", ["drum solos whose feet keep time"] = "drumSoloFeet", ["phrase lines filled"] = "fills"
+        ["solos trading with the drums"] = "soloists", ["solos twinned"] = "solos", ["drum solos whose feet keep time"] = "drumSoloFeet", ["phrase lines filled"] = "fills",
+        ["sections with a figure"] = "figure", ["sections struck in ensemble hits"] = "ensembleHits", ["phrase lines kicked out"] = "kickOut",
+        ["bars with a hat roll"] = "hatRolls", ["sections the twin leads"] = "doubling", ["sections the counter-melody imitates"] = "doubling",
+        ["changes of section run into"] = "lineRun", ["sections sung in 8ths"] = "sung", ["sections whose bass walks a boogie"] = "alternatingBass",
+        ["songs building their last chorus"] = "lastRepeat", ["songs pinning a part to its figure"] = "pins"
     };
+
+    /// <summary>The measures that are no genre choice's, which every preset plays as its songs draw.</summary>
+    private static readonly HashSet<string> NoChoice = ["unconventionality", "melody notes stacked"];
+
+    /// <summary>
+    ///     Whether a preset names the choice a measure is by: a choice's own name, or a family's, the figures' of every
+    ///     player (<c>figure.*</c>).
+    /// </summary>
+    private static bool Names(GenrePresets.Preset preset, string choice) => preset.Choices.Keys.Any(x => x == choice || x.StartsWith(choice + "."));
 
     /// <summary>The measures that are numbers rather than shares.</summary>
     private static readonly HashSet<string> Numbers = ["reverb sent", "unconventionality"];
@@ -196,8 +234,11 @@ public sealed class GenreDevicesReportTest
         foreach (var (measure, choice) in ChoiceOf)
         {
             await Assert.That(measures[0].ContainsKey(measure)).IsTrue().Because(measure);
-            await Assert.That(GenreChoices.All.Any(x => x.Name == choice)).IsTrue().Because($"{measure}: {choice}");
+            await Assert.That(GenreChoices.All.Any(x => x.Name == choice || x.Name.StartsWith(choice + "."))).IsTrue().Because($"{measure}: {choice}");
         }
+        // and the other way: every measure is a choice's, or none's
+        foreach (var measure in measures[0].Keys)
+            await Assert.That(ChoiceOf.ContainsKey(measure) || NoChoice.Contains(measure)).IsTrue().Because(measure);
     }
 
     [Test]
@@ -212,7 +253,7 @@ public sealed class GenreDevicesReportTest
             (preset.Name + "|" + preset.Id, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => Measure(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset))))))));
 
         bool Inherits(string column, string measure) =>
-            column.Split('|') is [_, var id] && ChoiceOf.TryGetValue(measure, out var choice) && !GenrePresets.All.Single(x => x.Id == id).Choices.ContainsKey(choice);
+            column.Split('|') is [_, var id] && ChoiceOf.TryGetValue(measure, out var choice) && !Names(GenrePresets.All.Single(x => x.Id == id), choice);
         Console.WriteLine($"{"",-36}" + string.Join("", columns.Select(x => $"{x.Name.Split('|')[0],11}")));
         foreach (var measure in columns[0].Songs[0].Keys)
             Console.WriteLine($"{measure,-36}" + string.Join("", columns.Select(c =>

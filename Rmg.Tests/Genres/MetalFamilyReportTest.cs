@@ -71,7 +71,8 @@ public sealed class MetalFamilyReportTest
                 lowest.Add(low);
                 if (((low - key) % 12 + 12) % 12 == 0)
                     tonicLowest++;
-                classes.AddRange(riff.GroupBy(x => (int)Math.Floor(x.Position / song.Song.Meter.BarDuration)).Select(g => (double)g.Select(x => x.Value.Offset % 12).Distinct().Count()));
+                // by its bar, a section's own from its start, in its own meter
+                classes.AddRange(riff.GroupBy(x => (song.Map.SectionAt(x.Position)?.Start, song.Map.PlaceOf(x.Position).Bar)).Select(g => (double)g.Select(x => x.Value.Offset % 12).Distinct().Count()));
                 if (!song.Absent.Contains(TrackRole.Bass))
                 {
                     var bass = song.Notes(song.Track(TrackRole.Bass)).Select(x => Math.Round(x.Position * 48)).ToHashSet();

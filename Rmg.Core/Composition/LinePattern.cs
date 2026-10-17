@@ -144,6 +144,10 @@ internal sealed class LinePattern
         ];
         // a strong beat's note leaning on a tension, where the next note, on a weaker beat over the same chord, resolves it
         var leans = lineNotes.Select((x, i) => i + 1 < lineNotes.Length && Chord(lineNotes[i + 1]) == Chord(x) && Leans(x, lineNotes[i + 1], profile)).ToArray();
+        // the notes landing on a tension as they are placed below, a resolution and a lean apart
+        var tense = lineNotes.Where((x, i) => !leans[i] && !(i > 0 && leans[i - 1]))
+            .Count(x => IsTense(x, x.State.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : x.State.GetStateValue(CompositionStateKinds.BeatRank), profile));
+        StateTrace.RecordSection(TracePoints.LineDevices, trackNumber, 0, $"{leans.Count(x => x)} leaning, {tense} on a tension of {lineNotes.Length}", (leans.Count(x => x), tense, lineNotes.Length));
         var notes = lineNotes
             .Select((x, i) =>
                 {

@@ -78,9 +78,10 @@ public sealed class GhostsTest
             var (ghosts, others) = (new List<double>(), new List<double>());
             foreach (var (with, without) in pairs)
             {
-                var before = without.Song.Notes!.Where(x => snares.Contains(x.Key)).SelectMany(x => x.Value).Select(x => Math.Round(x.Position, 6)).ToHashSet();
+                // where the snares strike as rendered, swung, the song without the ghosts in its own swing
+                var before = without.Song.Notes!.Where(x => snares.Contains(x.Key)).SelectMany(x => x.Value).Select(x => Math.Round(without.Swing.Apply(x.Position), 6)).ToHashSet();
                 // the snares' notes by where and what they strike
-                var struck = with.Song.Notes!.Where(n => snares.Contains(n.Key)).SelectMany(n => n.Value).SelectMany(m => m.Value.Pitches.Select(p => (Math.Round(m.Position, 6), p))).ToHashSet();
+                var struck = with.Song.Notes!.Where(n => snares.Contains(n.Key)).SelectMany(n => n.Value).SelectMany(m => m.Value.Pitches.Select(p => (Math.Round(with.Swing.Apply(m.Position), 6), p))).ToHashSet();
                 foreach (var note in with.Rendered.Tracks.Where(x => x.IsPercussionInstrument).SelectMany(x => x.NoteTimeline)
                              .Where(x => struck.Contains((Math.Round(x.Position, 6), x.Value.Offset))))
                     (before.Contains(Math.Round(note.Position, 6)) ? others : ghosts).Add(note.Value.Velocity * 127);

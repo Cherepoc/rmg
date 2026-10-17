@@ -50,12 +50,12 @@ public sealed class CalmTest
             var end = span.End - span.Meter.BarDuration;
             foreach (var (track, definition) in song.Song.TrackDefinitions.Where(x => x.Value is PitchInstrumentTrack))
             {
-                var notes = song.Song.Notes!.GetValueOrDefault(track)?.Where(n => n.IsWithin(span.Start, span.End)).ToArray() ?? [];
+                var notes = song.Song.Notes!.GetValueOrDefault(track)?.Where(n => n.IsWithin(span.Start, end)).ToArray() ?? [];
                 var programs = notes.Select(n => InstrumentsOverTime.ProgramOf(n.Value.State, ((PitchInstrumentTrack)definition).InstrumentCode)).Distinct().ToArray();
                 if (notes.Length < 2 || !programs.Any(p => p is >= 24 and <= 31))
                     continue;
                 var onsets = notes.Select(n => n.Position).Distinct().Order().ToArray();
-                rows.Add((definition.Role, onsets.Length / span.Duration, onsets.Zip(onsets.Skip(1), (a, b) => b - a).Min()));
+                rows.Add((definition.Role, onsets.Length / (end - span.Start), onsets.Zip(onsets.Skip(1), (a, b) => b - a).Min()));
             }
         }
 

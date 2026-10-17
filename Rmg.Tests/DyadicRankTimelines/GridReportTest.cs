@@ -19,8 +19,9 @@ public sealed class GridReportTest
             {
                 var positions = drum.Select(x => x.Position).ToArray();
                 notes += positions.Length;
-                // each from its bar's start, as a meter of no whole beats moves the grids
-                offGrid += positions.Select(song.Map.BeatInBar).Count(x => !IsOn(x, 0.25) && !IsOn(x, 1 / 3.0));
+                // each from its bar's start, as a meter of no whole beats moves the grids; a hat roll's 32nds and 16th triplets
+                // and a fill's sextuplets on grids of their own, so that what is left is the quintuplets and septuplets
+                offGrid += positions.Select(song.Map.BeatInBar).Count(x => !IsOn(x, 0.125) && !IsOn(x, 1 / 6.0));
                 rushed += positions.Zip(positions.Skip(1), (a, b) => b - a).Count(x => x > 1e-9 && x < 0.125 - 1e-9);
             }
 
@@ -28,7 +29,7 @@ public sealed class GridReportTest
         });
         var (notes, offGrid, rushed) = (songs.Sum(x => x.Notes), songs.Sum(x => x.OffGrid), songs.Sum(x => x.Rushed));
 
-        Console.WriteLine($"{notes} drum notes: off the 16ths and the 8th triplets {offGrid}, under a 32nd after the one before {rushed}");
+        Console.WriteLine($"{notes} drum notes: off the 32nds and the 16th sextuplets, the quintuplets and septuplets, {offGrid}, under a 32nd after the one before {rushed}");
         await Task.CompletedTask;
     }
 

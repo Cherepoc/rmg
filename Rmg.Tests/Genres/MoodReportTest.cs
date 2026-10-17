@@ -33,6 +33,47 @@ public sealed class MoodReportTest
         Console.WriteLine($"{label}: chords sounding {string.Join(", ", chords.GroupBy(x => x.Quality).OrderByDescending(x => x.Sum(c => c.Duration)).Select(x => $"{x.Key} {x.Sum(c => c.Duration) / total:P0}"))}");
     }
 
+    /// <summary>How long a song's chords and pads sound major, of their triads.</summary>
+    private static double Major(CorpusSong song)
+    {
+        var chords = song.Song.Notes!.Where(n => song.Song.TrackDefinitions[n.Key].Role is TrackRole.Chords or TrackRole.Pad).SelectMany(n => n.Value)
+            .Where(x => x.Value.Pitches.Length >= 3).Select(x => (Quality: Quality(x.Value.Pitches), x.Value.Duration)).Where(x => x.Quality is "major" or "minor").ToArray();
+        return chords.Length > 0 ? chords.Where(x => x.Quality == "major").Sum(x => x.Duration) / chords.Sum(x => x.Duration) : double.NaN;
+    }
+
+    /// <summary>
+    ///     Every preset's mood at its ends, the same seeds at darkness -1, 0 and 1 given, its other setting at the middle, and
+    ///     at intensity -1, 0 and 1 likewise: the darkness by how long its chords sound major and its sections' scales'
+    ///     darkness, the intensity by its tempo and how many notes a second its pitched parts play; so that a setting
+    ///     whose ends a genre plays alike shows by number (the review reads it, run/mood.txt).
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task Ends()
+    {
+        const int count = 16;
+        double[] ends = [-1, 0, 1];
+        var presets = new (string Name, Genre? Genre)[] { ("none", null) }.Concat(GenrePresets.All.Select(x => (x.Name, (Genre?)GenrePresets.Genre(x)))).ToArray();
+        Console.WriteLine($"{"",-20}{"major chords",24}{"scale darkness",24}{"tempo",24}{"notes a second",24}");
+        Console.WriteLine($"{"",-20}" + string.Concat(Enumerable.Repeat($"{"-1",8}{"0",8}{"1",8}", 4)));
+        foreach (var (name, genre) in presets)
+        {
+            double Mean(IEnumerable<double> values) => values.Where(double.IsFinite).DefaultIfEmpty(double.NaN).Average();
+            CorpusSong[] At(double? darkness, double? intensity) =>
+                TestCorpus.InParallel(Enumerable.Range(0, count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre, Darkness: darkness, Intensity: intensity))).ToArray();
+            var dark = ends.Select(x => At(x, 0)).ToArray();
+            var fierce = ends.Select(x => At(0, x)).ToArray();
+            string Row(Func<CorpusSong, double> measure, CorpusSong[][] songs, string format) => string.Concat(songs.Select(x => Mean(x.Select(measure)).ToString(format).PadLeft(8)));
+            Console.WriteLine($"{name,-20}" +
+                              Row(Major, dark, "P0") +
+                              Row(x => Mean(x.Trace.Where(t => t.Point == TracePoints.SectionScale).Select(t => ((Scale)t.Value!).Darkness)), dark, "0.00") +
+                              Row(x => x.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(Rmg.Core.Events.StateKinds.Tempo).GetEffectiveValueAt(0) * Meter.BaseTempo, fierce, "0") +
+                              Row(x => x.Song.Notes!.Where(n => x.Song.TrackDefinitions[n.Key] is PitchInstrumentTrack).Sum(n => n.Value.Count) / x.Rendered.Seconds, fierce, "0.0"));
+        }
+
+        await Task.CompletedTask;
+    }
+
     [Test]
     [Explicit]
     public async Task Report()

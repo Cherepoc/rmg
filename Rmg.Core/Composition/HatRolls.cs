@@ -76,6 +76,7 @@ internal static class HatRolls
         // but where a fill plays, from its first note to its line, and in stop time, after the draws so that they are as many
         var holds = draft.Holds(song);
         rolls.RemoveAll(r => times.Any(track => holds.Meets(KeepsOutOf, r.From, r.To, track)));
+        StateTrace.RecordSong(TracePoints.HatRolls, string.Join(", ", rolls.Select(x => $"{x.From}-{x.To}")), rolls.ToImmutableArray());
 
         var result = notes.ToBuilder();
         foreach (var track in times)

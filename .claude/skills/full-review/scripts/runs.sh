@@ -1,6 +1,6 @@
 #!/bin/bash
 # The review's runs, one at a time under the memory cap: the build, the suite at each of the review's offsets
-# (review.json, from offsets.py), the four preset reports, and every run's failures as findings; first the reports'
+# (review.json, from offsets.py), the five preset reports, and every run's failures as findings; first the reports'
 # smoke test, as the review measures with them, and each failure run again alone, one passing alone flaky.
 #
 #   runs.sh <repo> <review folder>             # the review's runs, before the reviewers
@@ -41,4 +41,6 @@ cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/
 cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/EveryPreset_ChoicesByEnd" --output detailed > "$R/run/every-preset.txt" 2>&1
 # how the parts sound together: a note held into its part's next, a semitone between parts, a strong note off its chord
 cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/SoundingReportTest/Report" --output detailed > "$R/run/sounding.txt" 2>&1
+# every preset's mood at its ends, the same seeds at darkness and intensity -1, 0 and 1 given
+cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/MoodReportTest/Ends" --output detailed > "$R/run/mood.txt" 2>&1
 echo "runs done: $R/run"
