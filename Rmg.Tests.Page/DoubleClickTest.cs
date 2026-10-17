@@ -2,7 +2,7 @@ using Microsoft.Playwright;
 
 namespace Rmg.Tests.Page;
 
-/// <summary>A slider double-clicked back to its default: a value to its middle, a pan to the middle and a volume to its loudest.</summary>
+/// <summary>A slider double-clicked back to its default: a value to its middle, a pan to the middle and a volume to 100%.</summary>
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class DoubleClickTest(Site site)
 {

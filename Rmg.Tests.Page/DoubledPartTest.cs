@@ -11,19 +11,21 @@ public sealed class DoubledPartTest(Site site)
     // the seed of the song the level is measured on, any whose chords play
     private const string Seed = "1";
 
+    /// <summary>Every message the page sends its synthesizer, kept as it can be read, in window.posted.</summary>
+    private const string Posted = """
+        window.posted = [];
+        const post = MessagePort.prototype.postMessage;
+        MessagePort.prototype.postMessage = function (message, ...rest) {
+            try { window.posted.push(JSON.stringify(message)); } catch { }
+            return post.call(this, message, ...rest);
+        };
+        """;
+
     [Test]
     public async Task ADoubledPart_MutedHere_MutesEveryTakeOfIt()
     {
-        await using var page = await SongPage.Open(site);
         // every message the page sends its synthesizer, as it can be read
-        await page.Page.AddInitScriptAsync("""
-            window.posted = [];
-            const post = MessagePort.prototype.postMessage;
-            MessagePort.prototype.postMessage = function (message, ...rest) {
-                try { window.posted.push(JSON.stringify(message)); } catch { }
-                return post.call(this, message, ...rest);
-            };
-            """);
+        await using var page = await SongPage.Open(site, script: Posted);
         // the songs asked for with the riff, its twin and the chords on a distortion guitar, which a mix doubles
         string? report = null;
         await page.Page.RouteAsync("**/api/songs/generate", async route =>
@@ -78,15 +80,7 @@ public sealed class DoubledPartTest(Site site)
     [Test]
     public async Task ADoubledPart_PlaysAtItsTracksLevel_AsTheFileDoes()
     {
-        await using var page = await SongPage.Open(site);
-        await page.Page.AddInitScriptAsync("""
-            window.posted = [];
-            const post = MessagePort.prototype.postMessage;
-            MessagePort.prototype.postMessage = function (message, ...rest) {
-                try { window.posted.push(JSON.stringify(message)); } catch { }
-                return post.call(this, message, ...rest);
-            };
-            """);
+        await using var page = await SongPage.Open(site, script: Posted);
         string? report = null;
         await page.Page.RouteAsync("**/api/songs/generate", async route =>
         {

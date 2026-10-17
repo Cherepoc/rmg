@@ -22,13 +22,17 @@ public sealed class WalkingTheListTest(Site site)
         await genre.SelectOptionAsync(new SelectOptionValue { Label = "Rock" });
         await page.Until(() => page.Requests.Count > count, "the song asked for in Rock");
         await page.Settled();
-        var heard = await page.History();
-        await Assert.That(await page.Page.Locator("button[data-entry]").First.GetAttributeAsync("data-entry")).EndsWith(":rock");
+        // its entries, which carry its genre's key
+        var entries = page.Page.Locator("button[data-entry]");
+        var heard = await entries.EvaluateAllAsync<string[]>("xs => xs.map(x => x.dataset.entry)");
+        await Assert.That(heard[0]).EndsWith(":rock");
 
-        await page.Page.ReloadAsync();
+        // the page opened again rather than reloaded at the song's, which would open with that song and list it anew
+        await page.Page.GotoAsync("/");
         await page.FirstSong();
         await page.Settled();
-        await Assert.That((await page.History()).Intersect(heard).Count()).IsEqualTo(heard.Count);
+        var kept = await entries.EvaluateAllAsync<string[]>("xs => xs.map(x => x.dataset.entry)");
+        await Assert.That(kept.Intersect(heard).Count()).IsEqualTo(heard.Length);
         await Assert.That(page.Errors).IsEmpty();
     }
 

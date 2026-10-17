@@ -208,12 +208,15 @@ public sealed class GenreEditorTest(Site site)
         var dialog = await OpenEditor(page);
         await Section(dialog, "Parts");
 
+        // a page that could scroll, the window shorter than it
+        await page.Page.SetViewportSizeAsync(1280, 400);
+        await Assert.That(await page.Page.EvaluateAsync<bool>("() => document.scrollingElement.scrollHeight > innerHeight")).IsTrue();
         // the editor scrolled past its end, and the wheel over the backdrop: the page where it was
         var before = await page.Page.EvaluateAsync<double>("() => scrollY");
-        await page.Page.Mouse.MoveAsync(640, 300);
+        await page.Page.Mouse.MoveAsync(640, 200);
         for (var i = 0; i < 3; i++)
             await page.Page.Mouse.WheelAsync(0, 2000);
-        await page.Page.Mouse.MoveAsync(5, 300);
+        await page.Page.Mouse.MoveAsync(5, 200);
         await page.Page.Mouse.WheelAsync(0, 2000);
         await Assert.That(await page.Page.EvaluateAsync<double>("() => scrollY")).IsEqualTo(before);
 
@@ -1039,12 +1042,16 @@ public sealed class GenreEditorTest(Site site)
         await tune.Locator(".tune-option[data-option='lean']").ClickAsync();
         await tune.Locator("input[aria-label='Lean, middling']").FillAsync("60");
         await tune.Locator("input[aria-label='Lean, middling']").DispatchEventAsync("change");
+        // its ends as the window shows them, the songs' own, whatever the generator draws them at
+        async Task<int> Middle(string option) => int.Parse(System.Text.RegularExpressions.Regex.Match(
+            (await tune.Locator($".tune-row[data-option='{option}'] .tune-values").TextContentAsync() ?? "").Split(" · ")[1], @"\d+").Value);
+        var (from, to) = (await Middle("from"), await Middle("to"));
         await Done(tune);
 
         var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("tempo");
-        // the songs' own, 90 to about 175, leaning as given
-        await Assert.That(Ends(asked.GetProperty("from"))[1]).IsEqualTo(90);
-        await Assert.That(Ends(asked.GetProperty("to"))[1]).IsBetween(170, 180);
+        // asked for as shown, leaning as given
+        await Assert.That(Ends(asked.GetProperty("from"))[1]).IsEqualTo(from);
+        await Assert.That(Ends(asked.GetProperty("to"))[1]).IsEqualTo(to);
         await Assert.That(Ends(asked.GetProperty("lean"))[1]).IsEqualTo(60);
         await Assert.That(page.Errors).IsEmpty();
     }
@@ -1082,17 +1089,17 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await tune.Locator(".tune-chart .genre-band-centre").CountAsync()).IsEqualTo(1);
         await Assert.That(await tune.Locator(".tune-handle").CountAsync()).IsEqualTo(9);
         var lean = tune.Locator(".tune-handle[data-option='lean'][data-end='1']");
-        var below = double.Parse(await lean.GetAttributeAsync("cy") ?? "");
+        var below = double.Parse(await lean.GetAttributeAsync("cy") ?? "", System.Globalization.CultureInfo.InvariantCulture);
         // a lean's handle taken chooses its tab, and up leans longer, its handle higher
         await lean.FocusAsync();
         await Assert.That(await tune.Locator(".tune-row[data-option='lean']").GetAttributeAsync("aria-current")).IsEqualTo("true");
         for (var i = 0; i < 3; i++) await lean.PressAsync("PageUp");
         await Assert.That(await tune.Locator("input[aria-label='Lean, middling']").InputValueAsync()).IsEqualTo("30");
-        var above = double.Parse(await tune.Locator(".tune-handle[data-option='lean'][data-end='1']").GetAttributeAsync("cy") ?? "");
+        var above = double.Parse(await tune.Locator(".tune-handle[data-option='lean'][data-end='1']").GetAttributeAsync("cy") ?? "", System.Globalization.CultureInfo.InvariantCulture);
         await Assert.That(above).IsLessThan(below - 5);
         // the lean's handle follows its ends'
         await tune.Locator(".tune-handle[data-option='to'][data-end='1']").PressAsync("PageUp");
-        await Assert.That(double.Parse(await tune.Locator(".tune-handle[data-option='lean'][data-end='1']").GetAttributeAsync("cy") ?? "")).IsLessThan(above);
+        await Assert.That(double.Parse(await tune.Locator(".tune-handle[data-option='lean'][data-end='1']").GetAttributeAsync("cy") ?? "", System.Globalization.CultureInfo.InvariantCulture)).IsLessThan(above);
         // dragged down, toward the band's from, a lean's handle leans shorter
         var box = (await tune.Locator(".tune-handle[data-option='lean'][data-end='2']").BoundingBoxAsync())!;
         await page.Page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y + box.Height / 2);

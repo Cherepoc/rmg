@@ -57,6 +57,8 @@ public sealed class MediaSessionTest(Site site)
         await Assert.That(await pulses.CountAsync()).IsGreaterThan(0);
         await Assert.That(await pulses.First.GetAttributeAsync("aria-hidden")).IsEqualTo("true");
         var idle = await page.Page.EvaluateAsync<int[]>(drawn);
+        // every one a glow, small, while nothing plays
+        await Assert.That(idle.All(x => x > 0)).IsTrue();
 
         await page.Page.Locator("#play").ClickAsync();
         await page.Until(async () => (await page.Page.EvaluateAsync<int[]>(drawn)).Zip(idle).Any(x => x.First > x.Second * 2), "a pulse grown as its part plays", 15);

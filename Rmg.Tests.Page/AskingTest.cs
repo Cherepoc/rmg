@@ -179,11 +179,19 @@ public sealed class AskingTest(Site site)
         await Assert.That(since[1].Facet("feel")).IsEqualTo(10);
     }
 
+    /// <summary>Counts every time the song panel shows a song being made, which a remake does and a download's fetch never.</summary>
+    private const string CountMaking = """
+        window.makings = 0;
+        new MutationObserver(records => window.makings += records.flatMap(r => [...r.addedNodes]).filter(n => n.classList?.contains("work") && n.closest(".now-playing")).length)
+            .observe(document, { childList: true, subtree: true });
+        """;
+
     [Test]
     public async Task TheMixChanged_WhileARemakeIsOnItsWay_IsFetchedForTheDownloadOnceTheRemakeIsHere()
     {
-        await using var page = await SongPage.Open(site);
+        await using var page = await SongPage.Open(site, script: CountMaking);
         await page.FirstSong();
+        await page.Page.EvaluateAsync("() => { window.makings = 0; }");
         var asked = page.Requests.Count;
 
         page.Slow = Held;
@@ -197,5 +205,7 @@ public sealed class AskingTest(Site site)
         await Assert.That(remake.Ended).IsEqualTo("200");
         await Assert.That(download.Volume).IsEqualTo(30);
         await Assert.That(download.SentAt).IsGreaterThanOrEqualTo(remake.EndedAt!.Value);
+        // the song made once, the second request the download's alone
+        await Assert.That(await page.Page.EvaluateAsync<int>("() => window.makings")).IsEqualTo(1);
     }
 }

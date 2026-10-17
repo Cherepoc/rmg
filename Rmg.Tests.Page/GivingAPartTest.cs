@@ -84,6 +84,9 @@ public sealed class GivingAPartTest(Site site)
         var outside = await page.Page.EvaluateAsync<string>("selector => [...document.querySelectorAll(selector)].find(x => x.getAttribute('aria-pressed') === 'false').dataset.piece", Chips);
         var withIt = await Remade(page, () => page.Page.EvaluateAsync("([selector, piece]) => document.querySelector(`${selector}[data-piece='${piece}']`).click()", new object[] { Chips, outside }));
         await Assert.That(withIt.Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).Contains(outside);
+        // and taken out again
+        var without = await Remade(page, () => page.Page.EvaluateAsync("([selector, piece]) => document.querySelector(`${selector}[data-piece='${piece}']`).click()", new object[] { Chips, outside }));
+        await Assert.That(without.Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).DoesNotContain(outside);
         await Assert.That(page.Errors).IsEmpty();
     }
 

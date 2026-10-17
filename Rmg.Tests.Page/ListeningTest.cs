@@ -162,12 +162,13 @@ public sealed class ListeningTest(Site site)
         var count = page.Requests.Count;
         await strip.GetByRole(AriaRole.Button, new() { Name = "Play B" }).ClickAsync();
         await page.Until(() => page.Requests.Count > count, "B asked for");
-        // its patch laid over the genre, the genre's other choices as they are
+        // its patch laid over the genre's choice, the choice's other options as the genre has them
         var genre = page.Requests[^1].Body.GetProperty("genre");
         await Assert.That(genre.GetProperty("louderForms").GetProperty("quieter").GetInt32()).IsEqualTo(0);
-        await Assert.That(genre.GetProperty("effects").TryGetProperty("vibrato", out _)).IsTrue();
+        await Assert.That(genre.GetProperty("louderForms").TryGetProperty("guitars", out var guitars) && guitars.GetInt32() == 0).IsTrue();
         await page.Settled();
         await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
     }
 
     /// <summary>A question's songs keep the mutes and solos pressed, from A to B and on to the next song.</summary>
