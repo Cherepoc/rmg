@@ -239,19 +239,24 @@ public sealed class FiguresTest
     }
 
     [Test]
-    public async Task AFigureSeveralPlayersPlay_IsPlayedByAll_ABlastsKickWithItsSnareAndItsCymbal()
+    public async Task AFigureSeveralPlayersPlay_IsPlayedByAll_ABlastsKickWithItsSnareAndItsCymbal_ButInHalfOrDoubleTime()
     {
-        var blasts = 0;
+        var (blasts, alone) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
-        foreach (var figures in song.Trace.Where(t => t.Point == TracePoints.Figures).Select(t => (ImmutableDictionary<FigurePlayer, string>)t.Value!))
-            if (figures.GetValueOrDefault(FigurePlayer.Ground) == "blast")
-            {
-                blasts++;
-                await Assert.That(figures.GetValueOrDefault(FigurePlayer.Backbeat)).IsEqualTo("blast").Because($"seed {song.Seed}");
-                await Assert.That(figures.GetValueOrDefault(FigurePlayer.Time)).IsEqualTo("blast").Because($"seed {song.Seed}");
-            }
+        foreach (var entry in song.Trace.Where(t => t.Point == TracePoints.Figures))
+        {
+            var figures = (ImmutableDictionary<FigurePlayer, string>)entry.Value!;
+            if (figures.GetValueOrDefault(FigurePlayer.Ground) != "blast")
+                continue;
+            // in its own time with them, and in half or double time the kick's 8ths alone, under the backbeat it stretches
+            var stretched = (int)song.Trace.First(t => t.Point == TracePoints.TimeFeel && t.Section == entry.Section).Value! != 0;
+            (blasts, alone) = (blasts + (stretched ? 0 : 1), alone + (stretched ? 1 : 0));
+            await Assert.That(figures.GetValueOrDefault(FigurePlayer.Backbeat) == "blast").IsEqualTo(!stretched).Because($"seed {song.Seed}");
+            await Assert.That(figures.GetValueOrDefault(FigurePlayer.Time) == "blast").IsEqualTo(!stretched).Because($"seed {song.Seed}");
+        }
 
         await Assert.That(blasts).IsGreaterThan(5);
+        await Assert.That(alone).IsGreaterThan(0);
     }
 
     /// <summary>A section running a figure across its bar lines plays no figure, its cycle kept.</summary>

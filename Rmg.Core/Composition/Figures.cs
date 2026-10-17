@@ -259,8 +259,10 @@ internal static class Figures
                             // where the kick plays, the player's own rhythm where it rests; and no drum's of fixed onsets in half
                             // or double time, whose figure is the drum's own rhythm stretched or pressed, as the time feel
                             // stretches the drums alone, but one that follows, whose notes are as what it follows plays them
-                            // there, a breakdown's kick on its chugs
+                            // there, a breakdown's kick on its chugs, and the kick's steady step, a double kick's 16ths or a
+                            // blast's 8ths, no groove the time feel stretches, under the backbeat it halves or doubles
                             if (own.Length == 0 || onsets.Length == 0 || song.SectionOf(span.SectionId).TimeFeel != 0 && figure.Follows is null && Drums.Contains(player)
+                                && !(player == FigurePlayer.Ground && figure.Step > 0)
                                 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
                                 continue;
                             laid.Add((span.SectionId, player));
