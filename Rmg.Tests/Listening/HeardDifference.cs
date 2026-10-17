@@ -139,6 +139,21 @@ internal sealed class HeardDifference
             _ => role.ToString()
         }} ({GeneralMidi.Programs[code]})";
 
+    /// <summary>A controller as no MIDI one is, which the insertion effect a part plays through is told by.</summary>
+    private const int InsertionController = 1000;
+
+    /// <summary>
+    ///     A track's controllers in time, and the insertion effect it plays through as one of them, its kind's number over
+    ///     the whole song, as a wah or a phaser is heard on every note of the part (Midi assigns its part's channels).
+    /// </summary>
+    private static Dictionary<int, (double Seconds, double Value)[]> Controllers(RenderedSong song, RenderedTrack track)
+    {
+        var controllers = track.Controllers.GroupBy(x => x.Controller).ToDictionary(x => x.Key, x => x.Select(c => (song.SecondsAt(c.Position), (double)c.Value)).OrderBy(c => c.Item1).ToArray());
+        if (song.Insertion is { } insertion && !track.IsPercussionInstrument && !track.IsRiser && track.Role.Source() == insertion.Part)
+            controllers[InsertionController] = [(0.0, 16 * (1 + (int)insertion.Kind))];
+        return controllers;
+    }
+
     /// <summary>A rendering in seconds: its notes as heard, and every track's effects over time.</summary>
     private sealed class Rendering
     {
@@ -178,7 +193,7 @@ internal sealed class HeardDifference
                     // the order of their times, the expression a position's latest written at or before it, as Midi merges it
                     [..track.PitchBends.Select(x => (song.SecondsAt(x.Position), (x.Value - 8192) / 8191.0 * ExpressionRender.BendRange)).OrderBy(x => x.Item1)],
                     Track.AsWritten([..track.Expression.Select(x => (song.SecondsAt(x.Position), x.Value))]),
-                    track.Controllers.GroupBy(x => x.Controller).ToDictionary(x => x.Key, x => x.Select(c => (song.SecondsAt(c.Position), (double)c.Value)).OrderBy(c => c.Item1).ToArray())
+                    Controllers(song, track)
                 );
             }
 

@@ -1,245 +1,5 @@
 [
   {
-    "id": "chamber-canon",
-    "question": "Chamber's counter-melody taking the melody's phrase a bar later, an octave below, its notes that rubbed against the melody now bent to their chord: a conversation now?",
-    "decides": "Imitation, Chamber's doubling.imitation 15-25-35, against none; heard out of place on 16 October 2026 where the melody's passing notes a bar later rubbed against it, 16-18% of its notes, now 2%.",
-    "genre": "chamber",
-    "without": {
-      "skip": [],
-      "genre": {
-        "doubling": {
-          "imitation": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "T",
-        "at": 229.3,
-        "listen": [
-          "Melody (Violin)",
-          "Counter-melody (Viola)"
-        ]
-      },
-      {
-        "seed": "Z",
-        "at": 191,
-        "listen": [
-          "Melody (Violin)",
-          "Counter-melody (Cello)"
-        ]
-      },
-      {
-        "seed": "b",
-        "at": 176,
-        "listen": [
-          "Melody (Flute)",
-          "Counter-melody (Viola)"
-        ]
-      },
-      {
-        "seed": "17",
-        "at": 102.7,
-        "listen": [
-          "Melody (Oboe)",
-          "Counter-melody (Cello)"
-        ]
-      },
-      {
-        "seed": "1M",
-        "at": 146.6,
-        "listen": [
-          "Melody (Flute)",
-          "Counter-melody (Cello)"
-        ]
-      },
-      {
-        "seed": "1o",
-        "at": 361.9,
-        "listen": [
-          "Melody (Clarinet)",
-          "Counter-melody (Cello)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "medieval-canon",
-    "question": "Medieval's counter-melody taking the melody's phrase a bar later, an octave below, as a round: an old round's answer, or a crowd?",
-    "decides": "Imitation, Medieval's doubling.imitation 10-20-20, against none.",
-    "genre": "medieval",
-    "without": {
-      "skip": [],
-      "genre": {
-        "doubling": {
-          "imitation": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "D",
-        "at": 114,
-        "listen": [
-          "Counter-melody (Trombone)"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 160.1,
-        "listen": [
-          "Melody (Fiddle)",
-          "Counter-melody (Viola)"
-        ]
-      },
-      {
-        "seed": "17",
-        "at": 64.1,
-        "listen": [
-          "Melody (Fiddle)"
-        ]
-      },
-      {
-        "seed": "1M",
-        "at": 83.3,
-        "listen": [
-          "Melody (Shanai)",
-          "Counter-melody (Flute)"
-        ]
-      },
-      {
-        "seed": "1t",
-        "at": 84.3,
-        "listen": [
-          "Counter-melody (English Horn)"
-        ]
-      },
-      {
-        "seed": "23",
-        "at": 98.9,
-        "listen": [
-          "Counter-melody (Cello)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "ballad-step-down",
-    "question": "The Power ballad's bass stepping down into its chords, a chord's note a step below the last: the ballad's walk down, or a wandering bass?",
-    "decides": "The bass stepping down, the Power ballad's bassLanding.stepDown 30-40-40, against the root.",
-    "genre": "ballad",
-    "without": {
-      "skip": [],
-      "genre": {
-        "bassLanding": {
-          "stepDown": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 67.4,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 266,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "C",
-        "at": 0,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 24.8,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "M",
-        "at": 114.3,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "O",
-        "at": 156,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "jazzfunk-tresillo",
-    "question": "Jazz-funk's bass on the tresillo, 3+3+2 in each half bar: the groove's push, or a Latin bass in the wrong song?",
-    "decides": "The tresillo, Jazz-funk's figure.bass.tresillo 20-30-30, against its own line and the kick's.",
-    "genre": "jazzFunk",
-    "without": {
-      "skip": [],
-      "genre": {
-        "figure.bass": {
-          "tresillo": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 0.9,
-        "listen": [
-          "Bass (Fretless Bass)"
-        ]
-      },
-      {
-        "seed": "4",
-        "at": 174.6,
-        "listen": [
-          "Bass (Fretless Bass)"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 139.1,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 7,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 151.2,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "V",
-        "at": 62.8,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      }
-    ]
-  },
-  {
     "id": "latin-tumbao-varied",
     "question": "Latin's bass on its tumbao, played as a bassist varies it, a note left out or one of its own between now and then: a living tumbao, or a figure losing its shape?",
     "decides": "The tumbao as chances (Figure.Loose, the figures-as-chances experiment), against the tumbao laid exactly in every bar.",
@@ -299,145 +59,371 @@
     ]
   },
   {
-    "id": "trance-bright",
-    "question": "Trance at its brightest and liveliest, major and brighter chords, faster and busier: the euphoric peak, or too sweet?",
-    "decides": "Trance's mood spans, darkness -80 to 40 and intensity -20 to 100, the songs heard at their brightest, against a neutral mood.",
-    "genre": "trance",
+    "id": "celtic-solo",
+    "question": "Celtic's solo, a session's break, on fiddle, flute or whistle rather than harmonica: closer to the style?",
+    "decides": "Celtic's solo pool, Folk's copied, the harmonica the likeliest (100 against the violin's 80), against the same pool without the harmonica (#361).",
+    "genre": "celtic",
     "without": {
       "skip": [],
       "genre": {
-        "darkness": {
-          "from": 0,
-          "to": 0
-        },
-        "intensity": {
-          "from": 0,
-          "to": 0
+        "instrument.solo": {
+          "harmonica": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "Y",
-        "at": 23.8,
+        "seed": "J",
+        "at": 145.1,
         "listen": [
-          "Melody (Lead 2 (sawtooth))"
+          "Solo (Violin)"
         ]
       },
       {
-        "seed": "p",
-        "at": 66.6,
+        "seed": "a",
+        "at": 145.8,
         "listen": [
-          "Bass (Synth Bass 1)",
-          "Chords (Pad 3 (polysynth))",
-          "Melody (Lead 2 (sawtooth))"
+          "Solo (Violin)"
         ]
       },
       {
-        "seed": "14",
-        "at": 78.3,
+        "seed": "o",
+        "at": 152.3,
         "listen": [
-          "Pad (Pad 8 (sweep))"
+          "Solo (Harmonica)"
         ]
       },
       {
-        "seed": "1P",
-        "at": 124,
+        "seed": "x",
+        "at": 124.8,
         "listen": [
-          "Bass (Synth Bass 1)",
-          "Chords (Pad 2 (warm))",
-          "Pad (Pad 8 (sweep))"
+          "Rhythm part (Banjo)",
+          "Solo (Harmonica)"
         ]
       },
       {
-        "seed": "1g",
-        "at": 61.8,
+        "seed": "18",
+        "at": 39.8,
         "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Bass (Synth Bass 2)",
-          "Melody (Lead 2 (sawtooth))"
+          "Solo (Violin)"
         ]
       },
       {
-        "seed": "1r",
-        "at": 0,
+        "seed": "1z",
+        "at": 23.9,
         "listen": [
-          "Chords (Synth Strings 1)",
-          "Kick",
-          "Hi-Hat"
+          "Solo (Harmonica)"
         ]
       }
     ]
   },
   {
-    "id": "trap-dark",
-    "question": "Trap at its darkest, minor and darker chords: the menace it is known for, or just gloomy?",
-    "decides": "Trap's mood spans, darkness 0 to 100 and intensity -40 to 80, the songs heard at their darkest, against a neutral mood.",
-    "genre": "trap",
+    "id": "trance-strip",
+    "question": "Trance's ending, its parts leaving one by one over the drums: a mix-out, or the wrong part left last?",
+    "decides": "The stripped ending, Trance's ending.strip 100, against its fade (#150: the order the parts leave in is drawn, the lead or the pad possibly last).",
+    "genre": "trance",
     "without": {
       "skip": [],
       "genre": {
-        "darkness": {
-          "from": 0,
-          "to": 0
-        },
-        "intensity": {
-          "from": 0,
-          "to": 0
+        "ending": {
+          "strip": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "K",
-        "at": 11.7,
+        "seed": "2",
+        "at": 234.2,
         "listen": [
-          "Hi-Hat",
-          "Chords (String Ensemble 1)",
+          "Melody (Lead 2 (sawtooth))",
+          "Bass (Synth Bass 2)",
+          "Riff (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 243.1,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Synth Bass 2)",
+          "Counter-melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 239.5,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Pad (Synth Strings 1)",
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 295.1,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Melody (Lead 2 (sawtooth))",
+          "Pad (Pad 8 (sweep))"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 328.8,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
           "Bass (Synth Bass 2)"
         ]
       },
       {
-        "seed": "R",
-        "at": 107.6,
+        "seed": "Z",
+        "at": 239.5,
         "listen": [
-          "Bass (Synth Bass 1)"
+          "Chords (Pad 3 (polysynth))",
+          "Pad (Pad 7 (halo))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "darkjazz-inner-line",
+    "question": "Dark jazz's held chord with a line falling inside it a semitone at a time, root, major seventh, seventh, sixth: the noir line cliche, or a chord that wobbles?",
+    "decides": "The inner line, Dark jazz's harmonyDevices.innerLine 20-50-60, against none (#71: whether it earns its place, playing in at most 8% of a preset's sections).",
+    "genre": "darkJazz",
+    "without": {
+      "skip": [],
+      "genre": {
+        "harmonyDevices": {
+          "innerLine": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 326.5,
+        "listen": [
+          "Melody (Vibraphone)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 255,
+        "listen": [
+          "Bass (Fretless Bass)"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 53.3,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 166.1,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "P",
+        "at": 157.5,
+        "listen": [
+          "Bass (Fretless Bass)",
+          "Melody (Vibraphone)",
+          "Chords (Drawbar Organ)"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 365.8,
+        "listen": [
+          "Chords (Vibraphone)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "funk-wah",
+    "question": "Funk's comping guitar or clavinet through a wah, or a phaser: is the effect heard, and does it sound like a funk wah?",
+    "decides": "The insertion effect, Funk's insertion wah 40-50-60 and phaser 10-20-30, against none (#74: a cut candidate, never asked).",
+    "genre": "funk",
+    "without": {
+      "skip": [],
+      "genre": {
+        "insertion": {
+          "none": 100,
+          "wah": 0,
+          "phaser": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "9",
+        "at": 203.8,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 0,
+        "listen": [
+          "Rhythm part (Clavinet)"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 71.5,
+        "listen": [
+          "Riff (Clavinet)",
+          "Riff's twin (Clavinet)"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 0,
+        "listen": [
+          "Riff (Clavinet)"
+        ]
+      },
+      {
+        "seed": "k",
+        "at": 23.2,
+        "listen": [
+          "Chords (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "t",
+        "at": 52.7,
+        "listen": [
+          "Riff (Electric Guitar (muted))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "blackmetal-key-changes",
+    "question": "Black metal changing key, often led in by a chain of dominants: the style, or a song that will not stay put?",
+    "decides": "Black metal's key changes, the songs' own as it names none, against none (#397: 53% of its songs change key).",
+    "genre": "blackMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "keyChanges": {
+          "lastSection": 0,
+          "sections": 0,
+          "patterns": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "F",
+        "at": 172.1,
+        "listen": [
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 16,
+        "listen": [
+          "Chords (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 65.8,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 294.2,
+        "listen": [
+          "Chords (Overdriven Guitar)"
         ]
       },
       {
         "seed": "V",
-        "at": 14.9,
+        "at": 5.4,
         "listen": [
-          "Chords (Pad 2 (warm))",
-          "Bass (Synth Bass 2)",
-          "Melody (Flute)"
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Chords (Synth Strings 1)"
         ]
       },
       {
-        "seed": "W",
-        "at": 126,
+        "seed": "g",
+        "at": 183.3,
         "listen": [
-          "Bass (Synth Bass 1)",
-          "Counter-melody (String Ensemble 1)",
-          "Melody (Glockenspiel)"
+          "Melody (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pop-ornaments",
+    "question": "Pop's melody with turns and trills now and then: a singer's line, or out of style?",
+    "decides": "The ornaments, the songs' own as Pop names none (graces 0-25-100, turns 0-8-100, trills 0-10-100), against none (#364: 47% of its songs ornament).",
+    "genre": "pop",
+    "without": {
+      "skip": [],
+      "genre": {
+        "ornaments": {
+          "graces": 0,
+          "turns": 0,
+          "trills": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 6,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "12",
-        "at": 69.8,
+        "seed": "8",
+        "at": 3.5,
         "listen": [
-          "Hi-Hat",
-          "Kick",
-          "Electric Snare"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "1F",
-        "at": 3.1,
+        "seed": "D",
+        "at": 6.5,
         "listen": [
-          "Hi-Hat",
-          "Chords (Choir Aahs)",
-          "Melody (Tubular Bells)"
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 115,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "k",
+        "at": 136.7,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1D",
+        "at": 8.2,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
         ]
       }
     ]

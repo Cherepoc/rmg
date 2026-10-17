@@ -46,37 +46,40 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("chamber-canon", "Chamber's counter-melody taking the melody's phrase a bar later, an octave below, its notes that rubbed against the melody now bent to their chord: a conversation now?",
-            "Imitation, Chamber's doubling.imitation 15-25-35, against none; heard out of place on 16 October 2026 where the melody's passing notes a bar later rubbed against it, 16-18% of its notes, now 2%.", "chamber", [],
-            new() { ["doubling"] = new() { ["imitation"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Imitation, _ => true), 1),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Imitation && t.Section == span.SectionId)),
-        new("medieval-canon", "Medieval's counter-melody taking the melody's phrase a bar later, an octave below, as a round: an old round's answer, or a crowd?",
-            "Imitation, Medieval's doubling.imitation 10-20-20, against none.", "medieval", [], new() { ["doubling"] = new() { ["imitation"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Imitation, _ => true), 1),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Imitation && t.Section == span.SectionId)),
-        new("ballad-step-down", "The Power ballad's bass stepping down into its chords, a chord's note a step below the last: the ballad's walk down, or a wandering bass?",
-            "The bass stepping down, the Power ballad's bassLanding.stepDown 30-40-40, against the root.", "ballad", [], new() { ["bassLanding"] = new() { ["stepDown"] = 0 } },
-            x => Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Bass))?.Where(n => (ChordArrival)n.Value.State.GetStateValue(StateKinds.ChordArrival) == ChordArrival.StepDown)
-                .Select(n => (double?)n.Position).FirstOrDefault(), 2)),
-        new("jazzfunk-tresillo", "Jazz-funk's bass on the tresillo, 3+3+2 in each half bar: the groove's push, or a Latin bass in the wrong song?",
-            "The tresillo, Jazz-funk's figure.bass.tresillo 20-30-30, against its own line and the kick's.", "jazzFunk", [], new() { ["figure.bass"] = new() { ["tresillo"] = 0 } },
-            x => FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tresillo"),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Figures && t.Section == span.SectionId
-                                                    && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tresillo")),
         new("latin-tumbao-varied", "Latin's bass on its tumbao, played as a bassist varies it, a note left out or one of its own between now and then: a living tumbao, or a figure losing its shape?",
             "The tumbao as chances (Figure.Loose, the figures-as-chances experiment), against the tumbao laid exactly in every bar.", "latin", [], new() { ["figure.bass"] = new() { ["tumbaoChances"] = 0, ["tumbao"] = 100 } },
             x => FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tumbaoChances"),
             In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Figures && t.Section == span.SectionId
                                                     && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tumbaoChances")),
-        new("trance-bright", "Trance at its brightest and liveliest, major and brighter chords, faster and busier: the euphoric peak, or too sweet?",
-            "Trance's mood spans, darkness -80 to 40 and intensity -20 to 100, the songs heard at their brightest, against a neutral mood.", "trance", [],
-            new() { ["darkness"] = new() { ["from"] = 0, ["to"] = 0 }, ["intensity"] = new() { ["from"] = 0, ["to"] = 0 } },
-            x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!) is { Darkness: < -0.4, Intensity: > 0.4 } ? (double?)x.Map.Sections[0].Start : null),
-        new("trap-dark", "Trap at its darkest, minor and darker chords: the menace it is known for, or just gloomy?",
-            "Trap's mood spans, darkness 0 to 100 and intensity -40 to 80, the songs heard at their darkest, against a neutral mood.", "trap", [],
-            new() { ["darkness"] = new() { ["from"] = 0, ["to"] = 0 }, ["intensity"] = new() { ["from"] = 0, ["to"] = 0 } },
-            x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!).Darkness > 0.6 ? (double?)x.Map.Sections[0].Start : null)
+        new("celtic-solo", "Celtic's solo, a session's break, on fiddle, flute or whistle rather than harmonica: closer to the style?",
+            "Celtic's solo pool, Folk's copied, the harmonica the likeliest (100 against the violin's 80), against the same pool without the harmonica (#361).", "celtic", [],
+            new() { ["instrument.solo"] = new() { ["harmonica"] = 0 } },
+            // a solo some soloist of plays on the harmonica
+            x => x.Solos.Where(s => s.Value.Soloists.Any(r => x.Song.TrackDefinitions[x.Track(r)] is PitchInstrumentTrack { InstrumentCode: 22 }))
+                .Select(s => (double?)x.Map.Sections[s.Key].Start).Min(),
+            In: (song, span) => song.IsSolo(span)),
+        new("trance-strip", "Trance's ending, its parts leaving one by one over the drums: a mix-out, or the wrong part left last?",
+            "The stripped ending, Trance's ending.strip 100, against its fade (#150: the order the parts leave in is drawn, the lead or the pad possibly last).", "trance", [],
+            new() { ["ending"] = new() { ["strip"] = 0 } },
+            x => x.Map.Ending.Kind == EndingKind.Strip ? x.Map.Sections[^1].Start : null),
+        new("darkjazz-inner-line", "Dark jazz's held chord with a line falling inside it a semitone at a time, root, major seventh, seventh, sixth: the noir line cliche, or a chord that wobbles?",
+            "The inner line, Dark jazz's harmonyDevices.innerLine 20-50-60, against none (#71: whether it earns its place, playing in at most 8% of a preset's sections).", "darkJazz", [],
+            new() { ["harmonyDevices"] = new() { ["innerLine"] = 0 } },
+            x => FirstSection(x, TracePoints.InnerLine, v => v is true),
+            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.InnerLine && t.Section == span.SectionId && t.Value is true)),
+        new("funk-wah", "Funk's comping guitar or clavinet through a wah, or a phaser: is the effect heard, and does it sound like a funk wah?",
+            "The insertion effect, Funk's insertion wah 40-50-60 and phaser 10-20-30, against none (#74: a cut candidate, never asked).", "funk", [],
+            new() { ["insertion"] = new() { ["none"] = 100, ["wah"] = 0, ["phaser"] = 0 } },
+            x => x.Song.Draws?.Insertion is not null ? x.Map.Sections[0].Start : null),
+        new("blackmetal-key-changes", "Black metal changing key, often led in by a chain of dominants: the style, or a song that will not stay put?",
+            "Black metal's key changes, the songs' own as it names none, against none (#397: 53% of its songs change key).", "blackMetal", [],
+            new() { ["keyChanges"] = new() { ["lastSection"] = 0, ["sections"] = 0, ["patterns"] = 0 } },
+            x => Before(x, ((ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Select(k => (double?)k.Position).FirstOrDefault(), 2)),
+        new("pop-ornaments", "Pop's melody with turns and trills now and then: a singer's line, or out of style?",
+            "The ornaments, the songs' own as Pop names none (graces 0-25-100, turns 0-8-100, trills 0-10-100), against none (#364: 47% of its songs ornament).", "pop", [],
+            new() { ["ornaments"] = new() { ["graces"] = 0, ["turns"] = 0, ["trills"] = 0 } },
+            x => Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Where(n => !n.Value.State.GetStateValue(CompositionStateKinds.Ornament).IsDefaultOrEmpty)
+                .Select(n => (double?)n.Position).FirstOrDefault(), 1)),
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

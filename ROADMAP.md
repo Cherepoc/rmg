@@ -29,7 +29,8 @@ it, `?listen=` its id on the test instance (`ListeningQuestionsTest` writes them
 verdicts, by song too). A question's songs are those of the corpus's first 24 that play its device where it is heard
 the most, by how much its song with the device and without differ as heard (`HeardDifference`), from a pattern's start
 in the sections its device plays in; its song without lays its patch over the genre's options. Done for a version when
-every question is answered or let go of. Nothing is asked now: the fourth round (16 October 2026) is answered.
+every question is answered or let go of. The fifth round (18 October 2026, the review of 16 October's first) asks
+latin-tumbao-varied, celtic-solo, trance-strip, darkjazz-inner-line, funk-wah, blackmetal-key-changes and pop-ornaments.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
