@@ -279,7 +279,8 @@ function drawDaily() {
     elements.dailyPanel.querySelector(".empty")?.remove();
 
     const highest = Math.max(1, ...days.flatMap((day) => SERIES.map((series) => day[series.key])));
-    const step = niceStep(highest);
+    // a whole one at the least, as a day of a visitor or two counts no fractions
+    const step = Math.max(1, niceStep(highest));
     const top = Math.ceil(highest / step) * step;
 
     const plotWidth = BOX.width - BOX.left - BOX.right;
@@ -493,7 +494,7 @@ function drawSeeds() {
     const longest = summary.seeds[0].seconds;
 
     elements.seeds.replaceChildren(table(
-        ["Seed", "Settings", "Version", "Genre", "Listened", "Plays", ""],
+        ["Seed", "Settings", "Version", "Genre", "Listened", "Stretches", ""],
         summary.seeds.map((seed) => {
             const bar = document.createElement("div");
             bar.className = "bar";

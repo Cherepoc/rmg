@@ -162,12 +162,6 @@ if (events is not null)
 
     app.MapAnalytics(events, VisitorHasher.Create(settings.StateDirectory), settings.IsListening);
 }
-else if (settings.IsListening)
-{
-    // a listening server is there for its verdicts, which only analytics keep
-    app.Logger.LogCritical("A listening server keeps its verdicts, so AnalyticsEnabled must be true where it listens");
-    return 1;
-}
 else
 {
     app.Logger.LogInformation("AnalyticsEnabled is false, so nothing is counted; the genres songs are asked in are still kept, for their links");

@@ -541,6 +541,11 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
   (the tritone substitute's dominant, the half-diminished's whole step); the melody's joins at every pattern; the
   busyness reports' facets read from the trace; the MIDI file parsed for its program changes; the stages' hand-offs,
   each read after it is made.
+- **The page's song as it was made** (P4, #328): the events, a rating, the link and a download's name read the settings
+  the song on the page was made with, kept as it arrives and moved by a change of its mix alone, never by a change that
+  remakes it before the remake arrives, or for good where it fails.
+- **The fine-tune window's drag** (P4, #335): a range's band drawn again whole at every pointer move, a canvas rasterised
+  and encoded each time; profiled on a phone first, then its edges alone while dragging and the shading on letting go.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than

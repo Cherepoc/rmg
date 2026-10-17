@@ -4,7 +4,7 @@ namespace Rmg.WebApi.Genres;
 
 /// <summary>
 ///     A genre's amounts as a request gives them, whole numbers, against the amounts the songs take, from 0 to 1: a
-///     pool's weights, chances and values in percents; a tempo's ends in beats a minute, from 60 to 240, and its lean
+///     pool's weights, chances and values in percents; a tempo's ends in beats a minute, from 40 to 240, and its lean
 ///     from -100, to its slow end, through 0, its middle, to 100, to its fast.
 /// </summary>
 public static class GenreAmounts

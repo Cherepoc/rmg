@@ -1,3 +1,4 @@
+using Rmg.WebApi;
 using Rmg.WebApi.Analytics;
 using Rmg.WebApi.Songs;
 
@@ -5,6 +6,10 @@ namespace Rmg.Tests.WebApi;
 
 public sealed class EventStoreTest : IDisposable
 {
+    /// <summary>A store as the server makes it, its settings' defaults but where a test gives one of its own.</summary>
+    private static EventStore Store(string directory, int retentionDays = ServerSettings.DefaultRetentionDays, int dailyEvents = EventStore.DailyEvents) =>
+        EventStore.Create(directory, retentionDays, ServerSettings.DefaultEventsPerVisitorPerDay, dailyEvents);
+
     private static readonly DateTimeOffset Now = new(2026, 9, 24, 12, 0, 0, TimeSpan.Zero);
 
     private readonly string _directory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -12,7 +17,7 @@ public sealed class EventStoreTest : IDisposable
 
     public EventStoreTest()
     {
-        _store = EventStore.Create(_directory);
+        _store = Store(_directory);
     }
 
     public void Dispose()
@@ -65,7 +70,7 @@ public sealed class EventStoreTest : IDisposable
             making.ExecuteNonQuery();
         }
 
-        var store = EventStore.Create(directory);
+        var store = Store(directory);
         await Assert.That(store.Write(new StoredEvent(Now, EventStore.Day(Now), "someone", EventNames.Rated, null, null, null, 5, "none>up", "0.7.004", null, "rock"))).IsTrue();
         Write(EventNames.Rated, seed: 6, detail: "none>up", genre: "AbC123xyz09");
 
@@ -276,7 +281,7 @@ public sealed class EventStoreTest : IDisposable
 
         try
         {
-            var store = EventStore.Create(directory, 7);
+            var store = Store(directory, 7);
             store.Write(new StoredEvent(Now.AddDays(-8), EventStore.Day(Now.AddDays(-8)), "old", EventNames.PageOpen, null, null, null, null, null, null, null, null));
             store.Write(new StoredEvent(Now.AddDays(-6), EventStore.Day(Now.AddDays(-6)), "recent", EventNames.PageOpen, null, null, null, null, null, null, null, null));
 
@@ -328,7 +333,7 @@ public sealed class EventStoreTest : IDisposable
             making.ExecuteNonQuery();
         }
 
-        EventStore.Create(directory);
+        Store(directory);
         // a connection of its own, as a pooled one opened before the rewrite reads the file's old header
         using (var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={file};Pooling=False"))
         {
@@ -460,7 +465,7 @@ public sealed class EventStoreTest : IDisposable
     public async Task TheStore_KeepsNoMoreEventsADayThanItsCap_FromEveryoneTogether()
     {
         var directory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        var store = EventStore.Create(directory, dailyEvents: 5);
+        var store = Store(directory, dailyEvents: 5);
         try
         {
             StoredEvent Event(int i, string name) => new(Now, EventStore.Day(Now), $"visitor {i}", name, null, null, null, null, null, null, null, null);
@@ -470,7 +475,7 @@ public sealed class EventStoreTest : IDisposable
             await Assert.That(store.Write(Event(10, EventNames.Rated))).IsTrue();
 
             // and a server started again the same day reads the day's count back from the file
-            var again = EventStore.Create(directory, dailyEvents: 5);
+            var again = Store(directory, dailyEvents: 5);
             await Assert.That(again.Write(Event(20, EventNames.Played))).IsFalse();
         }
         finally
@@ -697,5 +702,13 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(server.Daily.Count).IsEqualTo(2);
         await Assert.That(server.Daily[0]).IsEqualTo(new ServerDay(EventStore.Day(Now.AddDays(-1)), 1, 0, 0, 0, 2));
         await Assert.That(server.Daily[1]).IsEqualTo(new ServerDay(EventStore.Day(Now), 3, 2, 1, 0, 9));
+    }
+
+    /// <summary>A verdict is kept whole or not at all: one longer than an event's detail, which would be cut, is refused.</summary>
+    [Test]
+    public async Task AVerdictLongerThanADetail_IsRefused()
+    {
+        await Assert.That(AnalyticsEndpoints.IsVerdict("gate:with")).IsTrue();
+        await Assert.That(AnalyticsEndpoints.IsVerdict($"{new string('a', AnalyticsEndpoints.DetailLength)}:without")).IsFalse();
     }
 }

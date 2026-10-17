@@ -1,7 +1,6 @@
 import { button, downloadJson, jsonFileInput } from "./dialog-parts.js";
-import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
-import { endsOf, isPresetName, nestedChoices, NOT_A_GENRE, ownOf, readGenreFile, sameName } from "./genres.js";
+import { endsOf, genreProblem, isPresetName, nestedChoices, NOT_A_GENRE, ownOf, readGenreFile, sameName } from "./genres.js";
 import { ADDED_WEIGHT, createGenreTune } from "./genre-tune.js";
 import { byMiddle, COLOURS, drawBand, drawLines, drawShares, ENDS, endsInWords, labelOf, svg } from "./genre-charts.js";
 
@@ -433,9 +432,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
 
     const body = document.createElement("div");
     body.className = "genre-body";
-    // those the server has, as a soloist has an instrument alone
+    // every name of the parts' choices, a name the server lacks never among a draft's, as a soloist has an instrument alone
     const partNames = [...PITCHED.flatMap(([part]) => [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`]), ...Object.values(PART_CHOICES).flat(), "kit", "drumPieces", "drumSetup",
-        ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])].filter((name) => choices.has(name));
+        ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])];
     body.append(
         description,
         principles,
@@ -581,20 +580,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         return { name: draft.name.trim(), ...(said === "" ? {} : { description: said }), choices: structuredClone(draft.choices) };
     }
 
-    /** A pool as the problem names it: a part's by its part and what it chooses, such as "Melody's feel". */
-    function poolName(choiceName) {
-        const label = choices.get(choiceName).label;
-        const of = { instrument: "instruments", feel: "feel", drumRole: "drums", figure: "figures" }[choiceName.split(".")[0]];
-        return choiceName.includes(".") ? `${label}'s ${of}` : label;
-    }
-
-    function problemOf(genre) {
-        if (new TextEncoder().encode(genre.name).length > MAX_GENRE_NAME_BYTES) return "The name is too long.";
-        // a pool with no options, or whose every option weighs nothing at every end, as the server refuses it
-        const weighs = (amount) => endsOf(amount).some((x) => typeof x === "number" && x > 0);
-        const empty = Object.entries(genre.choices).find(([name, options]) => choices.get(name)?.kind === "pool" && !Object.values(options).some(weighs));
-        return empty ? `${poolName(empty[0])} keeps none of its options.` : null;
-    }
+    // what the server would refuse the genre for (genreProblem), by its choices
+    const problemOf = (genre) => genreProblem(genre, (name) => choices.get(name));
 
     /**
      * Says the draft's problem, or another, a file refused, which leaves the draft as it was: the buttons as the draft's

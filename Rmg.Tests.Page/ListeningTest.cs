@@ -229,6 +229,10 @@ public sealed class ListeningTest(Site site)
                 await Assert.That(await page.Page.Locator("#like").IsDisabledAsync()).IsTrue();
                 await Assert.That(page.Page.Url).IsEqualTo(linked);
                 await Assert.That(await page.Page.Locator("#history > *").CountAsync()).IsEqualTo(listed);
+                // nor linked once its mix is moved, which keeps the address a moment later
+                await page.Page.EvaluateAsync("() => { const volume = document.getElementById('volume'); volume.value = String(Number(volume.value) - 0.1); volume.dispatchEvent(new Event('input')); }");
+                await Task.Delay(600);
+                await Assert.That(page.Page.Url).IsEqualTo(linked);
             }
             else
                 (listed, linked) = (await page.Page.Locator("#history > *").CountAsync(), page.Page.Url);

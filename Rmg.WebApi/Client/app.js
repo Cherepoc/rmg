@@ -852,7 +852,8 @@ function linkedSong() {
  *     should go on rolling when it ends.
  */
 function rememberSong(wasRolled = history.state?.rolled === true) {
-    if (songSeed === null) return;
+    // but a song no link names, a listening question's or one in a genre not kept, whose address would name another
+    if (songSeed === null || !isNamed() || asksQuestion) return;
 
     try {
         history.replaceState({ rolled: wasRolled }, "", songLink());
@@ -1824,6 +1825,7 @@ const genreManager = createGenreManager({
     },
     onKeepAll: keepAllGenres,
     knows: knowsChoice,
+    choiceOf: (name) => genreChoices.find((x) => x.name === name),
     asFile: (genre) => ({ ...genre, choices: nestedChoices(genre.choices, genreChoices.map((x) => x.name)) }),
 });
 document.body.append(genreManager.element);
@@ -1958,7 +1960,7 @@ function createGenreRow() {
 
     genreManage = document.createElement("button");
     genreManage.type = "button";
-    genreManage.className = "secondary genre-manage";
+    genreManage.className = "genre-manage";
     genreManage.textContent = "Manage";
     genreManage.title = "Every genre: make one, duplicate any, edit or remove your own, import and export them";
     genreManage.disabled = true;
@@ -2949,7 +2951,9 @@ async function start() {
 
     // said afterwards, since the generating itself has the status line until it is done with it, and
     // only once a song has arrived: a failure has the status line to itself
-    const generating = isListening ? Promise.resolve(false) : generate(linked.seed, { isRolled: linked.seed === null || linked.wasRolled });
+    // a fresh visit of Any genre in a preset drawn for its first song, as every new song of it is
+    const asked = linked.seed === null && isAnyGenre ? { ...settings, genre: drawAnyGenre() } : settings;
+    const generating = isListening ? Promise.resolve(false) : generate(linked.seed, { isRolled: linked.seed === null || linked.wasRolled, asked });
     const complaint = linked.wasAsked && linked.seed === null
         ? "That link has no valid song, so here is a random one."
         : linked.isSettingsBad
@@ -3006,8 +3010,15 @@ function knowsChoice(name, option) {
 
 /** A genre without the choices and options the server no longer knows, renamed or taken out since it was kept. */
 function pruned(genre) {
+    // a choice left with none of the options it named, or a range without both its ends, left out, its songs playing it as
+    // the songs have it, as the server leaves it; one the genre named with none kept as it is
+    const isRange = (options) => "from" in options || "to" in options;
+    const kept = (before, after) => Object.keys(before).length === 0
+        || Object.keys(after).length > 0 && (!isRange(before) || "from" in after && "to" in after);
     const choices = Object.fromEntries(Object.entries(genre.choices).filter(([choice]) => knowsChoice(choice))
-        .map(([choice, options]) => [choice, Object.fromEntries(Object.entries(options).filter(([option]) => knowsChoice(choice, option)))]));
+        .map(([choice, options]) => [choice, options, Object.fromEntries(Object.entries(options).filter(([option]) => knowsChoice(choice, option)))])
+        .filter(([, before, after]) => kept(before, after))
+        .map(([choice, , after]) => [choice, after]));
     return { ...genre, choices };
 }
 

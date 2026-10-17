@@ -64,4 +64,12 @@ public sealed class GenreStoreTest
         var body = """{"format":1,"name":"Mine","choices":{"kickLock":{"sections":50},"push":{"never":10,"sections":50}}}""";
         await Assert.That(Rmg.WebApi.Genres.GenreEndpoints.Known(body)).IsEqualTo("""{"format":1,"name":"Mine","choices":{"push":{"sections":50}}}""");
     }
+
+    /// <summary>A choice left with none of the options it named is left out, its songs playing it as the songs have it; one the genre names with none kept.</summary>
+    [Test]
+    public async Task AChoiceTakenOutWhole_IsLeftOut_OneNamedWithNoneKept()
+    {
+        var body = """{"format":1,"name":"Mine","choices":{"meter":{"5/3":100},"passingChords":{},"push":{"sections":50}}}""";
+        await Assert.That(Rmg.WebApi.Genres.GenreEndpoints.Known(body)).IsEqualTo("""{"format":1,"name":"Mine","choices":{"passingChords":{},"push":{"sections":50}}}""");
+    }
 }

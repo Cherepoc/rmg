@@ -78,6 +78,28 @@ public sealed class GenreManagerTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>
+    ///     A genre file the window imports: one of a mood below 0 at an end kept, as the server takes it, and one whose pool
+    ///     weighs nothing, or whose choice is no family of options, refused as the editor's import refuses it.
+    /// </summary>
+    [Test]
+    public async Task AGenreFile_OfAMoodBelowNone_IsKept_AndOneTheServerWouldRefuse_IsNot()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var manager = await OpenManager(page);
+        var told = manager.Locator(".genre-told");
+        async Task Import(string json) => await manager.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "genre.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes(json) });
+
+        await Import("""{ "name": "Dark", "choices": { "darkness": { "from": -80, "to": 90 } } }""");
+        await page.Until(async () => await told.TextContentAsync() == "One genre kept among yours.", "the dark genre kept");
+        await Import("""{ "name": "Nothing", "choices": { "meter": { "4/4": 0 } } }""");
+        await page.Until(async () => (await told.TextContentAsync() ?? "").Contains("keeps none of its options"), "the empty pool refused");
+        await Import("""{ "name": "Null", "choices": { "feel": null } }""");
+        await page.Until(async () => (await told.TextContentAsync() ?? "").Contains("not a genre"), "the malformed file refused");
+        await Assert.That(await manager.Locator("ul[aria-label='Yours'] li").CountAsync()).IsEqualTo(1);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task ANewGenre_OpensTheEditor_OnNone()
     {

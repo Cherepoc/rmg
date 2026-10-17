@@ -1,5 +1,5 @@
 import { button, downloadJson, jsonFileInput } from "./dialog-parts.js";
-import { byName, NOT_A_GENRE, readGenreFile } from "./genres.js";
+import { byName, genreProblem, NOT_A_GENRE, readGenreFile } from "./genres.js";
 
 /**
  *     The window of every genre, a popup over the page: the presets, each to be duplicated, and one's own, each to be
@@ -8,7 +8,7 @@ import { byName, NOT_A_GENRE, readGenreFile } from "./genres.js";
  *     is done with a genre is the page's (app.js), the editor (genre-editor.js) opening over this window; the list shown
  *     again whenever the genres change (refresh).
  */
-export function createGenreManager({ presets, own, current, onKeep, onNew, onDuplicate, onEdit, onRemove, onKeepAll, knows, asFile }) {
+export function createGenreManager({ presets, own, current, onKeep, onNew, onDuplicate, onEdit, onRemove, onKeepAll, knows, choiceOf, asFile }) {
     const dialog = document.createElement("dialog");
     dialog.className = "genre-manager";
     dialog.setAttribute("aria-label", "Genres");
@@ -33,7 +33,10 @@ export function createGenreManager({ presets, own, current, onKeep, onNew, onDup
 
     const file = jsonFileInput((text) => {
         const read = readGenreFile(text, knows);
+        // a genre the server would refuse every song of told, as the editor's import tells it, and none kept
+        const problem = read === null ? null : (read.genres ?? [read.genre]).map((x) => genreProblem(x, choiceOf)).find((x) => x !== null) ?? null;
         if (read === null) tell(NOT_A_GENRE);
+        else if (problem !== null) tell(problem);
         else tell(`${onKeepAll(read.genres ?? [read.genre])} kept among yours.`);
     });
     const imported = button("Import JSON", "Keep a genre saved as a JSON file, or every one of a list of them, among yours", () => file.click(), "genre-export");

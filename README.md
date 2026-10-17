@@ -98,7 +98,7 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
     "tempo": 40,
     "parts": {
       "melody": { "instrument": 40, "volume": 32 },
-      "drum": { "isOn": false }
+      "drum": { "plays": false }
     },
     "volume": 50,
     "genreName": "Rock",
@@ -107,8 +107,8 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
   ```
 
   The seed is in letters and digits, all 64 bits of it; without one a random song is made. A part, by its role's name,
-  may be given in or out (`plays`), an instrument (General MIDI 0-127), a volume and a pan, or left out of the file
-  (`isOn: false`); `drumSetup` and `drumGroups` do the same for the drums, `drumPieces` gives the drum pieces the song
+  may be given in or out (`plays`), an instrument (General MIDI 0-127), a volume and a pan; `drumGroups` gives the
+  drum groups' volumes, `drumPieces` gives the drum pieces the song
   plays, by name, which make its setup, and `key`, `tempo` and `meter` give those (the tempo by its step from 0 to 61,
   60 to 240 beats a minute with 120 at 31, and the meter by its place in `GET /api/songs/options`). A genre (`genre`, by
   the names of `GET /api/genres/choices`) gives a choice's amounts in whole numbers, one alike at every end or three, at
@@ -285,15 +285,16 @@ Machine-specific values also belong in the environment, since a deploy replaces 
 ## Analytics
 
 The page records timings and how far people get, to find slow spots. `POST /api/tally` accepts an event
-name from a fixed list and up to four numbers, stored in SQLite in the state directory. Nothing goes to
-third parties.
+name from a fixed list, a few numbers (milliseconds, bytes, seconds) and a short detail, stored in SQLite in the state
+directory. Nothing goes to third parties.
 
 - **Anonymous.** A visitor is an HMAC of their address and browser with a secret that changes daily,
   cut to 16 characters. The address is never stored, and no analytics data is kept in the browser.
-- **Opt-out.** Browsers sending Global Privacy Control or Do Not Track send nothing.
+- **Opt-out.** Browsers sending Global Privacy Control or Do Not Track send nothing but what their visitor tells on
+  purpose: a rating, or a listening question's verdict.
 - **Events:** `page_open`, `song_generated`, `song_failed`, `soundfont_ready`, `soundfont_failed`,
-  `audio_ready`, `play`, `listened`, `mix_changed`, `download_mid`, `export_mp3`, `shared` and `rated`, each
-  with the song's seed, version and settings. Others are dropped. Soundfonts are recorded by size and source,
+  `audio_ready`, `play`, `listened`, `mix_changed`, `download_mid`, `export_mp3`, `shared`, `genre_chosen`, `rated`
+  and `verdict`, each with the song's seed, version and settings. Others are dropped. Soundfonts are recorded by size and source,
   not name.
 
 The script is `tally.js` and the path `/api/tally` because blocklists block `analytics.js` and

@@ -210,13 +210,19 @@ export function getPlayer() {
 
 async function create() {
     const context = new AudioContext();
-    await context.audioWorklet.addModule(WORKLET_URL);
+    // a stack that cannot be made, its worklet unreachable, closes its context, so that a retry makes no other beside it
+    try {
+        await context.audioWorklet.addModule(WORKLET_URL);
 
-    const synth = new WorkletSynthesizer(context);
-    synth.connect(createLimiter(context)).connect(context.destination);
-    // every channel's own output, which the synthesizer offers to be looked at, measured and heard no further
-    const analysers = Array.from({ length: 16 }, (_, channel) => synth.connectChannel(new AnalyserNode(context, { fftSize: LEVEL_SAMPLES }), channel));
-    await synth.isReady;
+        const synth = new WorkletSynthesizer(context);
+        synth.connect(createLimiter(context)).connect(context.destination);
+        // every channel's own output, which the synthesizer offers to be looked at, measured and heard no further
+        const analysers = Array.from({ length: 16 }, (_, channel) => synth.connectChannel(new AnalyserNode(context, { fftSize: LEVEL_SAMPLES }), channel));
+        await synth.isReady;
 
-    return new Player(context, synth, new Sequencer(synth), analysers);
+        return new Player(context, synth, new Sequencer(synth), analysers);
+    } catch (error) {
+        await context.close().catch(() => {});
+        throw error;
+    }
 }

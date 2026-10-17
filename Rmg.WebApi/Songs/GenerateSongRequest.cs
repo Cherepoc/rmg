@@ -80,7 +80,10 @@ public sealed record GenerateSongRequest(
     /// <summary>The stages the request leaves out, or says which is no stage that may be.</summary>
     public bool TryReadSkip(out ImmutableHashSet<string> skipped, out string? error)
     {
-        skipped = [..Skip ?? []];
+        skipped = [..Skip?.OfType<string>() ?? []];
+        // a stage's name missing, which names no stage
+        if (Skip?.Any(x => x is null) == true)
+            return Fail("A stage left out is named, never null.", out error);
         if (skipped.FirstOrDefault(x => !SongGenerator.SkippableStages.Contains(x)) is { } unknown)
             return Fail($"{unknown} is not a stage a song may leave out. Those are {string.Join(", ", SongGenerator.SkippableStages)}.", out error);
         error = null;

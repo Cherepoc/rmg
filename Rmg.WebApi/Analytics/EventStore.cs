@@ -42,15 +42,16 @@ public sealed class EventStore
 
     /// <summary>
     ///     How many songs' measurements are kept in one day, those refused and the others each, well above what the server
-    ///     makes, as many as two a second all day long: about 40 MB a day at the most.
+    ///     makes, as many as two a second all day long: about 40 MB a day at the most, both halves at about 100 bytes a row.
     /// </summary>
     public const int DailySongs = 200_000;
 
     /// <summary>
     ///     How many events are kept in one day from everyone together, of those told on purpose (a rating, a verdict) and
     ///     of the page's own each, well above honest use, so that clients posing as new visitors on every request cannot
-    ///     fill the disk faster than this, nor the page's telemetry crowd out the ratings: at the caps every day, events
-    ///     and songs together, some 80 MB a day, about 14 GB over 180 days kept, which honest use stays far below.
+    ///     fill the disk faster than this, nor the page's telemetry crowd out the ratings: at the caps every day, both halves
+    ///     of the events at about 400 bytes a row with their indexes and both of the songs, some 200 MB a day, about 36 GB
+    ///     over 180 days kept, which honest use stays far below.
     /// </summary>
     public const int DailyEvents = 200_000;
 
@@ -61,8 +62,8 @@ public sealed class EventStore
 
     public static EventStore Create(
         string directory,
-        int retentionDays = ServerSettings.DefaultRetentionDays,
-        int dailyEventsPerVisitor = ServerSettings.DefaultEventsPerVisitorPerDay,
+        int retentionDays,
+        int dailyEventsPerVisitor,
         int dailyEvents = DailyEvents)
     {
         Directory.CreateDirectory(directory);

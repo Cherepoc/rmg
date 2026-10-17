@@ -85,6 +85,27 @@ public sealed class ServerSettingsTest
         await Assert.That(error).Contains("EventsPerVisitorPerDay is a whole number");
     }
 
+    /// <summary>A retention past a century, which no date counts back to, says so rather than stopping the server later.</summary>
+    [Test]
+    public async Task ARetentionPastACentury_SaysSo()
+    {
+        var read = TryRead([("RetentionDays", "1000000")], out _, out var error);
+
+        await Assert.That(read).IsFalse();
+        await Assert.That(error).Contains("RetentionDays");
+        await Assert.That(Read(("RetentionDays", $"{ServerSettings.MaxRetentionDays}")).RetentionDays).IsEqualTo(ServerSettings.MaxRetentionDays);
+    }
+
+    /// <summary>A listening server without analytics, which keep its verdicts, says so.</summary>
+    [Test]
+    public async Task ListeningWithoutAnalytics_SaysSo()
+    {
+        var read = TryRead([("Listening", "true"), ("AnalyticsEnabled", "false")], out _, out var error);
+
+        await Assert.That(read).IsFalse();
+        await Assert.That(error).Contains("AnalyticsEnabled");
+    }
+
     /// <summary>A blank in appsettings.json is a setting nobody filled in, not a setting of "".</summary>
     [Test]
     [Arguments("")]

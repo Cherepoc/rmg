@@ -81,6 +81,18 @@ public sealed record ServerSettings(
                 "events for one visitor in a day", DefaultEventsPerVisitorPerDay, out var perVisitor, out error)) return false;
         if (!TryReadYesOrNo(Value(configuration, "AnalyticsEnabled"), "AnalyticsEnabled", true, out var isCounting, out error)) return false;
         if (!TryReadYesOrNo(Value(configuration, "Listening"), "Listening", false, out var isListening, out error)) return false;
+        // a retention past a century's days is no date the store can count back to
+        if (retention > MaxRetentionDays)
+        {
+            error = $"RetentionDays must be {MaxRetentionDays} or fewer, not {retention}.";
+            return false;
+        }
+        // a listening server is there for its verdicts, which only analytics keep
+        if (isListening && !isCounting)
+        {
+            error = "A listening server keeps its verdicts, so AnalyticsEnabled must be true where it listens.";
+            return false;
+        }
         // a password guessed at one a second must be long enough not to fall in days
         var token = Value(configuration, "DashboardToken");
         if (token is { Length: < MinTokenLength })
@@ -109,6 +121,9 @@ public sealed record ServerSettings(
 
     /// <summary>The fewest characters the admin area's password may have.</summary>
     public const int MinTokenLength = 16;
+
+    /// <summary>The most days an event may be kept, a century's.</summary>
+    public const int MaxRetentionDays = 36_500;
 
     /// <summary>A setting nobody filled in reads as one nobody set, so a blank in a file means the default.</summary>
     private static string? Value(IConfiguration configuration, string key)

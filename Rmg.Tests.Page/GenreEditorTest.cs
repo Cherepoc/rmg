@@ -276,6 +276,23 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>On a phone the fine-tune window's legend sits under its chart, in a column of one, and beside it on a wide screen.</summary>
+    [Test]
+    [Arguments(true)]
+    [Arguments(false)]
+    public async Task TheTuneLegend_SitsUnderTheChartOnAPhone_AndBesideItOtherwise(bool phone)
+    {
+        await using var page = await SongPage.Open(site, "?song=1", phone: phone);
+        var dialog = await OpenEditor(page);
+        var tune = await Change(await Section(dialog, "Time and feel"), "meter");
+        var (plot, legend) = ((await tune.Locator(".tune-plot").BoundingBoxAsync())!, (await tune.Locator(".tune-legend").BoundingBoxAsync())!);
+        if (phone)
+            await Assert.That(legend.Y).IsGreaterThanOrEqualTo(plot.Y + plot.Height - 1);
+        else
+            await Assert.That(legend.X).IsGreaterThanOrEqualTo(plot.X + plot.Width - 1);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task TheChosenOption_KeepsItsGreyOutlined_AndTheOnePointedAt_IsNamedWithItsShare()
     {

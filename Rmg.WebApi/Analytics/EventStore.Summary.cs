@@ -94,22 +94,26 @@ public static class EventStoreSummary
     /// </summary>
     private static List<FunnelStep> Funnel(SqliteConnection connection, string since)
     {
+        static string Visitors(string where) => $"SELECT COUNT(DISTINCT visitor) FROM events WHERE {where} AND day >= $since";
         (string Key, string Label, string Sql)[] steps =
         [
-            ("opened", "Opened the page", $"name = '{EventNames.PageOpen}'"),
-            ("song", "Got a song", $"name = '{EventNames.SongGenerated}'"),
-            ("soundfont", "Got a soundfont", $"name = '{EventNames.SoundFontReady}'"),
-            ("touched", "Touched the page", $"name = '{EventNames.AudioReady}'"),
-            ("played", "Pressed play", $"name = '{EventNames.Played}'"),
-            ("listened", "Listened past 30s", $"name = '{EventNames.Listened}' AND seconds >= 30"),
-            ("taken", "Took the song away", $"name IN ('{EventNames.DownloadedMidi}', '{EventNames.ExportedMp3}', '{EventNames.Shared}')")
+            ("opened", "Opened the page", Visitors($"name = '{EventNames.PageOpen}'")),
+            ("song", "Got a song", Visitors($"name = '{EventNames.SongGenerated}'")),
+            ("soundfont", "Got a soundfont", Visitors($"name = '{EventNames.SoundFontReady}'")),
+            ("touched", "Touched the page", Visitors($"name = '{EventNames.AudioReady}'")),
+            ("played", "Pressed play", Visitors($"name = '{EventNames.Played}'")),
+            // a song's stretches summed, as the versions count them, so that a listen paused and taken up again counts whole
+            ("listened", "Listened past 30s", $"""
+                SELECT COUNT(DISTINCT visitor) FROM (
+                    SELECT visitor FROM events WHERE name = '{EventNames.Listened}' AND day >= $since
+                    GROUP BY visitor, seed, COALESCE(identity, ''), COALESCE(genre, '')
+                    HAVING SUM(seconds) >= 30)
+                """),
+            ("taken", "Took the song away", Visitors($"name IN ('{EventNames.DownloadedMidi}', '{EventNames.ExportedMp3}', '{EventNames.Shared}')"))
         ];
 
         return steps
-            .Select(step => new FunnelStep(
-                step.Key,
-                step.Label,
-                Count(connection, $"SELECT COUNT(DISTINCT visitor) FROM events WHERE {step.Sql} AND day >= $since", since)))
+            .Select(step => new FunnelStep(step.Key, step.Label, Count(connection, step.Sql, since)))
             .ToList();
     }
 
@@ -453,7 +457,8 @@ public static class EventStoreSummary
 
     /// <summary>
     ///     Every verdict of the listening mode, whenever given, by its version, question, song and choice, which its detail
-    ///     says as "question:choice": a visitor's latest on a question's song alone, as one goes back and gives it again.
+    ///     says as "question:choice": a visitor's latest on a question's song alone, as one goes back and gives it again
+    ///     the same day; a visitor is a day's (VisitorHasher), so one given again another day counts twice.
     /// </summary>
     private static List<(string Version, string Question, string Seed, string Choice, int Count)> Verdicts(SqliteConnection connection)
     {

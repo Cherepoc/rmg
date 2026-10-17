@@ -75,7 +75,11 @@ public static class AnalyticsEndpoints
         });
     }
 
-    /// <summary>The events every network wrote in the day, what it told on purpose and what its pages told apart, forgotten the next.</summary>
+    /// <summary>
+    ///     The events every network wrote in the day, what it told on purpose and what its pages told apart, forgotten the
+    ///     next; no more networks than a day's events, past which a new one is refused as the store would refuse its
+    ///     events, so that one rotating its addresses grows it no further.
+    /// </summary>
     public sealed class NetworkCount
     {
         private readonly Dictionary<(string, bool), int> _counts = [];
@@ -94,7 +98,7 @@ public static class AnalyticsEndpoints
                     _counts.Clear();
                 }
                 var count = _counts.GetValueOrDefault((network, deliberate));
-                if (count >= most)
+                if (count >= most || count == 0 && _counts.Count >= 2 * EventStore.DailyEvents)
                     return false;
                 _counts[(network, deliberate)] = count + 1;
                 return true;
@@ -102,9 +106,10 @@ public static class AnalyticsEndpoints
         }
     }
 
-    /// <summary>A verdict's detail as the page writes it, "question:choice", its question a word or two, its choice one of the four.</summary>
+    /// <summary>A verdict's detail as the page writes it, "question:choice", its question a word or two, its choice one of the four, whole within the detail's length, never kept cut.</summary>
     public static bool IsVerdict(string? detail) =>
-        detail?.Split(':') is [{ Length: > 0 } question, "with" or "without" or "same" or "unsure"] && question.All(x => char.IsAsciiLetterLower(x) || char.IsAsciiDigit(x) || x == '-');
+        detail?.Length <= DetailLength && detail.Split(':') is [{ Length: > 0 } question, "with" or "without" or "same" or "unsure"]
+                                       && question.All(x => char.IsAsciiLetterLower(x) || char.IsAsciiDigit(x) || x == '-');
 
     private static long? Sane(long? value, long lowest, long highest)
     {

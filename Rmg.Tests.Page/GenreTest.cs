@@ -168,10 +168,13 @@ public sealed class GenreTest(Site site)
         }
         await Assert.That(names.Zip(names.Skip(1)).All(x => x.First != x.Second)).IsTrue();
 
-        // and kept for the next visit
+        // and kept for the next visit, whose first song is in a preset drawn for it, not the last song's again
+        count = page.Requests.Count;
         await page.Page.GotoAsync("/");
         genre = page.Page.Locator("select[aria-label='Genre']");
         await page.Until(async () => await genre.InputValueAsync() == "any", "Any genre kept");
+        await page.Until(() => page.Requests.Count > count, "the visit's first song asked for");
+        await Assert.That(page.Requests[^1].Body.GetProperty("genreName").GetString()).IsNotEqualTo(names[^1]);
         await Assert.That(page.Errors).IsEmpty();
     }
 }

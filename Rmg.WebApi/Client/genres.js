@@ -1,4 +1,5 @@
 import PRESET_FILE from "./genres.json";
+import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 
 /**
  *     Genres as the page has them: the presets it ships (genres.json), and those made here, which this browser keeps. A
@@ -128,9 +129,13 @@ export function readGenreFile(text, knows) {
     } catch {
         return null;
     }
-    const fromFile = (x) => (typeof x?.choices === "object" && x.choices !== null ? { ...x, choices: flatChoices(x.choices) } : x);
-    // an amount a whole number from 0, a range's lean from -100 to 100 (GenreAmounts.RangeOf), the server checking the rest
-    const isAmount = (option) => (x) => Number.isInteger(x) && (option === "lean" ? x >= -100 && x <= 100 : x >= 0);
+    // a choice that is no family of options, such as null or a number, no genre's
+    const fromFile = (x) => (typeof x?.choices === "object" && x.choices !== null
+        ? Object.values(x.choices).every(isFamily) ? { ...x, choices: flatChoices(x.choices) } : null
+        : x);
+    // an amount a whole number from 0, a range's lean from -100 to 100 and its ends any whole number, a mood's below 0
+    // too (GenreAmounts.RangeOf), the server checking the rest
+    const isAmount = (option) => (x) => Number.isInteger(x) && (option === "lean" ? x >= -100 && x <= 100 : option === "from" || option === "to" || x >= 0);
     const isOptions = (choice, options) => typeof options === "object" && options !== null && !Array.isArray(options)
         && Object.entries(options).every(([option, amount]) => knows(choice, option)
             && (isAmount(option)(amount) || Array.isArray(amount) && amount.length === 3 && amount.every(isAmount(option))));
@@ -139,4 +144,22 @@ export function readGenreFile(text, knows) {
     const parsed = Array.isArray(read) ? read.map(fromFile) : fromFile(read);
     if (Array.isArray(parsed)) return parsed.length > 0 && parsed.every(isGenre) ? { genres: parsed } : null;
     return isGenre(parsed) ? { genre: parsed } : null;
+}
+
+/**
+ *     What the server would refuse a genre for, said as the page says it, or null: a name too long, or a pool keeping no
+ *     option, or none that weighs anything at any end; by the server's choices, each its label and kind, by its name.
+ */
+export function genreProblem(genre, choiceOf) {
+    if (new TextEncoder().encode(genre.name).length > MAX_GENRE_NAME_BYTES) return "The name is too long.";
+    const weighs = (amount) => endsOf(amount).some((x) => typeof x === "number" && x > 0);
+    const empty = Object.entries(genre.choices).find(([name, options]) => choiceOf(name)?.kind === "pool" && !Object.values(options).some(weighs));
+    return empty ? `${poolName(empty[0], choiceOf)} keeps none of its options.` : null;
+}
+
+/** A pool as a problem names it: a part's by its part and what it chooses, such as "Melody's feel". */
+function poolName(choiceName, choiceOf) {
+    const label = choiceOf(choiceName).label;
+    const of = { instrument: "instruments", feel: "feel", drumRole: "drums", figure: "figures" }[choiceName.split(".")[0]];
+    return choiceName.includes(".") ? `${label}'s ${of}` : label;
 }

@@ -96,7 +96,7 @@ export function createGenreTune() {
     // the charts' heights the stylesheet sizes them by, and the legend beside every row of the middle column
     grid.style.setProperty("--tune-height", `${HEIGHT}px`);
     grid.style.setProperty("--tune-shares-height", `${SHARES_HEIGHT}px`);
-    legend.style.gridRow = `1 / span ${[plot, fieldsRow, sharesHeading, sharesBox, lists].length}`;
+    grid.style.setProperty("--tune-legend-rows", String([plot, fieldsRow, sharesHeading, sharesBox, lists].length));
     const empty = html("p", { class: "tune-empty", text: "The genre keeps none of these: pick some under Options." });
     const main = html("div", { class: "tune-main" }, heading, grid, empty);
     const body = html("div", { class: "tune-body" }, list, main);
@@ -210,6 +210,7 @@ export function createGenreTune() {
             const value = endsOf(amounts[handle.dataset.option])[Number(handle.dataset.end)];
             handle.setAttribute("cy", String(yOf(handle.dataset.option, Number(handle.dataset.end), value)));
             handle.setAttribute("aria-valuenow", String(value));
+            handle.setAttribute("aria-valuetext", numberInWords(choice, handle.dataset.option, value));
         }
         fields.forEach(({ input }, end) => (input.value = numberInWords(choice, selected, points[end])));
     }
@@ -533,9 +534,12 @@ export function createGenreTune() {
             tabindex: 0,
             role: "slider",
             "aria-label": `${optionOf(name).label}, ${ENDS[end].toLowerCase()}`,
+            // dragged up and down, its value read as its field shows it, a time's in minutes and seconds
+            "aria-orientation": "vertical",
             "aria-valuemin": least,
             "aria-valuemax": most,
             "aria-valuenow": value,
+            "aria-valuetext": numberInWords(choice, name, value),
             "data-option": name,
             "data-end": end,
         });

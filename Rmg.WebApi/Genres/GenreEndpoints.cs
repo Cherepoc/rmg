@@ -27,7 +27,11 @@ public static class GenreEndpoints
             : Results.NotFound(new ErrorResponse($"'{key}' is no genre kept here.")));
     }
 
-    /// <summary>A kept genre's canonical form without the choices and the options <see cref="GenreChoices" /> no longer has.</summary>
+    /// <summary>
+    ///     A kept genre's canonical form without the choices and the options <see cref="GenreChoices" /> no longer has, and
+    ///     without a choice left with none of the options it named, or a range without both its ends, which its songs then
+    ///     play as the songs have it; a choice the genre itself names with none kept as it is.
+    /// </summary>
     public static string Known(string body)
     {
         using var document = JsonDocument.Parse(body);
@@ -35,8 +39,10 @@ public static class GenreEndpoints
         var choices = root.GetProperty("choices").EnumerateObject()
             .Select(x => (Choice: GenreChoices.All.FirstOrDefault(c => c.Name == x.Name), x.Value))
             .Where(x => x.Choice is not null)
-            .ToDictionary(x => x.Choice!.Name, x => (IReadOnlyDictionary<string, JsonElement>)x.Value.EnumerateObject()
-                .Where(o => x.Choice!.Options.Any(c => c.Name == o.Name)).ToDictionary(o => o.Name, o => o.Value.Clone()));
+            .Select(x => (x.Choice, Named: x.Value.EnumerateObject().Count(), Kept: (IReadOnlyDictionary<string, JsonElement>)x.Value.EnumerateObject()
+                .Where(o => x.Choice!.Options.Any(c => c.Name == o.Name)).ToDictionary(o => o.Name, o => o.Value.Clone())))
+            .Where(x => (x.Named == 0 || x.Kept.Count > 0) && (x.Choice!.Kind != GenreChoiceKind.Range || x.Named == 0 || x.Kept.ContainsKey("from") && x.Kept.ContainsKey("to")))
+            .ToDictionary(x => x.Choice!.Name, x => x.Kept);
         return GenreStore.Canonical(root.GetProperty("name").GetString()!, choices);
     }
 

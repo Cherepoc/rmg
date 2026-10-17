@@ -37,7 +37,8 @@ export function createPulse(hue) {
         rings = rings.filter((born) => isPlaying && now - born < RING_SECONDS);
 
         const middle = SIZE / 2;
-        const radius = 4 + last * (middle - 5);
+        // the glow kept a few pixels inside the edge, so that a loud strike's ring still has room to spread
+        const radius = 4 + last * (middle - 9);
         context.clearRect(0, 0, SIZE, SIZE);
 
         // bright in the middle and clear at the edge, a glow rather than a disc

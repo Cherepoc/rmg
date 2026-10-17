@@ -1236,7 +1236,7 @@ html:has(dialog:modal) {
     font-size: 14px;
 }
 
-/* every part's row as high, a name on two lines among them, and every drum group's as high, its pieces on two lines */
+/* every part's row as high, a name on two lines among them; the drum groups' rows are evened as they are drawn (evenDrumGroupRows) */
 .mixer tr.part {
     height: 48px;
 }
@@ -2142,6 +2142,8 @@ canvas.pulse {
 
 .tune-legend {
     grid-column: 3;
+    /* beside every row the window has, as many as genre-tune.js says */
+    grid-row: 1 / span var(--tune-legend-rows, 1);
     display: flex;
     flex-direction: column;
     justify-content: center;

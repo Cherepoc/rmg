@@ -37,7 +37,7 @@ public static class GenreChoices
     public static double AmountOfLength(double seconds) => Math.Log(seconds / ShortestLength) / Math.Log(LongestLength / ShortestLength);
 
     /// <summary>
-    ///     The song's tempo, a range of them from 60 to 240 beats a minute, as wide as a tempo given may be, starting from the
+    ///     The song's tempo, a range of them from 40 to 240 beats a minute, starting from the
     ///     tempos the songs draw, from 90 to about 175, and how a song's leans within it, to the slow end or the fast.
     /// </summary>
     public static GenreChoice Tempo { get; } = new("tempo", "Tempo", GenreChoiceKind.Range,
