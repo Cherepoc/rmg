@@ -55,7 +55,7 @@
       },
       {
         "seed": "1o",
-        "at": 360.2,
+        "at": 361.9,
         "listen": [
           "Melody (Clarinet)",
           "Counter-melody (Cello)"
@@ -196,10 +196,16 @@
     },
     "seeds": [
       {
+        "seed": "0",
+        "at": 0.9,
+        "listen": [
+          "Bass (Fretless Bass)"
+        ]
+      },
+      {
         "seed": "4",
         "at": 174.6,
         "listen": [
-          "Chords (Electric Piano 2)",
           "Bass (Fretless Bass)"
         ]
       },
@@ -211,25 +217,17 @@
         ]
       },
       {
+        "seed": "9",
+        "at": 7,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
         "seed": "A",
         "at": 151.2,
         "listen": [
           "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 8.6,
-        "listen": [
-          "Chords (Clavinet)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "T",
-        "at": 46,
-        "listen": [
-          "Chords (Electric Guitar (clean))"
         ]
       },
       {

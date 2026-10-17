@@ -41,12 +41,13 @@ every question is answered or let go of. Nothing is asked now: the fourth round 
   the mood's spans of Synthwave, Drum and bass and Thrash, and the stepping-down bass of Cinematic piano and the
   Power ballad.
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
-  Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing, Bossa nova's
-  root and fifth, the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its
-  offbeat figure alone), the songs' double time halved (a scramble), Doom's blues scale reduced, Rock's key lift halved,
-  the melody's inversion, the pinch's squeal.
+  Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing (Bossa nova's
+  root and fifth too, back at 30-50-50 since the 14 October retune and the cycle's notes nearest since, to ask again),
+  the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
+  alone), the songs' double time halved (a scramble), Doom's blues scale reduced, Rock's key lift halved, the melody's
+  inversion, the pinch's squeal.
 - **Let go of, not told apart or too faint to ask** (as they are): Djent's polymeter frames, `pop-melody-chords`,
-  `trance-raise`, `pop-eighths`, `lift-cues`, IDM's 64th rolls, Dark jazz's and Black metal's darker moods
+  `trance-raise`, `pop-eighths`, IDM's 64th rolls, Dark jazz's and Black metal's darker moods
   (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard because a mood leans only a genre's
   own pool (*Planned: a mood every genre plays*).
 - **Tied and kept as they are:** Pop's held tones, Classical's cadence, the jazz ride, Pop's instrument switches,

@@ -158,6 +158,8 @@
     "name": "Dark jazz",
     "description": "Slow, dark jazz, a noir lounge band at a funeral's pace: a tenor sax or a vibraphone holding long notes over an electric piano's held minor chords, an upright bass on the roots, brushes barely there, an organ, strings or a choir beneath, minutes on two or three chords, everything soft and in a hall, 40 to 76.",
     "choices": {
+      "drumSetup": { "kit": 100 },
+      "arpeggio": { "none": 100, "up": [0, 3, 10], "upDown": [0, 2, 8] },
       "intensity": { "from": -100, "to": 0 },
       "darkness": { "from": 20, "to": 100 },
       "tempo": { "from": [40, 60, 60], "to": [50, 72, 76] },
@@ -175,7 +177,7 @@
       "passingChords": { "chords": 0 },
       "keyChanges": { "lastSection": 0, "sections": 0, "patterns": 0 },
       "sectionHome": { "tonic": 100, "relative": [10, 15, 20] },
-      "colour": { "heldDark": [0, 15, 30] },
+      "colour": { "none": 100, "heldDark": [0, 15, 30] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [60, 70, 80], "counterMelody": [20, 30, 40], "drum": [90, 90, 85], "riff": 0, "riffTwin": 0, "rhythm": 0, "solo": [0, 5, 15] },
       "rests": { "melody": 70, "pad": 60 },
       "sung": { "halves": [80, 70, 60], "eighths": [80, 50, 30] },
@@ -260,8 +262,8 @@
       "pan": { "pad": 80 },
       "formChances": { "forms": [90, 50, 10] },
       "instrument": {
-        "melody": { "lead1Square": [40, 40, 60], "lead2Sawtooth": [40, 40, 60], "lead5Charang": [30, 30, 36], "lead8BassAndLead": [10, 15, 20], "lead4Chiff": [5, 10, 20], "acousticGrandPiano": 100, "electricPiano1": [60, 60, 60], "lead6Voice": [30, 30, 40], "drawbarOrgan": [40, 40, 40] },
-        "chords": { "electricPiano2": [30, 30, 76], "acousticGrandPiano": 70, "electricPiano1": 80, "synthStrings1": 65, "pad2Warm": [45, 45, 72], "pad3Polysynth": [60, 70, 80], "orchestraHit": [10, 15, 20], "synthBrass1": [5, 10, 15] },
+        "melody": { "lead1Square": [40, 40, 60], "lead2Sawtooth": [40, 40, 60], "lead5Charang": [30, 30, 36], "lead8BassAndLead": [10, 15, 20], "lead4Chiff": [5, 10, 20], "acousticGrandPiano": 40, "electricPiano1": [60, 60, 60], "lead6Voice": [30, 30, 40], "drawbarOrgan": [40, 40, 40] },
+        "chords": { "electricPiano2": [30, 30, 76], "acousticGrandPiano": 70, "electricPiano1": 80, "synthStrings1": 65, "pad2Warm": [45, 45, 72], "pad3Polysynth": [60, 70, 80], "orchestraHit": [10, 15, 20], "synthBrass1": [5, 10, 15], "drawbarOrgan": [20, 30, 40] },
         "bass": { "synthBass1": 100, "synthBass2": [100, 100, 89], "drawbarOrgan": [5, 15, 20] },
         "pad": { "synthStrings1": [56, 56, 78], "pad2Warm": 100, "pad3Polysynth": [100, 100, 71], "pad7Halo": [81, 81, 57], "pad8Sweep": [81, 81, 57], "atmosphereFX4": [10, 15, 25], "pad6Metallic": [5, 10, 25] },
         "counterMelody": { "lead2Sawtooth": 100 },
@@ -294,7 +296,7 @@
   {
     "id": "techno",
     "name": "Techno",
-    "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 130 to 145, the pads and bass pumping.",
+    "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 124 to 145, the pads and bass pumping.",
     "choices": {
       "kickOut": { "lines": [20, 30, 40] },
       "length": { "from": [360, 360, 300], "to": [540, 540, 600] },
@@ -359,7 +361,7 @@
       "cadenceRaise": { "sections": 0 },
       "parts": { "melody": [35, 40, 50], "chords": [70, 70, 70], "bass": 100, "pad": [60, 60, 60], "counterMelody": 30, "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [10, 10, 30], "solo": [0, 10, 50] },
       "drumSetup": { "kit": 100 },
-      "drumPieces": { "kick": 100, "electricSnare": [60, 60, 60], "clap": 100, "hiHat": 100, "tom": [10, 10, 60], "cymbal": [50, 50, 80], "maracas": [20, 30, 30], "cowbell": [0, 10, 20], "ride": [30, 40, 50] },
+      "drumPieces": { "kick": 100, "electricSnare": [60, 60, 60], "clap": 100, "hiHat": 100, "tom": [10, 10, 60], "cymbal": [50, 50, 80], "maracas": [20, 30, 30], "ride": [30, 40, 50] },
       "levels": { "melody": 25, "bass": 70, "pad": 35, "drum": 95 },
       "grooveHold": { "held": 95 },
       "pocket": { "laidBack": 5 },
@@ -521,7 +523,7 @@
         "rhythm": { "electricPiano1": 100, "electricGuitarClean": 50, "electricGuitarMuted": 50 },
         "solo": { "altoSax": 60, "tenorSax": 60, "flute": 60, "trumpet": 50, "electricGuitarClean": 40, "lead1Square": 40, "lead2Sawtooth": 30 }
       },
-      "kit": { "standard": 100, "room": 70, "tr808": [40, 50, 60], "electronic": [0, 10, 25] },
+      "kit": { "tr808": 100, "standard": [60, 60, 50], "room": [40, 40, 30], "electronic": [0, 10, 25] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [90, 90, 81], "counterMelody": [15, 20, 40], "drum": 95, "riff": [25, 25, 44], "riffTwin": [0, 15, 15], "rhythm": [10, 10, 37], "solo": [0, 5, 25] },
       "drumSetup": { "kit": 100 },
       "drumPieces": { "kick": [100, 100, 89], "acousticSnare": 100, "electricSnare": [30, 30, 40], "clap": [30, 40, 60], "hiHat": [100, 100, 89], "cymbal": [30, 30, 100] },
@@ -851,8 +853,8 @@
       "harmonicRhythm": { "twoBars": 100, "oneBar": [30, 40, 50] },
       "lineScale": { "pentatonic": [100, 100, 60], "blues": [50, 50, 50], "section": [30, 30, 40], "octatonic": [0, 0, 15] },
       "bass": { "leading": 55 },
-      "instrument": { "melody": { "electricGuitarClean": 100, "overdrivenGuitar": [30, 40, 50], "lead2Sawtooth": [0, 5, 20] }, "chords": { "electricGuitarClean": 100, "overdrivenGuitar": [30, 40, 50] }, "bass": { "slapBass1": 100, "electricBassFinger": [80, 80, 70], "slapBass2": [40, 40, 30] }, "riff": { "overdrivenGuitar": 100, "electricGuitarClean": 60, "electricGuitarMuted": 40, "distortionGuitar": [20, 30, 40] }, "rhythm": { "electricGuitarMuted": 100, "electricGuitarClean": 70, "overdrivenGuitar": [20, 30, 40] }, "counterMelody": { "electricGuitarClean": 100, "overdrivenGuitar": 40 }, "solo": { "overdrivenGuitar": 100, "distortionGuitar": [50, 60, 70] } },
-      "kit": { "standard": 100, "power": [60, 60, 70], "room": [20, 20, 20] },
+      "instrument": { "melody": { "electricGuitarClean": 100, "overdrivenGuitar": [30, 40, 50] }, "chords": { "electricGuitarClean": 100, "overdrivenGuitar": [30, 40, 50] }, "bass": { "slapBass1": 100, "electricBassFinger": [80, 80, 70], "slapBass2": [40, 40, 30] }, "riff": { "overdrivenGuitar": 100, "electricGuitarClean": 60, "electricGuitarMuted": 40, "distortionGuitar": [20, 30, 40] }, "rhythm": { "electricGuitarMuted": 100, "electricGuitarClean": 70, "overdrivenGuitar": [20, 30, 40] }, "counterMelody": { "electricGuitarClean": 100, "overdrivenGuitar": 40 }, "solo": { "overdrivenGuitar": 100, "distortionGuitar": [50, 60, 70] } },
+      "kit": { "power": 100, "standard": [60, 60, 70], "room": [20, 20, 20] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 0, "counterMelody": [20, 30, 40], "drum": 100, "riff": [90, 90, 70], "riffTwin": 0, "rhythm": [60, 70, 70], "solo": [0, 20, 60] },
       "levels": { "bass": 65, "drum": 70 },
       "grooveHold": { "held": 75 },
@@ -880,7 +882,7 @@
   {
     "id": "jazzFunk",
     "name": "Jazz-funk",
-    "description": "Funk's groove played softer and jazzier: sevenths, ninths and elevenths, mediants and ii–V passing chords, an electric piano and warm pads, a finger bass leading, a flute or a soft lead, a laid-back pocket, 75 to 100, 4/4, short sung forms, few solos.",
+    "description": "Funk's groove played softer and jazzier: sevenths, ninths and elevenths, mediants and ii–V passing chords, an electric piano and warm pads, a finger bass leading, a flute or a soft lead, a laid-back pocket, 75 to 118, 4/4, short sung forms, few solos.",
     "choices": {
       "alone": { "drum": 100, "bass": 50, "rhythm": 30 },
       "texture": { "steady": [100, 82, 100], "build": [0, 10, 100], "thin": [0, 4, 100], "alone": [5, 10, 15] },
@@ -933,7 +935,7 @@
       "loop": { "sections": [20, 30, 30] },
       "articulation": { "legato": [20, 30, 50], "stabs": [10, 20, 20], "roll": 0, "deadNotes": [10, 20, 30] },
       "hook": { "choruses": [50, 60, 50], "sections": [50, 60, 50] },
-      "solos": { "sections": [10, 20, 30], "trades": 0 },
+      "solos": { "sections": [0, 5, 15], "trades": 0 },
       "strongEffect": { "none": 100 },
       "phraseScheme": { "aaab": 100, "aaaa": [80, 80, 50], "abab": [30, 30, 40], "aaba": [20, 20, 30] },
       "space": { "drum": 25, "bass": 30, "chords": 30, "rhythm": 25, "riff": 30, "melody": 40 },
@@ -945,6 +947,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
+      "cadenceRaise": { "sections": [10, 10, 0] },
       "harmonyDevices": { "pedal": [5, 15, 30], "reharmonised": [0, 25, 25], "innerLine": [0, 15, 30] },
       "articulation": { "letRing": [30, 50, 60], "legato": [0, 40, 60], "roll": [0, 30, 50] },
       "colour": { "none": 100, "held": [10, 30, 40] },
@@ -999,6 +1002,7 @@
     "name": "Celtic",
     "description": "Irish and Scottish tunes: a fiddle, a flute or a whistle and the pipes playing jigs and reels in unison, a bouzouki or a guitar droning beneath, Dorian and Mixolydian, cuts and rolls, sets of tunes changing key, a bodhrán or no drums, 100 to 190.",
     "choices": {
+      "cadenceRaise": { "sections": 0 },
       "intensity": { "from": -80, "to": 80 },
       "darkness": { "from": -80, "to": 80 },
       "length": { "from": [150, 150, 120], "to": [270, 300, 330] },
@@ -1027,7 +1031,7 @@
       "instrument": { "melody": { "fiddle": 100, "flute": 80, "recorder": 50, "piccolo": 40, "bagpipe": [20, 30, 40], "accordion": [20, 30, 40] }, "chords": { "acousticGuitarSteel": 100, "acousticGuitarNylon": 50, "dulcimer": 40 }, "bass": { "acousticBass": 100 }, "counterMelody": { "fiddle": 100, "flute": 60, "accordion": 40 }, "rhythm": { "acousticGuitarSteel": 100, "acousticGuitarNylon": [45, 45, 51], "banjo": [80, 80, 51] }, "solo": { "violin": [80, 80, 100], "flute": 65, "harmonica": [100, 100, 92] }, "pad": { "stringEnsemble1": 100, "voiceOohs": 40, "choirAahs": 30, "drawbarOrgan": 20 }, "riff": { "electricGuitarClean": 100, "percussiveOrgan": 20 } },
       "kit": { "standard": 45, "room": 100, "brush": 30 },
       "parts": { "melody": 100, "chords": 100, "bass": [80, 85, 90], "pad": [55, 55, 66], "counterMelody": 50, "drum": [30, 40, 50], "riff": [10, 10, 46], "riffTwin": [0, 15, 15], "rhythm": [70, 70, 49], "solo": [0, 20, 80] },
-      "drumSetup": { "percussion": 100, "kit": [0, 10, 30] },
+      "drumSetup": { "kit": 100 },
       "drumPieces": { "tom": 100, "tambourine": [20, 30, 40] },
       "grooveHold": { "held": 60 },
       "feelValues": { "sixteenths": 0 },
@@ -1188,8 +1192,9 @@
   {
     "id": "pop",
     "name": "Pop",
-    "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus now and then lifted a key or played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, mostly major, 95 to 125.",
+    "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus now and then lifted a key or played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, mostly major, 90 to 138.",
     "choices": {
+      "soloists": { "solo": 100, "melody": [20, 20, 30], "chords": [10, 13, 20], "riff": [10, 10, 20] },
       "darkness": { "from": -80, "to": 40 },
       "feelChances": { "swing": [0, 5, 10], "halfTime": [0, 10, 20], "doubleTime": [0, 2, 2] },
       "length": { "from": [180, 180, 165], "to": [250, 260, 300] },
@@ -1246,6 +1251,7 @@
     "name": "Power ballad",
     "description": "Slow, 60 to 95, mostly in 4/4, now and then 12/8: a clean or acoustic guitar's broken chords let ring with sweet held tones, an overdriven lead singing the melody, a fingered bass and strings, sus2 and add9 chords, the band building section by section in a big room, a heavy chorus, a guitar solo, now and then the last chorus up a step, fading or ringing out.",
     "choices": {
+      "soloists": { "solo": 100, "melody": [10, 15, 20] },
       "intensity": { "from": -80, "to": 40 },
       "bassLanding": { "root": 100, "third": [5, 5, 10], "fifth": [5, 5, 10], "free": [0, 10, 40], "stepDown": [30, 40, 40] },
       "harmonyDevices": { "reharmonised": [0, 25, 25], "innerLine": [15, 25, 30], "pedal": [0, 6, 15] },
@@ -1307,6 +1313,7 @@
     "name": "Lyrical guitar",
     "description": "Mellow, melancholic instrumental guitar: a dry jazz or nylon guitar's repeating melody over acoustic guitars' broken chords let ring, a simple bass, a heavy delay, a steady downtempo beat or none, a cello now and then, natural minor and Dorian with a Spanish colour, a distorted solo building at the end now and then, 76 to 95.",
     "choices": {
+      "drumSetup": { "kit": 100 },
       "echo": { "dottedEighth": 100, "quarter": 100, "eighth": 100, "cascade": [0, 25, 60] },
       "tempo": { "from": [76, 70, 70], "to": [90, 95, 150], "lean": 30 },
       "length": { "from": [150, 120, 60], "to": [360, 480, 600] },
@@ -1464,7 +1471,7 @@
       "drumSounds": { "china": 70 },
       "drumStrokes": { "china": 70, "openHiHat": 85 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
-      "louderForms": { "guitars": 80, "quieter": [5, 10, 20] },
+      "louderForms": { "guitars": 0, "quieter": [5, 10, 20] },
       "rootMotion": { "same": 75, "stepUp": 75, "stepDown": 60 },
       "rootDegree": { "second": 70, "sixth": 65 },
       "tempo": { "from": [150, 150, 130], "to": [220, 220, 240] },
@@ -1531,8 +1538,6 @@
       "pocket": { "laidBack": 10 },
       "openingAlone": { "songs": [30, 40, 50] },
       "breakdown": { "sections": [20, 30, 40] },
-      "sticking": { "singles": 100, "doubles": 50, "handFoot": 70, "sixStroke": [10, 30, 40], "cascade": [40, 60, 80] },
-      "drumSoloFeet": { "doubleKick": 100, "groove": 50 },
       "cadenceRaise": { "sections": [30, 40, 50] },
       "cadenceDegree": { "fifth": 70, "sixth": 60, "seventh": 55 },
       "sectionHome": { "tonic": 100, "relative": 40, "fourth": 20, "fifth": 20 },
@@ -1613,8 +1618,6 @@
       "pocket": { "laidBack": 10 },
       "openingAlone": { "songs": [40, 50, 60] },
       "breakdown": { "sections": [0, 10, 20] },
-      "sticking": { "singles": 100, "doubles": 50, "handFoot": 70, "sixStroke": [10, 30, 40], "cascade": [40, 60, 80] },
-      "drumSoloFeet": { "doubleKick": 100, "groove": 50 },
       "cadenceRaise": { "sections": [20, 30, 30] },
       "cadenceDegree": { "second": 65, "sixth": 65, "seventh": 55 },
       "sectionHome": { "tonic": 100, "relative": 15, "fourth": 20, "fifth": 20 },
@@ -1624,13 +1627,12 @@
       "alone": { "riff": 100, "rhythm": 60, "bass": 30 },
       "texture": { "steady": 100, "build": [30, 40, 50], "alone": [10, 15, 25] },
       "figure": {
-        "ground": { "own": 100, "withRiff": [40, 50, 50] },
-        "riff": { "own": 100 }
+        "ground": { "own": 100, "withRiff": [40, 50, 50] }
       },
       "drumSounds": { "china": 30 },
       "drumStrokes": { "china": 40, "openHiHat": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
-      "louderForms": { "guitars": 80, "quieter": [10, 20, 30] },
+      "louderForms": { "guitars": 0, "quieter": [10, 20, 30] },
       "rootMotion": { "same": 80, "stepUp": 70, "stepDown": 65, "thirdDown": 55 },
       "rootDegree": { "second": 65, "sixth": 70 },
       "tempo": { "from": [45, 50, 55], "to": [75, 85, 95] },
@@ -1646,7 +1648,7 @@
       "pins": { "ground": [80, 80, 50], "backbeat": [70, 70, 40] },
       "fills": { "amount": 40 },
       "stopTime": { "sections": [5, 10, 15] },
-      "solos": { "sections": [0, 15, 25], "twins": [0, 25, 40], "trades": 0 },
+      "solos": { "sections": [0, 5, 15], "twins": [0, 25, 40], "trades": 0 },
       "soloists": { "solo": 100, "riff": [10, 20, 30] },
       "keyChanges": { "lastSection": [0, 5, 30], "sections": [0, 5, 50], "patterns": [0, 0, 50] },
       "effects": { "bends": [40, 60, 80], "vibrato": [50, 70, 90], "swell": [0, 10, 30], "pinch": [10, 20, 30], "dive": [0, 10, 20], "chorus": [0, 15, 30], "tone": [0, 10, 30], "tape": 0 },
@@ -1734,7 +1736,7 @@
         "counterMelody": { "cello": 100, "viola": 80, "flute": 50, "oboe": 40, "englishHorn": 40, "trombone": [10, 15, 25] },
         "solo": { "flute": 100, "violin": 80 }
       },
-      "kit": { "room": 100, "standard": 50 },
+      "kit": { "room": 100, "standard": 50, "brush": 60 },
       "drumSetup": { "kitAndPercussion": 100 },
       "drumPieces": { "tambourine": 100, "tom": 80, "triangle": 60, "conga": [20, 30, 40], "cymbal": [0, 10, 30], "kick": [0, 0, 30], "acousticSnare": [0, 0, 20], "bongo": [10, 20, 30] },
       "drumJob": { "marks": [100, 80, 60], "groove": [25, 40, 50] },
@@ -1999,6 +2001,7 @@
     "name": "Disco",
     "description": "The kick four on the floor, the open hi-hat off the beat, a bass in octaves, strings and horns, a clean guitar scratching 16ths, electric piano sevenths and ninths, minor and Dorian, 110 to 130.",
     "choices": {
+      "solos": { "sections": [0, 4, 50], "trades": 0 },
       "intensity": { "from": -20, "to": 80 },
       "darkness": { "from": -80, "to": 20 },
       "length": { "to": [300, 360, 480], "from": [200, 200, 180] },
@@ -2071,7 +2074,7 @@
   {
     "id": "trap",
     "name": "Trap",
-    "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
+    "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, the loop kept under its verses, now and then left to a voice.",
     "choices": {
       "intensity": { "from": -40, "to": 80 },
       "darkness": { "from": 0, "to": 100 },
@@ -2224,6 +2227,7 @@
     "name": "Psytrance",
     "description": "Goa and full-on: a rolling bass, kick then three notes, under a one-chord vamp, Phrygian dominant, acid lines squelching, 16th sequenced riffs calling and answering, few pads, 140 to 148, six to nine minutes.",
     "choices": {
+      "callAndResponse": { "sections": [20, 35, 50] },
       "length": { "from": [360, 360, 360], "to": [540, 540, 540] },
       "doubling": { "octaves": [7, 11, 15], "harmony": [10, 20, 30], "block": 0, "riff": [100, 50, 0], "twin": 0 },
       "kickOut": { "lines": [10, 20, 30] },
@@ -2292,7 +2296,7 @@
       "sung": { "halves": [30, 30, 20], "eighths": [20, 10, 0] },
       "ghosts": { "sections": [30, 50, 60] },
       "ghostNotes": { "many": 20 },
-      "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
+      "sectionChanges": { "tempo": 0, "modulation": [0, 5, 50], "meter": 0, "shortBar": 0, "eased": 50 },
       "phraseBars": { "fourBars": 100 },
       "rudiments": { "flams": 0, "drags": 0 },
       "dynamics": { "evenness": 85 },
@@ -2355,6 +2359,8 @@
     "name": "Ska",
     "description": "Fast, the guitar and the piano skanking on the offbeats, a walking bass, horns on a riff and in solos, trumpet and sax leads, major, Mixolydian or minor.",
     "choices": {
+      "sectionChanges": { "tempo": [0, 0, 30], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
+      "figure": { "chords": { "own": [20, 40, 60], "skank": 100 } },
       "drumSounds": { "openHiHat": 65 },
       "length": { "from": [150, 140, 90], "to": [210, 220, 230] },
       "cadenceRaise": { "sections": [50, 60, 50] },
@@ -2418,6 +2424,8 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major, Mixolydian or minor, a count-in and a stop.",
     "choices": {
+      "cadenceRaise": { "sections": [0, 10, 10] },
+      "soloists": { "solo": 100, "riff": [40, 50, 60], "rhythm": [10, 15, 20] },
       "intensity": { "from": 0, "to": 100 },
       "rootDegree": { "fourth": 70, "fifth": 65, "sixth": 60 },
       "push": { "sections": [10, 20, 25] },
@@ -2594,7 +2602,7 @@
       },
       "kit": { "standard": 100, "room": 70 },
       "drumSetup": { "kit": 100 },
-      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "tambourine": [90, 80, 70], "ride": 40, "tom": 40, "cymbal": 60, "clap": [20, 30, 30], "conga": [10, 25, 40] },
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "tambourine": [90, 80, 70], "ride": 40, "tom": 40, "cymbal": 60, "clap": [20, 30, 30] },
       "drumStrokes": { "crossStick": 65 },
       "pins": { "backbeat": 90 },
       "grooveHold": { "held": 80 },
@@ -2680,7 +2688,7 @@
   {
     "id": "bluegrass",
     "name": "Bluegrass",
-    "description": "Bill Monroe's high lonesome sound: no drums, a banjo rolling, a mandolin's chop on 2 and 4, a guitar's runs and a fiddle, an upright bass on the root and the fifth, breaks passed round the band, tenor harmony, played ahead of the beat, 110 to 180.",
+    "description": "The high lonesome sound: no drums, a banjo rolling, a mandolin's chop on 2 and 4, a guitar's runs and a fiddle, an upright bass on the root and the fifth, breaks passed round the band, tenor harmony, played ahead of the beat, 110 to 180.",
     "choices": {
       "length": { "from": [120, 120, 100], "to": [200, 200, 240] },
       "strictness": { "rules": [50, 75, 70] },
@@ -2688,7 +2696,7 @@
       "lastRepeat": { "breakdown": [10, 15, 15], "songs": [0, 25, 25] },
       "arpeggio": { "up": 100, "upDown": 60, "alternatingThumb": 40, "none": [20, 20, 30] },
       "sung": { "halves": [100, 80, 60], "eighths": [100, 80, 60] },
-      "figure": { "bass": { "own": 100, "withKick": [20, 20, 15], "halves": [20, 30, 30], "waltz": [20, 30, 30] }, "backbeat": { "own": 100, "trainBeat": [10, 20, 30] }, "chords": { "own": [40, 40, 50], "waltz": 100, "backbeat": 100 } },
+      "figure": { "bass": { "own": 100, "halves": [20, 30, 30], "waltz": [20, 30, 30] }, "chords": { "own": [40, 40, 50], "waltz": 100, "backbeat": 100 } },
       "callAndResponse": { "sections": [10, 25, 35] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 10, 25] },
       "alternatingBass": { "sections": [80, 90, 90], "boogie": [10, 15, 20] },
@@ -2708,15 +2716,8 @@
       "bassLanding": { "root": 100, "fifth": 70 },
       "octaveBass": {},
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 0, "counterMelody": [50, 60, 60], "drum": 0, "riff": 0, "riffTwin": 0, "rhythm": 100, "solo": [20, 30, 40] },
-      "instrument": { "melody": { "fiddle": 100, "banjo": 60, "acousticGuitarSteel": 40 }, "chords": { "acousticGuitarSteel": 100, "banjo": 40 }, "bass": { "acousticBass": 100 }, "pad": { "stringEnsemble1": 100, "drawbarOrgan": 50, "voiceOohs": [10, 25, 30], "choirAahs": [0, 10, 20] }, "counterMelody": { "fiddle": 100, "banjo": 50 }, "riff": { "electricGuitarClean": 100 }, "rhythm": { "banjo": 100, "acousticGuitarSteel": 50 }, "solo": { "fiddle": 100, "banjo": 90, "acousticGuitarSteel": 70 } },
-      "kit": { "standard": 70, "room": 100, "brush": 40 },
-      "drumSetup": { "kit": 100 },
-      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "tambourine": 50, "ride": 30, "cymbal": 50, "tom": 30 },
-      "drumStrokes": { "crossStick": 60 },
-      "pins": { "ground": 70, "backbeat": 90 },
+      "instrument": { "melody": { "fiddle": 100, "banjo": 60, "acousticGuitarSteel": 40 }, "chords": { "acousticGuitarSteel": 100, "banjo": 40 }, "bass": { "acousticBass": 100 }, "counterMelody": { "fiddle": 100, "banjo": 50 }, "rhythm": { "banjo": 100, "acousticGuitarSteel": 50 }, "solo": { "fiddle": 100, "banjo": 90, "acousticGuitarSteel": 70 } },
       "rhythm": { "bass": { "speed": 50, "fullness": 82, "repetition": 92 } },
-      "grooveHold": { "held": 85 },
-      "fills": { "amount": 35 },
       "effects": { "bends": [30, 50, 70], "vibrato": [30, 50, 60], "chorus": 0, "swell": 0, "tone": 0, "tape": 0, "pinch": 0, "dive": 0 },
       "articulation": { "legato": [30, 40, 50], "roll": 0 },
       "space": { "melody": 45, "chords": 40 },
@@ -2731,7 +2732,7 @@
       "passingChords": {},
       "planing": {},
       "pocket": { "laidBack": 30 },
-      "doubling": { "harmony": [30, 40, 50], "octaves": [7, 11, 15], "riff": [100, 50, 0], "twin": 0 },
+      "doubling": { "harmony": [30, 40, 50], "octaves": [7, 11, 15], "riff": 0, "twin": 0 },
       "room": { "room": 100 },
       "louderForms": { "guitars": 0, "quieter": 0 }
     }
@@ -2741,6 +2742,7 @@
     "name": "Bossa nova",
     "description": "A nylon guitar's syncopated chords, a flute or a sax, major sevenths and ninths moving by ii-V, the snare's cross-stick on a brush kit, a shaker, soft and straight, 100 to 140.",
     "choices": {
+      "sectionChanges": { "tempo": [0, 0, 30], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
       "intensity": { "from": -100, "to": 20 },
       "darkness": { "from": -80, "to": 20 },
       "harmonyDevices": { "pedal": [10, 20, 30], "innerLine": [20, 30, 40], "reharmonised": [0, 25, 25] },
@@ -2872,6 +2874,8 @@
     "name": "Cinematic piano",
     "description": "A film's piano: a piano melody over a piano's arpeggios two octaves wide, strings swelling under it, a bass stepping down through the chords, add9, sus and seventh chords, major, minor and Lydian, AABA with a big return and the last section lifted a key, no drums, 60 to 90, or a bouncy 150.",
     "choices": {
+      "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
+      "feelChances": {},
       "sung": { "eighths": [100, 80, 60], "halves": [100, 50, 0] },
       "tempo": { "from": [60, 60, 60], "to": [92, 100, 160] },
       "length": { "from": [150, 150, 120], "to": [270, 300, 360] },
@@ -2908,9 +2912,10 @@
   {
     "id": "chamber",
     "name": "Chamber",
-    "description": "Chamber music: a melody on violin, flute or clarinet over a piano's Alberti figure and a cello's bass, no drums, raised cadences and ornaments, phrases of four bars, AABA, ABA and a rondo, terraced dynamics, 80 to 140 in 4/4, 3/4 and 6/8.",
+    "description": "Chamber music: a melody on violin, flute or clarinet over a piano's Alberti figure and a cello's bass, no drums, raised cadences and ornaments, phrases of four bars, AABA, ABA and a rondo, terraced dynamics, 60 to 170 in 4/4, 3/4 and 6/8.",
     "choices": {
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [100, 50, 0], "twin": 50, "imitation": [15, 25, 35] },
+      "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
+      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 0, "twin": 0, "imitation": [15, 25, 35] },
       "figure": { "chords": { "own": 100, "waltz": [20, 30, 30] }, "bass": { "own": 100, "waltz": [20, 30, 30], "eighths": [10, 15, 20] } },
       "sectionHome": { "tonic": 100, "contrast": 40, "relative": 10, "fourth": 10, "fifth": 5 },
       "appoggiatura": { "melody": [10, 20, 25], "counterMelody": [5, 10, 15] },
@@ -3034,6 +3039,7 @@
     "name": "IDM",
     "description": "Warm and warped at its plainest, a slow swung breakbeat under detuned pads, an electric piano and a music box, sevenths and Dorian; wilder, an acid bass squelching and gliding, odd meters, tuplets and polymeters, and drums splintering into rolls.",
     "choices": {
+      "intro": { "entries": 100, "cold": [20, 30, 40] },
       "hatRollRate": { "thirtySeconds": 100, "tripletSixteenths": 50, "sixtyFourths": [0, 20, 60] },
       "rudiments": { "flams": 0, "drags": 0 },
       "length": { "from": [180, 150, 60], "to": [420, 480, 600] },
@@ -3088,8 +3094,9 @@
   {
     "id": "fmGame",
     "name": "16-bit game",
-    "description": "A Mega Drive's FM chip: a slap or synth bass in busy 16ths, a DX electric piano and FM brass, sevenths and sus chords, sampled drums and orchestra hits, a bright lead echoed on a second channel, a game loop fading out, 110 to 160.",
+    "description": "A Mega Drive's FM chip: a slap or synth bass in busy 16ths, a DX electric piano and FM brass, sevenths and sus chords, sampled drums and orchestra hits, a bright lead echoed on a second channel, a game loop fading out, 105 to 165.",
     "choices": {
+      "drumSetup": { "kit": 100 },
       "tempo": { "from": [110, 105, 100], "to": [155, 165, 175] },
       "length": { "from": [100, 100, 90], "to": [180, 200, 240] },
       "darkness": { "from": -60, "to": 60 },
