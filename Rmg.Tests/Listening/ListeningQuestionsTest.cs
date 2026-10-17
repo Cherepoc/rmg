@@ -66,6 +66,11 @@ public sealed class ListeningQuestionsTest
             x => FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tresillo"),
             In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Figures && t.Section == span.SectionId
                                                     && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tresillo")),
+        new("latin-tumbao-varied", "Latin's bass on its tumbao, played as a bassist varies it, a note left out or one of its own between now and then: a living tumbao, or a figure losing its shape?",
+            "The tumbao as chances (Figure.Loose, the figures-as-chances experiment), against the tumbao laid exactly in every bar.", "latin", [], new() { ["figure.bass"] = new() { ["tumbaoChances"] = 0, ["tumbao"] = 100 } },
+            x => FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tumbaoChances"),
+            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Figures && t.Section == span.SectionId
+                                                    && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tumbaoChances")),
         new("trance-bright", "Trance at its brightest and liveliest, major and brighter chords, faster and busier: the euphoric peak, or too sweet?",
             "Trance's mood spans, darkness -80 to 40 and intensity -20 to 100, the songs heard at their brightest, against a neutral mood.", "trance", [],
             new() { ["darkness"] = new() { ["from"] = 0, ["to"] = 0 }, ["intensity"] = new() { ["from"] = 0, ["to"] = 0 } },

@@ -269,13 +269,14 @@ The review's fixes are its plan (outside the repository, `rmg-reviews/2026-10-16
 proposals are packages there, the holds written by their makers, the pulse on a place and one list of plays. What it
 proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
 
-- **Figures as chances** (the foundations reviewer, #39): a figure given as the per-slot chances of its part's own
-  rhythm, exact at the plain end and loosened toward the wild, a clave or the swing ride strict at every end, in place
-  of the onsets laid over a player after assembly; so that any part a genre's rhythm reaches may name a figure, and a
-  figure varies as a player varies it. The experiment first, the corpus unchanged: Latin's tumbao as chances beside
-  the tumbao laid, measured (notes on the figure, bars identical to it) and asked as `latin-tumbao-varied`; a
-  migration planned only once listening prefers it; planned as package 03b of the review's plan. The library of idioms parked in September is built, beside the
-  engine; this puts it inside. Risk: the listening verdicts tuned on exact figures.
+- **Figures as chances** (the foundations reviewer, #39), its experiment built (package 03b of the review's plan): a
+  loose figure (`Figure.Loose`) plays its onsets and the player's own notes each by a chance, a note on both always, by
+  how strictly the section plays it (`Figures.Strictness`, the feel facet's 1-0.9-0.6), exact at the plain end. Latin's
+  bass plays the tumbao so (`tumbaoChances`): its notes on the figure 76%-73%-57% at feel 0, 0.5 and 1 against the
+  tumbao laid's 76%-76%-71%, its bars the figure exactly 26%-16%-1% against 26%-23%-12% (`FigureChancesReportTest`).
+  Asked as `latin-tumbao-varied`; a migration of every figure is planned only if listening prefers it, else the option
+  goes and the verdict to `decided.md`. Built where the figures are laid, after assembly, rather than inside the rhythm
+  generator, whose patterns are drawn before a section's figure is.
 - **Waiting on figures as chances**, as each needs a player the figures do not reach: the conga's tumbao (#354, twelve
   presets name the conga), the reggae organ bubble on the pad (#355, Reggae, Dub, Ska), the boogie comp on the rhythm
   part (#340, Rock, Blues, Country, Punk, Funk rock; the bass's boogie steps shared).

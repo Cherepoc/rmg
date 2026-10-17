@@ -273,7 +273,8 @@ internal enum SongStream
     CounterRuns = 118,
     FrameArpeggio = 119,
     DeadNotes = 120,
-    TempoBand = 121
+    TempoBand = 121,
+    LooseFigures = 122
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

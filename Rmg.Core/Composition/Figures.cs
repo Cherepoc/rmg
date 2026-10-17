@@ -26,7 +26,11 @@ public enum FigurePlayer
 /// <param name="Follows">The player whose notes' starts it strikes, played before it, none for one of its own onsets.</param>
 /// <param name="AnswersKick">Whether it plays around the kick, between its beats, and so only in a bar the kick plays in, as a rolling bass does.</param>
 /// <param name="In">The meter of its bars, four's where none is given.</param>
-public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick, Meter? In = null)
+/// <param name="Loose">
+///     Whether it is played as a player varies it, its onsets and the player's own notes each by a chance, by how
+///     strictly the section plays it (<see cref="Figures.Strictness" />), rather than exactly.
+/// </param>
+public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick, Meter? In = null, bool Loose = false)
 {
     /// <summary>
     ///     Whether it plays in a bar of the meter: one that follows or strikes at a steady step in any, one of its own shape
@@ -76,6 +80,13 @@ internal static class Figures
         _ => throw new ArgumentOutOfRangeException(nameof(player), player, null)
     };
 
+    /// <summary>
+    ///     How strictly a section plays a loose figure, by its feel facet: exactly at the plain end, its onsets kept and
+    ///     the player's own notes left out; at the wild end the player's own rhythm more than the figure's. A note on both
+    ///     plays always; one on the figure alone by this chance, one of the player's own alone by its rest.
+    /// </summary>
+    public static ByConvention Strictness { get; } = new(1, 0.9, 0.6);
+
     /// <summary>A player's own rhythm, as its pool names it.</summary>
     public const string Own = "own";
 
@@ -122,6 +133,8 @@ internal static class Figures
         new("withKick", "With the kick, wherever it plays", FigurePlayer.Bass, [], 0, FigurePlayer.Ground, 0, false),
         // a salsa's bass, counted in half notes as its clave is: each of its bars' 2-and and 4, anticipating the chord
         new("tumbao", "The tumbao, a salsa bar's 2-and and 4, ahead of the chord", FigurePlayer.Bass, [3, 6, 11, 14], 16, null, 0, false),
+        // the tumbao as a bassist varies it, its onsets kept and its own notes between them now and then, an experiment
+        new("tumbaoChances", "The tumbao as a bassist varies it", FigurePlayer.Bass, [3, 6, 11, 14], 16, null, 0, false, Loose: true),
         new("bossaBass", "The bossa nova's bass, on 1, the 2-and, 3 and the 4-and, as its surdo", FigurePlayer.Bass, [0, 6, 8, 14], 16, null, 0, false),
         // the tresillo, 3+3+2 in each half of the bar, a jazz-funk vamp's bass arpeggio
         new("tresillo", "The tresillo, 3+3+2 in each half bar", FigurePlayer.Bass, [0, 3, 6, 8, 11, 14], 16, null, 0, false),
@@ -267,7 +280,23 @@ internal static class Figures
                                 continue;
                             laid.Add((span.SectionId, player));
                             played.RemoveAll(x => In(x.Position));
-                            played.AddRange(onsets.Where(In).Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
+                            if (figure.Loose)
+                            {
+                                // its onsets and the player's own notes, each kept by a chance of its own, from a sequence of
+                                // the bar's and the track's own
+                                var strict = Strictness.At(song.SectionOf(span.SectionId).Facets[Facet.Feel]);
+                                var context = song.Stream(SongStream.LooseFigures, (long)Math.Round(bar * 48), track);
+                                var ownAt = own.Select(x => Math.Round(x.Position, 6)).ToHashSet();
+                                var onAt = onsets.Where(In).Select(x => Math.Round(x, 6)).ToHashSet();
+                                foreach (var at in ownAt.Union(onAt).Order())
+                                {
+                                    var keeps = context.GenerateDouble() < (ownAt.Contains(at) && onAt.Contains(at) ? 1 : onAt.Contains(at) ? strict : 1 - strict);
+                                    if (keeps)
+                                        played.Add(own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at));
+                                }
+                            }
+                            else
+                                played.AddRange(onsets.Where(In).Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
                         }
                     }
 

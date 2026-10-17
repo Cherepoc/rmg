@@ -89,3 +89,7 @@ rejected while fixing: the place, what was decided, why.
   parts' generation within a section for a lean that a figure followed at a loose strictness gives, once figures are
   chances (the roadmap's experiment); taken up again only if that experiment is built and an interlocking part is still
   out of reach, with a measure of onsets struck together.
+- A genre's fineness moves a part coarser alone (`GenreRhythm.Of`, documented); a value above the middle is not
+  refused, the presets' 100s taken out (#61, #339).
+- The heavy presets' half and double time as their records tuned them (Heavy metal, Thrash, Symphonic, Black metal):
+  the kick's steady figure plays through them; only the descriptions set right (#367, #369, #398).

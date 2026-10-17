@@ -8,6 +8,28 @@ namespace Rmg.Tests.Drums;
 /// <summary>A genre's figures (<see cref="Figures" />): a player's rhythm in a section given by its figure, the kick with the riff, a double kick, a clave.</summary>
 public sealed class FiguresTest
 {
+    /// <summary>A loose figure at the plainest feel is the figure laid exactly: the same songs' bass note for note.</summary>
+    [Test]
+    public async Task ALooseFigure_AtThePlainEnd_IsTheFigureExactly()
+    {
+        var plain = TestCorpus.FacetsOf((Facet.Feel, 0));
+        var notes = 0;
+        foreach (var seed in Enumerable.Range(0, 8))
+        {
+            (double, int)[] Bass(string figure)
+            {
+                var song = TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.With("latin", GenreChoices.Figures[FigurePlayer.Bass], (figure, 1)), Facets: plain));
+                return [..song.Song.Notes![song.Song.Track(TrackRole.Bass)].Select(x => (Math.Round(x.Position, 6), x.Value.Pitches[0]))];
+            }
+
+            var (loose, exact) = (Bass("tumbaoChances"), Bass("tumbao"));
+            notes += exact.Length;
+            await Assert.That(loose).IsEquivalentTo(exact, CollectionOrdering.Matching).Because($"seed {seed}");
+        }
+
+        await Assert.That(notes).IsGreaterThan(0);
+    }
+
     /// <summary>
     ///     A name two players' figures share is a figure they play together (<see cref="Figures" />: an earlier player's
     ///     figure is a later one's where it has one of the name), so a name is shared only where meant: the blast, the
@@ -180,7 +202,7 @@ public sealed class FiguresTest
     ///     the figures place, a line's pickup or a push.
     /// </summary>
     [Test]
-    [Arguments("latin", "tumbao")]
+    [Arguments("latin", "tumbaoChances")]
     [Arguments("bossa", "bossaBass")]
     [Arguments("jazzFunk", "tresillo")]
     public async Task ALatinBass_StrikesOnItsFiguresSixteenths(string genre, string name)

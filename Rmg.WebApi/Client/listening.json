@@ -242,6 +242,65 @@
     ]
   },
   {
+    "id": "latin-tumbao-varied",
+    "question": "Latin's bass on its tumbao, played as a bassist varies it, a note left out or one of its own between now and then: a living tumbao, or a figure losing its shape?",
+    "decides": "The tumbao as chances (Figure.Loose, the figures-as-chances experiment), against the tumbao laid exactly in every bar.",
+    "genre": "latin",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "tumbaoChances": 0,
+          "tumbao": 100
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 64.6,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "1",
+        "at": 0,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 15.2,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 245.4,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 102.2,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 207.9,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      }
+    ]
+  },
+  {
     "id": "trance-bright",
     "question": "Trance at its brightest and liveliest, major and brighter chords, faster and busier: the euphoric peak, or too sweet?",
     "decides": "Trance's mood spans, darkness -80 to 40 and intensity -20 to 100, the songs heard at their brightest, against a neutral mood.",
