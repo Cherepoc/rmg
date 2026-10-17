@@ -63,9 +63,9 @@ internal static class HatRolls
             // every bar, a short last one's too, the bar before the next section where a roll is most at home
             foreach (var (_, start, end) in span.Bars)
             {
-                // the beats it may end on, a short bar's own, its end the likeliest
-                var beats = (int)Math.Max(1, Math.Round(end - start));
-                ImmutableArray<Weighted<double>> ends = [..Enumerable.Range(1, beats).Select(k => new Weighted<double>(k == beats ? BarEndOdds : 1, k == beats ? end : start + k))];
+                // the pulses it may end on, a short bar's own, its end the likeliest: 4/4's beats, 6/8's dotted quarters
+                double[] pulses = [..song.Form.Map.MeterAt(start).Pulses.Where(x => x > 1e-9 && start + x < end - 1e-9).Select(x => start + x), end];
+                ImmutableArray<Weighted<double>> ends = [..pulses.Select(x => new Weighted<double>(x == end ? BarEndOdds : 1, x))];
                 // drawn for every bar, so that the draws are as many
                 var (rolls1, rate, length, into) = (context.TestProbability(chance), context.Pick(rates), context.Pick(Lengths), context.Pick(ends));
                 if (rolls1)

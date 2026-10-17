@@ -344,7 +344,7 @@ internal static class Realizer
         var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio);
         if (role.PlaysChords() && !isLine && arpeggio != ArpeggioPattern.None)
             notes = [Arpeggios.Pick(arpeggio, Arpeggios.Coloured(notes, stateMap, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour)), place, position,
-                at.Meter.Pulses.Any(x => Math.Abs(at.Beat - x) < 1e-6), ToNote(0), stateMap.GetStateValue(CompositionStateKinds.ArpeggioOrder))];
+                at.OnPulse, at.Pulse, ToNote(0), stateMap.GetStateValue(CompositionStateKinds.ArpeggioOrder))];
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
     }

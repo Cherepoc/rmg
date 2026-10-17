@@ -181,7 +181,7 @@ internal static class StopTime
         // section, a drum never heard otherwise landing there, and the bass walking with them in a phrase's last half bar
         var fills = draft.FillSpans
             // and the last half bar of every phrase, the drums leading the band back in, with the fill its line draws there
-            .Concat(phrases.Select(x => (From: x.End - x.BarDuration / 2, To: x.End))).ToArray();
+            .Concat(phrases.Select(x => (From: x.End - song.Form.Map.BarBefore(x.End) / 2, To: x.End))).ToArray();
         bool InAFill(double position) => fills.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9);
 
         var result = notes.ToBuilder();

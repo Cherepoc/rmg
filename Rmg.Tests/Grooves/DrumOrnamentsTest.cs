@@ -51,9 +51,10 @@ public sealed class DrumOrnamentsTest
                 await Assert.That(song.SpanAt(note.Position) is { } section && note.Position - strokes * note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep) >= section.Start - 1e-9)
                     .IsTrue().Because(because);
                 await Assert.That(strokes is DrumOrnaments.FlamStrokes or DrumOrnaments.DragStrokes).IsTrue().Because(because);
-                // a flam on an 8th, a drag on the backbeat
+                // a flam on an 8th, a drag on the backbeat, the section's time feel's
                 var beat = map.BeatInBar(note.Position);
-                await Assert.That(strokes == DrumOrnaments.FlamStrokes ? Math.Abs(beat * 2 - Math.Round(beat * 2)) < 1e-6 : map.MeterAt(note.Position).Backbeats.Any(x => Math.Abs(x - beat) < 1e-6))
+                var feel = (int)song.Trace.First(t => t.Point == TracePoints.TimeFeel && t.Section == song.SpanAt(note.Position)!.SectionId).Value!;
+                await Assert.That(strokes == DrumOrnaments.FlamStrokes ? Math.Abs(beat * 2 - Math.Round(beat * 2)) < 1e-6 : map.MeterAt(note.Position).BackbeatsIn(feel).Any(x => Math.Abs(x - beat) < 1e-6))
                     .IsTrue().Because(because);
                 if (strokes == DrumOrnaments.FlamStrokes)
                     flams++;

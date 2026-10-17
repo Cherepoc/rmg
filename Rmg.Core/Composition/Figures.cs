@@ -363,7 +363,7 @@ internal static class Figures
                         var (start, end) = span.Bar(bar);
                         if (played.Any(x => x.IsWithin(start, end)) || !DrumsPlay(start, end))
                             continue;
-                        played.AddRange(span.Meter.Backbeats.Select(x => start + x).Where(x => x < end - 1e-9).Select(x => own.MergeWith(head).ToTimelineItem(x)));
+                        played.AddRange(span.Meter.BackbeatsIn(song.SectionOf(span.SectionId).TimeFeel).Select(x => start + x).Where(x => x < end - 1e-9).Select(x => own.MergeWith(head).ToTimelineItem(x)));
                     }
                 }
 

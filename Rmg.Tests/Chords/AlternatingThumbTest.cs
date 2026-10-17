@@ -1,4 +1,8 @@
+using Rmg.Core;
 using Rmg.Core.Composition;
+using Rmg.Core.Events;
+using Rmg.Core.Songs;
+using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Chords;
 
@@ -10,7 +14,7 @@ public sealed class AlternatingThumbTest
     {
         // a C major chord voiced C3 G3 C4 E4
         int[] voiced = [48, 55, 60, 64];
-        int At(int place, double position, bool onBeat) => Arpeggios.Pick(ArpeggioPattern.AlternatingThumb, [..voiced], place, position, onBeat, 0, 0);
+        int At(int place, double position, bool onBeat) => Arpeggios.Pick(ArpeggioPattern.AlternatingThumb, [..voiced], place, position, onBeat, (int)position, 0, 0);
 
         await Assert.That(At(0, 0, true)).IsEqualTo(48);
         await Assert.That(At(2, 1, true)).IsEqualTo(55);
@@ -20,5 +24,32 @@ public sealed class AlternatingThumbTest
         int[] fingers = [At(1, 0.5, false), At(3, 1.5, false), At(5, 2.5, false), At(7, 3.5, false)];
         await Assert.That(fingers.All(x => x > 55)).IsTrue();
         await Assert.That(fingers.Distinct().Count()).IsEqualTo(2);
+    }
+
+    /// <summary>
+    ///     In a song, the thumb strikes the same note on every bar's first pulse under one chord, whatever the meter, as it
+    ///     alternates by its bar's pulses, not the song's quarters: a 6/8 bar starting on the root every bar, not every other.
+    /// </summary>
+    [Test]
+    public async Task TheThumb_StrikesEveryBarsFirstPulseAlike_UnderOneChord_InEveryMeter()
+    {
+        var (groups, triple) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("folk")))))
+        {
+            var changes = song.ChordChanges;
+            foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role is TrackRole.Chords or TrackRole.Rhythm))
+            foreach (var chord in notes.Where(x => (ArpeggioPattern)x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == ArpeggioPattern.AlternatingThumb
+                                                   && x.Value.State.GetStateValue(CompositionStateKinds.Colour) == 0 && x.Value.Pitches.Length == 1
+                                                   && song.Map.PlaceOf(x.Position) is { OnPulse: true, Pulse: 0 })
+                         .GroupBy(x => Array.FindLastIndex(changes, c => c <= x.Position + 1e-9)).Where(x => x.Count() > 1))
+            {
+                groups++;
+                triple += song.Map.PlaceOf(chord.First().Position).Meter.PulseSixteenths % 3 == 0 ? 1 : 0;
+                await Assert.That(chord.Select(x => x.Value.Pitches[0] % 12).Distinct().Count()).IsEqualTo(1).Because($"seed {song.Seed} at {chord.First().Position}, track {track}");
+            }
+        }
+
+        Console.WriteLine($"{groups} chords held over bars, {triple} in a meter of dotted pulses");
+        await Assert.That(groups).IsGreaterThan(20);
     }
 }

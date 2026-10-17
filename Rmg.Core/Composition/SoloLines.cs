@@ -333,8 +333,10 @@ internal static class SoloLines
         // note off the beat that leads into a chord change planed into it, an approach, where the soloist approaches
         var arc = LinePattern.PhraseArc([..marks.Select(x => x.Phrase)], [..marks.Select(x => x.Pitch)], PhraseArc);
         int ChangeAt(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordChange);
+        // off a pulse of its bar, the bars counted from the section's start, as an answer's gap may start on a half beat
+        bool OffThePulse(double position) => !span.Meter.Pulses.Any(x => Math.Abs((position - barOrigin).Mod(span.Meter.BarDuration) - x) < 1e-6);
         bool Approaches(int i) => soloist.Approaches && i + 1 < line.Count && line[i].Value.GetStateValue(CompositionStateKinds.LineVoices) > 1
-                                  && Math.Abs(line[i].Position - span.Start - Math.Round(line[i].Position - span.Start)) > 1e-6 && ChangeAt(line[i + 1].Position) != ChangeAt(line[i].Position);
+                                  && OffThePulse(line[i].Position) && ChangeAt(line[i + 1].Position) != ChangeAt(line[i].Position);
         return ([
             ..line.Select((x, i) =>
             {

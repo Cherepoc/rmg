@@ -212,6 +212,17 @@ public sealed record Meter(ImmutableArray<int> Groups)
 
     private ImmutableArray<double>? _backbeats;
 
+    /// <summary>
+    ///     Where the bar's backbeat strikes in a time feel (<see cref="GeneratedSection.TimeFeel" />): its own in the song's
+    ///     time, once mid-bar in half time, 4/4's 3, and in double time twice as often, its backbeats pressed into each half.
+    /// </summary>
+    public ImmutableArray<double> BackbeatsIn(int timeFeel) => timeFeel switch
+    {
+        0 => Backbeats,
+        > 0 => [BarDuration / 2],
+        < 0 => [..Backbeats.Select(x => x / 2).SelectMany(x => new[] { x, x + BarDuration / 2 })]
+    };
+
     /// <summary>How long a level's nodes most often are, in 16ths, the longer where two lengths are as common.</summary>
     private int ModeLength(int level) =>
         Levels[level].GroupBy(x => x.Length).OrderByDescending(x => x.Count()).ThenByDescending(x => x.Key).First().Key;

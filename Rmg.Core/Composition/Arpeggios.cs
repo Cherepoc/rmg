@@ -202,7 +202,7 @@ internal static class Arpeggios
     /// <param name="onBeat">Whether the note falls on a beat of its bar, its meter's pulses counted from the bar's start, where a montuno plays the root.</param>
     /// <param name="root">The chord's root, any octave of it, which the root and fifth and the pedal play on, as the voicing may put another note lowest.</param>
     /// <param name="order">The seed a chord broken in no pattern's order draws its notes by (<see cref="CompositionStateKinds.ArpeggioOrder" />).</param>
-    public static int Pick(ArpeggioPattern pattern, ImmutableArray<int> voiced, int place, double position, bool onBeat, int root, long order)
+    public static int Pick(ArpeggioPattern pattern, ImmutableArray<int> voiced, int place, double position, bool onBeat, int pulse, int root, long order)
     {
         var notes = voiced.Order().ToArray();
         var count = notes.Length;
@@ -233,10 +233,10 @@ internal static class Arpeggios
             ArpeggioPattern.Montuno => onBeat
                 ? notes[low]
                 : notes[others[(place % Math.Max(1, 2 * others.Length - 2)) is var step && step < others.Length ? step : 2 * others.Length - 2 - step]],
-            // the thumb on the beat, the root on the even beats and the fifth on the odd, the fingers off it on the notes
-            // above the fifth by turns, or above the root where the fifth is the top
+            // the thumb on the beat, the root on its bar's even pulses and the fifth on the odd, the fingers off it on the
+            // notes above the fifth by turns, or above the root where the fifth is the top
             ArpeggioPattern.AlternatingThumb => onBeat
-                ? notes[(long)Math.Floor(position + 1e-9) % 2 == 0 ? low : fifth]
+                ? notes[pulse % 2 == 0 ? low : fifth]
                 : notes[Enumerable.Range(0, count).Where(x => x > fifth).DefaultIfEmpty(count - 1).ToArray() is var upper ? upper[place / 2 % upper.Length] : 0],
             _ => throw new ArgumentOutOfRangeException(nameof(pattern), pattern, null)
         };

@@ -64,7 +64,7 @@ internal static class DrumOrnaments
                 // in a fill on an 8th, its accents, and elsewhere on its bar's backbeat
                 var inFill = holds.At(Hold.Fill, position);
                 var beat = map.BeatInBar(position);
-                if (inFill ? Math.Abs(beat * 2 - Math.Round(beat * 2)) > 1e-6 : !map.MeterAt(position).Backbeats.Any(x => Math.Abs(x - beat) < 1e-6))
+                if (inFill ? Math.Abs(beat * 2 - Math.Round(beat * 2)) > 1e-6 : !map.MeterAt(position).BackbeatsIn(song.SectionOf(section.SectionId).TimeFeel).Any(x => Math.Abs(x - beat) < 1e-6))
                     return note;
                 var (plays, share, strokes) = inFill ? (flams, FlamShare, FlamStrokes) : (drags, DragShare, DragStrokes);
                 // drawn by the note's place, so that a song made again plays it alike

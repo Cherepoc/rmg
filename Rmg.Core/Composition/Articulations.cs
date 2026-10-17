@@ -120,7 +120,8 @@ internal static class Articulations
                     state = state.With(CompositionStateKinds.PalmMute, 1);
                 // a dead note: a 16th between the 8ths with a note a 16th before or after it, of the part's own line or the
                 // solo it plays, ghosted as a soloist's run is
-                var between = Math.Abs((note.Position + Sixteenth) % (2 * Sixteenth)) < 1e-6;
+                // between the 8ths of its bar, counted from the bar's start, as a bar of an odd number of 16ths moves them
+                var between = Math.Abs((song.Form.Map.PlaceOf(note.Position).Beat + Sixteenth) % (2 * Sixteenth)) < 1e-6;
                 var chained = i > 0 && Math.Abs(note.Position - timeline[i - 1].Position - Sixteenth) < 1e-6
                               || i + 1 < timeline.Count && Math.Abs(timeline[i + 1].Position - note.Position - Sixteenth) < 1e-6;
                 if (deadNotes && between && chained)

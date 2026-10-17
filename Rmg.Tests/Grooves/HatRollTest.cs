@@ -76,4 +76,24 @@ public sealed class HatRollTest
         Console.WriteLine($"64ths in a row: {with} with the rolls, {without} without");
         await Assert.That(with).IsGreaterThan(without + 100);
     }
+
+    /// <summary>A roll rolls into a pulse of its bar, whatever the meter: 4/4's beats, 6/8's dotted quarters, a short bar's own.</summary>
+    [Test]
+    public async Task ARoll_EndsOnAPulseOfItsBar()
+    {
+        var (rolls, other) = (0, 0);
+        foreach (var genre in new[] { "trap", "idm" })
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        // a song with no drum keeping time rolling none
+        foreach (var (_, to, _) in song.Trace.SingleOrDefault(x => x.Point == TracePoints.HatRolls)?.Value as System.Collections.Immutable.ImmutableArray<(double, double, int)>? ?? [])
+        {
+            rolls++;
+            var place = song.Map.PlaceOf(to);
+            other += place.Meter.PulseSixteenths != 4 ? 1 : 0;
+            await Assert.That(place.OnPulse).IsTrue().Because($"seed {song.Seed}, a roll into {to}");
+        }
+
+        Console.WriteLine($"{rolls} rolls, {other} in a meter of other pulses");
+        await Assert.That(rolls).IsGreaterThan(20);
+    }
 }

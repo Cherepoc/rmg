@@ -128,7 +128,34 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
 /// <param name="PatternBar">Its bar of the section's pattern.</param>
 /// <param name="Beat">How far into its bar it is, in beats.</param>
 /// <param name="Meter">Its bar's own meter, a short last bar's.</param>
-public readonly record struct Place(int Bar, int PatternBar, double Beat, Meter Meter);
+public readonly record struct Place(int Bar, int PatternBar, double Beat, Meter Meter)
+{
+    /// <summary>The pulse of its bar it falls in, counted from the bar's first (<see cref="Meter.Pulses" />): 4/4's beats, 6/8's dotted quarters.</summary>
+    public int Pulse
+    {
+        get
+        {
+            var beat = Beat;
+            return Math.Max(0, Meter.Pulses.Count(x => x <= beat + 1e-6) - 1);
+        }
+    }
+
+    /// <summary>How far past its pulse's start it is, in beats.</summary>
+    public double SincePulse => Beat - Meter.Pulses[Pulse];
+
+    /// <summary>Whether it is on a pulse of its bar, as a note on the beat is.</summary>
+    public bool OnPulse => SincePulse < 1e-6;
+
+    /// <summary>Whether it is on its bar's backbeat (<see cref="Meter.Backbeats" />): 4/4's 2 and 4, 6/8's fourth 8th.</summary>
+    public bool OnBackbeat
+    {
+        get
+        {
+            var beat = Beat;
+            return Meter.Backbeats.Any(x => Math.Abs(x - beat) < 1e-6);
+        }
+    }
+}
 
 /// <summary>A stretch of a section, a bar, a phrase or a play of its pattern, by its index from the section's start, the last cut at the section's end.</summary>
 public readonly record struct Span(int Index, double Start, double End)
