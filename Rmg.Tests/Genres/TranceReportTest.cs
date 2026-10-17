@@ -19,7 +19,7 @@ public sealed class TranceReportTest
         var drops = songs.Sum(x => x.Trace.Count(t => t.Point == TracePoints.Drop));
         var drawn = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Progression).Select(t => (ImmutableArray<int>)t.Value!)).SelectMany(x => x.Skip(1).Select(r => (r % 7 + 7) % 7)).ToArray();
         string Degree(string label, int step) => $"{label} {drawn.Count(x => x == step) / (double)drawn.Length:P0}";
-        Console.WriteLine($"trance: sections' bass {Figure(FigurePlayer.Bass, "rolling")}, {Figure(FigurePlayer.Bass, "offbeat")}; chords {Figure(FigurePlayer.Chords, "sixteenths")}; " +
+        Console.WriteLine($"trance: sections' bass {Figure(FigurePlayer.Bass, "rolling")}, {Figure(FigurePlayer.Bass, "offbeat")}; chords {Figure(FigurePlayer.Chords, "arpeggio16")}; " +
                           $"{drops / (double)songs.Length:F2} drops a song, songs with one {songs.Count(x => x.Trace.Any(t => t.Point == TracePoints.Drop)) / (double)songs.Length:P0}");
         Console.WriteLine($"trance: strong effects a song {effects.Average(x => (x.Strong == StrongEffect.None ? 0 : 1) + x.Others.Length):F2}, two or more {effects.Count(x => x.Others.Length > 0) / (double)effects.Length:P0}; " +
                           $"{string.Join(", ", effects.SelectMany(x => x.Others.Prepend(x.Strong)).Where(x => x != StrongEffect.None).GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))}; " +

@@ -8,6 +8,18 @@ namespace Rmg.Tests.Drums;
 /// <summary>A genre's figures (<see cref="Figures" />): a player's rhythm in a section given by its figure, the kick with the riff, a double kick, a clave.</summary>
 public sealed class FiguresTest
 {
+    /// <summary>
+    ///     A name two players' figures share is a figure they play together (<see cref="Figures" />: an earlier player's
+    ///     figure is a later one's where it has one of the name), so a name is shared only where meant: the blast, the
+    ///     breakbeat and the waltz.
+    /// </summary>
+    [Test]
+    public async Task AFiguresName_IsSharedByPlayers_OnlyWhereTheyPlayItTogether()
+    {
+        var shared = Figures.All.GroupBy(x => x.Name).Where(x => x.Select(f => f.Player).Distinct().Count() > 1).Select(x => x.Key).Order().ToArray();
+        await Assert.That(shared).IsEquivalentTo(["blast", "breakbeat", "waltz"], CollectionOrdering.Matching);
+    }
+
     /// <summary>The sections, by their ids, whose player plays the figure named, but a drum solo's, whose drums the solo plays.</summary>
     private static ImmutableHashSet<int> Playing(CorpusSong song, FigurePlayer player, string figure) =>
     [

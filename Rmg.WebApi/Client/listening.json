@@ -264,8 +264,8 @@
         "seed": "Y",
         "at": 16.9,
         "listen": [
-          "Bass (Synth Bass 2)",
           "Chords (Pad 3 (polysynth))",
+          "Bass (Synth Bass 2)",
           "Melody (Lead 2 (sawtooth))"
         ]
       },
