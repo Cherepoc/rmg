@@ -20,7 +20,6 @@ is removed once it is built, its leftovers kept under *Open work*.
    with its reason; no new presets until the owner asks (15 October 2026).
 7. **Parked** (P4): kept for their reasons, not planned.
 
-The owner's calls waiting: a guitar solo in Rock's and Metal's plainest songs, which the curve rule leaves out.
 
 ## Listening
 
@@ -679,6 +678,8 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 
 ## Decided, and kept
 
+- **No solo in the plainest songs** (decided by the owner 18 October 2026): Rock's and Metal's plainest songs play no
+  guitar solo, as the curve rule has it, a solo an unconventional thing that never happens at 0.
 - **Analytics written off the request** (decided 11 October 2026): an event is written in 0.042 ms
   (`EventStoreTest.Report_AnEventsWrite`), so a burst of ten thousand holds the lock under half a second; a queue's
   writer would answer no sooner that anyone could tell. The admin password's pause is built (`AdminArea.WrongPasswordPause`).
