@@ -65,11 +65,11 @@ public sealed class StateTraceTest
 
     /// <summary>
     ///     The snare's bar patterns of the corpus's first song that plays a snare, traced, as a song of another corpus may
-    ///     play none.
+    ///     play none; failing where none of the first 64 does.
     /// </summary>
     private static StateTraceEntry[] SnareBarPatterns()
     {
-        for (var index = 1; ; index++)
+        for (var index = 1; index <= 64; index++)
         {
             using var trace = StateTrace.Start();
             SongGenerator.GenerateSong(TestCorpus.SongSeed(index));
@@ -77,6 +77,8 @@ public sealed class StateTraceTest
             if (entries.Length > 0)
                 return entries;
         }
+
+        throw new InvalidOperationException("None of the corpus's first 64 songs traced a snare's bar pattern.");
     }
 
     [Test]

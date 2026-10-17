@@ -129,9 +129,9 @@ public sealed class VoiceLeaderTest
     public async Task Songs_ChordTracksRarelyJumpRegister()
     {
         int changes = 0, jumps = 0;
-        for (var seed = 0; seed < 64; seed++)
+        foreach (var corpusSong in TestCorpus.Range(64))
         {
-            var chords = TestCorpus.Get(seed).Rendered.Tracks
+            var chords = corpusSong.Rendered.Tracks
                 .First(x => x.Role == TrackRole.Chords && !x.IsDouble)
                 .NoteTimeline.GroupBy(x => x.Position)
                 .Select(x => x.Select(note => note.Value.Offset).ToArray())
@@ -156,9 +156,9 @@ public sealed class VoiceLeaderTest
     {
         var byInstrument = new Dictionary<double, List<double>>();
         var songsVaryingBySection = 0;
-        for (var seed = 0; seed < 64; seed++)
+        foreach (var corpusSong in TestCorpus.Range(64))
         {
-            var song = TestCorpus.Get(seed).Song;
+            var song = corpusSong.Song;
             var definition = (PitchInstrumentTrack)song.TrackDefinitions[song.Track(TrackRole.Chords)];
             var instrument = Rmg.Core.Composition.InstrumentRoles.Chords.Instruments.Single(x => x.Program == definition.InstrumentCode);
             // a section's smoothness is the track's state along the section, not a note's own

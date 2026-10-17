@@ -14,19 +14,19 @@ public sealed class BlockHarmonyTest
     private static IEnumerable<CorpusSong> Songs() =>
         new[] { "soul", "funk" }.SelectMany(genre => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))));
 
-    /// <summary>A block plays only where the counter-melody harmonises the melody.</summary>
+    /// <summary>The counter-melody stacks its notes in a block only in an appearance traced as one, its doubled notes there.</summary>
     [Test]
-    public async Task ABlock_PlaysOnlyWhereTheCounterMelodyHarmonisesTheMelody()
+    public async Task ACounterMelodysBlock_PlaysOnlyWhereTraced()
     {
         var blocks = 0;
         foreach (var song in Songs())
         {
-            var harmonised = song.Trace.Where(x => x.Point == TracePoints.LineDoubling).Select(x => ((int Index, TrackRole Source, TrackRole Target, int))x.Value!)
-                .Where(x => x.Source == TrackRole.Melody && x.Target == TrackRole.CounterMelody).Select(x => x.Index).ToHashSet();
-            foreach (var index in song.Trace.Where(x => x.Point == TracePoints.BlockHarmony).Select(x => (int)x.Value!))
+            var traced = song.Trace.Where(x => x.Point == TracePoints.BlockHarmony).Select(x => (int)x.Value!).ToHashSet();
+            foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.CounterMelody))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Doubled) > 0
+                         && x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) >= LineDoubling.BlockVoices) ?? [])
             {
                 blocks++;
-                await Assert.That(harmonised).Contains(index).Because($"seed {song.Seed}");
+                await Assert.That(song.Map.PlayingAt(note.Position) is { } play && traced.Contains(play.Index)).IsTrue().Because($"seed {song.Seed} at {note.Position}");
             }
         }
 

@@ -258,7 +258,7 @@ public sealed class FiguresTest
         {
             var bass = song.Track(TrackRole.Bass);
             var playing = Playing(song, FigurePlayer.Bass, name);
-            foreach (var span in song.Map.Sections.Where(x => playing.Contains(x.SectionId) && x.Meter == Meter.FourFour))
+            foreach (var span in song.Map.Sections.Where(x => playing.Contains(x.SectionId) && x.Meter.HasSameBar(Meter.FourFour)))
             foreach (var note in song.Song.Notes!.GetValueOrDefault(bass)?.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9) ?? [])
             {
                 notes++;

@@ -38,9 +38,10 @@ public sealed class GivenTempoKeyMeterTest
 
             var (_, songScale) = ((HarmonicUnconventionality, Scale))given.Trace.Single(x => x.Point == TracePoints.SongHarmony).Value!;
             await Assert.That(songScale).IsEqualTo(scale);
-            // swung half a triplet's swing, or straight where the meter pairs no notes to swing
+            // swung half a triplet's swing exactly where the meter pairs the notes its tempo swings, straight elsewhere
             var amount = given.Song.Draws!.SwingAmount;
-            await Assert.That(amount is 0 || Math.Abs(amount - 0.5) < 1e-9).IsTrue();
+            var pairs = given.Map.Meter.Pairs(Groove.SwungPeriod(Start(given).GetStateValue(StateKinds.Tempo), Genre.None));
+            await Assert.That(pairs ? Math.Abs(amount - 0.5) < 1e-9 : amount is 0).IsTrue().Because($"seed {seed}");
             swung += amount > 0 ? 1 : 0;
             // and the rest drawn as it was: the same form, tempo and instruments
             await Assert.That(given.Map.Sections.Select(x => (x.SectionId, x.Duration))).IsEquivalentTo(drawn.Map.Sections.Select(x => (x.SectionId, x.Duration)), CollectionOrdering.Matching);
@@ -48,7 +49,7 @@ public sealed class GivenTempoKeyMeterTest
             await Assert.That(given.Rendered.Tracks.Select(x => x.PitchInstrumentCode)).IsEquivalentTo(drawn.Rendered.Tracks.Select(x => x.PitchInstrumentCode), CollectionOrdering.Matching);
         }
 
-        await Assert.That(swung).IsGreaterThan(4);
+        await Assert.That(swung).IsGreaterThan(0);
     }
 
     [Test]

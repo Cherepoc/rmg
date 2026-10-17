@@ -47,8 +47,19 @@ public sealed class SongDescriptionTextTest
             foreach (var (row, section) in rows.Zip(description.Sections))
                 await Assert.That(row.StartsWith($"| {section.Place} | {section.Name} | {section.Bars} | {section.Energy} | {section.Density} | ")).IsTrue();
             // a progression spelled out once, and pointed back to after
-            var spelled = rows.Select(x => x.Split(" | ")[5]).Where(x => x != "—" && !x.StartsWith("as in ")).ToArray();
+            var shown = rows.Select(x => x.Split(" | ")[5]).ToArray();
+            var spelled = shown.Where(x => x != "—" && !x.StartsWith("as in ")).ToArray();
             await Assert.That(spelled.Distinct().Count()).IsEqualTo(spelled.Length);
+            // each pointing back to an earlier row that spells the chords it plays, as a section of the same chords does
+            var chords = description.Sections.Select(SongDescriptionText.Chords).ToArray();
+            for (var i = 0; i < shown.Length; i++)
+                if (shown[i].StartsWith("as in ") && int.Parse(shown[i]["as in ".Length..]) is var place)
+                {
+                    var earlier = Array.FindIndex(description.Sections.ToArray(), x => x.Place == place);
+                    await Assert.That(earlier).IsBetween(0, i - 1).Because($"seed {seed}, row {i + 1}");
+                    await Assert.That(chords[earlier]).IsEqualTo(chords[i]).Because($"seed {seed}, row {i + 1}");
+                    await Assert.That(shown[earlier].StartsWith("as in ")).IsFalse().Because($"seed {seed}, row {i + 1}");
+                }
         }
     }
 }

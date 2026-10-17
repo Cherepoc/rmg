@@ -7,9 +7,9 @@ namespace Rmg.Tests.Rendering;
 /// <summary>A chord cycled at a sound chip's frame rate, its notes in turn on one voice.</summary>
 public sealed class FrameArpeggioTest
 {
-    /// <summary>A Chiptune song asked to play its chords so plays no chord on its chords part, but one note at a time, its short chords' notes two frames each.</summary>
+    /// <summary>A Chiptune song asked to play its chords so plays no chord on its chords part, but one note at a time, and cycles some, a note a frame or two.</summary>
     [Test]
-    public async Task AChordAtTheFrameRate_PlaysOneNoteAtATime_EachTwoFramesAtMost()
+    public async Task AChordAtTheFrameRate_PlaysOneNoteAtATime()
     {
         var genre = GenrePresets.With("chiptune", GenreChoices.Articulation, ("frames", 1), ("legato", 0), ("roll", 0));
         var cycled = 0;
@@ -42,7 +42,8 @@ public sealed class FrameArpeggioTest
         var chord = new RealizedNote([60, 64, 67], 0.8, beats, Rmg.Core.Events.StateMap.FromStates([]));
         var cycled = Articulations.Frames(Rmg.Core.Events.EventTimeline.Create(4, [new Rmg.Core.Events.TimelineItem<RealizedNote>(0, chord)]), _ => 1).ToArray();
         await Assert.That(cycled[1].Position - cycled[0].Position).IsEqualTo(frames * Articulations.Frame).Within(1e-9);
-        await Assert.That(cycled.Length).IsLessThanOrEqualTo(Math.Max(3 * Articulations.FrameCycles + 3, (int)Math.Ceiling(beats / Articulations.FrameSeconds)));
+        // its notes cycled as many times at the most, and once more begun
+        await Assert.That(cycled.Length).IsLessThanOrEqualTo(chord.Pitches.Length * Articulations.FrameCycles + 1);
     }
 
     /// <summary>

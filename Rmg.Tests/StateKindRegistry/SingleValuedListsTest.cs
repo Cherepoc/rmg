@@ -17,10 +17,14 @@ public sealed class SingleValuedListsTest
         var maxChordSize = ChordShapes.All.Max(x => x.Targets.Length);
         var checkedNotes = 0;
         foreach (var song in TestCorpus.Range(16))
-        foreach (var note in song.Song.Notes!.Values.SelectMany(x => x))
+        foreach (var (track, notes) in song.Song.Notes!)
+        foreach (var note in notes)
         {
             var scale = note.Value.State.GetStateValue(StateKinds.ScaleOffsets);
             var chord = note.Value.State.GetStateValue(StateKinds.ChordNotePitchOffsets);
+            // a pitched note has its scale
+            if (!song.IsDrum(track))
+                await Assert.That(scale.Length).IsEqualTo(Core.Composition.Scales.StepCount).Because($"seed {song.Seed}, track {track} at {note.Position}");
             if (scale.IsEmpty && chord.IsEmpty)
                 continue;
 

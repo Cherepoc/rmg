@@ -82,7 +82,6 @@ public sealed class MeterTreeTest
     [Test]
     [Arguments(new[] { 8, 8 }, new[] { 1.0, 3.0 })]
     [Arguments(new[] { 4, 4, 4 }, new[] { 1.0, 2.0 })]
-    [Arguments(new[] { 8, 8 }, new[] { 1.0, 3.0 })]
     [Arguments(new[] { 6, 6 }, new[] { 1.5 })]
     [Arguments(new[] { 4, 4, 4, 3 }, new[] { 1.0, 2.0, 3.0 })]
     [Arguments(new[] { 4, 3, 3, 3 }, new[] { 1.0, 1.75, 2.5 })]

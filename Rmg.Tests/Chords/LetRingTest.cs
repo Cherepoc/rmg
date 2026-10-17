@@ -53,9 +53,9 @@ public sealed class LetRingTest
             }
         }
 
-        // against the same songs with no ringing (measured: 64% to 73% against 48% to 54%, at offsets 0 and a million)
-        var (rung, all) = Measure(songs);
-        var plain = Measure(unrung);
+        // against the same songs with no ringing, over 64 (measured: 63% against 42% over 64, 64% to 73% against 48% to 54% over 16 at offsets 0 and a million)
+        var (rung, all) = Measure(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ringing(1)))));
+        var plain = Measure(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ringing(0)))));
         Console.WriteLine($"{rung} of {all} broken chords' notes ringing over the next, against {plain.Ringing} of {plain.Notes} with none rung");
         await Assert.That(rung).IsGreaterThan(plain.Ringing + all / 10);
     }

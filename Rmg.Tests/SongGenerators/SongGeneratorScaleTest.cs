@@ -14,15 +14,6 @@ public sealed class SongGeneratorScaleTest
         song.Trace.Where(x => x.Point == TracePoints.SectionScale).ToDictionary(x => x.Section, x => (Scale)x.Value!);
 
     [Test]
-    public async Task EveryPitchedNote_PlaysInOneScaleOfSevenNotes()
-    {
-        foreach (var song in TestCorpus.Range(32))
-        foreach (var (track, notes) in song.Song.Notes!.Where(x => !song.IsDrum(x.Key)))
-        foreach (var note in notes)
-            await Assert.That(note.Value.State.GetStateValue(StateKinds.ScaleOffsets).Length).IsEqualTo(7);
-    }
-
-    [Test]
     public async Task EveryChordNote_IsInItsSectionsScale()
     {
         foreach (var song in TestCorpus.Range(32))

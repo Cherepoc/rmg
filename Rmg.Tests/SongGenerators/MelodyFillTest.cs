@@ -42,7 +42,8 @@ public sealed class MelodyFillTest
 
         // a floor well under the corpus's count, which moves a walk or two with every change of the songs
         await Assert.That(walks).IsGreaterThan(10);
-        // into its note by a step, but where the note it leads into is moved an octave into its range after
+        // into its note by a step, but where the note it leads into is moved an octave into its range after (measured over these songs: 96%)
+        Console.WriteLine($"{stepping} of {walks} walks into their note by a step");
         await Assert.That(stepping / (double)walks).IsGreaterThan(0.85);
     }
 

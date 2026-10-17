@@ -17,7 +17,7 @@ public sealed class MontunoTest
     public async Task AMontuno_PlaysTheRootOnTheBeats_TheOtherNotesOffThem()
     {
         var (beats, beatRoots, offs, offRoots) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Montuno))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Montuno))))
         foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)]
                      .Where(x => (ArpeggioPattern)x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == ArpeggioPattern.Montuno
                                  && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0 && x.Value.Pitches.Length == 1))
@@ -32,7 +32,7 @@ public sealed class MontunoTest
                 (offs, offRoots) = (offs + 1, offRoots + (isRoot ? 1 : 0));
         }
 
-        // but a voicing without its root, and a note pushed, an anticipation (measured: 99% and 3% to 5%, at offsets 0 and a million)
+        // but a voicing without its root, and a note pushed, an anticipation (measured: 99% and 3% to 5%, at offsets 0 and a million; 99% and 4.7% over 64)
         Console.WriteLine($"montuno: {beatRoots} of {beats} notes on the beat the root, {offRoots} of {offs} off it");
         await Assert.That(beats).IsGreaterThan(100);
         await Assert.That(beatRoots).IsGreaterThan(beats * 8 / 10);

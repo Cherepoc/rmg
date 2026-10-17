@@ -47,7 +47,7 @@ public sealed class RhythmLayerTest
     }
 
     [Test]
-    public async Task DrumGroove_IsKeptByMostSongs()
+    public async Task DrumGroove_IsKeptInMostBars()
     {
         // the chance that no layer moves a groove setting, such as the snare's backbeat
         var keptChance = DrumLayers.Aggregate(1.0, (chance, layer) => chance * (1 - layer.Groove));

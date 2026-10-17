@@ -25,7 +25,6 @@ public sealed class ListeningQuestionsTest
     /// <param name="Skip">The stages the song without the device leaves out.</param>
     /// <param name="GenrePatch">The options the song without the device lays over its genre's, by choice and option, the genre's others as they are.</param>
     /// <param name="At">Where the song first plays the device, in beats, as its trace and notes have it, a little before it where it grows; none where it does not.</param>
-    /// <param name="Heard">The corpus seeds asked before, left out where the question is asked again over other songs.</param>
     /// <param name="In">The sections the device plays in, where alone it is listened to; every section for none.</param>
     private sealed record Question(
         string Id,
@@ -35,7 +34,6 @@ public sealed class ListeningQuestionsTest
         string[] Skip,
         Dictionary<string, Dictionary<string, int>>? GenrePatch,
         Func<CorpusSong, double?> At,
-        int[]? Heard = null,
         Func<CorpusSong, SectionSpan, bool>? In = null
     );
 
@@ -80,15 +78,6 @@ public sealed class ListeningQuestionsTest
             new() { ["darkness"] = new() { ["from"] = 0, ["to"] = 0 }, ["intensity"] = new() { ["from"] = 0, ["to"] = 0 } },
             x => ((Mood)x.Trace.Single(t => t.Point == TracePoints.Mood).Value!).Darkness > 0.6 ? (double?)x.Map.Sections[0].Start : null)
     ];
-
-    /// <summary>Where the song's chords first break in a colour of those given, a bar before it.</summary>
-    private static double? FirstColoured(CorpusSong song, Func<ChordColour, bool> colours) =>
-        Before(song, song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Chords))?.Where(x => colours((ChordColour)x.Value.State.GetStateValue(CompositionStateKinds.Colour)))
-            .Select(x => (double?)x.Position).FirstOrDefault(), 1);
-
-    /// <summary>Where the song last changes key.</summary>
-    private static double? LastKeyChange(CorpusSong song) =>
-        ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Select(x => (double?)x.Position).Max();
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()
@@ -204,7 +193,7 @@ public sealed class ListeningQuestionsTest
         {
             var genre = GenreOf(question, false);
             // the first songs that play the device, each measured where it plays
-            var measured = TestCorpus.InParallel(Enumerable.Range(0, 128).Except(question.Heard ?? []), seed =>
+            var measured = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
                 {
                     var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
                     return question.At(song) is { } at ? (Seed: seed, Measure: Measure(question, seed, song, at)) : (seed, null);

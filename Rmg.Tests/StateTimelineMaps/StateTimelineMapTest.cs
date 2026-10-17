@@ -72,20 +72,44 @@ public sealed class StateTimelineMapTest
             .IsEquivalentTo(new[] { new TimelineItem<int>(0, 1) }, CollectionOrdering.Matching);
     }
 
+    private static readonly StateKind<int> LowerCaseKind = StateKinds.CreateAdditive<int>("StateTimelineMapTest.a");
+    private static readonly StateKind<int> UpperCaseKind = StateKinds.CreateAdditive<int>("StateTimelineMapTest.B");
+
+    /// <summary>The timelines in their kinds' names' ordinal order, upper case first whatever the culture, as a map read from them needs.</summary>
     [Test]
-    public async Task Create_TimelinesAreOrderedByKindName()
+    public async Task Create_TimelinesAreOrderedByKindName_Ordinally()
     {
         var result = StateTimelineMap.Create(
             2,
             [
-                StateTimeline.Create(2, KeyOffset, [new TimelineItem<int>(0, 1)]),
-                StateTimeline.Create(2, Velocity, [new TimelineItem<double>(0, 1)]),
+                StateTimeline.Create(2, LowerCaseKind, [new TimelineItem<int>(0, 1)]),
+                StateTimeline.Create(2, UpperCaseKind, [new TimelineItem<int>(0, 1)]),
             ]
         );
 
         var names = result.StateTimelines.Select(x => x.StateKind.Name).ToArray();
-        await Assert.That(names).IsEquivalentTo(names.Order().ToArray(), CollectionOrdering.Matching);
-        await Assert.That(names.Length).IsEqualTo(2);
+        await Assert.That(names).IsEquivalentTo(names.Order(StringComparer.Ordinal).ToArray(), CollectionOrdering.Matching);
+        await Assert.That(names[0]).IsEqualTo(UpperCaseKind.Name);
+    }
+
+    /// <summary>A map's state read at a place, as a note reads it, is its effective state there: before the first change, at and between changes, and at its end.</summary>
+    [Test]
+    public async Task GetStateMapAt_IsTheEffectiveStateMap()
+    {
+        var map = StateTimelineMap.Create(
+            4,
+            [
+                StateTimeline.Create(4, KeyOffset, [new TimelineItem<int>(1, 2), new TimelineItem<int>(3, 5)]),
+                StateTimeline.Create(4, Velocity, [new TimelineItem<double>(0, 0.5), new TimelineItem<double>(2, 0.8)]),
+            ]
+        );
+
+        foreach (var at in new[] { 0, 0.5, 1, 1.5, 2, 2.5, 3, 4 })
+        {
+            var (read, effective) = (map.GetStateMapAt(at), map.GetEffectiveStateMapAt(at));
+            await Assert.That(read.GetStateValue(KeyOffset)).IsEqualTo(effective.GetStateValue(KeyOffset)).Because($"at {at}");
+            await Assert.That(read.GetStateValue(Velocity)).IsEqualTo(effective.GetStateValue(Velocity)).Because($"at {at}");
+        }
     }
 
     [Test]

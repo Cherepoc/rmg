@@ -27,14 +27,26 @@ public sealed class SongIntroTest
     ///     then cleared, and sat silent for four bars; a sparse song's parts resting through their first bar, its earliest
     ///     coming in on its first beat (<see cref="SilentStart" />). And no section's appearance is silent: an IDM song's
     ///     second section once rested every part it had, its rests drawn alone covering them all
-    ///     (<see cref="GeneratedSection" />). One pass over the genres' songs for both, as they are made once.
+    ///     (<see cref="GeneratedSection" />). And its intro one its genre names, where it names its intros. One pass over the
+    ///     genres' songs for all, as they are made once: 16 a preset, 32 of the songs' own.
     /// </summary>
     [Test]
-    public async Task ASong_SoundsFromItsFirstBar_AndInEverySection_InEveryGenre()
+    public async Task ASong_SoundsFromItsFirstBar_AndInEverySection_AndOpensAsItsGenreNames_InEveryGenre()
     {
-        foreach (var genre in GenrePresets.All.Select(x => x.Id).Prepend(null))
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
+        foreach (var preset in GenrePresets.All.Prepend(null))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, preset is null ? 32 : 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: preset is null ? null : GenrePresets.Genre(preset)))))
         {
+            var genre = preset?.Id;
+            if (preset is not null && preset.Choices.TryGetValue(GenreChoices.Intro.Name, out var intros))
+            {
+                var named = intros.Where(x => x.Value.ValueKind == System.Text.Json.JsonValueKind.Array ? x.Value.EnumerateArray().Any(y => y.GetInt32() > 0) : x.Value.GetInt32() > 0)
+                    .Select(x => x.Key).ToHashSet();
+                var intro = song.Map.Intro;
+                var opensAlone = song.Trace.Single(x => x.Point == TracePoints.OpeningAlone).Value is not null && intro.Kind == IntroKind.Entries;
+                await Assert.That(named.Contains(GenreChoices.Name(intro.Kind.ToString())) || opensAlone || intro.Kind == IntroKind.Cold && named.Count == 0)
+                    .IsTrue().Because($"{genre} seed {song.Seed}: {intro.Kind}");
+            }
+
             var notes = song.Song.Notes!.Values.SelectMany(x => x).Select(x => x.Position).Order().ToArray();
             await Assert.That(notes.Length).IsGreaterThan(0).Because($"{genre ?? "the songs"} seed {song.Seed}");
             await Assert.That(notes[0]).IsLessThan(song.Song.Meter.BarDuration).Because($"{genre ?? "the songs"} seed {song.Seed}");
@@ -67,6 +79,7 @@ public sealed class SongIntroTest
     [Test]
     public async Task EveryPart_IsLeftOutUntilItComesIn_ButForTheDrumsFillIntoTheLanding()
     {
+        var entries = 0;
         foreach (var song in Entries)
         {
             var window = song.Map.Intro.Window.Bars * song.Map.Meter.BarDuration;
@@ -75,6 +88,7 @@ public sealed class SongIntroTest
             {
                 if (!song.Song.Notes!.TryGetValue(track, out var notes) || notes.Count == 0)
                     continue;
+                entries++;
 
                 // a fill leads the drums in where the band lands, a bar at most
                 var from = WindowStart(song) + entry.Entry - (entry.Part.Role == TrackRole.Drum && entry.Entry == window ? song.Map.Meter.BarDuration : 0);
@@ -82,6 +96,8 @@ public sealed class SongIntroTest
                     .Because($"seed {song.Seed}, {entry.Part} at {entry.Entry}");
             }
         }
+
+        await Assert.That(entries).IsGreaterThan(0);
     }
 
     [Test]

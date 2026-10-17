@@ -10,14 +10,17 @@ public sealed class ArrangementReportTest
     [Test]
     public async Task ARestingPart_PlaysNoNotes_AndASectionKeepsItsHarmony()
     {
+        var rests = 0;
         foreach (var song in TestCorpus.Range(32))
         foreach (var span in song.Map.Sections)
         {
             var resting = song.Resting(span);
+            rests += resting.Count;
             // but where a part plays alone
             if (song.Texture(span).Kind != TextureKind.Alone)
                 await Assert.That(resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords)).IsFalse();
-            // but the drums' fill in its last bar, where they come back into the next section
+            // but the drums' fill in its last bar, where they come back into the next section, and a pitched part's walk or
+            // pickup into it in its last beat
             foreach (var (track, notes) in song.Song.Notes!.Where(x => resting.Contains(song.Song.TrackDefinitions[x.Key].Role)))
             {
                 var end = song.Song.TrackDefinitions[track].Role == TrackRole.Drum ? span.LastBar : span.End - 1;
@@ -25,6 +28,8 @@ public sealed class ArrangementReportTest
                     .Because($"seed {song.Seed}, track {track} at {span.Start}");
             }
         }
+
+        await Assert.That(rests).IsGreaterThan(0);
     }
 
     [Test]

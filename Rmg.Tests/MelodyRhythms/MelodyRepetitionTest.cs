@@ -88,7 +88,8 @@ public sealed class MelodyRepetitionTest
             var comparisons = spans.Where(x => x.Duration >= 2 * x.Meter.PatternDuration - 1e-9).Select(x => (From: x.Start, To: x.Start + x.Meter.PatternDuration, Length: x.Meter.PatternDuration))
                 .Concat(spans.Select((x, i) => (Span: x, First: spans.First(s => s.SectionId == x.SectionId)))
                     .Where(x => x.First != x.Span)
-                    .Select(x => (From: x.First.Start, To: x.Span.Start, Length: x.Span.Duration)));
+                    // over the shorter of the two, a first appearance cut short ending where it ends
+                    .Select(x => (From: x.First.Start, To: x.Span.Start, Length: Math.Min(x.First.Duration, x.Span.Duration))));
             foreach (var (from, to, length) in comparisons)
             foreach (var note in pitches.Where(x => x.Key >= from && x.Key < from + length))
             {

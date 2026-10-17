@@ -20,32 +20,6 @@ public sealed class DrivenRiffBassTest
         song.Song.Notes!.GetValueOrDefault(track)?.Any(x => x.Position < end - 1e-9 && x.Position + x.Value.Duration > start + 1e-6) ?? false;
 
     [Test]
-    public async Task APartPlayingAPolymeter_PlaysInEverySectionItPlaysOtherwise()
-    {
-        var sections = 0;
-        foreach (var genre in Genres)
-            foreach (var song in Songs(genre))
-            {
-                var plans = song.PolymeterPlans;
-                var spans = song.Map.Sections.Where(x => plans.ContainsKey(x.SectionId)).ToArray();
-                if (spans.Length == 0)
-                    continue;
-
-                // the song with its sections in their bars, where every part plays what it plays without the cycle
-                var unrolled = SongGenerator.GenerateSong(TestCorpus.SongSeed(song.Seed), new SongOverrides(Genre: GenrePresets.Genre(genre)),
-                    new HashSet<string> { "Polymeter" }, (_, _) => { }, CancellationToken.None);
-                foreach (var span in spans)
-                foreach (var part in plans[span.SectionId].Parts.Where(x => unrolled.Notes!.GetValueOrDefault(unrolled.Track(x))?.Any(n => n.Position >= span.Start && n.Position < span.End) ?? false))
-                {
-                    sections++;
-                    await Assert.That(Sounds(song, song.Track(part), span.Start, span.End)).IsTrue().Because($"{genre} seed {song.Seed}, {part} in the section at {span.Start}");
-                }
-            }
-
-        await Assert.That(sections).IsGreaterThan(10);
-    }
-
-    [Test]
     public async Task UnderADrivenRiff_TheBass_PlaysEveryPhraseItPlays_ButInTheOpening_AndInASectionItSitsOut()
     {
         var phrases = 0;

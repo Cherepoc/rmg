@@ -26,8 +26,9 @@ public sealed class DrumStrokesTest
     [Test]
     public async Task AGenresDrumStroke_LeansTheSteadyStroke_AndItsDrumSounds_LeaveItBe()
     {
-        Genre[] genres = [Leaning(GenreChoices.DrumStrokes, 1), Leaning(GenreChoices.DrumStrokes, 0), Leaning(GenreChoices.DrumSounds, 1), Genre.None];
-        var songs = genres.Select(genre => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))).ToArray()).ToArray();
+        Genre[] genres = [Leaning(GenreChoices.DrumStrokes, 1), Leaning(GenreChoices.DrumStrokes, 0), Leaning(GenreChoices.DrumSounds, 1)];
+        // and the songs' own, the corpus's
+        CorpusSong[][] songs = [..genres.Select(genre => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))).ToArray()), TestCorpus.Range(64)];
         var (most, least) = (Open(songs[0]), Open(songs[1]));
         // against the mechanism breaking (measured: 29% to 35% leaning most, none least, 5% to 14% as the songs have it, at offsets 0 and a million)
         Console.WriteLine($"the hi-hat's steady stroke open: {most:P0} leaning most, {least:P0} least, {Open(songs[3]):P0} as the songs have it");

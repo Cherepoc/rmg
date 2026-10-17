@@ -75,7 +75,7 @@ public static class SongDescriptionText
     }
 
     /// <summary>A section's chords as numerals, and by name where the chords' part plays them.</summary>
-    private static string Chords(SectionDescription section)
+    public static string Chords(SectionDescription section)
     {
         if (section.Chords.IsEmpty)
             return "";

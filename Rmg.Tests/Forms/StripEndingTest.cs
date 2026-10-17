@@ -16,7 +16,7 @@ public sealed class StripEndingTest
     {
         var songs = 0;
         var drummed = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Stripping))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Stripping))))
         {
             await Assert.That(song.Map.Ending.Kind).IsEqualTo(EndingKind.Strip);
             var end = song.Map.Ending.Start;
@@ -37,8 +37,9 @@ public sealed class StripEndingTest
                 drummed++;
         }
 
-        await Assert.That(songs).IsGreaterThan(20);
-        // most stripped songs end on the drums alone
+        Console.WriteLine($"{drummed} of {songs} stripped songs end on the drums alone");
+        await Assert.That(songs).IsGreaterThan(40);
+        // most stripped songs end on the drums alone, a calibration (measured over 64: every one)
         await Assert.That(drummed).IsGreaterThan(songs * 3 / 4);
     }
 }

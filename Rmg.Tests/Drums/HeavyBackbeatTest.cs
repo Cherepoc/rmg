@@ -4,7 +4,7 @@ using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Drums;
 
-/// <summary>A heavy figure's backbeat (<see cref="Figures" />): the snare under a double kick, a blast or a breakdown's kick struck on its head, a phrase at most without it.</summary>
+/// <summary>A heavy figure's backbeat (<see cref="Figures" />): the snare under a double kick, a blast or the kick with the riff struck on its head, a phrase at most without it.</summary>
 public sealed class HeavyBackbeatTest
 {
     [Test]

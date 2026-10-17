@@ -77,7 +77,7 @@ public sealed class ScalesTest
             scales.Add(traced[song.Map.Sections[0].SectionId]);
         }
 
-        // 30 songs reach well beyond minor and major
+        // 32 songs reach well beyond minor and major
         await Assert.That(scales.Count).IsGreaterThanOrEqualTo(4);
     }
 

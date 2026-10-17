@@ -51,7 +51,7 @@ internal static class LineDoubling
     public static ByConvention BlockChance { get; } = new(0, 0, 0);
 
     /// <summary>The notes a block's counter-melody stacks, its own and its chord's under it: with the melody's, three voices.</summary>
-    private const int BlockVoices = 2;
+    internal const int BlockVoices = 2;
 
     /// <summary>
     ///     The chance the bass plays the riff with it in a section, as a band plays a riff together, by the melody facet: a

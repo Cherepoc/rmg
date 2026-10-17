@@ -101,12 +101,14 @@ internal static class TestCorpus
 
     private static CorpusSong Generate(int seed) => Generate(seed, SongOverrides.None);
 
-    private static CorpusSong Generate(int seed, SongOverrides overrides) => Generate(SongSeed(seed), overrides) with { Seed = seed };
+    private static CorpusSong Generate(int seed, SongOverrides overrides) => Generate(seed, SongSeed(seed), overrides);
 
     /// <summary>The seed the song of a corpus's seed is made from, moved by the offset, for a test that makes the song itself.</summary>
     public static ulong SongSeed(int seed) => unchecked((ulong)seed + Offset);
 
-    private static CorpusSong Generate(ulong seed, SongOverrides overrides)
+    /// <param name="corpusSeed">The corpus's seed of the song, which a test names it by.</param>
+    /// <param name="seed">The song's own seed, the corpus's moved by the offset.</param>
+    private static CorpusSong Generate(int corpusSeed, ulong seed, SongOverrides overrides)
     {
         return Isolated(() =>
             {
@@ -114,7 +116,7 @@ internal static class TestCorpus
                 // times slower to generate: a test that explains a state traces a song of its own
                 using var trace = StateTrace.Start(explains: false);
                 var song = SongGenerator.GenerateSong(seed, overrides, CancellationToken.None);
-                return new CorpusSong((int)seed, song, Render.RenderSong(song), [..trace.Entries]);
+                return new CorpusSong(corpusSeed, song, Render.RenderSong(song), [..trace.Entries]);
             }
         );
     }
@@ -171,7 +173,11 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     public double[] ChordChanges => [..Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)];
 
     /// <summary>The parts a section leaves out where the song plays it, by its span's place among the song's (<see cref="Arrangement" />).</summary>
-    public ImmutableHashSet<TrackRole> Resting(SectionSpan span) => Arrangements[Array.IndexOf(Spans, span)];
+    public ImmutableHashSet<TrackRole> Resting(SectionSpan span) => Arrangements[IndexOf(span)];
+
+    /// <summary>A span's place among the song's sections, a played one's, a hook intro's, as the section it plays as.</summary>
+    private int IndexOf(SectionSpan span) => Array.IndexOf(Spans, span) is >= 0 and var index ? index
+        : Map.PlayAt(span.Start)?.Index ?? throw new ArgumentException($"No section of the song plays at {span.Start}.", nameof(span));
 
     // the song's sections, and what the trace says of each, read once
     private SectionSpan[] Spans => field ??= [..Map.Sections];
@@ -182,14 +188,14 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
         [..Trace.Where(x => x.Point == TracePoints.Texture).Select(x => ((int, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>>))x.Value!)];
 
     /// <summary>How a section brings its parts in where the song plays it (<see cref="Rmg.Core.Composition.Texture" />).</summary>
-    public (int Index, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Texture(SectionSpan span) => Textures[Array.IndexOf(Spans, span)];
+    public (int Index, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Texture(SectionSpan span) => Textures[IndexOf(span)];
 
     /// <summary>The sections the song plays as solos, by their places among its sections.</summary>
     public ImmutableDictionary<int, SoloPlan> Solos => field ??=
         Trace.Where(x => x.Point == TracePoints.Solo).Select(x => ((int Index, SoloPlan Plan))x.Value!).ToImmutableDictionary(x => x.Index, x => x.Plan);
 
     /// <summary>Whether the song plays a section as a solo where it plays it.</summary>
-    public bool IsSolo(SectionSpan span) => Solos.ContainsKey(Array.IndexOf(Spans, span));
+    public bool IsSolo(SectionSpan span) => Solos.ContainsKey(IndexOf(span));
 
     /// <summary>Whether a section's drums play where the song plays it, rather than rest for a breakdown.</summary>
     public bool HasDrums(SectionSpan span) => !Resting(span).Contains(TrackRole.Drum);

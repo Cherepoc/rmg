@@ -70,6 +70,7 @@ public sealed class FillTest
     public async Task IdleDrums_KeepTheSectionsState()
     {
         // the toms play in few sections, but have the drums' state in all of them
+        var checkedSongs = 0;
         for (var seed = 0; seed < 8; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
@@ -77,9 +78,12 @@ public sealed class FillTest
             if (!song.TrackEventStateTimelineMap.TrackTimelineMap.TryGetValue(DrumGroups.GetTrackNumber(DrumDefinitions.Tom), out var toms))
                 continue;
 
+            checkedSongs++;
             foreach (var span in song.Map!.Sections)
                 await Assert.That(toms.GetEffectiveStateMapAt(span.Start).GetStateValue(StateKinds.Velocity)).IsNotEqualTo(0);
         }
+
+        await Assert.That(checkedSongs).IsGreaterThan(0);
     }
 
     [Test]

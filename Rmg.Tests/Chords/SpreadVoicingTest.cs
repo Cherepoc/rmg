@@ -20,7 +20,7 @@ public sealed class SpreadVoicingTest
     }
 
     [Test]
-    public async Task AWilderSongsChords_SpreadOverTwoOctaves_NowAndThen_APlainOnesNever()
+    public async Task AWildVoicing_SpreadsATriadOverTwoOctaves_NowAndThen_APlainSongsChordsNever()
     {
         // the songs: a plain one's chords never spread, wherever its instrument would leave room
         var (plain, wild) = (TwoOctaves(0), TwoOctaves(1));

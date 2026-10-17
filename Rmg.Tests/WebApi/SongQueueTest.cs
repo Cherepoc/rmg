@@ -35,6 +35,8 @@ public sealed class SongQueueTest
 
         await Assert.That(await IsGiven(other)).IsTrue();
         await Assert.That(await IsWaiting(many[1])).IsTrue();
+        // and as the queue holds it, whatever the pool's threads: one making, the rest of many waiting
+        await Assert.That(queue.Load).IsEqualTo((1, 4));
     }
 
     [Test]
@@ -101,6 +103,7 @@ public sealed class SongQueueTest
 
         await Assert.That(await IsGiven(first)).IsTrue();
         await Assert.That(await IsWaiting(second)).IsTrue();
+        await Assert.That(queue.Load).IsEqualTo((1, 1));
     }
 
     // a turn is handed over at once, but the song's wait for it ends on a thread of the pool, so one given is waited for,

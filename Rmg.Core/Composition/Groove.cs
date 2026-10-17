@@ -87,6 +87,10 @@ internal static class Groove
     /// </summary>
     public const double GenreSwungNoteReach = 2;
 
+    /// <summary>The pair a song swings at its tempo, in beats: 16ths where one lasts long enough to swing, as a genre moves it, 8ths otherwise.</summary>
+    public static double SwungPeriod(double tempo, Genre genre) =>
+        Meter.SecondsPerBeat(tempo) / 4 >= ShortestSwungNote * Math.Pow(GenreSwungNoteReach, -genre.Shift(GenreChoices.FeelValues, "sixteenths")) ? 0.5 : 1;
+
     /// <param name="meter">The meter the song's bars are in, whose groups a pair must divide to swing, as 6/8's 8ths do not.</param>
     /// <param name="unconventionality">The feel facet of the song's unconventionality.</param>
     /// <param name="given">How much the song swings where it is given, as a part of the triplet's, 0 for straight.</param>
@@ -96,8 +100,7 @@ internal static class Groove
         // drawn when it is given too, so that the rest is as it was
         var swings = context.TestProbability(SwingChance.At(unconventionality, genre.Chance(GenreChoices.FeelChances, "swing")));
         var amount = LightestSwing + (1 - LightestSwing) * Math.Pow(context.GenerateDouble(), Math.Exp(-AmountLean * genre.Shift(GenreChoices.FeelValues, "swing")));
-        var sixteenth = Meter.SecondsPerBeat(tempo) / 4;
-        var period = sixteenth >= ShortestSwungNote * Math.Pow(GenreSwungNoteReach, -genre.Shift(GenreChoices.FeelValues, "sixteenths")) ? 0.5 : 1;
+        var period = SwungPeriod(tempo, genre);
         // no heavier than leaves the pair's second note its shortest, its middle a sixth of the pair late at the triplet's
         amount = Math.Clamp(6 * (period / 2 - ShortestSecondNote / Meter.SecondsPerBeat(tempo)) / period, 0, amount);
         if (given is { } amountGiven)

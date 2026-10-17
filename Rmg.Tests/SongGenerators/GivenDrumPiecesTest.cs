@@ -131,12 +131,14 @@ public sealed class GivenDrumPiecesTest
                 if (!FollowsTheDrums(definition.Role, drawn, given))
                     await Assert.That(after).IsEquivalentTo(before, CollectionOrdering.Matching).Because($"seed {seed}, the {definition.Role}");
                 else
-                    (notes, changed) = (notes + before.Length, changed + before.Except(after).Count());
+                    // the notes the drums change, taken out or added, against the more of the two
+                    (notes, changed) = (notes + Math.Max(before.Length, after.Length), changed + before.Except(after).Count() + after.Except(before).Count());
             }
         }
 
-        // a few in a hundred, from 1% to 5% over these songs and drums
-        await Assert.That(changed / (double)notes).IsLessThan(0.06);
+        // a few in a hundred, taken out or added, from 5.5% to 8.6% over these songs and drums
+        Console.WriteLine($"{changed} of {notes} notes of the parts following the drums changed");
+        await Assert.That(changed / (double)notes).IsLessThan(0.1);
         // (14 to 26 of the 32 over these songs and drums, the rest bringing their parts in by the drums or soloing on them)
         await Assert.That(compared).IsGreaterThanOrEqualTo(12);
     }

@@ -29,7 +29,9 @@ public sealed class BoogieTest
             if (place == 0 || !sections.Contains(song.Map.SectionAt(note.Position)?.SectionId ?? -1) || note.Value.Pitches.Length != 1)
                 continue;
             strong++;
-            var step = Rmg.Core.Composition.Realizer.GetChord(note.Value.State).Chord.GetPitch(SectionGenerator.Boogie[place % SectionGenerator.Boogie.Length]);
+            // its sixth and seventh the major sixth and the flat seventh over the root, as the boogie plays them
+            var chord = Rmg.Core.Composition.Realizer.GetChord(note.Value.State).Chord;
+            var step = SectionGenerator.Boogie[place % SectionGenerator.Boogie.Length] switch { 5 => chord.GetPitch(0) + 9, 6 => chord.GetPitch(0) + 10, var other => chord.GetPitch(other) };
             onStep += ((note.Value.Pitches[0] - step) % 12 + 12) % 12 == 0 ? 1 : 0;
         }
 
@@ -47,6 +49,7 @@ public sealed class BoogieTest
         Console.WriteLine($"the boogie's step on {onStep} of {strong} strong notes after a chord's first, against {plainOnStep} of {plainStrong} where none walks one");
         await Assert.That(strong).IsGreaterThan(50);
         await Assert.That(plainStrong).IsGreaterThan(50);
+        // (measured over 64: 94% against 14%)
         await Assert.That(onStep / (double)strong).IsGreaterThan(0.7);
         await Assert.That(onStep / (double)strong).IsGreaterThan(2 * plainOnStep / (double)plainStrong);
     }

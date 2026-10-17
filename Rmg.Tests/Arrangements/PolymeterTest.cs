@@ -175,14 +175,17 @@ public sealed class PolymeterTest
         }
     }
 
-    /// <summary>Djent's cycles in the cells it names, its long odd ones, 13 and 17, among them, which the songs' own reach rarely or never.</summary>
+    /// <summary>
+    ///     Djent's cycles in the cells it names, its long odd ones, 13 and 17, among them, which the songs' own reach rarely
+    ///     or never (measured over 64: 28% of its cells).
+    /// </summary>
     [Test]
     public async Task DjentsPolymeters_PlayItsCells_ItsLongOddOnesAmongThem()
     {
-        var plans = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("djent"))))
+        var plans = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("djent"))))
             .SelectMany(x => x.PolymeterPlans.Values).ToArray();
         var cells = plans.SelectMany(x => x.Cells).ToArray();
-        Console.WriteLine($"{plans.Length} polymeters, cells {string.Join(", ", cells.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}"))}");
+        Console.WriteLine($"{plans.Length} polymeters, cells {string.Join(", ", cells.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}"))}, 13 or 17 {cells.Count(x => x is 13 or 17) / (double)cells.Length:P0}");
         await Assert.That(cells.All(x => x != 10)).IsTrue();
         await Assert.That(cells.Count(x => x is 13 or 17)).IsGreaterThan(cells.Length / 10);
     }
@@ -215,5 +218,35 @@ public sealed class PolymeterTest
         Console.WriteLine($"  {plans.Length} polymeters: the bass with the riff {plans.Count(x => x.Parts.Contains(TrackRole.Riff) && x.Parts.Contains(TrackRole.Bass)) / (double)Math.Max(1, plans.Count(x => x.Parts.Contains(TrackRole.Riff))):P0}, the snare {plans.Count(x => x.Snare) / (double)plans.Length:P0}, the kick with them {plans.Count(x => x.Kick) / (double)plans.Length:P0}, frames {string.Join(", ", plans.Where(x => x.Patterns != Polymeter.Plan.Section).GroupBy(x => x.Patterns).OrderBy(x => x.Key).Select(x => $"{x.Key} patterns {x.Count() / (double)plans.Length:P0}"))}, " +
                           $"running on {plans.Count(x => x.Patterns == Polymeter.Plan.Section) / (double)plans.Length:P0}, growing {plans.Count(x => x.Grows) / (double)plans.Length:P0}, composite {plans.Count(x => x.Cells.Length > 1) / (double)plans.Length:P0}: {string.Join(", ", plans.Where(x => x.Cells.Length > 1).Select(x => string.Join("+", x.Cells)).GroupBy(x => x).OrderByDescending(x => x.Count()).Take(12).Select(x => $"{x.Key} {x.Count()}"))}");
         await Task.CompletedTask;
+    }
+
+    /// <summary>The genres of driven riffs, whose polymeters the rule below plays.</summary>
+    private static readonly string[] DrivenGenres = ["rock", "metal", "djent", "nuMetal", "punk"];
+
+    /// <summary>A part playing a polymeter in a section plays in it wherever it plays there without the cycle.</summary>
+    [Test]
+    public async Task APartPlayingAPolymeter_PlaysInEverySectionItPlaysOtherwise()
+    {
+        var sections = 0;
+        foreach (var genre in DrivenGenres)
+            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(genre)))))
+            {
+                var plans = song.PolymeterPlans;
+                var spans = song.Map.Sections.Where(x => plans.ContainsKey(x.SectionId)).ToArray();
+                if (spans.Length == 0)
+                    continue;
+
+                // the song with its sections in their bars, where every part plays what it plays without the cycle
+                var unrolled = SongGenerator.GenerateSong(TestCorpus.SongSeed(song.Seed), new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(genre)),
+                    new HashSet<string> { "Polymeter" }, (_, _) => { }, CancellationToken.None);
+                foreach (var span in spans)
+                foreach (var part in plans[span.SectionId].Parts.Where(x => unrolled.Notes!.GetValueOrDefault(unrolled.Track(x))?.Any(n => n.Position >= span.Start && n.Position < span.End) ?? false))
+                {
+                    sections++;
+                    await Assert.That(song.Song.Notes!.GetValueOrDefault(song.Track(part))?.Any(x => x.Position < span.End - 1e-9 && x.Position + x.Value.Duration > span.Start + 1e-6) ?? false).IsTrue().Because($"{genre} seed {song.Seed}, {part} in the section at {span.Start}");
+                }
+            }
+
+        await Assert.That(sections).IsGreaterThan(10);
     }
 }

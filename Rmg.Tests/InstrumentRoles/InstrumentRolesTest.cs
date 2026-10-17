@@ -7,7 +7,7 @@ namespace Rmg.Tests.InstrumentRoles;
 public sealed class InstrumentRolesTest
 {
     // every pitched part's instruments
-    private static readonly InstrumentRole[] Roles = [..Enum.GetValues<TrackRole>().Select(RoleOf).OfType<InstrumentRole>().Distinct()];
+    private static readonly InstrumentRole[] Roles = [..Enum.GetValues<TrackRole>().Select(InstrumentsOverTime.RoleOf).OfType<InstrumentRole>().Distinct()];
 
     [Test]
     public async Task Roles_HoldNoSoundEffectsOrDrums_AndNoInstrumentTwice()
@@ -22,20 +22,6 @@ public sealed class InstrumentRolesTest
         }
     }
 
-    /// <summary>A role's instruments, by a pitched track's role, the twin's its riff's.</summary>
-    private static InstrumentRole? RoleOf(TrackRole role) => role switch
-    {
-        TrackRole.Melody => Rmg.Core.Composition.InstrumentRoles.Melody,
-        TrackRole.Chords => Rmg.Core.Composition.InstrumentRoles.Chords,
-        TrackRole.Bass => Rmg.Core.Composition.InstrumentRoles.Bass,
-        TrackRole.Pad => Rmg.Core.Composition.InstrumentRoles.Pad,
-        TrackRole.CounterMelody => Rmg.Core.Composition.InstrumentRoles.CounterMelody,
-        TrackRole.Riff or TrackRole.RiffTwin => Rmg.Core.Composition.InstrumentRoles.Riff,
-        TrackRole.Rhythm => Rmg.Core.Composition.InstrumentRoles.Rhythm,
-        TrackRole.Solo => Rmg.Core.Composition.InstrumentRoles.Solo,
-        _ => null
-    };
-
     [Test]
     public async Task APlainSoundsSong_PlaysNoInstrumentWithCharacter()
     {
@@ -45,14 +31,19 @@ public sealed class InstrumentRolesTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, plain)))
         foreach (var (track, definition) in song.Song.TrackDefinitions)
         {
-            if (definition is not PitchInstrumentTrack part || RoleOf(part.Role) is not { } role)
+            if (definition is not PitchInstrumentTrack part || InstrumentsOverTime.RoleOf(part.Role) is not { } role)
                 continue;
-            var programs = song.Song.Notes!.GetValueOrDefault(track)?.Select(x => InstrumentsOverTime.ProgramOf(x.Value.State, part.InstrumentCode)).Distinct() ?? [];
-            // but an articulation's variant, the same player's (InstrumentsOverTime.Variants)
-            foreach (var program in programs.Append(part.InstrumentCode).Where(x => role.Instruments.Any(i => i.Program == x)))
+            // but a note sounding as another part, a counter-melody in the melody's sound
+            var programs = song.Song.Notes!.GetValueOrDefault(track)?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.SoundsAs) == 0).Select(x => InstrumentsOverTime.ProgramOf(x.Value.State, part.InstrumentCode)).Distinct() ?? [];
+            // every one its role lists and plain, but an articulation's variant of one it plays, the same player's (InstrumentsOverTime.Variants)
+            var played = programs.Append(part.InstrumentCode).ToHashSet();
+            foreach (var program in played)
             {
                 checkedPrograms++;
-                await Assert.That(role.Instruments.Single(x => x.Program == program).Weight.Plain).IsGreaterThan(0).Because($"seed {song.Seed}, {part.Role} {program}");
+                if (role.Instruments.FirstOrDefault(x => x.Program == program) is { } listed)
+                    await Assert.That(listed.Weight.Plain).IsGreaterThan(0).Because($"seed {song.Seed}, {part.Role} {program}");
+                else
+                    await Assert.That(InstrumentsOverTime.Variants.Any(x => played.Contains(x.Key) && x.Value.Contains(program))).IsTrue().Because($"seed {song.Seed}, {part.Role} {program} unlisted");
             }
         }
 
@@ -64,8 +55,8 @@ public sealed class InstrumentRolesTest
     public async Task Report()
     {
         // the parts on an instrument that has character, never the plainest songs', by fifths of the sound facet
-        var parts = TestCorpus.Measure(256, song => song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().Where(x => RoleOf(x.Role) is not null)
-            .Select(x => (Fifth: Math.Min(4, (int)(song.Song.Draws!.Unconventionality[Facet.Sound] * 5)), x.InstrumentCode, Character: RoleOf(x.Role)!.Instruments.Single(i => i.Program == x.InstrumentCode).Weight.Plain == 0))
+        var parts = TestCorpus.Measure(256, song => song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().Where(x => InstrumentsOverTime.RoleOf(x.Role) is not null)
+            .Select(x => (Fifth: Math.Min(4, (int)(song.Song.Draws!.Unconventionality[Facet.Sound] * 5)), x.InstrumentCode, Character: InstrumentsOverTime.RoleOf(x.Role)!.Instruments.Single(i => i.Program == x.InstrumentCode).Weight.Plain == 0))
             .ToArray()).SelectMany(x => x).ToArray();
         foreach (var fifth in Enumerable.Range(0, 5))
         {

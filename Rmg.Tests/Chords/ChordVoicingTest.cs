@@ -49,7 +49,7 @@ public sealed class ChordVoicingTest
     }
 
     [Test]
-    public async Task ThePlainestTriads_AreClose_TheVoiceLeaderInvertingThem_AndTheWildestOftenSpread()
+    public async Task ThePlainestTriads_AreClose_AndTheWildestOftenSpread()
     {
         var triad = ChordShapes.All.First(x => x.Name == "Triad");
         var context = new GenerationContext(0);

@@ -135,6 +135,8 @@ public sealed class DropTest
         }
 
         Console.WriteLine($"of 32 Techno songs' drops, {silent} silent and {filtered} filtered, the riser's part playing on under {playingOn} of these");
+        // the riser's part playing on under a filtered drop, a calibration (measured over 32: 21 of 62)
+        await Assert.That(playingOn).IsGreaterThan(filtered / 4);
         await Assert.That(silent).IsGreaterThan(5);
         await Assert.That(filtered).IsGreaterThan(5);
     }

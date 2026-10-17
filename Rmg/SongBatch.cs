@@ -1,9 +1,11 @@
 using System.Collections.Immutable;
 using Rmg.Core;
+using Rmg.Core.Composition;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 using Rmg.Core.Versions;
+using Rmg.WebApi.Genres;
 
 namespace Rmg;
 
@@ -27,6 +29,13 @@ public static class SongBatch
             seeds.Add(context.GenerateSeed());
 
         return seeds.MoveToImmutable();
+    }
+
+    /// <summary>A song of a seed as the options ask for it: in the preset they name, or the songs' own.</summary>
+    public static Func<ulong, Song> Generator(CliOptions options)
+    {
+        var genre = options.Genre is { } id ? GenrePresetFile.Genre(GenrePresetFile.All.Single(x => x.Id == id)) : null;
+        return seed => SongGenerator.GenerateSong(seed, new SongOverrides(Genre: genre));
     }
 
     /// <returns>Process exit code.</returns>

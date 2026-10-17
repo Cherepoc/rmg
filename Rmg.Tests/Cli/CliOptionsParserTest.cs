@@ -36,6 +36,7 @@ public sealed class CliOptionsParserTest
     {
         await Assert.That(Parse("--genre", "ballad").Options!.Genre).IsEqualTo("ballad");
         await Assert.That(Parse("--genre=rock").Options!.Genre).IsEqualTo("rock");
+        await Assert.That(Parse("-g", "metal").Options!.Genre).IsEqualTo("metal");
         await Assert.That(Parse("--genre", "polka").Error).Contains("no preset");
     }
 
@@ -131,6 +132,8 @@ public sealed class CliOptionsParserTest
     [Arguments("-o")]
     [Arguments("-n")]
     [Arguments("-s")]
+    [Arguments("--genre")]
+    [Arguments("-g")]
     public async Task MissingValue_ResultsIn_Error_NamingTheOption(string option)
     {
         var result = Parse(option);

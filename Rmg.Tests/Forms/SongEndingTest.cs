@@ -75,7 +75,8 @@ public sealed class SongEndingTest
     [Test]
     public async Task TheFinalChord_PlaysOnTheLine_AndIsHeld()
     {
-        foreach (var song in Songs.Where(x => FormLayers.HasFinalChord(Ending(x).Kind)))
+        var endings = Songs.Where(x => FormLayers.HasFinalChord(Ending(x).Kind)).ToArray();
+        foreach (var song in endings)
         {
             var bass = song.Notes(song.Track(TrackRole.Bass))[^1];
 
@@ -83,6 +84,8 @@ public sealed class SongEndingTest
             await Assert.That(bass.Value.Duration).IsEqualTo(Ending(song).Held);
             await Assert.That(song.Song.Duration).IsEqualTo(Ending(song).Start + Ending(song).Duration);
         }
+
+        await Assert.That(endings.Length).IsGreaterThan(0);
     }
 
     [Test]

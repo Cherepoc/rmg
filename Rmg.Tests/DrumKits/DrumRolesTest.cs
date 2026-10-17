@@ -43,6 +43,10 @@ public sealed class DrumRolesTest
         var context = new GenerationContext(1);
         var kicks = Enumerable.Range(0, 200).Select(_ => (DrumRole)DrumRoles.GenerateSong(context, DrumDefinitions.Kick, 0, Genre.None).GetStateValue(CompositionStateKinds.DrumRole).Value);
         await Assert.That(kicks.All(x => x == DrumRole.Ground)).IsTrue();
-        await Assert.That(OffRoles(1)).IsGreaterThan(OffRoles(0) * 3);
+        // and a drum of several roles its own at the plain end, never another, a rule, and another now and then at the wild
+        var (plain, wild) = (OffRoles(0), OffRoles(1));
+        Console.WriteLine($"a drum of several roles off its own: {plain:P1} at the plain end, {wild:P1} at the wild");
+        await Assert.That(plain).IsEqualTo(0);
+        await Assert.That(wild).IsGreaterThan(0.05);
     }
 }

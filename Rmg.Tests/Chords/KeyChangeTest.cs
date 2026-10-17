@@ -80,10 +80,13 @@ public sealed class KeyChangeTest
             var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
             await Assert.That(Changes(song).All(x => song.Map.Sections.Any(y => y.Start == x.Position))).IsTrue();
 
-            // the last section in its key, or a whole or half step above it where it played before
+            // the last section in its key, or a whole or half step above it where it played before: the appearance the lift
+            // may come at, its repeat where it plays twice, the one before an outro where there is one
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
-            var last = song.Map.Sections[structure.SectionIds.Length - 1];
-            var before = song.Map.Sections.Take(structure.SectionIds.Length - 1).FirstOrDefault(x => x.SectionId == last.SectionId);
+            var ids = structure.SectionIds;
+            var at = ids.Length - 1 + ((bool)song.Trace.Single(x => x.Point == TracePoints.LastRepeat).Value! ? 1 : 0) - (structure.Roles[ids[^1]] == SectionRole.Outro ? 1 : 0);
+            var last = song.Map.Sections[at];
+            var before = song.Map.Sections.Take(at).FirstOrDefault(x => x.SectionId == last.SectionId);
             if (before is null)
                 continue;
 

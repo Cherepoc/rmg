@@ -5,30 +5,36 @@ namespace Rmg.Tests.SongStructures;
 
 public sealed class SongStructureGeneratorTest
 {
+    /// <summary>A free form's parts keep to their limits at every unconventionality: the plainest reusing a section wherever it can, the wildest none.</summary>
     [Test]
-    public async Task Parts_RespectLimits_AndNeverRepeatAdjacentSection()
+    [Arguments(0.0)]
+    [Arguments(0.5)]
+    [Arguments(1.0)]
+    public async Task Parts_RespectLimits(double unconventionality)
     {
         for (var seed = 0; seed < 500; seed++)
         {
-            var parts = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null, 0.5);
+            var parts = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null, unconventionality);
 
             await Assert.That(parts.Length).IsBetween(4, 8);
             foreach (var part in parts)
             {
                 await Assert.That(part.SectionIds.Length).IsBetween(1, 4);
                 await Assert.That(part.SectionIds.Distinct().Count()).IsBetween(1, 3);
-                for (var i = 1; i < part.SectionIds.Length; i++)
-                    await Assert.That(part.SectionIds[i]).IsNotEqualTo(part.SectionIds[i - 1]);
             }
         }
     }
 
+    /// <summary>No section plays twice in a row, within a part or across parts, at every unconventionality.</summary>
     [Test]
-    public async Task Sections_NeverRepeat_AcrossPartBoundaries()
+    [Arguments(0.0)]
+    [Arguments(0.5)]
+    [Arguments(1.0)]
+    public async Task Sections_NeverRepeat_AcrossPartBoundaries(double unconventionality)
     {
         for (var seed = 0; seed < 2000; seed++)
         {
-            var sectionIds = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null, 0.5)
+            var sectionIds = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null, unconventionality)
                 .SelectMany(x => x.SectionIds)
                 .ToArray();
 
@@ -65,6 +71,10 @@ public sealed class SongStructureGeneratorTest
             );
 
         await Assert.That(shared).IsGreaterThan(0);
+        // and none at the wild end, which reuses no section
+        var wild = Enumerable.Range(0, 200).Select(seed => SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null, 1))
+            .Count(parts => parts.SelectMany(p => p.SectionIds.Distinct()).GroupBy(x => x).Any(x => x.Count() > 1));
+        await Assert.That(wild).IsEqualTo(0);
     }
 
     [Test]

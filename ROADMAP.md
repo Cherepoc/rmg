@@ -501,7 +501,8 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
   voicings, swells, odd meters); not its tone, which General MIDI has not, its long legato soloing, which the solo's
   gestures (licks, runs, held notes) are not built for, its drumming and its melodic bass, gaps of their own.
 - **A section holding its spacing** rather than the voice leader drawing it anew a chord, should a spread chord's
-  (`ChordVoicing`, "Spread") neighbours sound close.
+  (`ChordVoicing`, "Spread") neighbours sound close; first whether the spread earns its place, heard in 0% to 2.6% of
+  the wildest songs' chords, in no song to one of 64, as the instrument and register pull it back (#222).
 - **Approach chords, the rest** (P3): turnarounds, passing chords, a chord solo's planed approaches, chromatic passing
   chords from above and a later appearance reharmonised are built. A plain song is never reharmonised, by any of them,
   the songs' chance 0 at the plain end; a preset's may be above it, as Soul's and Bossa nova's turnarounds. Passing chords of a genre's kinds are built too (`PassingChords.Kinds`): the
@@ -545,6 +546,13 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
   cache them; a corpus song keeps about 3 MB, every note's state the most of it, and its making allocates 47 MB
   more for a moment.
+- **Tests the review of 16 October 2026 left** (P4): a dyadic pattern's variation over a cycle of another shape, 3+3+2
+  or 7/8, repeating no draw made for another place (#237); the improvisation measured on the same songs with it forced
+  off, not against the songs that drew none (#276); a part switched to another instrument sitting in its octaves,
+  after `RegisterReportTest` says whether any falls outside (#281); the mix filter's opening read as `MixFilter` reads
+  it, beyond Trance's four-bar phrases and intros of entries (#289); the scale rule walking its timelines in step, not
+  quadratically (#297); a silent start recognised by its trace, its holder exempt alone (#304); the harmony's N.C.
+  wherever no pitched part sounds mid-song, and a named chord's root the chords part's (#318).
 
 ## Genres
 

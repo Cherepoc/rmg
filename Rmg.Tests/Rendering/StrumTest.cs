@@ -27,8 +27,8 @@ public sealed class StrumTest
             (double Position, double Strum)? previous = null;
             foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Strum) != 0))
             {
-                // a piano's roll, upward, on a held chord
-                if (Program(note.Value) is >= 0 and <= 7)
+                // a roll, upward, on a held chord, an instrument's that rolls rather than strums
+                if (!InstrumentTraits.Has(Program(note.Value), InstrumentTrait.Strums))
                 {
                     rolled++;
                     await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Strum)).IsGreaterThan(0);

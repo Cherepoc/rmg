@@ -21,6 +21,19 @@ public sealed class SongBatchTest
         }
     }
 
+    /// <summary>The songs of a run naming a genre are its preset's, those of one naming none the songs' own.</summary>
+    [Test]
+    public async Task AGenreAsked_MakesItsPresetsSongs()
+    {
+        static (double, int)[] Notes(Song song) => [..song.Notes!.SelectMany(x => x.Value.Select(n => (Math.Round(n.Position, 6), n.Value.Pitches[0])))];
+        var metal = Rmg.WebApi.Genres.GenrePresetFile.Genre(Rmg.WebApi.Genres.GenrePresetFile.All.Single(x => x.Id == "metal"));
+        var asked = SongBatch.Generator(new CliOptions("out", 1, 0, "metal"))(5);
+        var own = SongBatch.Generator(new CliOptions("out", 1, 0))(5);
+
+        await Assert.That(Notes(asked)).IsEquivalentTo(Notes(SongGenerator.GenerateSong(5, new SongOverrides(Genre: metal))), CollectionOrdering.Matching);
+        await Assert.That(Notes(own)).IsEquivalentTo(Notes(SongGenerator.GenerateSong(5)), CollectionOrdering.Matching);
+    }
+
     [Test]
     public async Task GenerateSongSeeds_ResultsIn_RequestedCount()
     {

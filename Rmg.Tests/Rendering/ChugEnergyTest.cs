@@ -28,6 +28,7 @@ public sealed class ChugEnergyTest
 
         var (quietShare, loudShare) = (quiet.Average(x => x ? 1.0 : 0), loud.Average(x => x ? 1.0 : 0));
         Console.WriteLine($"{preset}: chugs in {quietShare:P0} of {quiet.Count} quieter sections, {loudShare:P0} of {loud.Count} louder");
-        await Assert.That(quietShare).IsGreaterThan(loudShare);
+        // by a gap the songs without the lean do not reach (measured: Punk 75% against 45%, Metal 67% against 49%; with the lean off, Punk 31% against 22%, Metal 64% against 62%)
+        await Assert.That(quietShare - loudShare).IsGreaterThan(preset == "punk" ? 0.12 : 0.08);
     }
 }

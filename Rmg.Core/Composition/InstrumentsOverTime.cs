@@ -94,7 +94,7 @@ internal static class InstrumentsOverTime
     }.ToImmutableDictionary();
 
     /// <summary>The instruments of a role, which a section switches a part among.</summary>
-    private static InstrumentRole? RoleOf(TrackRole role) => role switch
+    internal static InstrumentRole? RoleOf(TrackRole role) => role switch
     {
         TrackRole.Chords => InstrumentRoles.Chords,
         TrackRole.Melody => InstrumentRoles.Melody,

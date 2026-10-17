@@ -387,8 +387,7 @@ public sealed class GenreTest
             await Assert.That(song.Song.Draws.Parts).Contains(TrackRole.CounterMelody);
             // swung wherever the meter pairs the notes its tempo swings, 16ths at a slow one and 8ths otherwise
             var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo);
-            var period = 60 / (Meter.BaseTempo * tempo) / 4 >= Groove.ShortestSwungNote ? 0.5 : 1;
-            await Assert.That(song.Song.Draws.Swing.Delay > 0).IsEqualTo(song.Map.Meter.Pairs(period));
+            await Assert.That(song.Song.Draws.Swing.Delay > 0).IsEqualTo(song.Map.Meter.Pairs(Groove.SwungPeriod(tempo, genre))).Because($"seed {seed}");
         }
     }
 
@@ -426,23 +425,6 @@ public sealed class GenreTest
     }
 
     /// <summary>A song of a preset that names its intros opens on one of them, a hook intro among them only where it names it; opening on one part, its band entering, aside.</summary>
-    [Test]
-    public async Task ASongsIntro_IsOneItsGenreNames()
-    {
-        foreach (var preset in GenrePresets.All.Where(x => x.Choices.ContainsKey(GenreChoices.Intro.Name)))
-        {
-            var named = preset.Choices[GenreChoices.Intro.Name].Where(x => x.Value.ValueKind == System.Text.Json.JsonValueKind.Array ? x.Value.EnumerateArray().Any(y => y.GetInt32() > 0) : x.Value.GetInt32() > 0)
-                .Select(x => x.Key).ToHashSet();
-            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))))
-            {
-                var intro = song.Map.Intro;
-                var opensAlone = song.Trace.Single(x => x.Point == TracePoints.OpeningAlone).Value is not null && intro.Kind == IntroKind.Entries;
-                await Assert.That(named.Contains(GenreChoices.Name(intro.Kind.ToString())) || opensAlone || intro.Kind == IntroKind.Cold && named.Count == 0)
-                    .IsTrue().Because($"{preset.Id} seed {song.Seed}: {intro.Kind}");
-            }
-        }
-    }
-
     [Test]
     public async Task EveryDevice_NamedAsTheSongsHaveIt_PlaysAsNoGenre()
     {
@@ -489,7 +471,7 @@ public sealed class GenreTest
     }
 
     /// <summary>The same songs at a value choice's least and its most, measured, and the averages at each.</summary>
-    private static (double Least, double Most) AtTheEnds(Func<double, Genre> genre, Func<CorpusSong, double> measure, int songs = 32)
+    private static (double Least, double Most) AtTheEnds(Func<double, Genre> genre, Func<CorpusSong, double> measure, int songs = 64)
     {
         double Average(double amount) => TestCorpus.InParallel(Enumerable.Range(0, songs), seed => measure(TestCorpus.Get(seed, new SongOverrides(Genre: genre(amount))))).Average();
         return (Average(0), Average(1));
@@ -503,6 +485,7 @@ public sealed class GenreTest
         var (least, most) = AtTheEnds(a => Of((GenreChoices.Ghosts, [("sections", 1)]), (GenreChoices.GhostNotes, [("many", a)])),
             song => song.Song.Notes!.Where(x => snares.Contains(x.Key)).Sum(x => x.Value.Count));
         Console.WriteLine($"snare notes a song: {least:F0} at the fewest ghosts, {most:F0} at the most");
+        // (measured over 64: 321 against 584)
         await Assert.That(most).IsGreaterThan(least);
     }
 
@@ -515,6 +498,7 @@ public sealed class GenreTest
             song => song.Trace.Where(x => x.Point == TracePoints.BarPattern && song.IsDrum(x.Track))
                 .Select(x => (x.StateMap.GetStateValue(r.Period.Power), x.StateMap.GetStateValue(r.Phase.Rank))).Distinct().Count());
         Console.WriteLine($"the drums' speeds and phases a song: {least:F1} held least, {most:F1} held most");
+        // (measured over 64: 18.5 against 3.8)
         await Assert.That(most).IsLessThan(least);
     }
 
@@ -526,6 +510,7 @@ public sealed class GenreTest
             song => song.Rendered.Tracks.Where(x => x.Role == TrackRole.Melody && !x.IsDouble).SelectMany(x => x.Controllers.Where(c => c.Controller == Rmg.Core.Rendering.ExpressionRender.ReverbController))
                 .Select(c => (double)c.Value).DefaultIfEmpty(0).Average());
         Console.WriteLine($"the melody's reverb: {least:F1} at the least space, {most:F1} at the most");
+        // (measured over 64: 10.3 against 119)
         await Assert.That(most).IsGreaterThan(least);
     }
 
@@ -536,6 +521,7 @@ public sealed class GenreTest
         var (least, most) = AtTheEnds(a => Of((GenreChoices.Pan, [("chords", a)])),
             song => song.Rendered.Tracks.Where(x => x.Role == TrackRole.Chords && !x.IsDouble).Select(x => Math.Abs(x.Pan)).DefaultIfEmpty(0).Average());
         Console.WriteLine($"the chords' pan: {least:F2} at the least, {most:F2} at the most");
+        // (measured over 64: 0.03 against 0.76)
         await Assert.That(most).IsGreaterThan(least);
     }
 
@@ -546,6 +532,7 @@ public sealed class GenreTest
         var (least, most) = AtTheEnds(a => Of((GenreChoices.FeelChances, [("swing", 1)]), (GenreChoices.FeelValues, [("swing", a)])),
             song => Rmg.Core.Rendering.Render.GetSwing(song.Song).Delay);
         Console.WriteLine($"the swing's delay: {least:F3} at the least, {most:F3} at the most");
+        // (measured over 64: 0.051 against 0.131)
         await Assert.That(most).IsGreaterThan(least);
     }
 
@@ -556,6 +543,7 @@ public sealed class GenreTest
         var (least, most) = AtTheEnds(a => Of((GenreChoices.CadenceDegrees, [("fifth", a)])),
             song => song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => (ImmutableArray<int>)x.Value!).Average(x => x[^1].Mod(7) == 4 ? 1.0 : 0));
         Console.WriteLine($"cadences from the fifth: {least:P1} at the least, {most:P1} at the most");
+        // (measured over 64: 23% against 64%)
         await Assert.That(most).IsGreaterThan(least);
     }
 }

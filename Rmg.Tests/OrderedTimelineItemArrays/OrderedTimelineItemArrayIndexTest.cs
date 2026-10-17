@@ -13,6 +13,16 @@ public sealed class OrderedTimelineItemArrayIndexTest
         new(4, 40),
     ];
 
+    /// <summary>Several items at one position, as a chord's notes are: the ceiling the first of them, the floor one of them.</summary>
+    [Test]
+    public async Task Ties_TheCeilingTheFirstOfThem_TheFloorOneOfThem()
+    {
+        ImmutableArray<TimelineItem<int>> tied = [new(1, 10), new(2, 20), new(2, 21), new(2, 22), new(4, 40)];
+
+        await Assert.That(tied.GetIndexAtCeiling(2)).IsEqualTo(1);
+        await Assert.That(tied[tied.GetIndexAtFloor(2)].Position).IsEqualTo(2);
+    }
+
     [Test]
     public async Task GetIndexAtFloor_Empty_ResultsIn_MinusOne()
     {
