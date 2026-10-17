@@ -1419,7 +1419,7 @@
       "turnaround": { "sections": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [20, 20, 40], "counterMelody": [40, 45, 45], "drum": 100, "riff": 100, "riffTwin": [25, 35, 35], "rhythm": [80, 80, 60], "solo": [0, 40, 70] },
       "rhythm": {
-        "ground": { "speed": 100, "fineness": 100, "fullness": 100, "repetition": 82 },
+        "ground": { "speed": 100, "fullness": 100, "repetition": 82 },
         "backbeat": { "repetition": 76 },
         "riff": { "speed": 82, "repetition": 82 },
         "rhythm": { "speed": 70 }
@@ -1505,7 +1505,7 @@
       "turnaround": { "sections": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [0, 10, 20], "counterMelody": [0, 10, 20], "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [80, 80, 60], "solo": [0, 40, 70] },
       "rhythm": {
-        "ground": { "speed": 100, "fineness": 100, "fullness": 100, "repetition": 82 },
+        "ground": { "speed": 100, "fullness": 100, "repetition": 82 },
         "backbeat": { "repetition": 76 },
         "riff": { "speed": 100, "fullness": 82, "repetition": 82 },
         "rhythm": { "speed": 76 }
@@ -1589,7 +1589,7 @@
       "turnaround": { "sections": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [80, 80, 90], "counterMelody": [50, 50, 60], "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [60, 60, 50], "solo": [20, 40, 60] },
       "rhythm": {
-        "ground": { "speed": 100, "fineness": 100, "fullness": 100, "repetition": 82 },
+        "ground": { "speed": 100, "fullness": 100, "repetition": 82 },
         "backbeat": { "repetition": 76 },
         "riff": { "speed": 82, "repetition": 82 },
         "rhythm": { "speed": 70 }

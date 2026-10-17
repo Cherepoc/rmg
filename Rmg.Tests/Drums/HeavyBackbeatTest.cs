@@ -25,7 +25,8 @@ public sealed class HeavyBackbeatTest
                 var (start, end) = span.Bar(bar);
                 var notes = song.Song.Notes!.Where(x => snares.Contains(x.Key)).SelectMany(x => x.Value).Where(n => n.IsWithin(start, end)).ToArray();
                 (snareNotes, crossStick) = (snareNotes + notes.Length, crossStick + notes.Count(n => n.Value.Pitches[0] == DrumSounds.CrossStick));
-                if (bar < span.Meter.PhraseBars)
+                // a bar the other drums play, not one where the drums rest, as while a section builds
+                if (bar < span.Meter.PhraseBars || !song.Song.Notes!.Any(x => song.IsDrum(x.Key) && !snares.Contains(x.Key) && x.Value.Any(n => n.IsWithin(start, end))))
                     continue;
                 bars++;
                 bare += notes.Length == 0 ? 1 : 0;
@@ -33,7 +34,7 @@ public sealed class HeavyBackbeatTest
         }
 
         // a fill's own sounds, a drop's silent bar and a stop among the rest, against the mechanism breaking (measured: under
-        // 0.5% of the snare's notes the cross-stick, under 1% of the bars after a section's first phrase without a snare)
+        // 0.5% of the snare's notes the cross-stick, 0.5% to 2.1% of the bars the drums play after a section's first phrase without a snare)
         Console.WriteLine($"{genre}: {bare} of {bars} bars after a section's first phrase without a snare, {crossStick} of {snareNotes} snare notes the cross-stick");
         await Assert.That(bars).IsGreaterThan(100);
         await Assert.That(bare / (double)bars).IsLessThan(0.03);

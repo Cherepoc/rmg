@@ -80,13 +80,15 @@ internal static class Mutations
         foreach (var (span, index) in song.Form.Map.Sections.Select((x, i) => (x, i)))
         {
             var section = song.SectionOf(span.SectionId);
-            // the drums playing their own rhythm alone: not a figure's, a cycle's run across the bar lines, one bound to a lead or a lead
+            // the drums playing their own rhythm alone: not a figure's or one a figure follows, a cycle's run across the bar lines, one bound to a lead or a lead
             var figures = draft.Figures.GetValueOrDefault(span.SectionId, ImmutableDictionary<FigurePlayer, string>.Empty);
+            // a player playing a figure, or one a figure follows, as a bass with the kick
+            bool Fixed(FigurePlayer player) => figures.ContainsKey(player) || figures.Any(x => Figures.Of(x.Key, x.Value)?.Follows == player);
             int[] own = draft.Polymeters.Contains(span.SectionId) ? [] :
             [
-                ..drums.Where(x => !section.Bindings.ContainsKey(x) && !section.Bindings.ContainsValue(x) && !(figures.ContainsKey(FigurePlayer.Ground) && kicks.Contains(x))
-                                   && !(figures.ContainsKey(FigurePlayer.Backbeat) && snares.Contains(x)) && !(figures.ContainsKey(FigurePlayer.Time) && timekeepers.Contains(x))
-                                   && !(figures.ContainsKey(FigurePlayer.Claves) && x == claves))
+                ..drums.Where(x => !section.Bindings.ContainsKey(x) && !section.Bindings.ContainsValue(x) && !(Fixed(FigurePlayer.Ground) && kicks.Contains(x))
+                                   && !(Fixed(FigurePlayer.Backbeat) && snares.Contains(x)) && !(Fixed(FigurePlayer.Time) && timekeepers.Contains(x))
+                                   && !(Fixed(FigurePlayer.Claves) && x == claves))
             ];
             var groove = section.Facets[Facet.Groove];
             var context = song.AppearanceStream(SongStream.Mutations, index);

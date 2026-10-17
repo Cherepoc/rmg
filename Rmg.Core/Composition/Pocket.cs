@@ -47,9 +47,14 @@ internal static class Pocket
             // a drum by its role in the song's groove, whatever a section makes of it
             var definition = song.Tracks.Definitions[track];
             var offset = amount * OffsetOf(definition.Role, definition.Role == TrackRole.Drum ? DrumRoles.Of(definition.StateMap) : null);
+            // but a bass playing the kick's figure, note for note with it, in the kick's place
+            var onKick = amount * OffsetOf(TrackRole.Drum, DrumRole.Ground);
+            bool WithKick(double position) => definition.Role == TrackRole.Bass && song.Form.Map.SectionAt(position) is { } span
+                                              && draft.Figures.GetValueOrDefault(span.SectionId)?.GetValueOrDefault(FigurePlayer.Bass) is { } figure
+                                              && Figures.Of(FigurePlayer.Bass, figure)?.Follows == FigurePlayer.Ground;
             // in beats at the tempo where the note plays
-            double Beats(double position) => offset * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position));
-            result[track] = EventTimeline.Create(timeline.Duration, timeline.Select(note => offset == 0
+            double Beats(double position) => (WithKick(position) ? onKick : offset) * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position));
+            result[track] = EventTimeline.Create(timeline.Duration, timeline.Select(note => offset == 0 || Beats(note.Position) == 0
                 ? note
                 : (note.Value with { State = note.Value.State.With(CompositionStateKinds.TimingOffset, Beats(note.Position)) }).ToTimelineItem(note.Position)));
         }

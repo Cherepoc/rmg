@@ -291,14 +291,15 @@ internal static class Figures
         return HeavyBackbeat(song, draft with { Figures = figures });
     }
 
-    /// <summary>The ground's figures heavy enough that the snare under them strikes its head: the double kick, the blast and a breakdown's kick with its riff.</summary>
+    /// <summary>The ground's figures heavy enough that the snare under them strikes its head: the double kick, the blast and the kick with its riff.</summary>
     private static readonly ImmutableHashSet<string> Heavy = ["doubleKick", "blast", "withRiff"];
 
     /// <summary>
     ///     A heavy figure's backbeat: the snare under it struck on its head, never its cross-stick, as a thrash or a
     ///     breakdown's drummer hits it; and from a section's second phrase on, a bar the snare would leave empty under it
     ///     given its backbeat, the meter's (2 and 4 in four), so that a double kick runs a phrase at most without one,
-    ///     as a drummer brings the snare in, where the section's kit plays none too.
+    ///     as a drummer brings the snare in, where the section's kit plays none too; only in a bar the other drums play,
+    ///     never where the drums rest, as while a part opens the song alone or the drums come in late.
     /// </summary>
     private static SongDraft HeavyBackbeat(SongDecisions song, SongDraft draft)
     {
@@ -307,6 +308,9 @@ internal static class Figures
         var snares = DrumGroups.Snare.Tracks.Where(draft.Timeline.TrackTimelineMap.ContainsKey).ToArray();
         if (spans.Length == 0 || snares.Length == 0)
             return draft;
+        // the other drums, which play where the drums do
+        var others = draft.Timeline.TrackTimelineMap.Keys.Where(x => song.Tracks.Definitions[x].Role == TrackRole.Drum && !snares.Contains(x)).ToArray();
+        bool DrumsPlay(double start, double end) => others.Any(t => draft.Timeline.TrackTimelineMap[t].EventTimeline.Any(x => x.IsWithin(start, end)));
 
         return draft with
         {
@@ -325,7 +329,7 @@ internal static class Figures
                     for (var bar = span.Meter.PhraseBars; bar < span.BarCount; bar++)
                     {
                         var (start, end) = span.Bar(bar);
-                        if (played.Any(x => x.IsWithin(start, end)))
+                        if (played.Any(x => x.IsWithin(start, end)) || !DrumsPlay(start, end))
                             continue;
                         played.AddRange(span.Meter.Backbeats.Select(x => start + x).Where(x => x < end - 1e-9).Select(x => own.MergeWith(head).ToTimelineItem(x)));
                     }
