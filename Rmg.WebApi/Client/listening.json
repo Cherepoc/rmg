@@ -321,10 +321,8 @@
     "seeds": [
       {
         "seed": "Y",
-        "at": 16.9,
+        "at": 23.8,
         "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Bass (Synth Bass 2)",
           "Melody (Lead 2 (sawtooth))"
         ]
       },
@@ -346,7 +344,7 @@
       },
       {
         "seed": "1P",
-        "at": 138.2,
+        "at": 124,
         "listen": [
           "Bass (Synth Bass 1)",
           "Chords (Pad 2 (warm))",
@@ -355,7 +353,7 @@
       },
       {
         "seed": "1g",
-        "at": 68.9,
+        "at": 61.8,
         "listen": [
           "Chords (Pad 3 (polysynth))",
           "Bass (Synth Bass 2)",
@@ -364,9 +362,11 @@
       },
       {
         "seed": "1r",
-        "at": 28,
+        "at": 0,
         "listen": [
-          "Chords (Synth Strings 1)"
+          "Chords (Synth Strings 1)",
+          "Kick",
+          "Hi-Hat"
         ]
       }
     ]

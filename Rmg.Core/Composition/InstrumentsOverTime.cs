@@ -151,7 +151,8 @@ internal static class InstrumentsOverTime
                 var switches = context.TestProbability(SwitchChance.At(sound[index], genre.Chance(GenreChoices.InstrumentSwitches, "sections")));
                 var role = RoleOf(pitched.Role);
                 var pool = PoolOf(pitched.Role.Source(), sound[index], genre);
-                double Weight(RoleInstrument instrument) => pool?.Invoke(instrument) ?? instrument.Weight.At(sound[index]);
+                var weight = pool ?? role?.Own(sound[index]);
+                double Weight(RoleInstrument instrument) => weight!(instrument);
                 // within the family where it keeps to it and the role has another of it, or to any other of the role's
                 var keeps = families(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track).TestProbability(FamilyChance.At(sound[index]));
                 var family = FamilyOf(pitched.InstrumentCode);
@@ -162,10 +163,10 @@ internal static class InstrumentsOverTime
                 var program = switches ? switched : pitched.InstrumentCode;
                 var mode = context.Pick(ByConvention.Weigh(Modes, sound[index]));
                 // a variant the genre's pool of the part leaves out, a slapped bass in a metal band's, never plays, drawn all the
-                // same; one the role never lists, a driven guitar's pinch harmonics, is the player's own
+                // same; one the role never lists, a guitar's muted strings or a violin's pizzicato, is the player's own
                 var drawnVariants = Variants.GetValueOrDefault(program, []);
                 var drawnVariant = drawnVariants.IsEmpty ? program : drawnVariants[context.GenerateInt(0, drawnVariants.Length)];
-                var leftOut = pool is not null && role?.Of(pool).FirstOrDefault(x => x.Program == drawnVariant) is { } listed && !(Weight(listed) > 0);
+                var leftOut = pool is not null && role?.Instruments.FirstOrDefault(x => x.Program == drawnVariant) is { } listed && !(Weight(listed) > 0);
                 var (variants, variant) = leftOut ? (ImmutableArray<int>.Empty, program) : (drawnVariants, drawnVariant);
                 var bars = Enumerable.Range(0, span.BarCount).Select(_ => context.TestProbability(BarChance)).ToArray();
 

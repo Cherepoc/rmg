@@ -154,13 +154,13 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         return new EventTimeline<TDest>(Duration, _items.MapValues(mapFunc));
     }
 
-    /// <summary>The timeline without the events from <paramref name="from" /> up to <paramref name="to" />.</summary>
+    /// <summary>The timeline without the events from <paramref name="from" /> up to <paramref name="to" />, a hair early counting as at either (<see cref="TimelineItem{T}.IsWithin" />).</summary>
     public EventTimeline<T> RemoveSpan(double from, double to)
     {
-        if (to <= from || _items.All(x => x.Position < from || x.Position >= to))
+        if (to <= from || !_items.Any(x => x.IsWithin(from, to)))
             return this;
 
-        return new EventTimeline<T>(Duration, [.._items.Where(x => x.Position < from || x.Position >= to)]);
+        return new EventTimeline<T>(Duration, [.._items.Where(x => !x.IsWithin(from, to))]);
     }
 
     public EventTimeline<T> PhaseShift(double phase)

@@ -70,6 +70,9 @@ public sealed class InstrumentRole
     /// <summary>The instruments a pick weighs: every one where a pool, a genre's, weighs them, the role's own where none does.</summary>
     public ImmutableArray<RoleInstrument> Of(Func<RoleInstrument, double>? pool) => pool is null ? Instruments : Everything;
 
+    /// <summary>The role's own instruments' weights at the sound facet, weighed as a genre's pool of them is (<see cref="ByConvention.Within{T}" />).</summary>
+    public Func<RoleInstrument, double> Own(double sound) => ByConvention.Within(Instruments, sound, x => x.Weight);
+
     /// <summary>
     ///     An instrument of the role, the heavier ones being more likely, by their weights at the song's sound facet or a
     ///     pool's, such as a genre's, other than the ones given, which a pool that keeps nothing else lets play.
@@ -79,7 +82,8 @@ public sealed class InstrumentRole
     public RoleInstrument Pick(IGenerationContext context, double sound, Func<RoleInstrument, double>? pool, params IEnumerable<int> excludedPrograms)
     {
         var excluded = excludedPrograms.ToHashSet();
-        var kept = Of(pool).Select(x => (Instrument: x, Weight: pool?.Invoke(x) ?? x.Weight.At(sound))).Where(x => x.Weight > 0).ToArray();
+        var weight = pool ?? Own(sound);
+        var kept = Of(pool).Select(x => (Instrument: x, Weight: weight(x))).Where(x => x.Weight > 0).ToArray();
         var candidates = kept.Where(x => !excluded.Contains(x.Instrument.Program)).ToArray();
         if (candidates.Length == 0 && pool is not null)
             candidates = kept;

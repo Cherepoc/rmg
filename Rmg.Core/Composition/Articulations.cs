@@ -325,6 +325,6 @@ internal static class Articulations
     }
 
 
-    /// <summary>Whether a part chugs: the riff and its twin, the rhythm part or the bass, on a guitar or a picked bass.</summary>
+    /// <summary>Whether a part chugs: the riff and its twin, the rhythm part, the chords or the bass, on a guitar or a picked bass.</summary>
     internal static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Rhythm or TrackRole.Chords or TrackRole.Bass && InstrumentTraits.Has(program, InstrumentTrait.Chugs);
 }

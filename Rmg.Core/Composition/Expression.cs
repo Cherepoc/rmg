@@ -43,7 +43,7 @@ public enum StrongEffect
     Echo,
     Sweep,
 
-    /// <summary>The pads, the chords and the bass ducking on every beat and swelling back, as a kick four on the floor pumps them.</summary>
+    /// <summary>The pads, the chords and the bass ducking on every beat and swelling back, as a kick four on the floor pumps them, in a bar the kick strikes in.</summary>
     Pump,
 
     /// <summary>A synth's filter closing and opening again and again, in time, as a wobbling bass's.</summary>
@@ -526,7 +526,8 @@ internal static class Expression
         ImmutableArray<Weighted<int>> MayCarry(StrongEffect effect) =>
         [
             ..definitions
-                .Where(x => playing.Contains(x.Key) && x.Value is PitchInstrumentTrack && (effect != StrongEffect.Echo || EchoesFrom(x.Value.Role))
+                // a riff's twin carrying what its riff does, never alone
+                .Where(x => playing.Contains(x.Key) && x.Value is PitchInstrumentTrack && x.Value.Role != TrackRole.RiffTwin && (effect != StrongEffect.Echo || EchoesFrom(x.Value.Role))
                             && (!OnlySuited(effect) || Fits(effect, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode))
                             && !(IsFilter(effect) && carriers.Any(c => IsFilter(c.Key) && c.Value == x.Key)))
                 .Select(x => new Weighted<int>(Fits(effect, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
@@ -605,10 +606,11 @@ internal static class Expression
     )
     {
         var ((songVibrato, songChorus, songSwell, songBends, _, _), carriers) = songEffects;
-        // a gated part holding its chords, which the gate chops in time, where it plays at all
-        if (carriers.TryGetValue(StrongEffect.Gate, out var gated) && notes.TryGetValue(gated, out var gatedNotes))
-            notes = notes.SetItem(gated, GatedChords.Hold(gatedNotes, map, changes, cuts(gated), [..holds.Of(Hold.Stop).Select(x => (x.Start, x.End))],
-                note => InstrumentTraits.Has(ProgramOf(note, ((PitchInstrumentTrack)definitions[gated]).InstrumentCode), InstrumentTrait.Decays)));
+        // a gated part holding its chords, which the gate chops in time, where it plays at all, a riff's twin with it
+        if (carriers.TryGetValue(StrongEffect.Gate, out var gateCarrier))
+            foreach (var gated in notes.Keys.Where(x => drawsAs(x) == gateCarrier).ToArray())
+                notes = notes.SetItem(gated, GatedChords.Hold(notes[gated], map, changes, cuts(gated), [..holds.Of(Hold.Stop).Select(x => (x.Start, x.End))],
+                    note => InstrumentTraits.Has(ProgramOf(note, ((PitchInstrumentTrack)definitions[gated]).InstrumentCode), InstrumentTrait.Decays)));
 
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
         var backbeat = DrumGroups.Snare.Tracks.ToHashSet();
@@ -624,6 +626,11 @@ internal static class Expression
         var songDives = pinchStream.TestProbability(SongDiveChance.At(songSound, genre.Chance(GenreChoices.Effects, "dive")));
         // and whether its guitars pinch, on General MIDI's guitar harmonics, which listening preferred to the driven guitar's squeal
         var songPinches = pinchStream.TestProbability(SongPinchChance.At(songSound, genre.Chance(GenreChoices.Effects, "pinch")));
+
+        // the bars a kick strikes in, which a pump ducks the band in, by where each starts, so that a pad alone or the
+        // band where the drums rest or the kick is out swells free
+        double BarStart(double position) => Math.Round(position - map.PlaceOf(position).Beat, 6);
+        var kicked = DrumGroups.Kick.Tracks.Where(notes.ContainsKey).SelectMany(x => notes[x]).Select(x => BarStart(x.Position)).ToHashSet();
 
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
@@ -660,7 +667,8 @@ internal static class Expression
             var vibrates = part.TestProbability(VibratoChance.At(songSound)) & songVibrato;
             var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : SwellChance).At(songSound)) & songSwell;
             var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
-            bool Carries(StrongEffect effect) => carriers.TryGetValue(effect, out var carrier) && carrier == track;
+            // a riff's twin as its riff
+            bool Carries(StrongEffect effect) => carriers.TryGetValue(effect, out var carrier) && carrier == drawsAs(track);
             var tremoloDepth = 30 + part.GenerateInt(0, 40);
             var sweepDepth = 40 + part.GenerateInt(0, 60);
             var tremolo = Carries(StrongEffect.Tremolo) ? tremoloDepth : 0;
@@ -699,7 +707,7 @@ internal static class Expression
             var filterDepth = 40 + part.GenerateInt(0, 60);
             var wobbleCycle = WobbleCycles[part.GenerateInt(0, WobbleCycles.Length)];
             // the filter this part plays, one at most
-            var filter = carriers.Where(x => IsFilter(x.Key) && x.Value == track).Select(x => x.Key).FirstOrDefault();
+            var filter = carriers.Where(x => IsFilter(x.Key) && x.Value == drawsAs(track)).Select(x => x.Key).FirstOrDefault();
             // and a gate's 16ths, every one or a pattern's, its first always sounding, drawn whatever the song plays
             var patterned = part.TestProbability(GatePatternChance.At(songSound));
             var steps = Enumerable.Range(0, 16).Select(_ => part.TestProbability(GateStepChance)).ToArray();
@@ -815,7 +823,7 @@ internal static class Expression
                     // a tremolo moving a held note alone, as a gate chops a held chord, never a run's
                     if (role != TrackRole.Drum)
                         state = state.With(CompositionStateKinds.Tremolo, note.Value.Duration >= 1 - 1e-9 ? tremolo : 0).With(CompositionStateKinds.AutoPan, sweeps);
-                    if (pumps)
+                    if (pumps && kicked.Contains(BarStart(note.Position)))
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
                     // but a chord cycled at the frame rate, whose cycle an echo would blur
                     if (echoes && (isLine || role == TrackRole.Rhythm) && note.Value.State.GetStateValue(CompositionStateKinds.Cycled) == 0)

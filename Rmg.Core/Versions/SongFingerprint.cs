@@ -8,7 +8,7 @@ namespace Rmg.Core.Versions;
 /// <summary>
 ///     A fingerprint of the songs: a hash of the MIDI files of the corpus's seeds, written with no label, and of a few of
 ///     them played with values supplied (<see cref="Overrides" />) and in every genre given, so that it changes when the
-///     songs do, their notes, tempo or fades, those of a song with a facet at an end, a tempo or a genre given too, and only
+///     songs do, their notes, tempo or fades, those of a song with a facet at an end, a tempo, a mood or a genre given too, and only
 ///     then. A refactor keeps it; the
 ///     deploy bumps the songs' version when it changes (<see cref="SongsVersion" />), and when the page's genres do.
 /// </summary>
@@ -38,7 +38,9 @@ public static class SongFingerprint
         new(DrumSetup: DrumSetup.Percussion),
         new(DrumPieces: ["kick", "conga", "tambourine"]),
         new(Parts: ImmutableDictionary<Songs.TrackRole, bool>.Empty.Add(Songs.TrackRole.Pad, false).Add(Songs.TrackRole.Solo, true)),
-        new(Scale: Scales.Dorian, Meter: Meter.Options[2].Meter)
+        new(Scale: Scales.Dorian, Meter: Meter.Options[2].Meter),
+        new(Darkness: -1, Intensity: 1),
+        new(Darkness: 1, Intensity: -1)
     ];
 
     /// <summary>The fingerprint of the songs of seeds 0 to <paramref name="count" /> - 1 and of <paramref name="genres" />' songs, as 16 hex digits.</summary>

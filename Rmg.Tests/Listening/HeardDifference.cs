@@ -174,9 +174,11 @@ internal sealed class HeardDifference
                 Tracks[name] = new Track(
                     NameOf(track.Role, track.IsPercussionInstrument, track.PitchInstrumentCode),
                     grid,
-                    [..track.PitchBends.Select(x => (song.SecondsAt(x.Position), (x.Value - 8192) / 8191.0 * ExpressionRender.BendRange))],
-                    [..track.Expression.Select(x => (song.SecondsAt(x.Position), x.Value))],
-                    track.Controllers.GroupBy(x => x.Controller).ToDictionary(x => x.Key, x => x.Select(c => (song.SecondsAt(c.Position), (double)c.Value)).ToArray())
+                    // in time, as MIDI plays them, each note having written its own to its end: the bends and controllers in
+                    // the order of their times, the expression a position's latest written at or before it, as Midi merges it
+                    [..track.PitchBends.Select(x => (song.SecondsAt(x.Position), (x.Value - 8192) / 8191.0 * ExpressionRender.BendRange)).OrderBy(x => x.Item1)],
+                    Track.AsWritten([..track.Expression.Select(x => (song.SecondsAt(x.Position), x.Value))]),
+                    track.Controllers.GroupBy(x => x.Controller).ToDictionary(x => x.Key, x => x.Select(c => (song.SecondsAt(c.Position), (double)c.Value)).OrderBy(c => c.Item1).ToArray())
                 );
             }
 
@@ -204,6 +206,22 @@ internal sealed class HeardDifference
         public double ExpressionAt(double at) => ValueAt(Expressions, at, 1);
 
         public double ControllerAt(int controller, double at) => Controllers.TryGetValue(controller, out var values) ? ValueAt(values, at, -1) : -1;
+
+        /// <summary>Values in the order they were written as a timeline: at each second, the latest written of those at or before it.</summary>
+        public static (double Seconds, double Value)[] AsWritten((double Seconds, double Value)[] written)
+        {
+            var (latest, next) = (-1, 0);
+            var byTime = Enumerable.Range(0, written.Length).OrderBy(i => written[i].Seconds).ToArray();
+            var result = new List<(double Seconds, double Value)>();
+            foreach (var at in byTime.Select(i => written[i].Seconds).Distinct())
+            {
+                for (; next < byTime.Length && written[byTime[next]].Seconds <= at; next++)
+                    latest = Math.Max(latest, byTime[next]);
+                result.Add((at, written[latest].Value));
+            }
+
+            return [..result];
+        }
 
         /// <summary>The last value set at or before a second, the one given before any is.</summary>
         private static double ValueAt((double Seconds, double Value)[] values, double at, double before)

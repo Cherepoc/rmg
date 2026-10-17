@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
+using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Songs;
@@ -198,7 +199,7 @@ public readonly record struct Span(int Index, double Start, double End)
     public bool Contains(double position) => Within(position, Start, End);
 
     /// <summary>Whether a position is within [start, end), a hair early counting as at a bound, the one tolerance the stages share.</summary>
-    public static bool Within(double position, double start, double end) => position >= start - 1e-9 && position < end - 1e-9;
+    public static bool Within(double position, double start, double end) => position >= start - TimelineItem.Tolerance && position < end - TimelineItem.Tolerance;
 }
 
 /// <summary>How a song starts: its intro's kind, and how long it plays before the first section, 0 for none.</summary>

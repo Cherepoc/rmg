@@ -111,7 +111,8 @@ public sealed class TrackEventStateTimelineMap<T> : ITimelineLike<TrackEventStat
     /// <summary>
     ///     The map with the events of the given tracks changed, and all state kept. A track the map does not have yet
     ///     starts with no events and default state, and one whose events are all mapped away stays, empty, as a resting
-    ///     part's track does, for the stages that look its state up.
+    ///     part's track does, for the stages that look its state up; but a track empty and of default state is dropped by
+    ///     the next edit that makes the map anew (<see cref="Create" />), so a part's track carries state of its own.
     /// </summary>
     public TrackEventStateTimelineMap<T> MapTrackEvents(IReadOnlyDictionary<int, Func<EventTimeline<T>, EventTimeline<T>>> maps)
     {

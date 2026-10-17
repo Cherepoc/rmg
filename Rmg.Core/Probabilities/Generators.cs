@@ -14,7 +14,10 @@ public static class Generators
 
         var sum = 0.0;
         foreach (var option in options)
-            sum += option.Weight;
+            sum += option.Weight < 0 ? throw new ArgumentException($"A weight of {option.Weight} is below none.", nameof(options)) : option.Weight;
+        // a sum that is no number or past every number, as an overflowing lean gives, picks none, as the thresholds refuse it
+        if (!(sum > 0) || double.IsInfinity(sum))
+            throw new InvalidOperationException($"The options' weights sum to {sum}, which picks none.");
         var probability = context.GenerateDouble();
         var threshold = 0.0;
         var last = -1;

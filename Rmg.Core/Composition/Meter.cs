@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
@@ -148,9 +149,10 @@ public sealed record Meter(ImmutableArray<int> Groups)
     ///     groups, and every node split into the odd number of its steps first and in two after, as a grouped cycle splits
     ///     (<see cref="ResolvedRhythm.SplitOf" />); a node of one 16th stays one on the levels below.
     /// </summary>
-    public ImmutableArray<ImmutableArray<(int Start, int Length)>> Levels => _levels ??= BuildLevels();
+    public ImmutableArray<ImmutableArray<(int Start, int Length)>> Levels => (_levels ??= new(BuildLevels())).Value;
 
-    private ImmutableArray<ImmutableArray<(int Start, int Length)>>? _levels;
+    // the caches, each a reference written whole, as a meter is shared by songs made at once
+    private StrongBox<ImmutableArray<ImmutableArray<(int Start, int Length)>>>? _levels;
 
     private ImmutableArray<ImmutableArray<(int Start, int Length)>> BuildLevels()
     {
@@ -195,22 +197,22 @@ public sealed record Meter(ImmutableArray<int> Groups)
     ///     nearest a beat long, the coarser where two are as near, 4/4's and 3/4's quarters, 6/8's dotted quarters and
     ///     15/16's groups.
     /// </summary>
-    public int Tactus => _tactus ??= Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / 4.0)), 9), x));
+    public int Tactus => (_tactus ??= new(Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / 4.0)), 9), x)))).Value;
 
-    private int? _tactus;
+    private StrongBox<int>? _tactus;
 
     /// <summary>How long the meter's pulse most often is, in 16ths: 4/4's quarter, 6/8's dotted quarter.</summary>
     public int PulseSixteenths => ModeLength(Tactus);
 
     /// <summary>Where the bar's pulses start, in beats: 4/4's four beats, 6/8's two dotted quarters.</summary>
-    public ImmutableArray<double> Pulses => _pulses ??= [..Levels[Tactus].Select(x => x.Start / 4.0)];
+    public ImmutableArray<double> Pulses => (_pulses ??= new([..Levels[Tactus].Select(x => x.Start / 4.0)])).Value;
 
-    private ImmutableArray<double>? _pulses;
+    private StrongBox<ImmutableArray<double>>? _pulses;
 
     /// <summary>Where the bar's backbeat strikes, in beats, half its cycle late (<see cref="GetCycles" />): 4/4's 2 and 4, 3/4's 2 and 3, 6/8's fourth 8th.</summary>
-    public ImmutableArray<double> Backbeats => _backbeats ??= [..Probabilities.DyadicRankTimeline.GenerateSlots(BarDuration, GetCycles(2, 1), 0).Select(x => x.Position)];
+    public ImmutableArray<double> Backbeats => (_backbeats ??= new([..Probabilities.DyadicRankTimeline.GenerateSlots(BarDuration, GetCycles(2, 1), 0).Select(x => x.Position)])).Value;
 
-    private ImmutableArray<double>? _backbeats;
+    private StrongBox<ImmutableArray<double>>? _backbeats;
 
     /// <summary>
     ///     Where the bar's backbeat strikes in a time feel (<see cref="GeneratedSection.TimeFeel" />): its own in the song's

@@ -49,7 +49,7 @@ public sealed class InsertionTest
             var (msb, lsb) = Insertions.TypeOf(insertion.Kind);
             await Assert.That(messages.Any(x => x is [0x40, 0x03, 0x00, var m, var l] && m == msb && l == lsb)).IsTrue();
             var assigned = messages.Where(x => x is [0x40, _, 0x22, 1]).Count();
-            await Assert.That(assigned).IsEqualTo(song.Rendered.Tracks.Count(x => x.Role == insertion.Part));
+            await Assert.That(assigned).IsEqualTo(song.Rendered.Tracks.Count(x => x.Role.Source() == insertion.Part && !x.IsRiser));
         }
 
         // a quarter of Funk's songs at least, 32 of 128, against the mechanism breaking (measured: 51 at offset 0, 55 at a million)

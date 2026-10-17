@@ -63,8 +63,6 @@ internal static class Insertions
     {
         var kind = context.Pick(ByConvention.Weigh(Kinds, sound, genre.Pool<InsertionKind>(GenreChoices.Insertion)));
         ImmutableArray<Weighted<TrackRole>> suited = [..parts.Where(x => Suits(kind, x.Role, x.Program)).Select(x => new Weighted<TrackRole>(1, x.Role))];
-        // drawn whatever the kind where a part suits it, so that the kind changes no draw but its own
-        var part = suited.IsEmpty ? TrackRole.Chords : context.Pick(suited);
-        return kind == InsertionKind.None || suited.IsEmpty ? null : new Insertion(kind, part);
+        return suited.IsEmpty ? null : new Insertion(kind, context.Pick(suited));
     }
 }

@@ -282,7 +282,7 @@ public static class GenreChoices
     public static GenreChoice Tension { get; } = Chances("tension", "Strong beats on a tension",
         [..LinePattern.Tensions.Select(x => (Name(x.Role.ToString()), $"The {TrackRoles.LabelOf(x.Role).ToLowerInvariant()}'s", x.Chance))]);
 
-    /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, and the chords are struck short (<see cref="Articulations.Apply" />).</summary>
+    /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, the chords are struck short, broken chords ring, chords cycle at a chip's frame rate, and a 16th chain's notes are muted (<see cref="Articulations.Apply" />).</summary>
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
         [("legato", "Slurred steps", Articulations.LegatoChance), ("roll", "Rolled piano chords", Articulations.RollChance), ("stabs", "Chords as stabs", Articulations.StabChance),
             ("letRing", "Broken chords let ring", Articulations.LetRingChance), ("frames", "Chords cycled at a chip's frame rate", Articulations.FrameChance),

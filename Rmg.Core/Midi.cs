@@ -95,7 +95,10 @@ public static class Midi
         if (expression.IsEmpty)
             return fade.Select(x => (x.Position, x.Value));
 
-        var fadeAt = (double position) => fade.Count == 0 || fade[0].Position > position + 1e-9 ? 1 : fade.GetEffectiveValueAt(position);
+        // and past the song's end its last, so that a note ringing out after a fade rings at the fade's level, not in full
+        var fadeAt = (double position) => fade.Count == 0 || fade[0].Position > position + 1e-9 ? 1
+            : position >= fade.Duration - 1e-9 ? fade[^1].Value
+            : fade.GetEffectiveValueAt(position);
         // the expression at a position: its latest step, in its order, of those at or before it, swept in the positions'
         // order rather than looked for at each
         var byPosition = Enumerable.Range(0, expression.Length).OrderBy(i => expression[i].Position).ToArray();
@@ -485,10 +488,10 @@ public static class Midi
         var ticksPerQuarterNoteBytes = IntToBytesFixed(TicksPerQuarterNote, 2);
         stream.Write(ticksPerQuarterNoteBytes, 0, ticksPerQuarterNoteBytes.Length);
 
-        // the insertion effect, and every channel its part plays on through it, its second take's too, but its riser's, a
-        // sweep of its own
+        // the insertion effect, and every channel its part plays on through it, its second take's and a riff's twin's too,
+        // but its riser's, a sweep of its own
         var insertion = song.Insertion is { } effect
-            ? (effect.Kind, song.Tracks.ToChannels().Zip(song.Tracks).Where(x => x.Second.Role == effect.Part && !x.Second.IsRiser).Select(x => x.First).ToImmutableArray())
+            ? (effect.Kind, song.Tracks.ToChannels().Zip(song.Tracks).Where(x => x.Second.Role.Source() == effect.Part && !x.Second.IsRiser).Select(x => x.First).ToImmutableArray())
             : ((InsertionKind, ImmutableArray<byte>)?)null;
         WriteSystemTrack(song.TempoTimeline, song.Meters, song.Room, insertion, song.Echo, song.EchoOnce, song.Harmony, label, songDurationDelta, stream);
 
