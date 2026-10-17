@@ -76,6 +76,39 @@ public sealed class GivenTempoKeyMeterTest
         }
     }
 
+    /// <summary>A mood given as the song drew it leaves the song as its seed made it, and one given at its ends is the song's as given.</summary>
+    [Test]
+    public async Task AGivenMood_IsTheSongs_AndGivenAsDrawn_LeavesTheSongAsItsSeedMadeIt()
+    {
+        foreach (var seed in Enumerable.Range(0, 4))
+        {
+            var drawn = TestCorpus.Get(seed);
+            var mood = (Mood)drawn.Trace.Single(x => x.Point == TracePoints.Mood).Value!;
+            var given = TestCorpus.Get(seed, new SongOverrides(Darkness: mood.Darkness, Intensity: mood.Intensity));
+            await Assert.That(Write(given)).IsEquivalentTo(Write(drawn), CollectionOrdering.Matching);
+
+            var ends = TestCorpus.Get(seed, new SongOverrides(Darkness: -1, Intensity: 1));
+            await Assert.That((Mood)ends.Trace.Single(x => x.Point == TracePoints.Mood).Value!).IsEqualTo(new Mood(-1, 1));
+        }
+    }
+
+    /// <summary>A drawn mood lies within its genre's span, the songs' own where it has none.</summary>
+    [Test]
+    public async Task ADrawnMood_LiesWithinItsGenresSpan()
+    {
+        foreach (var (id, genre) in new[] { ("songs", (Genre?)null), ("darkJazz", Genres.GenrePresets.Genre("darkJazz")), ("trance", Genres.GenrePresets.Genre("trance")) })
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            var mood = (Mood)song.Trace.Single(x => x.Point == TracePoints.Mood).Value!;
+            var at = ((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!).Base;
+            var (darkness, intensity) = genre is null
+                ? (Mood.SongsSpan, Mood.SongsSpan)
+                : (genre.Range(GenreChoices.Darkness, at) ?? Mood.SongsSpan, genre.Range(GenreChoices.Intensity, at) ?? Mood.SongsSpan);
+            await Assert.That(mood.Darkness).IsBetween(Mood.OfAmount(darkness.From) - 1e-9, Mood.OfAmount(darkness.To) + 1e-9).Because($"{id} seed {song.Seed}");
+            await Assert.That(mood.Intensity).IsBetween(Mood.OfAmount(intensity.From) - 1e-9, Mood.OfAmount(intensity.To) + 1e-9).Because($"{id} seed {song.Seed}");
+        }
+    }
+
     [Test]
     public async Task TheTempos_RunFrom90ToAbout175BeatsAMinute()
     {

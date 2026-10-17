@@ -60,7 +60,7 @@ internal static class TracePoints
     /// <summary>A line part's notes leaning on a tension, landing on one, and in all, as it is placed (a tuple of three <c>int</c>s).</summary>
     public const string LineDevices = "Line devices";
 
-    /// <summary>A section whose counter-melody imitates the melody, how many bars later (an <c>int</c>, <see cref="Composition.LineDoubling.ImitationChance" />).</summary>
+    /// <summary>An appearance whose counter-melody imitates a line: its place, the line's part and how many bars later (an <c>(int, TrackRole, int)</c>, <see cref="Composition.LineDoubling.ImitationChance" />).</summary>
     public const string Imitation = "Imitation";
 
     /// <summary>The part the song opens on alone, none where it opens otherwise (a <see cref="Songs.TrackRole" />?).</summary>

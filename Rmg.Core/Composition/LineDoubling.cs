@@ -194,7 +194,7 @@ internal static class LineDoubling
                 if (bars > 0 && doubling.Contains((targetTrack, index)))
                     continue;
                 if (bars > 0)
-                    StateTrace.RecordSection(TracePoints.Imitation, targetTrack, span.SectionId, $"{source} {bars} bar later", bars);
+                    StateTrace.RecordSection(TracePoints.Imitation, targetTrack, span.SectionId, $"{source} {bars} bar later", (index, source, bars));
                 else
                     StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));
                 doubling.Add((sourceTrack, index));

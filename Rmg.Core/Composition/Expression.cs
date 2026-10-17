@@ -123,7 +123,7 @@ internal static class Expression
     private static readonly IStateKind[] SteadyKinds =
     [
         CompositionStateKinds.Reverb, CompositionStateKinds.Chorus, CompositionStateKinds.Tone, CompositionStateKinds.Wow, CompositionStateKinds.Detune,
-        CompositionStateKinds.AutoPan, CompositionStateKinds.Tremolo, CompositionStateKinds.Echo, CompositionStateKinds.Filter, CompositionStateKinds.FilterCycle,
+        CompositionStateKinds.AutoPan, CompositionStateKinds.Tremolo, CompositionStateKinds.Echo, CompositionStateKinds.EchoOnce, CompositionStateKinds.Filter, CompositionStateKinds.FilterCycle,
         CompositionStateKinds.FilterDepth
     ];
 

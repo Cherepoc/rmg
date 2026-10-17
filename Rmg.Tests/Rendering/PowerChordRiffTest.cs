@@ -31,9 +31,9 @@ public sealed class PowerChordRiffTest
 
         Console.WriteLine($"the riff's fifth over {fifths} of {notes} notes in {sections} sections in power chords");
         await Assert.That(sections).IsGreaterThan(5);
-        // but where a section's landing stacks the band's chord (LineChords.Riff), or the range has no room above the note,
-        // as many as the songs' riffs sit high in their ranges: 79% to 86% over these songs
-        await Assert.That(fifths / (double)notes).IsGreaterThan(0.6);
+        // but where a section's landing stacks the band's chord (LineChords.Riff), a note at the top of its range taking its
+        // fifth an octave down: 98% over these songs
+        await Assert.That(fifths / (double)notes).IsGreaterThan(0.9);
         await Assert.That(twinNotes).IsEqualTo(0);
     }
 

@@ -38,12 +38,24 @@ public sealed class EnsembleHitsTest
         {
             bars++;
             await Assert.That(kick.Length).IsGreaterThan(0).Because($"seed {song.Seed} at {start}");
+            // its section's last bar, before another section
+            var span = song.Map.Sections.First(x => x.IsWithin(start));
+            await Assert.That(start).IsEqualTo(span.Bar(span.BarCount - 1).Start).Within(1e-6).Because($"seed {song.Seed} at {start}");
+            await Assert.That(song.Map.Sections[^1]).IsNotEqualTo(span).Because($"seed {song.Seed} at {start}");
             foreach (var role in new[] { TrackRole.Chords, TrackRole.Pad, TrackRole.Riff, TrackRole.RiffTwin, TrackRole.Rhythm }.Where(x => !song.Absent.Contains(x)))
             foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Track(role))?.Where(n => n.Position >= start - 1e-9 && n.Position < (start + end) / 2 - 1e-9) ?? [])
                 await Assert.That(kick.Any(k => Math.Abs(k - note.Position) < 1e-6)).IsTrue().Because($"seed {song.Seed}, its {role} at {note.Position} in the bar struck at {start}");
         }
 
         await Assert.That(bars).IsGreaterThan(3);
+    }
+
+    /// <summary>The plainest of the songs strike no bar of hits, the songs' chance of them none at the plain end.</summary>
+    [Test]
+    public async Task ThePlainestSongs_StrikeNoBar()
+    {
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+            await Assert.That(Struck(song).Any()).IsFalse().Because($"seed {song.Seed}");
     }
 
     [Test]

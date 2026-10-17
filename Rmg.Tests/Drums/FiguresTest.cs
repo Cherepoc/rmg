@@ -67,6 +67,51 @@ public sealed class FiguresTest
             .Where(x => Math.Abs(Math.IEEERemainder(x.Bar + span.Meter.BarDuration - span.Start, span.Meter.PhraseDuration)) > 1e-6 && !OnLine(x.Bar + span.Meter.BarDuration)));
     }
 
+    /// <summary>Every figure of fixed onsets, by its player and its name, but the pair of claves whose sides a test of their own checks.</summary>
+    public static IEnumerable<(FigurePlayer Player, string Name)> Fixed() =>
+        Figures.All.Where(x => x.Follows is null && x.Player != FigurePlayer.Claves).Select(x => (x.Player, x.Name));
+
+    /// <summary>
+    ///     A calibration: a figure of fixed onsets laid in a section, its player's hits there on the figure's 16ths, most
+    ///     of them, but where a fill takes the drums or a line walks (measured over 32, every figure 61% to 100%, the
+    ///     waltz's bass, the chick on 2 and 4 and the bossa nova's clave the fewest, walking or filling between).
+    /// </summary>
+    [Test]
+    [MethodDataSource(nameof(Fixed))]
+    public async Task AFigure_IsPlayedOnItsSixteenths(FigurePlayer player, string name)
+    {
+        var figure = Figures.All.Single(x => x.Player == player && x.Name == name);
+        var preset = player switch { FigurePlayer.Riff => "metal", _ => "rock" };
+        var genre = GenrePresets.With(preset, GenreChoices.Figures[player], (name, 1));
+        genre = genre with
+        {
+            Choices = genre.Choices.SetItem(GenreChoices.Meter.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(figure.In == Meter.ThreeFour ? "3/4" : "4/4", new(1, 1, 1)))
+        };
+        var onsets = figure.Onsets.Select(x => x % 16).ToHashSet();
+        var (hits, on) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            var tracks = player switch
+            {
+                FigurePlayer.Ground => DrumGroups.Kick.Tracks.ToHashSet(),
+                FigurePlayer.Backbeat => DrumGroups.Snare.Tracks.ToHashSet(),
+                FigurePlayer.Time => DrumGroups.Timekeepers.Tracks.ToHashSet(),
+                FigurePlayer.Riff => [song.Song.Track(TrackRole.Riff)],
+                FigurePlayer.Chords => [song.Song.Track(TrackRole.Chords)],
+                _ => [song.Song.Track(TrackRole.Bass)]
+            };
+            foreach (var (_, bar, position) in Hits(song, tracks, Playing(song, player, name)))
+            {
+                hits++;
+                on += onsets.Contains((int)Math.Round((position - bar) * 4) % figure.Sixteenths % 16) ? 1 : 0;
+            }
+        }
+
+        Console.WriteLine($"{player} {name}: {on} of {hits} hits on its 16ths, {(hits == 0 ? 0 : on / (double)hits):P0}");
+        await Assert.That(hits).IsGreaterThan(0);
+        await Assert.That(on / (double)hits).IsGreaterThan(0.5);
+    }
+
     /// <summary>
     ///     A calibration: the kick follows the riff's pattern before the lines are placed, which leave a few of the riff's
     ///     notes out after it, so that nearly all its hits are on the riff's notes as they end up.

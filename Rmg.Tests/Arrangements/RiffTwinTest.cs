@@ -46,6 +46,44 @@ public sealed class RiffTwinTest
         await Assert.That(twins).IsGreaterThan(3);
     }
 
+    /// <summary>
+    ///     A twin plays only in the sections its twin lead draws, and there, where the genre tunes its riff down, the riff
+    ///     and its twin play as many octaves up as it does (<see cref="CompositionStateKinds.LineRaise" />).
+    /// </summary>
+    [Test]
+    public async Task ATwin_PlaysOnlyWhereItsSectionTwinLeads_ItsRiffUpAsFarAsTheGenreTunesItDown()
+    {
+        var genre = Rmg.Tests.Genres.GenrePresets.Genre("metal");
+        var raise = Math.Max(0, -Rmg.Core.Composition.Registers.OctavesOf(genre, TrackRole.Riff));
+        var (leading, raised) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre,
+                     Parts: ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true).Add(TrackRole.RiffTwin, true)))))
+        {
+            var leads = song.Trace.Where(x => x.Point == TracePoints.TwinLead).ToDictionary(x => x.Section, x => (bool)x.Value!);
+            var twin = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.RiffTwin))?.ToArray() ?? [];
+            var riff = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff))?.ToArray() ?? [];
+            foreach (var play in song.Map.Plays)
+            {
+                var notes = twin.Where(x => x.IsWithin(play.Span.Start, play.Span.End)).ToArray();
+                await Assert.That(notes.Length == 0 || leads[play.Span.SectionId]).IsTrue().Because($"seed {song.Seed} at {play.Span.Start}");
+                if (notes.Length == 0)
+                    continue;
+                leading++;
+                // the riff's notes the twin harmonises, up with it
+                var harmonised = notes.Select(x => Math.Round(x.Position, 6)).ToHashSet();
+                foreach (var note in riff.Where(x => harmonised.Contains(Math.Round(x.Position, 6)) && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
+                {
+                    await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.LineRaise)).IsEqualTo(raise).Because($"seed {song.Seed} at {note.Position}");
+                    raised++;
+                }
+            }
+        }
+
+        Console.WriteLine($"{leading} appearances twin-led, {raised} riff notes under a twin, raised {raise}");
+        await Assert.That(leading).IsGreaterThan(5);
+        await Assert.That(raised).IsGreaterThan(0);
+    }
+
     private static SongOverrides Melody(double melody, bool? twin) => new(
         Facets: TestCorpus.FacetsOf((Facet.Melody, melody)),
         Parts: twin is null

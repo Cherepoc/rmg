@@ -20,8 +20,9 @@ public sealed class ImitationTest
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Imitation))
         {
             sections++;
-            var span = song.Map.Sections.First(x => x.SectionId == entry.Section);
-            var bar = (int)entry.Value! * span.Meter.BarDuration;
+            var (index, _, bars) = ((int, TrackRole, int))entry.Value!;
+            var span = song.Map.Sections[index];
+            var bar = bars * span.Meter.BarDuration;
             var melody = song.Song.Notes![song.Track(TrackRole.Melody)].Where(x => x.Position >= span.Start && x.Position < span.End).Select(x => Math.Round(x.Position, 3)).ToHashSet();
             foreach (var note in song.Song.Notes![song.Track(TrackRole.CounterMelody)].Where(x => x.Position >= span.Start + bar && x.Position < span.End - 1e-9
                                                                                                 && x.Value.State.GetStateValue(CompositionStateKinds.Doubled) > 0))

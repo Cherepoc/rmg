@@ -35,4 +35,25 @@ public sealed class DeadNoteTest
         await Assert.That(dead).IsGreaterThan(50);
         await Assert.That(solo).IsGreaterThan(0);
     }
+
+    /// <summary>The songs' own dead notes, none, leave a band that chugs muting no note but a chug's, in a section that chugs: Metal's without its articulations.</summary>
+    [Test]
+    public async Task TheSongsOwn_MuteOnlyAChugsNotes()
+    {
+        var chugged = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without("metal", GenreChoices.Articulation.Name)))))
+        {
+            var chugs = song.Trace.Where(x => x.Point == TracePoints.Chugs).ToDictionary(x => x.Section, x => (bool)x.Value!);
+            foreach (var role in new[] { TrackRole.Bass, TrackRole.Riff, TrackRole.RiffTwin, TrackRole.Rhythm, TrackRole.Chords, TrackRole.Solo })
+            foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Track(role))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0) ?? [])
+            {
+                chugged++;
+                var play = song.Map.PlayingAt(note.Position);
+                await Assert.That(play is { } at && chugs.GetValueOrDefault(at.Span.SectionId)).IsTrue().Because($"seed {song.Seed}, {role} at {note.Position}");
+            }
+        }
+
+        Console.WriteLine($"{chugged} muted notes in 32 Metal songs");
+        await Assert.That(chugged).IsGreaterThan(0);
+    }
 }

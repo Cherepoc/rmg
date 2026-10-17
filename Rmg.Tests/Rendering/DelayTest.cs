@@ -47,6 +47,27 @@ public sealed class DelayTest
         await Assert.That(echoing).IsGreaterThan(5);
     }
 
+    /// <summary>A cascade's echoing parts sent to the delay in full, its echoes repeating once, and an ordinary echo's at its send, dying away, an intro's and an ending's notes as their sources'.</summary>
+    [Test]
+    [Arguments(EchoKind.Cascade, ExpressionRender.CascadeSend, true)]
+    [Arguments(EchoKind.DottedEighth, ExpressionRender.DelaySend, false)]
+    public async Task AnEcho_IsSentAsItsKindIs(EchoKind kind, int send, bool once)
+    {
+        var dub = GenrePresets.With("dub", GenreChoices.Echo, (GenreChoices.Name(kind.ToString()), 1));
+        var echoing = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: dub))))
+        {
+            if (song.Rendered.Echo is null)
+                continue;
+            echoing++;
+            await Assert.That(song.Rendered.EchoOnce).IsEqualTo(once).Because($"seed {song.Seed}");
+            var sends = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument).SelectMany(x => x.Controllers).Where(c => c.Controller == ExpressionRender.DelayController && c.Value > 0).Select(c => c.Value).Distinct().ToArray();
+            await Assert.That(sends).IsEquivalentTo(new[] { send }).Because($"seed {song.Seed}");
+        }
+
+        await Assert.That(echoing).IsGreaterThan(3);
+    }
+
     [Test]
     [Arguments(0.5, 5)]
     [Arguments(2.0, 20)]

@@ -71,6 +71,32 @@ public sealed class FrameArpeggioTest
         await Assert.That(checkedNotes).IsGreaterThan(1000);
     }
 
+    /// <summary>A broken chord's note on an instrument that holds its sound, a saw's or a pad's, ends where its part's next note starts, in the songs and in Synthwave's and Trance's, so that broken notes never smear into a cluster.</summary>
+    [Test]
+    [Arguments(null)]
+    [Arguments("synthwave")]
+    [Arguments("trance")]
+    public async Task ABrokenChordsNote_OnAHeldSound_EndsWhereItsPartsNextStarts(string? genre)
+    {
+        var broken = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
+        foreach (var (track, definition) in song.Song.TrackDefinitions.Where(x => x.Value is PitchInstrumentTrack && song.Song.Notes!.ContainsKey(x.Key)))
+        {
+            var notes = song.Song.Notes![track].ToArray();
+            for (var i = 0; i + 1 < notes.Length; i++)
+            {
+                var note = notes[i];
+                if (note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 || note.Value.Pitches.Length != 1
+                    || InstrumentTraits.Rings(InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)definition).InstrumentCode)))
+                    continue;
+                broken++;
+                await Assert.That(note.Position + note.Value.Duration).IsLessThanOrEqualTo(notes[i + 1].Position + 1e-6).Because($"{genre} seed {song.Seed}, track {track} at {note.Position}");
+            }
+        }
+
+        await Assert.That(broken).IsGreaterThan(0);
+    }
+
     /// <summary>A chord's notes spread before they are cycled, none a tone or less above the one below, every note kept in its pitch class: a sus2 as root, fifth and ninth.</summary>
     [Test]
     [Arguments(new[] { 60, 62, 67 }, new[] { 60, 67, 74 })]

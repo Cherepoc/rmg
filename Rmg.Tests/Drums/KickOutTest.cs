@@ -28,4 +28,26 @@ public sealed class KickOutTest
         Console.WriteLine($"{spans} kick-outs");
         await Assert.That(spans).IsGreaterThan(20);
     }
+
+    /// <summary>
+    ///     The kick out over a kick-out, but in its last beat, where the drums may land early, a rule, and the rest of the
+    ///     groove playing on into the downbeat, a calibration: a timekeeper or a snare striking in nearly every span
+    ///     (measured over 32: 100%).
+    /// </summary>
+    [Test]
+    public async Task AKickOut_LeavesTheKickOut_TheRestOfTheGroovePlayingOn()
+    {
+        var (kicks, others) = (DrumGroups.Kick.Tracks.ToHashSet(), DrumGroups.Timekeepers.Tracks.Concat(DrumGroups.Snare.Tracks).ToHashSet());
+        var (spans, playing) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.With("techno", GenreChoices.KickOut, ("lines", 1))))))
+        foreach (var (from, to) in (ImmutableArray<(double From, double To)>)song.Trace.Single(x => x.Point == TracePoints.KickOuts).Value!)
+        {
+            spans++;
+            await Assert.That(song.Song.Notes!.Where(x => kicks.Contains(x.Key)).SelectMany(x => x.Value).Any(x => x.IsWithin(from, to - 1))).IsFalse().Because($"seed {song.Seed} at {from}-{to}");
+            playing += song.Song.Notes!.Where(x => others.Contains(x.Key)).SelectMany(x => x.Value).Any(x => x.IsWithin(from, to)) ? 1 : 0;
+        }
+
+        Console.WriteLine($"{spans} kick-outs, the groove playing on in {playing}");
+        await Assert.That(playing / (double)spans).IsGreaterThan(0.8);
+    }
 }
