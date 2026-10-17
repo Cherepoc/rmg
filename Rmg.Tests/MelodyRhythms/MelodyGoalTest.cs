@@ -23,7 +23,8 @@ public sealed class MelodyGoalTest
             var pitch = note.Value.Pitches[0] % 12;
             ends++;
             roots += pitch == ((chord.GetPitch(0) % 12) + 12) % 12 ? 1 : 0;
-            thirds += pitch == ((chord.GetPitch(2) % 12) + 12) % 12 ? 1 : 0;
+            // its third where the chord has one, never a sus chord's second or fourth
+            thirds += pitch == ((chord.GetPitch(2) % 12) + 12) % 12 && classes.Contains(pitch) ? 1 : 0;
             tones += classes.Contains(pitch) ? 1 : 0;
         }
 

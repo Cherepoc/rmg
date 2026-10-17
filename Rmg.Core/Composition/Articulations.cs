@@ -151,7 +151,10 @@ internal static class Articulations
                 if (part.Role == TrackRole.Bass && ownLine && !doubled && !cycle.IsEmpty && strongPlaces[i] > 0 && cycle[strongPlaces[i] % cycle.Length] is var step and not 0
                     && pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.BassPedal) == 0)
                 {
-                    var target = Realizer.GetChord(note.Value.State).Chord.GetPitch(step);
+                    // its sixth and seventh a boogie's over the root, the major sixth and the flat seventh, whatever the
+                    // chord's scale has there, and the chord's own root, third and fifth
+                    var chord = Realizer.GetChord(note.Value.State).Chord;
+                    var target = step switch { 5 => chord.GetPitch(0) + 9, 6 => chord.GetPitch(0) + 10, _ => chord.GetPitch(step) };
                     var last = played[Array.LastIndexOf(strongPlaces, strongPlaces[i] - 1, i)].Min();
                     var under = last - (last - target).Mod(12);
                     var nearest = last - under <= under + 12 - last ? under : under + 12;

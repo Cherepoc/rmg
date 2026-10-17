@@ -9,6 +9,20 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class SoloTest
 {
+    /// <summary>
+    ///     The chord's own notes at a solo's note, as the chords part plays its shape there, a sus or power chord's without
+    ///     the third; the triad's of the note's chord where the band carries no shape.
+    /// </summary>
+    private static HashSet<int> ChordTones(CorpusSong song, double position, Rmg.Core.Events.StateMap state)
+    {
+        var band = song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Chords))?.LastOrDefault(x => x.Position <= position + 1e-9);
+        if (band is { Value: { } chordNote } && !chordNote.State.GetStateValue(Rmg.Core.Events.StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty
+            && chordNote.State.GetStateValue(Rmg.Core.Events.StateKinds.ChordChange) == state.GetStateValue(Rmg.Core.Events.StateKinds.ChordChange))
+            return [..Realizer.GetChordNotes(chordNote.State).Classes];
+        var (_, _, chord) = Realizer.GetChord(state);
+        return [..new[] { 0, 2, 4 }.Select(x => chord.GetPitch(x).Mod(12))];
+    }
+
     private static readonly TrackRole[] Band = [TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Riff, TrackRole.Drum];
 
     [Test]
@@ -169,8 +183,7 @@ public sealed class SoloTest
                 if (gesture == SoloGesture.Held && played.Length > 0)
                 {
                     held++;
-                    var (offsets, _, chord) = Realizer.GetChord(played[0].Value.State);
-                    var tones = new[] { 0, 2, 4 }.Select(x => chord.GetPitch(x).Mod(12)).ToHashSet();
+                    var tones = ChordTones(song, played[0].Position, played[0].Value.State);
                     if (tones.Contains(played[0].Value.Pitches[0].Mod(12)))
                         onChord++;
                 }
@@ -489,8 +502,7 @@ public sealed class SoloTest
             foreach (var note in song.Song.Notes![soloist].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.SoloRelease) == 1 && x.Position >= span.Start && x.Position < span.End))
             {
                 releases++;
-                var (_, _, chord) = Realizer.GetChord(note.Value.State);
-                if (new[] { 0, 2, 4 }.Select(x => chord.GetPitch(x).Mod(12)).Contains(note.Value.Pitches[0].Mod(12)))
+                if (ChordTones(song, note.Position, note.Value.State).Contains(note.Value.Pitches[0].Mod(12)))
                     onChord++;
             }
         }

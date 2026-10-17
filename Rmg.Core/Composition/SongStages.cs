@@ -223,7 +223,7 @@ internal static class SongStages
         draft with
         {
             Timeline = draft.Timeline.MergeStateTimelineMap(Reharmonisation.Apply(song.Stream(SongStream.Reharmonisation), song.Facets[Facet.Progression], song.Genre, song.Form.Map,
-                draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change))))
+                draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change)), song.SectionIds.Count - 1 + (song.Repeats ? 1 : 0)))
         };
 
     /// <summary>

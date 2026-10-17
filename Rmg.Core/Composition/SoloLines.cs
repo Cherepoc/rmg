@@ -157,7 +157,7 @@ internal static class SoloLines
     /// <summary>How much louder a cell's first note is, so that its grouping is heard.</summary>
     public const double CellAccent = 0.1;
 
-    /// <summary>The steps above a chord's root its notes are: the root, the third and the fifth.</summary>
+    /// <summary>The steps above a chord's root a triad's notes are, the root, the third and the fifth, where no part carries the chord's shape.</summary>
     private static readonly int[] ChordSteps = [0, 2, 4];
 
     /// <summary>A solo's line, and every segment's intensity and gesture, by its start.</summary>
@@ -206,7 +206,19 @@ internal static class SoloLines
         }
 
         int[] ScaleNotes(double position) => Notes(position, Enumerable.Range(-4 * Scales.StepCount, 12 * Scales.StepCount));
-        int[] ChordNotes(double position) => Notes(position, Enumerable.Range(-4, 12).SelectMany(octave => ChordSteps.Select(x => x + octave * Scales.StepCount)));
+        // the chord's own notes, as the band's shape has them, a sus or a power chord's without the third it leaves out; the
+        // triad's where no part carries a shape there
+        var chordChanges = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        int[] ShapeSteps(double position)
+        {
+            // the band's note struck under the chord there, read as a note there reads its state
+            var since = chordChanges.LastOrDefault(x => x <= position + 1e-9);
+            if (band.LastOrDefault(x => x.Position <= position + 1e-9) is not { Value: { } struck } note || note.Position < since - 1e-9)
+                return ChordSteps;
+            var state = Realizer.StateAt(struck, position, track, definition, common);
+            return state.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty ? ChordSteps : [..Realizer.GetChordNotes(state).Steps];
+        }
+        int[] ChordNotes(double position) => Notes(position, Enumerable.Range(-4, 12).SelectMany(octave => ShapeSteps(position).Select(x => x + octave * Scales.StepCount)));
         int Nearest(int[] notes, int pitch) => notes.Length == 0 ? Math.Clamp(pitch, bottom, top) : notes.MinBy(x => Math.Abs(x - pitch));
 
         // the louder the more intense, around none, as the caller sets how loud the line plays as heard (Solos.Lift)

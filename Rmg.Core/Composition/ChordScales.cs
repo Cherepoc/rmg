@@ -131,7 +131,8 @@ public static class ChordScales
     /// <param name="cadenceRaised">The step the cadence raises, none for a cadence that keeps the scale.</param>
     /// <param name="ownContext">The sequence a chord's own scale is drawn from, apart from the rest, so that a song that plays none draws as it did.</param>
     /// <param name="mediantContext">The sequence a chromatic mediant is drawn from, apart from the rest.</param>
-    internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, IGenerationContext ownContext, IGenerationContext mediantContext, Scale scale, int home,
+    internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, IGenerationContext ownContext, IGenerationContext mediantContext,
+        IGenerationContext minorMediantContext, Scale scale, int home,
         ImmutableArray<int> progression, int? cadenceRaised, bool dominants, double unconventionality, Genre genre)
     {
         var mediant = Mediant.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "mediant"));
@@ -172,8 +173,8 @@ public static class ChordScales
                 var ownsScale = ownContext.TestProbability(own);
                 var ownScale = OwnScale(root);
                 var mediates = mediantContext.TestProbability(mediant);
-                // drawn only where a genre gives it a chance, so that the songs draw as they did
-                var mediatesMinor = minorMediant > 0 && mediantContext.TestProbability(minorMediant);
+                // from a sequence of its own, drawn for every chord, so that its chance at 0 moves no other draw
+                var mediatesMinor = minorMediantContext.TestProbability(minorMediant);
                 var applies = context.TestProbability(applied);
                 var borrows = context.TestProbability(borrowing);
                 if (Mod(root) == 0)

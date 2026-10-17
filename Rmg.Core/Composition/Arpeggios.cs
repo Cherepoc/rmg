@@ -209,10 +209,12 @@ internal static class Arpeggios
         if (count == 1 || pattern == ArpeggioPattern.None)
             return notes[0];
 
-        // the root's lowest note in the voicing, the lowest note where it has none, and the fifth above it, the middle note
-        // where it has none
+        // the root's lowest note in the voicing, the lowest note where it has none, and its fifth, the nearest above it or,
+        // in an inversion that puts it lower, below it, another note than the root's where the chord has none
         var low = Array.FindIndex(notes, x => (x - root).Mod(12) == 0) is var r and >= 0 ? r : 0;
-        var fifth = Array.FindIndex(notes, x => x > notes[low] && (x - notes[low]).Mod(12) == 7) is var f and >= 0 ? f : count / 2;
+        var fifth = Array.FindIndex(notes, x => x > notes[low] && (x - notes[low]).Mod(12) == 7) is var above and >= 0 ? above
+            : Array.FindLastIndex(notes, x => x < notes[low] && (x - notes[low]).Mod(12) == 7) is var below and >= 0 ? below
+            : count / 2 != low ? count / 2 : (low + 1) % count;
         int[] others = [..Enumerable.Range(0, count).Where(x => x != low)];
 
         var cycle = Math.Max(1, 2 * count - 2);

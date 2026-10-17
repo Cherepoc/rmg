@@ -31,11 +31,12 @@ internal static class Reharmonisation
     ///     again.
     /// </summary>
     /// <param name="moved">Where a key change moves a chord or leads into one, which keeps it.</param>
-    public static StateTimelineMap Apply(IGenerationContext context, double unconventionality, Genre genre, SongMap map, StateTimelineMap common, IEnumerable<double> moved)
+    /// <param name="last">The last appearance played in full, by its place: the last section, or its drawn repeat, not the passes a fade or a strip adds after it.</param>
+    public static StateTimelineMap Apply(IGenerationContext context, double unconventionality, Genre genre, SongMap map, StateTimelineMap common, IEnumerable<double> moved, int last)
     {
         var reharmonises = context.TestProbability(Chance.At(unconventionality, genre.Chance(GenreChoices.HarmonyDevices, "reharmonised")));
         var sections = map.Sections;
-        var later = Enumerable.Range(0, sections.Length).LastOrDefault(i => sections.Take(i).Any(x => x.SectionId == sections[i].SectionId), -1);
+        var later = Enumerable.Range(0, last + 1).LastOrDefault(i => sections.Take(i).Any(x => x.SectionId == sections[i].SectionId), -1);
         var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         // and a chord moved by semitones, and the chord it slides into, kept, and a chord in a scale of its own, an applied
         // dominant's, a borrowed chord's or the cadence's raised fifth, whose colour a substitute would lose

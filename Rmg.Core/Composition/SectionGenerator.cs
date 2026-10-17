@@ -360,11 +360,13 @@ internal sealed class SectionGenerator
         // a section of dominants, a genre's, from a sequence of its own, so that a song in none draws as it did
         var dominants = Stream(sectionId, SectionStream.DominantChords)
             .TestProbability(ChordScales.Dominant.At(facets[Facet.Progression], _genre.Chance(GenreChoices.ChordScales, "dominant")));
-        var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), Stream(sectionId, SectionStream.ChordOwnScales), Stream(sectionId, SectionStream.Mediants), scale, home, progression, raisedStep,
+        var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), Stream(sectionId, SectionStream.ChordOwnScales), Stream(sectionId, SectionStream.Mediants),
+            Stream(sectionId, SectionStream.MinorMediants), scale, home, progression, raisedStep,
             dominants, facets[Facet.Progression], _genre);
-        // the home held over the first two chords now and then, a slower start, the rest changing as they were, from a
-        // sequence of its own
-        if (progression.Length >= 4 && Stream(sectionId, SectionStream.HeldHome).TestProbability(Progressions.HeldHome.At(facets[Facet.Progression])))
+        // the home held over the first two bars now and then, the first two chords where each lasts a bar or less, a slower
+        // start, the rest changing as they were, from a sequence of its own; drawn all the same where chords last longer,
+        // whose second would hold the home over the question phrase's end
+        if (Stream(sectionId, SectionStream.HeldHome).TestProbability(Progressions.HeldHome.At(facets[Facet.Progression])) && progression.Length >= 4 && harmonicRhythm.Bars <= 1)
             (progression, chordScales) = (progression.SetItem(1, progression[0]), chordScales.SetItem(1, chordScales[0]));
         // passing chords now and then, the next chord's dominant, by the progression facet, the energy and a genre's, from a
         // sequence of their own
@@ -1136,5 +1138,6 @@ internal enum SectionStream
     Boogie = 64,
     RiffHook = 65,
     TwinLead = 66,
-    SungEighths = 67
+    SungEighths = 67,
+    MinorMediants = 68
 }
