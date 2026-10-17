@@ -76,6 +76,10 @@ internal static class BassLeadingLayers
         new(0.1, ChordApproach.Anticipation)
     ];
 
+    /// <summary>The approaches' weights at the ends: the semitone above, the line's least settled way in, leaning unconventional, never in the plainest song, the others as plain as they are middling.</summary>
+    public static ImmutableArray<(ChordApproach Approach, ByConvention Weight)> ApproachWeights { get; } =
+        [..Approaches.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == ChordApproach.HalfStepAbove ? 1 : 0)))];
+
     /// <summary>
     ///     How the bass moves, as a line (<see cref="LineProfile" />): by step through the chord's notes, every note one of
     ///     them, over the whole of its range, which it keeps to rather than to a phrase's shape; it never starts a phrase

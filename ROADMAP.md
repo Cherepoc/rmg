@@ -294,6 +294,10 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   (#381, the ten presets with drops); a pocket ahead of the beat, the pocket's lean below zero (#387, Bluegrass, Punk,
   Thrash); the chopped loop, `Mutations`' swap and ratchet laid on a looping section's pitched parts (#352, Hip-hop,
   Trap, IDM, House, Techno, Drum and bass).
+- **A scale's darkness by its third** (#117), with the mood's plan above, whose steps lean by it: the sum of a scale's
+  offsets ranks the seven modes but makes Hungarian and melodic minor as bright as Mixolydian and harmonic minor as
+  dark as Dorian, so a dark mood and a loud section's brighter scale misjudge them; its third first, minor against
+  major, the sum breaking ties, measured on `MoodReportTest.Ends` before and after.
 
 ### Older rule failures
 

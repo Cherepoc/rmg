@@ -22,11 +22,8 @@ internal static class Reharmonisation
     /// <summary>A substitute's root from the chord's, in scale steps, and how likely: a third below, as vi for I and ii for IV, the likelier, and a third above, as iii for I.</summary>
     public static ImmutableArray<Weighted<int>> Substitutes { get; } = [new(1, -2), new(0.5, 2)];
 
-    /// <summary>The section's own scale, deeper than a chord's own (<see cref="ChordScales" />), which a substitute plays in.</summary>
-    private static LayerValue<StepAlterations> SectionsScale { get; } = new(StateDepths.BarPattern, StepAlterations.None);
-
     /// <summary>
-    ///     The substitutes, as the song's state: a root moved and the section's scale from each substituted chord to the
+    ///     The substitutes, as the song's state: a root moved from each substituted chord to the
     ///     next change, never a chord moved by semitones; none where the song does not reharmonise or has no section heard
     ///     again.
     /// </summary>
@@ -44,7 +41,7 @@ internal static class Reharmonisation
         var kept = leading.Concat(changes.Where((x, i) => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordShift) != 0
                                                        || i > 0 && common.GetEffectiveStateMapAt(changes[i - 1]).GetStateValue(StateKinds.ChordShift) != 0
                                                        || common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } own && own.Value != StepAlterations.None)).ToHashSet();
-        var (roots, scales) = (new List<TimelineItem<int>>(), new List<TimelineItem<LayerValue<StepAlterations>>>());
+        var roots = new List<TimelineItem<int>>();
         // a section on one chord, a vamp, which a substitute would undo, left as it is, but the chords leading into a key change
         bool OneChord(SectionSpan first) => changes.Where(x => first.IsWithin(x) && !leading.Contains(x)).Select(x => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordRoot)).Distinct().Count() <= 1;
         if (later >= 0 && OneChord(sections.First(x => x.SectionId == sections[later].SectionId)))
@@ -62,7 +59,6 @@ internal static class Reharmonisation
                     continue;
                 var (at, next) = (inSpan[i], i + 1 < inSpan.Length ? inSpan[i + 1] : span.End);
                 roots.AddRange([step.ToTimelineItem(at), 0.ToTimelineItem(next)]);
-                scales.AddRange([SectionsScale.ToTimelineItem(at), LayerValue<StepAlterations>.Unset.ToTimelineItem(next)]);
             }
         }
 
@@ -73,8 +69,7 @@ internal static class Reharmonisation
         static IEnumerable<TimelineItem<T>> Once<T>(IEnumerable<TimelineItem<T>> items) => items.GroupBy(x => x.Position).Select(x => x.Last()).OrderBy(x => x.Position);
         return StateTimelineMap.Create(common.Duration,
         [
-            StateTimeline.Create(common.Duration, StateKinds.ChordRoot, Once(roots)).WithLayer("Reharmonisation"),
-            StateTimeline.Create(common.Duration, StateKinds.ScaleAlterations, Once(scales)).WithLayer("Reharmonisation")
+            StateTimeline.Create(common.Duration, StateKinds.ChordRoot, Once(roots)).WithLayer("Reharmonisation")
         ]);
     }
 }

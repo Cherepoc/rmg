@@ -186,6 +186,8 @@ internal static class StopTime
 
         // where the chords change, which a hit strikes the chord of
         var chordChanges = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        // the song's loudness at a place, the lift's swell into the next section among it, which a hit struck there carries
+        double Loudness(double at) => draft.Timeline.CommonStateTimelineMap.GetEffectiveStateMapAt(at).GetStateValue(StateKinds.Velocity);
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
@@ -194,12 +196,13 @@ internal static class StopTime
                 continue;
             bool Fills(double position) => role is TrackRole.Drum or TrackRole.Bass && InAFill(position);
             // a pitched part's every hit in a bar of ensemble hits, the note it sounds there, or its last before, struck, of the
-            // chord there, never one the chord changed since
+            // chord there, never one the chord changed since, as loud as the song is there
             var struck = role == TrackRole.Drum ? [] : hitBars.SelectMany(b => HitsOf(b.Start, b.End).Where(at => Place(at, track).In && !Fills(at))
                 .Select(at => (At: at, Note: timeline.Where(x => x.Position <= at + 1e-6 && x.Position >= chordChanges.LastOrDefault(c => c <= at + 1e-6) - 1e-9
                                                                 && (x.Position >= b.Start - 1e-9 || x.Position + x.Value.Duration > b.Start + 1e-6)).Select(x => (TimelineItem<RealizedNote>?)x).LastOrDefault()))
                 .Where(x => x.Note is not null)
-                .Select(x => (x.Note!.Value.Value with { Duration = Math.Min(x.Note.Value.Value.Duration, Hit) }).ToTimelineItem(x.At))).ToArray();
+                .Select(x => (x.Note!.Value.Value with { Duration = Math.Min(x.Note.Value.Value.Duration, Hit) })
+                    .WithVelocity(x.Note.Value.Value.Velocity + Loudness(x.At) - Loudness(x.Note.Value.Position)).ToTimelineItem(x.At))).ToArray();
             // a hit bar's own notes given up for those struck, the drums' but on a hit, and a note held into it ending at its start
             bool IsHitBar(double at) => hitStarts.Contains(Math.Round(at, 6));
             // a note held into a struck phrase, stop time's or a bar of hits, ending at its first hit

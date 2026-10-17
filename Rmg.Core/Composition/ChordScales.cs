@@ -143,10 +143,9 @@ public static class ChordScales
         var onHome = Rotate(scale.Offsets, home);
         // the parallels a genre's scales allow, as it weighs them where it names them, the songs' weights otherwise
         var pool = genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name));
-        int Distance(Scale x) => x.Offsets.Zip(onHome).Count(y => y.First != y.Second);
-        var near = Scales.All.Where(x => Distance(x) is > 0 and <= BorrowedDistance && (pool is null || pool(x) is not null)).Select(x => (x, x.Weight)).ToArray();
+        var near = Scales.All.Where(x => x.Distance(onHome) is > 0 and <= BorrowedDistance && (pool is null || pool(x) is not null)).Select(x => (x, x.Weight)).ToArray();
         var parallels = (pool is null || near.Length == 0 ? [..near.Select(x => new Weighted<Scale>(x.Weight.At(unconventionality), x.x))] : ByConvention.Weigh(near, unconventionality, pool))
-            .Select(x => x with { Weight = x.Weight * Math.Pow(Scales.Closeness, Distance(x.Value) - 1) })
+            .Select(x => x with { Weight = x.Weight * x.Value.Nearness(onHome) })
             .Where(x => x.Weight > 0)
             .ToArray();
         var borrowed = parallels.Length > 0 ? context.Pick([..parallels]) : null;

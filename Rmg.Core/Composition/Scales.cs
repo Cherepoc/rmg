@@ -26,10 +26,13 @@ public sealed record Scale(string Name, ImmutableArray<int> Offsets, ByConventio
     private const int DorianBrightness = 36;
 
     /// <summary>How many of its notes differ from another scale of as many notes, on the same first note.</summary>
-    public int Distance(Scale other)
-    {
-        return Offsets.Zip(other.Offsets).Count(x => x.First != x.Second);
-    }
+    public int Distance(Scale other) => Distance(other.Offsets);
+
+    /// <summary>How many of its notes differ from another scale's offsets, on the same first note.</summary>
+    public int Distance(ImmutableArray<int> other) => Offsets.Zip(other).Count(x => x.First != x.Second);
+
+    /// <summary>How likely it is beside another scale, less for every note it changes beyond the first (<see cref="Scales.Closeness" />).</summary>
+    public double Nearness(ImmutableArray<int> other) => Math.Pow(Scales.Closeness, Distance(other) - 1);
 }
 
 /// <summary>
@@ -111,7 +114,7 @@ public static class Scales
 
         var options = tilt.Weigh(
             ByConvention.Weigh(others.Select(x => (x, x.Weight)), unconventionality, pool)
-                .Select(x => x with { Weight = x.Weight * Math.Pow(Closeness, x.Value.Distance(song) - 1) }),
+                .Select(x => x with { Weight = x.Weight * x.Value.Nearness(song.Offsets) }),
             x => Math.Sign(x.Brightness - song.Brightness)
         );
         return context.Pick(options);

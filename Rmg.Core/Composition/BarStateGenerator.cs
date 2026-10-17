@@ -226,12 +226,14 @@ internal sealed class BarStateGenerator
     }
 
     /// <summary>
-    ///     How the bass leads out of every chord into the next, by how much it leads, and what it lands on in every new
-    ///     chord, the less conventional the section the less often the root.
+    ///     How the bass leads out of every chord into the next, by how much it leads, the less conventional the section
+    ///     the more often from a semitone above, and what it lands on in every new chord, the less conventional the
+    ///     section the less often the root.
     /// </summary>
     private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, ImmutableArray<double> changes, double bassLeading, double unconventionality)
     {
-        var approachGenerator = Generators.WeightedIndex(BassLeadingLayers.Approaches);
+        var approachWeights = ByConvention.Weigh(BassLeadingLayers.ApproachWeights, unconventionality);
+        var approachGenerator = Generators.WeightedIndex(approachWeights);
         // a genre's bass leading more or less, through the chance's odds
         var leaning = Tilt.Of(BassLeadingLayers.GenreLeadOdds, _genre.Shift(GenreChoices.Bass, "leading"));
         var approaches = StateTimeline.Create(
@@ -242,7 +244,7 @@ internal sealed class BarStateGenerator
                         {
                             // the way is drawn whether the chord leads or not, so that the draws are as many whatever the chance
                             var leads = context.TestProbability(leaning.Chance(bassLeading * BassLeadingLayers.MaxApproachChance, 1));
-                            var way = BassLeadingLayers.Approaches[approachGenerator(context)].Value;
+                            var way = approachWeights[approachGenerator(context)].Value;
                             var approach = leads ? way : ChordApproach.None;
                             return ((int)approach).ToTimelineItem(position);
                         }
