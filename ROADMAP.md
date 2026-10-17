@@ -212,9 +212,12 @@ given its brightest plays bright and is heard so. Reviewed against a strict read
 every mood, which would cost a genre its harmonic taste inside its own span (Blues' Mixolydian and its blues scale and
 Pop's major alike at one darkness); kept, the blend below. Each step through the implementation loop:
 
-1. **A measure of brightness**, a report: a song's chord time on major chords, on minor and on diminished, and its
-   scale's darkness, by genre at darkness -1, 0 and 1 given, the same seeds; the targets, every genre's major share at
-   least 20 points apart between its ends, and the songs whose mood is drawn moving little.
+1. **A measure of brightness**, built (`MoodReportTest.Ends`, 94e20e2, the review's `run/mood.txt`): every preset at
+   darkness and intensity -1, 0 and 1 given, 16 seeds. The target, every genre's major share at least 20 points apart
+   between its darkness's ends, is met by none but a few: the songs' own 61% to 43%, Medieval 89% to 58%, Ambient 84% to
+   58%, Djent 50% to 0%, Dub 74% to 47%; Funk 87-92-90%, Black metal 15-17-19%, Trap 28-33-33%, Rock 65-57-54%. The
+   intensity moves a genre's tempo by its range, but leaves the songs with no genre at 126 bpm and 7.3 notes a second
+   at either end (the tempo's lean a genre's alone, `Mood.Leans`).
 2. **The chords' degrees leaning by darkness**, put off from the mood's first plan: a progression's chord on a degree
    weighed by its chord's quality as the scale has it, major the brighter, minor and diminished the darker, by
    `Mood.Odds`, in every genre's scale without an option added: a minor key's ♭III, ♭VI and ♭VII the brighter, its i,
