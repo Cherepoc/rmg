@@ -44,7 +44,7 @@ public enum InstrumentTrait
     /// <summary>A filter's opening and closing suits it, a synth's: a lead's, a pad's, a synth bass's, strings' or brass's.</summary>
     Filters = 2048,
 
-    /// <summary>A wah pedal suits it, a guitar's or a clavinet's.</summary>
+    /// <summary>A wah pedal suits it, an electric guitar's or a clavinet's.</summary>
     Wahs = 4096,
 
     /// <summary>Its note dies away as it rings, a struck or plucked string's or a bar's, so that a chord held long is struck again.</summary>
@@ -103,6 +103,9 @@ public static class InstrumentTraits
         [20] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
         // the harmonica, bent as its notes are blown
         [22] = InstrumentTrait.Bends,
+        // the acoustic guitars, no pedal between them and the room
+        [24] = Guitar & ~InstrumentTrait.Wahs,
+        [25] = Guitar & ~InstrumentTrait.Wahs,
         // the clean guitar's chorus its classic sound
         [27] = Guitar | InstrumentTrait.ChorusesClassically,
         // the driven guitars chugging; the muted guitar is a clean one muted, which never does

@@ -1028,7 +1028,7 @@
       "formChances": { "forms": [100, 95, 70] },
       "form": { "vcvc": 100, "vcvcbc": 70, "vcvcbvc": 40, "vvvv": [40, 50, 40], "vvvvvv": [20, 25, 20] },
       "phrases": { "eightBars": [100, 90, 60], "fourBars": [60, 60, 60] },
-      "instrument": { "melody": { "fiddle": 100, "flute": 80, "recorder": 50, "piccolo": 40, "bagpipe": [20, 30, 40], "accordion": [20, 30, 40] }, "chords": { "acousticGuitarSteel": 100, "acousticGuitarNylon": 50, "dulcimer": 40 }, "bass": { "acousticBass": 100 }, "counterMelody": { "fiddle": 100, "flute": 60, "accordion": 40 }, "rhythm": { "acousticGuitarSteel": 100, "acousticGuitarNylon": [45, 45, 51], "banjo": [80, 80, 51] }, "solo": { "violin": [80, 80, 100], "flute": 65, "harmonica": [100, 100, 92] }, "pad": { "stringEnsemble1": 100, "voiceOohs": 40, "choirAahs": 30, "drawbarOrgan": 20 }, "riff": { "electricGuitarClean": 100, "percussiveOrgan": 20 } },
+      "instrument": { "melody": { "fiddle": 100, "flute": 80, "recorder": 50, "piccolo": 40, "bagpipe": [20, 30, 40], "accordion": [20, 30, 40] }, "chords": { "acousticGuitarSteel": 100, "acousticGuitarNylon": 50, "dulcimer": 40 }, "bass": { "acousticBass": 100 }, "counterMelody": { "fiddle": 100, "flute": 60, "accordion": 40 }, "rhythm": { "acousticGuitarSteel": 100, "acousticGuitarNylon": [45, 45, 51], "banjo": [80, 80, 51] }, "solo": { "violin": [80, 80, 100], "flute": 65 }, "pad": { "stringEnsemble1": 100, "voiceOohs": 40, "choirAahs": 30, "drawbarOrgan": 20 }, "riff": { "electricGuitarClean": 100, "percussiveOrgan": 20 } },
       "kit": { "standard": 45, "room": 100, "brush": 30 },
       "parts": { "melody": 100, "chords": 100, "bass": [80, 85, 90], "pad": [55, 55, 66], "counterMelody": 50, "drum": [30, 40, 50], "riff": [10, 10, 46], "riffTwin": [0, 15, 15], "rhythm": [70, 70, 49], "solo": [0, 20, 80] },
       "drumSetup": { "kit": 100 },
@@ -1356,6 +1356,7 @@
     "name": "Heavy metal",
     "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4 or on 3 in its half-time sections, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "soloCount": { "one": 100, "two": [20, 30, 40], "three": 0 },
       "intensity": { "from": -60, "to": 80 },
       "darkness": { "from": -70, "to": 70 },
@@ -1441,6 +1442,7 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "intensity": { "from": 0, "to": 100 },
       "darkness": { "from": -20, "to": 100 },
       "openingPart": { "riff": 85, "bass": 10, "drum": 10 },
@@ -1528,6 +1530,7 @@
     "name": "Symphonic metal",
     "description": "Distorted guitars and a double kick under a choir, strings and a church organ, a soaring melody on a violin or a voice-like lead, harmonic minor's raised cadence, keyboard and guitar solos, a lifted last chorus.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "keyLift": { "semitones1": 30, "semitones2": 40, "semitones3": [5, 10, 20], "semitones4": [5, 10, 20] },
       "openingPart": { "riff": 50, "pad": 40, "chords": 10 },
       "soloShare": { "trading": 100, "together": [40, 50, 60] },
@@ -1610,6 +1613,7 @@
     "name": "Doom metal",
     "description": "Slow and crushing: low power chords held and left to ring over a heavy, sparse beat, long stretches on one chord creeping by half steps, the tritone and Phrygian, an organ, a mournful lead, few solos, long songs.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "intensity": { "from": -80, "to": 40 },
       "darkness": { "from": 0, "to": 100 },
       "sectionChanges": { "tempo": [0, 10, 20], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": [0, 4, 50], "eased": 50 },
@@ -1822,6 +1826,7 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, now and then a clean lead floating over.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "intensity": { "from": -20, "to": 100 },
       "darkness": { "from": -20, "to": 100 },
       "length": { "from": [210, 220, 180], "to": [360, 400, 480] },
@@ -1916,7 +1921,7 @@
     "choices": {
       "intensity": { "from": -20, "to": 100 },
       "darkness": { "from": -20, "to": 100 },
-      "insertion": { "none": 100, "wah": [0, 10, 20] },
+      "insertion": { "none": 100 },
       "loop": { "sections": [10, 25, 30] },
       "rootDegree": { "third": 60, "sixth": 65, "seventh": 65 },
       "length": { "from": [150, 150, 120], "to": [270, 270, 330] },
@@ -2972,6 +2977,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "intensity": { "from": 0, "to": 100 },
       "darkness": { "from": 20, "to": 100 },
       "chordScales": { "applied": [0, 10, 10], "borrowed": [0, 12, 12], "own": [0, 0, 30], "mediant": 0, "dominant": 0, "minorMediant": [20, 30, 40] },

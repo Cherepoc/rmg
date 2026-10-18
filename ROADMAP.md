@@ -28,8 +28,9 @@ it, `?listen=` its id on the test instance (`ListeningQuestionsTest` writes them
 verdicts, by song too). A question's songs are those of the corpus's first 24 that play its device where it is heard
 the most, by how much its song with the device and without differ as heard (`HeardDifference`), from a pattern's start
 in the sections its device plays in; its song without lays its patch over the genre's options. Done for a version when
-every question is answered or let go of. The fifth round (18 October 2026, the review of 16 October's first) asks
-latin-tumbao-varied, celtic-solo, trance-strip, darkjazz-inner-line, funk-wah, blackmetal-key-changes and pop-ornaments.
+every question is answered or let go of. The fifth round (18 October 2026) is answered; the next asks `trap-ends`, a
+genre past its span and `solo-ghosts` (*Priorities*). A question listens only in the sections its device plays in, not
+every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
@@ -39,13 +40,15 @@ latin-tumbao-varied, celtic-solo, trance-strip, darkjazz-inner-line, funk-wah, b
   the riff's hook, riser, rudiments, phrase lengths, short bars, held tones and let ring, calm sections, call and
   response, the big ending, ensemble hits, bass on the kick, the waltz, the drone, imitation (now bent to the melody),
   the mood's spans of Synthwave, Drum and bass and Thrash, and the stepping-down bass of Cinematic piano and the
-  Power ballad.
+  Power ballad; and of 18 October, Latin's tumbao varied (two songs answered), Trance's stripped ending, Dark jazz's
+  inner line, Funk's wah, Black metal's key changes and Pop's ornaments.
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing (Bossa nova's
   root and fifth too, back at 30-50-50 since the 14 October retune and the cycle's notes nearest since, to ask again),
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
   alone), the songs' double time halved (a scramble), Doom's blues scale reduced, Rock's key lift halved, the melody's
-  inversion, the pinch's squeal.
+  inversion, the pinch's squeal; and of 18 October, Celtic's harmonica solo, and by the owner's ear the wah of the metal
+  genres and of the acoustic guitars.
 - **Let go of, not told apart or too faint to ask** (as they are): Djent's polymeter frames, `pop-melody-chords`,
   `trance-raise`, `pop-eighths`, IDM's 64th rolls, Dark jazz's and Black metal's darker moods
   (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard because a mood leans only a genre's
@@ -261,8 +264,8 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   how strictly the section plays it (`Figures.Strictness`, the feel facet's 1-0.9-0.6), exact at the plain end. Latin's
   bass plays the tumbao so (`tumbaoChances`): its notes on the figure 76%-73%-57% at feel 0, 0.5 and 1 against the
   tumbao laid's 76%-76%-71%, its bars the figure exactly 26%-16%-1% against 26%-23%-12% (`FigureChancesReportTest`).
-  Asked as `latin-tumbao-varied`; a migration of every figure is planned only if listening prefers it, else the option
-  goes and the verdict to `decided.md`. Built where the figures are laid, after assembly, rather than inside the rhythm
+  Heard better as `latin-tumbao-varied` (18 October 2026, two songs answered), so a migration of every figure is
+  planned, each figure played as chances by its section's strictness, the presets' figures as they are. Built where the figures are laid, after assembly, rather than inside the rhythm
   generator, whose patterns are drawn before a section's figure is.
 - **Waiting on figures as chances**, as each needs a player the figures do not reach: the conga's tumbao (#354, twelve
   presets name the conga), the reggae organ bubble on the pad (#355, Reggae, Dub, Ska), the boogie comp on the rhythm
@@ -347,6 +350,12 @@ Each taken up when its reason no longer holds or listening asks:
 
 What the plans of 8 to 15 October 2026 left, each by listening unless said:
 
+- **The inner line** (`darkjazz-inner-line` heard better, 18 October 2026, and "might be good for other genres"): it
+  plays at the songs' 0-15-30 in every genre naming no harmony devices, Pop, Rock and Cinematic piano among them, at
+  Dark jazz's 20-50-60 and Bossa nova's and Soul's 20-30-40; raised where listening asks. On chords broken into an
+  arpeggio (Dark jazz's seed S, its vibraphone) the line was not told apart from none: kept to struck chords if
+  listening asks again.
+
 - **Phrases:** a genre's section lengths named in bars of four (`bars16`) play their patterns as often whatever the
   phrase, so a section of "16 bars" in threes has 12; an intro's window of four bars, which a first section in threes
   does not end a phrase with.
@@ -359,8 +368,8 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
   lick or not, and a held or bent ♭5; a melody spoken rather than sung (repeated notes, a range of a fifth), with *A
   melody sung rather than played*.
 - **The researched idioms not built:** the bass gallop; Metal's plagal motion (low confidence); a riff's AAAB; tempos
-  over 240; parts muted in and out on a loop; a long instrumental stretch before the first vocal; stoner doom's wah and
-  pentatonic riff; the octave whammy squeal; a china on a cell's start; a kick moved off the snare; House's offbeat bass
+  over 240; parts muted in and out on a loop; a long instrumental stretch before the first vocal; stoner doom's pentatonic
+  riff (its wah not, the metal genres playing none); the octave whammy squeal; a china on a cell's start; a kick moved off the snare; House's offbeat bass
   and congas; darksynth's split of Synthwave; IDM's vignettes (a one-minute song as one section); a bass note pushed a
   16th early; a wah on the bass; the bass playing the head while a synth takes the bass line; a meter laid over another;
   the triangle's bass (General MIDI has none); sonata form's recapitulation; a drum part with no steady pulse; a

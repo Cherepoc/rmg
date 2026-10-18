@@ -51,13 +51,6 @@ public sealed class ListeningQuestionsTest
             x => FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tumbaoChances"),
             In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Figures && t.Section == span.SectionId
                                                     && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tumbaoChances")),
-        new("celtic-solo", "Celtic's solo, a session's break, on fiddle, flute or whistle rather than harmonica: closer to the style?",
-            "Celtic's solo pool, Folk's copied, the harmonica the likeliest (100 against the violin's 80), against the same pool without the harmonica (#361).", "celtic", [],
-            new() { ["instrument.solo"] = new() { ["harmonica"] = 0 } },
-            // a solo some soloist of plays on the harmonica
-            x => x.Solos.Where(s => s.Value.Soloists.Any(r => x.Song.TrackDefinitions[x.Track(r)] is PitchInstrumentTrack { InstrumentCode: 22 }))
-                .Select(s => (double?)x.Map.Sections[s.Key].Start).Min(),
-            In: (song, span) => song.IsSolo(span)),
         new("trance-strip", "Trance's ending, its parts leaving one by one over the drums: a mix-out, or the wrong part left last?",
             "The stripped ending, Trance's ending.strip 100, against its fade (#150: the order the parts leave in is drawn, the lead or the pad possibly last).", "trance", [],
             new() { ["ending"] = new() { ["strip"] = 0 } },

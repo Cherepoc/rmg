@@ -59,65 +59,6 @@
     ]
   },
   {
-    "id": "celtic-solo",
-    "question": "Celtic's solo, a session's break, on fiddle, flute or whistle rather than harmonica: closer to the style?",
-    "decides": "Celtic's solo pool, Folk's copied, the harmonica the likeliest (100 against the violin's 80), against the same pool without the harmonica (#361).",
-    "genre": "celtic",
-    "without": {
-      "skip": [],
-      "genre": {
-        "instrument.solo": {
-          "harmonica": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "J",
-        "at": 145.1,
-        "listen": [
-          "Solo (Violin)"
-        ]
-      },
-      {
-        "seed": "a",
-        "at": 145.8,
-        "listen": [
-          "Solo (Violin)"
-        ]
-      },
-      {
-        "seed": "o",
-        "at": 152.3,
-        "listen": [
-          "Solo (Harmonica)"
-        ]
-      },
-      {
-        "seed": "x",
-        "at": 124.8,
-        "listen": [
-          "Rhythm part (Banjo)",
-          "Solo (Harmonica)"
-        ]
-      },
-      {
-        "seed": "18",
-        "at": 39.8,
-        "listen": [
-          "Solo (Violin)"
-        ]
-      },
-      {
-        "seed": "1z",
-        "at": 23.9,
-        "listen": [
-          "Solo (Harmonica)"
-        ]
-      }
-    ]
-  },
-  {
     "id": "trance-strip",
     "question": "Trance's ending, its parts leaving one by one over the drums: a mix-out, or the wrong part left last?",
     "decides": "The stripped ending, Trance's ending.strip 100, against its fade (#150: the order the parts leave in is drawn, the lead or the pad possibly last).",
