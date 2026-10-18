@@ -51,11 +51,39 @@ public sealed class HatRollTest
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Added(seed, null));
         Console.WriteLine($"rolls added: Trap {trap.Sum(x => x.Rolls)}, {trap.Sum(x => x.Louder)} louder; the songs {songs.Sum(x => x.Rolls)}");
 
-        // seen: Trap's 64 songs add about 2230 rolls, nearly all louder, the songs' own none
+        // seen: Trap's 64 songs add about 2120 rolls, nearly all louder, the songs' own none
         await Assert.That(trap.Sum(x => x.Rolls)).IsGreaterThan(1000);
         await Assert.That(trap.Sum(x => x.Louder)).IsGreaterThan(trap.Sum(x => x.Rolls) * 3 / 4);
         // the songs' own none, as their chance is none
         await Assert.That(songs.Sum(x => x.Rolls)).IsEqualTo(0);
+    }
+
+    /// <summary>A roll on the hi-hat alone: a ride's, a tambourine's or a shaker's time plays as it would without the rolls.</summary>
+    [Test]
+    public async Task ARoll_IsTheHiHats_NeverAnotherTimekeepers()
+    {
+        var trap = GenrePresets.With("trap", GenreChoices.HatRolls, ("bars", 1));
+        var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
+        var (others, rolled) = (0, 0);
+        foreach (var seed in Enumerable.Range(0, 32))
+        {
+            var with = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), new SongOverrides(Genre: trap), CancellationToken.None);
+            var without = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), new SongOverrides(Genre: trap), ImmutableHashSet.Create("Hat rolls"), CancellationToken.None);
+            foreach (var (track, notes) in with.Notes!.Where(x => with.TrackDefinitions[x.Key] is PercussionInstrumentTrack d && DrumRoles.Of(d.StateMap) == DrumRole.Time))
+            {
+                var count = without.Notes!.TryGetValue(track, out var own) ? own.Count : 0;
+                if (track == hiHat)
+                    rolled += notes.Count - count;
+                else
+                {
+                    others++;
+                    await Assert.That(notes.Count).IsEqualTo(count).Because($"seed {seed}, track {track}");
+                }
+            }
+        }
+
+        Console.WriteLine($"notes the hi-hat's rolls add: {rolled}; other timekeepers checked: {others}");
+        await Assert.That(rolled).IsGreaterThan(100);
     }
 
     /// <summary>A drill, IDM's: its rolls in 64ths where its genre names them (`hatRollRate`), four notes a 64th apart, none without the stage.</summary>

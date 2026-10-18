@@ -43,13 +43,14 @@ internal static class HatRolls
     ///     Hi-hat rolls, the trap's: now and then a beat of a bar, or its half, on the drums keeping time played as a roll of
     ///     32nds or 16th triplets growing louder, into one of the bar's beats, its end the likeliest, into the snare or the
     ///     next bar, each note the drum's own note there, where it plays and no fill does. A
-    ///     bar's decision, a genre's, from a sequence of its own for each appearance. The drums keeping time are the song's,
-    ///     as their roles are drawn for it, a wild section's redrawn roles aside.
+    ///     bar's decision, a genre's, from a sequence of its own for each appearance. The drum keeping time is the song's
+    ///     hi-hat where it keeps time, as the roles are drawn for the song, a wild section's redrawn roles aside; a ride's
+    ///     or a shaker's time never rolls.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var notes = SongStages.NotesOf(draft);
-        var times = song.Tracks.DrumsOf(DrumRole.Time).Where(notes.ContainsKey).ToArray();
+        var times = song.Tracks.DrumsOf(DrumRole.Time).Where(x => notes.ContainsKey(x) && x == DrumGroups.GetTrackNumber(DrumDefinitions.HiHat)).ToArray();
         if (times.Length == 0)
             return draft;
 

@@ -12,7 +12,7 @@ is removed once it is built, its leftovers kept under *Open work*.
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
    the seventh round's nine decided by genre judgment and retired (19 October), and the rest of the queue reviewed
-   against the genres' conventions on 19 October (*Genre conventions*, being built); left to ask: the cuts of #136 the
+   against the genres' conventions on 19 October (*Genre conventions*, built); left to ask: the cuts of #136 the
    shared solo, #341 the stickings and #77 the articulation variants, each a question of the code's cost, not of a
    genre's, and a loose figure of the drums' and the boom's (*Figures as chances*, a switch first).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
@@ -249,12 +249,8 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
 ### Genre conventions (the listening review of 19 October 2026)
 
 The review of 16 October's unasked questions and every earlier verdict judged against the genres' conventions (19
-October 2026), decided without asking where convention is clear, each step measured on the devices report and
-committed with its songs' count:
-
-7. **Hat rolls on the hi-hat** (#66), never the ride.
-
-Put off, each its own plan:
+October 2026), its seven steps built, each decided without asking where convention was clear (their commits say what
+each moved). Put off, each its own plan:
 
 - **A walking bass's line** (from the review of 9 October 2026): its weak quarters keep to the chord's notes, so a ii–V
   walks arpeggios; a walk takes scale steps and chromatic approaches on 2 and 4 (about 30-50% of Jazz's walking notes
@@ -263,7 +259,7 @@ Put off, each its own plan:
 - **Rock's I–♭VII–IV loop,** a progression template of its own: the progression's home, away, preparation and cadence
   come near it only through the cadence (Rock's ♭VII–I in 45% of sections).
 - **A key change's preparation as a genre's choice** (`KeyChange.PrepareChance`, 0.5 for every song): Black metal's
-  jumps; put off until its key changes as named in step 2 are heard.
+  jumps; put off until its key changes, named without a lift on 19 October, are heard.
 
 ### Older rule failures
 
