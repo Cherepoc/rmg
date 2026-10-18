@@ -252,8 +252,6 @@ The review of 16 October's unasked questions and every earlier verdict judged ag
 October 2026), decided without asking where convention is clear, each step measured on the devices report and
 committed with its songs' count:
 
-4. **Steady figures on the meter's pulses** (#38): a step of a quarter or more landing on the pulses, so that 6/8's
-   boom and kick fall on 1 and 4.
 5. **The bass under a twin's lead** (#87) its own line, the riff's doubling passed over where the twin leads.
 6. **A solo's answers between phrases** (#130): only the gap across a phrase's start answered, the melody's notes
    having no end before `Realizer`.

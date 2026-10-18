@@ -56,6 +56,19 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
     public int Step { get; } = Sixteenths == 16 && Onsets.Length > 0 && 16 % Onsets.Length == 0 && Onsets.Select((x, i) => x == i * (16 / Onsets.Length)).All(x => x)
         ? 16 / Onsets.Length
         : 0;
+
+    /// <summary>
+    ///     Where it strikes in a bar of the meter at its steady step, in beats: a step of a quarter or more on the bar's
+    ///     pulses, as many of them as it strikes of 4/4's, so that 6/8's boom and kick fall on its dotted quarters, 1 and 4;
+    ///     a finer one every 8th or 16th, the meter's own.
+    /// </summary>
+    public IEnumerable<double> StepsIn(Meter meter)
+    {
+        if (Step < 4)
+            return Enumerable.Range(0, meter.Sixteenths).Where(x => x % Step == 0).Select(x => x * 0.25);
+        var stride = Math.Max(1, (int)Math.Round(meter.Pulses.Length * Step / 16.0, MidpointRounding.AwayFromZero));
+        return meter.Pulses.Where((_, i) => i % stride == 0);
+    }
 }
 
 /// <summary>
@@ -273,7 +286,7 @@ internal static class Figures
                             double[] onsets = figure.Follows is { } follows
                                 ? [..Followed(follows).SelectMany(t => timelines[t].EventTimeline).Where(x => In(x.Position)).Select(x => x.Position).Distinct().Order()]
                                 : figure.Step > 0
-                                    ? [..Enumerable.Range(0, span.Meter.Sixteenths).Where(x => x % figure.Step == 0).Select(x => bar + x * 0.25)]
+                                    ? [..figure.StepsIn(span.Meter).Select(x => bar + x)]
                                     : [..figure.Onsets.Select(x => x - (barsBefore[span] + index) % (figure.Sixteenths / span.Meter.Sixteenths) * span.Meter.Sixteenths)
                                         .Where(x => x >= 0 && x < span.Meter.Sixteenths).Select(x => bar + x * 0.25)];
                             onsets = [..onsets.Where(x => !holds.At(Hold.Cut, x, track))];

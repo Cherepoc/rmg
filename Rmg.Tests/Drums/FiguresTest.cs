@@ -13,6 +13,41 @@ public sealed class FiguresTest
     ///     A loose figure (<see cref="Figures.Loosen" />) at the plain end's strictness is the figure exactly, its onsets kept and
     ///     the player's own left out; and at any strictness a place both strike is kept.
     /// </summary>
+    /// <summary>A figure at a steady step on its meter's pulses where the step is a quarter or more, 6/8's boom on 1 and 4, its 8ths every 8th.</summary>
+    [Test]
+    public async Task AStepOfAQuarterOrMore_StrikesOnTheMetersPulses()
+    {
+        double[] In(string name, FigurePlayer player, Meter meter) => [..Figures.Of(player, name)!.StepsIn(meter)];
+        await Assert.That(In("halves", FigurePlayer.Bass, Meter.FourFour)).IsEquivalentTo([0.0, 2]);
+        await Assert.That(In("halves", FigurePlayer.Bass, Meter.SixEight)).IsEquivalentTo([0.0, 1.5]);
+        await Assert.That(In("halves", FigurePlayer.Bass, Meter.TwelveEight)).IsEquivalentTo([0.0, 3]);
+        await Assert.That(In("halves", FigurePlayer.Bass, Meter.ThreeFour)).IsEquivalentTo([0.0, 2]);
+        await Assert.That(In("fourOnTheFloor", FigurePlayer.Ground, Meter.FourFour)).IsEquivalentTo([0.0, 1, 2, 3]);
+        await Assert.That(In("fourOnTheFloor", FigurePlayer.Ground, Meter.SixEight)).IsEquivalentTo([0.0, 1.5]);
+        await Assert.That(In("eighths", FigurePlayer.Bass, Meter.SixEight)).IsEquivalentTo([0.0, 0.5, 1, 1.5, 2, 2.5]);
+    }
+
+    /// <summary>How many sections play a figure of a quarter's step or more in a meter whose pulses are not its quarters, which the step's 16ths missed.</summary>
+    [Test]
+    [Explicit]
+    public async Task ReportStepsOnPulses()
+    {
+        foreach (var genre in new[] { "celtic", "folk", "bluegrass", "country", "symphonic" })
+        {
+            var counts = TestCorpus.InParallel(Enumerable.Range(0, 64), seed =>
+            {
+                var song = TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)));
+                var figures = song.Trace.Where(x => x.Point == TracePoints.Figures).ToDictionary(x => x.Section, x => (ImmutableDictionary<FigurePlayer, string>)x.Value!);
+                return song.Map.Sections.Count(span => figures.TryGetValue(span.SectionId, out var played)
+                                                       && !span.Meter.Pulses.SequenceEqual(Enumerable.Range(0, span.Meter.Pulses.Length).Select(x => (double)x))
+                                                       && played.Any(x => Figures.Of(x.Key, x.Value) is { Step: >= 4 }));
+            });
+            Console.WriteLine($"{genre}: {counts.Sum()} sections in a meter of other pulses playing a quarter's step or more, in {counts.Count(x => x > 0)} of 64 songs");
+        }
+
+        await Task.CompletedTask;
+    }
+
     [Test]
     public async Task ALooseFigure_AtThePlainEnd_IsTheFigureExactly_AndKeepsWhereBothStrike()
     {
