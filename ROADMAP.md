@@ -11,7 +11,7 @@ is removed once it is built, its leftovers kept under *Open work*.
 2. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
-   nine asked in the seventh round; next its cuts (#136 the shared solo, #341 the stickings, #77 the articulation
+   the seventh round's nine decided by genre judgment and retired (19 October); next its cuts (#136 the shared solo, #341 the stickings, #77 the articulation
    variants), #66, #391 if still apt, #87 (the bass under a twin's lead) and #130 (a solo's answer after a held note)
    needing a switch first, and a loose figure of the drums' and the boom's (*Figures as chances*, a switch too).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
@@ -27,11 +27,9 @@ it, `?listen=` its id on the test instance (`ListeningQuestionsTest` writes them
 verdicts, by song too). A question's songs are those of the corpus's first 24 that play its device where it is heard
 the most, by how much its song with the device and without differ as heard (`HeardDifference`), from a pattern's start
 in the sections its device plays in; its song without lays its patch over the genre's options. Done for a version when
-every question is answered or let go of. The seventh round (18 October 2026) asks nine of the review of 16 October's
-queue, each a preset's choice patched: pop-homes (#107), reggae-closing (#95, three songs alone end closing on a
-button), darkjazz-eighths (#345), and as a device a preset may take, side B with it added, jazz-two-feel (#343),
-house-offbeat (#350), psytrance-texture (#380), punk-square (#386, B square), filmpiano-octaves (#393) and fmgame-bass
-(#400); `symphonic-hits` (#371) differed 0.02, too faint to ask. A question listens only in the sections its device plays in, not
+every question is answered or let go of. The seventh round (18 October 2026) asked nine of the review of 16 October's
+queue and was retired on 19 October, each decided by genre judgment, side B (see *Decided by genre judgment*);
+`symphonic-hits` (#371) differed 0.02, too faint to ask. A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -57,6 +55,11 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   `trance-raise`, `pop-eighths`, IDM's 64th rolls, Dark jazz's and Black metal's darker moods
   (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard while a mood leaned only a genre's
   own pool (since built: the chords' degrees by darkness and a mood past a genre's span, heard in the sixth round).
+- **Decided by genre judgment, not heard** (the seventh round, retired 19 October 2026, side B taken): Dark jazz's
+  8ths swung, never its 16ths (#345); Jazz's bass in two now and then, 25-20-10, the plainer the likelier (#343);
+  House's offbeat bass, 15-30-40, Techno's pump leaning wild (#350); Psytrance's texture built and thinned, steadier
+  than Trance's (#380); Punk in square fours, six bars and a short bar at its wild end alone (#386); Cinematic
+  piano's octaves at 20-30-40 (#393); the 16-bit game's bass in 16ths, 25-30-35 (#400).
 - **Tied and kept as they are:** Pop's held tones, Classical's cadence, the jazz ride, Pop's instrument switches,
   Black metal's two endings, Bossa nova's root and fifth (`bossa-root-fifth`, taken out on 11 October, back at
   30-50-50 since the 14 October retune, tied in the sixth round).
