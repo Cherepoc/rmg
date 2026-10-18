@@ -161,12 +161,12 @@ internal static class Solos
     /// <summary>The steps from the first soloist the others play together: the same notes, a third or a sixth away.</summary>
     public static ImmutableArray<int> Steps { get; } = [0, 2, -2, 5, -5];
 
-    /// <summary>The chance a note of a soloist playing together with the first is left out, which tells their lines apart.</summary>
+    /// <summary>The chance a note of a soloist harmonising the first is left out, which tells their lines apart; a unison leaves none out.</summary>
     public const double LeftOutChance = 0.2;
 
     /// <summary>
-    ///     How long a note the others play together with the first lasts at least, to its next, in beats: an 8th, a run's
-    ///     quick notes left to the first, as a second guitar harmonises a lead's held notes.
+    ///     How long a note the others harmonise with the first lasts at least, to its next, in beats: an 8th, a run's
+    ///     quick notes left to the first, as a second guitar harmonises a lead's held notes; a unison plays them all.
     /// </summary>
     public const double TogetherShortest = 0.5;
 
@@ -294,13 +294,16 @@ internal static class Solos
             // the drums' turns the drums' own (DrumSolos)
             foreach (var (soloist, place) in solo.Soloists.Select((x, i) => (x, i)).Where(x => x.x != TrackRole.Drum))
             {
+                // a part together with the first: a unison doubling the line whole, its runs and its altered notes too, as two
+                // players doubling a line play it; a harmony leaving some out and the quick ones to the first, drawn all the same
                 TimelineItem<StateMap>[] notes = solo.Mode == SoloMode.Trading
                     ? [..line.Where(x => solo.TurnAt(span, x.Position) == place)]
                     : place == 0
                         ? line
-                        : [..line.Select((x, i) => (x, Kept: !context.TestProbability(LeftOutChance)))
-                            .Where((x, i) => x.Kept && (i + 1 >= line.Length || line[i + 1].Position - x.x.Position >= TogetherShortest - 1e-9))
-                            .Select(x => x.x.Value.With(StateKinds.ScaleStep, x.x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step).With(StateKinds.Alteration, 0).ToTimelineItem(x.x.Position))];
+                        : line.Select((x, i) => (x, Kept: !context.TestProbability(LeftOutChance))).ToArray() is var drawn && solo.Step == 0
+                            ? line
+                            : [..drawn.Where((x, i) => x.Kept && (i + 1 >= line.Length || line[i + 1].Position - x.x.Position >= TogetherShortest - 1e-9))
+                                .Select(x => x.x.Value.With(StateKinds.ScaleStep, x.x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step).With(StateKinds.Alteration, 0).ToTimelineItem(x.x.Position))];
                 // over the band, however loud its part and its draws there, as a pad that solos is not comping any more
                 var track = song.TrackTimelineMap[trackOf[soloist]];
                 var heard = Realizer.GetNoteStates(

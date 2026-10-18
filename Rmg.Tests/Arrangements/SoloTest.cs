@@ -4,6 +4,7 @@ using Rmg.Core.Events;
 using Rmg.Core.Composition;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
+using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Arrangements;
 
@@ -880,6 +881,35 @@ public sealed class SoloTest
         }
 
         await Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     Soloists together in unison double the first's line whole, its quick notes too, where a harmony leaves some out
+    ///     (<see cref="Solos.LeftOutChance" />): a calibration over Metal's solos given two soloists together, as a stage after
+    ///     may edit a note.
+    /// </summary>
+    [Test]
+    public async Task SoloistsInUnison_DoubleTheLineWhole()
+    {
+        var metal = GenrePresets.With("metal", GenreChoices.SoloShare, ("together", 1));
+        var genre = metal with { Choices = metal.Choices.SetItem(GenreChoices.SoloCount.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("two", new ByConvention(1, 1, 1))) };
+        var (unison, doubled, harmony, harmonised) = (0, 0, 0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var (index, plan) in song.Solos.Where(x => x.Value is { Mode: SoloMode.Together, Soloists.Length: 2 } && !x.Value.Soloists.Contains(TrackRole.Drum)))
+        {
+            var span = song.Map.Sections[index];
+            double[] At(TrackRole part) => [..song.Song.Notes!.GetValueOrDefault(song.Song.Track(part))?.Where(x => span.IsWithin(x.Position) && x.Position < span.End - 1e-9).Select(x => Math.Round(x.Position, 4)).Distinct() ?? []];
+            var (first, second) = (At(plan.Soloists[0]), At(plan.Soloists[1]).ToHashSet());
+            if (plan.Step == 0)
+                (unison, doubled) = (unison + first.Length, doubled + first.Count(second.Contains));
+            else
+                (harmony, harmonised) = (harmony + first.Length, harmonised + first.Count(second.Contains));
+        }
+
+        Console.WriteLine($"in unison {doubled} of {unison} of the first's notes doubled, in harmony {harmonised} of {harmony}");
+        // measured 100% in unison (420 notes), 31% in harmony, October 2026
+        await Assert.That(unison).IsGreaterThan(100);
+        await Assert.That(doubled / (double)unison).IsGreaterThan(0.9);
     }
 
     [Test]
