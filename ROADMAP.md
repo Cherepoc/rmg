@@ -252,12 +252,6 @@ The review of 16 October's unasked questions and every earlier verdict judged ag
 October 2026), decided without asking where convention is clear, each step measured on the devices report and
 committed with its songs' count:
 
-1. **Devices inherited at the songs' rate:** the octave bass 0 in Metal, Thrash, Doom, Black metal, Symphonic, Djent,
-   Nu metal, Bossa nova and the Power ballad (#121); flams 0-5-20 and drags 0-0-10 in the presets of plain or
-   programmed drums (Pop, Ballad, Lyrical, Disco, Djent, Nu metal, Reggae, Dub, Bossa, Country, Bluegrass, Folk,
-   Celtic, Black metal), none in the 16-bit game (#401); Rock's ornaments in Ska, Reggae, Dub, IDM, Black metal,
-   Ambient and the 16-bit game, and Pop's and the Ballad's trills 0-0-15; the drums soloing at the wild end alone in
-   Rock, Metal and Thrash.
 2. **One genre's retunes:** Bossa nova's root and fifth 50-50-40, the plainest the likeliest (#390); Doom's blues
    riffs 15-15-25; Black metal's key changes named, no lift, a section's own 0-8-50; Symphonic's ensemble hits
    15-20-25 (#371); Orchestral's solos to the leads, about a quarter of its songs (#391); Folk's solos about half;
