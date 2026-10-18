@@ -62,10 +62,15 @@ public sealed class MixFilterTest
     [Explicit]
     public async Task Report()
     {
-        foreach (var name in new string?[] { null, "trance", "techno", "electronic", "djent" })
+        foreach (var name in new string?[] { null, "trance", "techno", "electronic", "djent", "reggae", "dub", "ambient", "idm" })
         {
-            var plans = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Plan(TestCorpus.Get(seed, new SongOverrides(Genre: name is null ? null : GenrePresets.Genre(name)))));
-            Console.WriteLine($"{name ?? "the songs"}: opening {plans.Count(x => x.Opening) / (double)plans.Length:P0}, closing {plans.Count(x => x.Closing) / (double)plans.Length:P0}, " +
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: name is null ? null : GenrePresets.Genre(name))));
+            var plans = songs.Select(Plan).ToArray();
+            // the closing by the ending it closes into, one on a hit muffled by it
+            string Closing(bool onHit) => songs.Where(x => FormLayers.HitEndings.Contains(x.Map.Ending.Kind) == onHit).ToArray() is var some
+                ? $"{some.Count(x => Plan(x).Closing)} of {some.Length}" : "";
+            Console.WriteLine($"{name ?? "the songs"}: opening {plans.Count(x => x.Opening) / (double)plans.Length:P0}, closing {plans.Count(x => x.Closing) / (double)plans.Length:P0} " +
+                              $"(into a hit {Closing(true)}, into another ending {Closing(false)}), " +
                               $"songs dipping {plans.Count(x => !x.Dips.IsEmpty) / (double)plans.Length:P0}, {plans.Sum(x => x.Dips.Length) / (double)plans.Length:F2} dips a song");
         }
 

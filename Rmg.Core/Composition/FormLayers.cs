@@ -226,6 +226,9 @@ internal static class FormLayers
     /// </summary>
     public const double GenreLiftReach = 4;
 
+    /// <summary>The endings on a hit, the band's last chord struck together and let go, which a mix closing over it would muffle (<see cref="MixFilter" />).</summary>
+    public static ImmutableHashSet<EndingKind> HitEndings { get; } = [EndingKind.Button, EndingKind.Stop, EndingKind.Big];
+
     /// <summary>The endings that lean unconventional, likelier the further the song's form strays.</summary>
     public static ImmutableHashSet<EndingKind> AdventurousEndings { get; } = [EndingKind.Open, EndingKind.Stop];
 

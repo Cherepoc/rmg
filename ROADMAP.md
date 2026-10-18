@@ -61,7 +61,8 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   than Trance's (#380); Punk in square fours, six bars and a short bar at its wild end alone (#386); Cinematic
   piano's octaves at 20-30-40 (#393); the 16-bit game's bass in 16ths, 25-30-35 (#400); a section's home on the
   tonic and its relative at the plain end, IV and V leaned in by the progression facet, the plainest songs' V never,
-  and Pop's IV and V at its middle halved (#107).
+  and Pop's IV and V at its middle halved (#107); the mix's closing leaned off an ending on a hit, a button, a stop or
+  a big ending, by odds of 8 (#95).
 - **Tied and kept as they are:** Pop's held tones, Classical's cadence, the jazz ride, Pop's instrument switches,
   Black metal's two endings, Bossa nova's root and fifth (`bossa-root-fifth`, taken out on 11 October, back at
   30-50-50 since the 14 October retune, tied in the sixth round).

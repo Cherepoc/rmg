@@ -28,6 +28,9 @@ internal static class MixFilter
 
     public static ByConvention ClosingChance { get; } = new(0, 0.04, 0.04);
 
+    /// <summary>The odds the closing's chance is leaned by against an ending on a hit (<see cref="FormLayers.HitEndings" />), whose last chord it would muffle.</summary>
+    private const double ClosingOdds = 8;
+
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var map = song.Form.Map;
@@ -70,7 +73,7 @@ internal static class MixFilter
         foreach (var drop in song.Form.FilteredDrops)
             ramps.Add((drop - song.Form.Map.BarBefore(drop), drop, 0, 1));
 
-        var closes = stream.TestProbability(Chance(ClosingChance, "closing"));
+        var closes = stream.TestProbability(Tilt.Of(ClosingOdds, FormLayers.HitEndings.Contains(map.Ending.Kind) ? -1 : 0).Chance(Chance(ClosingChance, "closing"), 1));
         var closingDepth = 0.6 + 0.4 * stream.GenerateDouble();
         if (closes)
         {
