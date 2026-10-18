@@ -308,9 +308,6 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
 Rules that fail on other songs than the corpus's own, each older than the second order of work (15 October 2026), to
 trace at the committed code before blaming a change:
 
-- **At offset 816000000:** a palm-muted note's length; seed 21's bass at 90 landing a semitone over its chord's root,
-  placed so by `LinePattern.Place`; shapes apart (seed 5 at 173.5 after a reharmonisation, seed 49 at 44 the melody's
-  triad over the chords' cluster).
 - **At offset 716000000:** a solo's scale run (seed 3 at 600.25, facets of form and melody 1) falling 74, 72, 71, 67,
   67, a step skipped and the next note repeated, though `SoloLines.Cells` steps the scale, so a stage after it; seed
   38's bass at 178 a half step above the next chord's root at 178.5 (`ChordApproach.HalfStepAbove`), which the scale
@@ -321,12 +318,10 @@ trace at the committed code before blaming a change:
     own alteration (+1), with an anticipation (`ChordApproach.Anticipation`) of F#, the root of the key preparation's
     chord at 556, though a note of the line at 554 over another chord comes between. Neither a walk (`LineFills`) nor a
     stage after the lines makes it: `LinePattern.Place` leads 552 past 554, to trace there.
-  - **At offset 619000000:** seed 47's shapes apart at 256 and 400. Every part sounds the same chord (pitch classes 2,
-    5, 10), but the chords and the melody write its third in semitones (5/12 of an octave) where the bass and the pad
-    write it in scale steps (2/7), on a chord approached a semitone below (`ChordApproach` 2). The same kind as seed 5
-    at 173.5 above: one stage rewriting a chord's offsets on some parts only.
-- **A long lift moving notes outside its swell** (#224): about a hundred notes of 64 songs moved outside the swell's
-  bars by more than 0.01 of the velocity, through a stage that sets a part by the song as heard (`LiftTest`).
+  - **At offset 619000000:** seed 47's shapes apart at 256 and 400, a section's start after a chord approached a
+    semitone below (`ChordApproach` 2): the chords and the melody hold a sus4 (heights 0, 5/12, 7/12) where the bass and
+    the pad hold the triad (0, 2/7, 7/12), so a part's shape drawn or kept apart from the others' there; to trace where
+    the bass and the pad take theirs.
 - **Two page tests seen failing once each,** their messages not kept: the seek readout's
   (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`) and the length's
   (`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`), to read when they fail again.

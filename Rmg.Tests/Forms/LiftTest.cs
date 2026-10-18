@@ -18,8 +18,10 @@ public sealed class LiftTest
         foreach (var seed in Enumerable.Range(0, 64))
         {
             var (own, longer) = (TestCorpus.Get(seed), TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
-            // each change of section, the bar before it, a short last bar's, and the full bars of the section it ends
-            var starts = own.Map.Sections.Skip(1).Select((x, i) => (x.Start, Last: own.Map.BarBefore(x.Start), own.Map.Sections[i].Meter.BarDuration)).ToArray();
+            // each change of section, an intro's into the first among them, the bar before it, a short last bar's, and the
+            // full bars of the section it ends, an intro's counted in the first's
+            var starts = own.Map.Sections.Select((x, i) => (x.Start, Last: own.Map.BarBefore(x.Start), own.Map.Sections[Math.Max(0, i - 1)].Meter.BarDuration))
+                .Where(x => x.Start > 1e-9).ToArray();
             foreach (var (track, notes) in own.Song.Notes!)
             {
                 var other = longer.Song.Notes![track];
@@ -35,10 +37,9 @@ public sealed class LiftTest
                         louder += b.Value.Velocity > a.Value.Velocity ? 1 : 0;
                     }
                     // and the notes elsewhere that move more than a hair, but in the last bar, which the songs' own lift swells too,
-                    // and a solo, set over the band as its section heard it, swell and all (Solos.Lift); counted, a few, through a
-                    // stage that sets a part by the song as heard (ROADMAP.md)
+                    // and a solo, the soloist's or a part's own, set over the band as its section heard it, swell and all (Solos.Lift)
                     else if (!starts.Any(x => a.Position >= x.Start - x.Last - 1e-9 && a.Position < x.Start + 1e-9) && own.Song.TrackDefinitions[track].Role != Rmg.Core.Songs.TrackRole.Solo
-                             && Math.Abs(a.Value.Velocity - b.Value.Velocity) > Hair)
+                             && a.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0 && Math.Abs(a.Value.Velocity - b.Value.Velocity) > Hair)
                         outside++;
                 }
             }
