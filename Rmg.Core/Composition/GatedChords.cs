@@ -18,11 +18,11 @@ internal static class GatedChords
 
     /// <summary>
     ///     A part's notes as held chords: for every chord of the song, from the first beat of the bar the part plays at or
-    ///     after, every note it plays over the chord as one, the first's, of the notes it sounds longest there, held until the
-    ///     next chord, the section's end or the band's next stop, whichever comes first; a note pushed ahead of a chord, as
-    ///     it reaches the chord's beat, the chord's, and a chord the same as the one before it part of it. Stop time's notes
-    ///     as they are, its hits, and an arpeggio's, a broken chord being a rhythm of its own, which the gate chops as it
-    ///     plays, as trance gates a pluck. A chord on an instrument that dies away as it rings, a guitar's or a piano's, is
+    ///     after, every note it plays over the chord as one, the notes it sounds longest there struck as the first, held until
+    ///     the next chord, the section's end or the band's next stop, whichever comes first; a note pushed ahead of a chord,
+    ///     as it reaches the chord's beat, the chord's, and a chord the same as the one before it part of it. Stop time's
+    ///     notes as they are, its hits, an arpeggio's, a broken chord being a rhythm of its own, which the gate chops as it
+    ///     plays, as trance gates a pluck, and a solo's, a line of its own. A chord on an instrument that dies away as it rings, a guitar's or a piano's, is
     ///     struck again, softer, on every bar line it holds across, so that the gate has a sound to chop.
     /// </summary>
     /// <param name="changes">Where the chords change, in order.</param>
@@ -42,9 +42,10 @@ internal static class GatedChords
         var stops = cuts.Concat(stopTime.Select(x => x.Start)).Order().ToArray();
         double NextStop(double position) => stops.FirstOrDefault(x => x > position + Epsilon, double.PositiveInfinity);
 
-        // every section's; an intro's and an ending's notes, which play no gate, as they are
-        bool Arpeggiated(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0;
-        var held = timeline.Where(x => InStopTime(x.Position) || Arpeggiated(x.Value) || x.Position < map.Sections[0].Start - Epsilon || x.Position >= map.Sections[^1].End - Epsilon).ToList();
+        // every section's; an intro's and an ending's notes, which play no gate, as they are, and a broken chord's and a
+        // solo's, which hold no chord
+        bool HoldsNoChord(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0 || note.State.GetStateValue(CompositionStateKinds.LineSolo) != 0;
+        var held = timeline.Where(x => InStopTime(x.Position) || HoldsNoChord(x.Value) || x.Position < map.Sections[0].Start - Epsilon || x.Position >= map.Sections[^1].End - Epsilon).ToList();
         foreach (var section in map.Sections)
         {
             var bar = section.Meter.BarDuration;
@@ -60,19 +61,20 @@ internal static class GatedChords
             var chords = new List<(double Start, double End, RealizedNote Note)>();
             // over a chord, the notes before a stop apart from those after it
             foreach (var group in timeline
-                         .Where(x => x.Position >= section.Start - Epsilon && x.Position < section.End - Epsilon && !InStopTime(x.Position) && !Arpeggiated(x.Value))
+                         .Where(x => x.Position >= section.Start - Epsilon && x.Position < section.End - Epsilon && !InStopTime(x.Position) && !HoldsNoChord(x.Value))
                          .Select(x => (Beat: Beat(x.Position), x.Value, Stop: NextStop(x.Position)))
                          .Where(x => x.Beat < Math.Min(section.End, x.Stop) - Epsilon)
                          .GroupBy(x => (Chord: starts.Last(s => s <= x.Beat + Epsilon), x.Stop)))
             {
                 var start = group.First().Beat;
-                // the notes it sounds longest over it, a stab pushed ahead of it or a passing note left out
-                var pitches = group.GroupBy(x => string.Join(",", x.Value.Pitches)).MaxBy(x => x.Sum(y => y.Value.Duration))!.First().Value.Pitches;
+                // the notes it sounds longest over it, their chord with them, a stab pushed ahead of it or a passing note left
+                // out, struck as its first note is
+                var longest = group.GroupBy(x => string.Join(",", x.Value.Pitches)).MaxBy(x => x.Sum(y => y.Value.Duration))!.First().Value;
                 var end = Math.Min(Math.Min(starts.FirstOrDefault(s => s > group.Key.Chord + Epsilon, section.End), section.End), group.Key.Stop);
-                if (chords.Count > 0 && chords[^1].Note.Pitches.SequenceEqual(pitches) && Math.Abs(chords[^1].End - start) < Epsilon)
+                if (chords.Count > 0 && chords[^1].Note.Pitches.SequenceEqual(longest.Pitches) && Math.Abs(chords[^1].End - start) < Epsilon)
                     chords[^1] = chords[^1] with { End = end };
                 else
-                    chords.Add((start, end, group.First().Value with { Pitches = pitches }));
+                    chords.Add((start, end, longest.WithVelocity(group.First().Value.Velocity)));
             }
 
             foreach (var (start, end, note) in chords)

@@ -59,7 +59,7 @@ public sealed class GenreDevicesReportTest
             ["sections over a pedal"] = sections.Length > 0 ? sections.Average(span => bassNotes.Any(n => span.IsWithin(n.Position) && n.Value.State.GetStateValue(CompositionStateKinds.BassPedal) > 0) ? 1.0 : 0) : double.NaN,
             ["songs reharmonising"] = song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is null ? 0 : 1,
             ["songs changing key"] = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).IsEmpty ? 0 : 1,
-            ["sections in stop time"] = Sections(TracePoints.StopTime, x => (bool)x!),
+            ["sections in stop time"] = Sections(TracePoints.StopTime, x => ((System.Collections.Immutable.ImmutableArray<double>)x!).Length > 0),
             ["sections pushing"] = Sections(TracePoints.Push, x => (bool)x!),
             ["lifts dropped"] = lifts > 0 ? song.Trace.Count(x => x.Point == TracePoints.Drop) / (double)lifts : double.NaN,
             ["sections of 16 bars or more"] = song.Song.Map!.Sections.Average(x => x.Duration >= 16 * x.Meter.BarDuration - 1e-9 ? 1.0 : 0),

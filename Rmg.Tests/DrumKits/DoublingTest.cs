@@ -10,7 +10,7 @@ public sealed class DoublingTest
     private static double FillBars(Meter meter) => meter.BarDuration;
 
     /// <summary>Whether a section plays in stop time (<see cref="StopTime" />).</summary>
-    private static bool InStopTime(CorpusSong song, int section) => song.Trace.Any(x => x.Point == TracePoints.StopTime && x.Section == section && (bool)x.Value!);
+    private static bool InStopTime(CorpusSong song, int section) => song.Trace.Any(x => x.Point == TracePoints.StopTime && x.Section == section && ((System.Collections.Immutable.ImmutableArray<double>)x.Value!).Length > 0);
 
     [Test]
     public async Task ADrumThatDoublesOrAccentsALead_PlaysOnlyBeatsTheLeadPlays_AnAccentFewerOfThem()

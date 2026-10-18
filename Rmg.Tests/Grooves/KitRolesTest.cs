@@ -97,7 +97,7 @@ public sealed class KitRolesTest
             var changed = Section<ImmutableDictionary<int, DrumRole>>(TracePoints.DrumRoles, span.SectionId);
             var kit = Section<SectionKit>(TracePoints.Kit, span.SectionId);
             DrumRole RoleOf(int track) => changed.TryGetValue(track, out var role) ? role : SongRole(track);
-            var label = (Section<bool>(TracePoints.Breakdown, span.SectionId) ? ", a breakdown" : "") + (Section<bool>(TracePoints.StopTime, span.SectionId) ? ", stop time" : "");
+            var label = (Section<bool>(TracePoints.Breakdown, span.SectionId) ? ", a breakdown" : "") + (Section<System.Collections.Immutable.ImmutableArray<double>>(TracePoints.StopTime, span.SectionId).Length > 0 ? ", stop time" : "");
             var from = song.DrumsFrom(index);
             var bars = span.BarCount;
             for (var bar = from * span.Meter.PatternBarCount; bar < bars; bar++)

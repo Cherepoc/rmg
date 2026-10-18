@@ -63,6 +63,9 @@ public sealed class PassingChordTest
                 // an intro planing as the section it plays as does
                 if (shift is not (1 or -1) || song.Map.PlayAt(changes[i]) is { } play && planing.Contains(play.Span.SectionId))
                     continue;
+                // and an intro's last, a quote cut off before the chord it passes to, the first section starting over
+                if (changes[i] < song.Map.Origin - 1e-9 && changes[i + 1] >= song.Map.Origin - 1e-9)
+                    continue;
                 if (Chord(changes[i]) is not { } chord || Chord(changes[i + 1]) is not { } next)
                     continue;
                 (above, below) = shift == 1 ? (above + 1, below) : (above, below + 1);

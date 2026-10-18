@@ -40,7 +40,7 @@ public sealed class GateTest
             // sounding on every bar's first 16th it holds a note over
             var timeline = song.Song.Notes!.Values.First(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0));
             foreach (var section in song.Map.Sections)
-            foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0))
+            foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
             for (var bar = section.Start + Math.Ceiling((note.Position - section.Start - 1e-9) / section.Meter.BarDuration) * section.Meter.BarDuration;
                  bar < note.Position + note.Value.Duration - 1e-9;
                  bar += section.Meter.BarDuration)
@@ -60,7 +60,7 @@ public sealed class GateTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
         foreach (var timeline in song.Song.Notes!.Values.Where(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
         foreach (var section in song.Map.Sections)
-        foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0))
+        foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
         {
             gated++;
             var inBar = (note.Position - section.Start) % section.Meter.BarDuration;
@@ -104,7 +104,7 @@ public sealed class GateTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
         foreach (var (track, timeline) in song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
         foreach (var section in song.Map.Sections)
-        foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0))
+        foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
         {
             var program = InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
             var bar = section.Meter.BarDuration;

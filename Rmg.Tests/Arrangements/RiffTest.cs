@@ -132,7 +132,7 @@ public sealed class RiffTest
         {
             var span = song.Map.Sections[index];
             // a solo plays over a doubling, and stop time's hits the band strikes together, the bass walking out of them
-            if (song.IsSolo(span) || song.Trace.Any(x => x.Point == TracePoints.StopTime && x.Section == span.SectionId && x.Value is true))
+            if (song.IsSolo(span) || song.Trace.Any(x => x.Point == TracePoints.StopTime && x.Section == span.SectionId && ((System.Collections.Immutable.ImmutableArray<double>)x.Value!).Length > 0))
                 continue;
             // but a part's walk into the next section, which it plays as its own
             double[] At(TrackRole role) => [..song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == role).Value

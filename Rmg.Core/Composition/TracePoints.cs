@@ -105,7 +105,7 @@ internal static class TracePoints
     /// </summary>
     public const string Turnaround = "Turnaround";
 
-    /// <summary>Whether a section plays its appearances' first phrase in stop time (a <c>bool</c>).</summary>
+    /// <summary>Where a section plays its appearances' first phrase in stop time, the phrases' starts, none for none (an <c>ImmutableArray&lt;double&gt;</c>).</summary>
     public const string StopTime = "Stop time";
 
     /// <summary>Where a section strikes its last bar before a louder one in ensemble hits, the bars' starts, none for none (an <c>ImmutableArray&lt;double&gt;</c>).</summary>

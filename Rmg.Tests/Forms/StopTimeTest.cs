@@ -96,10 +96,10 @@ public sealed class StopTimeTest
     /// <summary>The song's stop-time phrases, its start, end and bar, as the trace has them.</summary>
     private static IEnumerable<(double Start, double End, double Bar)> StopTimeSpans(CorpusSong song)
     {
-        var stopping = song.Trace.Where(x => x.Point == TracePoints.StopTime && (bool)x.Value!).Select(x => x.Section).ToHashSet();
+        var stopping = song.Trace.Where(x => x.Point == TracePoints.StopTime).SelectMany(x => (System.Collections.Immutable.ImmutableArray<double>)x.Value!).ToArray();
         var intro = song.Map.Intro;
         var built = intro.Kind == IntroKind.Entries && !intro.Window.IsBefore ? song.Map.Sections[0] : null;
-        return song.Song.Map!.Sections.Where((x, i) => stopping.Contains(x.SectionId) && x != built && !song.Solos.ContainsKey(i))
+        return song.Song.Map!.Sections.Where((x, i) => stopping.Any(s => Math.Abs(s - x.Start) < 1e-6) && x != built && !song.Solos.ContainsKey(i))
             .Select(x => (x.Start, Math.Min(x.End, x.Start + x.Meter.PhraseDuration), x.Meter.BarDuration));
     }
 

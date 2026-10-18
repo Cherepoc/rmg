@@ -120,7 +120,7 @@ public sealed class GivenDrumPiecesTest
             // where the drums change the form, the parts move with it: where they enter, as an intro bringing the parts in
             // one by one does, its order taking the drums' roles, a drum solo, stop time, which the drums keeping time carry
             // through a bar, and ensemble hits, struck with the kick
-            if (!SameForm(drawn.Map, given.Map) || drawn.Trace.Concat(given.Trace).Any(x => x.Point == TracePoints.DrumSolo || x.Point == TracePoints.StopTime && (bool)x.Value!
+            if (!SameForm(drawn.Map, given.Map) || drawn.Trace.Concat(given.Trace).Any(x => x.Point == TracePoints.DrumSolo || x.Point == TracePoints.StopTime && ((ImmutableArray<double>)x.Value!).Length > 0
                     || x.Point == TracePoints.EnsembleHits && ((ImmutableArray<double>)x.Value!).Length > 0))
                 continue;
             compared++;

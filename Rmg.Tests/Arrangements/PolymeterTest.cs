@@ -111,11 +111,12 @@ public sealed class PolymeterTest
                 var cells = new List<(double At, double Length)>();
                 for (var (cell, at) = (0, start); at < end - 1e-9; at += cells[^1].Length)
                     cells.Add((at, plan.CellAt(cell++) * 0.25));
-                // the motif as the longest cell plays it whole where it first does
+                // the motif as the longest cell plays it whole where it first does, and the first cell its start, either
+                // missing what falls in a bar the part sits out
                 var longest = cells.FirstOrDefault(x => x.Length.Equals(plan.Longest * 0.25) && x.At + x.Length <= end + 1e-9);
                 if (longest == default)
                     continue;
-                var first = events.Where(x => x >= longest.At - 1e-9 && x < longest.At + longest.Length - 1e-9).Select(x => Math.Round(x - longest.At, 6)).ToHashSet();
+                var first = new[] { longest, cells[0] }.SelectMany(c => events.Where(x => x >= c.At - 1e-9 && x < c.At + c.Length - 1e-9).Select(x => Math.Round(x - c.At, 6))).ToHashSet();
                 if (first.Count == 0)
                     first = [0];
                 foreach (var onset in events.Where(x => x >= start - 1e-9 && x < Math.Min(start + frame, span.End) - 1e-9))

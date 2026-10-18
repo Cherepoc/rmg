@@ -100,14 +100,14 @@ internal static class StopTime
         // and no hits in a section running a polymeter, whose cycle runs to its end
         var hitBars = song.EnsembleHits.Where(x => !holds.Meets(KeepsOutOf | Hold.Polymeter, x.Start, x.End)).ToImmutableArray();
         var phrases = song.StopTime.Where(x => !holds.Meets(KeepsOutOf, x.Start, x.End)).Concat(hitBars).ToImmutableArray();
-        // whether a section is stopped wherever it plays, as it is played: a phrase drawn that nothing carries is not
+        // where a section plays in stop time, as it is played: the starts of its appearances' phrases stopped, a phrase drawn
+        // that nothing carries not
         void Record(Func<(double Start, double End, double BarDuration), bool> played)
         {
             foreach (var id in song.SectionIds.Distinct())
             {
-                var drawn = phrases.Where(p => song.Form.Map.Sections.Any(x => x.SectionId == id && Math.Abs(p.Start - x.Start) < 1e-9)).ToArray();
-                var stops = drawn.Length > 0 && drawn.All(played);
-                StateTrace.RecordSection(TracePoints.StopTime, SectionGenerator.SectionTrace, id, $"{stops}", stops);
+                ImmutableArray<double> stops = [..phrases.Where(p => song.Form.Map.Sections.Any(x => x.SectionId == id && Math.Abs(p.Start - x.Start) < 1e-9) && played(p)).Select(p => p.Start)];
+                StateTrace.RecordSection(TracePoints.StopTime, SectionGenerator.SectionTrace, id, string.Join(", ", stops), stops);
                 ImmutableArray<double> struck = [..hitBars.Where(p => song.Form.Map.Sections.Any(x => x.SectionId == id && x.IsWithin(p.Start)) && played(p)).Select(p => p.Start)];
                 StateTrace.RecordSection(TracePoints.EnsembleHits, SectionGenerator.SectionTrace, id, string.Join(", ", struck), struck);
             }

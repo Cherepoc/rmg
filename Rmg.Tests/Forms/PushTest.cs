@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Songs;
@@ -23,8 +24,8 @@ public sealed class PushTest
             var chords = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.ToArray() ?? [];
             var kick = song.Song.Notes!.Where(x => kicks.Contains(x.Key)).SelectMany(x => x.Value).Select(x => x.Position).ToArray();
             // but in and at the end of a phrase in stop time, which a push leaves be, its fill landing there
-            var stopped = song.Trace.Where(x => x.Point == TracePoints.StopTime && (bool)x.Value!).Select(x => x.Section).ToHashSet();
-            bool InStopTime(double at) => song.Song.Map!.Sections.Any(s => stopped.Contains(s.SectionId) && at >= s.Start - 1e-9 && at <= s.Start + s.Meter.PhraseDuration + 1e-9);
+            var stopped = song.Trace.Where(x => x.Point == TracePoints.StopTime).SelectMany(x => (ImmutableArray<double>)x.Value!).ToArray();
+            bool InStopTime(double at) => song.Song.Map!.Sections.Any(s => stopped.Any(x => Math.Abs(x - s.Start) < 1e-6) && at >= s.Start - 1e-9 && at <= s.Start + s.Meter.PhraseDuration + 1e-9);
             // but in a polymeter, whose cycle runs across the changes (Pushes)
             var polymetric = song.PolymeterPlans.Keys.ToHashSet();
             foreach (var (span, index) in song.Song.Map!.Sections.Select((x, i) => (x, i)).Where(x => pushing.Contains(x.x.SectionId) && !song.Solos.ContainsKey(x.i) && !polymetric.Contains(x.x.SectionId)))

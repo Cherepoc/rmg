@@ -308,15 +308,13 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
 Rules that fail on other songs than the corpus's own, each older than the second order of work (15 October 2026), to
 trace at the committed code before blaming a change:
 
-- **At offset 816000000:** the rhythm part's realized note at a change keeping the chord before in its state (seed 57
-  at 180, its pitches the new chord's, so the realizer's merge); a chromatic passing chord a semitone from the next
-  (seed 1 at 6); a palm-muted note's length; seed 21's bass at 90 landing a semitone over its chord's root, placed so by `LinePattern.Place`;
-  shapes apart (seed 5 at 173.5 after a reharmonisation, seed 49 at 44 the melody's triad over the chords' cluster).
-- **At offset 716000000:** a polymeter's chords off its cell (seed 26 at 248, 6-16th cells); a soloist's stacks; a
-  line's fall from the root; a passing chord (seed 15 at 22, seed 4 at 2); a filtered drop's band (seed 29 at 608); a
-  section's own key (seed 50); a pushed change (seed 58 at 192 and 224); a strum's direction (seed 15 at 148); the inner
-  line; every chord note in its scale; the render's notes; a djent breakdown in 15/16 whose kick pattern plays no note
-  (seed 48, section 7), so the kick with the riff has nothing to lay on.
+- **At offset 816000000:** a palm-muted note's length; seed 21's bass at 90 landing a semitone over its chord's root,
+  placed so by `LinePattern.Place`; shapes apart (seed 5 at 173.5 after a reharmonisation, seed 49 at 44 the melody's
+  triad over the chords' cluster).
+- **At offset 716000000:** a soloist's stacks; a line's fall from the root; a filtered drop's band (seed 29 at 608); a
+  section's own key (seed 50); a strum's direction (seed 15 at 148); the inner line; every chord note in its scale; a
+  djent breakdown in 15/16 whose kick pattern plays no note (seed 48, section 7), so the kick with the riff has nothing
+  to lay on.
 - **From the review of 16 October 2026,** both failing at its commit already:
   - **At offset 942000000:** seed 5's bass at 552 plays F#, the fifth of its Bb chord raised, its own alteration +1,
     where the raised step (G minor's F#) ended at 550. The note is an anticipation (`ChordApproach.Anticipation`) and a
