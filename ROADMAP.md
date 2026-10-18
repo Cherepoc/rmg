@@ -6,18 +6,18 @@ is removed once it is built, its leftovers kept under *Open work*.
 
 ## Priorities
 
-1. **Now: the review of 16 October 2026** (P1, *Open work*): its packages, the failing tests first at the review's
-   commit.
-2. **The rules on the other corpora** (P1, *Older rule failures*): the failures older than the second order of work,
-   each traced at the committed code first.
-3. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
+1. **Now: the rules on the other corpora** (P1, *Older rule failures*): the failures older than the second order of
+   work, each traced at the committed code first, the review of 16 October's #296 and #302 among them.
+2. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
-   before it is asked).
-4. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
+   before it is asked). Next, the review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package
+   `listening`): 25 questions to ask as the code is, #87 (the bass under a twin's lead) and #130 (a solo's answer
+   after a held note) needing a switch first, and a loose figure of the drums' and the boom's (*Figures as chances*).
+3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.
-5. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
+4. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
    with its reason; no new presets until the owner asks (15 October 2026).
-6. **Parked** (P4): kept for their reasons, not planned.
+5. **Parked** (P4): kept for their reasons, not planned.
 
 ## Listening
 
@@ -204,7 +204,8 @@ Each item with its plan, and what it waits for.
 
 ### From the review of 16 October 2026
 
-The review's fixes are its plan (outside the repository, `rmg-reviews/2026-10-16/plan/plan.md`); its three architecture
+The review's fixes are its plan (outside the repository, `rmg-reviews/2026-10-16/plan/plan.md`), done but its
+listening queue (*Priorities*) and four findings partly fixed as designed (#54, #191, #369, #398); its three architecture
 proposals are packages there, the holds written by their makers, the pulse on a place and one list of plays. What it
 proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
 
