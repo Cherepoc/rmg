@@ -252,8 +252,6 @@ The review of 16 October's unasked questions and every earlier verdict judged ag
 October 2026), decided without asking where convention is clear, each step measured on the devices report and
 committed with its songs' count:
 
-6. **A solo's answers between phrases** (#130): only the gap across a phrase's start answered, the melody's notes
-   having no end before `Realizer`.
 7. **Hat rolls on the hi-hat** (#66), never the ride.
 
 Put off, each its own plan:

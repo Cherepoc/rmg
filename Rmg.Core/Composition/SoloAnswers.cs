@@ -7,9 +7,9 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     The solo part answering the melody outside its solos, as a guitarist fills between a singer's phrases: in a section
 ///     the counter-melody leaves to it, now and then, by the melody facet, never in a plain song, it plays in the melody's
-///     gaps of more than two beats, a rest or a note held, now and then, a short line of its own in its soloist's
-///     vocabulary (<see cref="SoloLines" />), planned over the gap as a solo's phrase is, under the melody, starting on
-///     the half beat a beat into the gap and ending before the melody goes on.
+///     gaps of more than two beats between its phrases, a rest or a phrase's last note held, now and then, a short line
+///     of its own in its soloist's vocabulary (<see cref="SoloLines" />), planned over the gap as a solo's phrase is,
+///     under the melody, starting on the half beat a beat into the gap and ending before the melody goes on.
 /// </summary>
 internal static class SoloAnswers
 {
@@ -29,6 +29,9 @@ internal static class SoloAnswers
     public const double After = 1;
 
     public const double Before = 0.25;
+
+    /// <summary>How far before a phrase's start the melody's next note may come and the gap still be the one between its phrases, its pickup, in beats.</summary>
+    public const double Pickup = 1;
 
     /// <summary>How much quieter an answer plays than the melody of its section, on the average of their velocities as rendered.</summary>
     public const double Quieter = 0.06;
@@ -86,6 +89,10 @@ internal static class SoloAnswers
             // melody as it is heard there
             var heard = Solos.Loudness(melodyHeard.Value.Where(IsIn), 0);
             var onsets = melody.Select(x => x.Position).Append(span.End).ToArray();
+            // the phrases' starts after the section's, and its end, which a gap answered spans, the melody's next note at most
+            // its pickup before it
+            var phrases = span.Phrases.Select(x => x.Start).Skip(1).Append(span.End).ToArray();
+            bool BetweenPhrases(int gap) => phrases.Any(x => x > onsets[gap] + 1e-9 && x <= onsets[gap + 1] + Pickup + 1e-9);
             // every gap's test drawn before any line, so that a line's draws leave which gaps are answered
             var gaps = Enumerable.Range(0, onsets.Length - 1).Select(_ => context.TestProbability(GapChance)).ToArray();
             // and every gap's line from sequences of its own, by its place, so that a gap passed over leaves the others' lines
@@ -98,7 +105,7 @@ internal static class SoloAnswers
                 // a short line, a bar or two at most, however long the gap
                 var end = Math.Min(onsets[i + 1] - Before, start + LongestBars * span.Meter.BarDuration);
                 // nor over another part's answer to a call
-                if (!answered || end - start < 1 - 1e-9 || holds.Meets(KeepsOutOf, start, end))
+                if (!answered || !BetweenPhrases(i) || end - start < 1 - 1e-9 || holds.Meets(KeepsOutOf, start, end))
                     continue;
 
                 var gap = span with { Start = start, Duration = end - start };

@@ -26,6 +26,7 @@ public sealed class SoloAnswerTest
         {
             var (answerNotes, melody) = Notes(song);
             var onsets = melody.Select(x => x.Position).ToArray();
+            var phrases = song.Map.Sections.SelectMany(x => x.Phrases.Select(p => p.Start).Append(x.End)).ToArray();
             foreach (var note in answerNotes)
             {
                 // a beat or more after the melody's note before it, and over before its next
@@ -33,6 +34,8 @@ public sealed class SoloAnswerTest
                 var next = onsets.FirstOrDefault(x => x > note.Position + 1e-9, double.MaxValue);
                 await Assert.That(note.Position - before).IsGreaterThanOrEqualTo(1 - 1e-9).Because($"seed {song.Seed} at {note.Position}");
                 await Assert.That(note.Position + note.Value.Duration).IsLessThanOrEqualTo(next + 1e-6).Because($"seed {song.Seed} at {note.Position}");
+                // between the melody's phrases, a phrase starting after the note before, its next at most a pickup before it
+                await Assert.That(phrases.Any(x => x > before + 1e-9 && x <= next + Rmg.Core.Composition.SoloAnswers.Pickup + 1e-9)).IsTrue().Because($"seed {song.Seed} at {note.Position}");
                 // a short line, starting a beat after the note before at the soonest and played over two bars at most
                 var bar = song.Map.MeterAt(note.Position).BarDuration;
                 await Assert.That(note.Position - before).IsLessThanOrEqualTo(Rmg.Core.Composition.SoloAnswers.After + Rmg.Core.Composition.SoloAnswers.LongestBars * bar + 1)
