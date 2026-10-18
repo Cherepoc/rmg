@@ -173,23 +173,36 @@ public static class Render
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
             {
                 // a driven guitar played twice, by the instrument it sounds, the drawn or the one given, or one a section switches
-                // it to, all the way to the side it drew, its second take on the other
+                // it to, all the way to the side it drew where it plays driven, its second take on the other, and at the pan it
+                // drew where it plays alone, clean or muted
                 var programChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing);
-                var doubles = mix.Of(pitchInstrumentTrack.Role)?.Instrument is { } givenProgram
+                var given = mix.Of(pitchInstrumentTrack.Role)?.Instrument;
+                var doubles = given is { } givenProgram
                     ? DoubleTracking.Doubles(pitchInstrumentTrack.Role, givenProgram)
                     : programChanges.Select(x => x.Program).Prepend(pitchInstrumentTrack.InstrumentCode).Any(x => DoubleTracking.Doubles(pitchInstrumentTrack.Role, x));
-                var pan = doubles ? Math.Sign(pitchInstrumentTrack.Pan) is 0 ? 1.0 : Math.Sign(pitchInstrumentTrack.Pan) : pitchInstrumentTrack.Pan;
+                // a driven guitar's pinch, played on the harmonics, doubled with the notes around it
+                bool Driven(double position) => given is not null
+                    || programChanges.LastOrDefault(x => x.Position <= position + 1e-9, (0, pitchInstrumentTrack.InstrumentCode)).Item2 is var program
+                    && (InstrumentTraits.Has(program, InstrumentTrait.Driven) || program == Composition.Expression.GuitarHarmonics);
+                var side = Math.Sign(pitchInstrumentTrack.Pan) is 0 ? 1.0 : Math.Sign(pitchInstrumentTrack.Pan);
+                double PanAt(double position) => doubles && Driven(position) ? side : pitchInstrumentTrack.Pan;
+                var pan = PanAt(0);
                 // how the part is played beyond its notes, its send to the delay that echoes it among them
                 var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pan, mixClosed);
                 var played = EventTimeline.Create(trackNotes.Duration, renderedNotes);
-                // a doubled part plays no sweep, its takes standing apart on either side
+                // a doubled part plays no sweep, its takes standing apart on either side, its first moving to its side and back
+                // where its sound changes
                 var controllers = doubles ? [..expression.Controllers.Where(x => x.Controller != 10)] : expression.Controllers;
+                var moves = doubles
+                    ? programChanges.Select(x => (x.Position, Pan: PanAt(x.Position))).Where((x, i) => Math.Abs(x.Pan - (i == 0 ? pan : PanAt(programChanges[i - 1].Position))) > 1e-9)
+                        .Select(x => (x.Position, 10, (int)Math.Round(64 + 63 * x.Pan))).ToArray()
+                    : [];
                 renderedTracks.Add(
                     new RenderedTrack(false, pitchInstrumentTrack.Role, pitchInstrumentTrack.InstrumentCode, played, pan, doubles ? DoubleTracking.Level : 1)
                     {
                         ProgramChanges = programChanges,
                         PitchBends = expression.Bends,
-                        Controllers = controllers,
+                        Controllers = [..controllers, ..moves],
                         Expression = expression.Expression
                     }
                 );
@@ -209,14 +222,9 @@ public static class Render
                     var tempo = common.GetStateTimeline(StateKinds.Tempo);
                     TimelineItem<RenderedNote> Late(TimelineItem<RenderedNote> note) =>
                         (note.Value with { Shift = note.Value.Shift + DoubleTracking.Delay * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(note.Position)) }).ToTimelineItem(note.Position);
-                    var given = mix.Of(pitchInstrumentTrack.Role)?.Instrument;
-                    // a driven guitar's pinch, played on the harmonics, doubled with the notes around it
-                    bool Driven(double position) => given is not null
-                        || programChanges.LastOrDefault(x => x.Position <= position + 1e-9, (0, pitchInstrumentTrack.InstrumentCode)).Item2 is var program
-                        && (InstrumentTraits.Has(program, InstrumentTrait.Driven) || program == Composition.Expression.GuitarHarmonics);
                     renderedTracks.Add(
                         new RenderedTrack(false, pitchInstrumentTrack.Role, DoubleTracking.SecondTake(pitchInstrumentTrack.InstrumentCode),
-                            EventTimeline.Create(played.Duration, played.Where(x => Driven(x.Position)).Select(Late)), -pan, DoubleTracking.Level)
+                            EventTimeline.Create(played.Duration, played.Where(x => Driven(x.Position)).Select(Late)), -side, DoubleTracking.Level)
                         {
                             IsDouble = true,
                             ProgramChanges = [..programChanges.Select(x => (x.Position, DoubleTracking.SecondTake(x.Program)))],

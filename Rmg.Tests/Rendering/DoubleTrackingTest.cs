@@ -17,9 +17,9 @@ public sealed class DoubleTrackingTest
         TestCorpus.InParallel(Enumerable.Range(0, 16 * Genres.Length), i => TestCorpus.Get(i / Genres.Length, new SongOverrides(Genre: GenrePresets.Genre(Genres[i % Genres.Length]))));
 
     [Test]
-    public async Task ADrivenGuitarsPart_PlaysTwice_HardLeftAndRight_TheSecondTakeOnTheOtherDrivenGuitar_ALittleLate()
+    public async Task ADrivenGuitarsPart_PlaysTwice_HardLeftAndRight_TheSecondTakeOnTheOtherDrivenGuitar_ALittleLate_AtItsOwnPanWhereItPlaysAlone()
     {
-        var doubled = 0;
+        var (doubled, moving) = (0, 0);
         foreach (var song in Songs())
         {
             var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
@@ -38,8 +38,8 @@ public sealed class DoubleTrackingTest
                     continue;
                 doubled++;
                 var (first, second) = (takes.Single(x => !x.IsDouble), takes.Single(x => x.IsDouble));
-                await Assert.That(Math.Abs(first.Pan)).IsEqualTo(1);
-                await Assert.That(second.Pan).IsEqualTo(-first.Pan);
+                var side = Math.Sign(part.Pan) is 0 ? 1.0 : Math.Sign(part.Pan);
+                await Assert.That(second.Pan).IsEqualTo(-side);
                 await Assert.That(second.PitchInstrumentCode).IsEqualTo(DoubleTracking.SecondTake(first.PitchInstrumentCode));
                 // the other driven guitar where the part starts on one, its switches' too
                 if (InstrumentTraits.Has(first.PitchInstrumentCode, InstrumentTrait.Driven))
@@ -51,6 +51,12 @@ public sealed class DoubleTrackingTest
                 bool Driven(double position) => first.ProgramChanges.LastOrDefault(x => x.Position <= position + 1e-9, (0, first.PitchInstrumentCode)).Item2 is var program
                                                 && (InstrumentTraits.Has(program, InstrumentTrait.Driven) || program == Expression.GuitarHarmonics);
                 var driven = first.NoteTimeline.Where(x => Driven(x.Position)).ToArray();
+                // the first take hard to its side where the second plays, at the pan the part drew where it plays alone
+                int PanAt(double position) => first.Controllers.Where(x => x.Controller == 10 && x.Position <= position + 1e-9).Select(x => x.Value)
+                    .LastOrDefault((int)Math.Round(64 + 63 * first.Pan));
+                moving += first.Controllers.Any(x => x.Controller == 10) ? 1 : 0;
+                foreach (var note in first.NoteTimeline)
+                    await Assert.That(PanAt(note.Position)).IsEqualTo((int)Math.Round(64 + 63 * (Driven(note.Position) ? side : part.Pan))).Because($"seed {song.Seed} at {note.Position}");
                 await Assert.That(second.NoteTimeline.Select(x => (x.Position, x.Value.Offset))).IsEquivalentTo(driven.Select(x => (x.Position, x.Value.Offset)), CollectionOrdering.Matching);
                 foreach (var (a, b) in driven.Zip(second.NoteTimeline))
                     await Assert.That(b.Value.Shift - a.Value.Shift).IsEqualTo(DoubleTracking.Delay * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(a.Position))).Within(1e-9);
@@ -61,6 +67,7 @@ public sealed class DoubleTrackingTest
             song.Rendered.Write(Stream.Null, null);
         }
 
+        Console.WriteLine($"of {doubled} doubled parts, {moving} moving to their side and back");
         await Assert.That(doubled).IsGreaterThan(40);
     }
 
