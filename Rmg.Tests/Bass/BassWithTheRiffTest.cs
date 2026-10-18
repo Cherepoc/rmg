@@ -33,4 +33,18 @@ public sealed class BassWithTheRiffTest
         await Assert.That(shares[^1].Share).IsLessThan(0.1);
         await Assert.That(shares.Zip(shares.Skip(1)).All(x => x.First.Share >= x.Second.Share - 0.05)).IsTrue();
     }
+
+    /// <summary>Where the twin leads, the riff a lead line, the bass plays its own beneath it, never the lead in unison.</summary>
+    [Test]
+    public async Task WhereTheTwinLeads_TheBassPlaysItsOwn()
+    {
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre("metal"))));
+        HashSet<int> Doubled(CorpusSong song, TrackRole target) =>
+            [..song.Trace.Where(t => t.Point == TracePoints.LineDoubling && t.Value is (int, TrackRole.Riff, TrackRole, int) && ((ValueTuple<int, TrackRole, TrackRole, int>)t.Value!).Item3 == target)
+                .Select(t => ((ValueTuple<int, TrackRole, TrackRole, int>)t.Value!).Item1)];
+        var (twinLed, both) = (songs.Sum(x => Doubled(x, TrackRole.RiffTwin).Count), songs.Sum(x => Doubled(x, TrackRole.RiffTwin).Intersect(Doubled(x, TrackRole.Bass)).Count()));
+        Console.WriteLine($"Metal's sections the twin leads: {twinLed}, {both} of them with the bass doubling the riff");
+        await Assert.That(twinLed).IsGreaterThan(10);
+        await Assert.That(both).IsEqualTo(0);
+    }
 }

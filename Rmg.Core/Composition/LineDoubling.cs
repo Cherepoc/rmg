@@ -208,8 +208,10 @@ internal static class LineDoubling
                 var events = song.TrackTimelineMap;
                 bool Plays(int track) => events[track].EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
                 // a twin in the sections it leads alone, but an appearance that leaves it out, a calm section's
-                // nor into a part playing a figure there, the bass's rolling or offbeat rhythm, which it keeps as a pedal is kept
-                if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && (!twinLeads(index) || twinRests(index)) || playsAFigure(index, target))
+                // nor into a part playing a figure there, the bass's rolling or offbeat rhythm, which it keeps as a pedal is kept,
+                // nor the bass with a riff the twin leads in, a lead line, under which the bass plays its own
+                if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && (!twinLeads(index) || twinRests(index)) || playsAFigure(index, target)
+                    || target == TrackRole.Bass && twinLeads(index))
                     continue;
 
                 // a section a pair doubles already, the counter-melody harmonising it, not imitated too
