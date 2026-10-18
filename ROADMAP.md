@@ -11,9 +11,10 @@ is removed once it is built, its leftovers kept under *Open work*.
 2. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
-   the seventh round's nine decided by genre judgment and retired (19 October); next its cuts (#136 the shared solo, #341 the stickings, #77 the articulation
-   variants), #66, #391 if still apt, #87 (the bass under a twin's lead) and #130 (a solo's answer after a held note)
-   needing a switch first, and a loose figure of the drums' and the boom's (*Figures as chances*, a switch too).
+   the seventh round's nine decided by genre judgment and retired (19 October), and the rest of the queue reviewed
+   against the genres' conventions on 19 October (*Genre conventions*, being built); left to ask: the cuts of #136 the
+   shared solo, #341 the stickings and #77 the articulation variants, each a question of the code's cost, not of a
+   genre's, and a loose figure of the drums' and the boom's (*Figures as chances*, a switch first).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.
 4. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
@@ -84,7 +85,8 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
 - **Key changes:** two a song in the fourth fifth; prepared ones, pivots, pedals, sequences heard. Decides their
   chances and devices.
 - **Tempo:** 6/8 counted in quarters; 13/16 too busy? Decides the odd meters' weights.
-- **The fade-outs:** a ritardando into the fade, the drums fading first, a tag after it? Decides whether to build one.
+- **The fade-outs:** the drums fading first, a tag after it? Decides whether to build one (a ritardando not: a fade
+  keeps its groove, the slowing a ring-out's).
 - **The settings panel:** a song made again with changed settings sounding moved rather than jumped; the pad in 80% of
   songs, the counter-melody in 60%, the drums in 95%. Decides the parts' chances.
 
@@ -101,11 +103,6 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
 - **The walks into a section:** the melody at 15% of changes, the bass at half of the runs. Decides their chances.
 - **Double stops and the riff's chords:** the melody's on a chord instrument's downbeats in a quarter of sections.
   Decides their chance.
-- **The bass's pickup** always on the beat: square? Decides an 8th before the bar line, leaned by convention.
-- **A walking bass** (from the review of 9 October 2026): its weak quarters keep to the chord's notes, so a ii–V may
-  walk arpeggios rather than a line. A report of the share of Jazz's bass notes on beats 2 and 4 outside the chord
-  (about 30-50% in a walk) decides letting them take scale steps and chromatic passing notes where a genre leans its
-  leading high.
 - **Octaves and twins** (`doubling` heard better, 8 October 2026): a line in octaves in 10-20% of appearances, the riff's twin in 15% of riff
   songs, twin leads a third apart. Decides their chances and intervals.
 
@@ -188,8 +185,7 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   drums marking the form. Decides each preset's choices.
 - **The dark presets' mood** (`MoodReportTest`): still happy? Decides their degrees leaned (`rootDegree`).
 - **Rock's and Metal's degrees** (`RockAndMetalReportTest`): Rock's ♭VII–I in 45% of sections, Metal's ♭VI in 19% of its
-  chords; a rock song's I–♭VII–IV loop, which the progression's home, away, preparation and cadence come near only
-  through the cadence? Decides a loop's template of its own.
+  chords (a rock song's I–♭VII–IV loop decided by convention, *Genre conventions*).
 - **Rock and metal against their bands** (`RockAndMetalReportTest`): the organ's solos, the shuffle, Metal's clean
   quiet sections. Decides the presets' weights.
 - **The wild ends** (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, the wildest Jazz 56% swung; a wild
@@ -249,6 +245,42 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   section a fifth to a half faster (`SectionTempo`, 4% of sections at the middle) may play it near 0.07 s; the swing
   is song-wide state, and a clamp per section a swing of the section's own, put off until a fast swung section is
   heard rushed.
+
+### Genre conventions (the listening review of 19 October 2026)
+
+The review of 16 October's unasked questions and every earlier verdict judged against the genres' conventions (19
+October 2026), decided without asking where convention is clear, each step measured on the devices report and
+committed with its songs' count:
+
+1. **Devices inherited at the songs' rate:** the octave bass 0 in Metal, Thrash, Doom, Black metal, Symphonic, Djent,
+   Nu metal, Bossa nova and the Power ballad (#121); flams 0-5-20 and drags 0-0-10 in the presets of plain or
+   programmed drums (Pop, Ballad, Lyrical, Disco, Djent, Nu metal, Reggae, Dub, Bossa, Country, Bluegrass, Folk,
+   Celtic, Black metal), none in the 16-bit game (#401); Rock's ornaments in Ska, Reggae, Dub, IDM, Black metal,
+   Ambient and the 16-bit game, and Pop's and the Ballad's trills 0-0-15; the drums soloing at the wild end alone in
+   Rock, Metal and Thrash.
+2. **One genre's retunes:** Bossa nova's root and fifth 50-50-40, the plainest the likeliest (#390); Doom's blues
+   riffs 15-15-25; Black metal's key changes named, no lift, a section's own 0-8-50; Symphonic's ensemble hits
+   15-20-25 (#371); Orchestral's solos to the leads, about a quarter of its songs (#391); Folk's solos about half;
+   Hip-hop's hat rolls the wild end's; Techno's rolling bass 0-0-15, its middle as listening left it.
+3. **The pocket laid back, the bass not rushed** (#103): a genre's laid-back factor scaling the late offsets, the early
+   ones (the bass's, the time's) by it only where it tightens.
+4. **Steady figures on the meter's pulses** (#38): a step of a quarter or more landing on the pulses, so that 6/8's
+   boom and kick fall on 1 and 4.
+5. **The bass under a twin's lead** (#87) its own line, the riff's doubling passed over where the twin leads.
+6. **A solo's answers between phrases** (#130): only the gap across a phrase's start answered, the melody's notes
+   having no end before `Realizer`.
+7. **Hat rolls on the hi-hat** (#66), never the ride.
+
+Put off, each its own plan:
+
+- **A walking bass's line** (from the review of 9 October 2026): its weak quarters keep to the chord's notes, so a ii–V
+  walks arpeggios; a walk takes scale steps and chromatic approaches on 2 and 4 (about 30-50% of Jazz's walking notes
+  outside the chord), and the bass's pickup an 8th before the bar line, leaned by convention, with it, as both are the
+  bass line's walks. Needs a report of the share first.
+- **Rock's I–♭VII–IV loop,** a progression template of its own: the progression's home, away, preparation and cadence
+  come near it only through the cadence (Rock's ♭VII–I in 45% of sections).
+- **A key change's preparation as a genre's choice** (`KeyChange.PrepareChance`, 0.5 for every song): Black metal's
+  jumps; put off until its key changes as named in step 2 are heard.
 
 ### Older rule failures
 
