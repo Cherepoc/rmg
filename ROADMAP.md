@@ -311,10 +311,11 @@ trace at the committed code before blaming a change:
 - **At offset 816000000:** a palm-muted note's length; seed 21's bass at 90 landing a semitone over its chord's root,
   placed so by `LinePattern.Place`; shapes apart (seed 5 at 173.5 after a reharmonisation, seed 49 at 44 the melody's
   triad over the chords' cluster).
-- **At offset 716000000:** a soloist's stacks; a line's fall from the root; a filtered drop's band (seed 29 at 608); a
-  strum's direction (seed 15 at 148); the inner line; every chord note in its scale; seed 38's bass at 178 out of its
-  scale; a djent breakdown in 15/16 whose kick pattern plays no note (seed 48, section 7), so the kick with the riff has
-  nothing to lay on.
+- **At offset 716000000:** a solo's scale run (seed 3 at 600.25, facets of form and melody 1) falling 74, 72, 71, 67,
+  67, a step skipped and the next note repeated, though `SoloLines.Cells` steps the scale, so a stage after it; seed
+  38's bass at 178 a half step above the next chord's root at 178.5 (`ChordApproach.HalfStepAbove`), which the scale
+  rule means to let by, so the rule's reading of the rendered note; a djent breakdown in 15/16 whose kick pattern
+  plays no note (seed 48, section 7), so the kick with the riff has nothing to lay on.
 - **From the review of 16 October 2026,** both failing at its commit already:
   - **At offset 942000000:** seed 5's bass at 552 plays F# over its Bb chord, the chord's fifth raised by the note's
     own alteration (+1), with an anticipation (`ChordApproach.Anticipation`) of F#, the root of the key preparation's

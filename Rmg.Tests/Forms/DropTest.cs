@@ -75,9 +75,10 @@ public sealed class DropTest
         {
             drops++;
             var bar = song.Song.Map!.MeterAt(at - 1e-6).BarDuration;
-            // the band playing on there, the drums at least, where a section of drums alone drops into the next
+            // the band playing on there, the drums at least, where a section of drums alone drops into the next, its notes
+            // sounding in the bar, a sparse section's held
             var played = song.Song.Notes!.Values.SelectMany(x => x).ToArray();
-            await Assert.That(played.Count(x => x.Position >= at - bar - 1e-9 && x.Position < at - 1e-9)).IsGreaterThan(2).Because($"seed {song.Seed} at {at}");
+            await Assert.That(played.Count(x => x.Position < at - 1e-9 && x.Position + x.Value.Duration > at - bar + 1e-9)).IsGreaterThan(2).Because($"seed {song.Seed} at {at}");
             var mix = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(CompositionStateKinds.MixClosed);
             await Assert.That(mix.GetEffectiveValueAt(at - 0.25)).IsGreaterThan(0.8).Because($"seed {song.Seed} at {at}");
             await Assert.That(mix.GetEffectiveValueAt(at)).IsLessThan(0.05).Because($"seed {song.Seed} at {at}");
