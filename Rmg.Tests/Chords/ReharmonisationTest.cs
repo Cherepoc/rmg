@@ -49,4 +49,31 @@ public sealed class ReharmonisationTest
 
         await Assert.That(reharmonised).IsGreaterThan(3);
     }
+
+    /// <summary>A pattern's chord substituted is substituted alike at every pass of the pattern, as a band keeps the changes it learned.</summary>
+    [Test]
+    public async Task ASubstitute_IsTheSame_AtEveryPassOfThePattern()
+    {
+        var (passes, places) = (0, 0);
+        foreach (var (seed, with, substitutes, without) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed =>
+                 {
+                     var (with, substitutes) = Generate(seed);
+                     return (Seed: seed, With: with, Substitutes: substitutes, Without: substitutes is null ? null : Generate(seed, "Reharmonisation").Song);
+                 }))
+        {
+            if (substitutes is not { } found || without is null)
+                continue;
+            int Root(Song song, double position) => song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
+            var span = with.Map!.Sections[found.Appearance];
+            foreach (var place in found.At.GroupBy(x => Math.Round((x - span.Start) % span.Meter.PatternDuration, 6)))
+            {
+                places++;
+                passes += place.Count() > 1 ? 1 : 0;
+                await Assert.That(place.Select(x => Root(with, x) - Root(without, x)).Distinct().Count()).IsEqualTo(1).Because($"seed {seed} at {place.Key}");
+            }
+        }
+
+        Console.WriteLine($"{passes} of {places} substituted places played at more than one pass");
+        await Assert.That(passes).IsGreaterThan(0);
+    }
 }

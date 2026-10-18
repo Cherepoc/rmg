@@ -7,7 +7,7 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     A later appearance reharmonised: the song's last appearance of a section heard before, a last chorus most often, now
-///     and then playing some of its chords as substitutes a third away, which share two of their three notes with the
+///     and then playing some of its pattern's chords as substitutes a third away, the same at every pass, which share two of their three notes with the
 ///     chords they replace, in the section's own scale, but a section on one chord, a vamp; decided before the lines are
 ///     placed, so that the melody placed over them fits them as it fits any chord.
 /// </summary>
@@ -50,15 +50,24 @@ internal static class Reharmonisation
         {
             var span = sections[later];
             var inSpan = changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9).ToArray();
+            // a substitute drawn once for each chord of the section's pattern, by its place in it, and played at every pass,
+            // as a band keeps the changes it learned each time round
+            var drawn = new Dictionary<double, int?>();
             for (var i = 0; i < inSpan.Length; i++)
             {
-                // drawn whether the song reharmonises or not, so that its draws are as many
-                var substitutes = context.TestProbability(Share);
-                var step = context.Pick(Substitutes);
-                if (!reharmonises || !substitutes || kept.Contains(inSpan[i]))
+                var place = Math.Round((inSpan[i] - span.Start) % span.Meter.PatternDuration, 6);
+                if (!drawn.TryGetValue(place, out var step))
+                {
+                    // drawn whether the song reharmonises or not, so that its draws are as many
+                    var substitutes = context.TestProbability(Share);
+                    var drawnStep = context.Pick(Substitutes);
+                    drawn[place] = step = substitutes ? drawnStep : null;
+                }
+
+                if (!reharmonises || step is null || kept.Contains(inSpan[i]))
                     continue;
                 var (at, next) = (inSpan[i], i + 1 < inSpan.Length ? inSpan[i + 1] : span.End);
-                roots.AddRange([step.ToTimelineItem(at), 0.ToTimelineItem(next)]);
+                roots.AddRange([step.Value.ToTimelineItem(at), 0.ToTimelineItem(next)]);
             }
         }
 
