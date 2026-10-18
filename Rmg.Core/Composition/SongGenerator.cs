@@ -274,7 +274,8 @@ internal enum SongStream
     FrameArpeggio = 119,
     DeadNotes = 120,
     TempoBand = 121,
-    LooseFigures = 122
+    LooseFigures = 122,
+    SoloGhosts = 123
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

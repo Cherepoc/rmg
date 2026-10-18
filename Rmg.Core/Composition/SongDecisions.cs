@@ -444,7 +444,12 @@ internal sealed record SongDecisions(
                 SongGenerator.CreateStream(seed, SongStream.Soloist, (int)role),
                 songUnconventionality[role == TrackRole.Drum ? Facet.Fills : Facet.Melody],
                 songUnconventionality[Facet.Sound],
-                role == TrackRole.Drum ? Soloist.DrumsProgram : tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Single(x => x.Role == role).InstrumentCode));
+                role == TrackRole.Drum ? Soloist.DrumsProgram : tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Single(x => x.Role == role).InstrumentCode) with
+            {
+                // and whether it ghosts its licks, a pitched soloist's, from a sequence of its own
+                Ghosts = role != TrackRole.Drum && SongGenerator.CreateStream(seed, SongStream.SoloGhosts, (int)role)
+                    .TestProbability(Articulations.SoloGhostChance.At(songUnconventionality[Facet.Sound], genre.Chance(GenreChoices.Articulation, "soloGhosts")))
+            });
         foreach (var (role, soloist) in soloists)
             StateTrace.RecordSong(TracePoints.Soloist, $"{role}", (role, soloist));
 

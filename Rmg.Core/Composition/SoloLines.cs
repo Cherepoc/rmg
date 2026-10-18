@@ -157,6 +157,12 @@ internal static class SoloLines
     /// <summary>How much louder a cell's first note is, so that its grouping is heard.</summary>
     public const double CellAccent = 0.1;
 
+    /// <summary>How often a ghosting soloist mutes an unaccented note of a lick at 16ths or slower (<see cref="Soloist.Ghosts" />).</summary>
+    public const double GhostRate = 0.2;
+
+    /// <summary>The stream a lick's note draws whether it is a ghost from, by its key.</summary>
+    private const int GhostStream = 1;
+
     /// <summary>The steps above a chord's root a triad's notes are, the root, the third and the fifth, where no part carries the chord's shape.</summary>
     private static readonly int[] ChordSteps = [0, 2, 4];
 
@@ -322,8 +328,11 @@ internal static class SoloLines
                         (motifPhrase, motifShape) = (phrase, shape);
                     }
 
-                    // a run, too fast to play in octaves, alone
-                    line.AddRange(positions.Select((position, i) => Place(position, pitches[i], level, accented: accents[i], stacked: stacks && accents[i], octave: gesture == SoloGesture.Lick)));
+                    // a run, too fast to play in octaves, alone; and a ghosting soloist's lick at 16ths or slower, not on a
+                    // pedal, an unaccented note of it muted now and then, by its own key's draw
+                    var ghosting = gesture == SoloGesture.Lick && soloist.Ghosts && shape != SoloShape.Pedal && (positions.Length < 2 || positions[1] - positions[0] >= 0.25 - 1e-9);
+                    line.AddRange(positions.Select((position, i) => Place(position, pitches[i], level, accented: accents[i], stacked: stacks && accents[i], octave: gesture == SoloGesture.Lick))
+                        .Select((x, i) => ghosting && !accents[i] && Ghosted(x.Value) ? x.Value.With(CompositionStateKinds.PalmMute, 1).ToTimelineItem(x.Position) : x));
                     StateTrace.RecordSection(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
                     if (pitches.Length > 0)
                         current = pitches[^1];
@@ -341,6 +350,7 @@ internal static class SoloLines
         }
 
         int FoldTowards(int pitch, int towards) => pitch + 12 * (int)Math.Round((towards - pitch) / 12.0);
+        static bool Ghosted(StateMap note) => new GenerationContext(Seeds.Derive((ulong)note.GetStateValue(CompositionStateKinds.NoteKey), GhostStream)).TestProbability(GhostRate);
         // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc); and a stacked
         // note off the beat that leads into a chord change planed into it, an approach, where the soloist approaches
         var arc = LinePattern.PhraseArc([..marks.Select(x => x.Phrase)], [..marks.Select(x => x.Pitch)], PhraseArc);

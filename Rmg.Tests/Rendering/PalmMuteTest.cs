@@ -22,7 +22,8 @@ public sealed class PalmMuteTest
             var items = notes.ToArray();
             for (var i = 0; i < items.Length; i++)
             {
-                if (items[i].Value.State.GetStateValue(CompositionStateKinds.PalmMute) == 0)
+                // a part's own line's, a solo's ghosts aside (SoloTest)
+                if (items[i].Value.State.GetStateValue(CompositionStateKinds.PalmMute) == 0 || items[i].Value.State.GetStateValue(CompositionStateKinds.LineSolo) != 0)
                     continue;
                 muted++;
                 // on a weak beat, a repeat of the note before or a riff's note chugging on its pedal; but a hook intro's first,

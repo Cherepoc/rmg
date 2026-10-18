@@ -243,16 +243,11 @@ by rule, to check by ear before the ends are trusted; a dark major song turning 
 leaning by the odds and never leaving the scale. Then `trap-ends` asked, Trap's brightest against its darkest, and a
 genre past its span (Black metal at its brightest) against its own.
 
-**A soloist's ghosts** (16 October 2026, from listening, `funk-dead-notes`: dead notes useful in any solo that plays
-percussively, never in its fast tremolos). Now a Funk-family soloist mutes its 16ths between the 8ths by the band's
-rule (`Articulations`), a pedal's repeated notes among them. The plan: decided where the solo is written
-(`SoloLines`), where its gesture is known, the Solo part out of `Articulations`: in a lick, the percussive gesture, at
-16ths or slower, not a pedal shape, an unaccented note now and then muted, never a run, a held note, a release or
-anything faster; in every genre, a genre option `articulation.soloGhosts` the songs play, Funk's leaning it more, so
-that a question can switch it apart from the band's; a stream of its own per soloist. Reviewed: no state kind and no
-table of instruments; a piano's ghost only a soft short note, accepted; a twin lead mutes as its riff does; measured
-by soloist, the chance lowered where a soloist's vocabulary of licks mutes 10% of its notes or more; then
-`solo-ghosts` asked.
+**A soloist's ghosts**, built: a song's soloist ghosts by a genre option `articulation.soloGhosts` the songs play
+(`Articulations.SoloGhostChance`, Funk's 50-70%), muting an unaccented note of a lick at 16ths or slower, not on a pedal,
+a fifth of the time (`SoloLines.GhostRate`), by its note's own draw; the band's dead notes its own lines' alone. Measured:
+31 of 47 of 64 Funk songs' soloists ghosting, 1.8% of their notes on the average, 10% at the most; the songs' 7 of 41,
+1.0%. `solo-ghosts` to ask in a round after the fifth.
 
 **Over a sus4, the third** (16 October 2026, song 2b of `chamber-canon` heard dissonant on its sus4 chords). The bass
 landed its inversions on the scale's third whatever the chord, 13.1% of its notes over a sus4 its missing third, a

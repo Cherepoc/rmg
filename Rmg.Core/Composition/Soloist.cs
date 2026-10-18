@@ -62,6 +62,13 @@ internal sealed record Soloist(
     double MotifInversion
 )
 {
+    /// <summary>
+    ///     Whether the soloist mutes now and then an unaccented note of a lick at 16ths or slower, a ghost, as a funk player's
+    ///     percussive line does, never a run's nor a fast lick's (<see cref="SoloLines.GhostRate" />); a song's decision for its
+    ///     soloist (<see cref="Articulations.SoloGhostChance" />).
+    /// </summary>
+    public bool Ghosts { get; init; }
+
     /// <summary>The chance a phrase answering the motif before inverts it rather than moving it, by the melody facet: never at the plain end.</summary>
     public static ByConvention MotifInversionChance { get; } = new(0, 0.3, 0.5);
 

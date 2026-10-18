@@ -282,11 +282,11 @@ public static class GenreChoices
     public static GenreChoice Tension { get; } = Chances("tension", "Strong beats on a tension",
         [..LinePattern.Tensions.Select(x => (Name(x.Role.ToString()), $"The {TrackRoles.LabelOf(x.Role).ToLowerInvariant()}'s", x.Chance))]);
 
-    /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, the chords are struck short, broken chords ring, chords cycle at a chip's frame rate, and a 16th chain's notes are muted (<see cref="Articulations.Apply" />).</summary>
+    /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, the chords are struck short, broken chords ring, chords cycle at a chip's frame rate, a 16th chain's notes are muted, and a soloist ghosts its licks (<see cref="Articulations.Apply" />, <see cref="Soloist.Ghosts" />).</summary>
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
         [("legato", "Slurred steps", Articulations.LegatoChance), ("roll", "Rolled piano chords", Articulations.RollChance), ("stabs", "Chords as stabs", Articulations.StabChance),
             ("letRing", "Broken chords let ring", Articulations.LetRingChance), ("frames", "Chords cycled at a chip's frame rate", Articulations.FrameChance),
-            ("deadNotes", "Dead notes in a 16th chain", Articulations.DeadNoteChance)]);
+            ("deadNotes", "Dead notes in a 16th chain", Articulations.DeadNoteChance), ("soloGhosts", "A soloist's ghosts in its licks", Articulations.SoloGhostChance)]);
 
     /// <summary>The chance a song pins a part to its rhythm, every bar alike: each pitched part, and each drum role but the colour (<see cref="DrumRoles.Pins" />).</summary>
     public static GenreChoice Pins { get; } = Chances("pins", "Parts pinned", [..Composition.DrumRoles.PinnedParts.Select(x => (Name(x.ToString()), Composition.DrumRoles.PinLabelOf(x), Composition.DrumRoles.Pins))]);
