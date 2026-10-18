@@ -26,6 +26,8 @@ public sealed class ListeningQuestionsTest
     /// <param name="GenrePatch">The options the song without the device lays over its genre's, by choice and option, the genre's others as they are.</param>
     /// <param name="At">Where the song first plays the device, in beats, as its trace and notes have it, a little before it where it grows; none where it does not.</param>
     /// <param name="In">The sections the device plays in, where alone it is listened to; every section for none.</param>
+    /// <param name="With">The settings the songs with the device are given, by the page's name, as its steps; none for none.</param>
+    /// <param name="Without">The settings the songs without it are given, as <paramref name="With" />.</param>
     private sealed record Question(
         string Id,
         string Text,
@@ -34,45 +36,41 @@ public sealed class ListeningQuestionsTest
         string[] Skip,
         Dictionary<string, Dictionary<string, int>>? GenrePatch,
         Func<CorpusSong, double?> At,
-        Func<CorpusSong, SectionSpan, bool>? In = null
+        Func<CorpusSong, SectionSpan, bool>? In = null,
+        Dictionary<string, int>? With = null,
+        Dictionary<string, int>? Without = null
     );
+
+    /// <summary>The darkness's steps on the page, from the brightest to the darkest (<c>StepScale</c>).</summary>
+    private const int Brightest = 0, Darkest = 61;
+
+    /// <summary>The solo sections, by their index, whose soloist ghosts a note of its own line (<see cref="Soloist.Ghosts" />).</summary>
+    private static IEnumerable<int> GhostedSolos(CorpusSong song) => song.Solos.Where(s => s.Value.Soloists.Any(r => r != TrackRole.Drum
+        && song.Song.Notes![song.Track(r)].Any(n => n.IsWithin(song.Map.Sections[s.Key].Start, song.Map.Sections[s.Key].End) && n.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0
+                                                    && (r == TrackRole.Solo || n.Value.State.GetStateValue(CompositionStateKinds.LineSolo) != 0)))).Select(s => s.Key);
 
     /// <summary>Where a section the trace finds playing the device first plays.</summary>
     private static double? FirstSection(CorpusSong song, string point, Func<object?, bool> plays) =>
         song.Trace.Where(x => x.Point == point && plays(x.Value)).Select(x => song.Map.Sections.Where(s => s.SectionId == x.Section).Select(s => (double?)s.Start).Min()).Min();
 
-    /// <summary>Bars before a place, to hear what leads into it, never before the song's start.</summary>
-    private static double? Before(CorpusSong song, double? at, int bars) => at is { } place ? Math.Max(0, place - bars * song.Song.MeterAt(place).BarDuration) : null;
-
     private static readonly Question[] Questions =
     [
-        new("latin-tumbao-varied", "Latin's bass on its tumbao, played as a bassist varies it, a note left out or one of its own between now and then: a living tumbao, or a figure losing its shape?",
-            "The tumbao as chances (Figure.Loose, the figures-as-chances experiment), against the tumbao laid exactly in every bar.", "latin", [], new() { ["figure.bass"] = new() { ["tumbaoChances"] = 0, ["tumbao"] = 100 } },
-            x => FirstSection(x, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tumbaoChances"),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.Figures && t.Section == span.SectionId
-                                                    && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).TryGetValue(FigurePlayer.Bass, out var name) && name == "tumbaoChances")),
-        new("trance-strip", "Trance's ending, its parts leaving one by one over the drums: a mix-out, or the wrong part left last?",
-            "The stripped ending, Trance's ending.strip 100, against its fade (#150: the order the parts leave in is drawn, the lead or the pad possibly last).", "trance", [],
-            new() { ["ending"] = new() { ["strip"] = 0 } },
-            x => x.Map.Ending.Kind == EndingKind.Strip ? x.Map.Sections[^1].Start : null),
-        new("darkjazz-inner-line", "Dark jazz's held chord with a line falling inside it a semitone at a time, root, major seventh, seventh, sixth: the noir line cliche, or a chord that wobbles?",
-            "The inner line, Dark jazz's harmonyDevices.innerLine 20-50-60, against none (#71: whether it earns its place, playing in at most 8% of a preset's sections).", "darkJazz", [],
-            new() { ["harmonyDevices"] = new() { ["innerLine"] = 0 } },
-            x => FirstSection(x, TracePoints.InnerLine, v => v is true),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.InnerLine && t.Section == span.SectionId && t.Value is true)),
-        new("funk-wah", "Funk's comping guitar or clavinet through a wah, or a phaser: is the effect heard, and does it sound like a funk wah?",
-            "The insertion effect, Funk's insertion wah 40-50-60 and phaser 10-20-30, against none (#74: a cut candidate, never asked).", "funk", [],
-            new() { ["insertion"] = new() { ["none"] = 100, ["wah"] = 0, ["phaser"] = 0 } },
-            x => x.Song.Draws?.Insertion is not null ? x.Map.Sections[0].Start : null),
-        new("blackmetal-key-changes", "Black metal changing key, often led in by a chain of dominants: the style, or a song that will not stay put?",
-            "Black metal's key changes, the songs' own as it names none, against none (#397: 53% of its songs change key).", "blackMetal", [],
-            new() { ["keyChanges"] = new() { ["lastSection"] = 0, ["sections"] = 0, ["patterns"] = 0 } },
-            x => Before(x, ((ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Select(k => (double?)k.Position).FirstOrDefault(), 2)),
-        new("pop-ornaments", "Pop's melody with turns and trills now and then: a singer's line, or out of style?",
-            "The ornaments, the songs' own as Pop names none (graces 0-25-100, turns 0-8-100, trills 0-10-100), against none (#364: 47% of its songs ornament).", "pop", [],
-            new() { ["ornaments"] = new() { ["graces"] = 0, ["turns"] = 0, ["trills"] = 0 } },
-            x => Before(x, x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Where(n => !n.Value.State.GetStateValue(CompositionStateKinds.Ornament).IsDefaultOrEmpty)
-                .Select(n => (double?)n.Position).FirstOrDefault(), 1)),
+        new("trap-ends", "Trap given its brightest mood against its darkest, its chords and scale leaning major or minor: heard apart, and which is the style? The same if not told apart.",
+            "Whether the mood is heard in the chords alone (steps 2 and 3 of a mood every genre plays), or the sound by darkness is built too (step 4), the darkness given at its ends.", "trap", [],
+            null, x => x.Map.Sections[0].Start, With: new() { ["darkness"] = Brightest }, Without: new() { ["darkness"] = Darkest }),
+        new("blackmetal-bright", "Black metal given its brightest mood, past its own span, major chords and scales over its tremolo: a bright black metal, or out of style?",
+            "A mood past a genre's span reaching the songs' own scales (Genre.AtMood), Black metal's major chords 94% at its brightest, against its own mood drawn.", "blackMetal", [],
+            null, x => x.Map.Sections[0].Start, With: new() { ["darkness"] = Brightest }),
+        new("solo-ghosts", "Funk's soloist muting a note now and then in its slower licks, a ghost between the notes it plays: a funk player's touch, or notes gone missing?",
+            "A soloist's ghosts, Funk's articulation.soloGhosts 50-60-70, a fifth of a lick's unaccented notes, against none.", "funk", [],
+            new() { ["articulation"] = new() { ["soloGhosts"] = 0 } },
+            x => GhostedSolos(x).Select(i => (double?)x.Map.Sections[i].Start).Min(),
+            In: (song, span) => GhostedSolos(song).Any(i => Math.Abs(song.Map.Sections[i].Start - span.Start) < 1e-9)),
+        new("bossa-root-fifth", "Bossa nova's bass alternating root and fifth on its strong beats, as a surdo does, rather than walking into its chords: the style, or plain?",
+            "Bossa nova's alternatingBass 30-50-50, back since the 14 October retune with the cycle's nearest notes, against none (asked again, taken out on 11 October).", "bossa", [],
+            new() { ["alternatingBass"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.AlternatingBass, v => v is true),
+            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.AlternatingBass && t.Section == span.SectionId && t.Value is true)),
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
@@ -139,6 +137,16 @@ public sealed class ListeningQuestionsTest
         return GenrePresets.Genre(preset with { Choices = choices });
     }
 
+    /// <summary>A question's songs of one side as the page asks for them: its genre, patched for the side without, and the settings the side gives.</summary>
+    private static SongOverrides OverridesOf(Question question, bool without)
+    {
+        var settings = (without ? question.Without : question.With) ?? [];
+        if (settings.Keys.Except(["darkness", "intensity"]).FirstOrDefault() is { } other)
+            throw new InvalidOperationException($"{question.Id}: the setting {other} is not one a question gives.");
+        double? Mood(string name) => settings.TryGetValue(name, out var step) ? Rmg.Core.Composition.Mood.OfAmount(Rmg.WebApi.Songs.StepScale.ToAmount(step)) : null;
+        return new SongOverrides(Genre: GenreOf(question, without), Darkness: Mood("darkness"), Intensity: Mood("intensity"));
+    }
+
     /// <summary>How long before a pattern's start a song is listened from, in seconds, the page starting it a moment earlier still.</summary>
     private const double LeadIn = 4;
 
@@ -156,7 +164,7 @@ public sealed class ListeningQuestionsTest
     /// </summary>
     private static (double Difference, double At, string[] Listen)? Measure(Question question, int seed, CorpusSong with, double first)
     {
-        var without = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), new SongOverrides(Genre: GenreOf(question, true)), question.Skip.ToImmutableHashSet(), CancellationToken.None);
+        var without = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), OverridesOf(question, true), question.Skip.ToImmutableHashSet(), CancellationToken.None);
         var difference = new HeardDifference(with.Rendered, Rmg.Core.Rendering.Render.RenderSong(without));
         var places = with.Map.Sections
             .Where(x => x.End > first + 1e-9 && (question.In?.Invoke(with, x) ?? true))
@@ -187,11 +195,11 @@ public sealed class ListeningQuestionsTest
         var written = new List<object>();
         foreach (var question in Questions)
         {
-            var genre = GenreOf(question, false);
+            var overrides = OverridesOf(question, false);
             // the first songs that play the device, each measured where it plays
             var measured = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
                 {
-                    var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
+                    var song = TestCorpus.Get(seed, overrides);
                     return question.At(song) is { } at ? (Seed: seed, Measure: Measure(question, seed, song, at)) : (seed, null);
                 })
                 .Where(x => x.Measure is not null).Take(Candidates).Select(x => (x.Seed, Difference: x.Measure!.Value.Item1, At: x.Measure.Value.Item2, Listen: x.Measure.Value.Item3)).ToArray();
@@ -207,7 +215,8 @@ public sealed class ListeningQuestionsTest
                 decides = question.Decides,
                 genre = question.Genre,
                 // an object of choices always, as the page reads it, empty where the song without the device patches none
-                without = new { skip = question.Skip, genre = PatchOf(question) ?? new Dictionary<string, Dictionary<string, object>>() },
+                with = new { settings = question.With ?? [] },
+                without = new { skip = question.Skip, genre = PatchOf(question) ?? new Dictionary<string, Dictionary<string, object>>(), settings = question.Without ?? [] },
                 seeds = asked.Select(x => new { seed = Base62.FromSeed(TestCorpus.SongSeed(x.Seed)), at = Math.Round(x.At, 1), listen = x.Listen }).ToArray()
             });
         }
@@ -251,6 +260,8 @@ public sealed class ListeningQuestionsTest
             await Assert.That(entry.GetProperty("genre").ValueKind == JsonValueKind.Null ? null : entry.GetProperty("genre").GetString()).IsEqualTo(asked.Genre).Because(asked.Id);
             await Assert.That(Json(entry.GetProperty("without").GetProperty("skip"))).IsEqualTo(Json(asked.Skip)).Because(asked.Id);
             await Assert.That(Json(entry.GetProperty("without").GetProperty("genre"))).IsEqualTo(Json(PatchOf(asked) ?? new Dictionary<string, Dictionary<string, object>>())).Because(asked.Id);
+            await Assert.That(Json(entry.GetProperty("with").GetProperty("settings"))).IsEqualTo(Json(asked.With ?? [])).Because(asked.Id);
+            await Assert.That(Json(entry.GetProperty("without").GetProperty("settings"))).IsEqualTo(Json(asked.Without ?? [])).Because(asked.Id);
         }
     }
 }

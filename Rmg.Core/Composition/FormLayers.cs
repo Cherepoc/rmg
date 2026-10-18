@@ -118,8 +118,8 @@ internal static class FormLayers
         (DropKind.Filtered, new ByConvention(0, 0, 0))
     ];
 
-    /// <summary>The chance a build rolls on the snare into its drop, a dance track's, a genre's where its drops are a band's.</summary>
-    public static ByConvention BuildRoll { get; } = new(1, 1, 1);
+    /// <summary>The chance a build rolls on the snare into its drop, a dance track's, a genre's that drops; the songs, which never drop, never.</summary>
+    public static ByConvention BuildRoll { get; } = new(0, 0, 0);
 
     /// <summary>How many bars a build grows louder over, the phrase before its drop, its section's at most.</summary>
     public const int BuildBars = 4;

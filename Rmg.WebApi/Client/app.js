@@ -55,7 +55,7 @@ import { createGenreEditor } from "./genre-editor.js";
 import { createGenreManager } from "./genre-manager.js";
 import { since, tell, track } from "./tally.js";
 import { harmonyAt, readHarmony } from "./harmony.js";
-import { createListeningIndex, createListeningStrip, listeningQuestion, loadQuestions, withoutDevice } from "./listening.js";
+import { createListeningIndex, createListeningStrip, givenSettings, listeningQuestion, loadQuestions, withoutDevice } from "./listening.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
 const PAUSE_ICON = "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z";
@@ -2878,10 +2878,11 @@ function askQuestion(questions, asked) {
             const genre = preset === null ? noGenre() : asGenre(preset);
             skipped = isWithout ? question.without.skip : [];
             const choices = isWithout ? withoutDevice(genre.choices, question.without.genre) : genre.choices;
-            // the song as the question picked it, of the settings as by default but its genre, the volume as heard; read as
-            // the song is asked for, before generate waits on anything
+            // the song as the question picked it, of the settings as by default but its genre and those its side gives, the
+            // volume as heard; read as the song is asked for, before generate waits on anything
             startAt = from;
-            const arrived = generate(seed, { isRolled: false, asked: { ...defaultSettings(), volume: settings.volume, genre: { name: genre.name, choices } } });
+            const given = givenSettings(isWithout ? question.without : question.with);
+            const arrived = generate(seed, { isRolled: false, asked: { ...defaultSettings(), ...given, volume: settings.volume, genre: { name: genre.name, choices } } });
             skipped = [];
             // and played at once, from where to listen, the button pressed the gesture the player waits for; a song that
             // never arrives leaves no place to start the next one from

@@ -6,9 +6,8 @@ is removed once it is built, its leftovers kept under *Open work*.
 
 ## Priorities
 
-1. **Now** (P1): *Planned: a mood every genre plays* (*Open work*), steps 1 to 3 built; `trap-ends` and a genre past
-   its span (Black metal at its brightest) to ask in the next round, with `solo-ghosts`, then step 4 only if they are
-   not heard enough.
+1. **Now** (P1): *Planned: a mood every genre plays* (*Open work*), steps 1 to 3 built; `trap-ends` and
+   `blackmetal-bright` asked in the sixth round, with `solo-ghosts`, then step 4 only if they are not heard enough.
 2. **The review of 16 October 2026** (P1, *Open work*): its packages, the failing tests first at the review's commit.
 3. **The rules on the other corpora** (P1, *Older rule failures*): the failures older than the second order of work,
    each traced at the committed code first.
@@ -28,8 +27,9 @@ it, `?listen=` its id on the test instance (`ListeningQuestionsTest` writes them
 verdicts, by song too). A question's songs are those of the corpus's first 24 that play its device where it is heard
 the most, by how much its song with the device and without differ as heard (`HeardDifference`), from a pattern's start
 in the sections its device plays in; its song without lays its patch over the genre's options. Done for a version when
-every question is answered or let go of. The fifth round (18 October 2026) is answered; the next asks `trap-ends`, a
-genre past its span and `solo-ghosts` (*Priorities*). A question listens only in the sections its device plays in, not
+every question is answered or let go of. The sixth round (18 October 2026) asks trap-ends, blackmetal-bright,
+solo-ghosts and bossa-root-fifth, a question's sides now giving their songs a mood (`with` and `without` settings);
+`solo-ghosts` differs the least of any asked (0.01, the others 0.02 and up), its soloist's part the one to hear. A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -44,7 +44,8 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   inner line, Funk's wah, Black metal's key changes and Pop's ornaments.
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing (Bossa nova's
-  root and fifth too, back at 30-50-50 since the 14 October retune and the cycle's notes nearest since, to ask again),
+  root and fifth too, back at 30-50-50 since the 14 October retune and the cycle's notes nearest since, asked again
+  in the sixth round),
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
   alone), the songs' double time halved (a scramble), Doom's blues scale reduced, Rock's key lift halved, the melody's
   inversion, the pinch's squeal; and of 18 October, Celtic's harmonica solo, and by the owner's ear the wah of the metal
@@ -244,14 +245,14 @@ dark major song vi and the minor iv; the genre's instruments, drums, rhythm and 
 Risks: Locrian at the dark end, its tonic diminished, kept off a plain song by its conventionality's plain weight of
 0, so plain dark stops at Phrygian; the exotic scales' darkness (harmonic minor, Phrygian dominant, whole tone) set
 by rule, to check by ear before the ends are trusted; a dark major song turning so minor its key is lost, the degrees
-leaning by the odds and never leaving the scale. Then `trap-ends` asked, Trap's brightest against its darkest, and a
-genre past its span (Black metal at its brightest) against its own.
+leaning by the odds and never leaving the scale. Asked in the sixth round: `trap-ends`, Trap's brightest against its
+darkest, and `blackmetal-bright`, Black metal at its brightest against its own mood.
 
 **A soloist's ghosts**, built: a song's soloist ghosts by a genre option `articulation.soloGhosts` the songs play
 (`Articulations.SoloGhostChance`, Funk's 50-70%), muting an unaccented note of a lick at 16ths or slower, not on a pedal,
 a fifth of the time (`SoloLines.GhostRate`), by its note's own draw; the band's dead notes its own lines' alone. Measured:
 31 of 47 of 64 Funk songs' soloists ghosting, 1.8% of their notes on the average, 10% at the most; the songs' 7 of 41,
-1.0%. `solo-ghosts` to ask in a round after the fifth.
+1.0%. Asked as `solo-ghosts` in the sixth round.
 
 ### From the review of 16 October 2026
 

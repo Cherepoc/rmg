@@ -1,375 +1,257 @@
 [
   {
-    "id": "latin-tumbao-varied",
-    "question": "Latin's bass on its tumbao, played as a bassist varies it, a note left out or one of its own between now and then: a living tumbao, or a figure losing its shape?",
-    "decides": "The tumbao as chances (Figure.Loose, the figures-as-chances experiment), against the tumbao laid exactly in every bar.",
-    "genre": "latin",
-    "without": {
-      "skip": [],
-      "genre": {
-        "figure.bass": {
-          "tumbaoChances": 0,
-          "tumbao": 100
-        }
+    "id": "trap-ends",
+    "question": "Trap given its brightest mood against its darkest, its chords and scale leaning major or minor: heard apart, and which is the style? The same if not told apart.",
+    "decides": "Whether the mood is heard in the chords alone (steps 2 and 3 of a mood every genre plays), or the sound by darkness is built too (step 4), the darkness given at its ends.",
+    "genre": "trap",
+    "with": {
+      "settings": {
+        "darkness": 0
       }
     },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 64.6,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "1",
-        "at": 0,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 15.2,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "M",
-        "at": 245.4,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 46.8,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 207.9,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "trance-strip",
-    "question": "Trance's ending, its parts leaving one by one over the drums: a mix-out, or the wrong part left last?",
-    "decides": "The stripped ending, Trance's ending.strip 100, against its fade (#150: the order the parts leave in is drawn, the lead or the pad possibly last).",
-    "genre": "trance",
     "without": {
       "skip": [],
-      "genre": {
-        "ending": {
-          "strip": 0
-        }
+      "genre": {},
+      "settings": {
+        "darkness": 61
       }
     },
     "seeds": [
       {
         "seed": "2",
-        "at": 234.2,
+        "at": 56.8,
         "listen": [
-          "Melody (Lead 2 (sawtooth))",
-          "Bass (Synth Bass 2)",
-          "Riff (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 243.1,
-        "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Bass (Synth Bass 2)",
-          "Counter-melody (Lead 2 (sawtooth))"
-        ]
-      },
-      {
-        "seed": "B",
-        "at": 239.5,
-        "listen": [
-          "Bass (Synth Bass 1)",
-          "Pad (Synth Strings 1)",
+          "Chords (Electric Piano 1)",
           "Melody (Lead 1 (square))"
         ]
       },
       {
-        "seed": "I",
-        "at": 295.1,
-        "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Melody (Lead 2 (sawtooth))",
-          "Pad (Pad 8 (sweep))"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 328.8,
-        "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Bass (Synth Bass 2)"
-        ]
-      },
-      {
-        "seed": "Z",
-        "at": 239.5,
-        "listen": [
-          "Chords (Pad 3 (polysynth))",
-          "Pad (Pad 7 (halo))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "darkjazz-inner-line",
-    "question": "Dark jazz's held chord with a line falling inside it a semitone at a time, root, major seventh, seventh, sixth: the noir line cliche, or a chord that wobbles?",
-    "decides": "The inner line, Dark jazz's harmonyDevices.innerLine 20-50-60, against none (#71: whether it earns its place, playing in at most 8% of a preset's sections).",
-    "genre": "darkJazz",
-    "without": {
-      "skip": [],
-      "genre": {
-        "harmonyDevices": {
-          "innerLine": 0
-        }
-      }
-    },
-    "seeds": [
-      {
         "seed": "3",
-        "at": 326.5,
+        "at": 0,
         "listen": [
-          "Melody (Vibraphone)"
+          "Chords (Pad 2 (warm))"
         ]
       },
       {
-        "seed": "5",
-        "at": 224.6,
+        "seed": "8",
+        "at": 2.5,
         "listen": [
-          "Bass (Fretless Bass)",
-          "Melody (Electric Piano 1)"
+          "Chords (Pad 2 (warm))",
+          "Bass (Synth Bass 1)"
         ]
       },
-      {
-        "seed": "6",
-        "at": 133.1,
-        "listen": [
-          "Bass (Acoustic Bass)",
-          "Melody (Vibraphone)",
-          "Chords (Electric Piano 1)"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 53.3,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "P",
-        "at": 157.5,
-        "listen": [
-          "Bass (Fretless Bass)",
-          "Melody (Vibraphone)",
-          "Chords (Drawbar Organ)"
-        ]
-      },
-      {
-        "seed": "S",
-        "at": 365.8,
-        "listen": [
-          "Chords (Vibraphone)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "funk-wah",
-    "question": "Funk's comping guitar or clavinet through a wah, or a phaser: is the effect heard, and does it sound like a funk wah?",
-    "decides": "The insertion effect, Funk's insertion wah 40-50-60 and phaser 10-20-30, against none (#74: a cut candidate, never asked).",
-    "genre": "funk",
-    "without": {
-      "skip": [],
-      "genre": {
-        "insertion": {
-          "none": 100,
-          "wah": 0,
-          "phaser": 0
-        }
-      }
-    },
-    "seeds": [
       {
         "seed": "9",
-        "at": 203.8,
+        "at": 0,
         "listen": [
-          "Chords (Electric Guitar (clean))"
+          "Chords (Pad 2 (warm))",
+          "Bass (Synth Bass 1)",
+          "Melody (Flute)"
         ]
       },
       {
         "seed": "C",
         "at": 0,
         "listen": [
-          "Rhythm part (Clavinet)"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 71.5,
-        "listen": [
-          "Riff (Clavinet)",
-          "Riff's twin (Clavinet)"
-        ]
-      },
-      {
-        "seed": "j",
-        "at": 0,
-        "listen": [
-          "Riff (Clavinet)"
-        ]
-      },
-      {
-        "seed": "k",
-        "at": 23.2,
-        "listen": [
-          "Chords (Electric Piano 1)"
-        ]
-      },
-      {
-        "seed": "t",
-        "at": 52.7,
-        "listen": [
-          "Riff (Electric Guitar (muted))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "blackmetal-key-changes",
-    "question": "Black metal changing key, often led in by a chain of dominants: the style, or a song that will not stay put?",
-    "decides": "Black metal's key changes, the songs' own as it names none, against none (#397: 53% of its songs change key).",
-    "genre": "blackMetal",
-    "without": {
-      "skip": [],
-      "genre": {
-        "keyChanges": {
-          "lastSection": 0,
-          "sections": 0,
-          "patterns": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "5",
-        "at": 165.2,
-        "listen": [
-          "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)",
-          "Rhythm part (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 172.1,
-        "listen": [
-          "Chords (Overdriven Guitar)"
+          "Chords (Pad 2 (warm))",
+          "Bass (Synth Bass 1)"
         ]
       },
       {
         "seed": "H",
-        "at": 16,
+        "at": 9.8,
         "listen": [
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 65.8,
-        "listen": [
-          "Rhythm part (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "V",
-        "at": 5.4,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))",
-          "Chords (Synth Strings 1)"
-        ]
-      },
-      {
-        "seed": "g",
-        "at": 183.3,
-        "listen": [
-          "Melody (Distortion Guitar)"
+          "Melody (Lead 1 (square))"
         ]
       }
     ]
   },
   {
-    "id": "pop-ornaments",
-    "question": "Pop's melody with turns and trills now and then: a singer's line, or out of style?",
-    "decides": "The ornaments, the songs' own as Pop names none (graces 0-25-100, turns 0-8-100, trills 0-10-100), against none (#364: 47% of its songs ornament).",
-    "genre": "pop",
+    "id": "blackmetal-bright",
+    "question": "Black metal given its brightest mood, past its own span, major chords and scales over its tremolo: a bright black metal, or out of style?",
+    "decides": "A mood past a genre's span reaching the songs' own scales (Genre.AtMood), Black metal's major chords 94% at its brightest, against its own mood drawn.",
+    "genre": "blackMetal",
+    "with": {
+      "settings": {
+        "darkness": 0
+      }
+    },
     "without": {
       "skip": [],
-      "genre": {
-        "ornaments": {
-          "graces": 0,
-          "turns": 0,
-          "trills": 0
-        }
-      }
+      "genre": {},
+      "settings": {}
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 6,
+        "seed": "2",
+        "at": 172.6,
         "listen": [
-          "Melody (Acoustic Grand Piano)"
+          "Rhythm part (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "4",
+        "at": 188,
+        "listen": [
+          "Chords (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "8",
-        "at": 3.5,
+        "at": 99.4,
         "listen": [
-          "Melody (Acoustic Grand Piano)"
+          "Chords (Distortion Guitar)",
+          "Melody (Lead 5 (charang))"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 261.3,
+        "listen": [
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 132.4,
+        "listen": [
+          "Melody (Lead 5 (charang))"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 282,
+        "listen": [
+          "Pad (Church Organ)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "solo-ghosts",
+    "question": "Funk's soloist muting a note now and then in its slower licks, a ghost between the notes it plays: a funk player's touch, or notes gone missing?",
+    "decides": "A soloist's ghosts, Funk's articulation.soloGhosts 50-60-70, a fifth of a lick's unaccented notes, against none.",
+    "genre": "funk",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "articulation": {
+          "soloGhosts": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 122.3,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 64.6,
+        "listen": [
+          "Melody (Trumpet)"
+        ]
+      },
+      {
+        "seed": "e",
+        "at": 163,
+        "listen": [
+          "Bass (Slap Bass 2)"
+        ]
+      },
+      {
+        "seed": "w",
+        "at": 190,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "x",
+        "at": 137.6,
+        "listen": [
+          "Rhythm part (Clavinet)"
+        ]
+      },
+      {
+        "seed": "10",
+        "at": 28.8,
+        "listen": [
+          "Solo (Alto Sax)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "bossa-root-fifth",
+    "question": "Bossa nova's bass alternating root and fifth on its strong beats, as a surdo does, rather than walking into its chords: the style, or plain?",
+    "decides": "Bossa nova's alternatingBass 30-50-50, back since the 14 October retune with the cycle's nearest notes, against none (asked again, taken out on 11 October).",
+    "genre": "bossa",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "alternatingBass": {
+          "sections": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 0,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 11.7,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 4.6,
+        "listen": [
+          "Bass (Acoustic Bass)"
         ]
       },
       {
         "seed": "D",
-        "at": 6.5,
+        "at": 15.2,
         "listen": [
-          "Melody (Lead 2 (sawtooth))"
+          "Bass (Acoustic Bass)"
         ]
       },
       {
-        "seed": "b",
-        "at": 115,
+        "seed": "F",
+        "at": 35,
         "listen": [
-          "Melody (Electric Guitar (clean))"
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "k",
-        "at": 136.7,
+        "seed": "J",
+        "at": 11.7,
         "listen": [
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "1D",
-        "at": 8.2,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
+          "Bass (Electric Bass (finger))"
         ]
       }
     ]

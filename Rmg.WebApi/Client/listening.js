@@ -2,8 +2,8 @@
  *     The page's listening mode, `?listen=` a question's id, on a server that listens (a test instance): a device heard
  *     with and without over a few songs, A and B swapped from song to song so that neither is always the one with, and a
  *     verdict on each. The questions are written by the tests (`ListeningQuestionsTest`), each its songs and where in each
- *     the device first plays, the genre they are made in, and what the song without leaves out: stages of it and choices
- *     of its genre. They are served beside the page, `listening.json`, and fetched only where the page listens.
+ *     the device first plays, the genre they are made in, what the song without leaves out, stages of it and choices of
+ *     its genre, and the settings each side gives its songs, a mood given. They are served beside the page, `listening.json`, and fetched only where the page listens.
  */
 
 import { minutesAndSeconds } from "./text.js";
@@ -24,6 +24,11 @@ export function withoutDevice(choices, patch) {
     const patched = { ...choices };
     for (const [choice, options] of Object.entries(patch)) patched[choice] = { ...(choices[choice] ?? {}), ...options };
     return patched;
+}
+
+/** The settings a question's side, `with` or `without`, gives its songs, each given at its value; none for a side giving none. */
+export function givenSettings(side) {
+    return Object.fromEntries(Object.entries(side?.settings ?? {}).map(([name, value]) => [name, { isGiven: true, value }]));
 }
 
 /** The question of the id, none for none or one not asked. */

@@ -243,6 +243,29 @@ public sealed class ListeningTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A question's sides give their songs the settings they name, a mood each, the rest as by default.</summary>
+    [Test]
+    public async Task AQuestionsSides_GiveTheirSongsTheirSettings()
+    {
+        await using var page = await SongPage.Open(site, "?listen=mood-given");
+        var strip = page.Page.Locator("section.listening");
+        await page.Until(() => strip.IsVisibleAsync(), "the question asked");
+        // the first song's A the one with, its B the one without
+        foreach (var (letter, darkness) in new[] { ("A", 0), ("B", 61) })
+        {
+            var count = page.Requests.Count;
+            await strip.GetByRole(AriaRole.Button, new() { Name = $"Play {letter}" }).ClickAsync();
+            await page.Until(() => page.Requests.Count > count, $"{letter} asked for");
+            var body = page.Requests[^1].Body;
+            await Assert.That(body.GetProperty("darkness").GetInt32()).IsEqualTo(darkness);
+            await Assert.That(body.TryGetProperty("intensity", out var intensity) && intensity.ValueKind != JsonValueKind.Null).IsFalse();
+            await page.Settled();
+        }
+
+        await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task NoQuestion_ListsEveryQuestion_WithItsLink_AndAsksForNoSong()
     {
