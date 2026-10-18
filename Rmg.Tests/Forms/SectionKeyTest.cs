@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 
@@ -17,17 +18,18 @@ public sealed class SectionKeyTest
         foreach (var song in songs)
         {
             // but for a last section going up, which only the last does, before the outro where there is one, and the outro
-            // after it, every section starts in its key every time
-            var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
-            var home = keys.GetEffectiveValueAt(song.Map.Sections[0].Start);
+            // after it, every section starts in its key every time, reached up or down as is nearer the key before
+            var timeline = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
+            int keys(double position) => timeline.GetEffectiveValueAt(position).Mod(12);
+            var home = keys(song.Map.Sections[0].Start);
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var outro = structure.Roles[structure.SectionIds[^1]] == SectionRole.Outro ? 1 : 0;
             var played = song.Map.Sections.Take(structure.SectionIds.Length - 1 - outro).ToArray();
             foreach (var appearances in played.GroupBy(x => x.SectionId))
-                await Assert.That(appearances.Select(x => keys.GetEffectiveValueAt(x.Start)).Distinct().Count()).IsEqualTo(1).Because($"seed {song.Seed}");
+                await Assert.That(appearances.Select(x => keys(x.Start)).Distinct().Count()).IsEqualTo(1).Because($"seed {song.Seed}");
 
-            await Assert.That(played.Where(x => x.SectionId == song.Map.Sections[0].SectionId).All(x => keys.GetEffectiveValueAt(x.Start) == home)).IsTrue();
-            ownKeys += played.Any(x => keys.GetEffectiveValueAt(x.Start) != home) ? 1 : 0;
+            await Assert.That(played.Where(x => x.SectionId == song.Map.Sections[0].SectionId).All(x => keys(x.Start) == home)).IsTrue();
+            ownKeys += played.Any(x => keys(x.Start) != home) ? 1 : 0;
         }
 
         await Assert.That(ownKeys).IsGreaterThan(0);

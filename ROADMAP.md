@@ -312,14 +312,14 @@ trace at the committed code before blaming a change:
   placed so by `LinePattern.Place`; shapes apart (seed 5 at 173.5 after a reharmonisation, seed 49 at 44 the melody's
   triad over the chords' cluster).
 - **At offset 716000000:** a soloist's stacks; a line's fall from the root; a filtered drop's band (seed 29 at 608); a
-  section's own key (seed 50); a strum's direction (seed 15 at 148); the inner line; every chord note in its scale; a
-  djent breakdown in 15/16 whose kick pattern plays no note (seed 48, section 7), so the kick with the riff has nothing
-  to lay on.
+  strum's direction (seed 15 at 148); the inner line; every chord note in its scale; seed 38's bass at 178 out of its
+  scale; a djent breakdown in 15/16 whose kick pattern plays no note (seed 48, section 7), so the kick with the riff has
+  nothing to lay on.
 - **From the review of 16 October 2026,** both failing at its commit already:
-  - **At offset 942000000:** seed 5's bass at 552 plays F#, the fifth of its Bb chord raised, its own alteration +1,
-    where the raised step (G minor's F#) ended at 550. The note is an anticipation (`ChordApproach.Anticipation`) and a
-    key preparation leads into 558: likely the line placed against the chord before the change, then read against the
-    next.
+  - **At offset 942000000:** seed 5's bass at 552 plays F# over its Bb chord, the chord's fifth raised by the note's
+    own alteration (+1), with an anticipation (`ChordApproach.Anticipation`) of F#, the root of the key preparation's
+    chord at 556, though a note of the line at 554 over another chord comes between. Neither a walk (`LineFills`) nor a
+    stage after the lines makes it: `LinePattern.Place` leads 552 past 554, to trace there.
   - **At offset 619000000:** seed 47's shapes apart at 256 and 400. Every part sounds the same chord (pitch classes 2,
     5, 10), but the chords and the melody write its third in semitones (5/12 of an octave) where the bass and the pad
     write it in scale steps (2/7), on a chord approached a semitone below (`ChordApproach` 2). The same kind as seed 5
