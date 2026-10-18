@@ -27,7 +27,11 @@ internal static class Pocket
     /// <summary>How much of its offsets a song plays by its feel facet: none in the plainest, which keep to the click, more in the wildest.</summary>
     public static ByConvention Amount { get; } = new(0, 1, 1.5);
 
-    /// <summary>How far a genre's pocket moves the offsets at its most and its least, as a factor: four times, or a quarter.</summary>
+    /// <summary>
+    ///     How far a genre's pocket moves the offsets at its most and its least, as a factor: four times, or a quarter; the
+    ///     late ones by it, laid back, the early ones, the bass's and the time's, only where it tightens them, as a laid-back
+    ///     band lays its backbeat back and never rushes its bass for it.
+    /// </summary>
     public const double GenreReach = 4;
 
     /// <summary>
@@ -37,9 +41,11 @@ internal static class Pocket
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
-        var amount = Amount.At(song.Facets[Facet.Feel]) * Math.Pow(GenreReach, song.Genre.Shift(GenreChoices.Pocket, "laidBack"));
+        var amount = Amount.At(song.Facets[Facet.Feel]);
         if (amount == 0)
             return draft;
+        var reach = Math.Pow(GenreReach, song.Genre.Shift(GenreChoices.Pocket, "laidBack"));
+        double Played(double offset) => amount * offset * (offset > 0 ? reach : Math.Min(reach, 1));
         var notes = SongStages.NotesOf(draft);
         var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var result = notes.ToBuilder();
@@ -49,9 +55,9 @@ internal static class Pocket
         {
             // a drum by its role in the song's groove, whatever a section makes of it
             var definition = song.Tracks.Definitions[track];
-            var offset = amount * OffsetOf(definition.Role, definition.Role == TrackRole.Drum ? DrumRoles.Of(definition.StateMap) : null);
+            var offset = Played(OffsetOf(definition.Role, definition.Role == TrackRole.Drum ? DrumRoles.Of(definition.StateMap) : null));
             // but a bass playing the kick's figure, note for note with it, in the kick's place
-            var onKick = amount * OffsetOf(TrackRole.Drum, DrumRole.Ground);
+            var onKick = Played(OffsetOf(TrackRole.Drum, DrumRole.Ground));
             bool WithKick(double position) => definition.Role == TrackRole.Bass && song.Form.Map.SectionAt(position) is { } span
                                               && draft.Figures.GetValueOrDefault(span.SectionId)?.GetValueOrDefault(FigurePlayer.Bass) is { } figure
                                               && Figures.Of(FigurePlayer.Bass, figure)?.Follows == FigurePlayer.Ground;

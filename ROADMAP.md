@@ -252,8 +252,6 @@ The review of 16 October's unasked questions and every earlier verdict judged ag
 October 2026), decided without asking where convention is clear, each step measured on the devices report and
 committed with its songs' count:
 
-3. **The pocket laid back, the bass not rushed** (#103): a genre's laid-back factor scaling the late offsets, the early
-   ones (the bass's, the time's) by it only where it tightens.
 4. **Steady figures on the meter's pulses** (#38): a step of a quarter or more landing on the pulses, so that 6/8's
    boom and kick fall on 1 and 4.
 5. **The bass under a twin's lead** (#87) its own line, the riff's doubling passed over where the twin leads.

@@ -36,4 +36,25 @@ public sealed class TimingTest
         // measured: 0.038 beats against 0.014, at offsets 0 and a million
         await Assert.That(LaidBackShifts(laidBack).Average()).IsGreaterThan(LaidBackShifts(own).DefaultIfEmpty(0).Average() * 1.5);
     }
+
+    /// <summary>How far ahead of its place the bass's notes are, the most a song plays it, in beats, by its seed.</summary>
+    private static Dictionary<int, double> BassAhead(IEnumerable<CorpusSong> songs) => songs.ToDictionary(song => song.Seed,
+        song => song.Rendered.Tracks.Where(x => x.Role == TrackRole.Bass).SelectMany(x => x.NoteTimeline).Select(x => -x.Value.Shift).DefaultIfEmpty(0).Max());
+
+    [Test]
+    public async Task ALaidBackGenre_LaysItsBackbeatBack_AndNeverRushesItsBass()
+    {
+        foreach (var genre in new[] { "reggae", "hipHop" })
+        {
+            var laidBack = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))));
+            var own = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without(genre, GenreChoices.Pocket.Name))));
+            var (ahead, ownAhead) = (BassAhead(laidBack), BassAhead(own));
+            Console.WriteLine($"{genre}: the bass ahead by {ahead.Values.Average():F4} beats at the most, {ownAhead.Values.Average():F4} with the songs' pocket; " +
+                              $"the drums laid back by {LaidBackShifts(laidBack).DefaultIfEmpty(0).Average():F4}, {LaidBackShifts(own).DefaultIfEmpty(0).Average():F4}");
+            // the same songs, their pocket alone differing
+            foreach (var (seed, beats) in ahead)
+                await Assert.That(beats).IsLessThanOrEqualTo(ownAhead[seed] + 1e-9).Because($"{genre}, seed {seed}");
+            await Assert.That(LaidBackShifts(laidBack).Average()).IsGreaterThan(LaidBackShifts(own).DefaultIfEmpty(0).Average());
+        }
+    }
 }
