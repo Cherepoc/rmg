@@ -44,7 +44,7 @@
       },
       {
         "seed": "N",
-        "at": 102.2,
+        "at": 46.8,
         "listen": [
           "Bass (Acoustic Bass)"
         ]
@@ -208,21 +208,24 @@
       },
       {
         "seed": "5",
-        "at": 255,
+        "at": 224.6,
         "listen": [
-          "Bass (Fretless Bass)"
+          "Bass (Fretless Bass)",
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 133.1,
+        "listen": [
+          "Bass (Acoustic Bass)",
+          "Melody (Vibraphone)",
+          "Chords (Electric Piano 1)"
         ]
       },
       {
         "seed": "A",
         "at": 53.3,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 166.1,
         "listen": [
           "Chords (Acoustic Grand Piano)"
         ]
@@ -323,6 +326,15 @@
     },
     "seeds": [
       {
+        "seed": "5",
+        "at": 165.2,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Riff (Overdriven Guitar)",
+          "Rhythm part (Distortion Guitar)"
+        ]
+      },
+      {
         "seed": "F",
         "at": 172.1,
         "listen": [
@@ -341,13 +353,6 @@
         "at": 65.8,
         "listen": [
           "Rhythm part (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "S",
-        "at": 294.2,
-        "listen": [
-          "Chords (Overdriven Guitar)"
         ]
       },
       {

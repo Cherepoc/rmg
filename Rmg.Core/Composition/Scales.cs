@@ -17,13 +17,23 @@ public sealed record Scale(string Name, ImmutableArray<int> Offsets, ByConventio
     /// <summary>How it sounds, in a sentence, which the page shows over its name.</summary>
     public required string Description { get; init; }
 
-    /// <summary>How bright the scale sounds: the sum of its offsets, lydian's the highest and locrian's the lowest.</summary>
-    public int Brightness => Offsets.Sum();
+    /// <summary>
+    ///     How bright the scale sounds: its third first, a major one brighter than any minor, and the sum of its offsets
+    ///     within either, Lydian's the highest and Locrian's the lowest, so that melodic minor is a bright minor and
+    ///     Phrygian dominant a dark major, never brighter or darker than the other third's.
+    /// </summary>
+    public int Brightness => Offsets.Sum() + (Offsets[2] == MajorThird ? MajorThirdBrightness : 0);
 
-    /// <summary>How dark it sounds, as a mood leans it: Dorian's 0, each step down the modes' order a third darker, Locrian 1 and Lydian -1.</summary>
-    public double Darkness => (DorianBrightness - Brightness) / 3.0;
+    /// <summary>How dark it sounds, as a mood leans it: Locrian 1 and Lydian -1, every scale of a minor third dark and of a major one bright.</summary>
+    public double Darkness => (MiddleBrightness - Brightness) / HalfBrightness;
 
-    private const int DorianBrightness = 36;
+    private const int MajorThird = 4;
+
+    /// <summary>How much a major third brightens a scale, past the sums a minor scale reaches.</summary>
+    private const int MajorThirdBrightness = 3;
+
+    /// <summary>The brightness between the minor scales' brightest and the major scales' darkest, and half the span from Locrian to Lydian.</summary>
+    private const double MiddleBrightness = 37.5, HalfBrightness = 4.5;
 
     /// <summary>How many of its notes differ from another scale of as many notes, on the same first note.</summary>
     public int Distance(Scale other) => Distance(other.Offsets);

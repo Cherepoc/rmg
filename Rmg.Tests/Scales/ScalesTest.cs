@@ -173,9 +173,9 @@ public sealed class ScalesTest
             var approach = (ChordApproach)(sounding?.Value.State.GetStateValue(CompositionStateKinds.LineApproach) is > 0 and var own ? own : approaches.GetEffectiveValueAt(note.Position));
             var nextChange = changes.Where(x => x > note.Position + 1e-9).DefaultIfEmpty(double.MaxValue).Min();
             // a change a pushing section strikes an eighth early, its arrival there
-            var isChromaticApproach = track.Role == TrackRole.Bass
-                && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9 && !(Pushes(x.Position) && Math.Abs(x.Position - (nextChange - Rmg.Core.Composition.Pushes.Early)) < 1e-3))
-                && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
+            var isLastBefore = !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9
+                                                            && !(Pushes(x.Position) && Math.Abs(x.Position - (nextChange - Rmg.Core.Composition.Pushes.Early)) < 1e-3));
+            var isChromaticApproach = track.Role == TrackRole.Bass && isLastBefore && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
             // a pedal holding its note over the chords, a key change's or a section's, as it holds it where it starts
             var isPedal = track.Role == TrackRole.Bass && (pedals.Any(x => note.Position >= x.From - (Pushes(x.From) ? Rmg.Core.Composition.Pushes.Early : 0) - 0.2 && note.Position < x.To)
                                                            || sounding?.Value.State.GetStateValue(CompositionStateKinds.BassPedal) > 0);
@@ -188,7 +188,7 @@ public sealed class ScalesTest
             var key = KeyAt(note.Position);
             var pitchClasses = scale.Select(x => ((x + key) % 12 + 12) % 12).ToHashSet();
             // a track's last note before a change leads into the next chord from its scale, which a key change moves
-            if (nextChange < double.MaxValue && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9))
+            if (nextChange < double.MaxValue && isLastBefore)
             {
                 var nextScale = Rmg.Core.Composition.Realizer.AlterScaleSteps(offsets.GetEffectiveValueAt(nextChange), AlteredAt(nextChange));
                 pitchClasses.UnionWith(nextScale.Select(x => ((x + KeyAt(nextChange)) % 12 + 12) % 12));

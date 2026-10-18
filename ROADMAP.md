@@ -218,10 +218,10 @@ Pop's major alike at one darkness); kept, the blend below. Each step through the
    58%, Djent 50% to 0%, Dub 74% to 47%; Funk 87-92-90%, Black metal 15-17-19%, Trap 28-33-33%, Rock 65-57-54%. The
    intensity moves a genre's tempo by its range, but leaves the songs with no genre at 126 bpm and 7.3 notes a second
    at either end (the tempo's lean a genre's alone, `Mood.Leans`).
-2. **The chords' degrees leaning by darkness**, put off from the mood's first plan: a progression's chord on a degree
-   weighed by its chord's quality as the scale has it, major the brighter, minor and diminished the darker, by
-   `Mood.Odds`, in every genre's scale without an option added: a minor key's ♭III, ♭VI and ♭VII the brighter, its i,
-   iv and v the darker, a major key's vi, ii and iii the darker. What makes a mood heard inside a genre's span.
+2. **The chords' degrees leaning by darkness**, built with a scale's darkness by its third (#117): a progression's
+   root leans by its triad's third in the scale, major the brighter, by `Mood.Odds` (`Progressions.Darkness`); the
+   major chords at darkness -1, 0 and 1 the songs' own 86-58-33% (61-58-43% before), Trap 61-33-17% (28-33-33%), Rock
+   85-57-32%, Black metal 33-16-9%, Funk 96-92-85% and Blues 100-94-88%, their genres' qualities holding them.
 3. **A mood past a genre's span reaching the songs' own options**, the farther the more: inside its span (its
    `darkness` from and to) a genre's pool as it is, leaned by the mood; past it the songs' own options blended in,
    none at the span's edge and wholly at the end beyond it, then leaned by the mood, as `ByConvention.Filled` plays the
@@ -294,10 +294,6 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   (#381, the ten presets with drops); a pocket ahead of the beat, the pocket's lean below zero (#387, Bluegrass, Punk,
   Thrash); the chopped loop, `Mutations`' swap and ratchet laid on a looping section's pitched parts (#352, Hip-hop,
   Trap, IDM, House, Techno, Drum and bass).
-- **A scale's darkness by its third** (#117), with the mood's plan above, whose steps lean by it: the sum of a scale's
-  offsets ranks the seven modes but makes Hungarian and melodic minor as bright as Mixolydian and harmonic minor as
-  dark as Dorian, so a dark mood and a loud section's brighter scale misjudge them; its third first, minor against
-  major, the sum breaking ties, measured on `MoodReportTest.Ends` before and after.
 - **The swing's clamp at a section's own tempo** (#64): the pair's second note kept to 0.1 s at the song's tempo, so a
   section a fifth to a half faster (`SectionTempo`, 4% of sections at the middle) may play it near 0.07 s; the swing
   is song-wide state, and a clamp per section a swing of the section's own, put off until a fast swung section is

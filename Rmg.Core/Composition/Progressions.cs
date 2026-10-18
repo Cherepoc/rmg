@@ -201,8 +201,13 @@ internal static class Progressions
     ///     How a genre leans the chord that leads home, by its steps above home, its place in <see cref="Degrees" />: a black
     ///     metal band's ♭II or ♭VI rather than V, as the degrees are leaned.
     /// </param>
+    /// <param name="mood">
+    ///     The song's mood, which leans each root by its chord's quality in the scale (<see cref="Darkness" />): a dark song
+    ///     the likelier to a minor or a diminished chord, a minor key's i, iv and v and a major key's vi, ii and iii, a bright
+    ///     one to a major chord, a minor key's ♭III, ♭VI and ♭VII, never leaving the scale.
+    /// </param>
     public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, int phrases, Func<int, double> motionLean,
-        Func<int, double> degreeLean, Func<int, double> cadenceLean)
+        Func<int, double> degreeLean, Func<int, double> cadenceLean, Mood mood)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(strictness);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(strictness, 1);
@@ -241,8 +246,9 @@ internal static class Progressions
                     : isPreparation ? (turnaround ? TurnaroundPreparations : PreCadenceSteps).Contains(step) ? 1 : OutOfRoleWeight
                     : 1;
                 var motion = Mod(step - previous);
-                weights[step] = new Weighted<int>(tilt.Weigh(tilt.Weigh(tilt.Weigh(Math.Pow((holds ? 1 : MotionWeights[motion]) * roleWeight, strictness), motionLean(motion)), degreeLean(step)),
-                    isCadence ? cadenceLean(step) : 0), step);
+                var weight = tilt.Weigh(tilt.Weigh(tilt.Weigh(Math.Pow((holds ? 1 : MotionWeights[motion]) * roleWeight, strictness), motionLean(motion)), degreeLean(step)),
+                    isCadence ? cadenceLean(step) : 0);
+                weights[step] = new Weighted<int>(mood.Tilt((Darkness(scale, home + step), 0)).Weigh(weight, 1), step);
             }
 
             // a root out of its phrase's place weighs nothing at the plainest
@@ -251,6 +257,9 @@ internal static class Progressions
 
         return [..roots];
     }
+
+    /// <summary>How dark the chord on a step of the scale sounds, by its third: a major one's -1, a minor or a diminished one's 1.</summary>
+    public static double Darkness(Scale scale, int step) => GetInterval(scale.Offsets, step, step + 2) == 4 ? -1 : 1;
 
     /// <summary>
     ///     How well each root, in steps above the home, ends a phrase that returns home. They follow from the chords

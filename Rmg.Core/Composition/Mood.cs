@@ -33,11 +33,11 @@ public readonly record struct Mood(double Darkness, double Intensity)
     ///     The options a mood leans, by their choice: each option's lean by darkness and by intensity, from -1 to 1, 0 for
     ///     none; a choice's options it does not name lean none; and whether a song of a genre that does not name the choice
     ///     leans it as the songs have it, where its options' own amounts are the songs' draw, and not where the songs draw
-    ///     otherwise, as their kit by their drums' job. The scales by their darkness, Dorian's none, Lydian bright and
-    ///     Locrian dark (<see cref="Scale.Darkness" />); the fiercer, the likelier the power kit, double time, a riff that
-    ///     chugs or plays power chords, a driven instrument, a loud section's figure, and the calmer the brushes, the jazz kit and
-    ///     half time; a tempo's range leaning to its fast end the fiercer; a chord shape by its darkness; fills the more the
-    ///     fiercer, a value as a range's lean.
+    ///     otherwise, as their kit by their drums' job. The scales by their darkness, a minor third's dark and a major's
+    ///     bright, Lydian the brightest and Locrian the darkest (<see cref="Scale.Darkness" />); the fiercer, the likelier
+    ///     the power kit, double time, a riff that chugs or plays power chords, a driven instrument, a loud section's figure,
+    ///     and the calmer the brushes, the jazz kit and half time; a tempo's range leaning to its fast end the fiercer; a
+    ///     chord shape by its darkness; fills the more the fiercer, a value as a range's lean.
     /// </summary>
     // built when first asked, as the choices it names take the songs' span of a mood from here
     public static ImmutableArray<(GenreChoice Choice, Func<string, (double Darkness, double Intensity)> Lean, bool AsSongs)> Leans => field.IsDefault ? field =

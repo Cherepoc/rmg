@@ -339,7 +339,7 @@ internal sealed class SectionGenerator
         var drawnCount = extended ? harmonicRhythm.Changes.Count(x => x < Meter.DefaultPhraseBars * meter.BarDuration - 1e-9) : harmonicRhythm.Count;
         var progression = Progressions.Generate(Stream(sectionId, SectionStream.Progression), scale, home, Progressions.StrictnessOf(facets[Facet.Progression], _genre.Shift(GenreChoices.Strictness, "rules")), drawnCount, meter.Phrases,
             motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name), step => _genre.Shift(GenreChoices.RootDegrees, Progressions.Degrees[step].Name),
-            step => _genre.Shift(GenreChoices.CadenceDegrees, Progressions.Degrees[step].Name));
+            step => _genre.Shift(GenreChoices.CadenceDegrees, Progressions.Degrees[step].Name), _genre.Mood);
         if (extended)
             progression = PhraseLengths.Extend(progression, harmonicRhythm.Changes, meter);
         // a turnaround now and then, the pattern's last bar leading back to its start, by the progression facet and a genre's,
