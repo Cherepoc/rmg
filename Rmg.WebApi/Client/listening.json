@@ -1,149 +1,297 @@
 [
   {
-    "id": "trap-ends",
-    "question": "Trap given its brightest mood against its darkest, its chords and scale leaning major or minor: heard apart, and which is the style? The same if not told apart.",
-    "decides": "Whether the mood is heard in the chords alone (steps 2 and 3 of a mood every genre plays), or the sound by darkness is built too (step 4), the darkness given at its ends.",
-    "genre": "trap",
-    "with": {
-      "settings": {
-        "darkness": 0
-      }
-    },
-    "without": {
-      "skip": [],
-      "genre": {},
-      "settings": {
-        "darkness": 61
-      }
-    },
-    "seeds": [
-      {
-        "seed": "2",
-        "at": 56.8,
-        "listen": [
-          "Chords (Electric Piano 1)",
-          "Melody (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "3",
-        "at": 0,
-        "listen": [
-          "Chords (Pad 2 (warm))"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 2.5,
-        "listen": [
-          "Chords (Pad 2 (warm))",
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 0,
-        "listen": [
-          "Chords (Pad 2 (warm))",
-          "Bass (Synth Bass 1)",
-          "Melody (Flute)"
-        ]
-      },
-      {
-        "seed": "C",
-        "at": 0,
-        "listen": [
-          "Chords (Pad 2 (warm))",
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
-        "seed": "H",
-        "at": 9.8,
-        "listen": [
-          "Melody (Lead 1 (square))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "blackmetal-bright",
-    "question": "Black metal given its brightest mood, past its own span, major chords and scales over its tremolo: a bright black metal, or out of style?",
-    "decides": "A mood past a genre's span reaching the songs' own scales (Genre.AtMood), Black metal's major chords 94% at its brightest, against its own mood drawn.",
-    "genre": "blackMetal",
-    "with": {
-      "settings": {
-        "darkness": 0
-      }
-    },
-    "without": {
-      "skip": [],
-      "genre": {},
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "2",
-        "at": 172.6,
-        "listen": [
-          "Rhythm part (Distortion Guitar)",
-          "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "4",
-        "at": 188,
-        "listen": [
-          "Chords (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 99.4,
-        "listen": [
-          "Chords (Distortion Guitar)",
-          "Melody (Lead 5 (charang))"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 261.3,
-        "listen": [
-          "Chords (Distortion Guitar)",
-          "Bass (Electric Bass (finger))",
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "B",
-        "at": 132.4,
-        "listen": [
-          "Melody (Lead 5 (charang))"
-        ]
-      },
-      {
-        "seed": "I",
-        "at": 282,
-        "listen": [
-          "Pad (Church Organ)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "solo-ghosts",
-    "question": "Funk's soloist muting a note now and then in its slower licks, a ghost between the notes it plays: a funk player's touch, or notes gone missing?",
-    "decides": "A soloist's ghosts, Funk's articulation.soloGhosts 50-60-70, a fifth of a lick's unaccented notes, against none.",
-    "genre": "funk",
+    "id": "pop-homes",
+    "question": "Pop's sections now and then centred on the fourth or the fifth rather than the tonic, a verse or chorus in a key beside the song's: A with them, B on the tonic and its relative alone. Heard as colour, or as the song losing its key?",
+    "decides": "Whether a section's home leans to the tonic at the plain end (#107): B preferred, the fourth and fifth kept from the plain end, leaned in by the progression facet.",
+    "genre": "pop",
     "with": {
       "settings": {}
     },
     "without": {
       "skip": [],
       "genre": {
-        "articulation": {
-          "soloGhosts": 0
+        "sectionHome": {
+          "tonic": 60,
+          "relative": 20,
+          "fourth": 0,
+          "fifth": 0,
+          "contrast": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 0,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 148.9,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 0,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 111.9,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 152.3,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 0,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "reggae-closing",
+    "question": "Reggae's last phrase closing its mix into a button, the band's last hit muffled: A closing, B open to the end. Which ends better?",
+    "decides": "Whether the closing filter keeps off a button's or a stop's ending (#95): B preferred, the closing leaned by the ending's kind.",
+    "genre": "reggae",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "mixFilter": {
+          "closing": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "11",
+        "at": 160.7,
+        "listen": [
+          "Pad (String Ensemble 1)",
+          "Chords (Percussive Organ)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "1K",
+        "at": 207.7,
+        "listen": [
+          "Melody (Electric Guitar (clean))",
+          "Pad (Drawbar Organ)"
+        ]
+      },
+      {
+        "seed": "1c",
+        "at": 130.1,
+        "listen": [
+          "Pad (String Ensemble 1)",
+          "Chords (Percussive Organ)",
+          "Melody (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "darkjazz-eighths",
+    "question": "Dark jazz swinging its 16ths, a light double-time shuffle, against swinging its 8ths as a slow ballad's brushes do: A in 16ths, B in 8ths. Which is the style?",
+    "decides": "Dark jazz's feelValues.sixteenths (#345): B preferred, the preset names sixteenths 0 as Jazz does.",
+    "genre": "darkJazz",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelValues": {
+          "sixteenths": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 216.3,
+        "listen": [
+          "Hi-Hat",
+          "Bass (Acoustic Bass)",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 0,
+        "listen": [
+          "Kick",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "K",
+        "at": 277.1,
+        "listen": [
+          "Kick",
+          "Chords (Acoustic Grand Piano)",
+          "Melody (Vibraphone)"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 116,
+        "listen": [
+          "Hi-Hat",
+          "Melody (Vibraphone)",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 65.8,
+        "listen": [
+          "Melody (Muted Trumpet)"
+        ]
+      },
+      {
+        "seed": "s",
+        "at": 468.9,
+        "listen": [
+          "Kick",
+          "Acoustic Snare"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jazz-two-feel",
+    "question": "Jazz's bass walking in every section (A), against now and then in two, roots on 1 and 3, before it walks (B). Which is the style?",
+    "decides": "Whether Jazz names the bass's halves figure (#343): B preferred, figure.bass halves 10-20-25 in the preset.",
+    "genre": "jazz",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "own": 100,
+          "halves": [
+            10,
+            20,
+            25
+          ],
+          "rolling": 0,
+          "offbeat": 0,
+          "waltz": 0,
+          "eighths": 0,
+          "sixteenths": 0,
+          "withKick": 0,
+          "tumbao": 0,
+          "bossaBass": 0,
+          "tresillo": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 2.2,
+        "listen": [
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 122.3,
+        "listen": [
+          "Solo (Tenor Sax)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 362.1,
+        "listen": [
+          "Solo (Muted Trumpet)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 246.4,
+        "listen": [
+          "Chords (Electric Guitar (jazz))",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 86.6,
+        "listen": [
+          "Melody (Tenor Sax)",
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 438.6,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "house-offbeat",
+    "question": "House's bass in its own rhythm (A), against now and then on the offbeats between the kicks, Techno's pump (B). Which is the style?",
+    "decides": "Whether House names the bass's offbeat figure (#350): B preferred, figure.bass offbeat 30-40-50 in the preset.",
+    "genre": "electronic",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "own": 100,
+          "offbeat": [
+            30,
+            40,
+            50
+          ],
+          "rolling": 0,
+          "halves": 0,
+          "waltz": 0,
+          "eighths": 0,
+          "sixteenths": 0,
+          "withKick": 0,
+          "tumbao": 0,
+          "bossaBass": 0,
+          "tresillo": 0
         }
       },
       "settings": {}
@@ -151,107 +299,371 @@
     "seeds": [
       {
         "seed": "1",
-        "at": 122.3,
+        "at": 0,
+        "listen": [
+          "Bass (Drawbar Organ)"
+        ]
+      },
+      {
+        "seed": "4",
+        "at": 19.8,
+        "listen": [
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 183.3,
+        "listen": [
+          "Riff (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 223.8,
         "listen": [
           "Bass (Synth Bass 1)",
-          "Chords (Electric Guitar (clean))"
+          "Riff (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 211,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 62.3,
+        "listen": [
+          "Bass (Synth Bass 1)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "psytrance-texture",
+    "question": "Psytrance's sections mostly entered whole (A), against built and thinned in layers as Trance's are (B). Which is the style?",
+    "decides": "Whether Psytrance names Trance's texture (#380): B preferred, texture build 100, steady 60, thin 30, alone 10-15-20 in the preset.",
+    "genre": "psytrance",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "texture": {
+          "build": 100,
+          "steady": 60,
+          "thin": 30,
+          "alone": [
+            10,
+            15,
+            20
+          ]
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 325.1,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Pad (Pad 7 (halo))",
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 269.3,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Melody (Lead 1 (square))",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 22.7,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Riff (Lead 1 (square))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 315.4,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Melody (Lead 2 (sawtooth))",
+          "Riff (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 219.6,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Melody (Lead 2 (sawtooth))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 377.4,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Chords (Pad 3 (polysynth))",
+          "Pad (Pad 8 (sweep))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "punk-square",
+    "question": "Punk now and then in phrases of three or six bars, or a section's last bar cut short (A), against square fours throughout (B). Which is the style?",
+    "decides": "Whether Punk keeps the songs' phrase lengths and short bars (#386): B preferred, phraseBars four alone and sectionChanges.shortBar 0 in the preset.",
+    "genre": "punk",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "phraseBars": {
+          "threeBars": 0,
+          "sixBars": 0,
+          "fourBars": 100
+        },
+        "sectionChanges": {
+          "shortBar": 0,
+          "tempo": [
+            0,
+            4,
+            100
+          ],
+          "modulation": [
+            0,
+            5,
+            50
+          ],
+          "meter": [
+            0,
+            2,
+            100
+          ],
+          "eased": 50
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "8",
+        "at": 5.3,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Chords (Distortion Guitar)",
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 83.4,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)",
+          "Chords (Distortion Guitar)",
+          "Melody (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "F",
-        "at": 64.6,
+        "at": 32.7,
         "listen": [
-          "Melody (Trumpet)"
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
-        "seed": "e",
-        "at": 163,
+        "seed": "K",
+        "at": 17.5,
+        "listen": [
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Rhythm part (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "g",
+        "at": 4.1,
+        "listen": [
+          "Melody (Overdriven Guitar)",
+          "Rhythm part (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 66.6,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Melody (Electric Guitar (clean))",
+          "Riff (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "filmpiano-octaves",
+    "question": "Cinematic piano's melody seldom doubled in octaves (A), against doubled in octaves more often, the louder sections the likelier, its big return (B). Which is the style?",
+    "decides": "Whether Cinematic piano names doubling.octaves (#393): B preferred, octaves 20-30-40 in the preset.",
+    "genre": "filmPiano",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "doubling": {
+          "octaves": [
+            20,
+            30,
+            40
+          ],
+          "harmony": 25,
+          "riff": [
+            100,
+            50,
+            0
+          ],
+          "block": 0,
+          "twin": 50,
+          "imitation": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 39,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "4",
+        "at": 93.7,
+        "listen": [
+          "Melody (Violin)"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 62.8,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 63,
+        "listen": [
+          "Counter-melody (Cello)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 147.6,
+        "listen": [
+          "Melody (Oboe)"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 207.2,
+        "listen": [
+          "Melody (Oboe)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fmgame-bass",
+    "question": "The 16-bit game's bass in its own rhythm (A), against now and then a pulse in busy 16ths, as its description promises (B). Which is the style?",
+    "decides": "Whether the 16-bit game names the bass's sixteenths figure (#400): B preferred, figure.bass sixteenths 20-30-40 in the preset.",
+    "genre": "fmGame",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "own": 100,
+          "sixteenths": [
+            20,
+            30,
+            40
+          ],
+          "rolling": 0,
+          "offbeat": 0,
+          "halves": 0,
+          "waltz": 0,
+          "eighths": 0,
+          "withKick": 0,
+          "tumbao": 0,
+          "bossaBass": 0,
+          "tresillo": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 0,
+        "listen": [
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 21.5,
         "listen": [
           "Bass (Slap Bass 2)"
         ]
       },
       {
-        "seed": "w",
-        "at": 190,
+        "seed": "6",
+        "at": 145.6,
         "listen": [
-          "Rhythm part (Electric Guitar (muted))"
+          "Bass (Slap Bass 2)"
         ]
       },
       {
-        "seed": "x",
-        "at": 137.6,
+        "seed": "7",
+        "at": 73.6,
         "listen": [
-          "Rhythm part (Clavinet)"
-        ]
-      },
-      {
-        "seed": "10",
-        "at": 28.8,
-        "listen": [
-          "Solo (Alto Sax)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "bossa-root-fifth",
-    "question": "Bossa nova's bass alternating root and fifth on its strong beats, as a surdo does, rather than walking into its chords: the style, or plain?",
-    "decides": "Bossa nova's alternatingBass 30-50-50, back since the 14 October retune with the cycle's nearest notes, against none (asked again, taken out on 11 October).",
-    "genre": "bossa",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "alternatingBass": {
-          "sections": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 134.1,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 0,
-        "listen": [
-          "Bass (Acoustic Bass)"
+          "Bass (Slap Bass 2)"
         ]
       },
       {
         "seed": "8",
-        "at": 11.7,
+        "at": 58.7,
         "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 4.6,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 53.6,
-        "listen": [
-          "Bass (Acoustic Bass)"
+          "Bass (Slap Bass 1)"
         ]
       },
       {
         "seed": "F",
-        "at": 35,
+        "at": 13.4,
         "listen": [
-          "Bass (Electric Bass (finger))"
+          "Bass (Synth Bass 2)"
         ]
       }
     ]

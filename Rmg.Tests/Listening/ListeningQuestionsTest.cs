@@ -23,7 +23,11 @@ public sealed class ListeningQuestionsTest
     /// <param name="Decides">What the answer decides.</param>
     /// <param name="Genre">The preset the songs are made in, none for the songs' own.</param>
     /// <param name="Skip">The stages the song without the device leaves out.</param>
-    /// <param name="GenrePatch">The options the song without the device lays over its genre's, by choice and option, the genre's others as they are.</param>
+    /// <param name="GenrePatch">
+    ///     The options the song without the device lays over its genre's, by choice and option, the genre's others as they
+    ///     are: an amount or its three ends; a device a preset may take, the song
+    ///     without it the song with it added.
+    /// </param>
     /// <param name="At">Where the song first plays the device, in beats, as its trace and notes have it, a little before it where it grows; none where it does not.</param>
     /// <param name="In">The sections the device plays in, where alone it is listened to; every section for none.</param>
     /// <param name="With">The settings the songs with the device are given, by the page's name, as its steps; none for none.</param>
@@ -34,43 +38,62 @@ public sealed class ListeningQuestionsTest
         string Decides,
         string? Genre,
         string[] Skip,
-        Dictionary<string, Dictionary<string, int>>? GenrePatch,
+        Dictionary<string, Dictionary<string, object>>? GenrePatch,
         Func<CorpusSong, double?> At,
         Func<CorpusSong, SectionSpan, bool>? In = null,
         Dictionary<string, int>? With = null,
         Dictionary<string, int>? Without = null
     );
 
-    /// <summary>The darkness's steps on the page, from the brightest to the darkest (<c>StepScale</c>).</summary>
-    private const int Brightest = 0, Darkest = 61;
+    /// <summary>Where a section the predicate takes first starts, none where the song has none.</summary>
+    private static double? FirstWhere(CorpusSong song, Func<SectionSpan, bool> takes) => song.Map.Sections.Where(takes).Select(x => (double?)x.Start).Min();
 
-    /// <summary>The solo sections, by their index, whose soloist ghosts a note of its own line (<see cref="Soloist.Ghosts" />).</summary>
-    private static IEnumerable<int> GhostedSolos(CorpusSong song) => song.Solos.Where(s => s.Value.Soloists.Any(r => r != TrackRole.Drum
-        && song.Song.Notes![song.Track(r)].Any(n => n.IsWithin(song.Map.Sections[s.Key].Start, song.Map.Sections[s.Key].End) && n.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0
-                                                    && (r == TrackRole.Solo || n.Value.State.GetStateValue(CompositionStateKinds.LineSolo) != 0)))).Select(s => s.Key);
+    /// <summary>Whether a section is homed on the song's fourth or fifth, three steps either way from its tonic (<see cref="Progressions.GenerateHome" />).</summary>
+    private static bool OnFourthOrFifth(CorpusSong song, SectionSpan span) =>
+        song.Trace.Any(t => t.Point == TracePoints.SectionHome && t.Section == span.SectionId && t.Value is 3 or -3);
 
-    /// <summary>Where a section the trace finds playing the device first plays.</summary>
-    private static double? FirstSection(CorpusSong song, string point, Func<object?, bool> plays) =>
-        song.Trace.Where(x => x.Point == point && plays(x.Value)).Select(x => song.Map.Sections.Where(s => s.SectionId == x.Section).Select(s => (double?)s.Start).Min()).Min();
+    /// <summary>Whether a section runs in phrases of three or six bars, or ends on a short bar.</summary>
+    private static bool Uneven(SectionSpan span) => span.Meter.PhraseBars != Meter.DefaultPhraseBars || span.Cut > 0;
 
     private static readonly Question[] Questions =
     [
-        new("trap-ends", "Trap given its brightest mood against its darkest, its chords and scale leaning major or minor: heard apart, and which is the style? The same if not told apart.",
-            "Whether the mood is heard in the chords alone (steps 2 and 3 of a mood every genre plays), or the sound by darkness is built too (step 4), the darkness given at its ends.", "trap", [],
-            null, x => x.Map.Sections[0].Start, With: new() { ["darkness"] = Brightest }, Without: new() { ["darkness"] = Darkest }),
-        new("blackmetal-bright", "Black metal given its brightest mood, past its own span, major chords and scales over its tremolo: a bright black metal, or out of style?",
-            "A mood past a genre's span reaching the songs' own scales (Genre.AtMood), Black metal's major chords 94% at its brightest, against its own mood drawn.", "blackMetal", [],
-            null, x => x.Map.Sections[0].Start, With: new() { ["darkness"] = Brightest }),
-        new("solo-ghosts", "Funk's soloist muting a note now and then in its slower licks, a ghost between the notes it plays: a funk player's touch, or notes gone missing?",
-            "A soloist's ghosts, Funk's articulation.soloGhosts 50-60-70, a fifth of a lick's unaccented notes, against none.", "funk", [],
-            new() { ["articulation"] = new() { ["soloGhosts"] = 0 } },
-            x => GhostedSolos(x).Select(i => (double?)x.Map.Sections[i].Start).Min(),
-            In: (song, span) => GhostedSolos(song).Any(i => Math.Abs(song.Map.Sections[i].Start - span.Start) < 1e-9)),
-        new("bossa-root-fifth", "Bossa nova's bass alternating root and fifth on its strong beats, as a surdo does, rather than walking into its chords: the style, or plain?",
-            "Bossa nova's alternatingBass 30-50-50, back since the 14 October retune with the cycle's nearest notes, against none (asked again, taken out on 11 October).", "bossa", [],
-            new() { ["alternatingBass"] = new() { ["sections"] = 0 } },
-            x => FirstSection(x, TracePoints.AlternatingBass, v => v is true),
-            In: (song, span) => song.Trace.Any(t => t.Point == TracePoints.AlternatingBass && t.Section == span.SectionId && t.Value is true)),
+        new("pop-homes", "Pop's sections now and then centred on the fourth or the fifth rather than the tonic, a verse or chorus in a key beside the song's: A with them, B on the tonic and its relative alone. Heard as colour, or as the song losing its key?",
+            "Whether a section's home leans to the tonic at the plain end (#107): B preferred, the fourth and fifth kept from the plain end, leaned in by the progression facet.", "pop", [],
+            new() { ["sectionHome"] = new() { ["tonic"] = 60, ["relative"] = 20, ["fourth"] = 0, ["fifth"] = 0, ["contrast"] = 0 } },
+            x => FirstWhere(x, s => OnFourthOrFifth(x, s)), In: OnFourthOrFifth),
+        new("reggae-closing", "Reggae's last phrase closing its mix into a button, the band's last hit muffled: A closing, B open to the end. Which ends better?",
+            "Whether the closing filter keeps off a button's or a stop's ending (#95): B preferred, the closing leaned by the ending's kind.", "reggae", [],
+            new() { ["mixFilter"] = new() { ["closing"] = 0 } },
+            x => x.Trace.Any(t => t.Point == TracePoints.MixFilter && t.Value is MixFilterPlan { Closing: true }) && x.Map.Ending.Kind is EndingKind.Button or EndingKind.Stop ? x.Map.Sections[^1].Start : null,
+            In: (song, span) => span == song.Map.Sections[^1]),
+        new("darkjazz-eighths", "Dark jazz swinging its 16ths, a light double-time shuffle, against swinging its 8ths as a slow ballad's brushes do: A in 16ths, B in 8ths. Which is the style?",
+            "Dark jazz's feelValues.sixteenths (#345): B preferred, the preset names sixteenths 0 as Jazz does.", "darkJazz", [],
+            new() { ["feelValues"] = new() { ["sixteenths"] = 0 } },
+            x => x.Trace.Any(t => t.Point == TracePoints.Swing && t.Value is Swing { Delay: > 0, Period: < 1 }) ? x.Map.Sections[0].Start : null),
+        new("jazz-two-feel", "Jazz's bass walking in every section (A), against now and then in two, roots on 1 and 3, before it walks (B). Which is the style?",
+            "Whether Jazz names the bass's halves figure (#343): B preferred, figure.bass halves 10-20-25 in the preset.", "jazz", [],
+            new() { ["figure.bass"] = new() { ["own"] = 100, ["halves"] = new[] { 10, 20, 25 } } },
+            x => x.Map.Sections[0].Start),
+        new("house-offbeat", "House's bass in its own rhythm (A), against now and then on the offbeats between the kicks, Techno's pump (B). Which is the style?",
+            "Whether House names the bass's offbeat figure (#350): B preferred, figure.bass offbeat 30-40-50 in the preset.", "electronic", [],
+            new() { ["figure.bass"] = new() { ["own"] = 100, ["offbeat"] = new[] { 30, 40, 50 } } },
+            x => x.Map.Sections[0].Start),
+        new("psytrance-texture", "Psytrance's sections mostly entered whole (A), against built and thinned in layers as Trance's are (B). Which is the style?",
+            "Whether Psytrance names Trance's texture (#380): B preferred, texture build 100, steady 60, thin 30, alone 10-15-20 in the preset.", "psytrance", [],
+            new() { ["texture"] = new() { ["build"] = 100, ["steady"] = 60, ["thin"] = 30, ["alone"] = new[] { 10, 15, 20 } } },
+            x => x.Map.Sections[0].Start),
+        new("punk-square", "Punk now and then in phrases of three or six bars, or a section's last bar cut short (A), against square fours throughout (B). Which is the style?",
+            "Whether Punk keeps the songs' phrase lengths and short bars (#386): B preferred, phraseBars four alone and sectionChanges.shortBar 0 in the preset.", "punk", [],
+            new() { ["phraseBars"] = new() { ["threeBars"] = 0, ["sixBars"] = 0 }, ["sectionChanges"] = new() { ["shortBar"] = 0 } },
+            x => FirstWhere(x, Uneven), In: (_, span) => Uneven(span)),
+        new("filmpiano-octaves", "Cinematic piano's melody seldom doubled in octaves (A), against doubled in octaves more often, the louder sections the likelier, its big return (B). Which is the style?",
+            "Whether Cinematic piano names doubling.octaves (#393): B preferred, octaves 20-30-40 in the preset.", "filmPiano", [],
+            new() { ["doubling"] = new() { ["octaves"] = new[] { 20, 30, 40 } } },
+            x => x.Map.Sections[0].Start),
+        new("fmgame-bass", "The 16-bit game's bass in its own rhythm (A), against now and then a pulse in busy 16ths, as its description promises (B). Which is the style?",
+            "Whether the 16-bit game names the bass's sixteenths figure (#400): B preferred, figure.bass sixteenths 20-30-40 in the preset.", "fmGame", [],
+            new() { ["figure.bass"] = new() { ["own"] = 100, ["sixteenths"] = new[] { 20, 30, 40 } } },
+            x => x.Map.Sections[0].Start),
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
@@ -104,7 +127,7 @@ public sealed class ListeningQuestionsTest
         var patch = new Dictionary<string, Dictionary<string, object>>();
         foreach (var (choice, options) in question.GenrePatch)
         {
-            var completed = options.ToDictionary(x => x.Key, x => (object)x.Value);
+            var completed = options.ToDictionary(x => x.Key, x => x.Value);
             if (!named.ContainsKey(choice))
                 foreach (var option in GenreChoices.All.Single(x => x.Name == choice).Options.Where(x => !options.ContainsKey(x.Name)))
                 {
