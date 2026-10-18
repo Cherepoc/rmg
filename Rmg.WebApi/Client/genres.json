@@ -1204,6 +1204,7 @@
       "figure": { "ground": { "own": 100, "fourOnTheFloor": [10, 20, 30] } },
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },
       "phraseBars": { "fourBars": 100, "sixBars": [0, 5, 20] },
+      "sectionHome": { "tonic": 100, "relative": 30, "fourth": [5, 8, 25], "fifth": [0, 8, 25] },
       "chordScales": { "applied": [0, 35, 35], "borrowed": [0, 15, 20], "own": [0, 0, 30], "mediant": [10, 20, 20] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "electricSnare": 30, "clap": [45, 60, 60], "hiHat": 100, "ride": 30, "tom": 60, "cymbal": 80, "tambourine": [30, 40, 50], "maracas": [20, 30, 40] },
       "strongEffect": { "none": [100, 80, 30], "pump": [0, 5, 20], "echo": [0, 10, 30], "tremolo": [0, 5, 20], "sweep": [0, 3, 20] },

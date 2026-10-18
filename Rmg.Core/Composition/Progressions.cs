@@ -122,16 +122,17 @@ internal static class Progressions
 
     /// <summary>
     ///     The homes a section may have, as a genre names them, and how likely each is: the tonic itself most often, the
-    ///     relative key (the third degree of a minor scale, the sixth of a major one) sometimes, and IV or V now and then; and
-    ///     the classical form's contrast, a major key's fifth and a minor one's relative major, a genre's alone.
+    ///     relative key (the third degree of a minor scale, the sixth of a major one) sometimes, and IV or V now and then, the
+    ///     wilder the likelier, the plainest songs' IV seldom and their V never; and the classical form's
+    ///     contrast, a major key's fifth and a minor one's relative major, a genre's alone.
     /// </summary>
-    public static ImmutableArray<(string Name, string Label, double Weight)> Homes { get; } =
+    public static ImmutableArray<(string Name, string Label, ByConvention Weight)> Homes { get; } =
     [
-        ("tonic", "The tonic", 0.6),
-        ("relative", "The relative key, a minor scale's third, a major one's sixth", 0.2),
-        ("fourth", "The fourth", 0.1),
-        ("fifth", "The fifth", 0.1),
-        ("contrast", "The contrast, a major key's fifth, a minor one's relative major", 0)
+        ("tonic", "The tonic", new ByConvention(0.75, 0.6, 0.45)),
+        ("relative", "The relative key, a minor scale's third, a major one's sixth", new ByConvention(0.2, 0.2, 0.2)),
+        ("fourth", "The fourth", new ByConvention(0.05, 0.1, 0.17)),
+        ("fifth", "The fifth", new ByConvention(0, 0.1, 0.17)),
+        ("contrast", "The contrast, a major key's fifth, a minor one's relative major", new ByConvention(0, 0, 0))
     ];
 
     /// <summary>
@@ -139,7 +140,7 @@ internal static class Progressions
     ///     genre weighs it where it names them, a black metal band's on its minor tonic and never its relative major.
     /// </summary>
     /// <param name="role">What the section does in the song's form: a bridge leans away from the tonic, to another key.</param>
-    /// <param name="progression">The section's progression facet, which a genre's weights are taken at.</param>
+    /// <param name="progression">The section's progression facet, which the homes' weights are taken at.</param>
     public static int GenerateHome(IGenerationContext context, Scale scale, SectionRole role, Genre genre, double progression)
     {
         var relativeStep = GetQuality(scale.Offsets, 0) == TriadQuality.Minor ? 2 : 5;
@@ -147,11 +148,12 @@ internal static class Progressions
         var minorThird = scale.Offsets[2] - scale.Offsets[0] == 3;
         int[] steps = [0, Normalize(relativeStep), Normalize(3), Normalize(4), Normalize(minorThird ? 2 : 4)];
         var pool = genre.Pool<string>(GenreChoices.SectionHome, x => x);
-        // a genre's homes weighed as its pool keeps them, an end it leaves empty playing the nearer end's
-        ImmutableArray<Weighted<int>> homes = pool is null
-            ? [..Homes.Select((x, i) => new Weighted<int>(x.Weight, steps[i]))]
-            : [..ByConvention.Weigh(Homes.Select((x, i) => (Option: i, Weight: new ByConvention(x.Weight, x.Weight, x.Weight))), progression, i => pool(Homes[i].Name))
-                .Select(x => new Weighted<int>(x.Weight, steps[x.Value]))];
+        // the homes at the section's progression facet, a genre's as its pool keeps them, an end it leaves empty playing the nearer end's
+        ImmutableArray<Weighted<int>> homes =
+        [
+            ..ByConvention.Weigh(Homes.Select((x, i) => (Option: i, x.Weight)), progression, pool is null ? null : i => pool(Homes[i].Name))
+                .Select(x => new Weighted<int>(x.Weight, steps[x.Value]))
+        ];
         var away = Tilt.Of(BridgeAwayOdds, role == SectionRole.Bridge ? 1 : 0);
         return context.Pick(away.Weigh(homes, home => home == 0 ? 0 : 1));
     }

@@ -110,7 +110,7 @@ public static class GenreChoices
     public static GenreChoice CadenceRaise { get; } = Chances("cadenceRaise", "The leading tone raised", [("sections", "Sections whose cadence raises it", Progressions.CadenceRaise)]);
 
     /// <summary>The homes a section's chords move around, the tonic, the relative key, the fourth or the fifth (<see cref="Progressions.Homes" />).</summary>
-    public static GenreChoice SectionHome { get; } = Pool("sectionHome", "A section's home", Progressions.Homes.Select(x => (x.Name, x.Label, new ByConvention(x.Weight, x.Weight, x.Weight))));
+    public static GenreChoice SectionHome { get; } = Pool("sectionHome", "A section's home", Progressions.Homes);
 
     /// <summary>
     ///     The chords that leave the section's scale, each its chance as the songs have it (<see cref="Composition.ChordScales" />):
