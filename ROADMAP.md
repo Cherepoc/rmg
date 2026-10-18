@@ -6,19 +6,18 @@ is removed once it is built, its leftovers kept under *Open work*.
 
 ## Priorities
 
-1. **Now** (P1): *Planned: a mood every genre plays* (*Open work*), steps 1 to 3 built; `trap-ends` and
-   `blackmetal-bright` asked in the sixth round, with `solo-ghosts`, then step 4 only if they are not heard enough.
-2. **The review of 16 October 2026** (P1, *Open work*): its packages, the failing tests first at the review's commit.
-3. **The rules on the other corpora** (P1, *Older rule failures*): the failures older than the second order of work,
+1. **Now: the review of 16 October 2026** (P1, *Open work*): its packages, the failing tests first at the review's
+   commit.
+2. **The rules on the other corpora** (P1, *Older rule failures*): the failures older than the second order of work,
    each traced at the committed code first.
-4. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
+3. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked).
-5. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
+4. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.
-6. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
+5. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
    with its reason; no new presets until the owner asks (15 October 2026).
-7. **Parked** (P4): kept for their reasons, not planned.
+6. **Parked** (P4): kept for their reasons, not planned.
 
 ## Listening
 
@@ -27,9 +26,7 @@ it, `?listen=` its id on the test instance (`ListeningQuestionsTest` writes them
 verdicts, by song too). A question's songs are those of the corpus's first 24 that play its device where it is heard
 the most, by how much its song with the device and without differ as heard (`HeardDifference`), from a pattern's start
 in the sections its device plays in; its song without lays its patch over the genre's options. Done for a version when
-every question is answered or let go of. The sixth round (18 October 2026) asks trap-ends, blackmetal-bright,
-solo-ghosts and bossa-root-fifth, a question's sides now giving their songs a mood (`with` and `without` settings);
-`solo-ghosts` differs the least of any asked (0.01, the others 0.02 and up), its soloist's part the one to hear. A question listens only in the sections its device plays in, not
+every question is answered or let go of. A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -41,21 +38,23 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   response, the big ending, ensemble hits, bass on the kick, the waltz, the drone, imitation (now bent to the melody),
   the mood's spans of Synthwave, Drum and bass and Thrash, and the stepping-down bass of Cinematic piano and the
   Power ballad; and of 18 October, Latin's tumbao varied (two songs answered), Trance's stripped ending, Dark jazz's
-  inner line, Funk's wah, Black metal's key changes and Pop's ornaments.
+  inner line, Funk's wah, Black metal's key changes and Pop's ornaments; and of the sixth round (18 October), the mood's ends
+  heard in Trap (`trap-ends`, its darkest preferred) and in Black metal given its brightest (`blackmetal-bright`, kept
+  though its chromatic and broken-chord devices still sound haunting in major: the genre leans dark, its brightest
+  the owner's to give), so that the mood's sound by darkness is not built, and the soloist's ghosts (`solo-ghosts`).
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
-  Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing (Bossa nova's
-  root and fifth too, back at 30-50-50 since the 14 October retune and the cycle's notes nearest since, asked again
-  in the sixth round),
+  Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
   alone), the songs' double time halved (a scramble), Doom's blues scale reduced, Rock's key lift halved, the melody's
   inversion, the pinch's squeal; and of 18 October, Celtic's harmonica solo, and by the owner's ear the wah of the metal
   genres and of the acoustic guitars, and Djent's snare rolled into a drop (`drop.rolls`, Nu metal's kept).
 - **Let go of, not told apart or too faint to ask** (as they are): Djent's polymeter frames, `pop-melody-chords`,
   `trance-raise`, `pop-eighths`, IDM's 64th rolls, Dark jazz's and Black metal's darker moods
-  (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard because a mood leans only a genre's
-  own pool (*Planned: a mood every genre plays*).
+  (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard while a mood leaned only a genre's
+  own pool (since built: the chords' degrees by darkness and a mood past a genre's span, heard in the sixth round).
 - **Tied and kept as they are:** Pop's held tones, Classical's cadence, the jazz ride, Pop's instrument switches,
-  Black metal's two endings.
+  Black metal's two endings, Bossa nova's root and fifth (`bossa-root-fifth`, taken out on 11 October, back at
+  30-50-50 since the 14 October retune, tied in the sixth round).
 
 ### The song and its sections
 
@@ -203,57 +202,6 @@ plain or wild the songs are.
 
 Each item with its plan, and what it waits for.
 
-### Planned: a mood every genre plays, and a soloist's ghosts
-
-Planned 16 October 2026 from listening: `trance-bright` and `trap-dark` heard as their neutral songs, and Trap at full
-brightness as at full darkness. The mood leans only the options a genre's pool names (`Mood.Leans`: the scale and the
-chord shapes by darkness), by odds of 4 at its ends, and Trap's scales are all minor: at darkness -1 and 1, 64% and 66%
-of its chords minor, 23% and 26% major, its scales minor either way (Dorian 7 songs and 1 of 64); Trance's major songs
-31 and 4 of 64, but its major chords 33% and 28%. `HeardDifference` measured the questions' songs apart (0.35 and
-1.07), notes the mood's draws moved, not how bright they sound: a mood's question wants a measure of brightness first.
-Not implemented. Rewritten the same day from the owner's proposal, one scale of mood every genre shares: at a level of
-mood every genre takes comparable scales and chords, a genre leaning only to a level of its own, so that Black metal
-given its brightest plays bright and is heard so. Reviewed against a strict reading, one palette for every genre at
-every mood, which would cost a genre its harmonic taste inside its own span (Blues' Mixolydian and its blues scale and
-Pop's major alike at one darkness); kept, the blend below. Each step through the implementation loop:
-
-1. **A measure of brightness**, built (`MoodReportTest.Ends`, 94e20e2, the review's `run/mood.txt`): every preset at
-   darkness and intensity -1, 0 and 1 given, 16 seeds. The target, every genre's major share at least 20 points apart
-   between its darkness's ends, is met by none but a few: the songs' own 61% to 43%, Medieval 89% to 58%, Ambient 84% to
-   58%, Djent 50% to 0%, Dub 74% to 47%; Funk 87-92-90%, Black metal 15-17-19%, Trap 28-33-33%, Rock 65-57-54%. The
-   intensity moves a genre's tempo by its range, but leaves the songs with no genre at 126 bpm and 7.3 notes a second
-   at either end (the tempo's lean a genre's alone, `Mood.Leans`).
-2. **The chords' degrees leaning by darkness**, built with a scale's darkness by its third (#117): a progression's
-   root leans by its triad's third in the scale, major the brighter, by `Mood.Odds` (`Progressions.Darkness`); the
-   major chords at darkness -1, 0 and 1 the songs' own 86-58-33% (61-58-43% before), Trap 61-33-17% (28-33-33%), Rock
-   85-57-32%, Black metal 33-16-9%, Funk 96-92-85% and Blues 100-94-88%, their genres' qualities holding them.
-3. **A mood past a genre's span reaching the songs' own options**, built (`Genre.AtMood`): past a genre's span of
-   darkness a pool of the songs' draw (the scale; the chord shapes, drawn by their levels first, not) blended with the
-   songs' own options that lean the mood's way, by how far past, so that past its darkest a genre grows no brighter;
-   drawn songs unchanged. The major chords at darkness -1, 0 and 1: Black metal 94-16-9%, Djent 92-40-0%, Trap
-   94-33-17%, Techno 77-42-12%, Doom metal 96-39-17%; short of 20 points apart Jazz 77-69-65%, Jazz-funk 69-56-59%,
-   Bossa nova 55-52-49%, Funk 66-92-53% and Fusion 50-39-57%, their shapes' thirds read as major or minor alone.
-4. **The sound by darkness**, only if 2 and 3 are not heard enough: a synth's and a pad's filter closed the darker,
-   its room longer, the chords' voicing centred a few semitones lower, never an octave.
-
-Review. *Overengineering*: one lean of the degrees' weights and one blend by the distance past the span, both on
-values the options carry already; the intensity left out of the blend, as its kit and instruments past a span would
-swap a genre's sound (brushes in Black metal) where its tempo, fills and density are heard in every genre already;
-step 4 only on measurement. *Musicality*: the ends are sounds of their own, a bright black metal tremolo-picked in
-major, a melodic trap in major, a dark trance; a bright minor song plays its relative major's chords (♭VI-♭VII-i), a
-dark major song vi and the minor iv; the genre's instruments, drums, rhythm and form kept, heard in another colour.
-Risks: Locrian at the dark end, its tonic diminished, kept off a plain song by its conventionality's plain weight of
-0, so plain dark stops at Phrygian; the exotic scales' darkness (harmonic minor, Phrygian dominant, whole tone) set
-by rule, to check by ear before the ends are trusted; a dark major song turning so minor its key is lost, the degrees
-leaning by the odds and never leaving the scale. Asked in the sixth round: `trap-ends`, Trap's brightest against its
-darkest, and `blackmetal-bright`, Black metal at its brightest against its own mood.
-
-**A soloist's ghosts**, built: a song's soloist ghosts by a genre option `articulation.soloGhosts` the songs play
-(`Articulations.SoloGhostChance`, Funk's 50-70%), muting an unaccented note of a lick at 16ths or slower, not on a pedal,
-a fifth of the time (`SoloLines.GhostRate`), by its note's own draw; the band's dead notes its own lines' alone. Measured:
-31 of 47 of 64 Funk songs' soloists ghosting, 1.8% of their notes on the average, 10% at the most; the songs' 7 of 41,
-1.0%. Asked as `solo-ghosts` in the sixth round.
-
 ### From the review of 16 October 2026
 
 The review's fixes are its plan (outside the repository, `rmg-reviews/2026-10-16/plan/plan.md`); its three architecture
@@ -350,6 +298,11 @@ Each taken up when its reason no longer holds or listening asks:
 ### Left of the built plans
 
 What the plans of 8 to 15 October 2026 left, each by listening unless said:
+
+- **The mood's ends** (built 17 October 2026, heard in the sixth round): Jazz, Jazz-funk, Bossa nova, Funk and Fusion
+  short of 20 points of major chords between their darkness's ends, their shapes' thirds read as major or minor alone;
+  the exotic scales' darkness (harmonic minor, Phrygian dominant, whole tone) set by rule, to check by ear; the sound by
+  darkness (a filter closed the darker, a longer room, a lower voicing) only if a genre's ends are not told apart.
 
 - **The inner line** (`darkjazz-inner-line` heard better, 18 October 2026, and "might be good for other genres"): it
   plays at the songs' 0-15-30 in every genre naming no harmony devices, Pop, Rock and Cinematic piano among them, at
