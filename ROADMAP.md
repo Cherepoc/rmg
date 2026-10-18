@@ -222,14 +222,12 @@ Pop's major alike at one darkness); kept, the blend below. Each step through the
    root leans by its triad's third in the scale, major the brighter, by `Mood.Odds` (`Progressions.Darkness`); the
    major chords at darkness -1, 0 and 1 the songs' own 86-58-33% (61-58-43% before), Trap 61-33-17% (28-33-33%), Rock
    85-57-32%, Black metal 33-16-9%, Funk 96-92-85% and Blues 100-94-88%, their genres' qualities holding them.
-3. **A mood past a genre's span reaching the songs' own options**, the farther the more: inside its span (its
-   `darkness` from and to) a genre's pool as it is, leaned by the mood; past it the songs' own options blended in,
-   none at the span's edge and wholly at the end beyond it, then leaned by the mood, as `ByConvention.Filled` plays the
-   songs' options at an end a genre allows none at. On the darkness's choices alone, the scale and the chord shapes,
-   by the darkness every option has already (`Scale.Darkness`, `ChordShape.Darkness`): no table of moods, no data per
-   genre. A drawn mood keeps inside its span, so a genre's drawn songs change only by step 2; a given one past it is
-   heard (*Drawn or given*). CLAUDE.md's *a genre's pool keeps to the options it names* amended: a mood past a genre's
-   span reaches the songs' own options, the farther the more.
+3. **A mood past a genre's span reaching the songs' own options**, built (`Genre.AtMood`): past a genre's span of
+   darkness a pool of the songs' draw (the scale; the chord shapes, drawn by their levels first, not) blended with the
+   songs' own options that lean the mood's way, by how far past, so that past its darkest a genre grows no brighter;
+   drawn songs unchanged. The major chords at darkness -1, 0 and 1: Black metal 94-16-9%, Djent 92-40-0%, Trap
+   94-33-17%, Techno 77-42-12%, Doom metal 96-39-17%; short of 20 points apart Jazz 77-69-65%, Jazz-funk 69-56-59%,
+   Bossa nova 55-52-49%, Funk 66-92-53% and Fusion 50-39-57%, their shapes' thirds read as major or minor alone.
 4. **The sound by darkness**, only if 2 and 3 are not heard enough: a synth's and a pad's filter closed the darker,
    its room longer, the chords' voicing centred a few semitones lower, never an octave.
 

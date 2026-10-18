@@ -8,7 +8,7 @@ public sealed class MoodLeansTest
     /// <summary>An option's weight over another's in a genre at a mood, at the middle conventionality.</summary>
     private static double Ratio(Genre genre, Mood mood, string choice, string option, string against)
     {
-        var options = genre.AtMood(mood).Choices[choice];
+        var options = genre.AtMood(mood, 0.5).Choices[choice];
         return options[option].Tuned / options[against].Tuned;
     }
 
@@ -19,6 +19,25 @@ public sealed class MoodLeansTest
         var jazz = GenrePresets.Genre("jazz");
         await Assert.That(Ratio(jazz, dark, "chordShape", "alteredDominant", "seventh")).IsGreaterThan(Ratio(jazz, bright, "chordShape", "alteredDominant", "seventh"));
         await Assert.That(Ratio(jazz, dark, "chordShape", "sixNine", "seventh")).IsLessThan(Ratio(jazz, bright, "chordShape", "sixNine", "seventh"));
+    }
+
+    /// <summary>
+    ///     A genre given a mood past its span reaching the songs' own scales that lean its way, none leaning the other way;
+    ///     inside its span its pool as it names it.
+    /// </summary>
+    [Test]
+    public async Task AMoodPastAGenresSpan_ReachesTheSongsScalesLeaningItsWay()
+    {
+        var genre = GenrePresets.Genre("blackMetal");
+        var own = genre.Choices[GenreChoices.Scale.Name].Where(x => x.Value.Tuned > 0).Select(x => x.Key).ToHashSet();
+        var (from, to, _) = genre.Range(GenreChoices.Darkness, 0.5)!.Value;
+        double DarknessOf(string name) => Rmg.Core.Composition.Scales.All.Single(x => GenreChoices.Name(x.Name) == name).Darkness;
+
+        var inside = genre.AtMood(new Mood(Mood.OfAmount((from + to) / 2), 0), 0.5).Choices[GenreChoices.Scale.Name];
+        await Assert.That(inside.Where(x => x.Value.Tuned > 0).Select(x => x.Key).ToHashSet().SetEquals(own)).IsTrue();
+        var brightest = genre.AtMood(new Mood(-1, 0), 0.5).Choices[GenreChoices.Scale.Name].Where(x => x.Value.Tuned > 0).Select(x => x.Key).ToArray();
+        await Assert.That(brightest).Contains("major");
+        await Assert.That(brightest.Where(x => !own.Contains(x)).All(x => DarknessOf(x) < 0)).IsTrue();
     }
 
     [Test]
@@ -33,7 +52,7 @@ public sealed class MoodLeansTest
     [Test]
     public async Task AMood_LeansAValue_FillsByIntensity()
     {
-        double Value(Mood mood, string choice, string option) => Genre.None.AtMood(mood).Choices[choice][option].Tuned;
+        double Value(Mood mood, string choice, string option) => Genre.None.AtMood(mood, 0.5).Choices[choice][option].Tuned;
         await Assert.That(Value(new Mood(0, 1), "fills", "amount")).IsGreaterThan(Value(new Mood(0, -1), "fills", "amount"));
     }
 

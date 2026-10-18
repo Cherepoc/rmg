@@ -172,12 +172,20 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
     ///     The genre as a song of a mood takes it (<see cref="Mood.Leans" />): a pool's options weighed by their odds under
     ///     the mood, the heaviest as heavy as it was; a chance's odds moved alike; a range's lean moved toward the end the
     ///     mood leans to; a choice the genre does not name taken as the songs have it where its options' own amounts are the
-    ///     songs' draw, and left as it is where they are not; nothing added nor taken away, an option at none staying none.
+    ///     songs' draw, and left as it is where they are not; nothing added nor taken away, an option at none staying none,
+    ///     but past the genre's span of darkness at the song's conventionality: there a pool the darkness leans, of the songs'
+    ///     draw, reaches the songs' own options that lean the mood's way, the farther the more, none at the span's edge and
+    ///     wholly at the end beyond it, so that a genre given a mood it never draws is heard in it.
     /// </summary>
-    public Genre AtMood(Mood mood)
+    public Genre AtMood(Mood mood, double conventionality)
     {
         if (mood == default)
             return this;
+        var (from, to, _) = Range(GenreChoices.Darkness, conventionality) ?? Mood.SongsSpan;
+        var (darkest, brightest) = (Mood.OfAmount(to), Mood.OfAmount(from));
+        var past = mood.Darkness > darkest + 1e-9 ? (mood.Darkness - darkest) / (1 - darkest)
+            : mood.Darkness < brightest - 1e-9 ? (brightest - mood.Darkness) / (brightest + 1)
+            : 0;
         var choices = Choices;
         foreach (var (choice, lean, asSongs) in Mood.Leans)
         {
@@ -190,6 +198,13 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
             // a range's options it leans, its lean, as the songs have them where the genre names none, and a value's alike
             else if (choice.Kind is GenreChoiceKind.Range or GenreChoiceKind.Values)
                 options = options.AddRange(choice.Options.Where(x => !options.ContainsKey(x.Name) && lean(x.Name) != default).Select(x => KeyValuePair.Create(x.Name, x.Own)));
+
+            // a pool the darkness leans, past the genre's span, blended with the songs' own options that lean the mood's
+            // way, so that past its darkest a genre grows no brighter, where their own amounts are the songs' draw, as the
+            // scales' are and the chord shapes', drawn by their levels first, are not; each pool's weights a share of its own
+            // at every end
+            else if (choice.Kind == GenreChoiceKind.Pool && asSongs && past > 0 && choice.Options.Any(x => lean(x.Name).Darkness != 0))
+                options = Blended(options, choice.Options.Where(x => Math.Sign(lean(x.Name).Darkness) == Math.Sign(mood.Darkness)).ToImmutableDictionary(x => x.Name, x => x.Own), past);
 
             ByConvention Each(ByConvention value, Func<double, double> at) => new(at(value.Plain), at(value.Tuned), at(value.Wild));
             options = choice.Kind switch
@@ -204,6 +219,15 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
         }
 
         return this with { Choices = choices, Mood = mood };
+
+        // two pools' options together, the second's a share of the whole, each's weights as shares of its own at an end
+        static ImmutableDictionary<string, ByConvention> Blended(ImmutableDictionary<string, ByConvention> pool, ImmutableDictionary<string, ByConvention> other, double share)
+        {
+            double Of(ImmutableDictionary<string, ByConvention> of, string name, Func<ByConvention, double> end) =>
+                of.TryGetValue(name, out var value) && of.Sum(x => end(x.Value)) is var total and > 0 ? end(value) / total : 0;
+            double At(string name, Func<ByConvention, double> end) => (1 - share) * Of(pool, name, end) + share * Of(other, name, end);
+            return pool.Keys.Union(other.Keys).ToImmutableDictionary(x => x, x => new ByConvention(At(x, v => v.Plain), At(x, v => v.Tuned), At(x, v => v.Wild)));
+        }
 
         // a pool's weights by their factors, at every end, the heaviest of an end as heavy as before
         static ImmutableDictionary<string, ByConvention> Weighed(ImmutableDictionary<string, ByConvention> pool, Func<string, double> factor)

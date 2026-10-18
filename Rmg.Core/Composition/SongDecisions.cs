@@ -145,7 +145,7 @@ internal sealed record SongDecisions(
         var mood = new Mood(overrides.Darkness ?? drawnMood.Darkness, overrides.Intensity ?? drawnMood.Intensity);
         StateTrace.RecordSong(TracePoints.Mood, $"{mood.Darkness:F2} {mood.Intensity:F2}", mood);
         // its options leaned by its mood, every draw after taking them so
-        genre = genre.AtMood(mood);
+        genre = genre.AtMood(mood, songUnconventionality.Base);
         var rhythmicUnconventionality = new RhythmicUnconventionality(songUnconventionality[Facet.Groove]) { GrooveHold = RhythmicUnconventionality.HoldOf(genre) };
         // a facet's value as the rhythm's unconventionality, for a choice that leans by it
         RhythmicUnconventionality Of(Facet facet) => new(songUnconventionality[facet]);

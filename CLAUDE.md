@@ -21,7 +21,8 @@
   facets reach the ends only together, as the song's value does; songs are spread well away from both, and whatever an
   end makes, however wild, is meant. A genre's pool keeps to the options it names: where it allows none at an end, that end
   plays the nearer end's (`ByConvention.Filled`), so that a song of the genre plays one of its options at every
-  conventionality.
+  conventionality; but a mood given past a genre's span reaches the songs' own options that lean its way, the farther
+  the more (`Genre.AtMood`).
 
 # Architecture
 
