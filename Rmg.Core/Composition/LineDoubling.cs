@@ -152,10 +152,31 @@ internal static class LineDoubling
         Func<int, TrackRole, bool> playsAFigure,
         Func<int, bool> drivenRiff,
         int twinRaise,
-        Genre genre
+        Genre genre,
+        IReadOnlyDictionary<int, IInstrumentTrack> definitions
     )
     {
         var trackOf = roles.TrackOf();
+        // the steps of the chords part's shape at a position, from the chord's root, as its note there reads them; none where
+        // it strikes no chord since the change
+        var changes = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        IReadOnlySet<int>? ShapeAt(double position)
+        {
+            if (!trackOf.TryGetValue(TrackRole.Chords, out var chords) || !song.TrackTimelineMap.TryGetValue(chords, out var timeline))
+                return null;
+            var since = changes.LastOrDefault(x => x <= position + 1e-9);
+            if (timeline.EventTimeline.LastOrDefault(x => x.Position <= position + 1e-9) is not { Value: { } struck } note || note.Position < since - 1e-9)
+                return null;
+            var state = Realizer.StateAt(struck, position, timeline, definitions[chords], song.CommonStateTimelineMap);
+            return state.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty ? null : Realizer.GetChordNotes(state).Steps.Select(x => x.Mod(Scales.StepCount)).ToHashSet();
+        }
+
+        // a harmony's note on its chord's third where the chord leaves it out, a sus chord's, moved to the chord's note
+        // beside it, the fourth or the second, as a second voice keeps to the chord the band plays
+        int Harmonised(int scaleStep, double position) =>
+            scaleStep.Mod(Scales.StepCount) == 2 && ShapeAt(position) is { } shape && !shape.Contains(2)
+                ? scaleStep + (shape.Contains(3) ? 1 : shape.Contains(1) ? -1 : 0)
+                : scaleStep;
         // the parts that double or are doubled in a section, by its place, which play no other doubling there
         var doubling = new HashSet<(int Track, int Section)>();
         foreach (var ((source, target, steps, chance, option, isTwin, bars), pair) in Pairs.Select((x, i) => (x, i)))
@@ -221,10 +242,11 @@ internal static class LineDoubling
                     .Select(x => x.Position).DefaultIfEmpty(double.MaxValue).Min();
                 bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && position < walk - 1e-9 && patterns.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
                 // in unison the source's alteration as it is, a chromatic riff's passing note too; a harmony a step away on the
-                // scale
+                // scale, off a third its chord leaves out, but a twin's, which keeps its step all the way
                 var doubled = events[sourceTrack].EventTimeline
                     .Where(x => Doubles(x.Position + delay))
-                    .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, step == 0 ? x.Value.GetStateValue(StateKinds.Alteration) : 0)
+                    .Select(x => x.Value.With(StateKinds.ScaleStep, step == 0 || isTwin ? x.Value.GetStateValue(StateKinds.ScaleStep) + step : Harmonised(x.Value.GetStateValue(StateKinds.ScaleStep) + step, x.Position + delay))
+                        .With(StateKinds.Alteration, step == 0 ? x.Value.GetStateValue(StateKinds.Alteration) : 0)
                         .With(CompositionStateKinds.Doubled, 1)
                         .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0)
                         .With(CompositionStateKinds.LineRaise, isTwin ? twinRaise : 0).ToTimelineItem(x.Position + delay))

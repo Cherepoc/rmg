@@ -6,8 +6,9 @@ is removed once it is built, its leftovers kept under *Open work*.
 
 ## Priorities
 
-1. **Now** (P1): *Planned: a mood every genre plays* (*Open work*), its brightness measured first; then a soloist's
-   ghosts and the counter-melody's third over a sus4 beside it.
+1. **Now** (P1): *Planned: a mood every genre plays* (*Open work*), steps 1 to 3 built; `trap-ends` and a genre past
+   its span (Black metal at its brightest) to ask in the next round, with `solo-ghosts`, then step 4 only if they are
+   not heard enough.
 2. **The review of 16 October 2026** (P1, *Open work*): its packages, the failing tests first at the review's commit.
 3. **The rules on the other corpora** (P1, *Older rule failures*): the failures older than the second order of work,
    each traced at the committed code first.
@@ -248,13 +249,6 @@ genre past its span (Black metal at its brightest) against its own.
 a fifth of the time (`SoloLines.GhostRate`), by its note's own draw; the band's dead notes its own lines' alone. Measured:
 31 of 47 of 64 Funk songs' soloists ghosting, 1.8% of their notes on the average, 10% at the most; the songs' 7 of 41,
 1.0%. `solo-ghosts` to ask in a round after the fifth.
-
-**Over a sus4, the third** (16 October 2026, song 2b of `chamber-canon` heard dissonant on its sus4 chords). The bass
-landed its inversions on the scale's third whatever the chord, 13.1% of its notes over a sus4 its missing third, a
-semitone or a tone under its fourth; now a landing on a note its chord leaves out takes the root, 3.5%, its walks'
-passing notes, as over a major triad its fourth (7.7% weak, 2.4% strong). Left: the counter-melody's weak notes over a
-sus4 its third 12.3% (5.0% a triad's fourth), likely its harmony a third from the melody's fifth by the scale; to
-measure by doubling and, if so, a harmonised note its chord leaves out moved to the chord's.
 
 ### From the review of 16 October 2026
 
