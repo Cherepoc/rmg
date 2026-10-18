@@ -252,6 +252,7 @@ internal sealed record SongDecisions(
             Stream(SongStream.Intro),
             Stream(SongStream.Drops),
             Stream(SongStream.DropKind),
+            Stream(SongStream.BuildRoll),
             Stream(SongStream.OpeningAlone),
             genre,
             Of(Facet.Form),

@@ -48,7 +48,7 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
   alone), the songs' double time halved (a scramble), Doom's blues scale reduced, Rock's key lift halved, the melody's
   inversion, the pinch's squeal; and of 18 October, Celtic's harmonica solo, and by the owner's ear the wah of the metal
-  genres and of the acoustic guitars.
+  genres and of the acoustic guitars, and Djent's snare rolled into a drop (`drop.rolls`, Nu metal's kept).
 - **Let go of, not told apart or too faint to ask** (as they are): Djent's polymeter frames, `pop-melody-chords`,
   `trance-raise`, `pop-eighths`, IDM's 64th rolls, Dark jazz's and Black metal's darker moods
   (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard because a mood leans only a genre's

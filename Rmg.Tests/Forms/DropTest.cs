@@ -13,7 +13,7 @@ public sealed class DropTest
     // House's songs asked to drop at every lift and silently, as its own drop seldom and filtered oftener
     private static readonly Lazy<CorpusSong[]> Electronic = new(() =>
     {
-        var genre = GenrePresets.With("electronic", GenreChoices.Drop, ("lifts", 1));
+        var genre = GenrePresets.With("electronic", GenreChoices.Drop, ("lifts", 1), ("rolls", 1));
         genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.DropKind.Name, GenrePresets.With("electronic", GenreChoices.DropKind, ("silent", 1), ("filtered", 0)).Choices[GenreChoices.DropKind.Name]) };
         return TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
     });
@@ -65,6 +65,28 @@ public sealed class DropTest
         await Assert.That(rolled / (double)builds).IsGreaterThan(0.8);
     }
 
+    /// <summary>A genre whose builds roll no snare, Djent's, its drops built to by the band alone.</summary>
+    [Test]
+    public async Task ABuild_AGenreRollsNot_LeavesTheSnareOutOfIt()
+    {
+        var genre = GenrePresets.With("electronic", GenreChoices.Drop, ("lifts", 1), ("rolls", 0));
+        genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.DropKind.Name, GenrePresets.With("electronic", GenreChoices.DropKind, ("silent", 1), ("filtered", 0)).Choices[GenreChoices.DropKind.Name]) };
+        var drops = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            var snare = FormLayers.BuildRollDrums.Select(DrumGroups.GetTrackNumber).FirstOrDefault(song.Song.Notes!.ContainsKey, -1);
+            foreach (var at in song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!))
+            {
+                drops++;
+                var bar = song.Song.Map!.MeterAt(at - 1e-6).BarDuration;
+                // no bar of 32nds before the silence
+                await Assert.That(snare < 0 || song.Song.Notes[snare].Count(x => x.Position >= at - 2 * bar - 1e-9 && x.Position < at - bar - 1e-9) < 8 * bar - 1).IsTrue().Because($"seed {song.Seed} at {at}");
+            }
+        }
+
+        await Assert.That(drops).IsGreaterThan(8);
+    }
+
     [Test]
     public async Task AFilteredDrop_KeepsTheBandPlaying_TheMixClosingOverTheBarBefore_AndOpeningOnIt()
     {
@@ -98,7 +120,7 @@ public sealed class DropTest
     {
         int silent = 0, filtered = 0, playingOn = 0;
         // Techno's songs asked to drop at every lift, as its own drop seldom
-        var genre = GenrePresets.With("techno", GenreChoices.Drop, ("lifts", 1));
+        var genre = GenrePresets.With("techno", GenreChoices.Drop, ("lifts", 1), ("rolls", 1));
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
         foreach (var song in songs)
         {

@@ -275,7 +275,8 @@ internal enum SongStream
     DeadNotes = 120,
     TempoBand = 121,
     LooseFigures = 122,
-    SoloGhosts = 123
+    SoloGhosts = 123,
+    BuildRoll = 124
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

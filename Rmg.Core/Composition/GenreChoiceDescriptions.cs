@@ -72,7 +72,7 @@ public static class GenreChoiceDescriptions
         ["pocket"] = "How the parts sit around the beat: above the middle laid back, the backbeat and the lead behind it, below tight on the grid.",
         ["fills"] = "How much the drums fill into a new section: above the middle oftener and longer, below seldom and short.",
         ["kickOut"] = "How often a line's fill is the kick dropping out instead, the hats, the snare and the bass playing on without it into the downbeat, as a dance track drops its kick for a beat or a bar before the next section.",
-        ["drop"] = "How often the band builds to a louder section and drops out for the bar before it, as dance music does.",
+        ["drop"] = "How often the band builds to a louder section and drops out for the bar before it, as dance music does, and how often the snare rolls faster and faster into it.",
         ["mutation"] = "How often a drum bar takes an edit that the bars after it keep, a hit moved, dropped, doubled or ratcheted, two 8ths swapped, the kick and snare traded, so that the groove strays further as a section goes on, as a programmed break evolves.",
         ["drumSoloFeet"] = "What a drum solo's feet keep time with while the hands solo: the groove's kick, the hi-hat's pedal on 2 and 4 as a jazz drummer's, a double kick in 16ths as a metal drummer's, or the bossa's kick.",
         ["sticking"] = "The stickings a drum solo's runs are played in: single and double strokes, paradiddles, six-stroke rolls, hands and foot in triplets, or a cascade down the toms, the right hand moving round the toms and the left on the snare.",

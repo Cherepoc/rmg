@@ -29,6 +29,9 @@ internal sealed class SongFormGenerator
     // a drop's kind, silent or filtered, from a sequence of its own
     private readonly IGenerationContext _dropKindContext;
 
+    // whether a build rolls on the snare, from a sequence of its own (FormLayers.BuildRoll)
+    private readonly IGenerationContext _buildRollContext;
+
     // the sequence whether the song opens on one part alone, and which, is drawn from (FormLayers.OpeningAlone)
     private readonly IGenerationContext _openingContext;
 
@@ -58,6 +61,7 @@ internal sealed class SongFormGenerator
         IGenerationContext introContext,
         IGenerationContext dropContext,
         IGenerationContext dropKindContext,
+        IGenerationContext buildRollContext,
         IGenerationContext openingContext,
         Genre genre,
         RhythmicUnconventionality songRhythm,
@@ -72,6 +76,7 @@ internal sealed class SongFormGenerator
         _introContext = introContext;
         _dropContext = dropContext;
         _dropKindContext = dropKindContext;
+        _buildRollContext = buildRollContext;
         _openingContext = openingContext;
         _genre = genre;
         _songRhythm = songRhythm;
@@ -419,13 +424,15 @@ internal sealed class SongFormGenerator
         var kinds = ByConvention.Weigh(FormLayers.DropKinds, _songRhythm.Value, _genre.Pool<DropKind>(GenreChoices.DropKind));
         // every line's drop and its kind from sequences of its own, by its place, drawn before any line is passed over, so
         // that whether another line may drop leaves them as they were
-        var (dropSeed, kindSeed) = (_dropContext.GenerateSeed(), _dropKindContext.GenerateSeed());
+        var (dropSeed, kindSeed, rollSeed) = (_dropContext.GenerateSeed(), _dropKindContext.GenerateSeed(), _buildRollContext.GenerateSeed());
+        var roll = FormLayers.BuildRoll.At(_songRhythm.Value, _genre.Chance(GenreChoices.Drop, "rolls"));
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
             var place = map.PlaceKey(line.Position, LinePlacesPerBeat);
             var dropping = new GenerationContext(Seeds.Derive(dropSeed, place)).TestProbability(drop);
             var kind = new GenerationContext(Seeds.Derive(kindSeed, place)).Pick(kinds);
+            var rolls = snare >= 0 && new GenerationContext(Seeds.Derive(rollSeed, place)).TestProbability(roll);
             if (!line.Lifts || line.Position >= end || !dropping)
                 continue;
             // but where the band does not come back on it, the section's first bar leaving every pitched part out, as a
@@ -442,16 +449,16 @@ internal sealed class SongFormGenerator
             foreach (var (track, role) in _roles.Where(_ => kind == DropKind.Silent))
                 edits.Rest(track, role, gap, line.Position);
 
-            // the build: the song's snare rolling over the bars before the silent one, its notes twice as fast each bar and
-            // louder as it goes, within the section
+            // the build: the song's snare rolling over the bars before the silent one, where it rolls, its notes twice as
+            // fast each bar and louder as it goes, within the section
             var bar = line.Ending.Meter.BarDuration;
             var rollFrom = Math.Max(gap - FormLayers.BuildRollBars * bar, i > 0 ? lines[i - 1].Position : 0);
             // each bar of the roll at its own rate, every hit counted
             // the snare rolling into the drop whether the drums played the bars before it or not, as a dance track's build
             // brings the drums back over a breakdown
-            if (snare >= 0)
+            if (rolls)
                 builds.Add((rollFrom, gap));
-            if (snare >= 0)
+            if (rolls)
                 for (var (barStart, step) = (gap - FormLayers.BuildRollBars * bar, FormLayers.BuildRollStart); barStart < gap - 1e-9; barStart += bar, step /= 2)
                 for (var hit = 0; hit < (int)Math.Round(bar / step); hit++)
                 {

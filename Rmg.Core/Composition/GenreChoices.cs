@@ -384,8 +384,9 @@ public static class GenreChoices
     /// <summary>Which bars of a pattern repeat which, AAAA to ABCD: a loop's one bar over and over (<see cref="PhraseSchemes" />).</summary>
     public static GenreChoice PhraseScheme { get; } = Pool("phraseScheme", "Bars repeating", PhraseSchemes.Weights.Select(x => (x.Scheme.ToLowerInvariant(), x.Scheme, x.Weight)));
 
-    /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
-    public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops", [("lifts", "Lifts built to a drop", FormLayers.Drop)]);
+    /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it, the songs never, and a build rolls on the snare (<see cref="FormLayers.Drop" />, <see cref="FormLayers.BuildRoll" />).</summary>
+    public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops",
+        [("lifts", "Lifts built to a drop", FormLayers.Drop), ("rolls", "Builds rolled on the snare", FormLayers.BuildRoll)]);
 
     /// <summary>How a drop takes the bar before it, the band silent or filtered (<see cref="FormLayers.DropKinds" />).</summary>
     public static GenreChoice DropKind { get; } = Pool("dropKind", "A drop's bar before it",
