@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
 using Rmg.Tests.Genres;
 
@@ -8,26 +9,35 @@ namespace Rmg.Tests.Drums;
 /// <summary>A genre's figures (<see cref="Figures" />): a player's rhythm in a section given by its figure, the kick with the riff, a double kick, a clave.</summary>
 public sealed class FiguresTest
 {
-    /// <summary>A loose figure at the plainest feel is the figure laid exactly: the same songs' bass note for note.</summary>
+    /// <summary>
+    ///     A loose figure (<see cref="Figures.Loosen" />) at the plain end's strictness is the figure exactly, its onsets kept and
+    ///     the player's own left out; and at any strictness a place both strike is kept.
+    /// </summary>
     [Test]
-    public async Task ALooseFigure_AtThePlainEnd_IsTheFigureExactly()
+    public async Task ALooseFigure_AtThePlainEnd_IsTheFigureExactly_AndKeepsWhereBothStrike()
     {
-        var plain = TestCorpus.FacetsOf((Facet.Feel, 0));
-        var notes = 0;
-        foreach (var seed in Enumerable.Range(0, 8))
+        foreach (var seed in Enumerable.Range(0, 256))
         {
-            (double, int)[] Bass(string figure)
-            {
-                var song = TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.With("latin", GenreChoices.Figures[FigurePlayer.Bass], (figure, 1)), Facets: plain));
-                return [..song.Song.Notes![song.Song.Track(TrackRole.Bass)].Select(x => (Math.Round(x.Position, 6), x.Value.Pitches[0]))];
-            }
-
-            var (loose, exact) = (Bass("tumbaoChances"), Bass("tumbao"));
-            notes += exact.Length;
-            await Assert.That(loose).IsEquivalentTo(exact, CollectionOrdering.Matching).Because($"seed {seed}");
+            var context = new GenerationContext((ulong)seed);
+            double[] own = [..Enumerable.Range(0, 16).Where(_ => context.GenerateDouble() < 0.4).Select(x => x * 0.25)];
+            double[] onsets = [..Enumerable.Range(0, 16).Where(_ => context.GenerateDouble() < 0.3).Select(x => x * 0.25)];
+            await Assert.That(Figures.Loosen(own, onsets, Figures.Strictness.At(0), new GenerationContext((ulong)seed))).IsEquivalentTo(onsets, CollectionOrdering.Matching).Because($"seed {seed}");
+            var loose = Figures.Loosen(own, onsets, Figures.Strictness.At(1), new GenerationContext((ulong)seed));
+            await Assert.That(own.Intersect(onsets).All(loose.Contains)).IsTrue().Because($"seed {seed}");
         }
+    }
 
-        await Assert.That(notes).IsGreaterThan(0);
+    /// <summary>
+    ///     The figures a player varies (<see cref="Figure.Loose" />): those across a half bar or a bar, but a clave, the swing
+    ///     ride and the waltz kept exact, a figure that follows another player, and a pulse the same every beat.
+    /// </summary>
+    [Test]
+    public async Task TheLooseFigures_AreThePatternsAcrossTheBeat_NotAClaveAFollowerOrAPulse()
+    {
+        var loose = Figures.All.Where(x => x.Loose).Select(x => $"{x.Player} {x.Name}").Order().ToArray();
+        await Assert.That(loose).IsEquivalentTo(
+            ["Backbeat breakbeat", "Bass bossaBass", "Bass halves", "Bass tresillo", "Bass tumbao", "Chords backbeat", "Chords charleston", "Ground breakbeat", "Ground surdo", "Ground twoStep"],
+            CollectionOrdering.Matching);
     }
 
     /// <summary>
@@ -247,7 +257,7 @@ public sealed class FiguresTest
     ///     the figures place, a line's pickup or a push.
     /// </summary>
     [Test]
-    [Arguments("latin", "tumbaoChances")]
+    [Arguments("latin", "tumbao")]
     [Arguments("bossa", "bossaBass")]
     [Arguments("jazzFunk", "tresillo")]
     public async Task ALatinBass_StrikesOnItsFiguresSixteenths(string genre, string name)

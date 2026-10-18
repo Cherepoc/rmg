@@ -208,14 +208,14 @@ The review's fixes are its plan (outside the repository, `rmg-reviews/2026-10-16
 proposals are packages there, the holds written by their makers, the pulse on a place and one list of plays. What it
 proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
 
-- **Figures as chances** (the foundations reviewer, #39), its experiment built (package 03b of the review's plan): a
-  loose figure (`Figure.Loose`) plays its onsets and the player's own notes each by a chance, a note on both always, by
-  how strictly the section plays it (`Figures.Strictness`, the feel facet's 1-0.9-0.6), exact at the plain end. Latin's
-  bass plays the tumbao so (`tumbaoChances`): its notes on the figure 76%-73%-57% at feel 0, 0.5 and 1 against the
-  tumbao laid's 76%-76%-71%, its bars the figure exactly 26%-16%-1% against 26%-23%-12% (`FigureChancesReportTest`).
-  Heard better as `latin-tumbao-varied` (18 October 2026, two songs answered), so a migration of every figure is
-  planned, each figure played as chances by its section's strictness, the presets' figures as they are. Built where the figures are laid, after assembly, rather than inside the rhythm
-  generator, whose patterns are drawn before a section's figure is.
+- **Figures as chances** (the foundations reviewer, #39), built: every figure across a half bar or a bar is played
+  as a player varies it (`Figure.Loose`), its onsets and the player's own notes each by a chance, by how strictly the
+  section plays it (`Figures.Strictness`, the feel facet's 1-0.9-0.6), exact at the plain end; a clave, the swing ride
+  and the waltz kept exact as listening heard them, and a figure that follows a player or a pulse the same every beat (a
+  double kick, a gallop, a skank) never loose. Heard better on Latin's tumbao (`latin-tumbao-varied`, 18 October 2026);
+  the others (`FigureChancesReportTest`, notes on the figure at feel 0.5 and 1) the bossa nova's bass 93-84%, the
+  tresillo 88-63%, the boom 91-46%, the chick 68-42%, the surdo 100-98%, the two-step 87-42% and the breakbeat's kick
+  93-63%, unasked: a question of the drums' (the two-step) and of the boom's when a round asks.
 - **Waiting on figures as chances**, as each needs a player the figures do not reach: the conga's tumbao (#354, twelve
   presets name the conga), the reggae organ bubble on the pad (#355, Reggae, Dub, Ska), the boogie comp on the rhythm
   part (#340, Rock, Blues, Country, Punk, Funk rock; the bass's boogie steps shared).

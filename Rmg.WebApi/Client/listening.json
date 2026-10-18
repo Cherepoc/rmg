@@ -213,6 +213,13 @@
     },
     "seeds": [
       {
+        "seed": "1",
+        "at": 134.1,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
         "seed": "5",
         "at": 0,
         "listen": [
@@ -235,7 +242,7 @@
       },
       {
         "seed": "D",
-        "at": 15.2,
+        "at": 53.6,
         "listen": [
           "Bass (Acoustic Bass)"
         ]
@@ -243,13 +250,6 @@
       {
         "seed": "F",
         "at": 35,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 11.7,
         "listen": [
           "Bass (Electric Bass (finger))"
         ]

@@ -684,7 +684,7 @@
       "sectionLength": { "bars8": [20, 20, 30], "bars16": 100, "bars32": [60, 60, 60] },
       "vamp": { "sections": [10, 20, 30] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35, "block": 50, "twin": 50 },
-      "figure": { "claves": { "own": 5, "clave32": 60, "clave23": 30 }, "bass": { "own": [20, 30, 40], "tumbaoChances": 100 } },
+      "figure": { "claves": { "own": 5, "clave32": 60, "clave23": 30 }, "bass": { "own": [20, 30, 40], "tumbao": 100 } },
       "louderForms": { "guitars": 0 },
       "pins": { "time": [100, 100, 70], "ground": [80, 80, 50], "bass": [80, 80, 50] },
       "push": { "sections": [40, 50, 50] },

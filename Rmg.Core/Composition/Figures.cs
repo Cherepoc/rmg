@@ -26,12 +26,20 @@ public enum FigurePlayer
 /// <param name="Follows">The player whose notes' starts it strikes, played before it, none for one of its own onsets.</param>
 /// <param name="AnswersKick">Whether it plays around the kick, between its beats, and so only in a bar the kick plays in, as a rolling bass does.</param>
 /// <param name="In">The meter of its bars, four's where none is given.</param>
-/// <param name="Loose">
-///     Whether it is played as a player varies it, its onsets and the player's own notes each by a chance, by how
-///     strictly the section plays it (<see cref="Figures.Strictness" />), rather than exactly.
-/// </param>
-public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick, Meter? In = null, bool Loose = false)
+/// <param name="Exact">Whether it is played exactly at every end, as a clave, the swing ride or the waltz is, rather than as a player varies it (<see cref="Loose" />).</param>
+public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick, Meter? In = null, bool Exact = false)
 {
+    /// <summary>
+    ///     Whether it is played as a player varies it, its onsets and the player's own notes each by a chance, by how
+    ///     strictly the section plays it (<see cref="Figures.Strictness" />): every figure but one kept exact, one that
+    ///     follows another player, and a pulse, the same every beat, a double kick's, a gallop's or a skank's, whose point
+    ///     is that it never varies.
+    /// </summary>
+    public bool Loose => !Exact && Follows is null && !Pulse;
+
+    /// <summary>Whether its onsets are the same in every beat.</summary>
+    private bool Pulse => Onsets.Length > 0 && Sixteenths % 4 == 0 && Onsets.All(x => Onsets.Contains((x + 4) % Sixteenths));
+
     /// <summary>
     ///     Whether it plays in a bar of the meter: one that follows or strikes at a steady step in any, one of its own shape
     ///     in a meter whose bars' groups its own bars' are, a waltz's in three, a figure of four's in four.
@@ -62,7 +70,7 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
 ///     players play, a blast's or a breakbeat's, drawn by the first and played by both; the songs play their own rhythms
 ///     always. The player plays the figure in every bar it plays in, its own notes
-///     there given up, each struck as its own was at or before it. A stage of the song before its fills, which play over
+///     there given up but where a loose figure keeps them, as a player varies it, each struck as its own was at or before it. A stage of the song before its fills, which play over
 ///     it (<see cref="SongStages" />), a figure of its own shape in its own meter, the waltz in three, the rest in four.
 /// </summary>
 internal static class Figures
@@ -99,7 +107,7 @@ internal static class Figures
         new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
         new("blast", "A blast beat, a cymbal riding it on every 8th", FigurePlayer.Time, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
         // the swing ride, the skip played late by the song's swing
-        new("swingRide", "The swing ride, on the beats and the skip after 2 and 4", FigurePlayer.Time, [0, 4, 6, 8, 12, 14], 16, null, 0, false),
+        new("swingRide", "The swing ride, on the beats and the skip after 2 and 4", FigurePlayer.Time, [0, 4, 6, 8, 12, 14], 16, null, 0, false, Exact: true),
         // the kick on every beat, a dance track's, a reggae's steppers, a pop chorus's, the likelier the louder the section
         new("fourOnTheFloor", "Four on the floor, the kick on every beat", FigurePlayer.Ground, [0, 4, 8, 12], 16, null, 1, false),
         // drum and bass's, the kick on 1 and the 3-and around the snare's 2 and 4
@@ -122,26 +130,24 @@ internal static class Figures
         // the boom-chicka's chick, the chords on 2 and 4 over the bass's boom on 1 and 3
         new("backbeat", "The chick, on 2 and 4", FigurePlayer.Chords, [4, 12], 16, null, 0, false),
         // the waltz, the bass's oom on 1 and the chords' pah-pah on 2 and 3, drawn by the chords and played by both
-        new("waltz", "The waltz, the pah-pah on 2 and 3", FigurePlayer.Chords, [4, 8], 12, null, 0, false, Meter.ThreeFour),
+        new("waltz", "The waltz, the pah-pah on 2 and 3", FigurePlayer.Chords, [4, 8], 12, null, 0, false, Meter.ThreeFour, Exact: true),
         new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, null, 0, true),
         new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, null, 0, true),
         // a pulse, the root hammered in even 8ths or 16ths, a disco's, a synthwave's, a darksynth's
         new("halves", "The boom, on 1 and 3", FigurePlayer.Bass, [0, 8], 16, null, 0, false),
-        new("waltz", "The waltz, the oom on 1", FigurePlayer.Bass, [0], 12, null, 0, false, Meter.ThreeFour),
+        new("waltz", "The waltz, the oom on 1", FigurePlayer.Bass, [0], 12, null, 0, false, Meter.ThreeFour, Exact: true),
         new("eighths", "A pulse in even 8ths", FigurePlayer.Bass, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 0, false),
         new("sixteenths", "A pulse in even 16ths", FigurePlayer.Bass, [..Enumerable.Range(0, 16)], 16, null, 0, false),
         new("withKick", "With the kick, wherever it plays", FigurePlayer.Bass, [], 0, FigurePlayer.Ground, 0, false),
         // a salsa's bass, counted in half notes as its clave is: each of its bars' 2-and and 4, anticipating the chord
         new("tumbao", "The tumbao, a salsa bar's 2-and and 4, ahead of the chord", FigurePlayer.Bass, [3, 6, 11, 14], 16, null, 0, false),
-        // the tumbao as a bassist varies it, its onsets kept and its own notes between them now and then, an experiment
-        new("tumbaoChances", "The tumbao as a bassist varies it", FigurePlayer.Bass, [3, 6, 11, 14], 16, null, 0, false, Loose: true),
         new("bossaBass", "The bossa nova's bass, on 1, the 2-and, 3 and the 4-and, as its surdo", FigurePlayer.Bass, [0, 6, 8, 14], 16, null, 0, false),
         // the tresillo, 3+3+2 in each half of the bar, a jazz-funk vamp's bass arpeggio
         new("tresillo", "The tresillo, 3+3+2 in each half bar", FigurePlayer.Bass, [0, 3, 6, 8, 11, 14], 16, null, 0, false),
         // a son clave counted in half notes, a salsa's beat, its two sides in a bar
-        new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 3, 6, 10, 12], 16, null, 0, false),
-        new("clave23", "The clave's 2-3", FigurePlayer.Claves, [2, 4, 8, 11, 14], 16, null, 0, false),
-        new("bossaClave", "The bossa nova's clave, the 3-2 with its last stroke an 8th later", FigurePlayer.Backbeat, [0, 6, 12, 20, 26], 32, null, 0, false)
+        new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 3, 6, 10, 12], 16, null, 0, false, Exact: true),
+        new("clave23", "The clave's 2-3", FigurePlayer.Claves, [2, 4, 8, 11, 14], 16, null, 0, false, Exact: true),
+        new("bossaClave", "The bossa nova's clave, the 3-2 with its last stroke an 8th later", FigurePlayer.Backbeat, [0, 6, 12, 20, 26], 32, null, 0, false, Exact: true)
     ];
 
     /// <summary>A player's options, its own rhythm first, as its pool shows them, the songs' weight of each: their own always.</summary>
@@ -283,23 +289,13 @@ internal static class Figures
                                 continue;
                             laid.Add((span.SectionId, player));
                             played.RemoveAll(x => In(x.Position));
-                            if (figure.Loose)
-                            {
-                                // its onsets and the player's own notes, each kept by a chance of its own, from a sequence of
-                                // the bar's and the track's own
-                                var strict = Strictness.At(song.SectionOf(span.SectionId).Facets[Facet.Feel]);
-                                var context = song.Stream(SongStream.LooseFigures, (long)Math.Round(bar * 48), track);
-                                var ownAt = own.Select(x => Math.Round(x.Position, 6)).ToHashSet();
-                                var onAt = onsets.Where(In).Select(x => Math.Round(x, 6)).ToHashSet();
-                                foreach (var at in ownAt.Union(onAt).Order())
-                                {
-                                    var keeps = context.GenerateDouble() < (ownAt.Contains(at) && onAt.Contains(at) ? 1 : onAt.Contains(at) ? strict : 1 - strict);
-                                    if (keeps)
-                                        played.Add(own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at));
-                                }
-                            }
-                            else
-                                played.AddRange(onsets.Where(In).Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
+                            // a loose figure's onsets and the player's own notes each kept by a chance, from a sequence of the
+                            // bar's and the track's own
+                            double[] kept = figure.Loose
+                                ? Loosen([..own.Select(x => x.Position)], [..onsets.Where(In)], Strictness.At(song.SectionOf(span.SectionId).Facets[Facet.Feel]),
+                                    song.Stream(SongStream.LooseFigures, (long)Math.Round(bar * 48), track))
+                                : [..onsets.Where(In)];
+                            played.AddRange(kept.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
                         }
                     }
 
@@ -309,6 +305,18 @@ internal static class Figures
         }
 
         return Laid(song, draft, drawn, laid);
+    }
+
+    /// <summary>
+    ///     A loose figure's onsets in a bar as the section plays them, by how strictly: a place both the figure and the
+    ///     player's own rhythm strike always, one the figure's alone by the strictness, one the player's own alone by its
+    ///     rest, so that at 1 the figure is played exactly.
+    /// </summary>
+    internal static double[] Loosen(double[] own, double[] onsets, double strict, IGenerationContext context)
+    {
+        var ownAt = own.Select(x => Math.Round(x, 6)).ToHashSet();
+        var onAt = onsets.Select(x => Math.Round(x, 6)).ToHashSet();
+        return [..ownAt.Union(onAt).Order().Where(at => context.GenerateDouble() < (ownAt.Contains(at) && onAt.Contains(at) ? 1 : onAt.Contains(at) ? strict : 1 - strict))];
     }
 
     /// <summary>The drums' players, whose rhythm a half or double time stretches or presses.</summary>
