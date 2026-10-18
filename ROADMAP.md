@@ -252,10 +252,6 @@ The review of 16 October's unasked questions and every earlier verdict judged ag
 October 2026), decided without asking where convention is clear, each step measured on the devices report and
 committed with its songs' count:
 
-2. **One genre's retunes:** Bossa nova's root and fifth 50-50-40, the plainest the likeliest (#390); Doom's blues
-   riffs 15-15-25; Black metal's key changes named, no lift, a section's own 0-8-50; Symphonic's ensemble hits
-   15-20-25 (#371); Orchestral's solos to the leads, about a quarter of its songs (#391); Folk's solos about half;
-   Hip-hop's hat rolls the wild end's; Techno's rolling bass 0-0-15, its middle as listening left it.
 3. **The pocket laid back, the bass not rushed** (#103): a genre's laid-back factor scaling the late offsets, the early
    ones (the bass's, the time's) by it only where it tightens.
 4. **Steady figures on the meter's pulses** (#38): a step of a quarter or more landing on the pulses, so that 6/8's

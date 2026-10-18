@@ -10,10 +10,10 @@ public sealed class HatRollTest
 {
     /// <summary>
     ///     The rolls the stage adds, the same songs made with it and without, so that a hat's own tuplets are not counted:
-    ///     Hip-hop's, louder as they go, far more than the songs' own.
+    ///     Trap's, louder as they go, far more than the songs' own.
     /// </summary>
     [Test]
-    public async Task AHipHopHat_RollsInEvenFastNotes_GrowingLouder_FarOftenerThanTheSongs()
+    public async Task ATrapHat_RollsInEvenFastNotes_GrowingLouder_FarOftenerThanTheSongs()
     {
         static (int Rolls, int Louder) Rolls(Song song)
         {
@@ -47,13 +47,13 @@ public sealed class HatRollTest
             return (with.Rolls - without.Rolls, with.Louder - without.Louder);
         }
 
-        var hipHop = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Added(seed, GenrePresets.Genre("hipHop")));
+        var trap = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Added(seed, GenrePresets.Genre("trap")));
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Added(seed, null));
-        Console.WriteLine($"rolls added: Hip-hop {hipHop.Sum(x => x.Rolls)}, {hipHop.Sum(x => x.Louder)} louder; the songs {songs.Sum(x => x.Rolls)}");
+        Console.WriteLine($"rolls added: Trap {trap.Sum(x => x.Rolls)}, {trap.Sum(x => x.Louder)} louder; the songs {songs.Sum(x => x.Rolls)}");
 
-        // seen: Hip-hop's 64 songs add about 290 rolls, nearly all louder, the songs' own none
-        await Assert.That(hipHop.Sum(x => x.Rolls)).IsGreaterThan(80);
-        await Assert.That(hipHop.Sum(x => x.Louder)).IsGreaterThan(hipHop.Sum(x => x.Rolls) * 3 / 4);
+        // seen: Trap's 64 songs add about 2230 rolls, nearly all louder, the songs' own none
+        await Assert.That(trap.Sum(x => x.Rolls)).IsGreaterThan(1000);
+        await Assert.That(trap.Sum(x => x.Louder)).IsGreaterThan(trap.Sum(x => x.Rolls) * 3 / 4);
         // the songs' own none, as their chance is none
         await Assert.That(songs.Sum(x => x.Rolls)).IsEqualTo(0);
     }
