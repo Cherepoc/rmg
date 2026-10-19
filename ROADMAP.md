@@ -395,11 +395,12 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
 The melody, the solos and the riff read as not expressive enough: what each lacks where it is placed without regard to
 what it plays over, proposed from the code and reviewed against every preset's conventions, none measured yet. Each to
 be measured before it is built, the share it moves with it on and off, and each a rule leaning by a facet that exists,
-a genre's amount its data, never a device of its own. In order: the song's riff, a riff's turnaround, a riff heavier with the section, a sequence; the rest after them (built 19 October 2026: a run
+a genre's amount its data, never a device of its own. In order: a riff's turnaround, a riff heavier with the section, a sequence; the rest after them (built 19 October 2026: a run
 landing on the change, its first note over a new chord the chord's 45-51% to 67-79%; an own solo's highest note at its
 climax, in its first fifth 36% to 11%; the lines' phrase arc by the genre's evenness; a melody phrase's last note
 falling away, 1.4 to 4.6 velocity steps under its middle; a melody swelling only into its held phrase ends, on a sound
-that holds; the swell's amount, 0.12, left to listening).
+that holds; the swell's amount, 0.12, left to listening; built 20 October: the song's riff, the first section's played again
+over the others' chords).
 
 Solos:
 
@@ -452,13 +453,10 @@ The melody:
 
 The riff:
 
-- **The song's riff** (P2, the largest gain; with *The riff between the sections* and *The loop's figures shared*):
-  each section draws its riff. A riff driving the song is its identity, the intro's, the verses' and the bars between
-  sections', in Rock, the metal genres, Punk, Funk rock, the Blues, Nu metal and Techno ("one figure looping for
-  minutes"); Ska's, Disco's, Synthwave's and Chiptune's riffs recurring as hooks. Perhaps no more than the riff's bar
-  patterns drawn from a stream of the song's, keyed by its role, rather than the section's, a section of another meter
-  drawing its own; a chorus that plays chords instead keeps its own chance of a riff. Treated by every stage as its
-  source is, as a hook intro is.
+- **The song's riff, the rest** (P3, by listening; built 20 October 2026, two sections' riffs opening on the same
+  rhythm 12% to 50% in 256 songs): a section of another meter than the first riff's plays its own; a polymeter's riff,
+  whose cycle is not its bar's, copied as its pattern's bars are, to be heard; the riff between the sections with *The
+  riff between the sections*.
 - **A riff's turnaround played from its bar** (P2): AAAB's last bar is drawn afresh (`RiffLayers.Schemes`); played as
   A′, starting as A did and changing, its last notes leading into the cycle's first as `RiffLayers.Leading` leads into
   a change. Rock's, the Blues' (with its form's turnaround), the metal genres' and Funk's; the loops' AAAA untouched. The
@@ -493,10 +491,6 @@ The riff:
 
 Their code, as planned and reviewed on 19 October 2026 (each item's numbers to its commit):
 
-- **The song's riff:** the riff's seeds and scheme from a song stream keyed by its role and its bar's length, the
-  section's still drawn and set aside; measured first how many of its onsets two sections share, as the riff's rhythm
-  settings are its section's. Should they differ, the riff of the first section that plays one re-placed over the
-  others' chords, as `Line`'s echoes are, rather than its settings drawn for the song.
 - **The turnaround:** A′ as data (`RiffLayers.Schemes`); then, measured, the walk into the cycle's restart as the
   walks into a section are (`LineFills`, a riff's profile), as a varied repeat alone may not be heard as one.
 - **Heavier with the section:** the power chords' draw leaned by the energy as the chugs' is, one line.
