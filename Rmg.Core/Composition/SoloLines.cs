@@ -84,6 +84,9 @@ internal static class SoloLines
 
     public const double ArcEnd = 0.6;
 
+    /// <summary>The solo's arc a share of the way through it: up from its start to the climax, and easing after.</summary>
+    public static double Arc(double place) => place < ClimaxAt ? ArcStart + (1 - ArcStart) * place / ClimaxAt : 1 - (1 - ArcEnd) * (place - ClimaxAt) / (1 - ClimaxAt);
+
     /// <summary>How far the soloist's volatility moves a phrase's peak and a gesture's intensity about.</summary>
     public const double Drift = 0.4;
 
@@ -177,6 +180,7 @@ internal static class SoloLines
     /// <param name="band">The chords' notes in the solo, the band's chord a stacked note stacks; the melody's where they rest.</param>
     /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
     /// <param name="barOrigin">Where the bars the span plays in start, its section's start (<see cref="Plan" />).</param>
+    /// <param name="climbs">Whether the line's range opens with the solo's arc (<see cref="Soloist.Ceiling" />), a solo's own; an answer's, which has no arc, and a solo on the melody's, which sings where the melody does, whole.</param>
     /// <param name="track">The soloist's track, whose state its notes are realized over.</param>
     /// <param name="definition">The soloist's definition, its range.</param>
     /// <param name="voicing">The sequence that draws which gestures the soloist stacks, a stream of its own.</param>
@@ -190,6 +194,7 @@ internal static class SoloLines
         double barOrigin,
         Soloist soloist,
         bool isOwn,
+        bool climbs,
         IReadOnlyList<TimelineItem<StateMap>> melody,
         IReadOnlyList<TimelineItem<StateMap>> band,
         EventStateTimelineMap<StateMap> track,
@@ -204,6 +209,11 @@ internal static class SoloLines
         var reach = (int)Math.Round(soloist.RegisterSteps * 12 / 14.0);
         var (bottom, top) = (Math.Max(low + 2, middle - reach), Math.Min(high - 2, middle + reach));
 
+        // the top of its register there: where the line climbs, a share of it the soloist's first phrase opens rising with the
+        // solo's arc to the whole at its climax, so that its highest note comes there, and never under an octave over its bottom
+        int TopAt(double position) => !climbs ? top
+            : Math.Max(bottom + 12, bottom + (int)Math.Round((top - bottom) * (soloist.Ceiling + (1 - soloist.Ceiling) * (Arc((position - span.Start) / span.Duration) - ArcStart) / (1 - ArcStart))));
+
         // the chord a note plays over, as Realizer reads its state there
         ChordContext Chord(StateMap note, double position) => Realizer.ChordAt(note, position, track, definition, common);
 
@@ -214,7 +224,7 @@ internal static class SoloLines
         int[] Notes(double position, IEnumerable<int> steps)
         {
             var chord = Chord(MelodyAt(position).Value, position);
-            return [..steps.Select(chord.GetPitch).Where(x => x >= bottom && x <= top).Distinct().Order()];
+            return [..steps.Select(chord.GetPitch).Where(x => x >= bottom && x <= TopAt(position)).Distinct().Order()];
         }
 
         int[] ScaleNotes(double position) => Notes(position, Enumerable.Range(-4 * Scales.StepCount, 12 * Scales.StepCount));
@@ -299,7 +309,7 @@ internal static class SoloLines
             // and the way a new run sets out: towards a note of the chord where the gesture ends, higher the more intense, or
             // the melody's there
             var heading = isOwn
-                ? Nearest(ChordNotes(Math.Min(end, span.End - 1e-6)), (current + bottom + (int)Math.Round(level * (top - bottom))) / 2)
+                ? Nearest(ChordNotes(Math.Min(end, span.End - 1e-6)), (current + bottom + (int)Math.Round(level * (TopAt(start) - bottom))) / 2)
                 : Nearest(ScaleNotes(end - 1e-6), FoldTowards(MelodyPitch(MelodyAt(Math.Min(end, span.End - 1e-6))), current));
 
             switch (gesture)
@@ -503,7 +513,7 @@ internal static class SoloLines
 
             // its peak, on the way to the solo's climax or easing after it, and the shape of its intensity
             var place = ((from + to) / 2 - span.Start) / span.Duration;
-            var arc = place < ClimaxAt ? ArcStart + (1 - ArcStart) * place / ClimaxAt : 1 - (1 - ArcEnd) * (place - ClimaxAt) / (1 - ClimaxAt);
+            var arc = Arc(place);
             var peak = Math.Clamp(arc + soloist.Volatility * Drift * Generators.SplineValue()(context), 0.05, 1);
             var contour = context.Pick(Contours);
             // a wild soloist's coming in a beat or two late, where the phrase has a bar to spare

@@ -276,7 +276,7 @@ internal static class Solos
             // the solo's line, in the first soloist's vocabulary and range
             var first = trackOf[solo.Soloists[0]];
             var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
-            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, span.Start, soloists[solo.Soloists[0]], solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, span.Start, soloists[solo.Soloists[0]], solo.IsOwn, solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
             StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
 
             // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart

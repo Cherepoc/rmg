@@ -110,7 +110,7 @@ internal static class SoloAnswers
 
                 var gap = span with { Start = start, Duration = end - start };
                 // its strong beats on its section's bars
-                var (line, _) = SoloLines.Generate(new GenerationContext(Seeds.Derive(lineSeed, i)), new GenerationContext(Seeds.Derive(voicingSeed, i)), new GenerationContext(Seeds.Derive(motifSeed, i)), gap, gap.Duration, span.Start, answerer, true, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
+                var (line, _) = SoloLines.Generate(new GenerationContext(Seeds.Derive(lineSeed, i)), new GenerationContext(Seeds.Derive(voicingSeed, i)), new GenerationContext(Seeds.Derive(motifSeed, i)), gap, gap.Duration, span.Start, answerer, true, false, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
                 var lift = Solos.Lift(
                     Realizer.GetNoteStates(EventStateTimelineMap.Create(song.Duration, EventTimeline.Create(song.Duration, line), track.StateTimelineMap), definitions[soloTrack], song.CommonStateTimelineMap).ToArray(),
                     heard - Quieter);

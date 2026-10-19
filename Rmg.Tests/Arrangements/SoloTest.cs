@@ -337,6 +337,22 @@ public sealed class SoloTest
     }
 
     /// <summary>
+    ///     An own solo of a soloist short of the wild end saves its highest note for its climax: it falls in the solo's
+    ///     first fifth seldom, its range opening with the arc, and in its third or fourth, about the climax, most (seen 9%
+    ///     and 68% in 64 songs; 36% and 35% in 512 songs of every melody before the range opened with it).
+    /// </summary>
+    [Test]
+    public async Task AnOwnSolo_SavesItsHighestNote_ForItsClimax()
+    {
+        var solos = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Climbs(TestCorpus.Get(seed, Facets(1, 0.6)))).SelectMany(x => x).ToArray();
+        var (first, climax) = (solos.Count(x => x.Peak == 0) / (double)solos.Length, solos.Count(x => x.Peak is 2 or 3) / (double)solos.Length);
+        Console.WriteLine($"  {solos.Length} solos, the highest note in the first fifth {first:P0}, about the climax {climax:P0}");
+        await Assert.That(solos.Length).IsGreaterThan(20);
+        await Assert.That(first).IsLessThan(0.25);
+        await Assert.That(climax).IsGreaterThan(first + 0.25);
+    }
+
+    /// <summary>
     ///     A single soloist's own solos, how they climb: in which fifth of the solo its highest note falls, and how high in its
     ///     range, from its lowest note to its highest, its first fifth and its fourth, which holds the climax, play on average.
     /// </summary>

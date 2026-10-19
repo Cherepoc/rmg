@@ -60,7 +60,8 @@ internal sealed record Soloist(
     bool Octaves,
     bool Approaches,
     double MotifInversion,
-    double LandingChance
+    double LandingChance,
+    double Ceiling
 )
 {
     /// <summary>
@@ -76,6 +77,13 @@ internal sealed record Soloist(
     ///     runs go where they go (<see cref="SoloLines" />).
     /// </summary>
     public static ByConvention LandingChances { get; } = new(1, 0.7, 0);
+
+    /// <summary>
+    ///     How much of its range a soloist's own solo opens with, rising with the solo's arc to the whole at its climax
+    ///     (<see cref="SoloLines.Arc" />), so that its highest note comes there, by the melody facet: a solo built to its
+    ///     climax, a convention, the plainest the most, and the wildest free of it, leaping anywhere from the first phrase.
+    /// </summary>
+    public static ByConvention Ceilings { get; } = new(0.6, 0.7, 1);
 
     /// <summary>The chance a phrase answering the motif before inverts it rather than moving it, by the melody facet: never at the plain end.</summary>
     public static ByConvention MotifInversionChance { get; } = new(0, 0.3, 0.5);
@@ -259,7 +267,7 @@ internal sealed record Soloist(
         var approaches = context.TestProbability(ApproachChance.At(melody));
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
             phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes, octaves, approaches, MotifInversionChance.At(melody),
-            LandingChances.At(melody));
+            LandingChances.At(melody), Ceilings.At(melody));
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>
