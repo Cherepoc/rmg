@@ -190,10 +190,11 @@ internal sealed class LinePattern
         for (var i = 0; i + 1 < notes.Length; i++)
         {
             // a change of chord, its first note one of the new chord's, led into as the chord before has it, but from a
-            // held note, a phrase's cadence, which rests where it is, and from a lean's resolution
+            // held note, a phrase's cadence, which rests where it is, from a lean's resolution, and from a note held across
+            // a change between, where the Realizer strikes it again
             var (last, next) = (notes[i], notes[i + 1]);
             var nextChord = Chord(next.Note);
-            var isChange = IsOnChange(next.Note, nextChord) && Chord(last.Note) < nextChord;
+            var isChange = IsOnChange(next.Note, nextChord) && Chord(last.Note) == nextChord - 1;
             var approach = (ChordApproach)last.Note.State.GetStateValue(CompositionStateKinds.LineApproach);
             var isHeld = last.Note.State.GetStateValue(StateKinds.HeldDuration) > 0;
             if (!isChange || isHeld || i > 0 && leans[i - 1] || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
