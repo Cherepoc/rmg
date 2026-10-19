@@ -13,8 +13,9 @@ is removed once it is built, its leftovers kept under *Open work*.
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
    the seventh round's nine decided by genre judgment and retired (19 October), and the rest of the queue reviewed
    against the genres' conventions on 19 October (*Genre conventions*, built); the eighth round (`metal-vibrato`,
-   `string-vibrato`, `stickings` #341) answered, kept and retired on 19 October, no round deployed; the shared solo played together (#136) the same
-   without in 19 of 24 Symphonic songs, the twin leads playing those together, its cut the owner's to make. The *Listening*
+   `string-vibrato`, `stickings` #341) answered, kept and retired on 19 October, no round deployed; the shared solo played together (#136), the same
+   without in 19 of 24 Symphonic songs as the twin set its soloists together over it, kept, the twin joining a soloist
+   alone since (19 October). The *Listening*
   backlog judged against the conventions on 19 October, its changes built (*Bends and vibrato*).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.

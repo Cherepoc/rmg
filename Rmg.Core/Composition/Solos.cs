@@ -79,16 +79,15 @@ internal static class Solos
 
     /// <summary>
     ///     A pitched solo played by two parts together a third above or below now and then, a second joining a soloist
-    ///     alone, from a sequence of its own; the solo as it is otherwise, and where it trades with the drums or has no
-    ///     part to join it.
+    ///     alone, from a sequence of its own; the solo as it is otherwise, where it trades with the drums or has no part to
+    ///     join it, and where it has several soloists already, whom the solo's share (<see cref="GenreChoices.SoloShare" />)
+    ///     sets trading or together.
     /// </summary>
     public static SoloPlan? WithTwin(IGenerationContext context, SoloPlan? solo, double melody, IReadOnlyCollection<TrackRole> parts, Genre genre)
     {
         var (twins, step) = (context.TestProbability(Twin.At(melody, genre.Chance(GenreChoices.Solos, "twins"))), context.Pick([new Weighted<int>(1, 2), new Weighted<int>(1, -2)]));
-        if (!twins || solo is null || solo.IsDrumSolo || solo.TradesWithDrums)
+        if (!twins || solo is null || solo.IsDrumSolo || solo.TradesWithDrums || solo.Soloists.Length >= 2)
             return solo;
-        if (solo.Soloists.Length >= 2)
-            return solo with { Mode = SoloMode.Together, Step = step };
         return TwinParts.Where(x => parts.Contains(x) && !solo.Soloists.Contains(x)).Select(x => (TrackRole?)x).FirstOrDefault() is { } second
             ? solo with { Soloists = [..solo.Soloists, second], Mode = SoloMode.Together, Step = step }
             : solo;
