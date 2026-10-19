@@ -500,6 +500,12 @@ internal static class Expression
 
     public static ByConvention SwellChance { get; } = new(0, 0.05, 0.3);
 
+    /// <summary>The chance a melody's or a counter-melody's phrases swell into their held last notes where the song's parts swell, by the sound facet.</summary>
+    public static ByConvention LineSwellChance { get; } = new(0, 0.3, 0.8);
+
+    /// <summary>How long a line's held last note is at least, in beats, to swell into.</summary>
+    public const double LineSwellBeats = 2;
+
     /// <summary>The widest a bend goes, in semitones: a step and a half or two whole steps, never a fourth.</summary>
     public const int WidestBend = 4;
 
@@ -759,7 +765,8 @@ internal static class Expression
             // plays, so that what one effect decides leaves the others' draws as they are
             var part = partStreams(track);
             var vibrates = part.TestProbability(VibratoChance.At(songSound)) & songVibrato;
-            var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : SwellChance).At(songSound)) & songSwell;
+            var isSung = role is TrackRole.Melody or TrackRole.CounterMelody;
+            var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : isSung ? LineSwellChance : SwellChance).At(songSound)) & songSwell;
             var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
             // a riff's twin as its riff
             bool Carries(StrongEffect effect) => carriers.TryGetValue(effect, out var carrier) && carrier == drawsAs(track);
@@ -936,8 +943,12 @@ internal static class Expression
                                 : state.With(CompositionStateKinds.Vibrato, width.Cents))
                             .With(CompositionStateKinds.VibratoRate, (int)Math.Round(10 * width.Rate))
                             .With(CompositionStateKinds.VibratoDelay, (int)Math.Round(10 * VibratoWait(shape, rise, seconds, eighth, width.Rate, sings)));
-                    // a soloist attacks its notes rather than swell into them
-                    if (swells && !isSolo && note.Value.Duration >= 1 && gate == 0)
+                    // a soloist attacks its notes rather than swell into them, and a melody swells only into its phrase's held last
+                    // note, as a voice or a bow lets a phrase bloom, on a sound that holds, where a softer attack on every long
+                    // note would blur its rhythm
+                    if (swells && !isSolo && gate == 0 && (isSung
+                            ? note.Value.State.GetStateValue(StateKinds.HeldDuration) > 0 && note.Value.Duration >= LineSwellBeats && !InstrumentTraits.Has(noteProgram, InstrumentTrait.Decays)
+                            : note.Value.Duration >= 1))
                         state = state.With(CompositionStateKinds.Swell, 1);
                     // a tremolo moving a held note alone, as a gate chops a held chord, never a run's
                     if (role != TrackRole.Drum)

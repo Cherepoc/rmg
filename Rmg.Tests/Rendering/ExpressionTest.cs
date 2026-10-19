@@ -301,6 +301,30 @@ public sealed class ExpressionTest
         await Assert.That(wide).IsGreaterThan(0);
     }
 
+    /// <summary>A melody swells only into its phrase's held last note, of two beats or more, on a sound that holds rather than dies away.</summary>
+    [Test]
+    public async Task AMelodysSwell_IsOnItsPhrasesHeldLastNote_OfASoundThatHolds()
+    {
+        var swelled = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var role in new[] { TrackRole.Melody, TrackRole.CounterMelody })
+        {
+            if (!song.Song.Notes!.TryGetValue(song.Track(role), out var notes))
+                continue;
+            foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Swell) == 1))
+            {
+                var program = InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Track(role)]).InstrumentCode);
+                await Assert.That(note.Value.State.GetStateValue(Core.Events.StateKinds.HeldDuration)).IsGreaterThan(0).Because($"seed {song.Seed} at {note.Position}");
+                await Assert.That(note.Value.Duration).IsGreaterThanOrEqualTo(Expression.LineSwellBeats - 1e-9);
+                await Assert.That(InstrumentTraits.Has(program, InstrumentTrait.Decays)).IsFalse();
+                swelled++;
+            }
+        }
+
+        Console.WriteLine($"  {swelled} swells");
+        await Assert.That(swelled).IsGreaterThan(0);
+    }
+
     [Test]
     public async Task OnlyALineOfAnInstrumentThatBends_Bends_InOctavesToo()
     {
