@@ -326,7 +326,7 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
 - **The metal family:** a slap bass in Nu metal's quiet sections alone; Doom's slow ♭3–4–♭5 motion heard as a blues
   lick or not, and a held or bent ♭5; a melody spoken rather than sung (repeated notes, a range of a fifth), with *A
   melody sung rather than played*.
-- **The researched idioms not built:** the bass gallop; Metal's plagal motion (low confidence); a riff's AAAB; tempos
+- **The researched idioms not built:** the bass gallop; Metal's plagal motion (low confidence); tempos
   over 240; parts muted in and out on a loop; a long instrumental stretch before the first vocal; stoner doom's pentatonic
   riff (its wah not, the metal genres playing none); the octave whammy squeal; a china on a cell's start; a kick moved off the snare; House's offbeat bass
   and congas; darksynth's split of Synthwave; IDM's vignettes (a one-minute song as one section); a bass note pushed a
@@ -390,11 +390,180 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
 - **The drums' changes by an appearance's energy** (their colour, a drum's stroke), which are the section's as it was
   made.
 
+### Expressive lines (proposed and reviewed by genre, 19 October 2026)
+
+The melody, the solos and the riff read as not expressive enough: what each lacks where it is placed without regard to
+what it plays over, proposed from the code and reviewed against every preset's conventions, none measured yet. Each to
+be measured before it is built, the share it moves with it on and off, and each a rule leaning by a facet that exists,
+a genre's amount its data, never a device of its own. In order: a run landing on the change, the solo's highest note
+at its climax, the melody's loudness over time, the song's riff, a riff's turnaround, a riff heavier with the section,
+a sequence; the rest after them.
+
+Solos:
+
+- **A run landing on the change** (P2): a run sets out towards a chord note where its gesture ends without aiming to
+  land there (`SoloLines`), so that only a phrase's release is sure to be the chord's. The note on a change of chord's
+  downbeat the new chord's nearest note, its third or seventh the likelier where its shape has one, a power chord's
+  root or fifth otherwise (Rock's and the metal genres' chords, 70-100% power chords, have no third to land on), the
+  run built back from it as a walk into a section is (`LineFills`, 1501b15). Most for Jazz, Bossa nova, Fusion,
+  Jazz-funk, Soul and Country, whose solos play the changes; nothing in a vamp (Techno, Psytrance, Funk's), which has
+  no change to land on, as it should. The enclosure, a step above and below and onto it, cut: a bebop idiom, Jazz's
+  alone, should listening ask for it a genre's choice. Measured by the share of a solo's notes on a change's downbeat
+  that are the chord's.
+- **The solo's highest note at its climax** (P2): a run aims higher the more intense, but the whole range is open from
+  the first phrase. The range's top rising with the solo's arc (`ArcStart`, `ClimaxAt`), never narrower than an octave
+  so that a low soloist's first phrases do not mud, its highest note at the climax. The Power ballad's (its solo in 85%
+  of songs, climbing to a bent top note), the metal genres' and Rock's the most; Jazz's and the fiddle tunes' (Celtic,
+  Bluegrass) no worse for it. A line of the arc, no data.
+- **A phrase answered whole** (P3, folded into `SoloLines.MotifChance` rather than beside it): a phrase opens on the
+  phrase before's first cell a step away, not its rhythm. The motif as the phrase before's first segments, from its
+  first cell to all but its last gesture, re-placed over the new chords by scale step, a question away from home
+  answered by one that comes home: a blues soloist's lick played again over the IV, Rock's, Country's and Funk's
+  riffing solos. A shred solo's (Metal's wild end) seldom, the answer's length leaning short at the wild end, as a
+  repeat there sounds a loop.
+- **Chromatic passing notes** (P3, with a genre's amount): every solo note is the chord's scale's. A weak note
+  between two scale notes a whole step apart the semitone between them, by the melody facet, never at the plain end;
+  Jazz's, the Blues', Fusion's and the metal genres' (whose riffs already take a chromatic scale, `riffScale`), never
+  Celtic's, Medieval's, Bluegrass's, Folk's, Ambient's or Dungeon synth's, so a genre's pool or chance, not the facet
+  alone, which would hand a wild Celtic song chromatic runs. The melody's and the counter-melody's lines the same rule,
+  which go chromatic now only by `LineScale.Chromatic`. First tried as the soloist's weak notes taking the section's
+  line scale (`LineScales`), which the genres pool already; built as a rule only if that is too narrow, a pentatonic
+  line scale having fewer notes, not more.
+- **A run's rhythm mixed within a beat** (P3, a report first): a run going on already draws its speed afresh every
+  segment of one to four beats (`SoloLines.Plan`), 16ths into sextuplets into 8ths, but `SoloLines.Positions` spaces a
+  segment's notes evenly, so no dotted 8th and 16th, no 8th and two 16ths, no triplet into 8ths, no off-beat note held
+  over the bar line. A lick's or a run's cell drawing a rhythm within its beat from a few, as the riff's gallop and its
+  reverse are, the swung and triplet feels leaning it, a genre's data keeping Metal's shred and Celtic's and Bluegrass's
+  fiddle runs even, the dotted and triplet licks Jazz's, the Blues' and Country's. One function's change, not
+  *Segments in any pattern* (*Parked*), whose mixed feels are a groove's. Measured first: how often a run's speed
+  changes within it, and how varied its onsets' spacing within a beat is, should the segments' speeds already be
+  enough.
+
+The melody:
+
+- **The melody's loudness over time** (P2, data first): `LinePattern.PhraseArc` makes a phrase's notes louder by
+  their height alone, and the swells are held chords' (`Expression.SwellChance` 0.05 a part at the middle). The phrase's
+  arc taking its time as well as its height, a slight crescendo into its peak and its last note softer, one function;
+  and a held note's swell the melody's more often on a sound that sustains (Orchestral's, Chamber's, Celtic's pipes and
+  fiddle, the Power ballad's lead, Symphonic metal's violin, Ambient's), never on one that dies away
+  (`InstrumentTraits.Rings`: Cinematic piano's piano, Lyrical guitar's and Bossa nova's guitars), the swell's chance
+  raised as data before any new shape, a swell dying away not built unless asked. Scaled by a genre's evenness
+  (`GenreChoices.Dynamics`) as every velocity layer is, so that Techno's, Trance's and Chiptune's programmed lines stay
+  even.
+- **A sequence** (P2, with *The melody's motif developed, the rest*): a B bar's rhythm and contour are drawn afresh.
+  Smaller than it reads: `Line` already plays an echo over another chord as a sequence, so a B bar taking A's rhythm
+  now and then, its pitches its own, is the whole of it. The classical genres' (Chamber, Orchestral, Cinematic piano,
+  Dungeon synth), Celtic's and Pop's the most; AABA's B as a contrast kept by the chance, which leans plain, as
+  development is the convention.
+- **A section's phrases building** (P3, a genre's choice): every phrase peaks at `MelodyLayers.PeakRegister` and a
+  section's phrases repeat the first's shape (`PhraseScheme.Across`). A section's last phrase peaking a few semitones
+  over the others and ending on its goal: Pop's, the Power ballad's, Soul's, Synthwave's, Symphonic metal's choruses,
+  Celtic's B part. Against the loops, Trap's, Hip-hop's, Techno's, Trance's and House's, whose repeat is the point, so a
+  genre's chance with the songs' own as the default. A hooked chorus's last phrase would move its hook up as an echo
+  does, to be heard. The song's highest note kept for its choruses cut: `MelodyLayers.EnergyRegister` lifts the loudest
+  section already, which a Jazz head or a Celtic tune with no chorus reads as well; measured before anything is added.
+- **A note's length by its place** (P3): legato is a part's (`Articulations.LegatoChance`). A line's repeated notes a
+  little detached, the note before a leap or a rest shortened, an edit at render, drawing nothing; a legato part's and
+  a let-ring part's left as they are but for repeated notes, which a singer separates (the sung genres' melody legato
+  in 96% of notes, `SungMelodyReportTest`). Funk's, Ska's, Reggae's, Country's, Bluegrass's and Celtic's lines the
+  most, a Jazz line's long-short 8ths the swing's.
+
+The riff:
+
+- **The song's riff** (P2, the largest gain; with *The riff between the sections* and *The loop's figures shared*):
+  each section draws its riff. A riff driving the song is its identity, the intro's, the verses' and the bars between
+  sections', in Rock, the metal genres, Punk, Funk rock, the Blues, Nu metal and Techno ("one figure looping for
+  minutes"); Ska's, Disco's, Synthwave's and Chiptune's riffs recurring as hooks. Perhaps no more than the riff's bar
+  patterns drawn from a stream of the song's, keyed by its role, rather than the section's, a section of another meter
+  drawing its own; a chorus that plays chords instead keeps its own chance of a riff. Treated by every stage as its
+  source is, as a hook intro is.
+- **A riff's turnaround played from its bar** (P2): AAAB's last bar is drawn afresh (`RiffLayers.Schemes`); played as
+  A′, starting as A did and changing, its last notes leading into the cycle's first as `RiffLayers.Leading` leads into
+  a change. Rock's, the Blues' (with its form's turnaround), the metal genres' and Funk's; the loops' AAAA untouched. The
+  entry *a riff's AAAB* under the researched idioms is built (`RiffLayers.Schemes`).
+- **A riff heavier with the section** (P3): heavy louder sections are `SectionForms`' (`louderForms.guitars`, clean
+  guitars distorted), but the riff's power chords are drawn by the sound facet alone, its chugs leaned by the energy
+  (`SectionGenerator.PowerChordChance`, `ChugChance`). The power chords leaned by the energy as the chugs are, a
+  verse's single notes in power chords in the chorus: Nu metal's quiet verses and heavy choruses, Funk rock's choruses
+  opening into big chords, Rock's and Punk's. The bass on the riff (`LineDoubling.RiffChance`, 1 at the plain end) left
+  as it is: a chance of 1 has no lean, and a plain band doubles its riff throughout.
+- **A riff moved as a shape** (P3, a genre's choice): a hooked riff over another chord keeps its scale steps from the
+  root (`Line`'s echoes). Its shape kept in semitones, as a hand moves it up the neck or a sequencer transposes it,
+  taking the chord's colour, a ♭VI's shape over ♭VI: the metal genres', Doom's creeping half steps, Punk's, Rock's in
+  power chords, a blues riff moved to the IV and the V, and a Techno, Trance or Psytrance sequence transposed. Only
+  where the chords play no third, power chords or a sus, as a shape's minor third over a major triad clashes; never
+  Latin's montuno, Disco's strings or a Jazz riff, which follow the chord's notes.
+- **A riff's home note** (P3, a genre's share): a pedal is a chug's or a drone's alone (`Line.PlaceOnPedal`,
+  `Line.PedalShare`). A riff's cycle starting on its chord's lowest root and its weak notes leaning back to it by a
+  share, of which the chug's and the drone's pedals are the ends rather than cases. The metal genres', Rock's, Punk's,
+  Funk's, the Blues' and Psytrance's riffs live on it; Ska's and Disco's horn and string riffs, Latin's montuno, Black
+  metal's tremolo lines and a Jazz riff do not, so the share is a genre's, the facet leaning it, not the facet alone,
+  which would root a plain Disco riff like a bass. Measured by the riff's notes on the root and its cycles starting
+  there.
+- **A riff's accents by its figure** (P3, its loudness alone): its loudness follows the beat's rank and a phrase arc of
+  0.1. The notes that start its figure or fall off the beat louder, the rest softer, relative to the riff's own notes
+  so that Reggae's and Ska's offbeat riffs keep a contrast; Funk's and Techno's an acid line's accents. The muting cut:
+  a funk guitar's dead notes are `deadNotes`', a chug's its own, and General MIDI's muted guitar cannot chug.
+- **A riff's rhythm** (P4, a report first): the riff's rhythm is the pattern generator's, a little fuller
+  (`RiffLayers.Fullness`), and the riff a figure's player (`Figures`: the gallop, its reverse, the tremolo). Its rests,
+  off-beat onsets and pushes measured against the bass's, the figures' sections apart; a lean of its own only if the
+  rest comes out a bass line's, Funk's and Nu metal's syncopation the measure.
+
+Their code, as planned and reviewed on 19 October 2026 (each item's numbers to its commit):
+
+- **First, no song changed:** `LineFills.Swept` a shared `LinePlacement.BackFrom(target, direction, count, scaleAt)`;
+  the solo's arc a function of its own (`SoloLines.Plan`'s inline arc); and the solo's notes planned as pitches and
+  placed once at the end of `SoloLines.Generate`, rather than placed gesture by gesture, so that the landing, the answer
+  and the passing notes edit pitches across a gesture's boundary, where a run's note on a change most often is.
+- **The landing:** a pass over the planned pitches, a run's note on a change's downbeat drawn by its key
+  (`NoteKey`, as `Ghosted` is) against a chance that leans plain, moved to the nearest chord note of its shape
+  (`ShapeSteps`), the third or the seventh where it has them; the notes since its cell's start built back from it,
+  the notes after it moved by the same scale steps, as the motif's are, never two notes on one.
+- **The ceiling:** a solo's own line alone, not one on the melody, which quotes the melody where it sings, nor an
+  answer (`SoloAnswers`), a short line with no arc; the range's top by the arc, never under an octave over its bottom;
+  a rule test over the solos' notes but their stacked notes and octaves.
+- **The loudness over time:** the time term beside `LinePattern.PhraseArc`'s height, scaled by the genre's evenness
+  (`VelocityLayers.SpreadOf`), which the height's arc is not now, a fix of its own; the melody's swell only on a held
+  note of two beats or more, a phrase's end, never every long note, whose softened attack blurs the line's rhythm.
+- **The song's riff:** the riff's seeds and scheme from a song stream keyed by its role and its bar's length, the
+  section's still drawn and set aside; measured first how many of its onsets two sections share, as the riff's rhythm
+  settings are its section's. Should they differ, the riff of the first section that plays one re-placed over the
+  others' chords, as `Line`'s echoes are, rather than its settings drawn for the song.
+- **The turnaround:** A′ as data (`RiffLayers.Schemes`); then, measured, the walk into the cycle's restart as the
+  walks into a section are (`LineFills`, a riff's profile), as a varied repeat alone may not be heard as one.
+- **Heavier with the section:** the power chords' draw leaned by the energy as the chugs' is, one line.
+- **A sequence:** `PhraseScheme.Rhythms`, the letter whose rhythm a bar plays, carried by `Fitted`, `Across` and
+  `Unvaried`; a bar's `Rhythm.Seed` and track state from that letter's seed and its `ValueSeed` (its `StateChanges` and
+  `NoteValues`, its notes' draws) from its own; the melody's alone, from a stream of its own, a hook's never.
+- **The answer:** in `SoloLines.Plan`, which the drum solos plan by too (`DrumSolos`), so a drum phrase answered as
+  well or the answer the pitched solo's alone, decided in the step; the motif's draws moved there from `motifs`, on
+  purpose. Its notes the source's pitches kept, as a blues player plays the same lick over the IV, a strong note
+  missing the chord moved to its nearest; the motif's step a variant of it.
+- **The passing notes:** after the landing. A run's notes on a beat the chord's scale's, its notes between the line
+  scale's the melody's state carries (`CompositionStateKinds.LineScale`, `LineScales.Classes`), written as a scale step
+  and its `Alteration`, as `Line` does with the melody's strong and weak beats; not the scale swapped whole, which at
+  a chromatic line scale would put a chromatic note on the beat.
+- **The building phrases:** `MelodyLayers.GenerateContour` over the pattern's phrases (`BarStateGenerator`), its
+  last lifted, its echoes rising with it as a sequence; the goal's chance 1 at its end; a hooked chorus heard first.
+- **The shape:** an echo's semitones from its root kept, written with its `Alteration`; only over a chord with no
+  third; the twin's third (`LineDoubling`) moved as the shape, a fixed interval, where the riff is.
+- **The home note:** `Line.PedalShare` a state of the track's, the chugs' 0.7, another riff's a genre's share well
+  under it; the riff's chord's first note landing on its root by the same share (its `landings`, `Free` now), as the
+  bass's does.
+- **The note lengths:** in `Articulations.Apply`, the stage after the notes that sets legato already, not a stage of
+  its own; never a palm-muted note, a solo's release or a bent note.
+- **The riff's accents:** `LineProfile.FigureAccent`, the riff's notes after a rest or held off the beat over its
+  others; none on a chugging riff, whose accents are open already.
+- **New genre choices** (`riff.song`, `riff.shape`, the home share, `phrases.build`, the soloist's beat figures): the
+  songs' own by default, set only in the genres the review names, as each is a choice for the editor and data for 47
+  presets; every share well under 1, so that the heavy genres, which gain most of the riff's items at once, keep riffs
+  unlike each other.
+
 ### Fills and lines
 
 - **The melody's motif developed, the rest** (P3): the inversion cut in the review of 11 October 2026, heard on 8 October
   as hard to notice and worse in 5 of 6 Pop songs; a figure displaced by an 8th or its rhythm stretched, development a
-  listener can follow, to try in its place and be heard.
+  listener can follow, to try in its place and be heard; a sequence under *Expressive lines*.
 - **Two toms at once** (P3, put off 10 October 2026, again with the cascade): a drum note's sound a list of
   articulations (`StateKinds.ArticulationIndex` now one, `TimelineEdits.Hit` replacing a hit at its place, the toms one
   track), so that a fill's wide window or a cascade's accent strikes a far pair of toms together, a rack and the floor;
