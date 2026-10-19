@@ -395,20 +395,16 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
 The melody, the solos and the riff read as not expressive enough: what each lacks where it is placed without regard to
 what it plays over, proposed from the code and reviewed against every preset's conventions, none measured yet. Each to
 be measured before it is built, the share it moves with it on and off, and each a rule leaning by a facet that exists,
-a genre's amount its data, never a device of its own. In order: the solo's highest note
-at its climax, the melody's loudness over time, the song's riff, a riff's turnaround, a riff heavier with the section,
-a sequence; the rest after them.
+a genre's amount its data, never a device of its own. In order: the melody's loudness over time, the song's riff, a
+riff's turnaround, a riff heavier with the section, a sequence; the rest after them (built 19 October 2026: a run
+landing on the change, its first note over a new chord the chord's 45-51% to 67-79%; an own solo's highest note at its
+climax, in its first fifth 36% to 11%).
 
 Solos:
 
 - **A run landing on the change, the rest** (P3, by listening; built 19 October 2026, a run's first note over a new
   chord the chord's 45-51% to 67-79%): the landing takes the chord's nearest note, the third or the seventh not
   preferred, should the root sound too often; the enclosure, a step above and below and onto it, Jazz's should it ask.
-- **The solo's highest note at its climax** (P2): a run aims higher the more intense, but the whole range is open from
-  the first phrase. The range's top rising with the solo's arc (`ArcStart`, `ClimaxAt`), never narrower than an octave
-  so that a low soloist's first phrases do not mud, its highest note at the climax. The Power ballad's (its solo in 85%
-  of songs, climbing to a bent top note), the metal genres' and Rock's the most; Jazz's and the fiddle tunes' (Celtic,
-  Bluegrass) no worse for it. A line of the arc, no data.
 - **A phrase answered whole** (P3, folded into `SoloLines.MotifChance` rather than beside it): a phrase opens on the
   phrase before's first cell a step away, not its rhythm. The motif as the phrase before's first segments, from its
   first cell to all but its last gesture, re-placed over the new chords by scale step, a question away from home
@@ -505,10 +501,6 @@ The riff:
 
 Their code, as planned and reviewed on 19 October 2026 (each item's numbers to its commit):
 
-- **First, no song changed:** the solo's arc a function of its own (`SoloLines.Plan`'s inline arc), with the ceiling.
-- **The ceiling:** a solo's own line alone, not one on the melody, which quotes the melody where it sings, nor an
-  answer (`SoloAnswers`), a short line with no arc; the range's top by the arc, never under an octave over its bottom;
-  a rule test over the solos' notes but their stacked notes and octaves.
 - **The loudness over time:** the time term beside `LinePattern.PhraseArc`'s height, scaled by the genre's evenness
   (`VelocityLayers.SpreadOf`), which the height's arc is not now, a fix of its own; the melody's swell only on a held
   note of two beats or more, a phrase's end, never every long note, whose softened attack blurs the line's rhythm.
