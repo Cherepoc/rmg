@@ -5,14 +5,14 @@ using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Rendering;
 
-/// <summary>A driven guitar's pinch harmonic (<see cref="Expression.SongPinchChance" />): a held single note's highlight, rare, always wavering.</summary>
+/// <summary>A driven guitar's pinch harmonic (<see cref="Expression.SongPinchChance" />): a held single note's highlight, rare, wavering where it holds long enough.</summary>
 public sealed class PinchTest
 {
     [Test]
     [Arguments("metal")]
     [Arguments("nuMetal")]
     [Arguments("thrash")]
-    public async Task APinch_IsAHeldSingleNotesHighlight_NeverAChordOrInARun_OneAPartAPhrase_AlwaysWavering(string genre)
+    public async Task APinch_IsAHeldSingleNotesHighlight_NeverAChordOrInARun_OneAPartAPhrase_WaveringWhereItHolds(string genre)
     {
         var (pinches, length) = (0, 0.0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
@@ -30,7 +30,10 @@ public sealed class PinchTest
                 // on General MIDI's guitar harmonics
                 await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Program)).IsEqualTo(Expression.GuitarHarmonics + 1).Because(because);
                 await Assert.That(notes.Count(x => Math.Abs(x.Position - note.Position) < 1 - 1e-9) / 2.0).IsLessThanOrEqualTo(Expression.PinchBusiest).Because(because);
-                await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Vibrato)).IsGreaterThan(0).Because(because);
+                // shaken wherever it holds long enough after its bend
+                var holds = Expression.HoldsVibrato((BendKind)note.Value.State.GetStateValue(CompositionStateKinds.Bend), note.Value.State.GetStateValue(CompositionStateKinds.BendRise) / 1000.0,
+                    note.Value.Duration * seconds, 0.5 * seconds, Expression.PinchRate);
+                await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0).IsEqualTo(holds).Because(because);
                 await Assert.That(song.Song.TrackDefinitions[track].Role).IsNotEqualTo(TrackRole.Chords).Because(because);
                 // its phrase where it plays, a hook intro's quote its own
                 var span = song.Map.PlayAt(note.Position)!.Value.Played;

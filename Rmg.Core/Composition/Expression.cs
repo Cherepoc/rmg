@@ -32,8 +32,8 @@ public enum BendKind
     Dive
 }
 
-/// <summary>A vibrato's width: in cents either side of the note, or in scale steps up from it, the wide sort.</summary>
-public readonly record struct Vibrato(int Cents, int Steps);
+/// <summary>A vibrato's width, in cents either side of the note or in scale steps up from it, the wide sort, and how fast it goes, in cycles a second.</summary>
+public readonly record struct Vibrato(int Cents, int Steps, double Rate);
 
 /// <summary>The strong effects, which move a part's sound about, a song playing one of them first and others beside it now and then.</summary>
 public enum StrongEffect
@@ -213,6 +213,9 @@ internal static class Expression
     /// <summary>How wide a pinch's vibrato is, in cents, and the chance it is bent up to the next scale note and back.</summary>
     public const int PinchVibrato = 40;
 
+    /// <summary>How fast a pinch's vibrato goes, in cycles a second, as a squeal is shaken.</summary>
+    public const double PinchRate = 6.5;
+
     public const double PinchBendChance = 0.5;
 
     /// <summary>
@@ -297,25 +300,34 @@ internal static class Expression
     public static ByConvention VibratoChance { get; } = new(0, 0.6, 0.9);
 
     /// <summary>
-    ///     How wide a held note's vibrato is: narrow, in cents either side of the note, as a voice or a violin sings, or
-    ///     wide, in scale steps up from the note and back, as a guitar's does, up to four semitones, both its ends on scale
-    ///     notes; the wide the wilder, and only an instrument it suits plays it. Each leans as a part's strength and its
-    ///     section's energy lean, the wider the more.
+    ///     How wide a held note's vibrato is, and how fast: narrow, in cents either side of the note, as a voice or a violin
+    ///     sings, the narrowest the quickest, or wide, in scale steps up from the note and back, as a guitar's does, up to
+    ///     four semitones, both its ends on scale notes, a step's slow as a blues or a rock player shakes it or fast as a
+    ///     metal player does; the wide the wilder, and only an instrument it suits plays it. Each leans as a part's strength
+    ///     and its section's energy lean, the wider the more.
     /// </summary>
     public static ImmutableArray<(Vibrato Width, ByConvention Weight)> Vibratos { get; } =
     [
-        (new Vibrato(15, 0), new ByConvention(1, 0.5, 0.2)),
-        (new Vibrato(35, 0), new ByConvention(0, 0.35, 0.2)),
-        (new Vibrato(60, 0), new ByConvention(0, 0.15, 0.2)),
-        (new Vibrato(0, 1), new ByConvention(0, 0.02, 0.25)),
-        (new Vibrato(0, 2), new ByConvention(0, 0, 0.15))
+        (new Vibrato(15, 0, 6), new ByConvention(1, 0.5, 0.2)),
+        (new Vibrato(35, 0, 5.5), new ByConvention(0, 0.35, 0.2)),
+        (new Vibrato(60, 0, 5.5), new ByConvention(0, 0.15, 0.2)),
+        (new Vibrato(0, 1, 4.5), new ByConvention(0, 0.01, 0.125)),
+        (new Vibrato(0, 1, 6.5), new ByConvention(0, 0.01, 0.125)),
+        (new Vibrato(0, 2, 5), new ByConvention(0, 0, 0.15))
     ];
+
+    /// <summary>
+    ///     How many of its cycles a vibrato waits after a note's attack, or after its bend lands, before it starts, so that
+    ///     a fast one starts sooner than a slow one; how many it grows in over; and how many more it must sound for at
+    ///     its full width to be heard, a note too short for them all singing none.
+    /// </summary>
+    public const double VibratoDelayCycles = 2, VibratoGrowthCycles = 1, VibratoHeardCycles = 2.5;
 
     /// <summary>How far a width leans to the wide side, for a strength or an energy to lean it.</summary>
     private static double Lean(Vibrato width) => width.Steps > 0 ? 0.5 * width.Steps : width.Cents / 60.0 - 1;
 
     /// <summary>The narrow vibrato a note plays in place of a wide one it cannot, a note off the scale or an instrument it does not suit.</summary>
-    private static Vibrato WidestNarrow => new(60, 0);
+    private static Vibrato WidestNarrow => new(60, 0, 5.5);
 
     /// <summary>Whether a wide vibrato suits an instrument: a guitar's or a synth lead's.</summary>
     private static bool VibratesWide(int program) => InstrumentTraits.Has(program, InstrumentTrait.VibratesWide);
@@ -346,8 +358,44 @@ internal static class Expression
 
     public const int GlideLeap = 5;
 
-    /// <summary>How long a note must be for a bend or a slide on it to be heard, in beats: an 8th, a run's notes going by straight.</summary>
-    public const double ShortestShaped = 0.5;
+    /// <summary>
+    ///     How long a bend takes to rise, in seconds, as a player bends quickly to land it: a soloist's from the slowest at
+    ///     the least intense to the quickest at the most, a part's line at the middle of them; a slow bend, as a blues
+    ///     player's crying one or a country player's in time, takes an 8th, or the quick one where an 8th is quicker.
+    /// </summary>
+    public const double SlowestQuickRise = 0.12, QuickestRise = 0.07, PartRise = 0.1;
+
+    /// <summary>The chance a bend or a slide goes slowly, in time, by the sound facet: some at the plain end, as slow bends are a convention of their own.</summary>
+    public static ByConvention SlowBendChance { get; } = new(0.1, 0.15, 0.25);
+
+    /// <summary>How long a fall-off takes to fall, in seconds, at the very end of its note.</summary>
+    public const double FallSeconds = 0.15;
+
+    /// <summary>
+    ///     When a shaped note's pitch is held, in seconds from its start: from where its bend lands, onto the note or its
+    ///     bent top, to where it moves again, a release's or a fall's start, or the note's end. A prebend holds its bent
+    ///     note for its rise before it releases, slowly, over an 8th, or its rise where that is longer.
+    /// </summary>
+    /// <param name="kind">How the note bends.</param>
+    /// <param name="rise">How long its bend takes to rise, in seconds.</param>
+    /// <param name="seconds">How long the note lasts, in seconds.</param>
+    /// <param name="eighth">How long an 8th lasts there, in seconds.</param>
+    public static (double From, double To) Held(BendKind kind, double rise, double seconds, double eighth) => kind switch
+    {
+        BendKind.Scoop or BendKind.Slide => (rise, seconds),
+        BendKind.BendAndRelease or BendKind.ReleaseAndBend => (rise, seconds - rise),
+        BendKind.PrebendRelease => (rise + Math.Max(eighth, rise), seconds),
+        BendKind.FallOff => (0, seconds - FallSeconds),
+        _ => (0, seconds)
+    };
+
+    /// <summary>Whether a note is long enough for its bend: held, between its moves, at least as long as it moves.</summary>
+    public static bool Fits(BendKind kind, double rise, double seconds, double eighth) =>
+        Held(kind, rise, seconds, eighth) is var (from, to) && to - from >= (kind == BendKind.FallOff ? FallSeconds : rise) - 1e-9;
+
+    /// <summary>Whether a note holds long enough for a vibrato of a rate, its wait, its growth and its heard cycles, where its pitch is held.</summary>
+    public static bool HoldsVibrato(BendKind kind, double rise, double seconds, double eighth, double rate) =>
+        Held(kind, rise, seconds, eighth) is var (from, to) && (to - from) * rate >= VibratoDelayCycles + VibratoGrowthCycles + VibratoHeardCycles - 1e-9;
 
     /// <summary>How soon before a note the one before it must have ended for the note to slide from it, in beats: a slide starts from a note heard.</summary>
     public const double SlideGap = 0.25;
@@ -385,9 +433,6 @@ internal static class Expression
     public static ImmutableArray<Weighted<BendKind>> ReleaseBends { get; } = [new(0.6, BendKind.Scoop), new(0.4, BendKind.PrebendRelease)];
 
     public const double ReleaseBendChance = 0.4;
-
-    /// <summary>How long a soloist's note must be to sing a vibrato, in beats: half a beat, as a soloist sings one on any note it holds, where a part's lines from a beat.</summary>
-    public const double SoloVibratoBeats = 0.5;
 
     /// <summary>How far a solo's intensity leans its notes, as a strength does: the bigger bends and vibratos, and the oftener bends and slides, the more intense.</summary>
     public const double SoloOdds = 8;
@@ -574,7 +619,7 @@ internal static class Expression
     /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them, and each part's derived from it by its track.</param>
     /// <param name="pinchStream">The song's sequence of whether its guitars pinch and dive.</param>
     /// <param name="pinchStreams">A part's sequence of its pinches, by its track.</param>
-    /// <param name="beatSeconds">How long a beat lasts at a position, in seconds, which a pinched note's length is held to.</param>
+    /// <param name="beatSeconds">How long a beat lasts at a position, in seconds, which a pinched note's length is held to, and a bend's and a vibrato's are timed in.</param>
     /// <param name="tapeStream">The song's sequence of its tape's wow, whether it plays one, how deep, and each part's detune derived from it by its track.</param>
     /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
     /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
@@ -702,7 +747,7 @@ internal static class Expression
             if (glides)
                 (slides, slideRate) = (true, genre.Names(GenreChoices.GlideRate) ? (genre.Shift(GenreChoices.GlideRate, "share") + 1) / 2 : GlideRate);
             // and from across a gap, into a short note too
-            var (slideGap, shortestSlide) = glides ? (GlideGap, GlideShortest) : (SlideGap, ShortestShaped);
+            var (slideGap, shortestSlide) = glides ? (GlideGap, GlideShortest) : (SlideGap, 0.0);
             // and how far its filter closes, and a wobble's cycle, drawn last, so that the part's other draws stay
             var filterDepth = 40 + part.GenerateInt(0, 60);
             var wobbleCycle = WobbleCycles[part.GenerateInt(0, WobbleCycles.Length)];
@@ -794,29 +839,44 @@ internal static class Expression
                     var slidesNow = drawing.TestProbability(soloist is null ? glideLean.Chance(slideRate, 1) : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
                     // and its vibrato, a note at a time, the wide likelier the more intense
                     var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
+                    // how fast it bends or slides, quickly, a soloist the quicker the more intense, or slowly, in time
+                    var slow = drawing.TestProbability(SlowBendChance.At(u));
+                    var eighth = 0.5 * beatSeconds(note.Position);
+                    var quick = soloist is null ? PartRise : SlowestQuickRise - (SlowestQuickRise - QuickestRise) * note.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0;
+                    // in whole milliseconds, as the note keeps it
+                    var rise = Math.Round(slow ? Math.Max(eighth, quick) : quick, 3);
+                    var seconds = note.Value.Duration * beatSeconds(note.Position);
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
-                    // and whether it sings a vibrato at all likewise
-                    if ((soloist is null ? vibrates : soloist.Vibrates && !echoes) && isLine && Bends(noteProgram) && note.Value.Duration >= (soloist is null ? 1 : SoloVibratoBeats))
+                    // a note that slides in bends no other way, and either only where the note holds long enough for it
+                    var shape = BendKind.None;
+                    if ((slides || soloist is not null && !echoes) && slidesNow && note.Value.Duration >= shortestSlide - 1e-9 && Fits(BendKind.Slide, rise, seconds, eighth)
+                        && !isRelease && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
                     {
-                        // a wide one between the note and a scale note above it, so the note must be on the scale
-                        var width = noteVibrato.Steps > 0 && (!VibratesWide(noteProgram) || !IsOnScale(note.Value)) ? WidestNarrow : noteVibrato;
-                        state = width.Steps > 0
-                            ? state.With(CompositionStateKinds.WideVibrato, ScaleDistance(note.Value, width.Steps))
-                            : state.With(CompositionStateKinds.Vibrato, width.Cents);
-                    }
-                    // a note that slides in bends no other way
-                    var shaped = note.Value.Duration >= ShortestShaped - 1e-9;
-                    if ((slides || soloist is not null && !echoes) && slidesNow && note.Value.Duration >= shortestSlide - 1e-9 && !isRelease && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
+                        shape = BendKind.Slide;
                         state = state.With(CompositionStateKinds.Bend, (int)BendKind.Slide).With(CompositionStateKinds.BendDepth, from);
-                    else if (bends && bendsNow && shaped)
+                    }
+                    else if (bends && bendsNow && Fits(kind, rise, seconds, eighth))
+                    {
+                        shape = kind;
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
                         {
                             BendKind.BendAndRelease or BendKind.PrebendRelease => BendDistance(note.Value, size),
                             BendKind.Scoop or BendKind.FallOff or BendKind.ReleaseAndBend => BendDistance(note.Value, -size),
                             _ => 0
                         });
+                    }
+
+                    if (shape != BendKind.None)
+                        state = state.With(CompositionStateKinds.BendRise, (int)Math.Round(1000 * rise));
+                    // and whether it sings a vibrato at all likewise, where its pitch holds long enough for one after its bend
+                    // a wide one between the note and a scale note above it, so the note must be on the scale
+                    var width = noteVibrato.Steps > 0 && (!VibratesWide(noteProgram) || !IsOnScale(note.Value)) ? WidestNarrow : noteVibrato;
+                    if ((soloist is null ? vibrates : soloist.Vibrates && !echoes) && isLine && Bends(noteProgram) && HoldsVibrato(shape, rise, seconds, eighth, width.Rate))
+                        state = (width.Steps > 0
+                            ? state.With(CompositionStateKinds.WideVibrato, ScaleDistance(note.Value, width.Steps))
+                            : state.With(CompositionStateKinds.Vibrato, width.Cents)).With(CompositionStateKinds.VibratoRate, (int)Math.Round(10 * width.Rate));
                     // a soloist attacks its notes rather than swell into them
                     if (swells && !isSolo && note.Value.Duration >= 1 && gate == 0)
                         state = state.With(CompositionStateKinds.Swell, 1);
@@ -860,10 +920,15 @@ internal static class Expression
                         {
                             pinchedPhrases.Add(phrase);
                             accents[i] = PinchAccent;
-                            state = state.With(CompositionStateKinds.Pinch, 1).With(CompositionStateKinds.Vibrato, PinchVibrato).With(CompositionStateKinds.WideVibrato, 0);
-                            state = bent
+                            // bent up quickly and back, where it holds long enough, and shaken where it holds long enough after
+                            var pinchShape = bent && Fits(BendKind.BendAndRelease, PartRise, seconds, eighth) ? BendKind.BendAndRelease : BendKind.None;
+                            var shakes = HoldsVibrato(pinchShape, PartRise, seconds, eighth, PinchRate);
+                            state = state.With(CompositionStateKinds.Pinch, 1).With(CompositionStateKinds.Vibrato, shakes ? PinchVibrato : 0)
+                                .With(CompositionStateKinds.VibratoRate, shakes ? (int)Math.Round(10 * PinchRate) : 0).With(CompositionStateKinds.WideVibrato, 0);
+                            state = pinchShape == BendKind.BendAndRelease
                                 ? state.With(CompositionStateKinds.Bend, (int)BendKind.BendAndRelease).With(CompositionStateKinds.BendDepth, ScaleDistance(note.Value, 1))
-                                : state.With(CompositionStateKinds.Bend, (int)BendKind.None).With(CompositionStateKinds.BendDepth, 0);
+                                    .With(CompositionStateKinds.BendRise, (int)Math.Round(1000 * PartRise))
+                                : state.With(CompositionStateKinds.Bend, (int)BendKind.None).With(CompositionStateKinds.BendDepth, 0).With(CompositionStateKinds.BendRise, 0);
                             state = state.With(CompositionStateKinds.Program, GuitarHarmonics + 1);
                         }
                     }
@@ -876,8 +941,8 @@ internal static class Expression
                         && note.Value.Duration >= 1 && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
                         && state.GetStateValue(CompositionStateKinds.Pinch) == 0 && Pinching(note.Position, 1).TestProbability(DiveChance))
                     {
-                        state = state.With(CompositionStateKinds.Bend, (int)BendKind.Dive).With(CompositionStateKinds.BendDepth, -DiveDepth)
-                            .With(CompositionStateKinds.Vibrato, 0).With(CompositionStateKinds.WideVibrato, 0);
+                        state = state.With(CompositionStateKinds.Bend, (int)BendKind.Dive).With(CompositionStateKinds.BendDepth, -DiveDepth).With(CompositionStateKinds.BendRise, 0)
+                            .With(CompositionStateKinds.Vibrato, 0).With(CompositionStateKinds.WideVibrato, 0).With(CompositionStateKinds.VibratoRate, 0);
                         // held through to the louder section's downbeat, where the band plays on to it, so that the dive is heard
                         held[i] = Math.Max(note.Value.Duration, trackCuts.Where(x => x > note.Position + 1e-9).Append(span.End).Min() - note.Position);
                         for (var next = i + 1; next < timeline.Count && timeline[next].Position < span.End - 1e-9; next++)

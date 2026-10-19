@@ -17,9 +17,6 @@ internal static class ExpressionRender
     /// <summary>The semitones a pitch bend reaches either way, set on every channel that bends.</summary>
     public const int BendRange = 12;
 
-    /// <summary>A vibrato's speed, in cycles a second, as a singer's or a string player's.</summary>
-    private const double VibratoRate = 5.5;
-
     /// <summary>How finely a curve is written, in beats: a 32nd.</summary>
     private const double Step = 0.125;
 
@@ -89,6 +86,13 @@ internal static class ExpressionRender
     /// <summary>How far the mix is closed at a time, swung, in the brightness controller's steps.</summary>
     private static double MixAt(ImmutableArray<(double At, double Steps)> mix, double at) => mix.LastOrDefault(x => x.At <= at + 1e-9).Steps;
 
+    /// <summary>How far a move has gone at a share of it, easing out of its start and into its end, none before it and all of it after.</summary>
+    private static double Eased(double share)
+    {
+        var x = Math.Clamp(share, 0, 1);
+        return x * x * (3 - 2 * x);
+    }
+
     /// <summary>The drums' brightness wherever the mix's closing changes, the drums sharing a channel and no tone of their own.</summary>
     public static IEnumerable<(double Position, int Controller, int Value)> MixBrightness(ImmutableArray<(double At, double Steps)> mix) =>
         mix.Select(x => (x.At, BrightnessController, Math.Max(64 - FilterReach, (int)Math.Round(64 - x.Steps))));
@@ -137,6 +141,10 @@ internal static class ExpressionRender
             var depth = state.GetStateValue(CompositionStateKinds.BendDepth);
             var vibrato = state.GetStateValue(CompositionStateKinds.Vibrato);
             var wide = state.GetStateValue(CompositionStateKinds.WideVibrato);
+            var rise = state.GetStateValue(CompositionStateKinds.BendRise) / 1000.0;
+            var rate = state.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0;
+            if ((vibrato > 0 || wide > 0) && rate <= 0 || bend is not (BendKind.None or BendKind.Dive) && rise <= 0)
+                throw new InvalidOperationException($"A note at {note.Position} bends or sings a vibrato with no rise or rate.");
             // and the tape's drift and the part's detune under them, in semitones, the drift by the time since the song's start
             var wow = state.GetStateValue(CompositionStateKinds.Wow);
             var detune = state.GetStateValue(CompositionStateKinds.Detune);
@@ -144,26 +152,35 @@ internal static class ExpressionRender
             var shaped = bend != BendKind.None || vibrato > 0 || wide > 0;
             if (shaped || wow > 0)
             {
-                var cyclesPerBeat = VibratoRate * Meter.SecondsPerBeat(tempo.GetEffectiveValueAt(note.Position));
+                // the note's moves in seconds, as a player times them, whatever the tempo
+                var beatSeconds = Meter.SecondsPerBeat(tempo.GetEffectiveValueAt(note.Position));
+                var seconds = duration * beatSeconds;
+                var (held, leaves) = Composition.Expression.Held(bend, rise, seconds, 0.5 * beatSeconds);
+                var release = Math.Max(0.5 * beatSeconds, rise);
+                // a vibrato waits its cycles after the pitch holds, then grows in, and stops where it moves again
+                var shakes = rate > 0 ? held + Composition.Expression.VibratoDelayCycles / rate : double.PositiveInfinity;
                 for (var t = 0.0; t < duration - 1e-9; t += shaped ? Step / 4 : Step)
                 {
-                    var share = t / duration;
+                    var (share, at) = (t / duration, t * beatSeconds);
                     var semitones = bend switch
                     {
                         // from a scale note below or above, or the note before, onto the note
-                        BendKind.Scoop or BendKind.PrebendRelease or BendKind.Slide => depth * Math.Max(0, 1 - t / Math.Min(0.25, duration / 3)),
-                        // to a scale note above or below, and back
-                        BendKind.BendAndRelease or BendKind.ReleaseAndBend => depth * Math.Sin(Math.PI * share),
-                        BendKind.FallOff => share < 0.75 ? 0 : depth * (share - 0.75) / 0.25,
+                        BendKind.Scoop or BendKind.Slide => depth * (1 - Eased(at / rise)),
+                        // struck bent, held, and let down slowly onto the note
+                        BendKind.PrebendRelease => depth * (1 - Eased((at - rise) / release)),
+                        // to a scale note above or below, held, and back at its end
+                        BendKind.BendAndRelease or BendKind.ReleaseAndBend => depth * Eased(at / rise) * (1 - Eased((at - leaves) / rise)),
+                        // falling away, faster and faster, at its very end
+                        BendKind.FallOff => depth * Math.Pow(Math.Clamp((at - leaves) / Composition.Expression.FallSeconds, 0, 1), 2),
                         // a dive past its attack, falling fast and slowing as it nears its bottom
                         BendKind.Dive => depth * (1 - Math.Pow(1 - Math.Clamp((share - 0.25) / 0.75, 0, 1), 2)),
                         _ => 0
                     };
-                    // a vibrato grows in after the attack, from a third of the note to its middle
-                    var growth = Math.Clamp((share - 0.3) / 0.3, 0, 1);
-                    semitones += vibrato / 100.0 * growth * Math.Sin(2 * Math.PI * cyclesPerBeat * t);
+                    var cycles = at >= shakes && at < leaves ? (at - shakes) * rate : 0;
+                    var growth = Math.Clamp(cycles / Composition.Expression.VibratoGrowthCycles, 0, 1);
+                    semitones += vibrato / 100.0 * growth * Math.Sin(2 * Math.PI * cycles);
                     // a wide one bends up from the note to its top and back, as a guitar's does, never below it
-                    semitones += wide * growth * (0.5 - 0.5 * Math.Cos(2 * Math.PI * cyclesPerBeat * t));
+                    semitones += wide * growth * (0.5 - 0.5 * Math.Cos(2 * Math.PI * cycles));
                     bends.Add((start + t, ToBend(semitones + Offset(start + t))));
                 }
 

@@ -74,6 +74,10 @@ internal static class CompositionStateKinds
 
     // how far a bend goes, in semitones, up or down, to the scale note its size in scale steps reaches
     public static StateKind<int> BendDepth { get; } = StateKinds.CreateAdditive<int>(Prefix + "BendDepth", StateScope.Render);
+
+    // how long a bend or a slide takes to move, in milliseconds, and how fast a vibrato goes, in tenths of a cycle a second
+    public static StateKind<int> BendRise { get; } = StateKinds.CreateAdditive<int>(Prefix + "BendRise", StateScope.Render);
+    public static StateKind<int> VibratoRate { get; } = StateKinds.CreateAdditive<int>(Prefix + "VibratoRate", StateScope.Render);
     public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
     public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
 

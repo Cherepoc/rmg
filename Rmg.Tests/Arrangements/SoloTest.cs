@@ -320,11 +320,11 @@ public sealed class SoloTest
     [Test]
     public async Task AnIntenseMomentOfASolo_BendsOftener_AndFurther()
     {
-        // of the notes long enough to bend, a run's going by straight, by thirds of the intensity
+        // of the notes of an 8th or longer, a run's going by straight, by thirds of the intensity
         static ((double, RealizedNote Note)[] Calm, (double, RealizedNote Note)[] Intense) Thirds(SongOverrides overrides)
         {
             var notes = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloNotes(TestCorpus.Get(seed, overrides)))
-                .SelectMany(x => x).Where(x => x.Note.Duration >= Expression.ShortestShaped).OrderBy(x => x.Intensity).ToArray();
+                .SelectMany(x => x).Where(x => x.Note.Duration >= 0.5).OrderBy(x => x.Intensity).ToArray();
             return ([..notes.Take(notes.Length / 3)], [..notes.TakeLast(notes.Length / 3)]);
         }
 
@@ -438,7 +438,7 @@ public sealed class SoloTest
     public async Task ExpressionReport()
     {
         var notes = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => SoloNotes(TestCorpus.Get(seed, Wild)))
-            .SelectMany(x => x).Where(x => x.Note.Duration >= Expression.ShortestShaped).OrderBy(x => x.Intensity).ToArray();
+            .SelectMany(x => x).Where(x => x.Note.Duration >= 0.5).OrderBy(x => x.Intensity).ToArray();
         foreach (var (name, third) in new[] { ("calmest", 0), ("middle", 1), ("most intense", 2) })
         {
             var some = notes.Skip(third * notes.Length / 3).Take(notes.Length / 3).Select(x => x.Note).ToArray();
@@ -561,8 +561,11 @@ public sealed class SoloTest
                     var program = InstrumentsOverTime.ProgramOf(state, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
                     var bend = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
                     await Assert.That(bend is BendKind.None or BendKind.Scoop or BendKind.PrebendRelease).IsTrue().Because($"seed {song.Seed} at {note.Position}");
-                    // nor a stacked one, a chord rather than a line
-                    if (!soloists.TryGetValue(role, out var soloist) || !soloist.Vibrates || echoes || !Expression.Bends(program) || note.Value.Duration < 1 || note.Value.Pitches.Length > 1)
+                    // nor a stacked one, a chord rather than a line, nor one too short for the slowest vibrato after its bend
+                    var seconds = Meter.SecondsPerBeat(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo));
+                    var holds = Expression.HoldsVibrato(bend, state.GetStateValue(CompositionStateKinds.BendRise) / 1000.0, note.Value.Duration * seconds, 0.5 * seconds,
+                        Expression.Vibratos.Min(x => x.Width.Rate));
+                    if (!soloists.TryGetValue(role, out var soloist) || !soloist.Vibrates || echoes || !Expression.Bends(program) || !holds || note.Value.Pitches.Length > 1)
                         continue;
                     releases.Add((state.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0, bend,
                         state.GetStateValue(CompositionStateKinds.Vibrato) > 0 || state.GetStateValue(CompositionStateKinds.WideVibrato) > 0));
