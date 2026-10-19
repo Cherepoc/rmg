@@ -15,7 +15,7 @@ is removed once it is built, its leftovers kept under *Open work*.
    against the genres' conventions on 19 October (*Genre conventions*, built); left to ask: the cuts of #136 the
    shared solo, #341 the stickings and #77 the articulation variants, each a question of the code's cost, not of a
    genre's, and a loose figure of the drums' and the boom's (*Figures as chances*, a switch first). The *Listening*
-  backlog judged against the conventions on 19 October, its changes planned (*Bends and vibrato*).
+  backlog judged against the conventions on 19 October, its changes built (*Bends and vibrato*).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.
 4. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
@@ -226,11 +226,8 @@ each moved). Put off, each its own plan:
 
 ### Bends and vibrato, and the backlog's conventions (19 October 2026)
 
-The *Listening* backlog judged against the genres' conventions, and the bends and vibratos, which sound out of place
-or strange, timed in seconds and set by genre. Each a step of its own:
-
-1. **A vibrato's width by genre** (`vibratoWidth`, a pool of the widths): the metal presets' fast step, Rock's,
-   Blues' and the Power ballad's slow step, the jazz and classical presets' narrow and middle widths alone.
+The *Listening* backlog judged against the genres' conventions, and the bends and vibratos, which sounded out of place
+or strange, timed in seconds and set by genre, its steps built (their commits say what each moved).
 
 Put off: the blues curl, a quarter tone's bend on ♭3 or ♭7 over a major chord (a bend kind of its own, its depth in
 cents, and the genres' data); a genre's share of slow bends (Country, the Power ballad), should the soloists' share

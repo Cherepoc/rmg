@@ -323,6 +323,20 @@ internal static class Expression
     /// </summary>
     public const double VibratoDelayCycles = 2, VibratoGrowthCycles = 1, VibratoHeardCycles = 2.5;
 
+    /// <summary>A vibrato's name, as a genre names it: narrow, medium or broad by its cents, a step's slow or fast, or two steps'.</summary>
+    public static string NameOf(Vibrato width) => width switch
+    {
+        { Steps: 2 } => "twoSteps",
+        { Steps: 1, Rate: < 5.5 } => "slowStep",
+        { Steps: 1 } => "fastStep",
+        { Cents: <= 15 } => "narrow",
+        { Cents: <= 35 } => "medium",
+        _ => "broad"
+    };
+
+    public static string LabelOf(Vibrato width) =>
+        $"{(width.Steps switch { 0 => $"{width.Cents} cents", 1 => "A step", _ => $"{width.Steps} steps" })} at {width.Rate} a second";
+
     /// <summary>How far a width leans to the wide side, for a strength or an energy to lean it.</summary>
     private static double Lean(Vibrato width) => width.Steps > 0 ? 0.5 * width.Steps : width.Cents / 60.0 - 1;
 
@@ -782,6 +796,8 @@ internal static class Expression
             IGenerationContext Pinching(double position, int decision) =>
                 new GenerationContext(Seeds.Derive(Seeds.Derive(pinchSeed, map.PlaceKey(position, NotePlacesPerBeat)), decision));
             var pinchedPhrases = new HashSet<(int, int)>();
+            // the widths the genre's vibratos take
+            var widths = genre.Pool<Vibrato>(GenreChoices.VibratoWidth, NameOf);
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
@@ -792,7 +808,7 @@ internal static class Expression
                 // only where its instrument suits it
                 var lean = new Tilt(Tilt.Of(StrengthOdds, strength).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds);
                 var sizes = lean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1);
-                var vibrato = context.Pick(lean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
+                var vibrato = context.Pick(lean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u, widths), Lean));
                 // the part's tone here, darker the quieter the section, as dark as it goes at an energy of -1 and below, half as
                 // dark at 1 and above
                 var tone = toned ? (int)Math.Round(ToneReach * toneDepth * (3 - Math.Clamp(energies[index], -1, 1)) / 4) : 0;
@@ -853,7 +869,7 @@ internal static class Expression
                     var glideLean = glides ? Tilt.Of(GlideOdds, (Math.Abs(from) >= GlideLeap ? 1 : 0) + (ends ? 1 : 0)) : new Tilt(0);
                     var slidesNow = drawing.TestProbability(soloist is null ? glideLean.Chance(slideRate, 1) : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
                     // and its vibrato, a note at a time, the wide likelier the more intense
-                    var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
+                    var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u, widths), Lean));
                     // how fast it bends or slides, quickly, a soloist the quicker the more intense, or slowly, in time
                     var slow = drawing.TestProbability(SlowBendChance.At(u));
                     var eighth = 0.5 * beatSeconds(note.Position);

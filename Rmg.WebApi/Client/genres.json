@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "vibratoWidth": { "narrow": [40, 30, 20], "medium": [30, 30, 30], "broad": [20, 30, 30], "slowStep": [10, 25, 40], "twoSteps": [0, 0, 10] },
       "length": { "from": [180, 180, 150], "to": [300, 330, 480] },
       "alternatingBass": { "sections": 0, "boogie": [10, 15, 20] },
       "callAndResponse": { "sections": [5, 10, 15] },
@@ -77,6 +78,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "tempoBand": { "slow": 31, "middle": 44, "fast": 31 },
       "soloShare": { "trading": 100, "together": [5, 10, 20] },
       "soloCount": { "one": 100, "two": [10, 20, 30], "three": [0, 5, 10] },
@@ -158,6 +160,7 @@
     "name": "Dark jazz",
     "description": "Slow, dark jazz, a noir lounge band at a funeral's pace: a tenor sax or a vibraphone holding long notes over an electric piano's held minor chords, an upright bass on the roots, brushes barely there, an organ, strings or a choir beneath, minutes on two or three chords, everything soft and in a hall, 40 to 76.",
     "choices": {
+      "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "drumSetup": { "kit": 100 },
       "arpeggio": { "none": 100, "up": [0, 3, 10], "upDown": [0, 2, 8] },
       "intensity": { "from": -100, "to": 0 },
@@ -1059,6 +1062,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "vibratoWidth": { "narrow": [40, 30, 20], "medium": [30, 30, 30], "broad": [20, 30, 30], "slowStep": [10, 25, 40], "twoSteps": [0, 0, 10] },
       "length": { "from": [140, 140, 140], "to": [330, 330, 330] },
       "vamp": { "sections": [5, 10, 15] },
       "harmonicRhythm": { "oneBar": 100, "twoBars": [10, 20, 25], "halfBar": [0, 5, 15] },
@@ -1262,6 +1266,7 @@
     "name": "Power ballad",
     "description": "Slow, 60 to 95, mostly in 4/4, now and then 12/8: a clean or acoustic guitar's broken chords let ring with sweet held tones, an overdriven lead singing the melody, a fingered bass and strings, sus2 and add9 chords, the band building section by section in a big room, a heavy chorus, a guitar solo, now and then the last chorus up a step, fading or ringing out.",
     "choices": {
+      "vibratoWidth": { "narrow": [40, 30, 20], "medium": [30, 30, 30], "broad": [20, 30, 30], "slowStep": [10, 25, 40], "twoSteps": [0, 0, 10] },
       "ornaments": { "graces": [0, 25, 100], "turns": [0, 8, 100], "trills": [0, 0, 15] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "octaveBass": { "sections": 0 },
@@ -1371,6 +1376,7 @@
     "name": "Heavy metal",
     "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4 or on 3 in its half-time sections, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
+      "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
       "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "soloCount": { "one": 100, "two": [20, 30, 40], "three": 0 },
@@ -1458,6 +1464,7 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
       "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "intensity": { "from": 0, "to": 100 },
@@ -1547,6 +1554,7 @@
     "name": "Symphonic metal",
     "description": "Distorted guitars and a double kick under a choir, strings and a church organ, a soaring melody on a violin or a voice-like lead, harmonic minor's raised cadence, keyboard and guitar solos, a lifted last chorus.",
     "choices": {
+      "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "ensembleHits": { "sections": [15, 20, 25] },
       "octaveBass": { "sections": 0 },
       "insertion": { "none": 100, "phaser": [0, 0, 30] },
@@ -1632,6 +1640,7 @@
     "name": "Doom metal",
     "description": "Slow and crushing: low power chords held and left to ring over a heavy, sparse beat, long stretches on one chord creeping by half steps, the tritone and Phrygian, an organ, a mournful lead, few solos, long songs.",
     "choices": {
+      "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
       "insertion": { "none": 100, "phaser": [0, 0, 30] },
       "intensity": { "from": -80, "to": 40 },
@@ -2778,6 +2787,7 @@
     "name": "Bossa nova",
     "description": "A nylon guitar's syncopated chords, a flute or a sax, major sevenths and ninths moving by ii-V, the snare's cross-stick on a brush kit, a shaker, soft and straight, 100 to 140.",
     "choices": {
+      "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "octaveBass": { "sections": 0 },
       "sectionChanges": { "tempo": [0, 0, 30], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
@@ -2846,6 +2856,7 @@
     "name": "Orchestral",
     "description": "Strings, horns and woodwinds over a contrabass, a harp's arpeggios, timpani and a cymbal marking the form, minor, major and harmonic minor, long crescendos into louder sections, parts entering one by one.",
     "choices": {
+      "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "soloists": { "solo": 100, "melody": [40, 50, 50], "counterMelody": [30, 40, 50] },
       "sectionHome": { "tonic": 100, "contrast": [20, 30, 30], "relative": 20, "fourth": 10, "fifth": 10 },
       "cadenceDegree": { "seventh": 60, "sixth": 55 },
@@ -2913,6 +2924,7 @@
     "name": "Cinematic piano",
     "description": "A film's piano: a piano melody over a piano's arpeggios two octaves wide, strings swelling under it, a bass stepping down through the chords, add9, sus and seventh chords, major, minor and Lydian, AABA with a big return and the last section lifted a key, no drums, 60 to 90, or a bouncy 150.",
     "choices": {
+      "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
       "feelChances": {},
       "sung": { "eighths": [100, 80, 60], "halves": [100, 50, 0] },
@@ -2954,6 +2966,7 @@
     "name": "Chamber",
     "description": "Chamber music: a melody on violin, flute or clarinet over a piano's Alberti figure and a cello's bass, no drums, raised cadences and ornaments, phrases of four bars, AABA, ABA and a rondo, terraced dynamics, 60 to 170 in 4/4, 3/4 and 6/8.",
     "choices": {
+      "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 0, "twin": 0, "imitation": [15, 25, 35] },
       "figure": { "chords": { "own": 100, "waltz": [20, 30, 30] }, "bass": { "own": 100, "waltz": [20, 30, 30], "eighths": [10, 15, 20] } },

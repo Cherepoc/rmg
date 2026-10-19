@@ -148,6 +148,44 @@ public sealed class ShapeTimingTest
         await Task.CompletedTask;
     }
 
+    /// <summary>The vibratos of a song's guitars and synth leads, which may shake wide, by their width and rate: "35 cents", "a step at 6.5".</summary>
+    internal static IEnumerable<string> GuitarVibratos(CorpusSong song) => song.Song.Notes!
+        .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { InstrumentCode: >= 24 and <= 31 or >= 80 and <= 87 })
+        .SelectMany(x => x.Value).Select(x => x.Value.State)
+        .Where(x => x.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.GetStateValue(CompositionStateKinds.WideVibrato) > 0)
+        .Select(x => x.GetStateValue(CompositionStateKinds.WideVibrato) > 0
+            ? $"{(x.GetStateValue(CompositionStateKinds.WideVibrato) > 2 ? "wider" : "a step")} at {x.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0}"
+            : $"{x.GetStateValue(CompositionStateKinds.Vibrato)} cents");
+
+    [Test]
+    public async Task AGenresVibratos_AreTheWidthsItNames_AJazzGuitarsNeverAStepWide_AMetalOnesOften()
+    {
+        string[] Of(string genre) => [..TestCorpus.InParallel(Enumerable.Range(0, 32), seed => GuitarVibratos(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))).ToArray()).SelectMany(x => x)];
+        var jazz = Of("jazz");
+        await Assert.That(jazz.Length).IsGreaterThan(20);
+        await Assert.That(jazz.All(x => x.EndsWith("cents"))).IsTrue();
+        // Metal's a step fast, never slow, its pinches' 40 cents beside
+        var metal = Of("metal");
+        Console.WriteLine($"Metal's guitars a step wide {metal.Count(x => !x.EndsWith("cents")) / (double)metal.Length:P0} of {metal.Length}");
+        await Assert.That(metal.Any(x => x.StartsWith("a step at 4.5"))).IsFalse();
+        await Assert.That(metal.Count(x => !x.EndsWith("cents"))).IsGreaterThan(metal.Length / 5);
+    }
+
+    [Test]
+    [Explicit]
+    public async Task WidthReport()
+    {
+        foreach (var name in new string?[] { null, "metal", "thrash", "doom", "rock", "blues", "ballad", "jazz", "fusion" })
+        {
+            var widths = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => GuitarVibratos(name is null ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))).ToArray())
+                .SelectMany(x => x).ToArray();
+            Console.WriteLine($"{name ?? "the corpus"}: wide {widths.Count(x => !x.EndsWith("cents")) / (double)Math.Max(1, widths.Length):P0} of {widths.Length}; " +
+                              string.Join(", ", widths.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)widths.Length:P0}")));
+        }
+
+        await Task.CompletedTask;
+    }
+
     private static string Spread(IEnumerable<double> values)
     {
         var sorted = values.Order().ToArray();
