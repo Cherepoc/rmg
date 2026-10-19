@@ -11,10 +11,12 @@ namespace Rmg.Tests.Rendering;
 public sealed class ShapeTimingTest
 {
     /// <summary>
-    ///     A shaped note as rendered: its kind, its depth, its widths, its bend's rise and its vibrato's rate, its length in
-    ///     seconds as decided and as swung, an 8th there, and its pitch over it, in semitones, by the seconds since its start.
+    ///     A shaped note as rendered: its kind, its depth, its widths, its bend's rise, its vibrato's rate and wait, whether its
+    ///     instrument sings its vibrato, its length in seconds as decided and as swung, an 8th there, and its pitch over it, in
+    ///     semitones, by the seconds since its start.
     /// </summary>
-    internal sealed record Shaped(BendKind Kind, int Depth, int Cents, int Wide, double Rise, double Rate, double Decided, double Seconds, double Eighth, (double At, double Semitones)[] Pitch);
+    internal sealed record Shaped(BendKind Kind, int Depth, int Cents, int Wide, double Rise, double Rate, double Wait, bool Sings, double Decided, double Seconds, double Eighth,
+        (double At, double Semitones)[] Pitch);
 
     /// <summary>Every shaped note of a song's lines, their tape's drift aside, rendered as its part plays it.</summary>
     internal static IEnumerable<Shaped> ShapedNotes(CorpusSong song)
@@ -22,7 +24,7 @@ public sealed class ShapeTimingTest
         var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         foreach (var (track, notes) in song.Song.Notes!)
         {
-            if (song.Song.TrackDefinitions[track] is not PitchInstrumentTrack)
+            if (song.Song.TrackDefinitions[track] is not PitchInstrumentTrack { InstrumentCode: var program })
                 continue;
             var shaped = notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Wow) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Detune) == 0
                                           && (x.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0 || x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0
@@ -41,7 +43,9 @@ public sealed class ShapeTimingTest
                 var state = note.Value.State;
                 yield return new Shaped((BendKind)state.GetStateValue(CompositionStateKinds.Bend), state.GetStateValue(CompositionStateKinds.BendDepth),
                     state.GetStateValue(CompositionStateKinds.Vibrato), state.GetStateValue(CompositionStateKinds.WideVibrato), state.GetStateValue(CompositionStateKinds.BendRise) / 1000.0,
-                    state.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0, note.Value.Duration * seconds, (end - start) * seconds, 0.5 * seconds, pitch);
+                    state.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0, state.GetStateValue(CompositionStateKinds.VibratoDelay) / 10.0,
+                    InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(state, program), InstrumentTrait.SingsVibrato) || state.GetStateValue(CompositionStateKinds.Pinch) == 1,
+                    note.Value.Duration * seconds, (end - start) * seconds, 0.5 * seconds, pitch);
             }
         }
     }
@@ -85,17 +89,19 @@ public sealed class ShapeTimingTest
     }
 
     [Test]
-    public async Task AVibrato_WaitsItsCyclesAfterTheAttackOrTheBendsLanding_OnANoteLongEnoughToBeHeard()
+    public async Task AVibrato_WaitsAShareOfItsHeldNoteInItsCycles_AfterTheAttackOrTheBendsLanding_OnANoteLongEnoughToBeHeard()
     {
         var shaking = RuledNotes().Where(x => x.Cents > 0 || x.Wide > 0).ToArray();
         await Assert.That(shaking.Length).IsGreaterThan(500);
         foreach (var note in shaking)
         {
-            var because = $"{note.Kind} of {note.Decided:F3} s, a vibrato at {note.Rate} a second";
-            await Assert.That(Expression.HoldsVibrato(note.Kind, note.Rise, note.Decided, note.Eighth, note.Rate)).IsTrue().Because(because);
+            var because = $"{note.Kind} of {note.Decided:F3} s, a vibrato at {note.Rate} a second waiting {note.Wait} cycles";
+            await Assert.That(Expression.HoldsVibrato(note.Kind, note.Rise, note.Decided, note.Eighth, note.Rate, note.Sings)).IsTrue().Because(because);
+            // its wait a share of the held note, in its cycles, within its instrument's bounds
+            await Assert.That(Math.Abs(note.Wait - Expression.VibratoWait(note.Kind, note.Rise, note.Decided, note.Eighth, note.Rate, note.Sings))).IsLessThan(0.051).Because(because);
             // still, or moving one way only, as its bend goes, until its cycles after the pitch holds
             var (held, _) = Expression.Held(note.Kind, note.Rise, note.Seconds, note.Eighth);
-            var before = note.Pitch.Where(x => x.At < held + Expression.VibratoDelayCycles / note.Rate - 1e-6).Select(x => x.Semitones).ToArray();
+            var before = note.Pitch.Where(x => x.At < held + note.Wait / note.Rate - 1e-6).Select(x => x.Semitones).ToArray();
             var steps = before.Zip(before.Skip(1), (a, b) => Math.Sign(Math.Round(b - a, 4))).Where(x => x != 0).Distinct().Count();
             await Assert.That(steps).IsLessThanOrEqualTo(1).Because(because);
             if (note.Kind == BendKind.None)

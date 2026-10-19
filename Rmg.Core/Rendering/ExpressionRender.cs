@@ -143,8 +143,9 @@ internal static class ExpressionRender
             var wide = state.GetStateValue(CompositionStateKinds.WideVibrato);
             var rise = state.GetStateValue(CompositionStateKinds.BendRise) / 1000.0;
             var rate = state.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0;
-            if ((vibrato > 0 || wide > 0) && rate <= 0 || bend is not (BendKind.None or BendKind.Dive) && rise <= 0)
-                throw new InvalidOperationException($"A note at {note.Position} bends or sings a vibrato with no rise or rate.");
+            var wait = state.GetStateValue(CompositionStateKinds.VibratoDelay) / 10.0;
+            if ((vibrato > 0 || wide > 0) && (rate <= 0 || wait <= 0) || bend is not (BendKind.None or BendKind.Dive) && rise <= 0)
+                throw new InvalidOperationException($"A note at {note.Position} bends or sings a vibrato with no rise, rate or wait.");
             // and the tape's drift and the part's detune under them, in semitones, the drift by the time since the song's start
             var wow = state.GetStateValue(CompositionStateKinds.Wow);
             var detune = state.GetStateValue(CompositionStateKinds.Detune);
@@ -158,7 +159,7 @@ internal static class ExpressionRender
                 var (held, leaves) = Composition.Expression.Held(bend, rise, seconds, 0.5 * beatSeconds);
                 var release = Math.Max(0.5 * beatSeconds, rise);
                 // a vibrato waits its cycles after the pitch holds, then grows in, and stops where it moves again
-                var shakes = rate > 0 ? held + Composition.Expression.VibratoDelayCycles / rate : double.PositiveInfinity;
+                var shakes = rate > 0 ? held + wait / rate : double.PositiveInfinity;
                 for (var t = 0.0; t < duration - 1e-9; t += shaped ? Step / 4 : Step)
                 {
                     var (share, at) = (t / duration, t * beatSeconds);

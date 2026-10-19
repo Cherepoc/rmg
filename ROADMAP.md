@@ -107,8 +107,9 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
 
 - **Runs and phrases:** a player's or a scale exercise; cells of five or seven; the intensity's arc; pauses in 17-20%
   of segments; 2.1 notes a beat at the middle. Decides the runs' cells and the solo's density.
-- **Expression:** the soloists' bends and vibratos as *Bends and vibrato* times and sets them by genre, heard once
-  built. Decides their timings and the genres' amounts.
+- **Expression** (*Bends and vibrato*, built): bends landing in about 90 ms or in time; a vibrato waiting a quarter of
+  its held note, in its cycles, a guitar's 1-3 and a bowed string's, a voice's or a flute's ½-1½, on a note long enough
+  to hear it; the genres' solo bends and widths. Decides their timings and the genres' amounts.
 - **Loudness:** a soloist 0.06 of velocity over the band's loudest part, a flute too? Decides the margin.
 - **Chords in solos:** 41% of a chord soloist's held notes stacked, planing 17% at the middle and 59% wild. Decides
   their rates.
@@ -127,9 +128,10 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
 ### Sound
 
 - **The velocity:** the bass's and the chords' evenness; bar layers adding 3 to 5. Decides the layers' spread.
-- **The effects:** 1.9 gentle kinds a song at the middle, a strong one in 25% (`ExpressionTest.Report`). Decides the
-  song's weights.
-- **Slides:** 44% of the pitch shapes. Decides their rate.
+- **The effects:** 1.9 gentle kinds a song at the middle, a strong one in 25% (`ExpressionTest.Report`); a vibrato on
+  the line notes long enough to hear it alone, 3% of the corpus's, Orchestral's and Chamber's 8-9%, Rock's and Metal's
+  2% (`GenreDevicesReportTest`, 19 October 2026). Decides the song's weights, and whether the parts' vibratos are rare.
+- **Slides:** 44% of the pitch shapes, as before the bends were timed in seconds (19 October 2026). Decides their rate.
 - **The instruments added in October 2026** (about 4% of parts): any too loud or strange in either soundfont? Decides
   their weights and traits.
 - **The riser into a drop:** a soundfont's sample shorter or longer than the bar. Decides starting it later.
@@ -234,20 +236,6 @@ cents, and the genres' data); a genre's share of slow bends (Country, the Power 
 sound rushed there; the heavy genres' low tuning (*Put off*). Not built: a double stop's or a unison's bend, one
 string bending under one held, which one channel's pitch bend cannot play; a guitar's narrow vibrato bending up
 alone, inaudible beside its wide one, which does.
-
-### A vibrato's wait (19 October 2026)
-
-The vibratos timed in seconds waited two of their cycles, a guitarist's way, so that a bowed string's or a voice's
-long notes went plain (Orchestral's line notes with a vibrato 13% to 5%), and a pinch shorter than 0.85 s dry. One
-step, and the questions measured again after it:
-
-1. **The wait by instrument and note:** a vibrato waits a share of the note's held part, a quarter, in its cycles,
-   within its instrument's bounds: a guitar's, a synth lead's, a reed's and a brass player's 1 to 3 cycles, a long note
-   the longer; a bowed string's, a voice's and a flute's, which sing it as part of their tone (`SingsVibrato`), and a
-   pinch's squeal, ½ to 1½; its rate setting the seconds, so that a fast one starts sooner; the note's wait on its
-   state (`VibratoDelay`), which the render reads.
-2. **Measured again:** the slides' share (*Sound*, 44% of the pitch shapes before the bends were timed in seconds), and
-   the gentle effects (*Sound*) by the share of the line notes they shape as well as the songs that play them.
 
 ### Older rule failures
 

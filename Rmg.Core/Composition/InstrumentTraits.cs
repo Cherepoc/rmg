@@ -51,7 +51,10 @@ public enum InstrumentTrait
     Decays = 8192,
 
     /// <summary>A phaser suits its held sound: strings', a pad's, an electric piano's or a guitar's.</summary>
-    Phases = 16384
+    Phases = 16384,
+
+    /// <summary>Its vibrato part of its tone, a bowed string's, a voice's or a flute's, sung soon after the note starts rather than let wait as a guitarist does.</summary>
+    SingsVibrato = 32768
 }
 
 /// <summary>
@@ -74,8 +77,8 @@ public static class InstrumentTraits
         (16, InstrumentTrait.None),
         (24, Guitar),
         (32, InstrumentTrait.Decays),
-        (40, InstrumentTrait.Bends),
-        (48, InstrumentTrait.Bends),
+        (40, InstrumentTrait.Bends | InstrumentTrait.SingsVibrato),
+        (48, InstrumentTrait.Bends | InstrumentTrait.SingsVibrato),
         (56, InstrumentTrait.Bends),
         (64, InstrumentTrait.Bends),
         (72, InstrumentTrait.Bends),
@@ -135,10 +138,12 @@ public static class InstrumentTraits
         [110] = InstrumentTrait.Bends,
         [111] = InstrumentTrait.Bends,
         // the string ensembles chorused and phased
-        [48] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Phases,
-        [49] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Phases,
-        [50] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Filters | InstrumentTrait.Phases,
-        [51] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Filters | InstrumentTrait.Phases
+        [48] = InstrumentTrait.Bends | InstrumentTrait.SingsVibrato | InstrumentTrait.Choruses | InstrumentTrait.Phases,
+        [49] = InstrumentTrait.Bends | InstrumentTrait.SingsVibrato | InstrumentTrait.Choruses | InstrumentTrait.Phases,
+        [50] = InstrumentTrait.Bends | InstrumentTrait.SingsVibrato | InstrumentTrait.Choruses | InstrumentTrait.Filters | InstrumentTrait.Phases,
+        [51] = InstrumentTrait.Bends | InstrumentTrait.SingsVibrato | InstrumentTrait.Choruses | InstrumentTrait.Filters | InstrumentTrait.Phases,
+        // the flute, its vibrato part of its tone, where the other pipes' players seldom shake a note
+        [73] = InstrumentTrait.Bends | InstrumentTrait.SingsVibrato
     };
 
     private static readonly ImmutableArray<InstrumentTrait> Table =

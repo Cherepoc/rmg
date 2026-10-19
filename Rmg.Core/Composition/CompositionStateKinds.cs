@@ -78,6 +78,9 @@ internal static class CompositionStateKinds
     // how long a bend or a slide takes to move, in milliseconds, and how fast a vibrato goes, in tenths of a cycle a second
     public static StateKind<int> BendRise { get; } = StateKinds.CreateAdditive<int>(Prefix + "BendRise", StateScope.Render);
     public static StateKind<int> VibratoRate { get; } = StateKinds.CreateAdditive<int>(Prefix + "VibratoRate", StateScope.Render);
+
+    // how many of its cycles a vibrato waits after the note's pitch holds, in tenths
+    public static StateKind<int> VibratoDelay { get; } = StateKinds.CreateAdditive<int>(Prefix + "VibratoDelay", StateScope.Render);
     public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
     public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
 

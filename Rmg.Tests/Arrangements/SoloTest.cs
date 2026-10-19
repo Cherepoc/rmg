@@ -561,10 +561,11 @@ public sealed class SoloTest
                     var program = InstrumentsOverTime.ProgramOf(state, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
                     var bend = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
                     await Assert.That(bend is BendKind.None or BendKind.Scoop or BendKind.PrebendRelease).IsTrue().Because($"seed {song.Seed} at {note.Position}");
-                    // nor a stacked one, a chord rather than a line, nor one too short for the slowest vibrato after its bend
+                    // nor a stacked one, a chord rather than a line, nor one too short for the slowest vibrato after its bend,
+                    // let wait the longest
                     var seconds = Meter.SecondsPerBeat(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo));
                     var holds = Expression.HoldsVibrato(bend, state.GetStateValue(CompositionStateKinds.BendRise) / 1000.0, note.Value.Duration * seconds, 0.5 * seconds,
-                        Expression.Vibratos.Min(x => x.Width.Rate));
+                        Expression.Vibratos.Min(x => x.Width.Rate), false);
                     if (!soloists.TryGetValue(role, out var soloist) || !soloist.Vibrates || echoes || !Expression.Bends(program) || !holds || note.Value.Pitches.Length > 1)
                         continue;
                     releases.Add((state.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0, bend,

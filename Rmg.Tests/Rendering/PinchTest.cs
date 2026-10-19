@@ -14,7 +14,7 @@ public sealed class PinchTest
     [Arguments("thrash")]
     public async Task APinch_IsAHeldSingleNotesHighlight_NeverAChordOrInARun_OneAPartAPhrase_WaveringWhereItHolds(string genre)
     {
-        var (pinches, length) = (0, 0.0);
+        var (pinches, shaken, length) = (0, 0, 0.0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         foreach (var (track, notes) in song.Song.Notes!)
         {
@@ -32,8 +32,9 @@ public sealed class PinchTest
                 await Assert.That(notes.Count(x => Math.Abs(x.Position - note.Position) < 1 - 1e-9) / 2.0).IsLessThanOrEqualTo(Expression.PinchBusiest).Because(because);
                 // shaken wherever it holds long enough after its bend
                 var holds = Expression.HoldsVibrato((BendKind)note.Value.State.GetStateValue(CompositionStateKinds.Bend), note.Value.State.GetStateValue(CompositionStateKinds.BendRise) / 1000.0,
-                    note.Value.Duration * seconds, 0.5 * seconds, Expression.PinchRate);
+                    note.Value.Duration * seconds, 0.5 * seconds, Expression.PinchRate, true);
                 await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0).IsEqualTo(holds).Because(because);
+                shaken += holds ? 1 : 0;
                 await Assert.That(song.Song.TrackDefinitions[track].Role).IsNotEqualTo(TrackRole.Chords).Because(because);
                 // its phrase where it plays, a hook intro's quote its own
                 var span = song.Map.PlayAt(note.Position)!.Value.Played;
@@ -42,7 +43,7 @@ public sealed class PinchTest
             }
         }
 
-        Console.WriteLine($"{genre}: {pinches} pinches in 64 songs, {length / Math.Max(1, pinches):F2} s long on the average");
+        Console.WriteLine($"{genre}: {pinches} pinches in 64 songs, {length / Math.Max(1, pinches):F2} s long on the average, {shaken / (double)Math.Max(1, pinches):P0} shaken");
         // some, against a pinch never made: a tremolo-picked genre holds few notes to pinch
         await Assert.That(pinches).IsGreaterThan(0);
     }
