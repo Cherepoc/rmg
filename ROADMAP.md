@@ -12,9 +12,9 @@ is removed once it is built, its leftovers kept under *Open work*.
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
    the seventh round's nine decided by genre judgment and retired (19 October), and the rest of the queue reviewed
-   against the genres' conventions on 19 October (*Genre conventions*, built); left to ask: the cuts of #136 the
-   shared solo, #341 the stickings and #77 the articulation variants, each a question of the code's cost, not of a
-   genre's, and a loose figure of the drums' and the boom's (*Figures as chances*, a switch first). The *Listening*
+   against the genres' conventions on 19 October (*Genre conventions*, built); the eighth round deployed on
+   19 October (`metal-vibrato`, `string-vibrato`, `stickings` #341); the shared solo played together (#136) the same
+   without in 19 of 24 Symphonic songs, the twin leads playing those together, its cut the owner's to make. The *Listening*
   backlog judged against the conventions on 19 October, its changes built (*Bends and vibrato*).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.
@@ -31,7 +31,9 @@ the most, by how much its song with the device and without differ as heard (`Hea
 in the sections its device plays in; its song without lays its patch over the genre's options. Done for a version when
 every question is answered or let go of. The seventh round (18 October 2026) asked nine of the review of 16 October's
 queue and was retired on 19 October, each decided by genre judgment, side B (see *Decided by genre judgment*);
-`symphonic-hits` (#371) differed 0.02, too faint to ask. A question listens only in the sections its device plays in, not
+`symphonic-hits` (#371) differed 0.02, too faint to ask. The eighth round (19 October 2026) asks three: Metal's fast
+vibrato a step wide (`metal-vibrato`, 0.12), the strings' vibrato sung soon (`string-vibrato`, 0.46) and a drummer's
+stickings against the songs' own (`stickings`, #341, 0.34). A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -56,7 +58,10 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
 - **Let go of, not told apart or too faint to ask** (as they are): Djent's polymeter frames, `pop-melody-chords`,
   `trance-raise`, `pop-eighths`, IDM's 64th rolls, Dark jazz's and Black metal's darker moods
   (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard while a mood leaned only a genre's
-  own pool (since built: the chords' degrees by darkness and a mood past a genre's span, heard in the sixth round).
+  own pool (since built: the chords' degrees by darkness and a mood past a genre's span, heard in the sixth round);
+  and of 19 October, measured too faint to ask: a blues soloist's bends (0.08), Celtic's vibrato (0.10, in 17 of 24
+  songs its soloists' alone), the articulation variants (#77, 0.10), and the two-step and the boom played loosely
+  (0.03, 0.08), so that a switch for the figures' strictness is not built.
 - **Decided by genre judgment, not heard** (the seventh round, retired 19 October 2026, side B taken): Dark jazz's
   8ths swung, never its 16ths (#345); Jazz's bass in two now and then, 25-20-10, the plainer the likelier (#343);
   House's offbeat bass, 15-30-40, Techno's pump leaning wild (#350); Psytrance's texture built and thinned, steadier
@@ -113,7 +118,8 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
 - **Loudness:** a soloist 0.06 of velocity over the band's loudest part, a flute too? Decides the margin.
 - **Chords in solos:** 41% of a chord soloist's held notes stacked, planing 17% at the middle and 59% wild. Decides
   their rates.
-- **Drum solos:** stickings round the kit; a crash with the kick in 23% of segments. Decides the drum solo's gestures.
+- **Drum solos:** stickings round the kit (`stickings`, the eighth round); a crash with the kick in 23% of segments.
+  Decides the drum solo's gestures.
 
 ### Drums and groove
 
@@ -188,7 +194,7 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   double kick, a gallop, a skank) never loose. Heard better on Latin's tumbao (`latin-tumbao-varied`, 18 October 2026);
   the others (`FigureChancesReportTest`, notes on the figure at feel 0.5 and 1) the bossa nova's bass 93-84%, the
   tresillo 88-63%, the boom 91-46%, the chick 68-42%, the surdo 100-98%, the two-step 87-42% and the breakbeat's kick
-  93-63%, unasked: a question of the drums' (the two-step) and of the boom's when a round asks.
+  93-63%; the two-step's and the boom's measured too faint to ask in their genres (19 October 2026).
 - **Waiting on figures as chances**, as each needs a player the figures do not reach: the conga's tumbao (#354, twelve
   presets name the conga), the reggae organ bubble on the pad (#355, Reggae, Dub, Ska), the boogie comp on the rhythm
   part (#340, Rock, Blues, Country, Punk, Funk rock; the bass's boogie steps shared).

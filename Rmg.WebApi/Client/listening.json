@@ -1,1 +1,224 @@
-[]
+[
+  {
+    "id": "metal-vibrato",
+    "question": "Metal's vibrato, a fast shake a scale step wide on the guitars' held notes: a metal guitarist's, or a warble?",
+    "decides": "Metal's vibrato widths (vibratoWidth), and Thrash's, Doom's and Symphonic's with them.",
+    "genre": "metal",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "vibratoWidth": {
+          "fastStep": 0,
+          "twoSteps": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 30.3,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 108.3,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 347.3,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 19.7,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 198.7,
+        "listen": [
+          "Melody (Lead 5 (charang))"
+        ]
+      },
+      {
+        "seed": "P",
+        "at": 179.2,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Solo (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "string-vibrato",
+    "question": "The strings' vibrato, sung soon after a long note starts: singing, or wobbly?",
+    "decides": "The orchestral presets' vibrato, and how soon a bowed string's starts (SingsVibrato).",
+    "genre": "orchestral",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "effects": {
+          "vibrato": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 264.2,
+        "listen": [
+          "Melody (Violin)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 0,
+        "listen": [
+          "Bass (Contrabass)",
+          "Melody (Violin)"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 71,
+        "listen": [
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 233.6,
+        "listen": [
+          "Melody (Flute)",
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 32.7,
+        "listen": [
+          "Riff (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "g",
+        "at": 182,
+        "listen": [
+          "Melody (Cello)",
+          "Bass (Timpani)",
+          "Counter-melody (French Horn)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "stickings",
+    "question": "A drummer's turn played round the kit in doubles, paradiddles and six-stroke rolls, or in the songs' own strokes: a drummer's vocabulary, or the same solo?",
+    "decides": "#341: keep the stickings a genre names, or cut the choice.",
+    "genre": "jazz",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "sticking": {
+          "singles": 100,
+          "doubles": [
+            40,
+            50,
+            60
+          ],
+          "paradiddle": [
+            20,
+            40,
+            60
+          ],
+          "sixStroke": [
+            0,
+            20,
+            50
+          ],
+          "handFoot": [
+            0,
+            30,
+            60
+          ],
+          "cascade": [
+            0,
+            10,
+            30
+          ]
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 224,
+        "listen": [
+          "Tom"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 345.9,
+        "listen": [
+          "Tom"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 135.1,
+        "listen": [
+          "Tom"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 357.4,
+        "listen": [
+          "Tom"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 38.7,
+        "listen": [
+          "Tom",
+          "Acoustic Snare",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 182.9,
+        "listen": [
+          "Tom",
+          "Acoustic Snare",
+          "Kick"
+        ]
+      }
+    ]
+  }
+]
