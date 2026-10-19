@@ -6,8 +6,8 @@ is removed once it is built, its leftovers kept under *Open work*.
 
 ## Priorities
 
-1. **Now: the rules on the other corpora** (P1, *Older rule failures*): traced on 19 October 2026, their plan of six
-   steps, the review of 16 October's #296 (step 4) and #302 (step 5) among them.
+1. **The rules on the other corpora** (P1, *Older rule failures*): none failing at five offsets (19 October 2026); the
+   suite at another offset now and then.
 2. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
@@ -250,27 +250,12 @@ alone, inaudible beside its wide one, which does.
 
 ### Older rule failures
 
-Rules that fail on other songs than the corpus's own, each traced at the committed code on 19 October 2026 (the djent
-breakdown's silent kick at offset 716000000 no longer failing), and their plan, a commit a step:
+None at offsets 0, 1000000, 619000000, 716000000 and 942000000 (19 October 2026, every failure traced and fixed, the
+review of 16 October's #296 and #302 among them); a new one checked against the committed code before it is recorded
+here. Left:
 
-1. **The rules read as the code means them** (no song changed): a fall-off on a section's last note ends its phrase,
-   as `Expression` has it (offsets 716000000 and 619000000); the scale rule's last note before a change read from the
-   notes as placed, a pushed note's moved by the pocket (716000000, seed 38 at 178, a half step above a pushed
-   change); Black metal's minor mediants over 128 songs (1000000).
-2. **A run across a change of chord** (`LineFills`, 1000000 seed 62 into 472, 942000000 seed 29 into 256): its pitches
-   of the chord before it, snapped to the chord at each note, two on one where the scale changes; built back from the
-   note it lands on, each note the next of the scale at its own place.
-3. **A solo's answer to its motif** (`SoloLines`, 716000000 seed 3 at 600.25): the motif's pitches re-indexed in
-   another scale, two on one step, and the rest of the run clamped at the range's edge; the motif kept as steps from
-   its first note, an answer that would leave the range not played, its draws kept.
-4. **An approach over a change the note holds across** (`LinePattern`, 942000000 seed 5 at 552): an anticipation of
-   the chord after next, the Realizer striking the held note again at the change between; no approach where a change
-   falls between a note and the next.
-5. **Shapes apart** (619000000 seed 47 at 256 and 400): the chords and the melody a sus4 over the bass's and the pad's
-   triad from the song's assembly, the pickup's chord (`PatternGenerator`) the likeliest, to trace first and plan
-   again should it be another.
-6. **Then** every offset again, a new failure checked against the committed code before it is recorded here.
-
+- **A run into a note above its line's range:** a counter-melody's run at offset 942000000 (seed 29 into 256) rising to
+  its range's top, 60, and landing on 67, a leap the run means to fill, its landing placed outside the range it runs in.
 - **Three page tests seen failing once each,** their messages not kept: the seek readout's
   (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), the length's
   (`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`) and the bar dragged by hand's
