@@ -214,7 +214,8 @@ public static class GenreChoices
         ("powerChords", "In power chords", SectionGenerator.PowerChordChance),
         ("chugs", "Palm-muted chugs", SectionGenerator.ChugChance),
         ("drone", "Its weak notes on a drone", SectionGenerator.DroneChance),
-        ("hook", "A figure kept over the chords", SectionGenerator.RiffHookChance)
+        ("hook", "A figure kept over the chords", SectionGenerator.RiffHookChance),
+        ("song", "Sections playing the song's riff", SectionGenerator.SongRiffChance)
     ]);
 
     /// <summary>The chance a section's pattern turns around in its last bar, a V or a ii–V into its start, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Progressions.Turnaround" />).</summary>
