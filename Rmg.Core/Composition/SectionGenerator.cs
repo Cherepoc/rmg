@@ -88,6 +88,9 @@ internal sealed class SectionGenerator
     /// <summary>How far a section's energy leans its chugs, to the quieter sections (<see cref="SectionEnergy.Tilt" />).</summary>
     public const double ChugCoupling = 0.4;
 
+    /// <summary>How far a section's energy leans its riff's power chords, to the louder sections, a verse's single notes coming back in power chords in the chorus.</summary>
+    public const double PowerChordCoupling = 0.4;
+
     /// <summary>The chance a section's bass plays in octaves, its notes off the beat the note before an octave up, as a disco or funk bass does, by the groove facet: rare in the songs.</summary>
     public static Probabilities.ByConvention OctaveBassChance { get; } = new(0, 0.05, 0.05);
 
@@ -444,11 +447,13 @@ internal sealed class SectionGenerator
     /// </summary>
     private (bool PowerChords, bool Chugs, bool OctaveBass, bool Hooks) DrawDevices(int sectionId, SectionRole role, Unconventionality facets)
     {
-        // its riff in power chords, a genre's, which the songs never play, from a sequence of its own
-        var powerChords = Stream(sectionId, SectionStream.PowerChords).TestProbability(PowerChordChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "powerChords")));
+        // its riff in power chords, a genre's, which the songs never play, from a sequence of its own, the louder the section the
+        // likelier, as a band plays its verse's riff in single notes and its chorus's in power chords
+        var energy = _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy);
+        var powerChords = Stream(sectionId, SectionStream.PowerChords)
+            .TestProbability(SectionEnergy.Tilt(energy, PowerChordCoupling).Chance(PowerChordChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "powerChords")), 1));
         // its guitars' and its picked bass's repeats palm-muted, a genre's, which the songs never play, from a sequence of its own,
         // the quieter the section the likelier, as a band mutes its verses and opens its choruses
-        var energy = _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy);
         var chugs = Stream(sectionId, SectionStream.Chugs).TestProbability(SectionEnergy.Tilt(-energy, ChugCoupling).Chance(ChugChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "chugs")), 1));
         // the bass in octaves now and then, a genre's the more, from a sequence of its own
         var octaveBass = Stream(sectionId, SectionStream.OctaveBass).TestProbability(OctaveBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.OctaveBass, "sections")));
