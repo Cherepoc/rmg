@@ -161,6 +161,14 @@ internal static class MelodyLayers
     /// </summary>
     public const double EnergyRegister = 6;
 
+    /// <summary>
+    ///     The chance a melody's later letter, off a hook, plays its first's rhythm with notes of its own, as a tune's next
+    ///     line keeps its first's rhythm and moves its notes, which over another chord sounds as a sequence (<see cref="PhraseScheme.Borrowed" />),
+    ///     by the melody facet: a plain tune's the oftenest, development being its convention, a wild one's seldom, each line
+    ///     drawn afresh.
+    /// </summary>
+    public static ByConvention SequenceChances { get; } = new(0.4, 0.3, 0.1);
+
     /// <summary>How far a genre widens or narrows the melody's range at its most, as a factor (<see cref="GenreChoices.MelodyRange" />).</summary>
     public const double GenreRangeReach = 1.5;
 

@@ -124,7 +124,8 @@ internal sealed class PatternGenerator
                     var phraseEnd = inAnswer ? answer!.PhraseEnd : null;
                     // a drum that doubles or accents a lead plays its lead's bar patterns, and one that plays a figure of its
                     // own on the lead's feel its own; a track that plays on another's feel makes its bar after that one's
-                    var seeds = trackSeedMaps[letter];
+                    // and a letter that borrows another's rhythm plays that one's rhythm with its own notes
+                    var (seeds, rhythmSeeds) = (trackSeedMaps[letter], trackSeedMaps[scheme.RhythmOf(letter)]);
                     var barFeels = new List<BarFeel>();
                     var bars = new Dictionary<int, EventStateTimelineMap<StateMap>>();
                     foreach (var x in seeds.OrderBy(x => feelLeads.ContainsKey(x.Key)))
@@ -133,6 +134,7 @@ internal sealed class PatternGenerator
                         var patternOf = doubles.TryGetValue(x.Key, out var doubling) && doubling.Binding != DrumBinding.Figure ? doubling.Lead : x.Key;
                         bars[x.Key] = GenerateBar(
                                 x.Key,
+                                rhythmSeeds[patternOf],
                                 seeds[patternOf],
                                 trackStateMaps[x.Key],
                                 barStateTimelineMap,
@@ -185,9 +187,12 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>A track's bar: its bar pattern's state over the track's, and the notes of its rhythm.</summary>
+    /// <param name="seed">The seed of the bar pattern's rhythm and settings.</param>
+    /// <param name="valueSeed">The seed of its notes, its own where its letter borrows another's rhythm.</param>
     private EventStateTimelineMap<StateMap> GenerateBar(
         int trackNumber,
         ulong seed,
+        ulong valueSeed,
         StateMap trackStateMap,
         StateTimelineMap barStateTimelineMap,
         int sectionId,
@@ -213,7 +218,7 @@ internal sealed class PatternGenerator
         var builder = new StateMapBuilder(Layers.BarPattern, perTrack: true)
             .Add(barPatternLayerGenerator)
             .Add(CompositionStateKinds.Rhythm.Seed, GetRhythmSeed(patternSeeds.Rhythm, redrawsRhythm, rhythmKey))
-            .Add(CompositionStateKinds.ValueSeed, seed);
+            .Add(CompositionStateKinds.ValueSeed, valueSeed);
         // a varied repeat plays its bar pattern with its cycles drawn afresh more often: it starts as the first did
         if (isVaried)
             builder.Add(CompositionStateKinds.Rhythm.Variation, PhraseSchemes.VariedRepeatVariation);

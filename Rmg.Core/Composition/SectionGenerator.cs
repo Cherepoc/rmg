@@ -629,8 +629,19 @@ internal sealed class SectionGenerator
             // a riff's bars follow a riff's scheme, from a sequence of its own, rather than the section's phrase
             var isRiff = _tracks.Definitions[trackNumber].Role == TrackRole.Riff;
             // and a hook's repeats are its first bar's, none varied
+            // and a melody's later letter, off a hook, playing its first's rhythm with notes of its own now and then, a
+            // sequence's, from a sequence of its own
+            var sequences = Stream(sectionId, SectionStream.MelodyRhythms);
             var trackRhythm = isRiff ? sectionRhythm with { Scheme = Stream(sectionId, SectionStream.Riff).Pick(RiffLayers.Schemes).Fitted(meter.PhraseBars) }
                 : isMelody && hooks ? sectionRhythm with { Scheme = sectionRhythm.Scheme.Unvaried() }
+                : isMelody ? sectionRhythm with
+                {
+                    Scheme = sectionRhythm.Scheme with
+                    {
+                        Borrowed = Enumerable.Range(1, sectionRhythm.Scheme.PatternCount - 1)
+                            .Where(_ => sequences.TestProbability(MelodyLayers.SequenceChances.At(sectionRhythm.Facets[Facet.Melody]))).ToImmutableDictionary(x => x, _ => 0)
+                    }
+                }
                 : sectionRhythm;
             var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, trackRhythm.Scheme);
             GeneratedBars BuildBars(ImmutableArray<long> rhythmKeys) => _generators(meter).Patterns.BuildBars(
@@ -1188,5 +1199,6 @@ internal enum SectionStream
     TwinLead = 66,
     SungEighths = 67,
     MinorMediants = 68,
-    SongRiff = 69
+    SongRiff = 69,
+    MelodyRhythms = 70
 }

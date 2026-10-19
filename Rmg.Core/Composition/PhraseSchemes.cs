@@ -14,10 +14,19 @@ public sealed record PhraseScheme(ImmutableArray<int> Letters, ImmutableArray<bo
 {
     public int PatternCount => Letters.Max() + 1;
 
+    /// <summary>
+    ///     The letters that play an earlier letter's rhythm with notes of their own, each by the letter whose rhythm it plays,
+    ///     as a tune's next line keeps its first's rhythm and moves its notes; none in a scheme drawn without them.
+    /// </summary>
+    public ImmutableDictionary<int, int> Borrowed { get; init; } = ImmutableDictionary<int, int>.Empty;
+
+    /// <summary>The letter whose rhythm a letter's bars play: its own, or the one it borrows.</summary>
+    public int RhythmOf(int letter) => Borrowed.GetValueOrDefault(letter, letter);
+
     /// <summary>The scheme over a section's pattern of several phrases, every phrase playing its bars as the first does, over its own chords.</summary>
     public PhraseScheme Across(int phrases) => phrases == 1
         ? this
-        : new PhraseScheme([..Enumerable.Repeat(Letters, phrases).SelectMany(x => x)], [..Enumerable.Repeat(IsVaried, phrases).SelectMany(x => x)]);
+        : new PhraseScheme([..Enumerable.Repeat(Letters, phrases).SelectMany(x => x)], [..Enumerable.Repeat(IsVaried, phrases).SelectMany(x => x)]) { Borrowed = Borrowed };
 
     /// <summary>
     ///     The scheme of a phrase of four played over a phrase of another length (<see cref="PhraseLengths.BarsOf" />), its
@@ -30,7 +39,9 @@ public sealed record PhraseScheme(ImmutableArray<int> Letters, ImmutableArray<bo
         var bars = PhraseLengths.BarsOf(phraseBars);
         var order = bars.Select(x => Letters[x]).Distinct().ToArray();
         ImmutableArray<int> letters = [..bars.Select(x => Array.IndexOf(order, Letters[x]))];
-        return new PhraseScheme(letters, [..bars.Select((x, i) => IsVaried[x] && letters[..i].Contains(letters[i]))]);
+        // and its borrowed rhythms by the letters as counted again, where both letters are still played
+        var borrowed = Borrowed.Where(x => order.Contains(x.Key) && order.Contains(x.Value)).ToImmutableDictionary(x => Array.IndexOf(order, x.Key), x => Array.IndexOf(order, x.Value));
+        return new PhraseScheme(letters, [..bars.Select((x, i) => IsVaried[x] && letters[..i].Contains(letters[i]))]) { Borrowed = borrowed };
     }
 
     /// <summary>The scheme with every repeat played as it was first, none varied.</summary>
@@ -39,7 +50,7 @@ public sealed record PhraseScheme(ImmutableArray<int> Letters, ImmutableArray<bo
     /// <summary>The scheme as letters, such as AABA, a varied repeat marked with a prime.</summary>
     public override string ToString()
     {
-        return string.Concat(Letters.Select((letter, bar) => (char)('A' + letter) + (IsVaried[bar] ? "′" : "")));
+        return string.Concat(Letters.Select((letter, bar) => (char)('A' + letter) + (IsVaried[bar] ? "′" : "") + (Borrowed.TryGetValue(letter, out var of) ? $"({(char)('A' + of)})" : "")));
     }
 }
 
