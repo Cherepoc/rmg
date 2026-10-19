@@ -24,6 +24,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
     /// <summary>Four dotted quarters, each of three 8ths, a slow blues' or a ballad's triplets.</summary>
     public static Meter TwelveEight { get; } = new([6, 6, 6, 6]);
 
+    /// <summary>Three dotted quarters, each of three 8ths, a slip jig's.</summary>
+    public static Meter NineEight { get; } = new([6, 6, 6]);
+
     /// <summary>
     ///     The meters a song is in, each in its usual grouping, and how often, by the feel facet of its unconventionality:
     ///     the plainest in four; at the middle mostly four, 3/4, 6/8 and 12/8 now and then and odd
@@ -43,7 +46,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
         (new Meter([4, 6, 6, 6]), new ByConvention(0, 0.002, 1)),
         (new Meter([4, 3, 3, 3]), new ByConvention(0, 0.002, 1)),
         (new Meter([4, 4, 4, 3]), new ByConvention(0, 0.002, 1)),
-        (TwelveEight, new ByConvention(0, 0.02, 0.15))
+        (TwelveEight, new ByConvention(0, 0.02, 0.15)),
+        // a genre's alone, as a slip jig's
+        (NineEight, new ByConvention(0, 0, 0))
     ];
 
     /// <summary>
@@ -64,8 +69,18 @@ public sealed record Meter(ImmutableArray<int> Groups)
         return new Meter(orders[(int)(context.GenerateDouble() * orders.Length)]);
     }
 
-    /// <summary>A meter's name, its time signature, such as "4/4".</summary>
-    public static string NameOf(Meter meter) => $"{meter.TimeSignature.Numerator}/{meter.TimeSignature.Denominator}";
+    /// <summary>
+    ///     A meter's name, its time signature, such as "4/4", or, where an option of even groups shares it, its groups'
+    ///     sum, as an additive signature writes them, 9/8's "2+2+2+3/8" beside the slip jig's "9/8".
+    /// </summary>
+    public static string NameOf(Meter meter)
+    {
+        static string Signature(Meter x) => $"{x.TimeSignature.Numerator}/{x.TimeSignature.Denominator}";
+        var signature = Signature(meter);
+        return meter.Groups.Distinct().Count() > 1 && Options.Any(x => x.Meter.Groups.Distinct().Count() == 1 && Signature(x.Meter) == signature)
+            ? $"{string.Join("+", meter.Groups.Order().Select(x => meter.TimeSignature.Denominator == 8 ? x / 2 : x))}/{meter.TimeSignature.Denominator}"
+            : signature;
+    }
 
     /// <summary>The place in <see cref="Options" /> of a meter, whatever the order of its groups.</summary>
     public static int OptionOf(Meter meter)

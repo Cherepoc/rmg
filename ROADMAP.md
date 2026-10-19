@@ -229,10 +229,7 @@ each moved). Put off, each its own plan:
 The *Listening* backlog judged against the genres' conventions, and the bends and vibratos, which sound out of place
 or strange, timed in seconds and set by genre. Each a step of its own:
 
-1. **The presets' data:** Celtic's slip jig, 9/8 at 10-10-15; Bluegrass's last section lifted 0-5-10, as it rarely
-   lifts within a tune; the last chorus repeated in Pop, the Power ballad and Soul at 60-55-40, a conventional device;
-   the song's bends (`effects.bends`) of Nu metal at 10-25-50 and of Bluegrass at 0-15-40.
-2. **Their timings, in seconds** (`Expression`, `ExpressionRender`): a bend rising quickly, 0.07-0.12 s by the solo's
+1. **Their timings, in seconds** (`Expression`, `ExpressionRender`): a bend rising quickly, 0.07-0.12 s by the solo's
    intensity, or in time, an 8th, a share of soloists' bends (10-15-25%), as a blues player's crying bend and a
    country player's are; held, and a release over the same time at the note's end; a scoop or a slide within its rise,
    a fall-off within the note's last 0.15 s; a note too short for its shape, its rise and a hold as long, playing
@@ -240,13 +237,13 @@ or strange, timed in seconds and set by genre. Each a step of its own:
    that a fast one starts sooner, on a note long enough for 2½ cycles of it besides, never over a bend moving. Each
    vibrato's rate its width's: narrow at 6 cycles a second, the middle widths at 5.5, a step's slow at 4.5 as blues
    and rock play it, fast at 6.5 as metal does, two steps' at 5.
-3. **Where they land:** a fall-off on a phrase's last note alone, a prebend's release on a note of a beat or more, a
+2. **Where they land:** a fall-off on a phrase's last note alone, a prebend's release on a note of a beat or more, a
    bend's top leaned to a chord tone (odds of 4), and the plain end's bends mostly scoops (scoop 1, bend and release
    0.5, fall-off 0.25).
-4. **A solo's bends by genre and instrument:** `effects.soloBends` (`Soloist.BendChance`), which the soloist takes
+3. **A solo's bends by genre and instrument:** `effects.soloBends` (`Soloist.BendChance`), which the soloist takes
    in place of the songs', blues' 90-95-100 to the classical presets' and Bossa nova's none; a guitar's or a synth
    lead's lean +1 and any other bending instrument's -1, the nylon and the jazz guitar no longer leaning to bend.
-5. **A vibrato's width by genre** (`vibratoWidth`, a pool of the widths): the metal presets' fast step, Rock's,
+4. **A vibrato's width by genre** (`vibratoWidth`, a pool of the widths): the metal presets' fast step, Rock's,
    Blues' and the Power ballad's slow step, the jazz and classical presets' narrow and middle widths alone.
 
 Put off: the blues curl, a quarter tone's bend on ♭3 or ♭7 over a major chord (a bend kind of its own, its depth in
