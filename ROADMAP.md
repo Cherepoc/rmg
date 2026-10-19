@@ -395,12 +395,12 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
 The melody, the solos and the riff read as not expressive enough: what each lacks where it is placed without regard to
 what it plays over, proposed from the code and reviewed against every preset's conventions, none measured yet. Each to
 be measured before it is built, the share it moves with it on and off, and each a rule leaning by a facet that exists,
-a genre's amount its data, never a device of its own. In order: a riff's turnaround, a riff heavier with the section, a sequence; the rest after them (built 19 October 2026: a run
+a genre's amount its data, never a device of its own. In order: a riff heavier with the section, a sequence; the rest after them (built 19 October 2026: a run
 landing on the change, its first note over a new chord the chord's 45-51% to 67-79%; an own solo's highest note at its
 climax, in its first fifth 36% to 11%; the lines' phrase arc by the genre's evenness; a melody phrase's last note
 falling away, 1.4 to 4.6 velocity steps under its middle; a melody swelling only into its held phrase ends, on a sound
 that holds; the swell's amount, 0.12, left to listening; built 20 October: the song's riff, the first section's played again
-over the others' chords).
+over the others' chords; a riff's turnaround, its last beat walking into its next cycle).
 
 Solos:
 
@@ -457,10 +457,10 @@ The riff:
   rhythm 12% to 50% in 256 songs): a section of another meter than the first riff's plays its own; a polymeter's riff,
   whose cycle is not its bar's, copied as its pattern's bars are, to be heard; the riff between the sections with *The
   riff between the sections*.
-- **A riff's turnaround played from its bar** (P2): AAAB's last bar is drawn afresh (`RiffLayers.Schemes`); played as
-  A′, starting as A did and changing, its last notes leading into the cycle's first as `RiffLayers.Leading` leads into
-  a change. Rock's, the Blues' (with its form's turnaround), the metal genres' and Funk's; the loops' AAAA untouched. The
-  entry *a riff's AAAB* under the researched idioms is built (`RiffLayers.Schemes`).
+- **A riff's turnaround, the rest** (P3, by listening; built 20 October 2026 as a walk of its cycle's last beat into
+  the next, one restart in seven): a bar varied as A′ was measured not heard as one, its last bar opening as its
+  first 31% to 32%, as a varied repeat draws its cycles afresh throughout; a turnaround that keeps the bar's first half
+  and changes its second, should the walk alone sound too slight.
 - **A riff heavier with the section** (P3): heavy louder sections are `SectionForms`' (`louderForms.guitars`, clean
   guitars distorted), but the riff's power chords are drawn by the sound facet alone, its chugs leaned by the energy
   (`SectionGenerator.PowerChordChance`, `ChugChance`). The power chords leaned by the energy as the chugs are, a
@@ -491,8 +491,6 @@ The riff:
 
 Their code, as planned and reviewed on 19 October 2026 (each item's numbers to its commit):
 
-- **The turnaround:** A′ as data (`RiffLayers.Schemes`); then, measured, the walk into the cycle's restart as the
-  walks into a section are (`LineFills`, a riff's profile), as a varied repeat alone may not be heard as one.
 - **Heavier with the section:** the power chords' draw leaned by the energy as the chugs' is, one line.
 - **A sequence:** `PhraseScheme.Rhythms`, the letter whose rhythm a bar plays, carried by `Fitted`, `Across` and
   `Unvaried`; a bar's `Rhythm.Seed` and track state from that letter's seed and its `ValueSeed` (its `StateChanges` and
