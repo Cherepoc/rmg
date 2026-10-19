@@ -163,6 +163,12 @@ internal static class SoloLines
     /// <summary>The stream a lick's note draws whether it is a ghost from, by its key.</summary>
     private const int GhostStream = 1;
 
+    /// <summary>The stream a run's note on a change draws whether it lands there from, by its key (<see cref="Soloist.LandingChances" />).</summary>
+    private const int LandingStream = 2;
+
+    /// <summary>How many scale steps a run's note on a change moves to land at most: one to a triad's note, two to a power chord's.</summary>
+    private const int LandingSteps = 2;
+
     /// <summary>The steps above a chord's root a triad's notes are, the root, the third and the fifth, where no part carries the chord's shape.</summary>
     private static readonly int[] ChordSteps = [0, 2, 4];
 
@@ -234,14 +240,14 @@ internal static class SoloLines
         // what comes after it
         var planned = new List<PlannedNote>();
         var placing = 0;
-        void Add(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false, bool ghosts = false) =>
-            planned.Add(new PlannedNote(position, pitch, intensity, held, accented, release, stacked, octave, ghosts, placing));
+        void Add(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false, bool ghosts = false, bool run = false) =>
+            planned.Add(new PlannedNote(position, pitch, intensity, held, accented, release, stacked, octave, ghosts, run, placing));
 
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there,
         // its key by its place in the line
         TimelineItem<StateMap> Place(PlannedNote note, int index)
         {
-            var (position, pitch, intensity, held, accented, release, stacked, octave, _, _) = note;
+            var (position, pitch, intensity, held, accented, release, stacked, octave, _, _, _) = note;
             var sung = MelodyAt(position);
             // in octaves as the soloist plays them, not as the melody it takes over did; a note of its own, the melody's
             // beat where it starts with the melody's note, the weakest elsewhere, its own key from that note's and its place
@@ -345,7 +351,8 @@ internal static class SoloLines
                     // pedal, an unaccented note of it muted now and then, by its own key's draw
                     var ghosting = gesture == SoloGesture.Lick && soloist.Ghosts && shape != SoloShape.Pedal && (positions.Length < 2 || positions[1] - positions[0] >= 0.25 - 1e-9);
                     for (var i = 0; i < positions.Length; i++)
-                        Add(positions[i], pitches[i], level, accented: accents[i], stacked: stacks && accents[i], octave: gesture == SoloGesture.Lick, ghosts: ghosting && !accents[i]);
+                        Add(positions[i], pitches[i], level, accented: accents[i], stacked: stacks && accents[i], octave: gesture == SoloGesture.Lick, ghosts: ghosting && !accents[i],
+                            run: gesture == SoloGesture.Run);
                     StateTrace.RecordSection(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
                     if (pitches.Length > 0)
                         current = pitches[^1];
@@ -361,6 +368,57 @@ internal static class SoloLines
                     break;
             }
         }
+
+        // a run's note on a change's downbeat landing there now and then, by its own key's draw, the key it is placed with
+        bool Lands(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), k + 1), LandingStream))
+            .TestProbability(soloist.LandingChance);
+
+        // a run's note on a change's downbeat landed on the new chord's nearest note, a scale step or two away, the way the run
+        // goes where two are as near: the run moved by as many steps from it on, leaping onto the chord's note as a player does
+        // and going on from there, or, where that would leave the range, the note's cell from it on, or the cell whole, which
+        // keeps a figure's shape; the next nearest where none can, and none where every move would leave the range or strike
+        // a note twice running
+        void Land(int k)
+        {
+            var note = planned[k];
+            var scale = ScaleNotes(note.Position);
+            if (ChordNotes(note.Position).Contains(note.Pitch) || scale.Length == 0)
+                return;
+            // the run the note is of, a run's notes going on in its phrase, and the cell it is in, from its accented first note
+            bool OfRun(int i) => i >= 0 && i < planned.Count && planned[i].Run && planned[i].Phrase == note.Phrase;
+            var (cellStart, cellEnd, runEnd) = (k, k, k);
+            while (OfRun(cellStart - 1) && !planned[cellStart].Accented)
+                cellStart--;
+            while (OfRun(cellEnd + 1) && !planned[cellEnd + 1].Accented)
+                cellEnd++;
+            while (OfRun(runEnd + 1))
+                runEnd++;
+            int Index(int[] notes, int pitch) => Array.IndexOf(notes, Nearest(notes, pitch));
+            var at = Index(scale, note.Pitch);
+            var direction = OfRun(k - 1) ? Math.Sign(note.Pitch - planned[k - 1].Pitch) : 0;
+            var moves = ChordNotes(note.Position).Select(x => Index(scale, x) - at).Where(x => x != 0 && Math.Abs(x) <= LandingSteps).Distinct()
+                .OrderBy(Math.Abs).ThenBy(x => Math.Sign(x) == direction ? 0 : 1);
+            foreach (var move in moves)
+            foreach (var (first, last) in new[] { (k, runEnd), (k, cellEnd), (cellStart, cellEnd) })
+            {
+                var moved = Enumerable.Range(first, last - first + 1).Select(i => ScaleNotes(planned[i].Position) is var notes && Index(notes, planned[i].Pitch) + move is var index
+                    && index >= 0 && index < notes.Length ? notes[index] : (int?)null).ToArray();
+                if (moved.Any(x => x is null))
+                    continue;
+                int PitchAt(int i) => i >= first && i <= last ? moved[i - first]!.Value : planned[i].Pitch;
+                if (Enumerable.Range(Math.Max(1, first), Math.Min(planned.Count - 1, last + 1) - Math.Max(1, first) + 1).Any(i => PitchAt(i) == PitchAt(i - 1) && planned[i].Pitch != planned[i - 1].Pitch))
+                    continue;
+
+                for (var i = first; i <= last; i++)
+                    planned[i] = planned[i] with { Pitch = PitchAt(i) };
+                StateTrace.RecordSection(TracePoints.SoloLanding, SectionGenerator.SectionTrace, span.SectionId, $"{note.Position}: {move} steps", (note.Position, move));
+                return;
+            }
+        }
+
+        for (var k = 0; k < planned.Count; k++)
+            if (planned[k].Run && chordChanges.Any(x => Math.Abs(x - planned[k].Position) < 1e-9) && Lands(k))
+                Land(k);
 
         int FoldTowards(int pitch, int towards) => pitch + 12 * (int)Math.Round((towards - pitch) / 12.0);
         static bool Ghosted(StateMap note) => new GenerationContext(Seeds.Derive((ulong)note.GetStateValue(CompositionStateKinds.NoteKey), GhostStream)).TestProbability(GhostRate);
@@ -383,7 +441,7 @@ internal static class SoloLines
     }
 
     /// <summary>A note of a solo's line as planned, before it is placed: where it starts, its pitch, and how it is played.</summary>
-    private sealed record PlannedNote(double Position, int Pitch, double Intensity, double Held, bool Accented, bool Release, bool Stacked, bool Octave, bool Ghosts, int Phrase);
+    private sealed record PlannedNote(double Position, int Pitch, double Intensity, double Held, bool Accented, bool Release, bool Stacked, bool Octave, bool Ghosts, bool Run, int Phrase);
 
     /// <summary>Where a run is in its cells: on which cell, on which note of it, from which note the cell starts and which way it goes.</summary>
     internal sealed class CellCursor(int root)

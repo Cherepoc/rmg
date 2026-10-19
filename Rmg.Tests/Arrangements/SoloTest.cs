@@ -306,6 +306,100 @@ public sealed class SoloTest
         await Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     A plain soloist's runs land on a change of chord: its first notes over the new chord are the chord's far more often
+    ///     than its run notes are their chord's in the same songs, about half (seen 78% against 50% in 64 songs).
+    /// </summary>
+    [Test]
+    public async Task APlainRun_LandsOnTheChange()
+    {
+        var counts = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Landings(TestCorpus.Get(seed, Facets(1, 0.2)))).ToArray();
+        var (landed, onChord) = (counts.Sum(x => x.Landed) / (double)counts.Sum(x => x.Changes), counts.Sum(x => x.OnChord) / (double)counts.Sum(x => x.Notes));
+        Console.WriteLine($"  {landed:P0} of {counts.Sum(x => x.Changes)} run notes over a new chord its, {onChord:P0} of {counts.Sum(x => x.Notes)} run notes their chord's");
+        await Assert.That(counts.Sum(x => x.Changes)).IsGreaterThan(50);
+        await Assert.That(landed).IsGreaterThan(onChord + 0.1);
+    }
+
+    /// <summary>
+    ///     The solos' runs over a change of chord, by fifth of the melody facet: how many of their first notes over the new
+    ///     chord are its notes, against how many of all their notes are their chord's.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task LandingReport()
+    {
+        var counts = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(song.Unconventionality[Facet.Melody] * 5), 0, 4), Counts: Landings(song)));
+        foreach (var band in counts.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
+            Console.WriteLine($"  melody {band.Key}/5: {band.Sum(x => x.Counts.Landed) / (double)Math.Max(1, band.Sum(x => x.Counts.Changes)):P0} of {band.Sum(x => x.Counts.Changes)} notes over a new chord its, " +
+                              $"{band.Sum(x => x.Counts.OnChord) / (double)Math.Max(1, band.Sum(x => x.Counts.Notes)):P0} of {band.Sum(x => x.Counts.Notes)} run notes their chord's");
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     A single soloist's own solos, how they climb: in which fifth of the solo its highest note falls, and how high in its
+    ///     range, from its lowest note to its highest, its first fifth and its fourth, which holds the climax, play on average.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task ClimaxReport()
+    {
+        var solos = TestCorpus.Measure(512, Climbs).SelectMany(x => x).ToArray();
+        Console.WriteLine($"  {solos.Length} solos, the highest note in fifth " + string.Join(" ", Enumerable.Range(0, 5).Select(f => $"{f + 1}: {solos.Count(x => x.Peak == f) / (double)solos.Length:P0}")) +
+                          $"; the first fifth at {solos.Average(x => x.First):P0} of the range, the fourth at {solos.Average(x => x.Fourth):P0}");
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     A song's own solos of a single soloist: the fifth its highest note falls in, and its first fifth's and its fourth's
+    ///     notes' average height in the solo's range.
+    /// </summary>
+    private static (int Peak, double First, double Fourth)[] Climbs(CorpusSong song) =>
+    [
+        ..Gestures(song).Where(x => x.IsOwn && song.Solos[x.Index].Soloists.Length == 1 && x.Segments.Length > 0).Select(solo =>
+        {
+            var (start, end) = (solo.Segments[0].Start, solo.Segments[^1].End);
+            var notes = song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == song.Solos[solo.Index].Soloists[0]).Value
+                .Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).Select(x => (Place: (x.Position - start) / (end - start), Pitch: x.Value.Pitches[0])).ToArray();
+            if (notes.Length == 0)
+                return ((int, double, double)?)null;
+            var (low, high) = (notes.Min(x => x.Pitch), notes.Max(x => x.Pitch));
+            int FifthOf(double place) => Math.Clamp((int)(place * 5), 0, 4);
+            double Height(int fifth) => notes.Where(x => FifthOf(x.Place) == fifth).Select(x => (x.Pitch - low) / (double)Math.Max(1, high - low)).DefaultIfEmpty(0.5).Average();
+            return (FifthOf(notes.MaxBy(x => x.Pitch).Place), Height(0), Height(3));
+        }).OfType<(int, double, double)>()
+    ];
+
+    /// <summary>
+    ///     A song's solos' runs, a single soloist's: how many of their notes are the first over a new chord, how many of
+    ///     those are its notes, how many notes they have and how many are their chord's.
+    /// </summary>
+    private static (int Changes, int Landed, int Notes, int OnChord) Landings(CorpusSong song)
+    {
+        var (changes, landed, notes, onChord) = (0, 0, 0, 0);
+        foreach (var (index, _, segments) in Gestures(song).Where(x => song.Solos[x.Index].Soloists.Length == 1))
+        {
+            var track = song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == song.Solos[index].Soloists[0]).Value.ToArray();
+            bool OnChord(TimelineItem<RealizedNote> note) => ChordTones(song, note.Position, note.Value.State).Contains(note.Value.Pitches[0].Mod(12));
+            int ChangeOf(TimelineItem<RealizedNote> note) => note.Value.State.GetStateValue(StateKinds.ChordChange);
+            foreach (var (start, end, _, _) in segments.Where(x => x.Gesture == SoloGesture.Run))
+            {
+                var played = Enumerable.Range(0, track.Length).Where(i => track[i].Position >= start - 1e-9 && track[i].Position < end - 1e-9).ToArray();
+                notes += played.Length;
+                onChord += played.Count(i => OnChord(track[i]));
+                // the first note over a new chord, the segment's own first among them where the note before it is of another
+                foreach (var i in played.Where(i => i > 0 && ChangeOf(track[i - 1]) != ChangeOf(track[i])))
+                {
+                    changes++;
+                    landed += OnChord(track[i]) ? 1 : 0;
+                }
+            }
+        }
+
+        return (changes, landed, notes, onChord);
+    }
+
     /// <summary>A song of solos played as wild as can be, its form, its melody and its sound.</summary>
     private static SongOverrides Wild => new(Facets: TestCorpus.FacetsOf((Facet.Form, 1), (Facet.Melody, 1), (Facet.Sound, 1)));
 

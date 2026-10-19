@@ -59,7 +59,8 @@ internal sealed record Soloist(
     bool Planes,
     bool Octaves,
     bool Approaches,
-    double MotifInversion
+    double MotifInversion,
+    double LandingChance
 )
 {
     /// <summary>
@@ -68,6 +69,13 @@ internal sealed record Soloist(
     ///     soloist (<see cref="Articulations.SoloGhostChance" />).
     /// </summary>
     public bool Ghosts { get; init; }
+
+    /// <summary>
+    ///     The chance a run's note on a change of chord's downbeat lands on the new chord's nearest note, as a player aims a
+    ///     run at the change, by the melody facet: a convention, every time at the plain end, and never at the wild, whose
+    ///     runs go where they go (<see cref="SoloLines" />).
+    /// </summary>
+    public static ByConvention LandingChances { get; } = new(1, 0.7, 0);
 
     /// <summary>The chance a phrase answering the motif before inverts it rather than moving it, by the melody facet: never at the plain end.</summary>
     public static ByConvention MotifInversionChance { get; } = new(0, 0.3, 0.5);
@@ -250,7 +258,8 @@ internal sealed record Soloist(
         var octaves = context.TestProbability(OctaveChance.At(melody));
         var approaches = context.TestProbability(ApproachChance.At(melody));
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
-            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes, octaves, approaches, MotifInversionChance.At(melody));
+            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes, octaves, approaches, MotifInversionChance.At(melody),
+            LandingChances.At(melody));
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>

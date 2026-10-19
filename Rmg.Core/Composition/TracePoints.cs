@@ -184,6 +184,9 @@ internal static class TracePoints
     /// </summary>
     public const string SoloCells = "Solo cells";
 
+    /// <summary>A solo's run landing on a change of chord: the note's place and how many scale steps its cell moved (a tuple of a <c>double</c> and an <c>int</c>).</summary>
+    public const string SoloLanding = "Solo landing";
+
     /// <summary>
     ///     A pitched solo's line as its soloists take it: the appearance's place and how many of the melody's notes there are
     ///     to solo on (a tuple of two <c>int</c>s), none leaving the parts to play as they would.
