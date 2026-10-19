@@ -395,21 +395,15 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
 The melody, the solos and the riff read as not expressive enough: what each lacks where it is placed without regard to
 what it plays over, proposed from the code and reviewed against every preset's conventions, none measured yet. Each to
 be measured before it is built, the share it moves with it on and off, and each a rule leaning by a facet that exists,
-a genre's amount its data, never a device of its own. In order: a run landing on the change, the solo's highest note
+a genre's amount its data, never a device of its own. In order: the solo's highest note
 at its climax, the melody's loudness over time, the song's riff, a riff's turnaround, a riff heavier with the section,
 a sequence; the rest after them.
 
 Solos:
 
-- **A run landing on the change** (P2): a run sets out towards a chord note where its gesture ends without aiming to
-  land there (`SoloLines`), so that only a phrase's release is sure to be the chord's. The note on a change of chord's
-  downbeat the new chord's nearest note, its third or seventh the likelier where its shape has one, a power chord's
-  root or fifth otherwise (Rock's and the metal genres' chords, 70-100% power chords, have no third to land on), the
-  run built back from it as a walk into a section is (`LineFills`, 1501b15). Most for Jazz, Bossa nova, Fusion,
-  Jazz-funk, Soul and Country, whose solos play the changes; nothing in a vamp (Techno, Psytrance, Funk's), which has
-  no change to land on, as it should. The enclosure, a step above and below and onto it, cut: a bebop idiom, Jazz's
-  alone, should listening ask for it a genre's choice. Measured by the share of a solo's notes on a change's downbeat
-  that are the chord's.
+- **A run landing on the change, the rest** (P3, by listening; built 19 October 2026, a run's first note over a new
+  chord the chord's 45-51% to 67-79%): the landing takes the chord's nearest note, the third or the seventh not
+  preferred, should the root sound too often; the enclosure, a step above and below and onto it, Jazz's should it ask.
 - **The solo's highest note at its climax** (P2): a run aims higher the more intense, but the whole range is open from
   the first phrase. The range's top rising with the solo's arc (`ArcStart`, `ClimaxAt`), never narrower than an octave
   so that a low soloist's first phrases do not mud, its highest note at the climax. The Power ballad's (its solo in 85%
@@ -511,14 +505,7 @@ The riff:
 
 Their code, as planned and reviewed on 19 October 2026 (each item's numbers to its commit):
 
-- **First, no song changed:** `LineFills.Swept` a shared `LinePlacement.BackFrom(target, direction, count, scaleAt)`;
-  the solo's arc a function of its own (`SoloLines.Plan`'s inline arc); and the solo's notes planned as pitches and
-  placed once at the end of `SoloLines.Generate`, rather than placed gesture by gesture, so that the landing, the answer
-  and the passing notes edit pitches across a gesture's boundary, where a run's note on a change most often is.
-- **The landing:** a pass over the planned pitches, a run's note on a change's downbeat drawn by its key
-  (`NoteKey`, as `Ghosted` is) against a chance that leans plain, moved to the nearest chord note of its shape
-  (`ShapeSteps`), the third or the seventh where it has them; the notes since its cell's start built back from it,
-  the notes after it moved by the same scale steps, as the motif's are, never two notes on one.
+- **First, no song changed:** the solo's arc a function of its own (`SoloLines.Plan`'s inline arc), with the ceiling.
 - **The ceiling:** a solo's own line alone, not one on the melody, which quotes the melody where it sings, nor an
   answer (`SoloAnswers`), a short line with no arc; the range's top by the arc, never under an octave over its bottom;
   a rule test over the solos' notes but their stacked notes and octaves.
