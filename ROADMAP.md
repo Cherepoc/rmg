@@ -270,9 +270,11 @@ trace at the committed code before blaming a change:
     semitone below (`ChordApproach` 2): the chords and the melody hold a sus4 (heights 0, 5/12, 7/12) where the bass and
     the pad hold the triad (0, 2/7, 7/12), so a part's shape drawn or kept apart from the others' there; to trace where
     the bass and the pad take theirs.
-- **Two page tests seen failing once each,** their messages not kept: the seek readout's
-  (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`) and the length's
-  (`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`), to read when they fail again.
+- **Three page tests seen failing once each,** their messages not kept: the seek readout's
+  (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), the length's
+  (`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`) and the bar dragged by hand's
+  (`TheKeyAndChord_FollowTheBar_AsAHandDragsIt(True)`, 19 October 2026, passing twice after), to read when they fail
+  again.
 
 ### Put off, with their reasons
 
