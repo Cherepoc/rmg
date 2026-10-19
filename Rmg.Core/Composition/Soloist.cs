@@ -206,22 +206,27 @@ internal sealed record Soloist(
 
     public const double ExpressionLean = 0.5;
 
-    /// <summary>The chances a soloist bends at all and sings a vibrato at all, by the sound facet: never at the plain end, always at the wild.</summary>
+    /// <summary>
+    ///     The chances a soloist bends at all and sings a vibrato at all, by the sound facet: never at the plain end, always at
+    ///     the wild; a genre's bends its own (<see cref="GenreChoices.Effects" />), a blues player's nearly always, a classical
+    ///     player's never.
+    /// </summary>
     public static ByConvention BendChance { get; } = new(0, 0.6, 1);
 
     public static ByConvention VibratoChance { get; } = new(0, 0.85, 1);
 
-    /// <summary>How much likelier a guitar or a synth lead is to bend than another instrument that bends, as the odds of 1.</summary>
+    /// <summary>How much likelier a guitar or a synth lead is to bend than its genre's soloists are, and another instrument that bends less likely, as odds.</summary>
     public const double BendSuitOdds = 4;
 
-    /// <summary>How far an instrument leans to bending: a guitar's and a synth lead's the most, as their players do.</summary>
-    private static double BendSuit(int program) => InstrumentTraits.Has(program, InstrumentTrait.SoloBends) ? 1 : 0;
+    /// <summary>How an instrument leans to bending: to it, a guitar and a synth lead, as their players do, and away from it, any other, whose players bend seldom.</summary>
+    private static double BendSuit(int program) => InstrumentTraits.Has(program, InstrumentTrait.SoloBends) ? 1 : -1;
 
     /// <summary>The program of a soloing drummer, none, which neither bends nor plays chords.</summary>
     public const int DrumsProgram = -1;
 
     /// <param name="program">The instrument the soloing part plays, which leans whether it bends; <see cref="DrumsProgram" /> for the drums.</param>
-    public static Soloist Generate(IGenerationContext context, double melody, double sound, int program)
+    /// <param name="genreBends">The genre's chance a soloist bends at all, which its instrument leans; none for the songs'.</param>
+    public static Soloist Generate(IGenerationContext context, double melody, double sound, int program, ByConvention? genreBends)
     {
         // every draw made in this order, whatever the instrument
         var speeds = SpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat).ToArray();
@@ -233,7 +238,7 @@ internal sealed record Soloist(
         var register = (int)Math.Round(Registers.At(melody)) + context.GenerateInt(-2, 3);
         var bendLean = ExpressionLean + ExpressionSpread.At(sound) * Generators.SplineValue()(context);
         var slideLean = ExpressionLean + ExpressionSpread.At(sound) * Generators.SplineValue()(context);
-        var bends = context.TestProbability(Tilt.Of(BendSuitOdds, BendSuit(program)).Chance(BendChance.At(sound), 1));
+        var bends = context.TestProbability(Tilt.Of(BendSuitOdds, BendSuit(program)).Chance(BendChance.At(sound, genreBends), 1));
         var vibrates = context.TestProbability(VibratoChance.At(sound));
         var fastest = FastestSpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat).ToArray();
         var stamina = Math.Pow(2, StaminaPowers.At(melody) + StaminaSpread.At(melody) * Generators.SplineValue()(context));

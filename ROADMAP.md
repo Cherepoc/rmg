@@ -229,10 +229,7 @@ each moved). Put off, each its own plan:
 The *Listening* backlog judged against the genres' conventions, and the bends and vibratos, which sound out of place
 or strange, timed in seconds and set by genre. Each a step of its own:
 
-1. **A solo's bends by genre and instrument:** `effects.soloBends` (`Soloist.BendChance`), which the soloist takes
-   in place of the songs', blues' 90-95-100 to the classical presets' and Bossa nova's none; a guitar's or a synth
-   lead's lean +1 and any other bending instrument's -1, the nylon and the jazz guitar no longer leaning to bend.
-2. **A vibrato's width by genre** (`vibratoWidth`, a pool of the widths): the metal presets' fast step, Rock's,
+1. **A vibrato's width by genre** (`vibratoWidth`, a pool of the widths): the metal presets' fast step, Rock's,
    Blues' and the Power ballad's slow step, the jazz and classical presets' narrow and middle widths alone.
 
 Put off: the blues curl, a quarter tone's bend on ♭3 or ♭7 over a major chord (a bend kind of its own, its depth in

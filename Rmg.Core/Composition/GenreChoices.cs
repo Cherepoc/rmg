@@ -485,8 +485,8 @@ public static class GenreChoices
 
     /// <summary>
     ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
-    ///     a vibrato, a chorus, a held chord's swell, a line's bends, a part's darker tone, a tape's wow, a guitar's pinch
-    ///     harmonics and a riff's dive into a louder section.
+    ///     a vibrato, a chorus, a held chord's swell, a line's bends, a soloist's bends, a part's darker tone, a tape's wow, a
+    ///     guitar's pinch harmonics and a riff's dive into a louder section.
     /// </summary>
     public static GenreChoice Effects { get; } = Chances("effects", "Effects",
     [
@@ -494,6 +494,7 @@ public static class GenreChoices
         ("chorus", "A chorus", Expression.SongChorusChance),
         ("swell", "A swell", Expression.SongSwellChance),
         ("bends", "Bends", Expression.SongBendChance),
+        ("soloBends", "A soloist's bends", Soloist.BendChance),
         ("tone", "A part's darker tone", Expression.SongToneChance),
         ("tape", "A tape's wow", Expression.TapeChance),
         ("pinch", "A guitar's pinch harmonics", Expression.SongPinchChance),

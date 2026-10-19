@@ -103,9 +103,11 @@ public static class InstrumentTraits
         [20] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
         // the harmonica, bent as its notes are blown
         [22] = InstrumentTrait.Bends,
-        // the acoustic guitars, no pedal between them and the room
-        [24] = Guitar & ~InstrumentTrait.Wahs,
+        // the acoustic guitars, no pedal between them and the room, the nylon's player, a classical or a bossa nova one,
+        // and the jazz guitarist seldom bending a solo
+        [24] = Guitar & ~InstrumentTrait.Wahs & ~InstrumentTrait.SoloBends,
         [25] = Guitar & ~InstrumentTrait.Wahs,
+        [26] = Guitar & ~InstrumentTrait.SoloBends,
         // the clean guitar's chorus its classic sound
         [27] = Guitar | InstrumentTrait.ChorusesClassically,
         // the driven guitars chugging; the muted guitar is a clean one muted, which never does
