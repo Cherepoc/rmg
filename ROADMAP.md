@@ -235,6 +235,20 @@ sound rushed there; the heavy genres' low tuning (*Put off*). Not built: a doubl
 string bending under one held, which one channel's pitch bend cannot play; a guitar's narrow vibrato bending up
 alone, inaudible beside its wide one, which does.
 
+### A vibrato's wait (19 October 2026)
+
+The vibratos timed in seconds waited two of their cycles, a guitarist's way, so that a bowed string's or a voice's
+long notes went plain (Orchestral's line notes with a vibrato 13% to 5%), and a pinch shorter than 0.85 s dry. One
+step, and the questions measured again after it:
+
+1. **The wait by instrument and note:** a vibrato waits a share of the note's held part, a quarter, in its cycles,
+   within its instrument's bounds: a guitar's, a synth lead's, a reed's and a brass player's 1 to 3 cycles, a long note
+   the longer; a bowed string's, a voice's and a flute's, which sing it as part of their tone (`SingsVibrato`), and a
+   pinch's squeal, ½ to 1½; its rate setting the seconds, so that a fast one starts sooner; the note's wait on its
+   state (`VibratoDelay`), which the render reads.
+2. **Measured again:** the slides' share (*Sound*, 44% of the pitch shapes before the bends were timed in seconds), and
+   the gentle effects (*Sound*) by the share of the line notes they shape as well as the songs that play them.
+
 ### Older rule failures
 
 Rules that fail on other songs than the corpus's own, each older than the second order of work (15 October 2026), to
