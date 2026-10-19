@@ -629,14 +629,17 @@ internal sealed class SongFormGenerator
         var homeBar = lastSection.Timeline.Trim(lastSection.Meter.BarDuration);
         var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length)]);
         // every track plays the home bar's chord as its earliest note has it, the downbeat's, whichever note it takes its
-        // own state from
+        // own state from; where no part plays in the home bar, the home chord as the song last played it, a section's
+        // before, rather than the shapes the parts last played, a cadence's among them
         IStateKind[] shapeKinds = [StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed];
-        var homeShape = homeBar.TrackTimelineMap
-            .Where(x => roles[x.Key] != TrackRole.Drum && x.Value.EventTimeline.Count > 0)
-            .OrderBy(x => x.Value.EventTimeline[0].Position)
-            .Select(x => x.Value.EventTimeline[0].Value.Subset(shapeKinds))
-            .FirstOrDefault();
         GeneratedSection[] before = [..earlierSections.Reverse()];
+        var homeShape = new[] { lastSection }.Concat(before)
+            .Select(section => section.Timeline.Trim(section.Meter.BarDuration).TrackTimelineMap
+                .Where(x => roles[x.Key] != TrackRole.Drum && x.Value.EventTimeline.Count > 0)
+                .OrderBy(x => x.Value.EventTimeline[0].Position)
+                .Select(x => x.Value.EventTimeline[0].Value.Subset(shapeKinds))
+                .FirstOrDefault())
+            .FirstOrDefault(x => x is not null) ?? StateMap.Default;
         // every track the song plays, one the last section rests in on the state of the last section it played in
         var tracks = roles.Keys.Select(track => (Key: track, Value: homeBar.TrackTimelineMap.GetValueOrDefault(track)
                                                                 ?? before.FirstOrDefault(x => x.Timeline.TrackTimelineMap.ContainsKey(track))?.Timeline.TrackTimelineMap[track]
@@ -656,7 +659,7 @@ internal sealed class SongFormGenerator
                     ? []
                     : template.Take(1)
                         // on the home chord itself
-                        .Select(note => (homeShape is null ? note.Value : note.Value.Except(shapeKinds).MergeWith(homeShape))
+                        .Select(note => note.Value.Except(shapeKinds).MergeWith(homeShape)
                             .MergeWith(final)
                             .ToTimelineItem(0)
                         )
