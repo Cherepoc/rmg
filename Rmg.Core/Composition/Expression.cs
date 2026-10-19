@@ -437,14 +437,25 @@ internal static class Expression
     /// <summary>How far a solo's intensity leans its notes, as a strength does: the bigger bends and vibratos, and the oftener bends and slides, the more intense.</summary>
     public const double SoloOdds = 8;
 
+    /// <summary>
+    ///     How a line's note bends, and how often: the plain end's mostly a scoop into the note; a fall-off on a phrase's
+    ///     last note alone and a prebend on a note of a beat or more (<see cref="Placed" />).
+    /// </summary>
     public static ImmutableArray<(BendKind Kind, ByConvention Weight)> BendKinds { get; } =
     [
         (BendKind.Scoop, new ByConvention(1, 0.4, 1)),
-        (BendKind.FallOff, new ByConvention(1, 0.25, 1)),
-        (BendKind.BendAndRelease, new ByConvention(1, 0.15, 1)),
+        (BendKind.FallOff, new ByConvention(0.25, 0.25, 1)),
+        (BendKind.BendAndRelease, new ByConvention(0.5, 0.15, 1)),
         (BendKind.ReleaseAndBend, new ByConvention(0, 0.06, 1)),
         (BendKind.PrebendRelease, new ByConvention(0, 0.08, 1))
     ];
+
+    /// <summary>The bends a note may take where it plays: a fall-off on its phrase's last note alone, a prebend on a note of a beat or more, held bent and let down.</summary>
+    private static ImmutableArray<Weighted<BendKind>> Placed(IEnumerable<Weighted<BendKind>> kinds, bool ends, double beats) =>
+        [..kinds.Where(x => (x.Value != BendKind.FallOff || ends) && (x.Value != BendKind.PrebendRelease || beats >= 1 - 1e-9))];
+
+    /// <summary>How much likelier a bend up goes to a note of its chord than to another scale note, as odds.</summary>
+    public const double ChordTopOdds = 4;
 
     /// <summary>The chance a part's held notes swell in where the song's do, a pad's likely, any other's now and then.</summary>
     public static ByConvention PadSwellChance { get; } = new(0, 0.5, 0.9);
@@ -820,10 +831,16 @@ internal static class Expression
                     var bendsNow = drawing.TestProbability(soloist is null ? bendChance
                         : isRelease ? intensity.Chance(ReleaseBendChance, 1)
                         : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.BendLean - Soloist.ExpressionLean).LogOdds).Chance(soloist.BendRate, 1));
-                    var kind = drawing.Pick(bendKinds);
+                    // whether it ends its phrase, the line resting a beat after it or starting a new phrase
+                    var following = i + 1 < timeline.Count && timeline[i + 1].Position < span.End - 1e-9 ? timeline[i + 1] : (TimelineItem<RealizedNote>?)null;
+                    var ends = following is not { } after || after.Position >= note.Position + note.Value.Duration + 1 - 1e-9 || after.Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) > 0;
+                    var kind = drawing.Pick(Placed(bendKinds, ends, note.Value.Duration));
                     if (isRelease)
-                        kind = drawing.Pick(ReleaseBends);
-                    var size = drawing.Pick(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1));
+                        kind = drawing.Pick(Placed(ReleaseBends, ends, note.Value.Duration));
+                    // a bend up to a scale note, the likelier its chord's, as a player bends a fourth to a fifth
+                    var tops = Realizer.GetChordNotes(note.Value.State).Classes;
+                    var size = drawing.Pick(Tilt.Of(ChordTopOdds, 1).Weigh(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1),
+                        steps => kind is BendKind.BendAndRelease or BendKind.PrebendRelease && tops.Contains((note.Value.Pitches[0] + BendDistance(note.Value, steps)).Mod(Realizer.OctaveNoteCount)) ? 1 : 0));
                     // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches;
                     // the note before that a dive let go of unheard, and none from a dive, fallen away
                     var before = i - 1;
@@ -832,9 +849,7 @@ internal static class Expression
                     var from = before >= 0 && held[before] is null && timeline[before].Position + timeline[before].Value.Duration >= note.Position - slideGap
                         ? timeline[before].Value.Pitches[0] - note.Value.Pitches[0]
                         : 0;
-                    // a gliding part sliding the likelier into a leap and into its phrase's last note, before a rest or a new phrase
-                    var following = i + 1 < timeline.Count && timeline[i + 1].Position < span.End - 1e-9 ? timeline[i + 1] : (TimelineItem<RealizedNote>?)null;
-                    var ends = following is not { } after || after.Position >= note.Position + note.Value.Duration + 1 - 1e-9 || after.Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) > 0;
+                    // a gliding part sliding the likelier into a leap and into its phrase's last note
                     var glideLean = glides ? Tilt.Of(GlideOdds, (Math.Abs(from) >= GlideLeap ? 1 : 0) + (ends ? 1 : 0)) : new Tilt(0);
                     var slidesNow = drawing.TestProbability(soloist is null ? glideLean.Chance(slideRate, 1) : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
                     // and its vibrato, a note at a time, the wide likelier the more intense

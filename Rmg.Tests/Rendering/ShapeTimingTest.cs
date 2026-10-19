@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Rendering;
@@ -100,6 +101,51 @@ public sealed class ShapeTimingTest
             if (note.Kind == BendKind.None)
                 await Assert.That(before.All(x => Math.Abs(x) < 1e-3)).IsTrue().Because(because);
         }
+    }
+
+    /// <summary>
+    ///     A bent note where it plays: its kind, whether it ends its phrase, the line resting a beat after it or starting a
+    ///     new phrase, how long it is in beats, and whether its top, the note or the note bent up to, is its chord's.
+    /// </summary>
+    internal static IEnumerable<(BendKind Kind, bool Ends, double Beats, bool TopOnChord)> Placed(CorpusSong song) =>
+        song.Song.Notes!.Values.SelectMany(notes => notes.Select((note, i) => (note, i))
+            .Where(x => (BendKind)x.note.Value.State.GetStateValue(CompositionStateKinds.Bend) is not (BendKind.None or BendKind.Slide or BendKind.Dive))
+            .Select(x =>
+            {
+                var (note, i) = x;
+                var state = note.Value.State;
+                var kind = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
+                var ends = i + 1 >= notes.Count || notes[i + 1].Position >= note.Position + note.Value.Duration + 1 - 1e-9 || notes[i + 1].Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) > 0;
+                var top = note.Value.Pitches[0] + (kind is BendKind.BendAndRelease or BendKind.PrebendRelease ? state.GetStateValue(CompositionStateKinds.BendDepth) : 0);
+                return (kind, ends, note.Value.Duration, Realizer.GetChordNotes(state).Classes.Contains(top.Mod(12)));
+            }));
+
+    [Test]
+    public async Task AFallOff_EndsItsPhrase_AndAPrebend_IsHeldABeatOrMore()
+    {
+        var bends = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Placed(TestCorpus.Get(seed)).ToArray())
+            .Concat(TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Placed(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))).ToArray()))
+            .SelectMany(x => x).ToArray();
+        await Assert.That(bends.Count(x => x.Kind == BendKind.FallOff)).IsGreaterThan(20);
+        await Assert.That(bends.Where(x => x.Kind == BendKind.FallOff).All(x => x.Ends)).IsTrue();
+        await Assert.That(bends.Where(x => x.Kind == BendKind.PrebendRelease).All(x => x.Beats >= 1 - 1e-9)).IsTrue();
+    }
+
+    [Test]
+    [Explicit]
+    public async Task PlacementReport()
+    {
+        foreach (var (name, overrides) in new (string, SongOverrides?)[] { ("the corpus", null), ("sound 0.2 given", new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Sound, 0.2)))), ("Blues", new SongOverrides(Genre: GenrePresets.Genre("blues"))) })
+        {
+            var bends = TestCorpus.InParallel(Enumerable.Range(0, name == "the corpus" ? 256 : 64), seed => Placed(overrides is null ? TestCorpus.Get(seed) : TestCorpus.Get(seed, overrides)).ToArray()).SelectMany(x => x).ToArray();
+            string Share(Func<(BendKind Kind, bool Ends, double Beats, bool TopOnChord), bool> of, IEnumerable<(BendKind Kind, bool Ends, double Beats, bool TopOnChord)> among) =>
+                among.ToArray() is var some ? $"{some.Count(of) / (double)Math.Max(1, some.Length):P0} of {some.Length}" : "";
+            Console.WriteLine($"{name}: kinds {string.Join(", ", bends.GroupBy(x => x.Kind).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)bends.Length:P0}"))}");
+            Console.WriteLine($"  fall-offs ending a phrase {Share(x => x.Ends, bends.Where(x => x.Kind == BendKind.FallOff))}; prebends of a beat or more {Share(x => x.Beats >= 1 - 1e-9, bends.Where(x => x.Kind == BendKind.PrebendRelease))}");
+            Console.WriteLine($"  tops on the chord: bends up {Share(x => x.TopOnChord, bends.Where(x => x.Kind is BendKind.BendAndRelease or BendKind.PrebendRelease))}, onto the note {Share(x => x.TopOnChord, bends.Where(x => x.Kind is BendKind.Scoop))}");
+        }
+
+        await Task.CompletedTask;
     }
 
     private static string Spread(IEnumerable<double> values)
