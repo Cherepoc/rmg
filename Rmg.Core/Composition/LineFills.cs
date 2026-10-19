@@ -28,6 +28,16 @@ internal static class LineFills
     /// <summary>The counter-melody, as the melody, where the melody does not.</summary>
     public static Way CounterMelody { get; } = Melody;
 
+    /// <summary>The riff, turning round into its next cycle over its own notes, two notes at most, a bar from its note before.</summary>
+    public static Way Riff { get; } = new(0, false, 2, 1);
+
+    /// <summary>
+    ///     The chance a riff turns round into its next cycle within a section, a walk of its cycle's last beat in 8ths by the
+    ///     scale's steps into the cycle's first note, as a riff's turnaround leads it round, by the melody facet: now and then,
+    ///     a plain riff a little less (<see cref="GenreChoices.Riff" />).
+    /// </summary>
+    public static ByConvention TurnaroundChance { get; } = new(0.25, 0.3, 0.3);
+
     /// <summary>How finely a run's line keys its stream: a 96th of a beat.</summary>
     private const int PlacesPerBeat = 96;
 
