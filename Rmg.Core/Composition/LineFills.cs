@@ -87,16 +87,26 @@ internal static class LineFills
                 continue;
 
             var target = Pitch(events[after]);
-            // a run from the octave below the note it lands on, or above where the line's range has none below
             var scale = ScaleNotes(events[before], low, high);
             // a run the scale's notes nearest under the note it lands on, rising into it, or over it, falling, where the
-            // line's range has too few under it; a walk by the scale's notes from the note before
-            int[] under = [..scale.Where(x => x < target).TakeLast(positions.Length)];
-            int[] over = [..scale.Where(x => x > target).Take(positions.Length).Reverse()];
-            var walk = !sweeps ? Walk(scale, Pitch(events[before]), target, positions.Length)
-                : under.Length == positions.Length ? under
-                : over.Length == positions.Length ? over
-                : Walk(scale, target - 12, target, positions.Length);
+            // line's range has too few under it, each the next of the scale at its own place, as a chord changing under the
+            // run changes it; a walk by the scale's notes from the note before
+            int[]? Swept(int direction)
+            {
+                var swept = new int[positions.Length];
+                var next = target;
+                for (var k = positions.Length - 1; k >= 0; k--)
+                {
+                    int[] here = [..ScaleNotes(events[before].Value.ToTimelineItem(positions[k]), low, high).Where(x => direction > 0 ? x < next : x > next)];
+                    if (here.Length == 0)
+                        return null;
+                    next = swept[k] = direction > 0 ? here[^1] : here[0];
+                }
+
+                return swept;
+            }
+
+            var walk = !sweeps ? Walk(scale, Pitch(events[before]), target, positions.Length) : Swept(1) ?? Swept(-1) ?? Walk(scale, target - 12, target, positions.Length);
             var walked = positions.Zip(walk, (position, pitch) => (position, pitch)).Select((x, i) => Place(events[before], x.position, x.pitch, i)).ToArray();
             walkedInto.Add(run.Line);
             StateTrace.RecordSection(TracePoints.LineFill, lineTrack, map.SectionAt(run.Line)?.SectionId ?? 0, $"{positions.Length} notes into {run.Line}{(sweeps ? ", a run" : "")}", (run.Line, positions));
