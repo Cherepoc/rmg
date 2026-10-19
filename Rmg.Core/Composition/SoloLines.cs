@@ -230,14 +230,18 @@ internal static class SoloLines
         // the louder the more intense, around none, as the caller sets how loud the line plays as heard (Solos.Lift)
         const double loudness = 0;
 
-        // every note's phrase and pitch, in the line's order, which its loudness arcs over
-        var marks = new List<(int Phrase, int Pitch)>();
+        // every note's pitch as planned, in the line's order, placed once the whole line is, so that a note may be moved for
+        // what comes after it
+        var planned = new List<PlannedNote>();
         var placing = 0;
+        void Add(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false, bool ghosts = false) =>
+            planned.Add(new PlannedNote(position, pitch, intensity, held, accented, release, stacked, octave, ghosts, placing));
 
-        // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there
-        TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false)
+        // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there,
+        // its key by its place in the line
+        TimelineItem<StateMap> Place(PlannedNote note, int index)
         {
-            marks.Add((placing, pitch));
+            var (position, pitch, intensity, held, accented, release, stacked, octave, _, _) = note;
             var sung = MelodyAt(position);
             // in octaves as the soloist plays them, not as the melody it takes over did; a note of its own, the melody's
             // beat where it starts with the melody's note, the weakest elsewhere, its own key from that note's and its place
@@ -245,7 +249,7 @@ internal static class SoloLines
                     CompositionStateKinds.LineVoices, CompositionStateKinds.LinePlanes])
                 .With(CompositionStateKinds.Octave, octave && soloist.Octaves ? 1 : 0)
                 .With(CompositionStateKinds.BeatRank, Math.Abs(sung.Position - position) < 1e-9 ? sung.Value.GetStateValue(CompositionStateKinds.BeatRank) : DyadicRankDistribution.MaxRank)
-                .With(CompositionStateKinds.NoteKey, Seeds.Key(sung.Value.GetStateValue(CompositionStateKinds.NoteKey), marks.Count));
+                .With(CompositionStateKinds.NoteKey, Seeds.Key(sung.Value.GetStateValue(CompositionStateKinds.NoteKey), index + 1));
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0));
             state = state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(Chord(state, position), pitch))
                 .With(StateKinds.Alteration, 0)
@@ -258,7 +262,9 @@ internal static class SoloLines
                     .With(CompositionStateKinds.LineVoices, soloist.Voices)
                     .With(CompositionStateKinds.LinePlanes, soloist.Planes ? 1 : 0);
 
-            return (held > 0 ? state.With(StateKinds.HeldDuration, held) : state).ToTimelineItem(position);
+            var placed = (held > 0 ? state.With(StateKinds.HeldDuration, held) : state).ToTimelineItem(position);
+            // a ghosting lick's unaccented note muted now and then, by its own key's draw
+            return note.Ghosts && Ghosted(placed.Value) ? placed.Value.With(CompositionStateKinds.PalmMute, 1).ToTimelineItem(position) : placed;
         }
 
         var plan = Plan(
@@ -271,7 +277,6 @@ internal static class SoloLines
             turn,
             barOrigin
         );
-        var line = new List<TimelineItem<StateMap>>();
         var current = Nearest(ChordNotes(span.Start), middle);
         CellCursor? cursor = null;
         // the phrase before's motif, its first run's or lick's first cell, as its first note and the scale steps of the others
@@ -295,7 +300,7 @@ internal static class SoloLines
             {
                 case SoloGesture.Held:
                     current = Nearest(ChordNotes(start), current);
-                    line.Add(Place(start, current, level, end - start, release: isRelease, stacked: stacks, octave: true));
+                    Add(start, current, level, end - start, release: isRelease, stacked: stacks, octave: true);
                     break;
                 case SoloGesture.Run:
                 case SoloGesture.Lick:
@@ -339,8 +344,8 @@ internal static class SoloLines
                     // a run, too fast to play in octaves, alone; and a ghosting soloist's lick at 16ths or slower, not on a
                     // pedal, an unaccented note of it muted now and then, by its own key's draw
                     var ghosting = gesture == SoloGesture.Lick && soloist.Ghosts && shape != SoloShape.Pedal && (positions.Length < 2 || positions[1] - positions[0] >= 0.25 - 1e-9);
-                    line.AddRange(positions.Select((position, i) => Place(position, pitches[i], level, accented: accents[i], stacked: stacks && accents[i], octave: gesture == SoloGesture.Lick))
-                        .Select((x, i) => ghosting && !accents[i] && Ghosted(x.Value) ? x.Value.With(CompositionStateKinds.PalmMute, 1).ToTimelineItem(x.Position) : x));
+                    for (var i = 0; i < positions.Length; i++)
+                        Add(positions[i], pitches[i], level, accented: accents[i], stacked: stacks && accents[i], octave: gesture == SoloGesture.Lick, ghosts: ghosting && !accents[i]);
                     StateTrace.RecordSection(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
                     if (pitches.Length > 0)
                         current = pitches[^1];
@@ -350,7 +355,7 @@ internal static class SoloLines
                     foreach (var note in melody.Where(x => x.IsWithin(start, end)))
                     {
                         current = Nearest(ScaleNotes(note.Position), FoldTowards(MelodyPitch(note), current));
-                        line.Add(Place(note.Position, current, level, stacked: stacks, octave: true));
+                        Add(note.Position, current, level, stacked: stacks, octave: true);
                     }
 
                     break;
@@ -361,11 +366,12 @@ internal static class SoloLines
         static bool Ghosted(StateMap note) => new GenerationContext(Seeds.Derive((ulong)note.GetStateValue(CompositionStateKinds.NoteKey), GhostStream)).TestProbability(GhostRate);
         // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc); and a stacked
         // note off the beat that leads into a chord change planed into it, an approach, where the soloist approaches
-        var arc = LinePattern.PhraseArc([..marks.Select(x => x.Phrase)], [..marks.Select(x => x.Pitch)], PhraseArc);
+        var line = planned.Select(Place).ToArray();
+        var arc = LinePattern.PhraseArc([..planned.Select(x => x.Phrase)], [..planned.Select(x => x.Pitch)], PhraseArc);
         int ChangeAt(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordChange);
         // off a pulse of its bar, the bars counted from the section's start, as an answer's gap may start on a half beat
         bool OffThePulse(double position) => !span.Meter.Pulses.Any(x => Math.Abs((position - barOrigin).Mod(span.Meter.BarDuration) - x) < 1e-6);
-        bool Approaches(int i) => soloist.Approaches && i + 1 < line.Count && line[i].Value.GetStateValue(CompositionStateKinds.LineVoices) > 1
+        bool Approaches(int i) => soloist.Approaches && i + 1 < line.Length && line[i].Value.GetStateValue(CompositionStateKinds.LineVoices) > 1
                                   && OffThePulse(line[i].Position) && ChangeAt(line[i + 1].Position) != ChangeAt(line[i].Position);
         return ([
             ..line.Select((x, i) =>
@@ -375,6 +381,9 @@ internal static class SoloLines
             })
         ], plan);
     }
+
+    /// <summary>A note of a solo's line as planned, before it is placed: where it starts, its pitch, and how it is played.</summary>
+    private sealed record PlannedNote(double Position, int Pitch, double Intensity, double Held, bool Accented, bool Release, bool Stacked, bool Octave, bool Ghosts, int Phrase);
 
     /// <summary>Where a run is in its cells: on which cell, on which note of it, from which note the cell starts and which way it goes.</summary>
     internal sealed class CellCursor(int root)
