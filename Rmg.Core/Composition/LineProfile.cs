@@ -44,6 +44,11 @@ public enum PhraseStart
 ///     How much louder a phrase's highest note plays than its lowest, in the velocity's units, about 35 to 50 MIDI steps one, fewer above the middle
 ///     (<see cref="LinePattern.PhraseArc" />); a few steps, so that the beat's accents still lead.
 /// </param>
+/// <param name="PhraseSwell">
+///     How much louder a phrase's middle plays than its ends, in the velocity's units, by each note's share of the way
+///     through its phrase's notes, its first and its held last the softest, as a voice swells into a phrase and lets its
+///     close fall away (<see cref="LinePattern.PhraseArc" />); a few steps, under its downbeat's accent.
+/// </param>
 /// <param name="AimOdds">
 ///     How much likelier a note is to go on towards where its phrase aims, and to turn back rather than go on away from
 ///     it, as the odds at <see cref="RegisterPull" /> semitones from it, less the nearer it is.
@@ -61,7 +66,8 @@ internal sealed record LineProfile(
     double RegisterFreedomSpread,
     double ContourShare,
     double ImprovisationShare,
-    double PhraseArc
+    double PhraseArc,
+    double PhraseSwell
 )
 {
     /// <summary>

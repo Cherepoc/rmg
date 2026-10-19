@@ -307,7 +307,7 @@ internal static class SongStages
         var hookChorus = song.FirstChorus?.Span.Start ?? 0;
         // each line's phrases louder at their peaks as far as the genre plays its parts' velocity (VelocityLayers.SpreadOf)
         TrackEventStateTimelineMap<StateMap> Place(TrackEventStateTimelineMap<StateMap> timeline, KeyValuePair<int, IInstrumentTrack> track, LineProfile profile) =>
-            SongFormGenerator.QuoteHook(LinePattern.Place(timeline, track.Key, (PitchInstrumentTrack)track.Value, profile with { PhraseArc = profile.PhraseArc * VelocityLayers.SpreadOf(song.Genre) }, map),
+            SongFormGenerator.QuoteHook(LinePattern.Place(timeline, track.Key, (PitchInstrumentTrack)track.Value, profile with { PhraseArc = profile.PhraseArc * VelocityLayers.SpreadOf(song.Genre), PhraseSwell = profile.PhraseSwell * VelocityLayers.SpreadOf(song.Genre) }, map),
                 track.Key, map, hookChorus);
         var (melody, bass, counter, riff) = (song.Track(TrackRole.Melody), song.Track(TrackRole.Bass), song.Track(TrackRole.CounterMelody), song.Track(TrackRole.Riff));
 

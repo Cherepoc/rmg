@@ -204,7 +204,7 @@ internal sealed class LinePattern
                 (LineScale)last.Note.State.GetStateValue(CompositionStateKinds.LineScale), last.Note.State.GetStateValue(CompositionStateKinds.LineLift)) };
         }
 
-        var loudness = PhraseArc(notes.Select(x => (x.Note.State, x.Pitch)).ToArray(), profile.PhraseArc);
+        var loudness = PhraseArc(notes.Select(x => (x.Note.State, x.Pitch)).ToArray(), profile.PhraseArc, profile.PhraseSwell);
         var placed = LinePlacement.Store(track.EventTimeline.Duration, notes.Select((x, i) => (
             loudness[i] == 0 ? x.Note : x.Note with { Note = x.Note.Note.Value.With(StateKinds.Velocity, x.Note.Note.Value.GetStateValue(StateKinds.Velocity) + loudness[i]).ToTimelineItem(x.Note.Position) },
             x.Pitch)));
@@ -327,30 +327,35 @@ internal sealed class LinePattern
     /// <summary>
     ///     How much louder each note of a line plays for its height in its phrase, a phrase ending on its held note or where
     ///     the next starts: by the arc given from its lowest note, half of it softer, to its highest, half of it louder, as a
-    ///     player leans into a phrase's peak and lets its close fall away; none in a phrase of one pitch.
+    ///     player leans into a phrase's peak and lets its close fall away, none in a phrase of one pitch; and by the swell
+    ///     given from its ends, half of it softer, to its middle, half of it louder, by each note's share of the way through
+    ///     its notes, a phrase of three or more.
     /// </summary>
-    internal static double[] PhraseArc(IReadOnlyList<(StateMap State, int Pitch)> notes, double arc)
+    internal static double[] PhraseArc(IReadOnlyList<(StateMap State, int Pitch)> notes, double arc, double swell)
     {
         var phrases = new int[notes.Count];
         for (var i = 1; i < notes.Count; i++)
             phrases[i] = phrases[i - 1] + (notes[i - 1].State.GetStateValue(StateKinds.HeldDuration) > 0
                                            || notes[i].State.GetStateValue(CompositionStateKinds.LinePhraseStart) != (int)PhraseStart.None ? 1 : 0);
-        return PhraseArc(phrases, [..notes.Select(x => x.Pitch)], arc);
+        return PhraseArc(phrases, [..notes.Select(x => x.Pitch)], arc, swell);
     }
 
     /// <summary>How much louder each note plays for its height in its phrase, as <see cref="PhraseArc(IReadOnlyList{ValueTuple{StateMap, int}}, double)" />, the phrases given.</summary>
     /// <param name="phrases">The phrase each note is of, by its number.</param>
-    internal static double[] PhraseArc(IReadOnlyList<int> phrases, IReadOnlyList<int> pitches, double arc)
+    internal static double[] PhraseArc(IReadOnlyList<int> phrases, IReadOnlyList<int> pitches, double arc, double swell)
     {
         var loudness = new double[pitches.Count];
-        if (arc == 0)
+        if (arc == 0 && swell == 0)
             return loudness;
-        foreach (var phrase in Enumerable.Range(0, pitches.Count).GroupBy(i => phrases[i]))
+        foreach (var phrase in Enumerable.Range(0, pitches.Count).GroupBy(i => phrases[i]).Select(x => x.ToArray()))
         {
             var (low, high) = (phrase.Min(i => pitches[i]), phrase.Max(i => pitches[i]));
             if (high > low)
                 foreach (var i in phrase)
                     loudness[i] = arc * ((pitches[i] - low) / (double)(high - low) - 0.5);
+            if (phrase.Length >= 3)
+                for (var k = 0; k < phrase.Length; k++)
+                    loudness[phrase[k]] += swell * (Math.Sin(Math.PI * k / (phrase.Length - 1)) - 0.5);
         }
 
         return loudness;

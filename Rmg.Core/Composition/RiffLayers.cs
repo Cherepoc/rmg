@@ -24,7 +24,8 @@ internal static class RiffLayers
         RegisterFreedomSpread: 0,
         ContourShare: 0,
         ImprovisationShare: 0.3,
-        PhraseArc: 0.1
+        PhraseArc: 0.1,
+        PhraseSwell: 0
     );
 
     /// <summary>How much a riff moves by step rather than by leap (<see cref="CompositionStateKinds.LineStepwiseness" />).</summary>

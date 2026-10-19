@@ -39,7 +39,8 @@ internal static class MelodyLayers
         RegisterFreedomSpread: 0.25,
         ContourShare: 1,
         ImprovisationShare: 1,
-        PhraseArc: 0.2
+        PhraseArc: 0.2,
+        PhraseSwell: 0.12
     );
 
     /// <summary>How much less often the melody's cycles are drawn afresh than the other tracks', so it plays riffs.</summary>

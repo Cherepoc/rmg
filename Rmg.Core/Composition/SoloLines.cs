@@ -435,7 +435,7 @@ internal static class SoloLines
         // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc); and a stacked
         // note off the beat that leads into a chord change planed into it, an approach, where the soloist approaches
         var line = planned.Select(Place).ToArray();
-        var arc = LinePattern.PhraseArc([..planned.Select(x => x.Phrase)], [..planned.Select(x => x.Pitch)], soloist.PhraseArc);
+        var arc = LinePattern.PhraseArc([..planned.Select(x => x.Phrase)], [..planned.Select(x => x.Pitch)], soloist.PhraseArc, 0);
         int ChangeAt(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordChange);
         // off a pulse of its bar, the bars counted from the section's start, as an answer's gap may start on a half beat
         bool OffThePulse(double position) => !span.Meter.Pulses.Any(x => Math.Abs((position - barOrigin).Mod(span.Meter.BarDuration) - x) < 1e-6);

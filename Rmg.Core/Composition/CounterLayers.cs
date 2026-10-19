@@ -20,7 +20,8 @@ internal static class CounterLayers
         RegisterFreedomSpread: 0,
         ContourShare: 0,
         ImprovisationShare: 0.5,
-        PhraseArc: 0.15
+        PhraseArc: 0.15,
+        PhraseSwell: 0.12
     );
 
     /// <summary>How much the counter-melody moves by step rather than by leap (<see cref="CompositionStateKinds.LineStepwiseness" />).</summary>
