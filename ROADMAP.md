@@ -394,14 +394,15 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
 
 The melody, the solos and the riff read as not expressive enough: what each lacks where it is placed without regard to
 what it plays over, proposed from the code and reviewed against every preset's conventions, none measured yet. Each to
-be measured before it is built, the share it moves with it on and off, and each a rule leaning by a facet that exists,
-a genre's amount its data, never a device of its own. In order: the rest, each by what listening to the built ones says (built 19 October 2026: a run
-landing on the change, its first note over a new chord the chord's 45-51% to 67-79%; an own solo's highest note at its
-climax, in its first fifth 36% to 11%; the lines' phrase arc by the genre's evenness; a melody phrase's last note
-falling away, 1.4 to 4.6 velocity steps under its middle; a melody swelling only into its held phrase ends, on a sound
-that holds; the swell's amount, 0.12, left to listening; built 20 October: the song's riff, the first section's played again
-over the others' chords; a riff's turnaround, its last beat walking into its next cycle; a riff's power chords leaning to the louder
-sections, Rock's 61% to 72% of them; a melody's later letter on its first's rhythm, 10% to 25% of its bars).
+be measured before it is built, the share it moves with it on and off, and each a rule leaning by a facet that exists, a
+genre's amount its data, never a device of its own. In order: the rest, each by what listening to the built ones says
+(built 19 October 2026: a run landing on the change, its first note over a new chord the chord's 45-51% to 67-79%; an
+own solo's highest note at its climax, in its first fifth 36% to 11%; the lines' phrase arc by the genre's evenness; a
+melody phrase's last note falling away, 1.4 to 4.6 velocity steps under its middle; a melody swelling only into its held
+phrase ends, on a sound that holds; the swell's amount, 0.12, left to listening; built 20 October: the song's riff, the
+first section's played again over the others' chords; a riff's turnaround, its last beat walking into its next cycle; a
+riff's power chords leaning to the louder sections, Rock's 61% to 72% of them; a melody's later letter on its first's
+rhythm, 10% to 25% of its bars).
 
 Solos:
 
