@@ -14,7 +14,8 @@ is removed once it is built, its leftovers kept under *Open work*.
    the seventh round's nine decided by genre judgment and retired (19 October), and the rest of the queue reviewed
    against the genres' conventions on 19 October (*Genre conventions*, built); left to ask: the cuts of #136 the
    shared solo, #341 the stickings and #77 the articulation variants, each a question of the code's cost, not of a
-   genre's, and a loose figure of the drums' and the boom's (*Figures as chances*, a switch first).
+   genre's, and a loose figure of the drums' and the boom's (*Figures as chances*, a switch first). The *Listening*
+  backlog judged against the conventions on 19 October, its changes planned (*Bends and vibrato*).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.
 4. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
@@ -63,7 +64,15 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   piano's octaves at 20-30-40 (#393); the 16-bit game's bass in 16ths, 25-30-35 (#400); a section's home on the
   tonic and its relative at the plain end, IV and V leaned in by the progression facet, the plainest songs' V never,
   and Pop's IV and V at its middle halved (#107); the mix's closing leaned off an ending on a hit, a button, a stop or
-  a big ending, by odds of 8 (#95).
+  a big ending, by odds of 8 (#95). And of the *Listening* backlog, judged on 19 October: a fill into a quieter
+  section, as a chorus's into a verse, its landing leaned by the energy already; the fade-outs, the whole mix fading
+  together, no drums first and no tag; harmonic rhythm by its length in seconds, not leaned, each preset's rate its own
+  and a fast genre's quick changes its convention; key changes, by the presets, a drawn song's two near the wild end
+  as meant; 6/8 counted in quarters, a drawn song's dotted quarter at 60-117 its convention; the polymeter's snare on
+  the cells, Djent's backbeat pinned (80-80-60) keeping it on 2 and 4 in most of its sections; trading with the drums,
+  the band laying out as a jazz band trading fours does; Trance's strong effects stacked, its sound; double-tracking,
+  the riff, rhythm and chords doubled to the sides, the lead and the bass single; the drum pieces, a kit drawing one
+  snare and a clap beside; a drum struck once, a fill's or a landing's alone, any other joining a groove.
 - **Tied and kept as they are:** Pop's held tones, Classical's cadence, the jazz ride, Pop's instrument switches,
   Black metal's two endings, Bossa nova's root and fifth (`bossa-root-fifth`, taken out on 11 October, back at
   30-50-50 since the 14 October retune, tied in the sixth round).
@@ -76,17 +85,11 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   outro of its own material (a third and a seventh of middling songs) the same song; a last chorus twice (17%). Decides
   the forms' weights and the last repeat's chance.
 - **The sections' energy:** quieter sections heard as sections, louder ones lifting; a last appearance 0.10 louder
-  than the first; fills into a quieter section 54% of the time. Decides the energy's contrast and the fills' landings.
+  than the first. Decides the energy's contrast.
 - **Rests, entries and textures:** breakdowns and melody-less sections as arrangement or parts gone missing; parts held
   back at the start (15-18%); one part alone (`orchestral-alone` heard better, 12 October 2026) or parts dropping out, leaned to the quieter sections (`TextureTest`).
   Decides the textures' weights and their lean.
-- **The lift** (`lift-cues` heard better, 8 October 2026): a crescendo of 8 of 127 into a louder section, and the drums' cues, 2.6 a song.
-  Decides whether the cues stay, and how often.
-- **Key changes:** two a song in the fourth fifth; prepared ones, pivots, pedals, sequences heard. Decides their
-  chances and devices.
-- **Tempo:** 6/8 counted in quarters; 13/16 too busy? Decides the odd meters' weights.
-- **The fade-outs:** the drums fading first, a tag after it? Decides whether to build one (a ritardando not: a fade
-  keeps its groove, the slowing a ring-out's).
+- **Tempo:** 13/16 too busy? Decides the odd meters' weights.
 - **The settings panel:** a song made again with changed settings sounding moved rather than jumped; the pad in 80% of
   songs, the counter-melody in 60%, the drums in 95%. Decides the parts' chances.
 
@@ -94,30 +97,22 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
 
 - **The section modes:** a mode change prepared by its cadence; the parallel and harmonic minor heard (seeds 196, 10,
   36, 171). Decides the modes' weights.
-- **Harmonic rhythm:** a chord every half bar busy at 175 bpm, one every two bars static at 90? Decides leaning the
-  span by its length in seconds.
 - **Phrases:** question and answer, varied repeats (A′ at 0.25 in a middling form, none in the plainest and every one in the wildest, `PhraseSchemes.VariedRepeatChance`), the melody's
   leaps at a phrase's start (a third), the sequences rising with the phrase. Decides their chances.
-- **The gaps before chord changes:** half the changes with no melody in their last beat, the solo part answering now
-  (`solo-answers` heard better, 8 October 2026). Decides filling them.
 - **The walks into a section:** the melody at 15% of changes, the bass at half of the runs. Decides their chances.
 - **Double stops and the riff's chords:** the melody's on a chord instrument's downbeats in a quarter of sections.
   Decides their chance.
-- **Octaves and twins** (`doubling` heard better, 8 October 2026): a line in octaves in 10-20% of appearances, the riff's twin in 15% of riff
-  songs, twin leads a third apart. Decides their chances and intervals.
 
 ### Solos
 
 - **Runs and phrases:** a player's or a scale exercise; cells of five or seven; the intensity's arc; pauses in 17-20%
   of segments; 2.1 notes a beat at the middle. Decides the runs' cells and the solo's density.
-- **Expression:** 59% of a middling solo's longer notes with a vibrato, 16% bent, 3% wide; 85% of guitar and synth
-  solos bending. Decides the soloists' leans.
+- **Expression:** the soloists' bends and vibratos as *Bends and vibrato* times and sets them by genre, heard once
+  built. Decides their timings and the genres' amounts.
 - **Loudness:** a soloist 0.06 of velocity over the band's loudest part, a flute too? Decides the margin.
 - **Chords in solos:** 41% of a chord soloist's held notes stacked, planing 17% at the middle and 59% wild. Decides
   their rates.
 - **Drum solos:** stickings round the kit; a crash with the kick in 23% of segments. Decides the drum solo's gestures.
-- **Trading with the drums** (`trade` heard better, 8 October 2026): Jazz's solos trading with the drums by turns, the band laying out. Decides
-  the trade's chance by genre, and whether the band keeps time under the drums' turns instead.
 
 ### Drums and groove
 
@@ -128,52 +123,20 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
 - **Repeated cycles** replaying their accents: mechanical? Decides a fresh loudness draw over them.
 - **Swing and panning:** a triplet's swing at 16ths; wild tuplets swung; the chords' pan. Decides the swing's amounts
   and the pans.
-- **Drum pieces given:** both snares doubling the backbeat; a piece put in by its roles alone. Decides giving the
-  snare group one snare.
-- **Every drum heard** (`DrumCoverage`): a drum landing once, placed or tacked on? Decides its landing.
-- **The drums' marks** (`drum-marks` heard better, 8 October 2026): a strike every three bars and a swell into a section. Decides the marks'
-  rate and the swell's length.
-- **The ornaments** (`ornaments` heard better, 8 October 2026): one in eight to ten long notes, 2.5% of Folk's and Medieval's lines; a trill
-  up to 1.5 s. Decides their rate and the trill's length.
-- **The polymeters** (`?listen=polymeter` to be asked first, Djent's sections with and without): the snare on every
-  cell's start; the chords joining a cycle. Decides who joins a cycle, and the frame below.
-- **The pocket** (`pocket` heard better, 8 October 2026): the backbeat a little late, the bass a touch ahead, the lead laid back. Decides
-  the offsets.
-- **The figures** (`kick-lock`, `double-kick` and `gallop` heard better, 8 October 2026; `?listen=clave`): Metal's sections 27% with the riff, 14% a
-  double kick, 15% galloping, Nu metal's 42% with the riff (`RockAndMetalReportTest`), Latin's claves on the clave.
-  Decides their weights and leans.
-- **Pushes** (`pushes` heard better, 8 October 2026): the band's changes an eighth early. Decides their chances by genre.
-- **Stop time carried** (`?listen=stop-time`): the band hitting once a bar under the lines, the drums keeping time
-  going on where the lines rest (Blues and Rock, none of 700 stopped bars silent past its hit, from 16%). Decides its
-  chance, and whether the drums keeping time is the band's device or the band should stop with them.
 
 ### Sound
 
 - **The velocity:** the bass's and the chords' evenness; bar layers adding 3 to 5. Decides the layers' spread.
-- **The echo as the synthesizer's delay** (`echo` heard better, 8 October 2026): the Roland GS delay's tone in the player, its feedback
-  (100, about half), its darkness (2 of 7), the send (100), and a dub snare's quiet strokes echoing with its backbeat,
-  the delay's send being a drum's, not a stroke's. Decides those settings, or the echo's notes back.
-- **Metal's arpeggios** (`metal-arpeggio` and `djent-arpeggio` heard better, 8 October 2026, `MetalArpeggiosReportTest`): a third
-  of Metal's chord parts' sections broken, the pedal point the commonest, 1.7 notes a beat, its colours dissonant 17%;
-  Djent's 79%. Ringing over the riff or muddying it; the rhythm part resting less where the heavy guitars rest, should
-  the arpeggio be lost under them. Decides the colours' and the patterns' weights.
-- **The strong effects stacked** (`ExpressionTest.ReportStacked`): Trance 56% of its songs with two or more, a pump
-  and a gate or an opening; the drawn songs 5%. A wall of effects, or a produced track? Decides the shares beside the
-  first, and a genre's weights.
 - **The effects:** 1.9 gentle kinds a song at the middle, a strong one in 25% (`ExpressionTest.Report`). Decides the
   song's weights.
-- **Bends, vibratos and slides:** slides 44% of the pitch shapes. Decides their rates.
+- **Slides:** 44% of the pitch shapes. Decides their rate.
 - **The instruments added in October 2026** (about 4% of parts): any too loud or strange in either soundfont? Decides
   their weights and traits.
 - **The riser into a drop:** a soundfont's sample shorter or longer than the bar. Decides starting it later.
 - **The filter:** wobble, squelch and opening, Techno 11%, Trance 28%, Dnb 26% (`FilterTest.Report`); a General MIDI
   synth bass wobbling thin? Decides its depth and resonance.
-- **Double-tracking:** Metal 2.8 parts a song at the sides (`DoubleTrackingTest.Report`): a wall, or mud? Decides the
-  delay and which parts stay single.
 - **The dub echo, the insertion effect and the rooms** (`DubEchoTest`, `InsertionTest.Report`): echoes as notes thin,
   the wah's and phaser's settings, the rooms wet enough? Decides the GS delay and the effects' settings.
-- **Louder forms** (`louder-forms` heard better, 8 October 2026): a clean guitar turned driven when loud. Decides its chance by genre.
-- **The bass under E1** (9% of its notes, `RegisterReportTest`). Decides the bass's range.
 
 ### Genres
 
@@ -261,6 +224,37 @@ each moved). Put off, each its own plan:
 - **A key change's preparation as a genre's choice** (`KeyChange.PrepareChance`, 0.5 for every song): Black metal's
   jumps; put off until its key changes, named without a lift on 19 October, are heard.
 
+### Bends and vibrato, and the backlog's conventions (19 October 2026)
+
+The *Listening* backlog judged against the genres' conventions, and the bends and vibratos, which sound out of place
+or strange, timed in seconds and set by genre. Each a step of its own:
+
+1. **The presets' data:** Celtic's slip jig, 9/8 at 10-10-15; Bluegrass's last section lifted 0-5-10, as it rarely
+   lifts within a tune; the last chorus repeated in Pop, the Power ballad and Soul at 60-55-40, a conventional device;
+   the song's bends (`effects.bends`) of Nu metal at 10-25-50 and of Bluegrass at 0-15-40.
+2. **Their timings, in seconds** (`Expression`, `ExpressionRender`): a bend rising quickly, 0.07-0.12 s by the solo's
+   intensity, or in time, an 8th, a share of soloists' bends (10-15-25%), as a blues player's crying bend and a
+   country player's are; held, and a release over the same time at the note's end; a scoop or a slide within its rise,
+   a fall-off within the note's last 0.15 s; a note too short for its shape, its rise and a hold as long, playing
+   none. A vibrato starting two of its cycles after the attack, or after a bend lands, and growing over one more, so
+   that a fast one starts sooner, on a note long enough for 2½ cycles of it besides, never over a bend moving. Each
+   vibrato's rate its width's: narrow at 6 cycles a second, the middle widths at 5.5, a step's slow at 4.5 as blues
+   and rock play it, fast at 6.5 as metal does, two steps' at 5.
+3. **Where they land:** a fall-off on a phrase's last note alone, a prebend's release on a note of a beat or more, a
+   bend's top leaned to a chord tone (odds of 4), and the plain end's bends mostly scoops (scoop 1, bend and release
+   0.5, fall-off 0.25).
+4. **A solo's bends by genre and instrument:** `effects.soloBends` (`Soloist.BendChance`), which the soloist takes
+   in place of the songs', blues' 90-95-100 to the classical presets' and Bossa nova's none; a guitar's or a synth
+   lead's lean +1 and any other bending instrument's -1, the nylon and the jazz guitar no longer leaning to bend.
+5. **A vibrato's width by genre** (`vibratoWidth`, a pool of the widths): the metal presets' fast step, Rock's,
+   Blues' and the Power ballad's slow step, the jazz and classical presets' narrow and middle widths alone.
+
+Put off: the blues curl, a quarter tone's bend on ♭3 or ♭7 over a major chord (a bend kind of its own, its depth in
+cents, and the genres' data); a genre's share of slow bends (Country, the Power ballad), should the soloists' share
+sound rushed there; the heavy genres' low tuning (*Put off*). Not built: a double stop's or a unison's bend, one
+string bending under one held, which one channel's pitch bend cannot play; a guitar's narrow vibrato bending up
+alone, inaudible beside its wide one, which does.
+
 ### Older rule failures
 
 Rules that fail on other songs than the corpus's own, each older than the second order of work (15 October 2026), to
@@ -287,6 +281,10 @@ trace at the committed code before blaming a change:
 ### Put off, with their reasons
 
 Each taken up when its reason no longer holds or listening asks:
+
+- **The heavy genres' low tuning** (19 October 2026): Metal, Djent and Nu metal tuned to B0 or a drop A, a five-string
+  bass's floor, as a genre's choice; every bass's floor is E1 (`InstrumentRanges`), and a range by genre is a mechanism
+  of its own.
 
 - **The false ending** (#372): the band hitting the home chord, a beat or two of silence, the drums counting back in;
   its hit a harmony edit before `Realizer`, for a gimmick that wears thin, rare even where it plays.
