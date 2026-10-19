@@ -99,3 +99,5 @@ rejected while fixing: the place, what was decided, why.
   #170, #171).
 - Tests counting a section's bars, phrases or patterns from its start in its own meter, which the map answers alike,
   left as they are where they hold for a short last bar too (#221, #244, #247, #264, #273, #278, #288, #303).
+- A drummer's stickings (`sticking`, #341) kept on listening: the eighth round (19 October 2026) heard the songs with
+  the genre's stickings preferred 5 to 1 over the songs' own strokes. Not a cut candidate again.

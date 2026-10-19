@@ -12,8 +12,8 @@ is removed once it is built, its leftovers kept under *Open work*.
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
    the seventh round's nine decided by genre judgment and retired (19 October), and the rest of the queue reviewed
-   against the genres' conventions on 19 October (*Genre conventions*, built); the eighth round deployed on
-   19 October (`metal-vibrato`, `string-vibrato`, `stickings` #341); the shared solo played together (#136) the same
+   against the genres' conventions on 19 October (*Genre conventions*, built); the eighth round (`metal-vibrato`,
+   `string-vibrato`, `stickings` #341) answered, kept and retired on 19 October, no round deployed; the shared solo played together (#136) the same
    without in 19 of 24 Symphonic songs, the twin leads playing those together, its cut the owner's to make. The *Listening*
   backlog judged against the conventions on 19 October, its changes built (*Bends and vibrato*).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
@@ -31,9 +31,9 @@ the most, by how much its song with the device and without differ as heard (`Hea
 in the sections its device plays in; its song without lays its patch over the genre's options. Done for a version when
 every question is answered or let go of. The seventh round (18 October 2026) asked nine of the review of 16 October's
 queue and was retired on 19 October, each decided by genre judgment, side B (see *Decided by genre judgment*);
-`symphonic-hits` (#371) differed 0.02, too faint to ask. The eighth round (19 October 2026) asks three: Metal's fast
+`symphonic-hits` (#371) differed 0.02, too faint to ask. The eighth round (19 October 2026) asked three, Metal's fast
 vibrato a step wide (`metal-vibrato`, 0.12), the strings' vibrato sung soon (`string-vibrato`, 0.46) and a drummer's
-stickings against the songs' own (`stickings`, #341, 0.34). A question listens only in the sections its device plays in, not
+stickings against the songs' own (`stickings`, #341, 0.34), and was retired the same day, each kept. A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -48,7 +48,10 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   inner line, Funk's wah, Black metal's key changes and Pop's ornaments; and of the sixth round (18 October), the mood's ends
   heard in Trap (`trap-ends`, its darkest preferred) and in Black metal given its brightest (`blackmetal-bright`, kept
   though its chromatic and broken-chord devices still sound haunting in major: the genre leans dark, its brightest
-  the owner's to give), so that the mood's sound by darkness is not built, and the soloist's ghosts (`solo-ghosts`).
+  the owner's to give), so that the mood's sound by darkness is not built, and the soloist's ghosts (`solo-ghosts`); and of the eighth round (19 October), Metal's fast vibrato a step wide
+  (5 to 1, its one song answered without a clean guitar's melody, so that a broad, a fast or a two steps' vibrato is
+  now shaken only on a sound that sustains, never a clean or an acoustic guitar's, the acoustic's never a step wide),
+  the strings' vibrato sung soon (4 to none, one the same, one unsure) and a drummer's stickings (#341, 5 to 1).
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
@@ -239,7 +242,8 @@ or strange, timed in seconds and set by genre, its steps built (their commits sa
 
 Put off: the blues curl, a quarter tone's bend on ♭3 or ♭7 over a major chord (a bend kind of its own, its depth in
 cents, and the genres' data); a genre's share of slow bends (Country, the Power ballad), should the soloists' share
-sound rushed there; the heavy genres' low tuning (*Put off*). Not built: a double stop's or a unison's bend, one
+sound rushed there; the heavy genres' low tuning (*Put off*); a whammy bar's shimmer on a clean guitar's held chord, one bend over the
+channel, a clean metal intro's, a new effect rather than a vibrato. Not built: a double stop's or a unison's bend, one
 string bending under one held, which one channel's pitch bend cannot play; a guitar's narrow vibrato bending up
 alone, inaudible beside its wide one, which does.
 

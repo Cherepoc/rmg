@@ -178,6 +178,52 @@ public sealed class ShapeTimingTest
     }
 
     [Test]
+    public async Task AVibrato_SuitsItsNotesInstrument_AStepWideOnlyAnElectricGuitarsOrALeads_ABroadOrAFastOneNeverOnAStringThatRings()
+    {
+        // the corpus's, and the presets' that name a fast step or play acoustic guitars
+        var genres = new[] { "metal", "doom", "folk", "country" };
+        var songs = TestCorpus.Range(64).Concat(genres.SelectMany(genre => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))))));
+        var wrong = songs.AsParallel().Select(song => song.Song.Notes!
+                .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
+                .SelectMany(x => x.Value.Select(note => (Program: InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode), note.Value.State)))
+                // a pinch's squeal shaken at its own width, none of the table's
+                .Where(x => (x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0 || x.State.GetStateValue(CompositionStateKinds.Vibrato) > 0) && x.State.GetStateValue(CompositionStateKinds.Pinch) == 0)
+                .Select(x => (x.Program, Width: Expression.Vibratos.Select(v => v.Width).Single(v => x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0
+                    ? v.Steps > 0 && Math.Abs(10 * v.Rate - x.State.GetStateValue(CompositionStateKinds.VibratoRate)) < 1e-9
+                    : v.Steps == 0 && v.Cents == x.State.GetStateValue(CompositionStateKinds.Vibrato))))
+                .Where(x => !Expression.Suits(x.Width, x.Program))
+                .Select(x => $"{song.Seed}: {Expression.LabelOf(x.Width)} on program {x.Program}").ToArray())
+            .SelectMany(x => x).ToArray();
+        await Assert.That(wrong).IsEmpty().Because(string.Join("; ", wrong.Take(5)));
+    }
+
+    /// <summary>A song's vibratos as <see cref="GuitarVibratos" /> words them, each with its note's instrument's sound: driven, a synth lead, clean, acoustic or other.</summary>
+    internal static IEnumerable<(string Sound, string Width)> VibratosBySound(CorpusSong song) => song.Song.Notes!
+        .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
+        .SelectMany(x => x.Value.Select(note => (Program: InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode), note.Value.State)))
+        .Where(x => x.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0)
+        .Select(x => (x.Program switch { 29 or 30 => "driven", >= 80 and <= 87 => "lead", >= 26 and <= 28 => "clean", 24 or 25 => "acoustic", _ => "other" },
+            x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0
+                ? $"{(x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 2 ? "wider" : "a step")} at {x.State.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0}"
+                : $"{x.State.GetStateValue(CompositionStateKinds.Vibrato)} cents"));
+
+    [Test]
+    [Explicit]
+    public async Task WidthBySoundReport()
+    {
+        foreach (var name in new string?[] { null, "metal", "thrash", "doom", "rock", "blues", "folk", "country" })
+        {
+            var widths = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => VibratosBySound(name is null ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))).ToArray())
+                .SelectMany(x => x).ToArray();
+            foreach (var sound in widths.GroupBy(x => x.Sound).Where(x => x.Key != "other").OrderBy(x => x.Key))
+                Console.WriteLine($"{name ?? "the corpus"} {sound.Key}: wide {sound.Count(x => !x.Width.EndsWith("cents")) / (double)sound.Count():P0} of {sound.Count()}; " +
+                                  string.Join(", ", sound.GroupBy(x => x.Width).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)sound.Count():P0}")));
+        }
+
+        await Task.CompletedTask;
+    }
+
+    [Test]
     [Explicit]
     public async Task WidthReport()
     {

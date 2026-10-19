@@ -45,43 +45,7 @@ public sealed class ListeningQuestionsTest
         Dictionary<string, int>? Without = null
     );
 
-    /// <summary>Where a song first plays a solo its plan takes, the start of its section; none where it plays none.</summary>
-    private static double? FirstSolo(CorpusSong song, Func<SoloPlan, bool> takes) =>
-        song.Map.Sections.Select((x, i) => (Span: x, Index: i)).FirstOrDefault(x => song.Solos.TryGetValue(x.Index, out var plan) && takes(plan)).Span?.Start;
-
-    /// <summary>Whether a section is played as a solo its plan takes.</summary>
-    private static bool IsSolo(CorpusSong song, SectionSpan span, Func<SoloPlan, bool> takes) => song.Solos.TryGetValue(song.Map.Sections.IndexOf(span), out var plan) && takes(plan);
-
-    /// <summary>Where a song first plays a note whose state takes, in beats; none where it plays none.</summary>
-    private static double? FirstNote(CorpusSong song, Func<int, RealizedNote, bool> takes) =>
-        song.Song.Notes!.SelectMany(x => x.Value.Where(n => takes(x.Key, n.Value)).Select(n => (double?)n.Position)).Min();
-
-    /// <summary>The program a note of a track sounds on.</summary>
-    private static int ProgramOf(CorpusSong song, int track, RealizedNote note) =>
-        song.Song.TrackDefinitions[track] is PitchInstrumentTrack { InstrumentCode: var code } ? InstrumentsOverTime.ProgramOf(note.State, code) : -1;
-
-    /// <summary>A choice's every option at the songs' own amounts, as a song without a genre's amounts plays it.</summary>
-    private static Dictionary<string, object> SongsOwn(GenreChoice choice) => choice.Options.ToDictionary(x => x.Name, x =>
-    {
-        int[] ends = [..new[] { x.Own.Plain, x.Own.Tuned, x.Own.Wild }.Select(v => (int)Math.Round(v * 100))];
-        return ends.Distinct().Count() == 1 ? ends[0] : (object)ends;
-    });
-
-    private static readonly Question[] Questions =
-    [
-        new("metal-vibrato", "Metal's vibrato, a fast shake a scale step wide on the guitars' held notes: a metal guitarist's, or a warble?",
-            "Metal's vibrato widths (vibratoWidth), and Thrash's, Doom's and Symphonic's with them.", "metal", [],
-            new() { ["vibratoWidth"] = new() { ["fastStep"] = 0, ["twoSteps"] = 0 } },
-            x => FirstNote(x, (_, n) => n.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0)),
-        new("string-vibrato", "The strings' vibrato, sung soon after a long note starts: singing, or wobbly?",
-            "The orchestral presets' vibrato, and how soon a bowed string's starts (SingsVibrato).", "orchestral", [],
-            new() { ["effects"] = new() { ["vibrato"] = 0 } },
-            x => FirstNote(x, (track, n) => n.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 && InstrumentTraits.Has(ProgramOf(x, track, n), InstrumentTrait.SingsVibrato))),
-        new("stickings", "A drummer's turn played round the kit in doubles, paradiddles and six-stroke rolls, or in the songs' own strokes: a drummer's vocabulary, or the same solo?",
-            "#341: keep the stickings a genre names, or cut the choice.", "jazz", [],
-            new() { ["sticking"] = SongsOwn(GenreChoices.Stickings) },
-            x => FirstSolo(x, plan => plan.IsDrumSolo || plan.TradesWithDrums), (x, span) => IsSolo(x, span, plan => plan.IsDrumSolo || plan.TradesWithDrums))
-    ];
+    private static readonly Question[] Questions = [];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

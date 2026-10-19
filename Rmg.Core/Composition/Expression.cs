@@ -32,8 +32,12 @@ public enum BendKind
     Dive
 }
 
-/// <summary>A vibrato's width, in cents either side of the note or in scale steps up from it, the wide sort, and how fast it goes, in cycles a second.</summary>
-public readonly record struct Vibrato(int Cents, int Steps, double Rate);
+/// <summary>
+///     A vibrato's width, in cents either side of the note or in scale steps up from it, the wide sort, how fast it goes, in
+///     cycles a second, and whether it needs a sound that sustains to be shaken, a voice's, a bowed string's, a wind's, a
+///     driven guitar's or a synth lead's, not a clean string's dying away (<see cref="InstrumentTraits.Rings" />).
+/// </summary>
+public readonly record struct Vibrato(int Cents, int Steps, double Rate, bool NeedsSustain);
 
 /// <summary>The strong effects, which move a part's sound about, a song playing one of them first and others beside it now and then.</summary>
 public enum StrongEffect
@@ -303,17 +307,18 @@ internal static class Expression
     ///     How wide a held note's vibrato is, and how fast: narrow, in cents either side of the note, as a voice or a violin
     ///     sings, the narrowest the quickest, or wide, in scale steps up from the note and back, as a guitar's does, up to
     ///     four semitones, both its ends on scale notes, a step's slow as a blues or a rock player shakes it or fast as a
-    ///     metal player does; the wide the wilder, and only an instrument it suits plays it. Each leans as a part's strength
-    ///     and its section's energy lean, the wider the more.
+    ///     metal player does, the broad, the fast and the two steps' only on a sound that sustains, a clean or an acoustic
+    ///     guitar's dying note warbling under them; the wide the wilder, and only an instrument it suits plays it. Each leans
+    ///     as a part's strength and its section's energy lean, the wider the more.
     /// </summary>
     public static ImmutableArray<(Vibrato Width, ByConvention Weight)> Vibratos { get; } =
     [
-        (new Vibrato(15, 0, 6), new ByConvention(1, 0.5, 0.2)),
-        (new Vibrato(35, 0, 5.5), new ByConvention(0, 0.35, 0.2)),
-        (new Vibrato(60, 0, 5.5), new ByConvention(0, 0.15, 0.2)),
-        (new Vibrato(0, 1, 4.5), new ByConvention(0, 0.01, 0.125)),
-        (new Vibrato(0, 1, 6.5), new ByConvention(0, 0.01, 0.125)),
-        (new Vibrato(0, 2, 5), new ByConvention(0, 0, 0.15))
+        (new Vibrato(15, 0, 6, false), new ByConvention(1, 0.5, 0.2)),
+        (new Vibrato(35, 0, 5.5, false), new ByConvention(0, 0.35, 0.2)),
+        (new Vibrato(60, 0, 5.5, true), new ByConvention(0, 0.15, 0.2)),
+        (new Vibrato(0, 1, 4.5, false), new ByConvention(0, 0.01, 0.125)),
+        (new Vibrato(0, 1, 6.5, true), new ByConvention(0, 0.01, 0.125)),
+        (new Vibrato(0, 2, 5, true), new ByConvention(0, 0, 0.15))
     ];
 
     /// <summary>
@@ -347,11 +352,12 @@ internal static class Expression
     /// <summary>How far a width leans to the wide side, for a strength or an energy to lean it.</summary>
     private static double Lean(Vibrato width) => width.Steps > 0 ? 0.5 * width.Steps : width.Cents / 60.0 - 1;
 
-    /// <summary>The narrow vibrato a note plays in place of a wide one it cannot, a note off the scale or an instrument it does not suit.</summary>
-    private static Vibrato WidestNarrow => new(60, 0, 5.5);
+    /// <summary>The narrow vibrato a note plays in place of a wide one it cannot, a note off the scale or an instrument it does not suit: broad on a sound that sustains, medium on one that rings.</summary>
+    private static Vibrato NarrowFor(int program) => Vibratos.Select(x => x.Width).Last(x => x.Steps == 0 && Suits(x, program));
 
-    /// <summary>Whether a wide vibrato suits an instrument: a guitar's or a synth lead's.</summary>
-    private static bool VibratesWide(int program) => InstrumentTraits.Has(program, InstrumentTrait.VibratesWide);
+    /// <summary>Whether a width suits an instrument: a wide one an electric guitar's or a synth lead's, and one needing a sound that sustains any but one that rings.</summary>
+    public static bool Suits(Vibrato width, int program) =>
+        (width.Steps == 0 || InstrumentTraits.Has(program, InstrumentTrait.VibratesWide)) && (!width.NeedsSustain || !InstrumentTraits.Rings(program));
 
     /// <summary>
     ///     The chance a part slides from note to note at all, never in a plain song and not every part in a wild one, and
@@ -826,7 +832,7 @@ internal static class Expression
                 // only where its instrument suits it
                 var lean = new Tilt(Tilt.Of(StrengthOdds, strength).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds);
                 var sizes = lean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1);
-                var vibrato = context.Pick(lean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u, widths), Lean));
+                var vibrato = context.Pick(lean.Weigh(ByConvention.Weigh(Vibratos.Where(x => Suits(x.Width, program)), u, widths), Lean));
                 // the part's tone here, darker the quieter the section, as dark as it goes at an energy of -1 and below, half as
                 // dark at 1 and above
                 var tone = toned ? (int)Math.Round(ToneReach * toneDepth * (3 - Math.Clamp(energies[index], -1, 1)) / 4) : 0;
@@ -887,7 +893,7 @@ internal static class Expression
                     var glideLean = glides ? Tilt.Of(GlideOdds, (Math.Abs(from) >= GlideLeap ? 1 : 0) + (ends ? 1 : 0)) : new Tilt(0);
                     var slidesNow = drawing.TestProbability(soloist is null ? glideLean.Chance(slideRate, 1) : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
                     // and its vibrato, a note at a time, the wide likelier the more intense
-                    var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u, widths), Lean));
+                    var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => Suits(x.Width, program)), u, widths), Lean));
                     // how fast it bends or slides, quickly, a soloist the quicker the more intense, or slowly, in time
                     var slow = drawing.TestProbability(SlowBendChance.At(u));
                     var eighth = 0.5 * beatSeconds(note.Position);
@@ -920,8 +926,9 @@ internal static class Expression
                     if (shape != BendKind.None)
                         state = state.With(CompositionStateKinds.BendRise, (int)Math.Round(1000 * rise));
                     // and whether it sings a vibrato at all likewise, where its pitch holds long enough for one after its bend
-                    // a wide one between the note and a scale note above it, so the note must be on the scale
-                    var width = noteVibrato.Steps > 0 && (!VibratesWide(noteProgram) || !IsOnScale(note.Value)) ? WidestNarrow : noteVibrato;
+                    // a wide one between the note and a scale note above it, so the note must be on the scale, and the note's
+                    // instrument, where the part switches, suiting it
+                    var width = !Suits(noteVibrato, noteProgram) || noteVibrato.Steps > 0 && !IsOnScale(note.Value) ? NarrowFor(noteProgram) : noteVibrato;
                     var sings = InstrumentTraits.Has(noteProgram, InstrumentTrait.SingsVibrato);
                     if ((soloist is null ? vibrates : soloist.Vibrates && !echoes) && isLine && Bends(noteProgram) && HoldsVibrato(shape, rise, seconds, eighth, width.Rate, sings))
                         state = (width.Steps > 0

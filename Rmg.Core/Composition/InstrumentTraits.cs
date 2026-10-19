@@ -11,7 +11,7 @@ public enum InstrumentTrait
     /// <summary>Its notes bent and slid, as a voice, a string, a wind or a synth lead's are; not a struck or plucked key's.</summary>
     Bends = 1,
 
-    /// <summary>A wide vibrato, a guitar's or a synth lead's, rather than a singer's.</summary>
+    /// <summary>A wide vibrato, an electric guitar's or a synth lead's, rather than a singer's or an acoustic guitar's light one.</summary>
     VibratesWide = 2,
 
     /// <summary>A soloist's bends its own, a guitarist's or a synth lead's.</summary>
@@ -106,10 +106,10 @@ public static class InstrumentTraits
         [20] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
         // the harmonica, bent as its notes are blown
         [22] = InstrumentTrait.Bends,
-        // the acoustic guitars, no pedal between them and the room, the nylon's player, a classical or a bossa nova one,
-        // and the jazz guitarist seldom bending a solo
-        [24] = Guitar & ~InstrumentTrait.Wahs & ~InstrumentTrait.SoloBends,
-        [25] = Guitar & ~InstrumentTrait.Wahs,
+        // the acoustic guitars, no pedal between them and the room and a light finger's vibrato, never a step wide, the
+        // nylon's player, a classical or a bossa nova one, and the jazz guitarist seldom bending a solo
+        [24] = Guitar & ~InstrumentTrait.Wahs & ~InstrumentTrait.VibratesWide & ~InstrumentTrait.SoloBends,
+        [25] = Guitar & ~InstrumentTrait.Wahs & ~InstrumentTrait.VibratesWide,
         [26] = Guitar & ~InstrumentTrait.SoloBends,
         // the clean guitar's chorus its classic sound
         [27] = Guitar | InstrumentTrait.ChorusesClassically,
