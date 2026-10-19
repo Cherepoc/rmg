@@ -274,8 +274,9 @@ internal static class SoloLines
         var line = new List<TimelineItem<StateMap>>();
         var current = Nearest(ChordNotes(span.Start), middle);
         CellCursor? cursor = null;
-        // the phrase before's motif, its first run's or lick's first cell, and the phrase whose motif is taken
-        int[]? motif = null;
+        // the phrase before's motif, its first run's or lick's first cell, as its first note and the scale steps of the others
+        // from it, so that a scale over another chord takes its figure whole, and the phrase whose motif is taken
+        (int First, int[] Steps)? motif = null;
         var (motifPhrase, motifShape) = (-1, SoloShape.Scale);
         foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, isRelease) in plan)
         {
@@ -310,21 +311,28 @@ internal static class SoloLines
                         var step = motifs.GenerateInt(0, 2) * 2 - 1;
                         var inverts = motifs.TestProbability(soloist.MotifInversion);
                         // in the motif's own figure, a scale's answered by a scale
-                        if (answers && motif is not null && shape == motifShape && scale.Length > 0)
+                        int Index(int pitch) => Array.IndexOf(scale, Nearest(scale, pitch));
+                        if (answers && motif is { } taken && shape == motifShape && scale.Length > 0)
                         {
                             // the motif in place of the first cell, a step away, or its intervals mirrored about its first
                             // note, developed rather than moved; and the rest moved with its last note, so that the gesture
-                            // goes on from it as it went on from its own
-                            int Index(int pitch) => Array.IndexOf(scale, Nearest(scale, pitch));
-                            int MotifAt(int i) => inverts ? 2 * Index(motif[0]) - Index(motif[i]) : Index(motif[i]);
-                            var count = Math.Min(motif.Length, pitches.Length);
+                            // goes on from it as it went on from its own; not where it would leave the range, which the
+                            // gesture keeps to as it is
+                            int MotifAt(int i) => Index(taken.First) + (inverts ? -taken.Steps[i] : taken.Steps[i]);
+                            var count = Math.Min(taken.Steps.Length, pitches.Length);
                             var moved = MotifAt(count - 1) + step - Index(pitches[count - 1]);
-                            for (var i = 0; i < pitches.Length; i++)
-                                pitches[i] = scale[Math.Clamp(i < count ? MotifAt(i) + step : Index(pitches[i]) + moved, 0, scale.Length - 1)];
-                            // and a run going on into the next gesture goes on from where it was moved to
-                            cursor.Root = scale[Math.Clamp(Index(cursor.Root) + moved, 0, scale.Length - 1)];
+                            int[] answered = [..pitches.Select((x, i) => i < count ? MotifAt(i) + step : Index(x) + moved)];
+                            var root = Index(cursor.Root) + moved;
+                            if (answered.All(x => x >= 0 && x < scale.Length) && root >= 0 && root < scale.Length)
+                            {
+                                for (var i = 0; i < pitches.Length; i++)
+                                    pitches[i] = scale[answered[i]];
+                                // and a run going on into the next gesture goes on from where it was moved to
+                                cursor.Root = scale[root];
+                            }
                         }
-                        motif = pitches[..Math.Min(cells.Length > 0 ? cells[0] : pitches.Length, pitches.Length)];
+                        var cell = pitches[..Math.Min(cells.Length > 0 ? cells[0] : pitches.Length, pitches.Length)];
+                        motif = (cell[0], [..cell.Select(x => Index(x) - Index(cell[0]))]);
                         (motifPhrase, motifShape) = (phrase, shape);
                     }
 
