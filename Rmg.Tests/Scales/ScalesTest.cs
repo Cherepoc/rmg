@@ -172,9 +172,13 @@ public sealed class ScalesTest
             var sounding = realized.GetValueOrDefault(track.Role)?.LastOrDefault(x => swing.Apply(x.Position) <= note.Position + 1e-3);
             var approach = (ChordApproach)(sounding?.Value.State.GetStateValue(CompositionStateKinds.LineApproach) is > 0 and var own ? own : approaches.GetEffectiveValueAt(note.Position));
             var nextChange = changes.Where(x => x > note.Position + 1e-9).DefaultIfEmpty(double.MaxValue).Min();
-            // a change a pushing section strikes an eighth early, its arrival there
-            var isLastBefore = !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9
-                                                            && !(Pushes(x.Position) && Math.Abs(x.Position - (nextChange - Rmg.Core.Composition.Pushes.Early)) < 1e-3));
+            // a change a pushing section strikes an eighth early, its arrival there; read from the notes as placed, where the
+            // pocket has not yet moved them off the beat, the rendered notes' where none sounds
+            var isLastBefore = sounding is { } placed
+                ? !realized[track.Role].Any(x => x.Position > placed.Position + 1e-9 && x.Position < nextChange - 1e-9
+                                                 && !(Pushes(x.Position) && Math.Abs(x.Position - (nextChange - Rmg.Core.Composition.Pushes.Early)) < 1e-6))
+                : !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9
+                                               && !(Pushes(x.Position) && Math.Abs(x.Position - (nextChange - Rmg.Core.Composition.Pushes.Early)) < 1e-3));
             var isChromaticApproach = track.Role == TrackRole.Bass && isLastBefore && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
             // a pedal holding its note over the chords, a key change's or a section's, as it holds it where it starts
             var isPedal = track.Role == TrackRole.Bass && (pedals.Any(x => note.Position >= x.From - (Pushes(x.From) ? Rmg.Core.Composition.Pushes.Early : 0) - 0.2 && note.Position < x.To)

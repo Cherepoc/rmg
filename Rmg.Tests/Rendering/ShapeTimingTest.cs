@@ -110,8 +110,8 @@ public sealed class ShapeTimingTest
     }
 
     /// <summary>
-    ///     A bent note where it plays: its kind, whether it ends its phrase, the line resting a beat after it or starting a
-    ///     new phrase, how long it is in beats, and whether its top, the note or the note bent up to, is its chord's.
+    ///     A bent note where it plays: its kind, whether it ends its phrase, the line resting a beat after it, starting a new
+    ///     phrase or a new section, how long it is in beats, and whether its top, the note or the note bent up to, is its chord's.
     /// </summary>
     internal static IEnumerable<(BendKind Kind, bool Ends, double Beats, bool TopOnChord)> Placed(CorpusSong song) =>
         song.Song.Notes!.Values.SelectMany(notes => notes.Select((note, i) => (note, i))
@@ -121,7 +121,8 @@ public sealed class ShapeTimingTest
                 var (note, i) = x;
                 var state = note.Value.State;
                 var kind = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
-                var ends = i + 1 >= notes.Count || notes[i + 1].Position >= note.Position + note.Value.Duration + 1 - 1e-9 || notes[i + 1].Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) > 0;
+                var ends = i + 1 >= notes.Count || notes[i + 1].Position >= note.Position + note.Value.Duration + 1 - 1e-9 || notes[i + 1].Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) > 0
+                           || notes[i + 1].Position >= (song.Map.SectionAt(note.Position)?.End ?? double.MaxValue) - 1e-9;
                 var top = note.Value.Pitches[0] + (kind is BendKind.BendAndRelease or BendKind.PrebendRelease ? state.GetStateValue(CompositionStateKinds.BendDepth) : 0);
                 return (kind, ends, note.Value.Duration, Realizer.GetChordNotes(state).Classes.Contains(top.Mod(12)));
             }));
