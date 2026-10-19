@@ -129,7 +129,7 @@ internal static class SoloLines
         _ => throw new ArgumentOutOfRangeException(nameof(shape), shape, null)
     };
 
-    /// <summary>How much louder a solo's phrase plays at its highest note than at its lowest, as the melody's does (<see cref="MelodyLayers" />).</summary>
+    /// <summary>How much louder a solo's phrase plays at its highest note than at its lowest, as the melody's does (<see cref="MelodyLayers" />), before its genre's evenness (<see cref="Soloist.PhraseArc" />).</summary>
     public const double PhraseArc = 0.2;
 
     /// <summary>How much louder a solo plays at its most intense than at its calmest, about the melody's loudness there.</summary>
@@ -435,7 +435,7 @@ internal static class SoloLines
         // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc); and a stacked
         // note off the beat that leads into a chord change planed into it, an approach, where the soloist approaches
         var line = planned.Select(Place).ToArray();
-        var arc = LinePattern.PhraseArc([..planned.Select(x => x.Phrase)], [..planned.Select(x => x.Pitch)], PhraseArc);
+        var arc = LinePattern.PhraseArc([..planned.Select(x => x.Phrase)], [..planned.Select(x => x.Pitch)], soloist.PhraseArc);
         int ChangeAt(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordChange);
         // off a pulse of its bar, the bars counted from the section's start, as an answer's gap may start on a half beat
         bool OffThePulse(double position) => !span.Meter.Pulses.Any(x => Math.Abs((position - barOrigin).Mod(span.Meter.BarDuration) - x) < 1e-6);

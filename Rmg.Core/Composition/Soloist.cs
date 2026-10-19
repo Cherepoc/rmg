@@ -61,7 +61,8 @@ internal sealed record Soloist(
     bool Approaches,
     double MotifInversion,
     double LandingChance,
-    double Ceiling
+    double Ceiling,
+    double PhraseArc
 )
 {
     /// <summary>
@@ -242,7 +243,8 @@ internal sealed record Soloist(
 
     /// <param name="program">The instrument the soloing part plays, which leans whether it bends; <see cref="DrumsProgram" /> for the drums.</param>
     /// <param name="genreBends">The genre's chance a soloist bends at all, which its instrument leans; none for the songs'.</param>
-    public static Soloist Generate(IGenerationContext context, double melody, double sound, int program, ByConvention? genreBends)
+    /// <param name="dynamics">How much of the velocity its layers draw its genre plays (<see cref="VelocityLayers.SpreadOf" />), which its phrases' arc takes.</param>
+    public static Soloist Generate(IGenerationContext context, double melody, double sound, int program, ByConvention? genreBends, double dynamics)
     {
         // every draw made in this order, whatever the instrument
         var speeds = SpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat).ToArray();
@@ -267,7 +269,7 @@ internal sealed record Soloist(
         var approaches = context.TestProbability(ApproachChance.At(melody));
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
             phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes, octaves, approaches, MotifInversionChance.At(melody),
-            LandingChances.At(melody), Ceilings.At(melody));
+            LandingChances.At(melody), Ceilings.At(melody), SoloLines.PhraseArc * dynamics);
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>
