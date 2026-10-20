@@ -469,8 +469,10 @@ The riff:
   round, answering the voice, doubled, in stop time, alone first, against the bar and under a solo (built); the main
   riff halved in a breakdown, and an ostinato kept while its filter and layers change (later, by listening). Three
   mechanisms, not one a use: a section that recurs, a riff that brings its chords, a riff moved as a shape.
-  1. *Measured first:* how much a riff's later appearances differ from its first, its onsets and pitches as played,
-     against the convention of the heavy genres, whose repeats are exact (`LineProfile.ImprovisationShare`).
+  Measured on 20 October (`RiffRepeatReportTest`): a section's riff as it comes back keeps its first appearance's
+  onsets in 90% of bars and its notes in 67% (Metal 69%, Thrash 77%, the Blues 93%), 93% over the same chords and key,
+  the rest bars whose harmony a later appearance changes on purpose, reharmonised, lifted or shifted, improvisation and
+  a phrase's fresh start nearly none of it; so a riff section that returns plays its riff again as it was.
   2. *A loop's riff:* a section on the first section's chords (`SectionGenerator.Loop`) playing its riff as well, its
      notes as made, over the same chords, so that a looping song is one riff: the smallest of them.
   3. *A riff section returning:* a riff genre's form playing its intro again between its sections and as its outro,
