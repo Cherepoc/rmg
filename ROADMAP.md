@@ -258,6 +258,39 @@ channel, a clean metal intro's, a new effect rather than a vibrato. Not built: a
 string bending under one held, which one channel's pitch bend cannot play; a guitar's narrow vibrato bending up
 alone, inaudible beside its wide one, which does.
 
+### Steadiness (the listening review of 21 October 2026)
+
+A metal song heard changing its feel again and again and stopping in section after section (HsspOh5sKbj in Metal:
+half time in every verse, double in every chorus, nine changes, its pre-chorus in stop time every time, the last one a
+clean guitar alone for 25 seconds). Measured (`FeelChangesReportTest`, `StopsReportTest`, 64 songs each): a song holding
+one feel throughout 52% of the songs' own, Rock's 27%, Metal's, Doom's, Nu metal's and Symphonic's 3%, Thrash's 5%;
+feel changes a song 1.7, Metal's 8.2, Thrash's 12.5; stop time in 18% of the songs' own, Metal's 70%, Thrash's 84%;
+silences of a beat or more a song 2.4, Doom's 5.2 and Black metal's 6.4 though they play little stop time. Every
+section draws its feel and its stops on its own, so that a song of six sections nearly never keeps either. As real
+songs have it: a song keeps its feel, a departure is an event, none or one in most genres (a half-time bridge or
+breakdown, a gallop before the solo, a half-time chorus in Nu metal, Pop and Punk), two or three in Thrash's, Death
+metal's and Black metal's riff sections, each keeping its feel as it comes back; a song stops in one place or two as
+a feature, before a big section or at a phrase's end, stop time a section's in the blues, early rock and funk, Doom
+and Black metal hardly ever; one part alone for a phrase or two, an intro or the break before the last chorus, never
+a pre-chorus, which builds. One mechanism for each: the song draws whether it does the thing at all, by its facet and
+the genre's chance, from a stream of its own, and only then do its sections draw it, leaning by their role as data,
+the genre's per-section chances retuned for songs that do; how many departures a song plays the genre's data, not a
+count of its own. In order:
+
+- **The song's feel kept** (P2): a song departing from its feel at all drawn first (`Groove`), its sections' half
+  and double time drawn only then, a bridge's and a breakdown's leaning to it and a verse's and a chorus's from it;
+  the metal genres' per-section chances lowered for the songs that depart. Targets: Metal's songs holding one feel
+  40-50%, its changes 1-2 a song; Thrash's and Black metal's still changing in most songs; the songs' own steadier.
+- **The song's stops** (P2): a song stopping at all drawn first, stop time and ensemble hits then drawn by its
+  sections; but a stop-time section of the blues plays in every verse as it does. First measured: where Doom's and
+  Black metal's silences come from, whose stop time is rare, before anything is changed for them. Targets: Metal's
+  songs with stop time about 30%, Doom's and Black metal's silences fewer.
+- **One part alone, short** (P2): the texture of one part alone kept to a phrase or two, the band coming in after,
+  as an intro's or the break before the last chorus is, and never a pre-chorus's, which builds; measured first how
+  long it lasts and in which roles.
+- **A song's own feel** (P3, deferred): a whole song in half time, Djent's and Trap's, or in double time, a skate punk
+  song's, as the song's feel rather than its sections' departures.
+
 ### Older rule failures
 
 None at offsets 0, 1000000, 619000000, 716000000 and 942000000 (19 October 2026, every failure traced and fixed, the
