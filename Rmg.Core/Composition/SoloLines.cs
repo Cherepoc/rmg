@@ -211,8 +211,9 @@ internal static class SoloLines
 
         // the top of its register there: where the line climbs, a share of it the soloist's first phrase opens rising with the
         // solo's arc to the whole at its climax, so that its highest note comes there, and never under an octave over its bottom
+        // but within its register, which a narrow part's is
         int TopAt(double position) => !climbs ? top
-            : Math.Max(bottom + 12, bottom + (int)Math.Round((top - bottom) * (soloist.Ceiling + (1 - soloist.Ceiling) * (Arc((position - span.Start) / span.Duration) - ArcStart) / (1 - ArcStart))));
+            : Math.Min(top, Math.Max(bottom + 12, bottom + (int)Math.Round((top - bottom) * (soloist.Ceiling + (1 - soloist.Ceiling) * (Arc((position - span.Start) / span.Duration) - ArcStart) / (1 - ArcStart)))));
 
         // the chord a note plays over, as Realizer reads its state there
         ChordContext Chord(StateMap note, double position) => Realizer.ChordAt(note, position, track, definition, common);

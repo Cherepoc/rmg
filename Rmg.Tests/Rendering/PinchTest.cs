@@ -57,7 +57,7 @@ public sealed class PinchTest
     public async Task ADive_IsTheRiffsLastHeldNoteBeforeALouderSection()
     {
         var (dives, songs, beats, reaching) = (0, 0, 0.0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("nuMetal")))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("nuMetal")))))
         {
             var any = false;
             foreach (var (track, notes) in song.Song.Notes!)
@@ -82,7 +82,8 @@ public sealed class PinchTest
             songs += any ? 1 : 0;
         }
 
-        Console.WriteLine($"{dives} dives in {songs} of 64 Nu metal songs, {beats / Math.Max(1, dives):F2} beats long on the average, {reaching} held to the section");
+        Console.WriteLine($"{dives} dives in {songs} of 128 Nu metal songs, {beats / Math.Max(1, dives):F2} beats long on the average, {reaching} held to the section");
+        // a rare device's count, 6 to 17 seen at the corpora's offsets
         await Assert.That(dives).IsGreaterThan(3);
         await Assert.That(reaching).IsGreaterThanOrEqualTo(dives * 3 / 4);
     }
