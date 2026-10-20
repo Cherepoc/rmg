@@ -40,7 +40,8 @@ stickings against the songs' own (`stickings`, #341, 0.34), and was retired the 
 each section's chords, came across as no riff at all, see *The riff's uses*), a solo's run landing on the
 change in Rock (`solo-landing`, 0.29) and a melody's later bar on its first's rhythm in Pop (`melody-sequence`, 0.20);
 the riff's turnaround in the Blues measured too faint to ask (0.07, from 0.02), and the melody's phrase swell, the
-solo's ceiling and the riff's power chords by the section's energy no choice's to switch off. A question listens only in the sections its device plays in, not
+solo's ceiling and the riff's power chords by the section's energy no choice's to switch off; retired on 21 October,
+both its questions not told apart and kept, to be heard again. A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -71,7 +72,10 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   own pool (since built: the chords' degrees by darkness and a mood past a genre's span, heard in the sixth round);
   and of 19 October, measured too faint to ask: a blues soloist's bends (0.08), Celtic's vibrato (0.10, in 17 of 24
   songs its soloists' alone), the articulation variants (#77, 0.10), and the two-step and the boom played loosely
-  (0.03, 0.08), so that a switch for the figures' strictness is not built.
+  (0.03, 0.08), so that a switch for the figures' strictness is not built; and of the ninth round (21 October), not
+  told apart and kept as built, to be asked again once they are changed: a solo's run landing on the change
+  (`solo-landing`, 0.28), and a melody's later bar on its first's rhythm (`melody-sequence`, 0.20), the bars of a
+  letter sharing their rhythm already.
 - **Decided by genre judgment, not heard** (the seventh round, retired 19 October 2026, side B taken): Dark jazz's
   8ths swung, never its 16ths (#345); Jazz's bass in two now and then, 25-20-10, the plainer the likelier (#343);
   House's offbeat bass, 15-30-40, Techno's pump leaning wild (#350); Psytrance's texture built and thinned, steadier
@@ -412,9 +416,11 @@ rhythm, 10% to 25% of its bars).
 
 Solos:
 
-- **A run landing on the change, the rest** (P3, by listening; built 19 October 2026, a run's first note over a new
-  chord the chord's 45-51% to 67-79%): the landing takes the chord's nearest note, the third or the seventh not
-  preferred, should the root sound too often; the enclosure, a step above and below and onto it, Jazz's should it ask.
+- **A run landing on the change, the rest** (P3, to be heard again; built 19 October 2026, a run's first note over a
+  new chord the chord's 45-51% to 67-79%, not told apart from a run that ignores the change in the ninth round): the
+  run aimed into its landing, its last notes before the change leading to it by step, as a player plans a line to
+  arrive, rather than leaping onto it at the change; the third or the seventh preferred over the nearest note, the
+  root sounding too often; the enclosure, a step above and below and onto it, Jazz's; asked again once built.
 - **A phrase answered whole** (P3, folded into `SoloLines.MotifChance` rather than beside it): a phrase opens on the
   phrase before's first cell a step away, not its rhythm. The motif as the phrase before's first segments, from its
   first cell to all but its last gesture, re-placed over the new chords by scale step, a question away from home
@@ -441,6 +447,10 @@ Solos:
 
 The melody:
 
+- **A melody's sequence, the rest** (P3, to be heard again; built 20 October 2026, a later letter's bar on the first
+  bar's rhythm 10% to 25%, not told apart in the ninth round, its letters' bars sharing their rhythm already): a
+  whole line's rhythm and shape carried a step higher or lower, as a sequence is, rather than one bar's rhythm alone;
+  asked again once built.
 - **A section's phrases building** (P3, a genre's choice): every phrase peaks at `MelodyLayers.PeakRegister` and a
   section's phrases repeat the first's shape (`PhraseScheme.Across`). A section's last phrase peaking a few semitones
   over the others and ending on its goal: Pop's, the Power ballad's, Soul's, Synthwave's, Symphonic metal's choruses,
