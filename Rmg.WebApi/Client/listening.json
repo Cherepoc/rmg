@@ -1,1 +1,195 @@
-[]
+[
+  {
+    "id": "song-riff",
+    "question": "The song's riff, the first section's riff played again over the other sections' chords: one riff driving the song, or the sections all alike?",
+    "decides": "How often a section plays the song's riff (riff.song) in the riff genres' presets, Rock's 100-85-50.",
+    "genre": "rock",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "riff": {
+          "song": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 127.2,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "2",
+        "at": 74.2,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 117.1,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 74.3,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 49.8,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "e",
+        "at": 87.9,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "solo-landing",
+    "question": "A solo's run leaping onto the new chord's nearest note as the chord changes: making the changes, or a forced leap?",
+    "decides": "Whether a run lands on the change (Soloist.LandingChances, 1-0.7-0), and whether its third or seventh is to be preferred.",
+    "genre": "rock",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "soloLanding": {
+          "runs": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 25.1,
+        "listen": [
+          "Solo (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 238,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 202.4,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 76.2,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 79.8,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "l",
+        "at": 257.6,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "melody-sequence",
+    "question": "A melody's later bar playing its first bar's rhythm with other notes: lines answering each other, or the same bar again?",
+    "decides": "How often a melody's later bar borrows its first's rhythm (MelodyLayers.SequenceChances, 0.4-0.3-0.1).",
+    "genre": "pop",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "sequence": {
+          "bars": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "8",
+        "at": 3.5,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 6.5,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 25,
+        "listen": [
+          "Solo (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 48.4,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 32.6,
+        "listen": [
+          "Melody (Electric Piano 1)"
+        ]
+      },
+      {
+        "seed": "U",
+        "at": 199,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      }
+    ]
+  }
+]

@@ -34,7 +34,12 @@ every question is answered or let go of. The seventh round (18 October 2026) ask
 queue and was retired on 19 October, each decided by genre judgment, side B (see *Decided by genre judgment*);
 `symphonic-hits` (#371) differed 0.02, too faint to ask. The eighth round (19 October 2026) asked three, Metal's fast
 vibrato a step wide (`metal-vibrato`, 0.12), the strings' vibrato sung soon (`string-vibrato`, 0.46) and a drummer's
-stickings against the songs' own (`stickings`, #341, 0.34), and was retired the same day, each kept. A question listens only in the sections its device plays in, not
+stickings against the songs' own (`stickings`, #341, 0.34), and was retired the same day, each kept. The ninth round
+(20 October 2026) asks three of the expressive lines' built devices, each switched off by a genre choice of its own
+(`soloLanding`, `sequence`) or the riff's: the song's riff in Rock (`song-riff`, 0.45), a solo's run landing on the
+change in Rock (`solo-landing`, 0.29) and a melody's later bar on its first's rhythm in Pop (`melody-sequence`, 0.20);
+the riff's turnaround in the Blues measured too faint to ask (0.07, from 0.02), and the melody's phrase swell, the
+solo's ceiling and the riff's power chords by the section's energy no choice's to switch off. A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -251,7 +256,8 @@ alone, inaudible beside its wide one, which does.
 ### Older rule failures
 
 None at offsets 0, 1000000, 619000000, 716000000 and 942000000 (19 October 2026, every failure traced and fixed, the
-review of 16 October's #296 and #302 among them); a new one checked against the committed code before it is recorded
+review of 16 October's #296 and #302 among them), and at 1000000 and 619000000 after the expressive lines (20 October,
+a climbing solo's ceiling over a narrow part's register fixed, Nu metal's dives counted over 128 songs); a new one checked against the committed code before it is recorded
 here. Left:
 
 - **A run into a note above its line's range:** a counter-melody's run at offset 942000000 (seed 29 into 256) rising to

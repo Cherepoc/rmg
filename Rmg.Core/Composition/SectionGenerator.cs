@@ -639,7 +639,7 @@ internal sealed class SectionGenerator
                     Scheme = sectionRhythm.Scheme with
                     {
                         Borrowed = Enumerable.Range(1, sectionRhythm.Scheme.PatternCount - 1)
-                            .Where(_ => sequences.TestProbability(MelodyLayers.SequenceChances.At(sectionRhythm.Facets[Facet.Melody]))).ToImmutableDictionary(x => x, _ => 0)
+                            .Where(_ => sequences.TestProbability(MelodyLayers.SequenceChances.At(sectionRhythm.Facets[Facet.Melody], _genre.Chance(GenreChoices.Sequence, "bars")))).ToImmutableDictionary(x => x, _ => 0)
                     }
                 }
                 : sectionRhythm;

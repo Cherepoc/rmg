@@ -45,7 +45,33 @@ public sealed class ListeningQuestionsTest
         Dictionary<string, int>? Without = null
     );
 
-    private static readonly Question[] Questions = [];
+    /// <summary>The sections the trace finds a point in, of a track or of any.</summary>
+    private static HashSet<int> SectionsOf(CorpusSong song, string point, Func<StateTraceEntry, bool>? takes = null) =>
+        [..song.Trace.Where(x => x.Point == point && (takes?.Invoke(x) ?? true)).Select(x => x.Section)];
+
+    /// <summary>Where a song first plays a section of those, in beats; none where it plays none.</summary>
+    private static double? FirstOf(CorpusSong song, HashSet<int> sections) => song.Map.Sections.FirstOrDefault(x => sections.Contains(x.SectionId))?.Start;
+
+    /// <summary>The sections whose melody plays a later letter on its first's rhythm.</summary>
+    private static HashSet<int> Sequenced(CorpusSong song) =>
+        SectionsOf(song, TracePoints.BarPattern, x => x.Track == song.Track(TrackRole.Melody) && x.Value is PhraseScheme { Borrowed.Count: > 0 });
+
+    private static readonly Question[] Questions =
+    [
+        new("song-riff", "The song's riff, the first section's riff played again over the other sections' chords: one riff driving the song, or the sections all alike?",
+            "How often a section plays the song's riff (riff.song) in the riff genres' presets, Rock's 100-85-50.", "rock", [],
+            new() { ["riff"] = new() { ["song"] = 0 } },
+            x => FirstOf(x, SectionsOf(x, TracePoints.SongRiff)), (x, span) => SectionsOf(x, TracePoints.SongRiff).Contains(span.SectionId)),
+        new("solo-landing", "A solo's run leaping onto the new chord's nearest note as the chord changes: making the changes, or a forced leap?",
+            "Whether a run lands on the change (Soloist.LandingChances, 1-0.7-0), and whether its third or seventh is to be preferred.", "rock", [],
+            new() { ["soloLanding"] = new() { ["runs"] = 0 } },
+            x => x.Trace.Where(t => t.Point == TracePoints.SoloLanding).Select(t => (double?)(((double Position, int Move))t.Value!).Position - 1).Min(),
+            (x, span) => SectionsOf(x, TracePoints.SoloLanding).Contains(span.SectionId)),
+        new("melody-sequence", "A melody's later bar playing its first bar's rhythm with other notes: lines answering each other, or the same bar again?",
+            "How often a melody's later bar borrows its first's rhythm (MelodyLayers.SequenceChances, 0.4-0.3-0.1).", "pop", [],
+            new() { ["sequence"] = new() { ["bars"] = 0 } },
+            x => FirstOf(x, Sequenced(x)), (x, span) => Sequenced(x).Contains(span.SectionId))
+    ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

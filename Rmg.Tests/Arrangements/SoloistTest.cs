@@ -12,7 +12,7 @@ public sealed class SoloistTest
     private const int Guitar = 30, Sax = 65;
 
     private static Soloist[] Draw(double conventionality, int program = Guitar) =>
-        [..Enumerable.Range(0, 400).Select(seed => Soloist.Generate(new GenerationContext((ulong)seed), conventionality, conventionality, program, null, 1))];
+        [..Enumerable.Range(0, 400).Select(seed => Soloist.Generate(new GenerationContext((ulong)seed), conventionality, conventionality, program, null, null, 1))];
 
     [Test]
     public async Task AWildSoloist_MayShredIn64ths_ForABurstOrForBars_APlainOneNever()
