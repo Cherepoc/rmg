@@ -36,8 +36,8 @@ queue and was retired on 19 October, each decided by genre judgment, side B (see
 vibrato a step wide (`metal-vibrato`, 0.12), the strings' vibrato sung soon (`string-vibrato`, 0.46) and a drummer's
 stickings against the songs' own (`stickings`, #341, 0.34), and was retired the same day, each kept. The ninth round
 (20 October 2026) asks three of the expressive lines' built devices, each switched off by a genre choice of its own
-(`soloLanding`, `sequence`) or the riff's: the song's riff in Rock (`song-riff`, 0.48, heard from where the riff is first played, as the first asking
-started at a later copy and copied a riff the song never played, fixed the same day), a solo's run landing on the
+(`soloLanding`, `sequence`) or the riff's: the song's riff in Rock (`song-riff`, taken off the same day: its copies, a riff never played re-fitted to each
+section's chords, came across as no riff at all, and it is to be rebuilt on the riff hook), a solo's run landing on the
 change in Rock (`solo-landing`, 0.29) and a melody's later bar on its first's rhythm in Pop (`melody-sequence`, 0.20);
 the riff's turnaround in the Blues measured too faint to ask (0.07, from 0.02), and the melody's phrase swell, the
 solo's ceiling and the riff's power chords by the section's energy no choice's to switch off. A question listens only in the sections its device plays in, not
