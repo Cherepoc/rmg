@@ -49,6 +49,30 @@ public sealed class RiffSectionReportTest
         }
     }
 
+    /// <summary>
+    ///     A section over the intro's riff is a verse of a song that opens on an intro, in genres that do not loop otherwise
+    ///     (<see cref="GenreChoices.Loop" />).
+    /// </summary>
+    [Test]
+    public async Task ASectionOverTheIntrosRiff_IsAVerse_OfASongOpeningOnAnIntro()
+    {
+        var over = 0;
+        foreach (var genre in new[] { "metal", "rock", "thrash" })
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        {
+            var form = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.LinesFrom))
+            {
+                over++;
+                await Assert.That(form.Roles[entry.Section]).IsEqualTo(SectionRole.Verse).Because($"{genre} seed {song.Seed}");
+                await Assert.That((int)entry.Value!).IsEqualTo(form.SectionIds[0]).Because($"{genre} seed {song.Seed}");
+                await Assert.That(form.Roles[form.SectionIds[0]]).IsEqualTo(SectionRole.Intro).Because($"{genre} seed {song.Seed}");
+            }
+        }
+
+        await Assert.That(over).IsGreaterThan(5);
+    }
+
     /// <summary>A riff section plays its riff in most of its appearances, short of every one, as a section rests its riff now and then (seen 74% and 86% in 64 songs each of Rock and Metal).</summary>
     [Test]
     public async Task ARiffSection_PlaysItsRiff()
@@ -69,6 +93,10 @@ public sealed class RiffSectionReportTest
             var appearances = songs.Select(Appearances).Where(x => x.Length > 0).ToArray();
             Console.WriteLine($"  {genre}: a riff section in {appearances.Length} of 64 songs, its riff heard in {appearances.SelectMany(x => x).Count(x => x) / (double)Math.Max(1, appearances.Sum(x => x.Length)):P0} of its {appearances.Sum(x => x.Length)} appearances; " +
                               $"the songs {songs.Average(x => x.Rendered.Seconds):F0} s long, {without.Average(x => x.Rendered.Seconds):F0} s without");
+            // and its verses over the intro's riff, as a loop of the intro's (LoopLineReportTest)
+            var verses = songs.Select(x => x.Trace.Count(t => t.Point == TracePoints.LinesFrom)).Sum();
+            var bars = songs.SelectMany(x => Melodies.LoopLineReportTest.Bars(x, TrackRole.Riff)).ToArray();
+            Console.WriteLine($"    {verses} sections over the intro's riff, its riff's rhythm in {bars.Count(x => x.Rhythm) / (double)Math.Max(1, bars.Length):P0} of {bars.Length} bars, its pitches in {bars.Sum(x => x.Kept) / (double)Math.Max(1, bars.Sum(x => x.Notes)):P0} of notes");
         }
         await Task.CompletedTask;
     }

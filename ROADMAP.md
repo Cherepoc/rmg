@@ -482,8 +482,9 @@ The riff:
   songs of each, its riff heard in 70-95% of its appearances (Punk's 34%, a third of its songs riffless), the songs a few
   seconds longer. Left: a riff section before the solo; the last chorus played twice in such a song, whose repeat is
   its last section's; its riff kept through it, should a riff section without one be heard.
-  4. *The verse over the riff:* a verse playing the riff section's riff and chords, its melody over them, leaning by
-     the section's role, as solos do, so that a chorus keeps its own and the song is not one progression.
+  And the verse over the riff (`riffSection.verses`): a verse of a song that opens on an intro looping the intro, its
+  chords, riff and bass, the melody over them, the chorus its own; in 6 to 10 sections of 64 songs of Rock, Metal and
+  Thrash, as few songs open on an intro, the intro's riff's rhythm kept in all of Metal's and Thrash's bars.
   5. *The riff moved as a shape,* below.
 - **A riff's turnaround, the rest** (P3, by listening; built 20 October 2026 as a walk of its cycle's last beat into
   the next, one restart in seven): a bar varied as A′ was measured not heard as one, its last bar opening as its

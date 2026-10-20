@@ -550,8 +550,9 @@ public static class GenreChoices
     /// <summary>The chance a verse calls and its band answers, the melody singing each phrase's first half and the riff the second (<see cref="Composition.CallAndResponse" />).</summary>
     public static GenreChoice CallAndResponse { get; } = Chances("callAndResponse", "Call and response", [("sections", "Verses calling and answered", Composition.CallAndResponse.Chance)]);
 
-    /// <summary>A song's intro coming back between its verses and closing it, a riff section (<see cref="SongForms.RiffSectionChance" />).</summary>
-    public static GenreChoice RiffSection { get; } = Chances("riffSection", "Riff section", [("songs", "Songs on a riff section returning", SongForms.RiffSectionChance)]);
+    /// <summary>A song's intro coming back between its verses and closing it, a riff section, and its verses over the intro's riff (<see cref="SongForms.RiffSectionChance" />, <see cref="SongForms.VerseOverRiffChance" />).</summary>
+    public static GenreChoice RiffSection { get; } = Chances("riffSection", "Riff section",
+        [("songs", "Songs on a riff section returning", SongForms.RiffSectionChance), ("verses", "Verses over the intro's riff", SongForms.VerseOverRiffChance)]);
 
     /// <summary>A last section that came back before played once more, as a last chorus (<see cref="SongForms.LastRepeatChance" />).</summary>
     public static GenreChoice LastRepeat { get; } = Chances("lastRepeat", "Last repeat",

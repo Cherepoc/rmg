@@ -142,6 +142,9 @@ internal sealed class SectionGenerator
     // the song's first section's harmony, which a section of a loop plays, and its meter
     private (SectionHarmony Harmony, Meter Meter)? _firstHarmony;
 
+    // the song's first section's role, an intro's whose riff its verses may play over
+    private SectionRole? _firstRole;
+
     // the song's first section's riff and bass, by track, its bars and its line, and the devices they play, which a section
     // of a loop plays
     private readonly Dictionary<int, (GeneratedBars Bars, SectionLine Line)> _firstLines = [];
@@ -427,9 +430,12 @@ internal sealed class SectionGenerator
         // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
         // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
         var loops = Stream(sectionId, SectionStream.Loop).TestProbability(Loop.At(facets[Facet.Form], _genre.Chance(GenreChoices.Loop, "sections")));
+        // or a verse over the intro's riff where the song opens on one, a genre's, from a sequence of its own
+        loops |= Stream(sectionId, SectionStream.VerseOverRiff).TestProbability(SongForms.VerseOverRiffChance.At(facets[Facet.Form], _genre.Chance(GenreChoices.RiffSection, "verses")))
+                 && plan.Role == SectionRole.Verse && _firstRole == SectionRole.Intro;
         var harmony = new SectionHarmony(scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, planes);
         if (plan.KeepsSongScale)
-            _firstHarmony = (harmony, meter);
+            (_firstHarmony, _firstRole) = ((harmony, meter), plan.Role);
         // but the song's last, which must land the ending home, where the first's home is not the tonic, as its chords'
         // scales were worked out on its own home
         var looped = !plan.KeepsSongScale && loops
@@ -1191,5 +1197,6 @@ internal enum SectionStream
     TwinLead = 66,
     SungEighths = 67,
     MinorMediants = 68,
-    MelodyRhythms = 70
+    MelodyRhythms = 70,
+    VerseOverRiff = 71
 }

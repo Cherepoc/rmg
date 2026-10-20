@@ -75,6 +75,13 @@ internal static class SongForms
     /// </summary>
     public static ByConvention RiffSectionChance { get; } = new(0, 0, 0);
 
+    /// <summary>
+    ///     The chance a verse of a song that opens on an intro plays over the intro's riff, its chords, riff and bass the
+    ///     intro's and its melody over them, as a riff-driven band sings its verse over its main riff: a genre's that the songs
+    ///     never play (<see cref="GenreChoices.RiffSection" />, <see cref="SectionGenerator.Loop" />).
+    /// </summary>
+    public static ByConvention VerseOverRiffChance { get; } = new(0, 0, 0);
+
     /// <summary>The chance a song takes one of the forms, at a form facet of middling conventionality.</summary>
     public const double FormChance = 0.7;
 
