@@ -477,9 +477,11 @@ The riff:
   made them, their devices and figures with them (`GeneratedSection.LinesFrom`), the first's rhythm in 62% of their
   bars against 16% of the other sections' (Techno, the Blues, Dub); short of all, as a figure answering the kick, Techno's
   offbeat bass, plays the bass's own rhythm where the section's kick rests, which listening may want kept.
-  3. *A riff section returning:* a riff genre's form playing its intro again between its sections and as its outro,
-     its pattern as it was, forms being data; only an intro whose riff plays, and the song's length kept to its
-     bounds. The riff between the sections (*Rock and metal as their bands play them*) is this.
+  Built on 21 October: a riff section (`riffSection`, the riff presets' 20-30-20 to Thrash's 60-60-50), a song in one
+  of the forms opening on its intro and playing it again after a chorus a verse follows and to close, in 10 to 29 of 64
+  songs of each, its riff heard in 70-95% of its appearances (Punk's 34%, a third of its songs riffless), the songs a few
+  seconds longer. Left: a riff section before the solo; the last chorus played twice in such a song, whose repeat is
+  its last section's; its riff kept through it, should a riff section without one be heard.
   4. *The verse over the riff:* a verse playing the riff section's riff and chords, its melody over them, leaning by
      the section's role, as solos do, so that a chorus keeps its own and the song is not one progression.
   5. *The riff moved as a shape,* below.
@@ -674,7 +676,7 @@ left:
   third of their sections) were there already; the organ's solo, Rock's shuffle at its plain end and Metal's clean
   quiet sections are presets now. Left:
   - The riff between the sections (P3): one part alone is a texture already (`TextureKind.Alone`), the riff a genre's
-    weight of it, but not placed as an interlude of its own: planned as *A riff section returning* (*The riff's uses*).
+    weight of it, placed as an interlude of its own as a riff section (*The riff's uses*, built 21 October 2026).
   - A melody sung rather than played (P3, `pop-sung-lines` heard and kept 4-0): no singer in General MIDI, so the melody
     stands for a voice by how it phrases, not by its sound. Measured (`SungMelodyReportTest`, 128 songs): its moves
     already sing (repeated 28%, steps 33%, thirds 19%, over a sixth 3%, legato 96%); every phrase of a pattern ends in a

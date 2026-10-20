@@ -190,8 +190,8 @@ internal static class SongStages
             form.Map,
             [..ids],
             structure.Roles,
-            // the last section's lift, at its repeat where it plays twice, before the outro where there is one
-            ids.Count - 1 + (song.Repeats ? 1 : 0) - (structure.Roles[ids[^1]] == SectionRole.Outro ? 1 : 0),
+            // the last section's lift, at its repeat where it plays twice, before the outro or a riff section closing it
+            ids.Count - 1 + (song.Repeats ? 1 : 0) - (structure.Roles[ids[^1]] is SectionRole.Outro or SectionRole.Intro ? 1 : 0),
             song.Genre
         );
         var sectionTempos = SectionTempo.Generate(place => song.AppearanceStream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre);

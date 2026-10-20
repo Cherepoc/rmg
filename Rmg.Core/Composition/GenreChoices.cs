@@ -550,6 +550,9 @@ public static class GenreChoices
     /// <summary>The chance a verse calls and its band answers, the melody singing each phrase's first half and the riff the second (<see cref="Composition.CallAndResponse" />).</summary>
     public static GenreChoice CallAndResponse { get; } = Chances("callAndResponse", "Call and response", [("sections", "Verses calling and answered", Composition.CallAndResponse.Chance)]);
 
+    /// <summary>A song's intro coming back between its verses and closing it, a riff section (<see cref="SongForms.RiffSectionChance" />).</summary>
+    public static GenreChoice RiffSection { get; } = Chances("riffSection", "Riff section", [("songs", "Songs on a riff section returning", SongForms.RiffSectionChance)]);
+
     /// <summary>A last section that came back before played once more, as a last chorus (<see cref="SongForms.LastRepeatChance" />).</summary>
     public static GenreChoice LastRepeat { get; } = Chances("lastRepeat", "Last repeat",
         [("songs", "A last chorus played twice", SongForms.LastRepeatChance), ("breakdown", "Its first pass built up from the voice alone", SongForms.BreakdownChorusChance)]);
@@ -775,7 +778,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, VibratoWidth, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
-        SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
+        SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, RiffSection, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

@@ -13,7 +13,7 @@ public enum SectionRole
     Chorus,
     Bridge,
 
-    /// <summary>A section of its own material that opens the song, played once.</summary>
+    /// <summary>A section of its own material that opens the song, played once, or a riff section coming back between the others and closing the song (<see cref="SongForms.RiffSectionChance" />).</summary>
     Intro,
 
     /// <summary>A section of its own material that closes the song, played once.</summary>
@@ -67,6 +67,13 @@ internal static class SongForms
 
     /// <summary>The chance a song closes on an outro of its own, by the form facet: never in a plain song, and no apter in a wild one than a middling one.</summary>
     public static ByConvention OutroChance { get; } = new(0, 0.15, 0.15);
+
+    /// <summary>
+    ///     The chance a song in one of the forms plays a riff section: its intro coming back after a chorus that a verse
+    ///     follows and closing the song, as a riff-driven band plays its riff between its verses and to end on, a genre's
+    ///     that the songs never play (<see cref="GenreChoices.RiffSection" />).
+    /// </summary>
+    public static ByConvention RiffSectionChance { get; } = new(0, 0, 0);
 
     /// <summary>The chance a song takes one of the forms, at a form facet of middling conventionality.</summary>
     public const double FormChance = 0.7;
@@ -137,6 +144,18 @@ internal static class SongForms
         var (intro, outro) = (ends.TestProbability(IntroChance.At(unconventionality)), ends.TestProbability(OutroChance.At(unconventionality)));
         var next = structure.SectionIds.Max() + 1;
         var (introId, outroId) = (next, next + 1);
+        // or a riff section, a genre's, the intro coming back after a chorus a verse follows and as the outro
+        if (ends.TestProbability(RiffSectionChance.At(unconventionality, genre.Chance(GenreChoices.RiffSection, "songs"))) && isConventional)
+        {
+            var ids = structure.SectionIds;
+            ImmutableArray<int> returning =
+            [
+                introId,
+                ..ids.SelectMany((id, i) => structure.Roles[id] == SectionRole.Chorus && i + 1 < ids.Length && structure.Roles[ids[i + 1]] == SectionRole.Verse ? [id, introId] : new[] { id }),
+                introId
+            ];
+            return new SongStructure(returning, structure.Roles.Add(introId, SectionRole.Intro));
+        }
         return new SongStructure(
             [..(intro ? [introId] : Array.Empty<int>()), ..structure.SectionIds, ..(outro ? [outroId] : Array.Empty<int>())],
             structure.Roles.AddRange(new[] { (intro, introId, SectionRole.Intro), (outro, outroId, SectionRole.Outro) }.Where(x => x.Item1).Select(x => new KeyValuePair<int, SectionRole>(x.Item2, x.Item3)))

@@ -114,6 +114,7 @@ public static class GenreChoiceDescriptions
         ["sequence"] = "How often a later bar of a melody plays its first bar's rhythm with notes of its own over another chord, a sequence, so that its lines answer each other.",
         ["soloAnswers"] = "How often the solo part answers the melody in its gaps, as a guitarist fills between a singer's lines.",
         ["callAndResponse"] = "How often a verse calls and its band answers, as a blues or a soul band does: the melody singing the first half of every phrase and resting in the second, where the riff answers it.",
+        ["riffSection"] = "How often a song plays a riff section: its intro coming back after a chorus that a verse follows and closing the song, as a riff-driven band plays its main riff between its verses and to end on.",
         ["lastRepeat"] = "How often the last chorus is played twice, and how often its first pass is a breakdown, built up from the voice alone, the drums next and the full band by its end.",
         ["doubling"] = "How often a line is doubled: in octaves by its own part, the melody harmonised by the counter-melody, now and then in three voices, the bass playing the riff with it, and, in a song with a twin, the sections its twin leads, the riff in single notes, busier, played as a soloist plays; and the melody imitated by the counter-melody a bar later, as a canon.",
         ["instrumentSwitches"] = "How often a section hands a part to another instrument, as a chorus's strings take over from a verse's piano.",

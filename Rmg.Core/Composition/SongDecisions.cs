@@ -308,7 +308,7 @@ internal sealed record SongDecisions(
         // how many times more a song that fades or strips plays its last section, by how often the section plays its pattern
         static int Fading(EndingKind ending, int plays) => ending is not (EndingKind.Fade or EndingKind.Strip) ? 0 : plays == 1 ? 2 : 1;
         bool Repeats(bool drawn, int fades) =>
-            drawn && fades == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]) && structure.Roles[sectionIds[^1]] != SectionRole.Outro;
+            drawn && fades == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]) && structure.Roles[sectionIds[^1]] is not (SectionRole.Outro or SectionRole.Intro);
         // a last section that came back before played once more now and then, drawn here, which the length takes in
         var lastRepeatDrawn = Stream(SongStream.LastRepeat).TestProbability(SongForms.LastRepeatChance.At(songUnconventionality[Facet.Form], genre.Chance(GenreChoices.LastRepeat, "songs")));
         // a length given leans every section's plays alike, the lean whose song comes nearest it, the ending's plays too
