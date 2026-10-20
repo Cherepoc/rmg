@@ -108,6 +108,9 @@ internal static class TracePoints
     /// <summary>Where a section plays its appearances' first phrase in stop time, the phrases' starts, none for none (an <c>ImmutableArray&lt;double&gt;</c>).</summary>
     public const string StopTime = "Stop time";
 
+    /// <summary>Whether the song stops at all, its sections then drawing stop time and ensemble hits (a <c>bool</c>; <see cref="Composition.StopTime.SongChance" />).</summary>
+    public const string Stops = "Stops";
+
     /// <summary>Where a section strikes its last bar before a louder one in ensemble hits, the bars' starts, none for none (an <c>ImmutableArray&lt;double&gt;</c>).</summary>
     public const string EnsembleHits = "Ensemble hits";
 

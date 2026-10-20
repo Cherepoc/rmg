@@ -84,6 +84,7 @@ public static class GenreChoiceDescriptions
         ["openingPart"] = "The part a song opening on one alone opens on: its riff, or the drums setting the groove, the bass, the chords as a pianist plays the first bars, or the pad.",
         ["stopTime"] = "How often a section's first phrase plays in stop time, the band hitting once a bar under the melody, as the blues and rock do.",
         ["ensembleHits"] = "How often a section's last bar before a louder one is struck in ensemble hits, the band hitting with the kick and resting between, as funk and horn bands do.",
+        ["stops"] = "How often a song stops at all, its sections then playing stop time and ensemble hits by their chances, as a band stops in one place or two as a feature rather than in section after section.",
         ["push"] = "How often a section plays its chord changes an 8th early, an anticipation that pushes the groove forward.",
         ["keyChanges"] = "How often the last chorus lifts to a higher key, a section plays in a key of its own, or the key changes anywhere at all.",
         ["hook"] = "How often a chorus, or any other section, is built on a short repeating melodic hook.",

@@ -286,10 +286,12 @@ count of its own. In order:
   its time alone, the song's draw made before its meters, Orchestral's, Fusion's and IDM's raised: a song whose feel,
   tempo and meter never change, the songs' own 35% to 66%, Metal's 12% to 61%, Rock's 31% to 64%. Thrash's 12 feel
   changes a song and Black metal's 5 left to listening.
-- **The song's stops** (P2): a song stopping at all drawn first, stop time and ensemble hits then drawn by its
-  sections; but a stop-time section of the blues plays in every verse as it does. First measured: where Doom's and
-  Black metal's silences come from, whose stop time is rare, before anything is changed for them. Targets: Metal's
-  songs with stop time about 30%, Doom's and Black metal's silences fewer.
+- **The song's stops** (built 21 October 2026): a song stopping at all drawn first (`stops`, the songs' own 0-50-50,
+  Funk's 80-90-90, the Blues' and Latin's 70-80-80, Doom's 10-20-20), stop time and ensemble hits then drawn by its
+  sections: a song in stop time, the songs' own 18% to 11%, Metal's 67% to 25%, Rock's 48% to 22%, Funk's 45% to 41%;
+  silences of a beat or more Metal's 3.1 to 2.2 a song. Doom's 5.2 and Black metal's 6.3 not stops but a section's
+  parts all resting at a phrase's end where one plays alone or the drums rest, the next step's. Left: stop time in only
+  some of a section's appearances, should a stopped verse every time be heard too often; Thrash's breakdowns, 2.7 a song.
 - **One part alone, short** (P2): the texture of one part alone kept to a phrase or two, the band coming in after,
   as an intro's or the break before the last chorus is, and never a pre-chorus's, which builds; measured first how
   long it lasts and in which roles.

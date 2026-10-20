@@ -16,10 +16,21 @@ internal static class StopTime
     private const Hold KeepsOutOf = Hold.Call | Hold.Answer;
 
     /// <summary>
-    ///     The chance a section plays its appearances' first phrase in stop time, by its form facet: never in the plainest
+    ///     The chance a section of a song that stops plays its appearances' first phrase in stop time, by its form facet: never in the plainest
     ///     songs, now and then past them; a genre's where it names it, the blues' and rock's.
     /// </summary>
-    public static ByConvention Chance { get; } = new(0, 0.03, 0.03);
+    public static ByConvention Chance { get; } = new(0, 0.06, 0.06);
+
+    /// <summary>
+    ///     The chance a song stops at all, its sections then drawing stop time and ensemble hits, by its form facet: never in
+    ///     the plainest songs, and as often in the wildest as in a middling one, as a band stops in one place or two as a
+    ///     feature rather than in section after section (<see cref="GenreChoices.Stops" />).
+    /// </summary>
+    public static ByConvention SongChance { get; } = new(0, 0.5, 0.5);
+
+    /// <summary>Whether the song stops at all, from a sequence of its own (<see cref="SongChance" />).</summary>
+    internal static bool Stops(SongDecisions song) =>
+        song.Stream(SongStream.Stops).TestProbability(SongChance.At(song.Facets[Facet.Form], song.Genre.Chance(GenreChoices.Stops, "songs")));
 
     /// <summary>How a section's energy leans the chance, through its odds: a quiet section the likelier, a verse more than a chorus.</summary>
     public const double EnergyLean = -1;
@@ -28,7 +39,7 @@ internal static class StopTime
     ///     The chance a section strikes its last bar before a louder one in ensemble hits, by its form facet: never in the
     ///     plainest songs, now and then past them, as stop time; a genre's where it names it, a funk or a horn band's.
     /// </summary>
-    public static ByConvention HitsChance { get; } = new(0, 0.03, 0.03);
+    public static ByConvention HitsChance { get; } = new(0, 0.06, 0.06);
 
     /// <summary>How long a stop-time hit is held at most, in beats.</summary>
     public const double Hit = 1;
@@ -42,12 +53,14 @@ internal static class StopTime
     /// <summary>Where the song plays in stop time: every stop-time section's appearances' first phrase, but a solo's, its start, end and bar.</summary>
     internal static (double Start, double End, double BarDuration)[] Phrases(SongDecisions song)
     {
-        var stops = song.SectionIds.Distinct().ToDictionary(id => id, id =>
+        // in a song that stops at all, every section drawn all the same
+        var stops = Stops(song);
+        var stopping = song.SectionIds.Distinct().ToDictionary(id => id, id =>
         {
             var section = song.SectionOf(id);
             var chance = section.EnergyTilt
                 .Chance(Chance.At(section.Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "sections")), EnergyLean);
-            return song.Stream(SongStream.StopTime, id).TestProbability(chance);
+            return song.Stream(SongStream.StopTime, id).TestProbability(chance) && stops;
         });
         // but the first section where an intro brings the band in part by part over it, whose parts not in yet would leave
         // its hits to none
@@ -56,7 +69,7 @@ internal static class StopTime
         // and but in a solo, whose soloists play over the band as loud as it was measured, as a push leaves a solo be
         return
         [
-            ..song.Form.Map.Sections.Where((x, i) => stops[x.SectionId] && x != built && !song.Solos.ContainsKey(i))
+            ..song.Form.Map.Sections.Where((x, i) => stopping[x.SectionId] && x != built && !song.Solos.ContainsKey(i))
                 .Select(x => (x.Start, Math.Min(x.End, x.Start + x.Meter.PhraseDuration), x.Meter.BarDuration))
         ];
     }
@@ -68,8 +81,10 @@ internal static class StopTime
     /// </summary>
     internal static (double Start, double End, double BarDuration)[] HitBars(SongDecisions song)
     {
+        // in a song that stops at all, every section drawn all the same
+        var stops = Stops(song);
         var hits = song.SectionIds.Distinct().ToDictionary(id => id, id => song.Stream(SongStream.EnsembleHits, id)
-            .TestProbability(HitsChance.At(song.SectionOf(id).Facets[Facet.Form], song.Genre.Chance(GenreChoices.EnsembleHits, "sections"))));
+            .TestProbability(HitsChance.At(song.SectionOf(id).Facets[Facet.Form], song.Genre.Chance(GenreChoices.EnsembleHits, "sections"))) && stops);
         var sections = song.Form.Map.Sections;
         return
         [
@@ -95,6 +110,7 @@ internal static class StopTime
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
+        StateTrace.RecordSong(TracePoints.Stops, $"{Stops(song)}", Stops(song));
         // but in a calling verse, whose answer stop time would cut to a hit a bar
         var holds = draft.Holds(song);
         // and no hits in a section running a polymeter, whose cycle runs to its end

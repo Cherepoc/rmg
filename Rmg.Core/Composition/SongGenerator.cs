@@ -278,7 +278,8 @@ internal enum SongStream
     SoloGhosts = 123,
     BuildRoll = 124,
     RiffTurnarounds = 125,
-    TimeChanges = 126
+    TimeChanges = 126,
+    Stops = 127
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

@@ -32,6 +32,38 @@ public sealed class StopsReportTest
                $"stop time {Devices(TracePoints.StopTime)}; ensemble hits {Devices(TracePoints.EnsembleHits)}; drops {Devices(TracePoints.Drop)}; breakdowns {Devices(TracePoints.Breakdown)}";
     }
 
+    /// <summary>A song that does not stop plays no stop time and no ensemble hits.</summary>
+    [Test]
+    public async Task ASongThatDoesNotStop_PlaysNoStopTime_NorHits()
+    {
+        var kept = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))))
+        {
+            if ((bool)song.Trace.Single(x => x.Point == TracePoints.Stops).Value!)
+                continue;
+            kept++;
+            foreach (var entry in song.Trace.Where(x => x.Point is TracePoints.StopTime or TracePoints.EnsembleHits))
+                await Assert.That(((ImmutableArray<double>)entry.Value!).Length).IsEqualTo(0).Because($"seed {song.Seed}, section {entry.Section}");
+        }
+
+        await Assert.That(kept).IsGreaterThan(10);
+    }
+
+    /// <summary>
+    ///     A genre's songs play stop time far less often than with every one of them stopping, the same songs (seen 25%
+    ///     against 67% of 64 Metal songs).
+    /// </summary>
+    [Test]
+    public async Task MostSongs_DoNotStop()
+    {
+        double Stopping(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
+            .Count(x => x.Trace.Any(t => t.Point == TracePoints.StopTime && ((ImmutableArray<double>)t.Value!).Length > 0)) / 64.0;
+        var metal = GenrePresets.Genre("metal");
+        var (own, all) = (Stopping(metal), Stopping(metal with { Choices = metal.Choices.SetItem(GenreChoices.Stops.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("songs", new(1, 1, 1))) }));
+        Console.WriteLine($"  Metal's songs in stop time: {own:P0}, {all:P0} with every song stopping");
+        await Assert.That(all).IsGreaterThan(own + 0.15);
+    }
+
     [Test]
     [Explicit]
     public async Task Report()
