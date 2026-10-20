@@ -36,7 +36,8 @@ queue and was retired on 19 October, each decided by genre judgment, side B (see
 vibrato a step wide (`metal-vibrato`, 0.12), the strings' vibrato sung soon (`string-vibrato`, 0.46) and a drummer's
 stickings against the songs' own (`stickings`, #341, 0.34), and was retired the same day, each kept. The ninth round
 (20 October 2026) asks three of the expressive lines' built devices, each switched off by a genre choice of its own
-(`soloLanding`, `sequence`) or the riff's: the song's riff in Rock (`song-riff`, 0.45), a solo's run landing on the
+(`soloLanding`, `sequence`) or the riff's: the song's riff in Rock (`song-riff`, 0.48, heard from where the riff is first played, as the first asking
+started at a later copy and copied a riff the song never played, fixed the same day), a solo's run landing on the
 change in Rock (`solo-landing`, 0.29) and a melody's later bar on its first's rhythm in Pop (`melody-sequence`, 0.20);
 the riff's turnaround in the Blues measured too faint to ask (0.07, from 0.02), and the melody's phrase swell, the
 solo's ceiling and the riff's power chords by the section's energy no choice's to switch off. A question listens only in the sections its device plays in, not
@@ -406,7 +407,7 @@ genre's amount its data, never a device of its own. In order: the rest, each by 
 own solo's highest note at its climax, in its first fifth 36% to 11%; the lines' phrase arc by the genre's evenness; a
 melody phrase's last note falling away, 1.4 to 4.6 velocity steps under its middle; a melody swelling only into its held
 phrase ends, on a sound that holds; the swell's amount, 0.12, left to listening; built 20 October: the song's riff, the
-first section's played again over the others' chords; a riff's turnaround, its last beat walking into its next cycle; a
+first section's to play it made and brought back by the others over their chords; a riff's turnaround, its last beat walking into its next cycle; a
 riff's power chords leaning to the louder sections, Rock's 61% to 72% of them; a melody's later letter on its first's
 rhythm, 10% to 25% of its bars).
 
@@ -456,8 +457,11 @@ The melody:
 
 The riff:
 
-- **The song's riff, the rest** (P3, by listening; built 20 October 2026, two sections' riffs opening on the same
-  rhythm 12% to 50% in 256 songs): a section of another meter than the first riff's plays its own; a polymeter's riff,
+- **The song's riff, the rest** (P3, by listening; built 20 October 2026, made by the first section that plays it, as
+  the first section generated, its riff often resting, gave the copies a riff never heard: two sections both playing it
+  opening on the same rhythm in 88% of pairs, against 16% of the others, in 256 songs): a copy over chords unlike the
+  first's, as two-note chords where the first played single notes, its notes the chord's there, should it be heard as
+  another riff (*A riff moved as a shape*); a section of another meter than the first riff's plays its own; a polymeter's riff,
   whose cycle is not its bar's, copied as its pattern's bars are, to be heard; the riff between the sections with *The
   riff between the sections*.
 - **A riff's turnaround, the rest** (P3, by listening; built 20 October 2026 as a walk of its cycle's last beat into

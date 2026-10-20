@@ -1,7 +1,7 @@
 [
   {
     "id": "song-riff",
-    "question": "The song's riff, the first section's riff played again over the other sections' chords: one riff driving the song, or the sections all alike?",
+    "question": "The song's riff: heard from where it is first played, on into a later section that brings it back over its own chords. One riff driving the song, or the sections too alike?",
     "decides": "How often a section plays the song's riff (riff.song) in the riff genres' presets, Rock's 100-85-50.",
     "genre": "rock",
     "with": {
@@ -26,32 +26,8 @@
         ]
       },
       {
-        "seed": "2",
-        "at": 74.2,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 117.1,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 74.3,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
         "seed": "7",
-        "at": 49.8,
+        "at": 0,
         "listen": [
           "Riff (Distortion Guitar)",
           "Bass (Electric Bass (finger))",
@@ -60,10 +36,36 @@
       },
       {
         "seed": "e",
-        "at": 87.9,
+        "at": 0,
         "listen": [
           "Riff (Distortion Guitar)",
           "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "n",
+        "at": 0,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "q",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "s",
+        "at": 0,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
         ]
       }
     ]

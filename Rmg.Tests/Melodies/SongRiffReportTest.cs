@@ -10,7 +10,7 @@ public sealed class SongRiffReportTest
     ///     bar's end leads into the next chord as each section's chords ask: whether the half bars' onsets are the same, and whether their notes move the same way too, up, down or not, as a figure moved by scale steps
     ///     over another chord does.
     /// </summary>
-    internal static (bool Rhythm, bool Figure, bool Plays)[] Pairs(CorpusSong song)
+    internal static (bool Rhythm, bool Figure, bool Both)[] Pairs(CorpusSong song)
     {
         if (!song.Song.Notes!.TryGetValue(song.Track(TrackRole.Riff), out var notes))
             return [];
@@ -24,7 +24,7 @@ public sealed class SongRiffReportTest
         }).Where(x => x.Length >= 2).ToArray();
         return
         [
-            ..firsts.SelectMany((a, i) => firsts.Skip(i + 1).Where(b => b.Meter == a.Meter).Select(b => (a.Onsets == b.Onsets, a.Onsets == b.Onsets && a.Contour == b.Contour, playing.Contains(a.SectionId) || playing.Contains(b.SectionId))))
+            ..firsts.SelectMany((a, i) => firsts.Skip(i + 1).Where(b => b.Meter == a.Meter).Select(b => (a.Onsets == b.Onsets, a.Onsets == b.Onsets && a.Contour == b.Contour, playing.Contains(a.SectionId) && playing.Contains(b.SectionId))))
         ];
     }
 
@@ -37,9 +37,9 @@ public sealed class SongRiffReportTest
     public async Task ASectionPlayingTheSongsRiff_OpensOnIt()
     {
         var pairs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => Pairs(TestCorpus.Get(seed))).SelectMany(x => x).ToArray();
-        double Same(bool plays) => pairs.Where(x => x.Plays == plays).Count(x => x.Rhythm) / (double)Math.Max(1, pairs.Count(x => x.Plays == plays));
-        Console.WriteLine($"  {pairs.Count(x => x.Plays)} pairs one of which plays the song's riff, the rhythm the same in {Same(true):P0}; {pairs.Count(x => !x.Plays)} neither, in {Same(false):P0}");
-        await Assert.That(pairs.Count(x => x.Plays)).IsGreaterThan(30);
+        double Same(bool plays) => pairs.Where(x => x.Both == plays).Count(x => x.Rhythm) / (double)Math.Max(1, pairs.Count(x => x.Both == plays));
+        Console.WriteLine($"  {pairs.Count(x => x.Both)} pairs both playing the song's riff, the rhythm the same in {Same(true):P0}; {pairs.Count(x => !x.Both)} others, in {Same(false):P0}");
+        await Assert.That(pairs.Count(x => x.Both)).IsGreaterThan(30);
         await Assert.That(Same(true)).IsGreaterThan(Same(false) + 0.25);
     }
 
@@ -81,8 +81,8 @@ public sealed class SongRiffReportTest
     public async Task Report()
     {
         var pairs = TestCorpus.Measure(256, Pairs).SelectMany(x => x).ToArray();
-        foreach (var group in pairs.GroupBy(x => x.Plays).Prepend(pairs.GroupBy(_ => true).Single()))
-            Console.WriteLine($"  {group.Count()} pairs of sections{(group.Count() == pairs.Length ? "" : group.Key ? ", one the song's riff" : ", neither the song's riff")}: the riff's first half bar's rhythm the same in " +
+        foreach (var group in pairs.GroupBy(x => x.Both).Prepend(pairs.GroupBy(_ => true).Single()))
+            Console.WriteLine($"  {group.Count()} pairs of sections{(group.Count() == pairs.Length ? "" : group.Key ? ", both the song's riff" : ", not both")}: the riff's first half bar's rhythm the same in " +
                               $"{group.Count(x => x.Rhythm) / (double)group.Count():P0}, its figure in {group.Count(x => x.Figure) / (double)group.Count():P0}");
         await Task.CompletedTask;
     }

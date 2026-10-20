@@ -128,8 +128,8 @@ internal sealed class SectionGenerator
     public static Probabilities.ByConvention RiffHookChance { get; } = new(1, 0.8, 0);
 
     /// <summary>
-    ///     The chance a section's riff is the song's, the riff of the first section that played one, its bars in turn over
-    ///     this one's chords, where its meter is the same, so that a riff-driven song's intro, verses and bars between play one
+    ///     The chance a section's riff is the song's, the riff the first section playing it makes, its bars in turn over
+    ///     this one's chords, where its meter is the same, so that whichever plays first states it and the others bring it back, so that a riff-driven song's intro, verses and bars between play one
     ///     riff, by the melody facet: a convention, every time in a plain song, and now and then in the wildest, whose sections
     ///     bring riffs of their own (<see cref="GenreChoices.Riff" />).
     /// </summary>
@@ -150,7 +150,7 @@ internal sealed class SectionGenerator
     // the song's first section's harmony, which a section of a loop plays, and its meter
     private (SectionHarmony Harmony, Meter Meter)? _firstHarmony;
 
-    // the song's riff, the first section's that played one: its riff's notes over its pattern, its bars' letters and its meter
+    // the song's riff, the first section's that plays it: its riff's notes over its pattern, its bars' letters and its meter
     private (EventTimeline<StateMap> Notes, ImmutableArray<int> Letters, Meter Meter)? _songRiff;
 
     /// <summary>The random sequence a decision of a section draws from, apart from its own and every other decision's.</summary>
@@ -286,8 +286,8 @@ internal sealed class SectionGenerator
         StateTrace.RecordSection(TracePoints.Drone, SectionTrace, sectionId, $"{drone}", drone);
         var riffHook = Stream(sectionId, SectionStream.RiffHook).TestProbability(RiffHookChance.At(facets[Facet.Melody], _genre.Chance(GenreChoices.Riff, "hook")));
         StateTrace.RecordSection(TracePoints.RiffHook, SectionTrace, sectionId, $"{riffHook}", riffHook);
-        // and the song's riff, from a sequence of its own
-        var songRiff = Stream(sectionId, SectionStream.SongRiff).TestProbability(SongRiffChance.At(facets[Facet.Melody], _genre.Chance(GenreChoices.Riff, "song")));
+        // and the song's riff, from a sequence of its own, where the song plays a riff
+        var songRiff = !_absent.Contains(TrackRole.Riff) && Stream(sectionId, SectionStream.SongRiff).TestProbability(SongRiffChance.At(facets[Facet.Melody], _genre.Chance(GenreChoices.Riff, "song")));
         var pitched = GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs, drone, riffHook, songRiff, twinLead, form).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
@@ -664,7 +664,7 @@ internal sealed class SectionGenerator
             }
 
             // the riff: the song's where the section plays it, the first riff's notes in turn over the pattern, its rhythm kept
-            // as its later appearances improvise; the first riff the song's
+            // as its later appearances improvise; the first section's to play it making it
             var letters = trackRhythm.Scheme.Across(meter.Phrases).Letters;
             var rebuilds = Rebuilt;
             if (isRiff && _songRiff is { } riff && songRiff && riff.Meter.Equals(meter))
@@ -682,8 +682,11 @@ internal sealed class SectionGenerator
                 rebuilds = _ => bars.Timeline.Repeat(2);
                 StateTrace.RecordSection(TracePoints.SongRiff, SectionTrace, sectionId, "the song's riff", true);
             }
-            else if (isRiff && _songRiff is null)
+            else if (isRiff && _songRiff is null && songRiff)
+            {
                 _songRiff = (bars.Timeline.TrackTimelineMap[trackNumber].EventTimeline, letters, meter);
+                StateTrace.RecordSection(TracePoints.SongRiff, SectionTrace, sectionId, "the song's riff, made here", false);
+            }
 
             // a line, placed with the song's, its pattern played twice as the section does, its figures played again as its
             // scheme has them: the bass leading and landing as its chords have it, the riff and the counter-melody leading

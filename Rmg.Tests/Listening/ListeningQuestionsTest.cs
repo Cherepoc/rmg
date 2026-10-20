@@ -30,6 +30,7 @@ public sealed class ListeningQuestionsTest
     /// </param>
     /// <param name="At">Where the song first plays the device, in beats, as its trace and notes have it, a little before it where it grows; none where it does not.</param>
     /// <param name="In">The sections the device plays in, where alone it is listened to; every section for none.</param>
+    /// <param name="From">Where the listener starts, in beats, where it is before where the device differs: what it brings back stated first; none for there.</param>
     /// <param name="With">The settings the songs with the device are given, by the page's name, as its steps; none for none.</param>
     /// <param name="Without">The settings the songs without it are given, as <paramref name="With" />.</param>
     private sealed record Question(
@@ -41,6 +42,7 @@ public sealed class ListeningQuestionsTest
         Dictionary<string, Dictionary<string, object>>? GenrePatch,
         Func<CorpusSong, double?> At,
         Func<CorpusSong, SectionSpan, bool>? In = null,
+        Func<CorpusSong, double?>? From = null,
         Dictionary<string, int>? With = null,
         Dictionary<string, int>? Without = null
     );
@@ -52,16 +54,26 @@ public sealed class ListeningQuestionsTest
     /// <summary>Where a song first plays a section of those, in beats; none where it plays none.</summary>
     private static double? FirstOf(CorpusSong song, HashSet<int> sections) => song.Map.Sections.FirstOrDefault(x => sections.Contains(x.SectionId))?.Start;
 
+    /// <summary>The sections that play the song's riff, its copies or the one that makes it too, as their traces have it.</summary>
+    private static HashSet<int> SongRiffs(CorpusSong song, bool makerToo) =>
+        SectionsOf(song, TracePoints.SongRiff, x => makerToo || x.Value is true);
+
+    /// <summary>Where the song's riff is first heard, in beats, in a section that plays it; none where none does.</summary>
+    private static double? FirstHeardRiff(CorpusSong song) =>
+        song.Song.Notes!.TryGetValue(song.Track(TrackRole.Riff), out var notes) && SongRiffs(song, true) is var sections
+            ? song.PlayedSpans.Where(x => sections.Contains(x.SectionId) && notes.Any(n => x.IsWithin(n.Position))).Select(x => (double?)x.Start).FirstOrDefault()
+            : null;
+
     /// <summary>The sections whose melody plays a later letter on its first's rhythm.</summary>
     private static HashSet<int> Sequenced(CorpusSong song) =>
         SectionsOf(song, TracePoints.BarPattern, x => x.Track == song.Track(TrackRole.Melody) && x.Value is PhraseScheme { Borrowed.Count: > 0 });
 
     private static readonly Question[] Questions =
     [
-        new("song-riff", "The song's riff, the first section's riff played again over the other sections' chords: one riff driving the song, or the sections all alike?",
+        new("song-riff", "The song's riff: heard from where it is first played, on into a later section that brings it back over its own chords. One riff driving the song, or the sections too alike?",
             "How often a section plays the song's riff (riff.song) in the riff genres' presets, Rock's 100-85-50.", "rock", [],
             new() { ["riff"] = new() { ["song"] = 0 } },
-            x => FirstOf(x, SectionsOf(x, TracePoints.SongRiff)), (x, span) => SectionsOf(x, TracePoints.SongRiff).Contains(span.SectionId)),
+            x => FirstOf(x, SongRiffs(x, false)), (x, span) => SongRiffs(x, false).Contains(span.SectionId), FirstHeardRiff),
         new("solo-landing", "A solo's run leaping onto the new chord's nearest note as the chord changes: making the changes, or a forced leap?",
             "Whether a run lands on the change (Soloist.LandingChances, 1-0.7-0), and whether its third or seventh is to be preferred.", "rock", [],
             new() { ["soloLanding"] = new() { ["runs"] = 0 } },
@@ -200,7 +212,10 @@ public sealed class ListeningQuestionsTest
             var measured = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
                 {
                     var song = TestCorpus.Get(seed, overrides);
-                    return question.At(song) is { } at ? (Seed: seed, Measure: Measure(question, seed, song, at)) : (seed, null);
+                    if (question.At(song) is not { } at || Measure(question, seed, song, at) is not { } measure)
+                        return (Seed: seed, Measure: ((double Difference, double At, string[] Listen)?)null);
+                    // heard from where what it brings back is stated, where the question says so
+                    return (Seed: seed, Measure: question.From?.Invoke(song) is { } from && from < at ? measure with { At = Math.Max(0, song.Rendered.SecondsAt(from) - LeadIn) } : measure);
                 })
                 .Where(x => x.Measure is not null).Take(Candidates).Select(x => (x.Seed, Difference: x.Measure!.Value.Item1, At: x.Measure.Value.Item2, Listen: x.Measure.Value.Item3)).ToArray();
             // a song the device plays in but that sounds the same without it, as another device plays it there too, never asked

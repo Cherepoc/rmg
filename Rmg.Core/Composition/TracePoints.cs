@@ -388,7 +388,7 @@ internal static class TracePoints
     /// <summary>Whether a section's riff is a figure, its first bar's notes kept over the chords that follow (a <c>bool</c>; <see cref="Composition.SectionGenerator.RiffHookChance" />).</summary>
     public const string RiffHook = "Riff hook";
 
-    /// <summary>A section whose riff is the song's, the first riff's notes over its chords (a <c>bool</c>; <see cref="Composition.SectionGenerator.SongRiffChance" />).</summary>
+    /// <summary>A section whose riff is the song's, the first such section's riff or its notes over its chords, and whether it is a copy of the first's (a <c>bool</c>; <see cref="Composition.SectionGenerator.SongRiffChance" />).</summary>
     public const string SongRiff = "Song riff";
 
     /// <summary>Whether a section's snare plays ghost notes (a <c>bool</c>; <see cref="Composition.Ghosts" />).</summary>
