@@ -223,6 +223,10 @@ internal static class Figures
         if (drawn.Values.Select(x => x[FigurePlayer.Claves]).FirstOrDefault(x => x is not null) is { } clave)
             foreach (var figures in drawn.Values.Where(x => x[FigurePlayer.Claves] is not null))
                 figures[FigurePlayer.Claves] = clave;
+        // and a loop's bass and riff the figures of the section whose lines it plays, drawn all the same
+        foreach (var id in drawn.Keys.Where(x => song.SectionOf(x).LinesFrom is not null))
+            foreach (var player in new[] { FigurePlayer.Bass, FigurePlayer.Riff })
+                drawn[id][player] = drawn[song.SectionOf(id).LinesFrom!.Value][player];
         // but a section running a figure across its bar lines, its cycle kept, as a mutating groove keeps it, its figures
         // drawn all the same: one of fixed onsets, as one that follows, the kick with the riff, follows it as the cycle runs it
         foreach (var id in drawn.Keys.Where(draft.Polymeters.Contains))

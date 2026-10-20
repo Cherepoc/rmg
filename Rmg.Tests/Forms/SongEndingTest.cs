@@ -184,6 +184,7 @@ public sealed class SongEndingTest
             SectionForm.Own,
             0,
             DrumJob.Groove,
+            null,
             Genre.None
         );
 

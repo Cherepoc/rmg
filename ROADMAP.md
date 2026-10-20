@@ -473,8 +473,10 @@ The riff:
   onsets in 90% of bars and its notes in 67% (Metal 69%, Thrash 77%, the Blues 93%), 93% over the same chords and key,
   the rest bars whose harmony a later appearance changes on purpose, reharmonised, lifted or shifted, improvisation and
   a phrase's fresh start nearly none of it; so a riff section that returns plays its riff again as it was.
-  2. *A loop's riff:* a section on the first section's chords (`SectionGenerator.Loop`) playing its riff as well, its
-     notes as made, over the same chords, so that a looping song is one riff: the smallest of them.
+  Built on 20 October: a loop's riff and bass, a section on the first's chords playing its riff and bass as the first
+  made them, their devices and figures with them (`GeneratedSection.LinesFrom`), the first's rhythm in 62% of their
+  bars against 16% of the other sections' (Techno, the Blues, Dub); short of all, as a figure answering the kick, Techno's
+  offbeat bass, plays the bass's own rhythm where the section's kick rests, which listening may want kept.
   3. *A riff section returning:* a riff genre's form playing its intro again between its sections and as its outro,
      its pattern as it was, forms being data; only an intro whose riff plays, and the song's length kept to its
      bounds. The riff between the sections (*Rock and metal as their bands play them*) is this.

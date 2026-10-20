@@ -60,14 +60,15 @@ public sealed class GlideTest
 
     /// <summary>
     ///     A gliding bass slides into a leap oftener than into a step, as the slide leans to it (<see cref="Expression.GlideOdds" />);
-    ///     a leap's share of the changes it may slide into, within a pitch bend's reach, against a step's.
+    ///     a leap's share of the changes it may slide into, within a pitch bend's reach, against a step's (seen 22% against 20%
+    ///     and 24% against 12% at two offsets, over 128 songs, as Hip-hop's loops play one bass line through a song's sections).
     /// </summary>
     [Test]
     public async Task AGlidingBass_SlidesIntoALeap_OftenerThanIntoAStep()
     {
         var genre = GenrePresets.With("hipHop", GenreChoices.Glide, ("bass", 1));
         var (leaps, steps, ends, inner) = (new List<bool>(), new List<bool>(), new List<bool>(), new List<bool>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             if (song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass))?.ToArray() is not { } bass)
                 continue;

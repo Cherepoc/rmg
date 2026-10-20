@@ -385,6 +385,9 @@ internal static class TracePoints
     /// <summary>Whether a section is one the riff's twin leads in (a <c>bool</c>; <see cref="Composition.LineDoubling.TwinLeadChance" />).</summary>
     public const string TwinLead = "Twin lead";
 
+    /// <summary>The section a loop's riff and bass are, the song's first, whose devices and figures they play (an <c>int</c>; <see cref="Composition.GeneratedSection.LinesFrom" />).</summary>
+    public const string LinesFrom = "Lines from";
+
     /// <summary>Whether a section's riff is a figure, its first bar's notes kept over the chords that follow (a <c>bool</c>; <see cref="Composition.SectionGenerator.RiffHookChance" />).</summary>
     public const string RiffHook = "Riff hook";
 
