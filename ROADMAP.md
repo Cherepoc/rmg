@@ -485,13 +485,19 @@ The riff:
   And the verse over the riff (`riffSection.verses`): a verse of a song that opens on an intro looping the intro, its
   chords, riff and bass, the melody over them, the chorus its own; in 6 to 10 sections of 64 songs of Rock, Metal and
   Thrash, as few songs open on an intro, the intro's riff's rhythm kept in all of Metal's and Thrash's bars.
-  5. *The riff moved as a shape,* below.
+  The riff moved as a shape, the plan's last, tried and put off (below).
 - **A riff's turnaround, the rest** (P3, by listening; built 20 October 2026 as a walk of its cycle's last beat into
   the next, one restart in seven): a bar varied as A′ was measured not heard as one, its last bar opening as its
   first 31% to 32%, as a varied repeat draws its cycles afresh throughout; a turnaround that keeps the bar's first half
   and changes its second, should the walk alone sound too slight.
-- **A riff moved as a shape** (P3, a genre's choice): a hooked riff over another chord keeps its scale steps from the
-  root (`Line`'s echoes). Its shape kept in semitones, as a hand moves it up the neck or a sequencer transposes it,
+- **A riff moved as a shape** (P4, tried and put off 21 October 2026): a hooked bar's notes moved by its chord's root
+  in semitones over a chord shaped as its first bar's, its first's notes kept where they fit otherwise, kept its
+  contour over another chord in 49% of bars against 55% without, and its intervals 36% against 41% (Metal, Punk, the
+  Blues, 64 songs each, `RiffHookReportTest`): a riff's notes are placed as scale steps over their chord's root already,
+  so that it moves with its chords, and the hook's kept notes are what hold it; moved, only the notes over a chord of
+  its first's kind move, not the bar's landings, and the figure breaks. Again only as the whole bar moved together, its
+  landings with it, should listening hear a riff over the IV that is not the riff. As planned: a hooked riff over
+  another chord keeps its scale steps from the root (`Line`'s echoes). Its shape kept in semitones, as a hand moves it up the neck or a sequencer transposes it,
   taking the chord's colour, a ♭VI's shape over ♭VI: the metal genres', Doom's creeping half steps, Punk's, Rock's in
   power chords, a blues riff moved to the IV and the V, and a Techno, Trance or Psytrance sequence transposed. Only
   where the chords play no third, power chords or a sus, as a shape's minor third over a major triad clashes; never
@@ -524,8 +530,9 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   a chromatic line scale would put a chromatic note on the beat.
 - **The building phrases:** `MelodyLayers.GenerateContour` over the pattern's phrases (`BarStateGenerator`), its
   last lifted, its echoes rising with it as a sequence; the goal's chance 1 at its end; a hooked chorus heard first.
-- **The shape:** an echo's semitones from its root kept, written with its `Alteration`; only over a chord with no
-  third; the twin's third (`LineDoubling`) moved as the shape, a fixed interval, where the riff is.
+- **The shape** (tried 21 October 2026, *A riff moved as a shape*): an echo's semitones from its root kept, written
+  with its `Alteration`; over a chord shaped as its first's rather than only one with no third; the twin's third
+  (`LineDoubling`) moved as the shape, a fixed interval, where the riff is.
 - **The home note:** `Line.PedalShare` a state of the track's, the chugs' 0.7, another riff's a genre's share well
   under it; the riff's chord's first note landing on its root by the same share (its `landings`, `Free` now), as the
   bass's does.

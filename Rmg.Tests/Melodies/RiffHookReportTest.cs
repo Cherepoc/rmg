@@ -8,8 +8,8 @@ public sealed class RiffHookReportTest
 {
     /// <summary>
     ///     Every repeated bar of a hooked riff, the first time its section plays, against its letter's first bar in its
-    ///     pattern: whether its chord's root is another, whether it starts its notes where the first does, whether its notes
-    ///     move the same way, and how many of its notes play the first's pitch at the same place, of how many.
+    ///     pattern: whether its chord's root is another, whether it starts its notes where the first does, whether its notes,
+    ///     by their lowest pitch, move the same way, and how many of its notes play the first's pitch at the same place, of how many.
     /// </summary>
     internal static (bool OtherChord, bool Rhythm, bool Contour, int Kept, int Notes)[] Repeats(CorpusSong song)
     {
@@ -34,10 +34,11 @@ public sealed class RiffHookReportTest
                     var first = group.First();
                     double Offset(double position, double start) => Math.Round(position - start, 3);
                     string Onsets((int, int, double Start, TimelineItem<RealizedNote>[] Played, int) b) => string.Join(",", b.Played.Select(x => Offset(x.Position, b.Start)));
-                    string Contour(TimelineItem<RealizedNote>[] played) => string.Join(",", played.Zip(played.Skip(1), (a, b) => Math.Sign(b.Value.Pitches[0] - a.Value.Pitches[0])));
-                    var pitches = first.Played.GroupBy(x => Offset(x.Position, first.Start)).ToDictionary(x => x.Key, x => x.First().Value.Pitches[0]);
+                    // a note by its lowest pitch, a power chord's root, whatever order its voicing lists them in
+                    string Contour(TimelineItem<RealizedNote>[] played) => string.Join(",", played.Zip(played.Skip(1), (a, b) => Math.Sign(b.Value.Pitches.Min() - a.Value.Pitches.Min())));
+                    var pitches = first.Played.GroupBy(x => Offset(x.Position, first.Start)).ToDictionary(x => x.Key, x => x.First().Value.Pitches.Min());
                     return group.Skip(1).Select(b => (b.Root != first.Root, Onsets(b) == Onsets(first), Contour(b.Played) == Contour(first.Played),
-                        b.Played.Count(x => pitches.TryGetValue(Offset(x.Position, b.Start), out var p) && p == x.Value.Pitches[0]), b.Played.Length));
+                        b.Played.Count(x => pitches.TryGetValue(Offset(x.Position, b.Start), out var p) && p == x.Value.Pitches.Min()), b.Played.Length));
                 });
             })
         ];
