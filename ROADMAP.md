@@ -36,8 +36,8 @@ queue and was retired on 19 October, each decided by genre judgment, side B (see
 vibrato a step wide (`metal-vibrato`, 0.12), the strings' vibrato sung soon (`string-vibrato`, 0.46) and a drummer's
 stickings against the songs' own (`stickings`, #341, 0.34), and was retired the same day, each kept. The ninth round
 (20 October 2026) asks three of the expressive lines' built devices, each switched off by a genre choice of its own
-(`soloLanding`, `sequence`) or the riff's: the song's riff in Rock (`song-riff`, taken off the same day: its copies, a riff never played re-fitted to each
-section's chords, came across as no riff at all, and it is to be rebuilt on the riff hook), a solo's run landing on the
+(`soloLanding`, `sequence`) or the riff's: the song's riff in Rock (`song-riff`, taken off the same day and the device reverted: its copies, a riff re-fitted to
+each section's chords, came across as no riff at all, see *The riff's uses*), a solo's run landing on the
 change in Rock (`solo-landing`, 0.29) and a melody's later bar on its first's rhythm in Pop (`melody-sequence`, 0.20);
 the riff's turnaround in the Blues measured too faint to ask (0.07, from 0.02), and the melody's phrase swell, the
 solo's ceiling and the riff's power chords by the section's energy no choice's to switch off. A question listens only in the sections its device plays in, not
@@ -406,8 +406,7 @@ genre's amount its data, never a device of its own. In order: the rest, each by 
 (built 19 October 2026: a run landing on the change, its first note over a new chord the chord's 45-51% to 67-79%; an
 own solo's highest note at its climax, in its first fifth 36% to 11%; the lines' phrase arc by the genre's evenness; a
 melody phrase's last note falling away, 1.4 to 4.6 velocity steps under its middle; a melody swelling only into its held
-phrase ends, on a sound that holds; the swell's amount, 0.12, left to listening; built 20 October: the song's riff, the
-first section's to play it made and brought back by the others over their chords; a riff's turnaround, its last beat walking into its next cycle; a
+phrase ends, on a sound that holds; the swell's amount, 0.12, left to listening; built 20 October: a riff's turnaround, its last beat walking into its next cycle; a
 riff's power chords leaning to the louder sections, Rock's 61% to 72% of them; a melody's later letter on its first's
 rhythm, 10% to 25% of its bars).
 
@@ -457,13 +456,29 @@ The melody:
 
 The riff:
 
-- **The song's riff, the rest** (P3, by listening; built 20 October 2026, made by the first section that plays it, as
-  the first section generated, its riff often resting, gave the copies a riff never heard: two sections both playing it
-  opening on the same rhythm in 88% of pairs, against 16% of the others, in 256 songs): a copy over chords unlike the
-  first's, as two-note chords where the first played single notes, its notes the chord's there, should it be heard as
-  another riff (*A riff moved as a shape*); a section of another meter than the first riff's plays its own; a polymeter's riff,
-  whose cycle is not its bar's, copied as its pattern's bars are, to be heard; the riff between the sections with *The
-  riff between the sections*.
+- **The riff's uses** (the plan of 20 October 2026, in its order): the song's riff, built on 19 and 20 October as one
+  section's riff copied into the others and each note re-fitted to their chords, was reverted unheard, as listening
+  found its copies no riff at all (song 1 of `song-riff`: its riff made in an intro that rests it, the chorus and the
+  bridge sharing two onsets a bar) and no convention moves a riff that way. How the riff genres use a riff: a riff of
+  each section, played again as the section comes back (built); one riff section returning as the intro, after a
+  chorus, before the solo and as the outro, its riff the song's hook where no chorus sings one (form, missing); the
+  verse over the main riff, its melody added, the chorus breaking away (missing); one riff for the whole song, the
+  sections told apart by their arrangement alone, a funk vamp's, a boogie's, Techno's, House's, a hip-hop loop's, a
+  drone's (`loop` replays the first section's chords but draws each section's riff anew); the riff moved with its
+  chords as a shape, a blues riff on the I, the IV and the V (*A riff moved as a shape*); its last bar varied or turned
+  round, answering the voice, doubled, in stop time, alone first, against the bar and under a solo (built); the main
+  riff halved in a breakdown, and an ostinato kept while its filter and layers change (later, by listening). Three
+  mechanisms, not one a use: a section that recurs, a riff that brings its chords, a riff moved as a shape.
+  1. *Measured first:* how much a riff's later appearances differ from its first, its onsets and pitches as played,
+     against the convention of the heavy genres, whose repeats are exact (`LineProfile.ImprovisationShare`).
+  2. *A loop's riff:* a section on the first section's chords (`SectionGenerator.Loop`) playing its riff as well, its
+     notes as made, over the same chords, so that a looping song is one riff: the smallest of them.
+  3. *A riff section returning:* a riff genre's form playing its intro again between its sections and as its outro,
+     its pattern as it was, forms being data; only an intro whose riff plays, and the song's length kept to its
+     bounds. The riff between the sections (*Rock and metal as their bands play them*) is this.
+  4. *The verse over the riff:* a verse playing the riff section's riff and chords, its melody over them, leaning by
+     the section's role, as solos do, so that a chorus keeps its own and the song is not one progression.
+  5. *The riff moved as a shape,* below.
 - **A riff's turnaround, the rest** (P3, by listening; built 20 October 2026 as a walk of its cycle's last beat into
   the next, one restart in seven): a bar varied as A′ was measured not heard as one, its last bar opening as its
   first 31% to 32%, as a varied repeat draws its cycles afresh throughout; a turnaround that keeps the bar's first half
@@ -511,7 +526,7 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   its own; never a palm-muted note, a solo's release or a bent note.
 - **The riff's accents:** `LineProfile.FigureAccent`, the riff's notes after a rest or held off the beat over its
   others; none on a chugging riff, whose accents are open already.
-- **New genre choices** (`riff.song`, `riff.shape`, the home share, `phrases.build`, the soloist's beat figures): the
+- **New genre choices** (`riff.shape`, the home share, `phrases.build`, the soloist's beat figures): the
   songs' own by default, set only in the genres the review names, as each is a choice for the editor and data for 47
   presets; every share well under 1, so that the heavy genres, which gain most of the riff's items at once, keep riffs
   unlike each other.
@@ -655,7 +670,7 @@ left:
   third of their sections) were there already; the organ's solo, Rock's shuffle at its plain end and Metal's clean
   quiet sections are presets now. Left:
   - The riff between the sections (P3): one part alone is a texture already (`TextureKind.Alone`), the riff a genre's
-    weight of it, but not placed as an interlude of its own.
+    weight of it, but not placed as an interlude of its own: planned as *A riff section returning* (*The riff's uses*).
   - A melody sung rather than played (P3, `pop-sung-lines` heard and kept 4-0): no singer in General MIDI, so the melody
     stands for a voice by how it phrases, not by its sound. Measured (`SungMelodyReportTest`, 128 songs): its moves
     already sing (repeated 28%, steps 33%, thirds 19%, over a sixth 3%, legato 96%); every phrase of a pattern ends in a

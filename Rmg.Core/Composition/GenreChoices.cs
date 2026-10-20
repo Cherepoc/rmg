@@ -215,7 +215,6 @@ public static class GenreChoices
         ("chugs", "Palm-muted chugs", SectionGenerator.ChugChance),
         ("drone", "Its weak notes on a drone", SectionGenerator.DroneChance),
         ("hook", "A figure kept over the chords", SectionGenerator.RiffHookChance),
-        ("song", "Sections playing the song's riff", SectionGenerator.SongRiffChance),
         ("turnaround", "A riff turning round into its next cycle", LineFills.TurnaroundChance)
     ]);
 
