@@ -277,10 +277,17 @@ the genre's chance, from a stream of its own, and only then do its sections draw
 the genre's per-section chances retuned for songs that do; how many departures a song plays the genre's data, not a
 count of its own. In order:
 
-- **The song's feel kept** (P2): a song departing from its feel at all drawn first (`Groove`), its sections' half
-  and double time drawn only then, a bridge's and a breakdown's leaning to it and a verse's and a chorus's from it;
-  the metal genres' per-section chances lowered for the songs that depart. Targets: Metal's songs holding one feel
-  40-50%, its changes 1-2 a song; Thrash's and Black metal's still changing in most songs; the songs' own steadier.
+- **The song's feel kept** (built 21 October 2026): a song leaving its time at all drawn first (`timeChanges`, the
+  songs' own 0-40-40, Thrash's 80-90-90, Black metal's 70-80-80, Djent's 50-60-70), its sections' half and double
+  time, its breakdown and a calm section's half time drawn only then, a bridge leaning to it and a verse and a
+  pre-chorus from it; Metal's and Symphonic's per-section chances lowered. A song holding one feel: the songs' own 52%
+  to 67%, Metal's 3% to 56%, Doom's 3% to 64%, Nu metal's 3% to 52%, Punk's 6% to 64%, Rock's 27% to 66%, Thrash's 5% to
+  14% and Black metal's 3% to 19%, theirs changing as their riffs do. Left: a section's own tempo and meter and a short
+  bar, drawn by the section whatever the song does, the next step.
+- **A section's own tempo and meter in a song that leaves its time** (P2): `SectionTempo`, `SectionMeter` and
+  `ShortBars` drawn only in a song that leaves its time, the song's draw moved before the meters; Orchestral's,
+  Fusion's, IDM's and Djent's own `timeChanges` raised where their tempo and meter changes are their style. Target:
+  Metal's songs whose feel, tempo and meter never change from 12% toward its feel's 56%.
 - **The song's stops** (P2): a song stopping at all drawn first, stop time and ensemble hits then drawn by its
   sections; but a stop-time section of the blues plays in every verse as it does. First measured: where Doom's and
   Black metal's silences come from, whose stop time is rare, before anything is changed for them. Targets: Metal's

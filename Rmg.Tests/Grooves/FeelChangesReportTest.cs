@@ -25,6 +25,38 @@ public sealed class FeelChangesReportTest
                $"feel changes a song {feelChanges.Average():F1}, any {anyChanges.Average():F1}";
     }
 
+    /// <summary>A song that keeps its time leaves it in no section, a calm one's and a breakdown's among them.</summary>
+    [Test]
+    public async Task ASongKeepingItsTime_LeavesItNowhere()
+    {
+        var kept = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))))
+        {
+            if ((bool)song.Trace.Single(x => x.Point == TracePoints.TimeChanges).Value!)
+                continue;
+            kept++;
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.TimeFeel))
+                await Assert.That((int)entry.Value!).IsEqualTo(0).Because($"seed {song.Seed}, section {entry.Section}");
+        }
+
+        await Assert.That(kept).IsGreaterThan(10);
+    }
+
+    /// <summary>
+    ///     A genre's songs hold one feel throughout far oftener than with every one of them leaving its time, the same songs
+    ///     (seen 56% against 9% of 64 Metal songs).
+    /// </summary>
+    [Test]
+    public async Task MostSongs_KeepTheirTime()
+    {
+        double Steady(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Sections(TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+            .Count(x => x.Zip(x.Skip(1)).All(p => p.First.Feel == p.Second.Feel)) / 64.0;
+        var metal = GenrePresets.Genre("metal");
+        var (own, departing) = (Steady(metal), Steady(metal with { Choices = metal.Choices.SetItem(GenreChoices.TimeChanges.Name, System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("songs", new(1, 1, 1))) }));
+        Console.WriteLine($"  Metal's songs holding one feel: {own:P0}, {departing:P0} with every song leaving its time");
+        await Assert.That(own).IsGreaterThan(departing + 0.2);
+    }
+
     [Test]
     [Explicit]
     public async Task Report()

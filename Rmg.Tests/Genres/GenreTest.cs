@@ -261,7 +261,9 @@ public sealed class GenreTest
         var genre = Of(
             (GenreChoices.PartFeels[RhythmPart.Time], [("grouped3", 1)]),
             (GenreChoices.DrumRoles[DrumRole.Time], [("ride", 1), ("maracas", 0.5)]),
-            (GenreChoices.FeelChances, [("halfTime", 1)])
+            (GenreChoices.FeelChances, [("halfTime", 1)]),
+            // in songs that leave their time, every one
+            (GenreChoices.TimeChanges, [("songs", 1)])
         );
         var keepers = 0;
         foreach (var seed in Enumerable.Range(0, 8))

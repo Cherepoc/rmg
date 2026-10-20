@@ -18,6 +18,9 @@ internal sealed class SectionGenerator
     // the stream of the song's own shift of its lines' freedom to change register, apart from every section's
     private const int SongRegisterFreedomStream = -1;
 
+    // the stream of whether the song leaves its time at all, apart from every section's
+    private const int DepartsStream = -3;
+
     private readonly IGenerationContext _context;
     private readonly ulong _seed;
 
@@ -39,6 +42,7 @@ internal sealed class SectionGenerator
 
     // the song's shift of its lines' freedom to change register, before a section's, in spreads (LineProfile.RegisterFreedomSpread)
     private readonly double _songRegisterFreedomShift;
+    private readonly bool _departs;
 
     // the drum half of making a section
     private readonly SectionDrumGenerator _drums;
@@ -76,6 +80,9 @@ internal sealed class SectionGenerator
         _songPercussion = songPercussion;
         _key = key;
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
+        // whether the song leaves its time at all, its sections then drawing half or double time, from a sequence of its own
+        _departs = context.CreateContext(Seeds.Derive(seed, DepartsStream)).TestProbability(Groove.DepartChance.At(songFacets[Facet.Groove], genre.Chance(GenreChoices.TimeChanges, "songs")));
+        StateTrace.RecordSong(TracePoints.TimeChanges, $"{_departs}", _departs);
         _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
         _drums = new SectionDrumGenerator(tracks, genre, id => SongStateMapOf(id).GetStateValue(CompositionStateKinds.Energy), songPercussion, Stream, Stream, FirstRests, Facets, CreateSectionTrackLayer,
@@ -244,8 +251,9 @@ internal sealed class SectionGenerator
         var (sectionStrokes, barDrums) = _drums.DrawDrumBars(sectionId, activeDrumTrackNumbers, kit, scheme, rhythm, tilt);
 
         // a heavy band's breakdown now and then, a genre's, from a sequence of its own
+        // in a song that leaves its time, whose departure a breakdown in half time is
         var breakdown = Breakdowns.MayBreakDown(plan.Role, plan.KeepsSongScale)
-                        && Stream(sectionId, SectionStream.Breakdown).TestProbability(Breakdowns.Chance.At(facets[Facet.Form], _genre.Chance(GenreChoices.Breakdown, "sections")));
+                        && Stream(sectionId, SectionStream.Breakdown).TestProbability(Breakdowns.Chance.At(facets[Facet.Form], _genre.Chance(GenreChoices.Breakdown, "sections"))) && _departs;
         StateTrace.RecordSection(TracePoints.Breakdown, SectionTrace, sectionId, $"{breakdown}", breakdown);
         // its form, calm or heavy, from a sequence of its own, by its energy against the song's
         var form = SectionForm.Draw(Stream(sectionId, SectionStream.Form), _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy), facets[Facet.Sound], _genre,
@@ -254,9 +262,9 @@ internal sealed class SectionGenerator
         StateTrace.RecordSection(TracePoints.SectionForm, SectionTrace, sectionId, $"{form.Kind}", form.Kind);
         // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its
         // own, drawn in a breakdown too, which plays in half time
-        var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt, sectionRhythm.Facets[Facet.Groove], _genre);
-        // a breakdown's and a calm section's in half time
-        if (breakdown || form.Kind == SectionFormKind.Calm)
+        var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt, sectionRhythm.Facets[Facet.Groove], _genre, _departs, plan.Role);
+        // a breakdown's and, in a song that leaves its time, a calm section's in half time
+        if (breakdown || form.Kind == SectionFormKind.Calm && _departs)
             timeFeel = 1;
         StateTrace.RecordSection(TracePoints.TimeFeel, SectionTrace, sectionId, $"{timeFeel}", timeFeel);
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays

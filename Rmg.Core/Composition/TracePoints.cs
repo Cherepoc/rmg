@@ -388,6 +388,9 @@ internal static class TracePoints
     /// <summary>The section a loop's riff and bass are, the song's first, whose devices and figures they play (an <c>int</c>; <see cref="Composition.GeneratedSection.LinesFrom" />).</summary>
     public const string LinesFrom = "Lines from";
 
+    /// <summary>Whether the song leaves its time at all, its sections then drawing half or double time (a <c>bool</c>; <see cref="Composition.Groove.DepartChance" />).</summary>
+    public const string TimeChanges = "Time changes";
+
     /// <summary>Whether a section's riff is a figure, its first bar's notes kept over the chords that follow (a <c>bool</c>; <see cref="Composition.SectionGenerator.RiffHookChance" />).</summary>
     public const string RiffHook = "Riff hook";
 

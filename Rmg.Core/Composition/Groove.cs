@@ -111,13 +111,40 @@ internal static class Groove
     }
 
     /// <summary>
-    ///     The chance a section's drums play in half time, at a section of middling energy: never in the plainest songs,
-    ///     which keep their time, and as often in the wildest as in a middling one.
+    ///     The chance a song leaves its time at all, its sections then drawing half or double time, by the groove facet:
+    ///     never in the plainest songs, which keep their time, and as often in the wildest as in a middling one, as a song
+    ///     keeps its feel and a departure is an event of it (<see cref="GenreChoices.TimeChanges" />).
     /// </summary>
-    public static ByConvention HalfTimeChance { get; } = new(0, 0.08, 0.08);
+    public static ByConvention DepartChance { get; } = new(0, 0.4, 0.4);
 
-    /// <summary>The chance a section's drums play in double time, as half time's, rarer, as it is a busy effect, heard as a scramble more often than a lift.</summary>
-    public static ByConvention DoubleTimeChance { get; } = new(0, 0.02, 0.02);
+    /// <summary>
+    ///     The chance a section of a song that leaves its time plays its drums in half time, at a section of middling
+    ///     energy: never in the plainest songs, and as often in the wildest as in a middling one.
+    /// </summary>
+    public static ByConvention HalfTimeChance { get; } = new(0, 0.15, 0.15);
+
+    /// <summary>The chance a section of a song that leaves its time plays its drums in double time, as half time's, rarer, as it is a busy effect, heard as a scramble more often than a lift.</summary>
+    public static ByConvention DoubleTimeChance { get; } = new(0, 0.04, 0.04);
+
+    /// <summary>
+    ///     How a section's role leans it to leave the song's time: a bridge the most, as a song breaks into half time or
+    ///     gallops there, a chorus less, a nu-metal or a pop chorus's half time, and a verse, which carries the song's
+    ///     feel, and a pre-chorus, which builds into the chorus, the least.
+    /// </summary>
+    public static ImmutableDictionary<SectionRole, double> DepartLeans { get; } = new Dictionary<SectionRole, double>
+    {
+        [SectionRole.Free] = 0,
+        [SectionRole.Verse] = -1,
+        [SectionRole.PreChorus] = -1,
+        [SectionRole.Chorus] = -0.5,
+        [SectionRole.Bridge] = 1,
+        [SectionRole.Intro] = 0,
+        [SectionRole.Outro] = 0,
+        [SectionRole.PostChorus] = 0
+    }.ToImmutableDictionary();
+
+    /// <summary>The odds a role leaning to leave the song's time has, as the odds of 1.</summary>
+    public const double DepartOdds = 3;
 
     /// <summary>
     ///     How a section's drums keep time: as a step of every drum's period, 1 for half time, the backbeat on the bar's
@@ -127,13 +154,16 @@ internal static class Groove
     /// </summary>
     /// <param name="groove">The groove facet of the section's unconventionality, by which a genre's chances lean.</param>
     /// <param name="genre">The genre whose chances of half and double time, at a section of middling energy, they take.</param>
-    public static int DrawTimeFeel(IGenerationContext context, Tilt energy, double groove, Genre genre)
+    /// <param name="departs">Whether the song leaves its time at all (<see cref="DepartChance" />).</param>
+    /// <param name="role">The section's role, which leans it to leave the song's time (<see cref="DepartLeans" />).</param>
+    public static int DrawTimeFeel(IGenerationContext context, Tilt energy, double groove, Genre genre, bool departs, SectionRole role)
     {
-        double Within(ByConvention chance, string option) => chance.At(groove, genre.Chance(GenreChoices.FeelChances, option));
+        double Within(ByConvention chance, string option) => Tilt.Of(DepartOdds, DepartLeans[role]).Chance(chance.At(groove, genre.Chance(GenreChoices.FeelChances, option)), 1);
         var half = energy.Chance(Within(HalfTimeChance, "halfTime"), -1);
         var twice = energy.Chance(Within(DoubleTimeChance, "doubleTime"), 1);
+        // drawn all the same in a song that keeps its time, which none of its sections leaves
         var draw = context.GenerateDouble();
-        return draw < half ? 1 : draw < half + twice ? -1 : 0;
+        return !departs ? 0 : draw < half ? 1 : draw < half + twice ? -1 : 0;
     }
 
     public static StateMap ToStateMap(Swing swing)
