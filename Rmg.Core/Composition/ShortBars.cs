@@ -19,10 +19,11 @@ internal static class ShortBars
     /// <param name="sections">A section's stream, by its id.</param>
     /// <param name="sectionIds">The song's sections, each once.</param>
     /// <param name="unconventionality">The form facet of the song's unconventionality.</param>
-    public static ImmutableHashSet<int> Draw(Func<int, IGenerationContext> sections, IEnumerable<int> sectionIds, double unconventionality, Genre genre)
+    /// <param name="departs">Whether the song leaves its time at all, which a bar cut short does (<see cref="Groove.DepartChance" />).</param>
+    public static ImmutableHashSet<int> Draw(Func<int, IGenerationContext> sections, IEnumerable<int> sectionIds, double unconventionality, Genre genre, bool departs)
     {
         var chance = Chance.At(unconventionality, genre.Chance(GenreChoices.SectionChanges, "shortBar"));
-        return [..sectionIds.Where(id => sections(id).TestProbability(chance))];
+        return [..sectionIds.Where(id => sections(id).TestProbability(chance) && departs)];
     }
 
     /// <summary>The short bar of a meter: the first half of its groups, the odd one with them, as a meter of its own.</summary>

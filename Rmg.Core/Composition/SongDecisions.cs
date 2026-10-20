@@ -15,6 +15,7 @@ namespace Rmg.Core.Composition;
 /// <param name="Solos">The appearances played as solos, by their places.</param>
 /// <param name="Pinned">The parts the song pins to their figures, a genre's (<see cref="DrumRoles.DrawPinned" />).</param>
 /// <param name="Repeats">Whether the last section plays once more, as a last chorus.</param>
+/// <param name="Departs">Whether the song leaves its time at all, its sections in half or double time, a tempo or a meter of their own (<see cref="Groove.DepartChance" />).</param>
 /// <param name="Scale">The scale the song starts in.</param>
 /// <param name="Sound">The effects the song plays at all, and the part playing its strong one (<see cref="Expression.DrawSound" />).</param>
 /// <param name="DrumJob">What the song's drums do, keep time or mark its form, a genre's (<see cref="DrumMarks" />).</param>
@@ -36,6 +37,7 @@ internal sealed record SongDecisions(
     ImmutableHashSet<RhythmPart> Pinned,
     SongAssembly Form,
     bool Repeats,
+    bool Departs,
     StateMap CommonStateMap,
     Swing Swing,
     Scale Scale,
@@ -230,6 +232,10 @@ internal sealed record SongDecisions(
         var drumJob = DrumMarks.Draw(Stream(SongStream.DrumJob), songUnconventionality[Facet.Groove], genre);
         StateTrace.RecordSong(TracePoints.DrumJob, drumJob.ToString(), drumJob);
 
+        // whether the song leaves its time at all, its sections then drawing half or double time, a tempo or a meter of their
+        // own, from a sequence of its own
+        var departs = Stream(SongStream.TimeChanges).TestProbability(Groove.DepartChance.At(songUnconventionality[Facet.Groove], genre.Chance(GenreChoices.TimeChanges, "songs")));
+        StateTrace.RecordSong(TracePoints.TimeChanges, $"{departs}", departs);
         var sectionGenerator = new SectionGenerator(
             root,
             Seeds.Derive(seed, (int)SongStream.Sections),
@@ -243,6 +249,7 @@ internal sealed record SongDecisions(
             commonStateMap.GetStateValue(StateKinds.KeyOffset),
             absent,
             drumJob,
+            departs,
             genre
         );
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
@@ -270,7 +277,8 @@ internal sealed record SongDecisions(
             songUnconventionality[Facet.Feel],
             sectionIds,
             structure.Roles,
-            genre
+            genre,
+            departs
         );
         // a section's pattern several phrases where a genre has longer progressions, each section's from a stream of its own
         if (genre.Pool<int>(GenreChoices.Phrases, GenreChoices.PhrasesName) is { } phrasePool)
@@ -460,12 +468,12 @@ internal sealed record SongDecisions(
         // the song put together as planned, and the lines the drums mark, then every stage after it in its order
         cancellation.ThrowIfCancellationRequested();
         // a section's last bar cut short before the next now and then, each from a stream of its own
-        var shortBars = ShortBars.Draw(id => SongGenerator.CreateStream(seed, SongStream.ShortBars, id), sectionIds.Distinct(), songUnconventionality[Facet.Form], genre);
+        var shortBars = ShortBars.Draw(id => SongGenerator.CreateStream(seed, SongStream.ShortBars, id), sectionIds.Distinct(), songUnconventionality[Facet.Form], genre, departs);
         StateTrace.RecordSong(TracePoints.ShortBars, string.Join(", ", shortBars.Order()), shortBars);
         var form = formGenerator.Assemble(plan, played, sections, shortBars);
         return new SongDecisions(
             seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections,
-            solos, soloists, pinned, form, repeats, commonStateMap, swing, scale, drumJob,
+            solos, soloists, pinned, form, repeats, departs, commonStateMap, swing, scale, drumJob,
             // the song's effects, decided before its notes, the part playing its strong one among those it plays
             Expression.DrawSound(Stream(SongStream.Effects), songUnconventionality[Facet.Sound], genre, tracks.Definitions,
                 tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).Select(x => x.Key).ToHashSet(),

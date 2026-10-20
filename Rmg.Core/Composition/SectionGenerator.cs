@@ -18,9 +18,6 @@ internal sealed class SectionGenerator
     // the stream of the song's own shift of its lines' freedom to change register, apart from every section's
     private const int SongRegisterFreedomStream = -1;
 
-    // the stream of whether the song leaves its time at all, apart from every section's
-    private const int DepartsStream = -3;
-
     private readonly IGenerationContext _context;
     private readonly ulong _seed;
 
@@ -50,6 +47,7 @@ internal sealed class SectionGenerator
 
     /// <param name="seed">The seed of the sections' random sequences, from which every section derives its own by its id.</param>
     /// <param name="songPercussion">How far the song leans to sections of percussion only (<see cref="PercussionSections" />).</param>
+    /// <param name="departs">Whether the song leaves its time at all, its sections then drawing half or double time (<see cref="Groove.DepartChance" />).</param>
     public SectionGenerator(
         IGenerationContext context,
         ulong seed,
@@ -63,9 +61,11 @@ internal sealed class SectionGenerator
         int key,
         ImmutableHashSet<TrackRole> absent,
         DrumJob drumJob,
+        bool departs,
         Genre genre
     )
     {
+        _departs = departs;
         _absent = absent;
         _drumJob = drumJob;
         _genre = genre;
@@ -80,9 +80,6 @@ internal sealed class SectionGenerator
         _songPercussion = songPercussion;
         _key = key;
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
-        // whether the song leaves its time at all, its sections then drawing half or double time, from a sequence of its own
-        _departs = context.CreateContext(Seeds.Derive(seed, DepartsStream)).TestProbability(Groove.DepartChance.At(songFacets[Facet.Groove], genre.Chance(GenreChoices.TimeChanges, "songs")));
-        StateTrace.RecordSong(TracePoints.TimeChanges, $"{_departs}", _departs);
         _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
         _drums = new SectionDrumGenerator(tracks, genre, id => SongStateMapOf(id).GetStateValue(CompositionStateKinds.Energy), songPercussion, Stream, Stream, FirstRests, Facets, CreateSectionTrackLayer,

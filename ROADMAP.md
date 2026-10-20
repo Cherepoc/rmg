@@ -282,12 +282,10 @@ count of its own. In order:
   time, its breakdown and a calm section's half time drawn only then, a bridge leaning to it and a verse and a
   pre-chorus from it; Metal's and Symphonic's per-section chances lowered. A song holding one feel: the songs' own 52%
   to 67%, Metal's 3% to 56%, Doom's 3% to 64%, Nu metal's 3% to 52%, Punk's 6% to 64%, Rock's 27% to 66%, Thrash's 5% to
-  14% and Black metal's 3% to 19%, theirs changing as their riffs do. Left: a section's own tempo and meter and a short
-  bar, drawn by the section whatever the song does, the next step.
-- **A section's own tempo and meter in a song that leaves its time** (P2): `SectionTempo`, `SectionMeter` and
-  `ShortBars` drawn only in a song that leaves its time, the song's draw moved before the meters; Orchestral's,
-  Fusion's, IDM's and Djent's own `timeChanges` raised where their tempo and meter changes are their style. Target:
-  Metal's songs whose feel, tempo and meter never change from 12% toward its feel's 56%.
+  14% and Black metal's 3% to 19%, theirs changing as their riffs do; and a section's own tempo, meter and short bar in a song that leaves
+  its time alone, the song's draw made before its meters, Orchestral's, Fusion's and IDM's raised: a song whose feel,
+  tempo and meter never change, the songs' own 35% to 66%, Metal's 12% to 61%, Rock's 31% to 64%. Thrash's 12 feel
+  changes a song and Black metal's 5 left to listening.
 - **The song's stops** (P2): a song stopping at all drawn first, stop time and ensemble hits then drawn by its
   sections; but a stop-time section of the blues plays in every verse as it does. First measured: where Doom's and
   Black metal's silences come from, whose stop time is rare, before anything is changed for them. Targets: Metal's

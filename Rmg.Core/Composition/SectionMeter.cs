@@ -21,13 +21,15 @@ internal static class SectionMeter
     /// <param name="sectionIds">The song's sections in its order.</param>
     /// <param name="roles">What each section does in the song's form, by its id.</param>
     /// <param name="genre">The genre whose pool of the meters a section keeps to, the song's alone where it has no other.</param>
+    /// <param name="departs">Whether the song leaves its time at all, which a section in a meter of its own does (<see cref="Groove.DepartChance" />).</param>
     public static ImmutableDictionary<int, Meter> Generate(
         Func<int, IGenerationContext> sections,
         Meter song,
         double unconventionality,
         IReadOnlyList<int> sectionIds,
         IReadOnlyDictionary<int, SectionRole> roles,
-        Genre genre
+        Genre genre,
+        bool departs
     )
     {
         var songOption = Meter.OptionOf(song);
@@ -36,7 +38,7 @@ internal static class SectionMeter
         return sectionIds.Distinct().ToImmutableDictionary(id => id, id =>
         {
             var drawing = sections(id);
-            var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(Chance.At(unconventionality, genre.Chance(GenreChoices.SectionChanges, "meter")), 1));
+            var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(Chance.At(unconventionality, genre.Chance(GenreChoices.SectionChanges, "meter")), 1)) && departs;
             // the first section sets the song's meter, as does a section with no other its facet allows, as a plain 4/4 song's
             // allows none where a genre gives it a chance and names no meters
             if (!hasOwn || id == sectionIds[0] || options.Length == 0 || pool is null && options.All(x => x.Weight.At(unconventionality) <= 0))

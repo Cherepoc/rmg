@@ -194,7 +194,7 @@ internal static class SongStages
             ids.Count - 1 + (song.Repeats ? 1 : 0) - (structure.Roles[ids[^1]] is SectionRole.Outro or SectionRole.Intro ? 1 : 0),
             song.Genre
         );
-        var sectionTempos = SectionTempo.Generate(place => song.AppearanceStream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre);
+        var sectionTempos = SectionTempo.Generate(place => song.AppearanceStream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre, song.Departs);
         StateTrace.RecordSong(TracePoints.SectionTempo, string.Join(", ", sectionTempos.Select(x => $"{x:F2}")), sectionTempos);
         StateTrace.RecordSong(TracePoints.KeyChange, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
         var homes = draft.Timeline.TrackTimelineMap.First(x => song.Tracks.Definitions[x.Key] is PitchInstrumentTrack).Value.StateTimelineMap;
