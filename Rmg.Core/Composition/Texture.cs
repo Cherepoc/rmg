@@ -16,7 +16,7 @@ public enum TextureKind
     /// <summary>The pitched parts drop out phrase by phrase, the fewer every phrase, a share of them left in the last.</summary>
     Thin,
 
-    /// <summary>One part plays the whole appearance, the drums or a pitched part, alone.</summary>
+    /// <summary>One part plays the appearance's first phrase alone, the drums or a pitched part, the band coming in after it, or the whole appearance where it plays one.</summary>
     Alone
 }
 
@@ -26,7 +26,7 @@ public enum TextureKind
 ///     facet: the plainest songs play every part through each section, their textures changing only where a section
 ///     does, the wildest take every texture as likely; those of fewer parts leaned to the quieter sections, as a band
 ///     thins out in a verse rather than in a chorus. The drums play through a phrase or rest the whole appearance, but
-///     where a section builds, which brings them in at a phrase now and then with a fill, as a band builds; and they play
+///     where a section builds or opens on one part alone, which brings them in at a phrase with a fill, as a band builds; and they play
 ///     alone, or first in a build, only where they keep time, never where they only mark the form.
 /// </summary>
 internal static class Texture
@@ -62,6 +62,7 @@ internal static class Texture
     /// <param name="genre">The genre whose pool of textures it is drawn among, where it names one.</param>
     /// <param name="energy">The appearance's energy, which the textures of fewer parts lean against.</param>
     /// <param name="drumsMark">Whether the song's drums only mark its form, which leaves them no part to play alone.</param>
+    /// <param name="role">The section's role: a pre-chorus, which builds into the chorus, never thins nor plays one part alone.</param>
     /// <param name="breakdown">
     ///     Whether the appearance is a breakdown chorus, built up from the melody alone, the drums coming in next, in place of
     ///     its drawn texture, every draw made all the same.
@@ -74,6 +75,7 @@ internal static class Texture
         Genre genre,
         Tilt energy,
         bool drumsMark,
+        SectionRole role,
         bool breakdown = false
     )
     {
@@ -81,6 +83,9 @@ internal static class Texture
         var kind = context.Pick(energy.Weigh(
             ByConvention.Weigh(Kinds.Select(x => (x.Kind, x.Weight)), form, genre.Pool<TextureKind>(GenreChoices.Texture)),
             x => leans[x]));
+        // but a pre-chorus, which builds, played steady where it would thin, the draws made all the same
+        if (role == SectionRole.PreChorus && kind is TextureKind.Thin or TextureKind.Alone)
+            kind = TextureKind.Steady;
         if (breakdown)
             kind = TextureKind.Build;
         TrackRole[] pitched = [..playing.Where(x => x != TrackRole.Drum).Order()];
@@ -131,8 +136,12 @@ internal static class Texture
                     Array.Reverse(silent);
                 return (kind, ImmutableHashSet<TrackRole>.Empty, [..silent]);
             }
+            // a part alone for the first phrase, the band coming in after it, as a lone guitar opens a section, or for the
+            // whole of an appearance of one phrase
             case TextureKind.Alone when playing.Count >= 2 && alone is not null:
-                return (kind, [..playing.Where(x => x != alone)], none);
+                return phrases >= 2
+                    ? (kind, ImmutableHashSet<TrackRole>.Empty, [[..playing.Where(x => x != alone)], ..none.Skip(1)])
+                    : (kind, [..playing.Where(x => x != alone)], none);
             default:
                 return (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, none);
         }

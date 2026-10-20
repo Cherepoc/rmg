@@ -1060,7 +1060,7 @@ internal sealed record GeneratedSection(
         // of the parts that have notes in the section, so that a part alone is never one that has none
         var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x) && HasNotes(x)).ToArray();
         var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing, Genre,
-            tilt, DrumJob == DrumJob.Marks, breakdownChorus);
+            tilt, DrumJob == DrumJob.Marks, Role, breakdownChorus);
         ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
         // a breakdown played steady, its riff through
         if (keepsTexture || Breakdown)

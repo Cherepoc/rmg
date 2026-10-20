@@ -44,7 +44,7 @@ public sealed class TextureTest
     public async Task TheTexturesOfFewerParts_LeanToTheQuieterSections()
     {
         var context = new GenerationContext(3);
-        int Fewer(double energy) => Enumerable.Range(0, 4000).Count(_ => Texture.Draw(context, 1, 2, Band, Genre.None, SectionEnergy.Tilt(energy, 1), false).Kind is TextureKind.Alone or TextureKind.Thin);
+        int Fewer(double energy) => Enumerable.Range(0, 4000).Count(_ => Texture.Draw(context, 1, 2, Band, Genre.None, SectionEnergy.Tilt(energy, 1), false, SectionRole.Free).Kind is TextureKind.Alone or TextureKind.Thin);
 
         await Assert.That(Fewer(0.5)).IsLessThan(Fewer(0)).And.IsLessThan(Fewer(-0.5));
         await Assert.That(Fewer(0)).IsLessThan(Fewer(-0.5));
@@ -56,8 +56,8 @@ public sealed class TextureTest
     public async Task ThePlainestSections_PlaySteady_AndTheWildest_EveryTextureAlike()
     {
         var context = new GenerationContext(1);
-        var plain = Enumerable.Range(0, 2000).Select(_ => Texture.Draw(context, 0, 2, Band, Genre.None, default, false).Kind).ToArray();
-        var wild = Enumerable.Range(0, 4000).Select(_ => Texture.Draw(context, 1, 2, Band, Genre.None, default, false).Kind).ToArray();
+        var plain = Enumerable.Range(0, 2000).Select(_ => Texture.Draw(context, 0, 2, Band, Genre.None, default, false, SectionRole.Free).Kind).ToArray();
+        var wild = Enumerable.Range(0, 4000).Select(_ => Texture.Draw(context, 1, 2, Band, Genre.None, default, false, SectionRole.Free).Kind).ToArray();
 
         await Assert.That(plain.All(x => x == TextureKind.Steady)).IsTrue();
         foreach (var kind in Enum.GetValues<TextureKind>())
@@ -68,7 +68,7 @@ public sealed class TextureTest
     public async Task ABuild_BringsItsPartsIn_PhraseByPhrase_ItsDrumsNowAndThenLate_AndAThinTakesItsPitchedOnesOut()
     {
         var context = new GenerationContext(2);
-        var draws = Enumerable.Range(0, 400).Select(_ => Texture.Draw(context, 1, 4, Band, Genre.None, default, false)).ToArray();
+        var draws = Enumerable.Range(0, 400).Select(_ => Texture.Draw(context, 1, 4, Band, Genre.None, default, false, SectionRole.Free)).ToArray();
         foreach (var (kind, resting, silent) in draws.Where(x => x.Kind is TextureKind.Build or TextureKind.Thin))
         {
             var counts = silent.Select(x => x.Count).ToArray();
@@ -87,8 +87,33 @@ public sealed class TextureTest
 
         await Assert.That(draws.Any(x => x.Kind == TextureKind.Build && x.PhraseSilent.Any(p => p.Contains(TrackRole.Drum)))).IsTrue();
 
-        foreach (var (_, resting, _) in draws.Where(x => x.Kind == TextureKind.Alone))
-            await Assert.That(resting.Count).IsEqualTo(Band.Length - 1);
+        // a part alone for the first phrase, the band in after it
+        foreach (var (_, resting, silent) in draws.Where(x => x.Kind == TextureKind.Alone))
+        {
+            await Assert.That(resting).IsEmpty();
+            await Assert.That(silent[0].Count).IsEqualTo(Band.Length - 1);
+            await Assert.That(silent.Skip(1).All(x => x.IsEmpty)).IsTrue();
+        }
+    }
+
+    /// <summary>A pre-chorus, which builds into the chorus, never thins nor plays one part alone.</summary>
+    [Test]
+    public async Task APreChorus_NeverThins()
+    {
+        var preChoruses = 0;
+        // in songs in one of the forms, a pre-chorus's among them, every texture drawn now and then
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 0.5))))))
+        {
+            var form = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Texture && form.Roles[x.Section] == SectionRole.PreChorus))
+            {
+                preChoruses++;
+                await Assert.That(((ValueTuple<int, TextureKind, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableHashSet<TrackRole>>>)entry.Value!).Item2)
+                    .IsNotIn([TextureKind.Thin, TextureKind.Alone]).Because($"seed {song.Seed}, section {entry.Section}");
+            }
+        }
+
+        await Assert.That(preChoruses).IsGreaterThan(5);
     }
 
     [Test]

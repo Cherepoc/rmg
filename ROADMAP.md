@@ -292,9 +292,10 @@ count of its own. In order:
   silences of a beat or more Metal's 3.1 to 2.2 a song. Doom's 5.2 and Black metal's 6.3 not stops but a section's
   parts all resting at a phrase's end where one plays alone or the drums rest, the next step's. Left: stop time in only
   some of a section's appearances, should a stopped verse every time be heard too often; Thrash's breakdowns, 2.7 a song.
-- **One part alone, short** (P2): the texture of one part alone kept to a phrase or two, the band coming in after,
-  as an intro's or the break before the last chorus is, and never a pre-chorus's, which builds; measured first how
-  long it lasts and in which roles.
+- **One part alone, short** (built 21 October 2026): one part alone for an appearance's first phrase, the band coming
+  in after it, the whole appearance only where it plays one phrase, and a pre-chorus never thinning nor playing one
+  part alone: silences of a beat or more, Black metal's 6.3 to 2.0 a song, Doom's 5.2 to 3.0, the songs' own 2.3 to
+  1.7, Metal's 2.2 to 1.7.
 - **A song's own feel** (P3, deferred): a whole song in half time, Djent's and Trap's, or in double time, a skate punk
   song's, as the song's feel rather than its sections' departures.
 
