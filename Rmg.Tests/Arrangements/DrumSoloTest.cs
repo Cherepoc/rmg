@@ -96,6 +96,37 @@ public sealed class DrumSoloTest
     }
 
     /// <summary>
+    ///     A kit's solo opens on its section's groove, its theme, and a solo that plays to its section's end builds into the
+    ///     next, its hits growing louder through its build, but for the beats' own accents, a 0.06 at most.
+    /// </summary>
+    [Test]
+    public async Task AKitsSolo_OpensOnItsGroove_AndBuildsIntoTheNextSection()
+    {
+        var (kick, crash) = (DrumGroups.GetTrackNumber(DrumDefinitions.Kick), DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal));
+        var (solos, built) = (0, 0);
+        foreach (var song in Songs)
+        foreach (var (span, plan, feet, solo) in KitSolos(song))
+        {
+            solos++;
+            await Assert.That(plan.First(x => x.Gesture != SoloGesture.Pause).Gesture).IsEqualTo(SoloGesture.Quote).Because($"seed {song.Seed} at {span.Start}");
+            if (solo.Build is not var (from, to))
+                continue;
+            built++;
+            await Assert.That(to).IsEqualTo(span.End).Because($"seed {song.Seed} at {span.Start}");
+            // the hands' drums, the feet's left to them and the crash a landing's
+            var feetTracks = feet ? DrumGroups.Kick.Tracks.Concat(DrumGroups.Timekeepers.Tracks).ToHashSet() : [];
+            var hits = song.Song.Notes!.Where(x => song.IsDrum(x.Key) && x.Key != crash && !feetTracks.Contains(x.Key)).SelectMany(x => x.Value)
+                .Where(x => x.Position >= from - 1e-9 && x.Position < to - 1e-9).OrderBy(x => x.Position).ToArray();
+            await Assert.That(hits.Length).IsGreaterThan(2).Because($"seed {song.Seed} at {span.Start}");
+            await Assert.That(hits[^1].Value.Velocity).IsGreaterThan(hits[0].Value.Velocity).Because($"seed {song.Seed} at {span.Start}");
+            await Assert.That(hits.Zip(hits.Skip(1)).All(x => x.Second.Value.Velocity - x.First.Value.Velocity >= -0.06)).IsTrue().Because($"seed {song.Seed} at {span.Start}");
+        }
+
+        Console.WriteLine($"{solos} kit solos, {built} building into the next section");
+        await Assert.That(built).IsGreaterThan(solos / 4);
+    }
+
+    /// <summary>
     ///     A kit's held gesture but a release a roll on one drum, its strokes growing or fading steadily through it, as a
     ///     drummer swells into the next gesture or eases off, but for the beats' own accents on it, a 0.06 at most.
     /// </summary>
@@ -138,7 +169,7 @@ public sealed class DrumSoloTest
             {
                 solos++;
                 var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
-                // all but the last bar, which the fill into the next section plays
+                // all but the last bar, which the fill into the next section plays, or its build does
                 await Assert.That(plan[^1].End).IsLessThanOrEqualTo(span.LastBar + 1e-9);
                 foreach (var segment in plan)
                 {
@@ -386,6 +417,8 @@ public sealed class DrumSoloTest
             .SelectMany(n => n.Value).Where(h => h.Position >= p.Start - 1e-9 && h.Position < p.End - 1e-9).Select(h => Rmg.Core.Rendering.Render.ToMidiVelocity(h.Value.Velocity)).Order().ToArray())
             .Where(v => v.Length >= 4).Select(v => v[^1] - v[v.Length / 2])).ToArray();
         var crashes = solos.Select(x => x.Song.Song.Notes!.GetValueOrDefault(crash)?.Count(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End) ?? 0).ToArray();
+        Console.WriteLine($"  the theme: solos opening on the groove {solos.Count(x => x.Plan.FirstOrDefault(p => p.Gesture != SoloGesture.Pause)?.Gesture == SoloGesture.Quote) / (double)solos.Length:P0}, " +
+                          $"quotes a solo {solos.Average(x => x.Plan.Count(p => p.Gesture == SoloGesture.Quote)):F1}; building into the next section {solos.Count(x => x.Solo.Build is not null) / (double)solos.Length:P0}");
         Console.WriteLine($"  loudness: the hands by the solo's third {string.Join(", ", hands.GroupBy(x => Math.Min(2, (int)(x.Place * 3))).OrderBy(x => x.Key).Select(x => $"{x.Average(y => y.Velocity):F2}"))}, " +
                           $"spread {Math.Sqrt(hands.Average(x => (x.Velocity - mean) * (x.Velocity - mean))):F2}; a run's loudest over its middle {gaps.DefaultIfEmpty().Average():F2}; crashes {crashes.Average():F1} a solo, {crashes.Sum() / bars.Sum():F2} a bar");
         await Task.CompletedTask;

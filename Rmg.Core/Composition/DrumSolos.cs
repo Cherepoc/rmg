@@ -92,6 +92,24 @@ internal static class DrumSolos
     /// <summary>How intense a release is at least to ring a crash with the kick, a quieter one the floor tom's.</summary>
     public const double CrashRelease = 0.6;
 
+    /// <summary>
+    ///     The chance a phrase of a solo, but its first and its last, which play the section's groove, its theme, opens on
+    ///     the groove varied, its strokes played round the kit, and the share of those on the triplets of the beat, by the
+    ///     groove facet; drawn for every phrase.
+    /// </summary>
+    public static ByConvention ThemeVariationChance { get; } = new(0.3, 0.4, 0.5);
+
+    public const double TripletVariation = 0.5;
+
+    /// <summary>
+    ///     A solo's build into the section after: its last bar, or its last two in a solo of eight bars or more, swelling from
+    ///     its softest to its loudest, as heard, down the toms in 16ths, or a snare roll by this chance; drawn for every solo.
+    /// </summary>
+    public const double BuildFrom = 0.5, BuildTo = 0.95, BuildRollChance = 1 / 3.0;
+
+    /// <summary>How many bars a solo has at least to build at its end, and how many to build over two.</summary>
+    private const int BuildingBars = 3, LongBuildBars = 8;
+
     /// <summary>How intense a run or a lick is before it starts on a crash, the solo's climax.</summary>
     public const double ClimaxIntensity = 0.8;
 
@@ -207,6 +225,7 @@ internal static class DrumSolos
                 index => song.AppearanceStream(SongStream.DrumSoloStickings, index),
                 index => song.AppearanceStream(SongStream.DrumSoloMotifs, index),
                 index => song.AppearanceStream(SongStream.DrumSoloFlams, index),
+                index => song.AppearanceStream(SongStream.DrumSoloThemes, index),
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
                 song.Form.Drops,
                 // where the form next stops the drums, which a drum solo keeps out of as every drum stage does
@@ -231,6 +250,7 @@ internal static class DrumSolos
     /// <param name="stickings">A solo's draws of its runs' and licks' stickings, by its appearance's place.</param>
     /// <param name="motifs">A solo's draws of which phrases restate the phrase before's motif, by its appearance's place.</param>
     /// <param name="flams">A solo's draws of which gestures flam their accents, by its appearance's place.</param>
+    /// <param name="themes">A solo's draws of which phrases vary its groove and how it builds, by its appearance's place.</param>
     /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
     /// <param name="drops">Where the song drops, whose build a solo before it leaves to roll.</param>
@@ -249,6 +269,7 @@ internal static class DrumSolos
         Func<int, IGenerationContext> stickings,
         Func<int, IGenerationContext> motifs,
         Func<int, IGenerationContext> flams,
+        Func<int, IGenerationContext> themes,
         Func<int, double> groove,
         IReadOnlyCollection<double> drops,
         Func<double, double> stopsAfter,
@@ -284,8 +305,12 @@ internal static class DrumSolos
             // all but its last bar, a short one's, the fill's into the section after, and the bars a build rolls over into a
             // drop after it
             // nor where the form stops the drums, a stop ending's silence
-            var until = Math.Min(drops.Any(x => Math.Abs(x - whole.End) < 1e-9) ? whole.LastBar - FormLayers.BuildRollBars * whole.Meter.BarDuration : whole.LastBar,
-                stopsAfter(whole.Start));
+            var (dropsAfter, stopsAt) = (drops.Any(x => Math.Abs(x - whole.End) < 1e-9), stopsAfter(whole.Start));
+            // but the solo's own build in its last bars where it plays to the section's end, in the drums' turn, a solo of a
+            // few bars or more, the fill's landing after it on the next section's first beat
+            var buildFrom = whole.End - (whole.BarCount >= LongBuildBars ? 2 : 1) * whole.Meter.BarDuration;
+            var builds = !dropsAfter && stopsAt >= whole.End - 1e-9 && whole.Cut == 0 && whole.BarCount >= BuildingBars && IsDrumsTurn(buildFrom);
+            var until = builds ? buildFrom : Math.Min(dropsAfter ? whole.LastBar - FormLayers.BuildRollBars * whole.Meter.BarDuration : whole.LastBar, stopsAt);
             var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, until - whole.Start), Cut = 0 };
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
                                           track.EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
@@ -379,21 +404,57 @@ internal static class DrumSolos
                 song = LaidOut(song, context);
                 continue;
             }
+
+            // its theme, the section's groove: its first phrase and its last opening on it, the others now and then on it varied
+            // round the kit, on the triplets or as it is; and its build after them, a segment of its own
+            var themeDraws = themes(index);
+            var phrases = played.Select(x => x.Phrase).Distinct().ToArray();
+            var varied = new Dictionary<double, bool>();
+            foreach (var phrase in phrases)
+            {
+                var (varies, triplets) = (themeDraws.TestProbability(ThemeVariationChance.At(facet)), themeDraws.TestProbability(TripletVariation));
+                var opening = Array.FindIndex(played, x => x.Phrase == phrase && x.Gesture != SoloGesture.Pause);
+                if (opening < 0)
+                    continue;
+                var states = phrase == phrases[0] || phrase == phrases[^1];
+                if (states || varies)
+                    played[opening] = played[opening] with { Gesture = SoloGesture.Quote };
+                if (!states && varies)
+                    varied[Math.Round(played[opening].Start, 6)] = triplets;
+            }
+
+            var buildsWithRoll = themeDraws.TestProbability(BuildRollChance);
+            (double From, double To)? build = builds ? (buildFrom, whole.End) : null;
             soloed.AddRange(played.Select(x => (x.Start, x.End)));
+            if (build is { } built)
+                soloed.Add(built);
             StateTrace.RecordSection(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId,
                 $"{played.Length} segments, {soloists.Count} soloists {mode}{(feetTracks.Count > 0 ? ", the feet keeping time" : "")}",
-                new DrumSolo(index, played, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered));
+                new DrumSolo(index, played, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered, build));
 
             song = LaidOut(song, context);
             var edits = new TimelineEdits(context, meter, map);
 
-            for (var k = 0; k < played.Length; k++)
+            // a stroke as loud as heard, over the loudness the song and the drum's track already give it there, which adds to it,
+            // so that a section's own dynamics cut across neither the solo's arc nor its build
+            void Strike(RunSound sound, double at, double share)
             {
-                var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, isRelease) = played[k];
+                var under = song.CommonStateTimelineMap.GetEffectiveStateMapAt(at);
+                if (song.TrackTimelineMap.TryGetValue(sound.Track, out var own))
+                    under = under.MergeWith(own.StateTimelineMap.GetEffectiveStateMapAt(at));
+                edits.Hit(sound.Track, at, Heard(share) - under.GetStateValue(StateKinds.Velocity), sound.Articulation, whole.SectionId, HitKind.DrumSolo);
+            }
+
+            // its gestures, and its build after them, played as one of them
+            SoloLines.Segment[] playing = build is var (from, to) ? [..played, new SoloLines.Segment(from, to, 1, SoloGesture.Run, drummer.Speeds[0], SoloShape.Scale, [drummer.CellSizes[0]], false, phrases[^1] + 1, false)] : played;
+            for (var k = 0; k < playing.Length; k++)
+            {
+                var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, isRelease) = playing[k];
                 // whether its accents flam, drawn for every gesture
                 var flamsHere = flamDraws.TestProbability(FlamChance.At(facet));
-                // the groove quoted as it plays, and anything else in place of it
-                if (gesture == SoloGesture.Quote)
+                // the groove quoted as it plays, but where it is varied, and anything else in place of it
+                var isBuild = build is not null && k == playing.Length - 1;
+                if (gesture == SoloGesture.Quote && !varied.ContainsKey(Math.Round(start, 6)))
                     continue;
                 bool IsIn(TimelineItem<StateMap> note) => note.IsWithin(start, end);
                 // every drum cleared but the feet's where they replay the groove's kick
@@ -422,11 +483,58 @@ internal static class DrumSolos
                 // taps under it
                 var heard = StartLoudness + (ClimaxLoudness - StartLoudness) * (SoloLines.Arc((start - whole.Start) / whole.Duration) - SoloLines.ArcStart) / (1 - SoloLines.ArcStart)
                             + IntensityReach * (2 * level - 1);
-                var (accented, tapped) = (Heard(heard + AccentGap), Heard(heard - TapDrop));
+                var (accented, tapped) = (heard + AccentGap, heard - TapDrop);
                 // the soloists in turn by phrase, or together
                 foreach (var player in mode == SoloMode.Trading ? [soloists[phrase % soloists.Count]] : soloists)
                 {
                     var scale = player.Scale;
+                    // the player's drums from the highest to the lowest the hands play, a kit's toms, or a player's sounds
+                    RunSound[] down = player.IsKit ? [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)] : scale;
+                    if (isBuild)
+                    {
+                        // a build: a roll on the snare, or 16ths down the drums, swelling from the softest to the loudest
+                        var beatsASecond = Meter.BeatsPerSecond(song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(start));
+                        var rolls = buildsWithRoll || down.Length == 0;
+                        var rate = rolls ? RollRates.FirstOrDefault(x => x * beatsASecond <= drummer.MaxNotesASecond + 1e-9, RollRates[^1]) : 4;
+                        var strokes = (int)Math.Round((end - start) * rate);
+                        for (var i = 0; i < strokes; i++)
+                        {
+                            var share = strokes == 1 ? 1 : i / (double)(strokes - 1);
+                            var drum = rolls ? scale[0] : down[Math.Min(down.Length - 1, i * down.Length / strokes)];
+                            Strike(drum, start + i / (double)rate, BuildFrom + (BuildTo - BuildFrom) * share);
+                        }
+
+                        continue;
+                    }
+
+                    if (gesture == SoloGesture.Quote)
+                    {
+                        // the groove varied: its strokes there round the player's drums, its snare's on the snare, its kick's on
+                        // the lowest, the others' on the drums in turn from the highest, on the triplets now and then, the loud
+                        // among them accents, one at a place; the feet's left to the feet
+                        var triplets = varied[Math.Round(start, 6)];
+                        var snares = Of(FillDrumRole.Snare).Select(x => x.Track).ToHashSet();
+                        var strokes = song.TrackTimelineMap.Where(x => tracks.Contains(x.Key) && !feetTracks.Contains(x.Key))
+                            .SelectMany(x => x.Value.EventTimeline.Where(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9)
+                                .Select(n => (Track: x.Key, Position: triplets ? Math.Floor(n.Position + 1e-9) + Math.Round((n.Position - Math.Floor(n.Position + 1e-9)) * 3) / 3 : n.Position,
+                                    Velocity: n.Value.GetStateValue(StateKinds.Velocity))))
+                            .Where(x => x.Position < end - 1e-9)
+                            .GroupBy(x => Math.Round(x.Position, 6)).Select(x => x.OrderBy(y => snares.Contains(y.Track) ? 0 : kick is not null && y.Track == kick.Track ? 1 : 2).First())
+                            .OrderBy(x => x.Position).ToArray();
+                        var loud = strokes.Select(x => x.Velocity).Order().ElementAtOrDefault(strokes.Length / 2);
+                        var next = 0;
+                        foreach (var (track, position, velocity) in strokes)
+                        {
+                            var drum = !player.IsKit || down.Length == 0 ? scale[next++ % scale.Length]
+                                : snares.Contains(track) ? scale[0]
+                                : kick is not null && track == kick.Track ? down[^1]
+                                : down[next++ % down.Length];
+                            Strike(drum, position, velocity >= loud ? accented : tapped);
+                        }
+
+                        continue;
+                    }
+
                     switch (gesture)
                     {
                         case SoloGesture.Held when player.IsKit && !isRelease:
@@ -437,12 +545,12 @@ internal static class DrumSolos
                             var drum = rolled.Length > 0 && player.At >= rolled.Length / 2 ? rolled[^1] : scale[0];
                             var beatsASecond = Meter.BeatsPerSecond(song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(start));
                             var rate = RollRates.FirstOrDefault(x => x * beatsASecond <= drummer.MaxNotesASecond + 1e-9, RollRates[^1]);
-                            var swells = k + 1 < played.Length && played[k + 1].Intensity >= level;
+                            var swells = k + 1 < playing.Length && playing[k + 1].Intensity >= level;
                             var strokes = (int)Math.Round((end - start) * rate);
                             for (var i = 0; i < strokes; i++)
                             {
                                 var share = strokes == 1 ? 1 : i / (double)(strokes - 1);
-                                edits.Hit(drum.Track, start + i / (double)rate, Heard(heard + RollSwell * (swells ? 2 * share - 1 : 1 - 2 * share)), drum.Articulation, whole.SectionId, HitKind.DrumSolo);
+                                Strike(drum, start + i / (double)rate, heard + RollSwell * (swells ? 2 * share - 1 : 1 - 2 * share));
                             }
 
                             break;
@@ -453,11 +561,11 @@ internal static class DrumSolos
                             RunSound[] lows = [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)];
                             var rings = player.IsKit && crash is not null && level >= CrashRelease;
                             if (rings)
-                                edits.Hit(crash!.Track, start, accented, crash.Articulation, whole.SectionId, HitKind.DrumSolo);
+                                Strike(crash!, start, accented);
                             var low = !player.IsKit ? scale[^1] : rings ? kick ?? scale[^1] : lows.LastOrDefault() ?? scale[^1];
-                            edits.Hit(low.Track, start, accented, low.Articulation, whole.SectionId, HitKind.DrumSolo);
+                            Strike(low, start, accented);
                             if (player.IsKit && !rings && kick is not null && low.Track != kick.Track)
-                                edits.Hit(kick.Track, start, accented, kick.Articulation, whole.SectionId, HitKind.DrumSolo);
+                                Strike(kick, start, accented);
                             break;
                         }
                         case SoloGesture.Run or SoloGesture.Lick when player.IsKit:
@@ -522,17 +630,17 @@ internal static class DrumSolos
                                 else
                                     sound = snare;
                                 var accent = i % limbs.Length == 0;
-                                edits.Hit(sound.Track, positions[i], accent ? accented : tapped, sound.Articulation, whole.SectionId, HitKind.DrumSolo);
+                                Strike(sound, positions[i], accent ? accented : tapped);
                                 // an accent on a drum the hands play flammed, at a pace that leaves room for its grace, the grace within
                                 // the gesture, never in a pause before it
                                 if (accent && flamsHere && speedOf <= FlamSpeed && limb != 'K' && positions[i] - FlamLead >= start - 1e-9)
-                                    edits.Hit(sound.Track, positions[i] - FlamLead, Heard(heard - TapDrop - FlamSofter), sound.Articulation, whole.SectionId, HitKind.DrumSolo);
+                                    Strike(sound, positions[i] - FlamLead, heard - TapDrop - FlamSofter);
                                 // a climax's gesture starting on a crash
                                 if (i == 0 && level >= ClimaxIntensity && crash is not null)
-                                    edits.Hit(crash.Track, positions[i], accented, crash.Articulation, whole.SectionId, HitKind.DrumSolo);
+                                    Strike(crash, positions[i], accented);
                                 // and the kick under an accent, but where the accent is the kick's own
                                 if (stacksKick && accent && sound.Track != kick!.Track)
-                                    edits.Hit(kick.Track, positions[i], accented, kick.Articulation, whole.SectionId, HitKind.DrumSolo);
+                                    Strike(kick, positions[i], accented);
                             }
 
                             player.At = at;
@@ -547,7 +655,7 @@ internal static class DrumSolos
                             var positions = SoloLines.Positions(start, end, gesture, speed);
                             var (hits, accents, _) = SoloLines.Cells([..Enumerable.Range(0, scale.Length)], player.Cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
                             for (var i = 0; i < hits.Length; i++)
-                                edits.Hit(scale[hits[i]].Track, positions[i], accents[i] ? accented : tapped, scale[hits[i]].Articulation, whole.SectionId, HitKind.DrumSolo);
+                                Strike(scale[hits[i]], positions[i], accents[i] ? accented : tapped);
                             if (hits.Length > 0)
                                 player.At = hits[^1];
                             break;
@@ -567,4 +675,5 @@ internal static class DrumSolos
 /// soloists and how they share it, the players keeping time, by their places among the players, and every player's
 /// tracks, the kit's drummer first.</summary>
 /// <param name="Answered">The phrases whose first run or lick restates the phrase before's motif.</param>
-internal sealed record DrumSolo(int Index, SoloLines.Segment[] Plan, bool Feet, int[] Soloists, SoloMode Mode, int[] Keepers, int[][] Tracks, IReadOnlyList<int> Answered);
+/// <param name="Build">Where the solo builds into the section after, after its gestures; none where it leaves its end to the fill.</param>
+internal sealed record DrumSolo(int Index, SoloLines.Segment[] Plan, bool Feet, int[] Soloists, SoloMode Mode, int[] Keepers, int[][] Tracks, IReadOnlyList<int> Answered, (double From, double To)? Build);
