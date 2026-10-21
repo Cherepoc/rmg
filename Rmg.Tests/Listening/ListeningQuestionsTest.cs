@@ -45,7 +45,23 @@ public sealed class ListeningQuestionsTest
         Dictionary<string, int>? Without = null
     );
 
-    private static readonly Question[] Questions = [];
+    private static HashSet<int> SectionsOf(CorpusSong song, string point, Func<StateTraceEntry, bool>? takes = null) =>
+        [..song.Trace.Where(x => x.Point == point && (takes?.Invoke(x) ?? true)).Select(x => x.Section)];
+
+    /// <summary>The sections that play stop time.</summary>
+    private static HashSet<int> Stopping(CorpusSong song) => SectionsOf(song, TracePoints.StopTime, x => ((ImmutableArray<double>)x.Value!).Length > 0);
+
+    /// <summary>Where a song's stop-time section first comes back, in beats; none where none comes back.</summary>
+    private static double? FirstReturn(CorpusSong song) =>
+        song.Map.Sections.Where((x, i) => Stopping(song).Contains(x.SectionId) && song.Map.Sections.Take(i).Any(y => y.SectionId == x.SectionId)).Select(x => (double?)x.Start).FirstOrDefault();
+
+    private static readonly Question[] Questions =
+    [
+        new("stop-returns", "A Metal section in stop time stopping again only now and then when it comes back, rather than every time: a feature kept for its moment, or the stop missed?",
+            "How often a stop-time section's later appearances stop again (stopTime.returns, Metal's 30), against every time.", "metal", [],
+            new() { ["stopTime"] = new() { ["returns"] = 100 } },
+            FirstReturn, (x, span) => Stopping(x).Contains(span.SectionId))
+    ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()
