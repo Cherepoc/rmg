@@ -519,7 +519,10 @@ public static class GenreChoices
 
     /// <summary>How a soloist phrases: its phrases coming in on a pickup, and leaving space (<see cref="Soloist.PickupChances" />, <see cref="Soloist.SpaceChances" />).</summary>
     public static GenreChoice SoloStyle { get; } = Chances("soloStyle", "A soloist's phrasing",
-        [("pickups", "Phrases coming in on a pickup", Soloist.PickupChances), ("space", "A soloist leaving space, a call, an answer and a rest", Soloist.SpaceChances)]);
+        [
+            ("pickups", "Phrases coming in on a pickup", Soloist.PickupChances), ("space", "A soloist leaving space, a call, an answer and a rest", Soloist.SpaceChances),
+            ("rhythm", "A soloist riffing on the band's rhythm", Soloist.RiffChances)
+        ]);
 
     /// <summary>How wide a vibrato is and how fast, narrow to broad in cents, a step's slow or fast, or two steps' (<see cref="Expression.Vibratos" />).</summary>
     public static GenreChoice VibratoWidth { get; } = Pool("vibratoWidth", "A vibrato's width",

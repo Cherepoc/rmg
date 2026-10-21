@@ -95,6 +95,15 @@ internal sealed record Soloist(
     /// </summary>
     public static ByConvention SpaceChances { get; } = new(0.05, 0.1, 0.1);
 
+    /// <summary>
+    ///     Whether the soloist riffs on the band's rhythm now and then, a note or two struck on its onsets, as a funk horn or a
+    ///     Latin soloist does (<see cref="SoloGesture.Rhythm" />); a song's decision for its soloist (<see cref="RiffChances" />).
+    /// </summary>
+    public bool Riffs { get; init; }
+
+    /// <summary>The chance a pitched soloist riffs on the band's rhythm, by the melody facet: seldom; a genre's where it names it, Funk's the most.</summary>
+    public static ByConvention RiffChances { get; } = new(0, 0.05, 0.1);
+
     /// <summary>The chance a phrase restating the phrase before's motif plays it displaced, later in the bar; a song's decision for its soloist (<see cref="DisplaceChances" />).</summary>
     public double DisplaceChance { get; init; }
 

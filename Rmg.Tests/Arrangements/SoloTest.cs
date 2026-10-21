@@ -321,6 +321,47 @@ public sealed class SoloTest
         await Task.CompletedTask;
     }
 
+    /// <summary>Funk songs whose soloists riff on the band's rhythm, or never.</summary>
+    private static Genre Riffing(double rhythm) => GenrePresets.With("funk", GenreChoices.SoloStyle, ("pickups", 0.3), ("space", 0.1), ("rhythm", rhythm));
+
+    /// <summary>
+    ///     A soloist riffing on the band's rhythm strikes its notes on the band's own onsets there, the rhythm part's or the chords', short, a
+    ///     moment either way as the parts' timing has them; and a Funk solo's notes fall on the band's onsets oftener than
+    ///     with none riffing, the same songs (seen 45% against 38% of 64 songs).
+    /// </summary>
+    [Test]
+    public async Task ARiff_StrikesTheBandsOnsets()
+    {
+        var offTheBand = new List<string>();
+        double Share(Genre genre, bool rule)
+        {
+            var (notes, on) = (0, 0);
+            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+            {
+                // the band's onsets, the rhythm part's where it plays, the chords' where it does not
+                var rhythm = song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Select(x => x.Position).ToArray() ?? [];
+                var chords = rhythm.Length > 0 ? rhythm : song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Chords))?.Select(x => x.Position).ToArray() ?? [];
+                foreach (var (span, solo, plan) in SolosNotes(song))
+                foreach (var note in solo)
+                {
+                    notes++;
+                    var struck = chords.Any(x => Math.Abs(x - note.Position) < 0.05);
+                    on += struck ? 1 : 0;
+                    if (rule && !struck && plan.Any(x => x.Gesture == SoloGesture.Rhythm && note.Position >= x.Start - 1e-9 && note.Position < x.End - 1e-9)
+                        && chords.Count(x => x >= span.Start && x < span.End) > 0)
+                        offTheBand.Add($"seed {song.Seed} at {note.Position}");
+                }
+            }
+
+            return on / (double)Math.Max(1, notes);
+        }
+
+        var (riffing, none) = (Share(Riffing(1), true), Share(Riffing(0), false));
+        Console.WriteLine($"  Funk's solo notes on the band's onsets: {riffing:P0} riffing, {none:P0} not");
+        await Assert.That(offTheBand).IsEmpty();
+        await Assert.That(riffing).IsGreaterThan(none);
+    }
+
     /// <summary>Soloists trading take whole phrases in turn: no phrase of the line runs over a turn's end.</summary>
     [Test]
     public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()

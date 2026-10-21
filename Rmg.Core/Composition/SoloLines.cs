@@ -34,7 +34,10 @@ public enum SoloGesture
     Pause,
 
     /// <summary>The melody's notes there, as the soloist plays them.</summary>
-    Quote
+    Quote,
+
+    /// <summary>A note or two struck on the band's own onsets there, short, a funk horn's or guitarist's riff on the groove.</summary>
+    Rhythm
 }
 
 /// <summary>
@@ -60,7 +63,9 @@ internal static class SoloLines
         (SoloGesture.Lick, new ByConvention(0.8, 1, 1), 0.3),
         (SoloGesture.Quote, new ByConvention(1, 1, 1), 0),
         (SoloGesture.Held, new ByConvention(1.2, 0.5, 0.4), -0.6),
-        (SoloGesture.Pause, new ByConvention(1, 0.4, 0.3), -1)
+        (SoloGesture.Pause, new ByConvention(1, 0.4, 0.3), -1),
+        // a soloist's who riffs alone (Soloist.Riffs)
+        (SoloGesture.Rhythm, new ByConvention(1.6, 1.6, 1.6), 0.2)
     ];
 
     /// <summary>How much a quote weighs in a solo of its own and in one on the melody, which paraphrases it.</summary>
@@ -102,6 +107,14 @@ internal static class SoloLines
     private const int WaveBars = 8;
 
     private const double WaveFloor = 0.7;
+
+    /// <summary>
+    ///     How many of the band's onsets a riff on them needs at least, how long its note is at most, in beats, and how much of
+    ///     the time to the next onset it sounds, short, as struck.
+    /// </summary>
+    private const int RhythmOnsets = 2;
+
+    private const double RhythmNote = 0.5, RhythmShare = 0.5;
 
     /// <summary>How much later a displaced motif plays, in beats, as likely each: an 8th, or a beat.</summary>
     private static readonly double[] DisplaceShifts = [0.5, 1];
@@ -177,7 +190,8 @@ internal static class SoloLines
         [SoloGesture.Lick] = 0,
         [SoloGesture.Quote] = 0,
         [SoloGesture.Held] = 1,
-        [SoloGesture.Pause] = 0
+        [SoloGesture.Pause] = 0,
+        [SoloGesture.Rhythm] = 0
     }.ToImmutableDictionary();
 
     /// <summary>The odds a gesture leaning to stacking has over one leaning away, and an intense moment over a calm one, as the odds of 1.</summary>
@@ -210,6 +224,7 @@ internal static class SoloLines
     /// <summary>A solo's line, and every segment's intensity and gesture, by its start.</summary>
     /// <param name="melody">The melody's notes in the solo, which a solo on the melody aims at and quotes, and every note takes its state from.</param>
     /// <param name="band">The chords' notes in the solo, the band's chord a stacked note stacks; the melody's where they rest.</param>
+    /// <param name="groove">Where the band strikes in the solo, the rhythm part's onsets or, where it has none, the chords', which a riff strikes on.</param>
     /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
     /// <param name="barOrigin">Where the bars the span plays in start, its section's start (<see cref="Plan" />).</param>
     /// <param name="climbs">Whether the line's range opens with the solo's arc (<see cref="Soloist.Ceiling" />), a solo's own; an answer's, which has no arc, and a solo on the melody's, which sings where the melody does, whole.</param>
@@ -231,6 +246,7 @@ internal static class SoloLines
         bool climbs,
         IReadOnlyList<TimelineItem<StateMap>> melody,
         IReadOnlyList<TimelineItem<StateMap>> band,
+        IReadOnlyList<double> groove,
         EventStateTimelineMap<StateMap> track,
         PitchInstrumentTrack definition,
         StateTimelineMap common
@@ -331,6 +347,9 @@ internal static class SoloLines
         );
         // whether a motif restated is displaced, from a sequence of its own after the plan's pickups
         var displacing = new GenerationContext(pickups.GenerateSeed());
+        // a riff where the band gives it onsets enough, a lick where it holds, as the plan then has it
+        double[] OnsetsIn(double start, double end) => [..groove.Where(x => x >= start - 1e-9 && x < end - 1e-9).Distinct().Order()];
+        plan = [..plan.Select(x => x.Gesture == SoloGesture.Rhythm && OnsetsIn(x.Start, x.End).Length < RhythmOnsets ? x with { Gesture = SoloGesture.Lick } : x)];
         var current = Nearest(ChordNotes(span.Start), middle);
         CellCursor? cursor = null;
         // the phrase before's motif, its first run's or lick's first cell, as its first note and the scale steps of the others
@@ -419,6 +438,22 @@ internal static class SoloLines
                     StateTrace.RecordSection(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
                     if (pitches.Length > 0)
                         current = pitches[^1];
+                    break;
+                }
+                // a riff on the band's onsets there, a chord's note near the line and the scale's note above it, the first
+                // accented and every note short
+                case SoloGesture.Rhythm:
+                {
+                    var onsets = OnsetsIn(start, end);
+                    current = Nearest(ChordNotes(start), current);
+                    var scale = ScaleNotes(start);
+                    var above = scale.FirstOrDefault(x => x > current, current);
+                    for (var i = 0; i < onsets.Length; i++)
+                    {
+                        var length = (i + 1 < onsets.Length ? onsets[i + 1] : end) - onsets[i];
+                        Add(onsets[i], i % 3 == 2 ? above : current, level, Math.Min(RhythmNote, length * RhythmShare), accented: i == 0);
+                    }
+
                     break;
                 }
                 case SoloGesture.Quote:
@@ -631,6 +666,7 @@ internal static class SoloLines
                     x.Gesture switch
                     {
                         SoloGesture.Quote => quoteWeight(at, end) * soloist.GestureWeights[x.Gesture],
+                        SoloGesture.Rhythm => soloist.Riffs ? soloist.GestureWeights[x.Gesture] : 0,
                         // a pause is a breath between gestures: never a phrase's first, nor one after another
                         SoloGesture.Pause => previous is null or { Gesture: SoloGesture.Pause } ? 0 : soloist.GestureWeights[x.Gesture] * soloist.PauseRate / Soloist.PauseRates.Tuned,
                         _ => soloist.GestureWeights[x.Gesture]

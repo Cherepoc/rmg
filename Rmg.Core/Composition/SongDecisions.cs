@@ -469,6 +469,9 @@ internal sealed record SongDecisions(
                 PickupChance = role == TrackRole.Drum ? 0 : Soloist.PickupChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "pickups")),
                 // and how often it displaces a motif it restates, a pitched soloist's
                 DisplaceChance = role == TrackRole.Drum ? 0 : Soloist.DisplaceChances.At(songUnconventionality[Facet.Melody]),
+                // and whether it riffs on the band's rhythm, a pitched soloist's, from a sequence of its own
+                Riffs = role != TrackRole.Drum && SongGenerator.CreateStream(seed, SongStream.SoloRhythm, (int)role)
+                    .TestProbability(Soloist.RiffChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "rhythm"))),
                 // and whether it leaves space, a pitched soloist's, from a sequence of its own
                 Spacious = role != TrackRole.Drum && SongGenerator.CreateStream(seed, SongStream.SoloSpace, (int)role)
                     .TestProbability(Soloist.SpaceChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "space")))
