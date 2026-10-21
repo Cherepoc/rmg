@@ -249,6 +249,34 @@ public sealed class SoloTest
         await Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     A restated motif plays displaced now and then, later by an 8th or a beat, the solo silent before it there but for a
+    ///     grace a moment before its first note (<see cref="Ornaments" />); and some
+    ///     restatements are displaced, not every one (seen 113 of 369, of 64 wild songs).
+    /// </summary>
+    [Test]
+    public async Task ARestatedMotif_IsDisplacedNowAndThen_SilentBeforeIt()
+    {
+        var (restated, displaced) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
+        {
+            var notes = song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Solo))?.ToArray() ?? [];
+            foreach (var (start, shift) in song.Trace.Where(x => x.Point == TracePoints.SoloMotif).Select(x => ((double Start, double Shift))x.Value!))
+            {
+                restated++;
+                if (shift <= 0)
+                    continue;
+                displaced++;
+                await Assert.That(shift is 0.5 or 1).IsTrue();
+                await Assert.That(notes.Any(x => x.Position >= start - 1e-9 && x.Position < start + shift - 0.25 - 1e-9)).IsFalse().Because($"seed {song.Seed} at {start}");
+            }
+        }
+
+        Console.WriteLine($"  of {restated} motifs restated, {displaced} displaced");
+        await Assert.That(displaced).IsGreaterThan(0);
+        await Assert.That(displaced).IsLessThan(restated);
+    }
+
     /// <summary>Soloists trading take whole phrases in turn: no phrase of the line runs over a turn's end.</summary>
     [Test]
     public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()

@@ -95,6 +95,12 @@ internal sealed record Soloist(
     /// </summary>
     public static ByConvention SpaceChances { get; } = new(0.05, 0.1, 0.1);
 
+    /// <summary>The chance a phrase restating the phrase before's motif plays it displaced, later in the bar; a song's decision for its soloist (<see cref="DisplaceChances" />).</summary>
+    public double DisplaceChance { get; init; }
+
+    /// <summary>The chance a soloist displaces a restated motif, by the melody facet: never at the plain end.</summary>
+    public static ByConvention DisplaceChances { get; } = new(0, 0.3, 0.5);
+
     /// <summary>How much a spacious soloist leans its gestures to the held and from the run, as odds, and how long its run is at most, in beats.</summary>
     public const double SpaceOdds = 4, SpaceRun = 1;
 

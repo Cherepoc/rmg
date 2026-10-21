@@ -95,6 +95,9 @@ internal static class SoloLines
     /// <summary>A spacious soloist's line, in bars, its section's phrase where that is not a multiple of it, and its call's.</summary>
     private const int SpaceLineBars = 4, SpaceCallBars = 1;
 
+    /// <summary>How much later a displaced motif plays, in beats, as likely each: an 8th, or a beat.</summary>
+    private static readonly double[] DisplaceShifts = [0.5, 1];
+
     /// <summary>
     ///     The solo's arc, which its phrases' peaks follow: where it starts, the climax it rises to at about 70% of the way,
     ///     and where it eases to by its end.
@@ -318,6 +321,8 @@ internal static class SoloLines
             turn,
             barOrigin
         );
+        // whether a motif restated is displaced, from a sequence of its own after the plan's pickups
+        var displacing = new GenerationContext(pickups.GenerateSeed());
         var current = Nearest(ChordNotes(span.Start), middle);
         CellCursor? cursor = null;
         // the phrase before's motif, its first run's or lick's first cell, as its first note and the scale steps of the others
@@ -350,6 +355,7 @@ internal static class SoloLines
                     var positions = Positions(start, end, gesture, speed);
                     var scale = ScaleNotes(start);
                     var (pitches, accents, cells) = Cells(scale, cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
+                    var shift = 0.0;
                     // a phrase's first opening on the phrase before's motif a step away now and then, its own the next's
                     if (phrase != motifPhrase && pitches.Length > 0)
                     {
@@ -376,11 +382,24 @@ internal static class SoloLines
                                     pitches[i] = scale[answered[i]];
                                 // and a run going on into the next gesture goes on from where it was moved to
                                 cursor.Root = scale[root];
+                                // and played later by an 8th or a beat now and then, displaced, its rhythm as it was, its notes past
+                                // the gesture's end left out, as a player moves a lick in the bar to make it new
+                                // and a gesture long enough to keep half a beat of itself after it, drawn whatever it is
+                                var (displaces, by) = (displacing.TestProbability(soloist.DisplaceChance), DisplaceShifts[displacing.GenerateInt(0, DisplaceShifts.Length)]);
+                                if (displaces && end - start >= by + 0.5 - 1e-9)
+                                    shift = by;
+                                StateTrace.RecordSection(TracePoints.SoloMotif, SectionGenerator.SectionTrace, span.SectionId, $"{start}+{shift}", (start, shift));
                             }
                         }
                         var cell = pitches[..Math.Min(cells.Length > 0 ? cells[0] : pitches.Length, pitches.Length)];
                         motif = (cell[0], [..cell.Select(x => Index(x) - Index(cell[0]))]);
                         (motifPhrase, motifShape) = (phrase, shape);
+                    }
+
+                    if (shift > 0)
+                    {
+                        positions = [..positions.Select(x => x + shift).Where(x => x < end - 1e-9)];
+                        (pitches, accents) = (pitches[..positions.Length], accents[..positions.Length]);
                     }
 
                     // a run, too fast to play in octaves, alone; and a ghosting soloist's lick at 16ths or slower, not on a
