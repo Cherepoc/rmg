@@ -97,6 +97,18 @@ internal static class ExpressionRender
     public static IEnumerable<(double Position, int Controller, int Value)> MixBrightness(ImmutableArray<(double At, double Steps)> mix) =>
         mix.Select(x => (x.At, BrightnessController, Math.Max(64 - FilterReach, (int)Math.Round(64 - x.Steps))));
 
+    /// <summary>
+    ///     How many cycles a beat a vibrato may take, on the beat's grid: a half note's, a dotted quarter's, a quarter's and down
+    ///     to a 32nd's, its triplets among them, so that a vibrato sung on note after note shakes in time with the band.
+    /// </summary>
+    public static ImmutableArray<double> VibratoGrid { get; } = [1, 1.5, 2, 3, 4, 6, 8];
+
+    /// <summary>A vibrato's cycles a beat: the grid's nearest to its rate, in cycles a second, at a beat's length there.</summary>
+    internal static double CyclesPerBeat(double rate, double beatSeconds) => VibratoGrid.MinBy(x => Math.Abs(Math.Log(x / (rate * beatSeconds))));
+
+    /// <summary>Where a vibrato's cycles count from: the start of the section playing at a place, the song's for none.</summary>
+    internal static double GridOrigin(SongMap? map, double position) => map?.PlayAt(position)?.Played.Start ?? 0;
+
     /// <summary>The track's expression, from its notes, as they are swung, at the song's tempo, a gate's and a filter's by the sections of the map, under the whole mix's closing.</summary>
     public static (ImmutableArray<(double Position, int Value)> Bends, ImmutableArray<(double Position, int Controller, int Value)> Controllers,
         ImmutableArray<(double Position, double Value)> Expression) Render(
@@ -158,8 +170,11 @@ internal static class ExpressionRender
                 var seconds = duration * beatSeconds;
                 var (held, leaves) = Composition.Expression.Held(bend, rise, seconds, 0.5 * beatSeconds);
                 var release = Math.Max(0.5 * beatSeconds, rise);
-                // a vibrato waits its cycles after the pitch holds, then grows in, and stops where it moves again
+                // a vibrato waits its cycles after the pitch holds, then grows in, and stops where it moves again, its cycles on
+                // the section's grid, so that the notes it shakes keep one pulse, whenever each starts
                 var shakes = rate > 0 ? held + wait / rate : double.PositiveInfinity;
+                var perBeat = rate > 0 ? CyclesPerBeat(rate, beatSeconds) : 0;
+                var origin = GridOrigin(map, note.Position);
                 for (var t = 0.0; t < duration - 1e-9; t += shaped ? Step / 4 : Step)
                 {
                     var (share, at) = (t / duration, t * beatSeconds);
@@ -177,8 +192,9 @@ internal static class ExpressionRender
                         BendKind.Dive => depth * (1 - Math.Pow(1 - Math.Clamp((share - 0.25) / 0.75, 0, 1), 2)),
                         _ => 0
                     };
-                    var cycles = at >= shakes && at < leaves ? (at - shakes) * rate : 0;
-                    var growth = Math.Clamp(cycles / Composition.Expression.VibratoGrowthCycles, 0, 1);
+                    var grown = at >= shakes && at < leaves ? (at - shakes) * rate : 0;
+                    var growth = Math.Clamp(grown / Composition.Expression.VibratoGrowthCycles, 0, 1);
+                    var cycles = (start + t - origin) * perBeat;
                     semitones += vibrato / 100.0 * growth * Math.Sin(2 * Math.PI * cycles);
                     // a wide one bends up from the note to its top and back, as a guitar's does, never below it
                     semitones += wide * growth * (0.5 - 0.5 * Math.Cos(2 * Math.PI * cycles));

@@ -71,6 +71,62 @@ public sealed class ShapeTimingTest
         ..TestCorpus.InParallel(Enumerable.Range(0, 32), seed => ShapedNotes(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))).ToArray()).SelectMany(x => x)
     ];
 
+    /// <summary>
+    ///     A vibrato shakes on its section's grid, its cycles a beat the grid's nearest to its rate, so that a note struck
+    ///     again shakes in the pulse of the one before: where a narrow vibrato on a note bent no other way has grown, its
+    ///     pitch is above the note where the grid's cycle is up and below where it is down, whenever the note started.
+    /// </summary>
+    [Test]
+    public async Task AVibrato_ShakesOnItsSectionsGrid_WheneverItsNoteStarts()
+    {
+        var (checkedSamples, notesChecked) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed)))
+        {
+            var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
+            foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack))
+            {
+                var steady = notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 && x.Value.State.GetStateValue(CompositionStateKinds.Bend) == 0
+                                              && x.Value.State.GetStateValue(CompositionStateKinds.Wow) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Detune) == 0).ToArray();
+                if (steady.Length == 0)
+                    continue;
+                var bends = ExpressionRender.Render(notes, song.Map, song.Swing, tempo, 0, []).Bends;
+                foreach (var note in steady)
+                {
+                    var (start, end) = (song.Swing.Apply(note.Position), song.Swing.Apply(note.Position + note.Value.Duration));
+                    var perBeat = ExpressionRender.CyclesPerBeat(note.Value.State.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0, Meter.SecondsPerBeat(tempo.GetEffectiveValueAt(note.Position)));
+                    var origin = ExpressionRender.GridOrigin(song.Map, note.Position);
+                    var depth = note.Value.State.GetStateValue(CompositionStateKinds.Vibrato) / 100.0;
+                    // its grown part: where it sounds near its full depth, and the grid's cycle well away from crossing the note
+                    var samples = bends.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).GroupBy(x => x.Position).Select(x => x.Last())
+                        .Select(x => (Pitch: (x.Value - 8192) / 8191.0 * ExpressionRender.BendRange, Cycle: Math.Sin(2 * Math.PI * (x.Position - origin) * perBeat)))
+                        .Where(x => Math.Abs(x.Pitch) >= 0.8 * depth && Math.Abs(x.Cycle) >= 0.5).ToArray();
+                    notesChecked += samples.Length > 0 ? 1 : 0;
+                    foreach (var (pitch, cycle) in samples)
+                    {
+                        checkedSamples++;
+                        await Assert.That(Math.Sign(pitch)).IsEqualTo(Math.Sign(cycle)).Because($"seed {song.Seed}, track {track} at {note.Position}");
+                    }
+                }
+            }
+        }
+
+        Console.WriteLine($"{notesChecked} vibrato notes, {checkedSamples} samples");
+        await Assert.That(notesChecked).IsGreaterThan(50);
+    }
+
+    /// <summary>A vibrato's cycles a beat are the grid's, within a quarter of its rate at any tempo a song plays.</summary>
+    [Test]
+    public async Task AVibratosCyclesABeat_AreTheGrids_NearItsRate()
+    {
+        foreach (var (width, _) in Expression.Vibratos)
+        foreach (var bpm in Enumerable.Range(40, 201))
+        {
+            var perBeat = ExpressionRender.CyclesPerBeat(width.Rate, 60.0 / bpm);
+            await Assert.That(ExpressionRender.VibratoGrid.Contains(perBeat)).IsTrue();
+            await Assert.That(Math.Abs(perBeat * bpm / 60 / width.Rate - 1)).IsLessThan(0.25).Because($"{width.Rate} a second at {bpm}");
+        }
+    }
+
     [Test]
     public async Task ABend_LandsWithinItsRise_QuickOrInTime_AndOnANoteLongEnoughToHoldIt()
     {
