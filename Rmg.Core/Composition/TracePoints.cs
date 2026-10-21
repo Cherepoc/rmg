@@ -190,6 +190,9 @@ internal static class TracePoints
     /// <summary>A solo's phrase restating the phrase before's motif: its gesture's start and how far later it plays it, 0 where in place (a tuple of two <c>double</c>s).</summary>
     public const string SoloMotif = "Solo motif";
 
+    /// <summary>A surf drop, a guitar's slide down the neck into a louder section: the bar it plays, its start and its end (a tuple of two <c>double</c>s).</summary>
+    public const string SurfDrop = "Surf drop";
+
     /// <summary>A solo's run landing on a change of chord: the note's place and how many scale steps its cell moved (a tuple of a <c>double</c> and an <c>int</c>).</summary>
     public const string SoloLanding = "Solo landing";
 

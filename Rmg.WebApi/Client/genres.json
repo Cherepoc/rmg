@@ -2615,6 +2615,7 @@
         "pad": { "rockOrgan": 100, "percussiveOrgan": 50 }
       },
       "riff": { "hook": 80, "powerChords": 40, "chugs": 20, "turnaround": [20, 30, 30] },
+      "surfDrop": { "lifts": [30, 40, 50] },
       "figure": { "riff": { "own": 100, "tremolo": [30, 40, 50] }, "backbeat": { "own": 100, "trainBeat": 40 }, "bass": { "own": 100, "eighths": 60 } },
       "room": { "plate": 100 },
       "space": { "melody": 85, "riff": 85, "solo": 85, "chords": 70, "rhythm": 70, "bass": 30, "drum": 35 },
