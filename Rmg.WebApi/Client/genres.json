@@ -1098,6 +1098,7 @@
       "lineScale": { "blues": [100, 100, 70], "pentatonic": [80, 80, 60], "section": [20, 30, 40], "chromatic": [0, 0, 20], "union": [10, 20, 20] },
       "bass": { "leading": 65 },
       "effects": { "bends": [90, 95, 100], "soloBends": [90, 95, 100], "vibrato": [70, 85, 100], "chorus": [0, 30, 80], "swell": [0, 35, 100], "tone": [20, 40, 60], "tape": 0, "pinch": 0, "dive": 0 },
+      "bendTiming": { "slow": [20, 30, 40], "late": [30, 40, 50] },
       "phrases": { "twelveBars": [100, 100, 70], "fourBars": [15, 20, 40] },
       "instrument": {
         "melody": { "acousticGrandPiano": [40, 40, 100], "harmonica": [100, 100, 88], "electricGuitarClean": [80, 80, 71], "tenorSax": [45, 45, 61] },
@@ -1291,6 +1292,7 @@
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 40, "tom": 80, "cymbal": 100, "tambourine": [10, 20, 30] },
       "louderForms": { "guitars": [50, 70, 80] },
       "effects": { "vibrato": [0, 70, 100], "chorus": [0, 50, 100], "swell": [0, 35, 100], "bends": [0, 50, 100], "soloBends": [60, 80, 95], "tone": [0, 50, 50], "tape": [0, 5, 5], "pinch": [0, 10, 10], "dive": 0 },
+      "bendTiming": { "slow": [20, 25, 30], "late": [0, 5, 10] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": 45, "drum": 95, "riff": [0, 10, 20], "riffTwin": [0, 15, 15], "rhythm": [20, 20, 30], "solo": [85, 85, 85] },
       "rootMotion": { "fourthDown": 85, "stepUp": 80, "thirdDown": 80 },
       "tempo": { "from": 55, "to": [95, 95, 105] },
@@ -2748,6 +2750,7 @@
       "grooveHold": { "held": 85 },
       "fills": { "amount": 35 },
       "effects": { "bends": [30, 50, 70], "soloBends": [50, 70, 90], "vibrato": [30, 50, 60], "chorus": 0, "swell": 0, "tone": 0, "tape": 0, "pinch": 0, "dive": 0 },
+      "bendTiming": { "slow": [15, 20, 25], "late": [5, 10, 15] },
       "articulation": { "legato": [30, 40, 50], "roll": 0, "soloGhosts": 0 },
       "space": { "melody": 45, "chords": 40 },
       "dynamics": { "energy": 55, "contrast": 55 },

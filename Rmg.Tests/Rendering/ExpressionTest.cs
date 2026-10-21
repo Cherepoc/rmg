@@ -146,7 +146,7 @@ public sealed class ExpressionTest
             if (kind is BendKind.None or BendKind.Slide or BendKind.Dive)
                 continue;
 
-            var direction = kind is BendKind.BendAndRelease or BendKind.PrebendRelease ? 1 : -1;
+            var direction = kind is BendKind.BendAndRelease or BendKind.PrebendRelease or BendKind.LateBend ? 1 : -1;
             await Assert.That(depth == Expression.ScaleDistance(note.Value, direction) || depth == Expression.ScaleDistance(note.Value, 2 * direction)).IsTrue();
             await Assert.That(Math.Abs(depth)).IsBetween(1, Expression.WidestBend);
             bent++;

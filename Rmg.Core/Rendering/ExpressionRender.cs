@@ -188,6 +188,8 @@ internal static class ExpressionRender
                         BendKind.BendAndRelease or BendKind.ReleaseAndBend => depth * Eased(at / rise) * (1 - Eased((at - leaves) / rise)),
                         // falling away, faster and faster, at its very end
                         BendKind.FallOff => depth * Math.Pow(Math.Clamp((at - leaves) / Composition.Expression.FallSeconds, 0, 1), 2),
+                        // held on the note a beat, then up slowly, and held bent
+                        BendKind.LateBend => depth * Eased((at - beatSeconds) / rise),
                         // a dive past its attack, falling fast and slowing as it nears its bottom
                         BendKind.Dive => depth * (1 - Math.Pow(1 - Math.Clamp((share - 0.25) / 0.75, 0, 1), 2)),
                         _ => 0

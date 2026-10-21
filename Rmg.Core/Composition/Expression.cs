@@ -29,7 +29,10 @@ public enum BendKind
     PrebendRelease,
 
     /// <summary>A whammy bar's dive, the note falling away as it rings, fast and then slowing at its bottom, an octave.</summary>
-    Dive
+    Dive,
+
+    /// <summary>Struck on the note and held a beat, then bent slowly up a step and held there, as a blues player lets a note hang before pushing it.</summary>
+    LateBend
 }
 
 /// <summary>
@@ -393,13 +396,23 @@ internal static class Expression
     /// <summary>The chance a bend or a slide goes slowly, in time, by the sound facet: some at the plain end, as slow bends are a convention of their own.</summary>
     public static ByConvention SlowBendChance { get; } = new(0.1, 0.15, 0.25);
 
+    /// <summary>
+    ///     The chance a bend up a step, on a note long enough, waits a beat before it rises, slowly, and stays bent, by the sound
+    ///     facet: a blues player's, which the songs play seldom and a genre's where it names it (<see cref="GenreChoices.BendTiming" />).
+    /// </summary>
+    public static ByConvention LateBendChance { get; } = new(0, 0.03, 0.05);
+
+    /// <summary>The place a note's draw of whether its bend waits is derived from its draws' by, a sequence of its own.</summary>
+    private const long LateBendDecision = 1;
+
     /// <summary>How long a fall-off takes to fall, in seconds, at the very end of its note.</summary>
     public const double FallSeconds = 0.15;
 
     /// <summary>
     ///     When a shaped note's pitch is held, in seconds from its start: from where its bend lands, onto the note or its
     ///     bent top, to where it moves again, a release's or a fall's start, or the note's end. A prebend holds its bent
-    ///     note for its rise before it releases, slowly, over an 8th, or its rise where that is longer.
+    ///     note for its rise before it releases, slowly, over an 8th, or its rise where that is longer; a late bend lands a
+    ///     beat and its rise after the note's start.
     /// </summary>
     /// <param name="kind">How the note bends.</param>
     /// <param name="rise">How long its bend takes to rise, in seconds.</param>
@@ -410,6 +423,7 @@ internal static class Expression
         BendKind.Scoop or BendKind.Slide => (rise, seconds),
         BendKind.BendAndRelease or BendKind.ReleaseAndBend => (rise, seconds - rise),
         BendKind.PrebendRelease => (rise + Math.Max(eighth, rise), seconds),
+        BendKind.LateBend => (2 * eighth + rise, seconds),
         BendKind.FallOff => (0, seconds - FallSeconds),
         _ => (0, seconds)
     };
@@ -886,10 +900,20 @@ internal static class Expression
                     var kind = drawing.Pick(Placed(bendKinds, ends, note.Value.Duration));
                     if (isRelease)
                         kind = drawing.Pick(Placed(ReleaseBends, ends, note.Value.Duration));
+                    var eighth = 0.5 * beatSeconds(note.Position);
+                    var quick = soloist is null ? PartRise : SlowestQuickRise - (SlowestQuickRise - QuickestRise) * note.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0;
+                    var seconds = note.Value.Duration * beatSeconds(note.Position);
+                    // a held note's bend made to wait a beat and rise slowly up, staying bent, where the note is long enough, whatever
+                    // the bend drawn but a fall-off, which ends its phrase, and a release's, which bends into its note; from a
+                    // sequence of its own, drawn for every note, before its size, which a bend up leans to the chord's notes by
+                    var late = new GenerationContext(Seeds.Derive(Seeds.Derive(noteSeed, map.PlaceKey(note.Position, NotePlacesPerBeat)), LateBendDecision))
+                        .TestProbability(LateBendChance.At(u, genre.Chance(GenreChoices.BendTiming, "late")));
+                    if (late && !isRelease && kind != BendKind.FallOff && Fits(BendKind.LateBend, Math.Round(Math.Max(eighth, quick), 3), seconds, eighth))
+                        kind = BendKind.LateBend;
                     // a bend up to a scale note, the likelier its chord's, as a player bends a fourth to a fifth
                     var tops = Realizer.GetChordNotes(note.Value.State).Classes;
                     var size = drawing.Pick(Tilt.Of(ChordTopOdds, 1).Weigh(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1),
-                        steps => kind is BendKind.BendAndRelease or BendKind.PrebendRelease && tops.Contains((note.Value.Pitches[0] + BendDistance(note.Value, steps)).Mod(Realizer.OctaveNoteCount)) ? 1 : 0));
+                        steps => kind is BendKind.BendAndRelease or BendKind.PrebendRelease or BendKind.LateBend && tops.Contains((note.Value.Pitches[0] + BendDistance(note.Value, steps)).Mod(Realizer.OctaveNoteCount)) ? 1 : 0));
                     // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches;
                     // the note before that a dive let go of unheard, and none from a dive, fallen away
                     var before = i - 1;
@@ -904,12 +928,9 @@ internal static class Expression
                     // and its vibrato, a note at a time, the wide likelier the more intense
                     var noteVibrato = soloist is null ? vibrato : drawing.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => Suits(x.Width, program)), u, widths), Lean));
                     // how fast it bends or slides, quickly, a soloist the quicker the more intense, or slowly, in time
-                    var slow = drawing.TestProbability(SlowBendChance.At(u));
-                    var eighth = 0.5 * beatSeconds(note.Position);
-                    var quick = soloist is null ? PartRise : SlowestQuickRise - (SlowestQuickRise - QuickestRise) * note.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0;
+                    var slow = drawing.TestProbability(SlowBendChance.At(u, genre.Chance(GenreChoices.BendTiming, "slow")));
                     // in whole milliseconds, as the note keeps it
-                    var rise = Math.Round(slow ? Math.Max(eighth, quick) : quick, 3);
-                    var seconds = note.Value.Duration * beatSeconds(note.Position);
+                    var rise = Math.Round(slow || kind == BendKind.LateBend ? Math.Max(eighth, quick) : quick, 3);
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
@@ -926,7 +947,7 @@ internal static class Expression
                         shape = kind;
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
                         {
-                            BendKind.BendAndRelease or BendKind.PrebendRelease => BendDistance(note.Value, size),
+                            BendKind.BendAndRelease or BendKind.PrebendRelease or BendKind.LateBend => BendDistance(note.Value, size),
                             BendKind.Scoop or BendKind.FallOff or BendKind.ReleaseAndBend => BendDistance(note.Value, -size),
                             _ => 0
                         });

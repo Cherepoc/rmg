@@ -251,9 +251,10 @@ each moved). Put off, each its own plan:
 The *Listening* backlog judged against the genres' conventions, and the bends and vibratos, which sounded out of place
 or strange, timed in seconds and set by genre, its steps built (their commits say what each moved).
 
-Put off: the blues curl, a quarter tone's bend on ♭3 or ♭7 over a major chord (a bend kind of its own, its depth in
-cents, and the genres' data); a genre's share of slow bends (Country, the Power ballad), should the soloists' share
-sound rushed there; the heavy genres' low tuning (*Put off*); a whammy bar's shimmer on a clean guitar's held chord, one bend over the
+A bend's timing a genre's (built 21 October 2026, `bendTiming`): slow, in time, and late, a held note struck
+and left a beat before it is pushed up slowly and kept bent, the Blues' 30-40-50, Country's and the Power ballad's
+some, the songs' own 0-3-5; 24% of the Blues' bends on notes of two beats or more waiting. Put off: the blues curl, a quarter tone's bend on ♭3 or ♭7 over a major chord (a bend kind of its own, its depth in
+cents, and the genres' data); the heavy genres' low tuning (*Put off*); a whammy bar's shimmer on a clean guitar's held chord, one bend over the
 channel, a clean metal intro's, a new effect rather than a vibrato. Not built: a double stop's or a unison's bend, one
 string bending under one held, which one channel's pitch bend cannot play; a guitar's narrow vibrato bending up
 alone, inaudible beside its wide one, which does.

@@ -114,6 +114,50 @@ public sealed class ShapeTimingTest
         await Assert.That(notesChecked).IsGreaterThan(50);
     }
 
+    /// <summary>
+    ///     A late bend sounds its note unbent for a beat, then rises over its rise, slowly, an 8th or longer, and is bent by the
+    ///     end of it, on a note long enough to hold it there.
+    /// </summary>
+    [Test]
+    public async Task ALateBend_HoldsItsNoteABeat_ThenRisesSlowly_AndStaysBent()
+    {
+        var late = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => ShapedNotes(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))).ToArray())
+            .SelectMany(x => x).Where(x => x.Kind == BendKind.LateBend).ToArray();
+        // seen 21
+        Console.WriteLine($"{late.Length} late bends in 64 Blues songs");
+        await Assert.That(late.Length).IsGreaterThan(10);
+        foreach (var note in late)
+        {
+            var (beat, depth) = (2 * note.Eighth, Math.Abs(note.Depth));
+            var because = $"a late bend of {note.Decided:F3} s, rising over {note.Rise} s with a beat of {beat:F3} s";
+            await Assert.That(note.Rise).IsGreaterThanOrEqualTo(note.Eighth - 1e-3).Because(because);
+            await Assert.That(note.Decided).IsGreaterThanOrEqualTo(beat + 2 * note.Rise - 1e-3).Because(because);
+            await Assert.That(note.Pitch.Where(x => x.At < beat - 1e-3).All(x => Math.Abs(x.Semitones) < 0.05)).IsTrue().Because(because);
+            await Assert.That(note.Pitch.Where(x => x.At >= beat + note.Rise + 1e-3).All(x => Math.Abs(x.Semitones) >= 0.9 * depth - 0.05 || note.Cents > 0 || note.Wide > 0)).IsTrue().Because(because);
+        }
+    }
+
+    /// <summary>
+    ///     A genre's late bends, the Blues', against the same songs with none: the share of its bends but slides, dives and
+    ///     fall-offs that wait, of those on a note of two beats or more, long enough to (seen 0% without, 24% with, of 32 Blues
+    ///     songs).
+    /// </summary>
+    [Test]
+    public async Task TheBlues_BendsLate_WhereItNamesIt()
+    {
+        double Share(Genre genre)
+        {
+            var up = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => ShapedNotes(TestCorpus.Get(seed, new SongOverrides(Genre: genre))).ToArray())
+                .SelectMany(x => x).Where(x => x.Kind is not (BendKind.None or BendKind.Slide or BendKind.Dive or BendKind.FallOff) && x.Decided >= 4 * x.Eighth - 1e-3).ToArray();
+            return up.Count(x => x.Kind == BendKind.LateBend) / (double)Math.Max(1, up.Length);
+        }
+
+        var (named, none) = (Share(GenrePresets.Genre("blues")), Share(GenrePresets.With("blues", GenreChoices.BendTiming, ("slow", 0.3), ("late", 0))));
+        Console.WriteLine($"  the Blues' bends on notes of two beats or more waiting: {named:P0}, {none:P0} with none");
+        await Assert.That(none).IsEqualTo(0);
+        await Assert.That(named).IsGreaterThan(0.1);
+    }
+
     /// <summary>A vibrato's cycles a beat are the grid's, within a quarter of its rate at any tempo a song plays.</summary>
     [Test]
     public async Task AVibratosCyclesABeat_AreTheGrids_NearItsRate()
