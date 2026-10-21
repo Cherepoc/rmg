@@ -45,7 +45,7 @@ public sealed class SoloTest
     public async Task APitchedSolo_TradesOnlyAwayFromThePlainEnd_AndTheSongsNeverTwin()
     {
         var context = new GenerationContext(3);
-        var solo = new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, true);
+        var solo = new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, true, 0);
         TrackRole[] parts = [..Band, TrackRole.Solo, TrackRole.Riff];
         await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.WithTrade(context, solo, 0, parts, Genre.None) == solo)).IsTrue();
         await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.WithTwin(context, solo, 0, parts, Genre.None) == solo && Solos.WithTwin(context, solo, 1, parts, Genre.None) == solo)).IsTrue();
@@ -82,7 +82,8 @@ public sealed class SoloTest
                 .Sum(x => x.Value.Count(n => n.Position >= span.Start - 1e-9 && n.Position < span.LastBar));
             if (solo.IsDrumSolo)
             {
-                foreach (var part in Enum.GetValues<TrackRole>().Where(x => x != TrackRole.Drum))
+                // the band resting, or striking its hits alone, its lines resting (DrumSoloTest)
+                foreach (var part in Enum.GetValues<TrackRole>().Where(x => x != TrackRole.Drum && (solo.HitEvery == 0 || x.Sings())))
                     await Assert.That(Notes(part)).IsEqualTo(0).Because($"seed {song.Seed}, {part} in a drum solo");
                 drumSolos++;
             }

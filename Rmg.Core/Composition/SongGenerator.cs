@@ -283,7 +283,8 @@ internal enum SongStream
     StopReturns = 128,
     DrumSoloFlams = 129,
     DrumSoloThemes = 130,
-    DrumSoloSounds = 131
+    DrumSoloSounds = 131,
+    SoloHits = 132
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

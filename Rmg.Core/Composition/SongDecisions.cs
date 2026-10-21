@@ -397,6 +397,9 @@ internal sealed record SongDecisions(
         // and played by two parts together a third apart now and then, each from a sequence of its own
         drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTwin(SongGenerator.CreateStream(seed, SongStream.SoloTwins, AppearanceKey(played, index)), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
+        // and a drum solo over the band's hits now and then, from a sequence of its own
+        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithHits(SongGenerator.CreateStream(seed, SongStream.SoloHits, AppearanceKey(played, index)), x,
+            generateSection(played[index]).Facets[Facet.Groove], genre))];
         // drums that only mark the form neither solo nor trade, as they play no groove to solo from, the appearance played as
         // it is, or by its pitched soloists alone
         if (drumJob != DrumJob.Groove)

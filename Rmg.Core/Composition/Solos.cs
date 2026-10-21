@@ -21,9 +21,10 @@ public enum SoloMode
 /// <param name="Mode">How several share it.</param>
 /// <param name="Step">How many scale steps from the first the others play, playing together.</param>
 /// <param name="IsOwn">Whether its line is its own, over the chords, rather than on the melody's.</param>
-public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode, int Step, bool IsOwn)
+/// <param name="HitEvery">How many bars apart the band strikes its hits under a drum solo, its melody resting; 0 for none, the band resting.</param>
+public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode, int Step, bool IsOwn, int HitEvery)
 {
-    /// <summary>Whether the drums solo alone, the band resting.</summary>
+    /// <summary>Whether the drums solo alone, the band resting or striking its hits.</summary>
     public bool IsDrumSolo => Soloists is [TrackRole.Drum];
 
     /// <summary>Whether a pitched solo trades with the drums, turn by turn, the band laying out for the drums' turns.</summary>
@@ -66,6 +67,23 @@ internal static class Solos
         return trades && solo is { IsDrumSolo: false } && parts.Contains(TrackRole.Drum)
             ? solo with { Soloists = [..solo.Soloists, TrackRole.Drum], Mode = SoloMode.Trading }
             : solo;
+    }
+
+    /// <summary>
+    ///     The chance a drum solo plays over the band's hits, the band striking its chord together on a bar's first beat,
+    ///     every bar or every second, as stop time is played, the drums soloing between, by the groove facet: never at the
+    ///     plain end; a genre's where it names it, a rock, a funk or a Latin band's.
+    /// </summary>
+    public static ByConvention Hits { get; } = new(0, 0.2, 0.3);
+
+    /// <summary>The chance a drum solo's band strikes its hits every second bar rather than every bar.</summary>
+    public const double HitsEverySecond = 0.5;
+
+    /// <summary>A drum solo over the band's hits now and then, from a sequence of its own, every draw made whatever the solo; the solo as it is otherwise.</summary>
+    public static SoloPlan? WithHits(IGenerationContext context, SoloPlan? solo, double groove, Genre genre)
+    {
+        var (hits, second) = (context.TestProbability(Hits.At(groove, genre.Chance(GenreChoices.Solos, "hits"))), context.TestProbability(HitsEverySecond));
+        return hits && solo is { IsDrumSolo: true } ? solo with { HitEvery = second ? 2 : 1 } : solo;
     }
 
     /// <summary>
@@ -194,7 +212,7 @@ internal static class Solos
         if (place == 0 || !parts.Contains(TrackRole.Solo) || !parts.Contains(TrackRole.Melody) || solos[place]?.IsDrumSolo == true)
             return [..solos];
 
-        return [..solos.Select((x, i) => i == place ? new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, own < OwnChance.At(melody[i])) : x)];
+        return [..solos.Select((x, i) => i == place ? new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, own < OwnChance.At(melody[i]), 0) : x)];
     }
 
     /// <summary>An appearance's solo, drawn whatever it turns out to be, so that the draws stay as they are; none for no solo.</summary>
@@ -227,9 +245,9 @@ internal static class Solos
             return null;
         // the drums solo where they alone are drawn, and leave the solo to the others where others are
         if (soloists is [TrackRole.Drum])
-            return new SoloPlan([TrackRole.Drum], SoloMode.Trading, 0, false);
+            return new SoloPlan([TrackRole.Drum], SoloMode.Trading, 0, false, 0);
         soloists.Remove(TrackRole.Drum);
-        return parts.Contains(TrackRole.Melody) ? new SoloPlan([..soloists], mode, step, isOwn) : null;
+        return parts.Contains(TrackRole.Melody) ? new SoloPlan([..soloists], mode, step, isOwn, 0) : null;
     }
 
     /// <summary>

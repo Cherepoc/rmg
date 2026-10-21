@@ -312,21 +312,14 @@ to 0.69 from the calmest third of intensity to the most intense, their intensity
 notes a beat their commonest speed. Each step one mechanism reused, a new decision from a stream of its own; the
 soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromatic). In order:
 
-- **Drum solos** (`DrumSolos`; the solo report extended by velocity by place and intensity, the accent's gap over the
-  taps, crash segments, rolls, flams and stabs a solo, the speeds, the groove's return):
-  - How often and how long, by genre, full solos and trades: a report first, deciding the last step's data.
-  - Dynamics and rolls: the solo's arc by its place in the hits' loudness, a cell's first stroke over taps near a
-    ghost's, a flam's grace before an accent at six a beat or slower, a held gesture a roll swelling or fading on the
-    snare or the floor tom, the crash only on a loud release and the climax's first stroke.
-  - Theme and build: the solo opening on the section's groove, a later phrase opening on it varied round the kit, now
-    and then in triplets, the last before the build on it again; the solo to its section's end, its last bar or two a
-    crescendo down the toms or a snare roll into the landing the band comes back on.
-  - The fastest speeds a burst, every soloist's: above eight a beat only at an intensity of 0.8 or more
-    (`SoloLines.Plan`), the drums' and Metal's guitars' speeds measured before and after.
-  - Cymbal stabs on loud accents and side-stick taps in quiet passages, of the song's own kit.
-  - A solo over the band's hits (`solos.hits`): the band kept and played as stop time carried by the drums, on every
-    bar's first beat or every second's.
-  - The data the report asks for, should rock's and pop's drum solos be too many or too long; then a listening round.
+- **Drum solos** (built 21 October 2026): as rare as their genres' conventions, Jazz's in 25% of its songs and trading
+  in 97%, Rock's in 5%, the others' 3% at most, so no data changed; dynamics as heard over the section's own (the hands
+  by the solo's third 0.61-0.62-0.65 to 0.57-0.61-0.66, a run's accent over its middle 0.03 to 0.22), flams, held
+  gestures rolled, crashes 5.7 a solo to 2.9; the groove its theme, opening every kit solo and coming back, varied
+  round the kit; a build into the band's landing in 63% of solos; the fastest speeds a burst, every soloist's; cymbals
+  of colour and the snare's rim; a solo over the band's hits (`solos.hits`). Left to listening by hand, a question of
+  them finding too few songs among the corpus's first (a drum solo over hits in one Jazz song of 128 and three Rock):
+  how the build, the rolls and the taps near a ghost's sound, the taps' floor among them.
 - **Pitched solos** (`SoloLines`, `Soloist`; a solo space report):
   - A solo on the melody a genre's (`solos.own`, `Solos.OwnChance`): Bluegrass's, Celtic's, Folk's and Medieval's.
   - Pickups: a phrase starting half a beat to a beat and a half early, out of the rest before it, never over a note.

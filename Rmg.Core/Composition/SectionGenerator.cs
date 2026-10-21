@@ -1067,8 +1067,12 @@ internal sealed record GeneratedSection(
             texture = (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, steady);
         // a solo plays through: a drum solo the drums alone, a pitched one its soloists and the melody, whose line it is,
         // improvised through
-        if (solo is { IsDrumSolo: true })
+        if (solo is { IsDrumSolo: true, HitEvery: 0 })
             return (this with { Resting = [..Roles.Values.Distinct().Where(x => x != TrackRole.Drum)], PhraseSilent = steady, TextureKind = TextureKind.Alone, Solo = solo }).Appear(appearance, improvisation);
+        // or the drums over the band's hits, the band playing its chords and its bass, which stop time strikes as hits, and
+        // its lines resting
+        if (solo is { IsDrumSolo: true })
+            return (this with { Resting = resting.Union([TrackRole.Melody, TrackRole.CounterMelody, TrackRole.Pad, TrackRole.Solo]), PhraseSilent = steady, TextureKind = TextureKind.Steady, Solo = solo }).Appear(appearance, improvisation);
         // and the counter-melody and the pad make room for it, unless they solo, and the riff's twin where the riff solos,
         // whose line it would harmonise as it was
         if (solo is not null)

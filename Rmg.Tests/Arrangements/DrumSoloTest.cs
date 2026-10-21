@@ -127,6 +127,36 @@ public sealed class DrumSoloTest
     }
 
     /// <summary>
+    ///     A drum solo over the band's hits: the band strikes them together, every bar or every second, the drums soloing on
+    ///     between, so that no pitched part starts a note but on a hit, a moment either way as the band's timing has it, but
+    ///     in its last bar, where the bass walks the band back in with the drums as it does out of stop time.
+    /// </summary>
+    [Test]
+    public async Task ADrumSoloOverHits_LeavesTheBandItsHitsAlone()
+    {
+        var genre = Rmg.Tests.Genres.GenrePresets.With("rock", GenreChoices.Solos, ("sections", 1), ("hits", 1));
+        var (solos, struck) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
+        foreach (var (index, solo) in song.Solos.Where(x => x.Value is { IsDrumSolo: true, HitEvery: > 0 }))
+        {
+            solos++;
+            var span = song.Map.Sections[index];
+            var every = span.Meter.BarDuration * solo.HitEvery;
+            var notes = song.Song.Notes!.Where(x => !song.IsDrum(x.Key)).SelectMany(x => x.Value).Where(x => x.Position >= span.Start + 0.25 && x.Position < span.LastBar - 1e-9).ToArray();
+            struck += notes.Length;
+            foreach (var note in notes)
+            {
+                var off = (note.Position - span.Start) % every;
+                await Assert.That(Math.Min(off, every - off)).IsLessThan(0.1).Because($"seed {song.Seed} at {note.Position}");
+            }
+        }
+
+        Console.WriteLine($"{solos} drum solos over hits, {struck} of the band's notes struck");
+        await Assert.That(solos).IsGreaterThan(3);
+        await Assert.That(struck).IsGreaterThan(0);
+    }
+
+    /// <summary>
     ///     A kit's held gesture but a release a roll on one drum, its strokes growing or fading steadily through it, as a
     ///     drummer swells into the next gesture or eases off, but for the beats' own accents on it, a 0.06 at most.
     /// </summary>
@@ -359,7 +389,8 @@ public sealed class DrumSoloTest
             var full = songs.SelectMany(x => x.Solos.Where(s => s.Value.IsDrumSolo).Select(s => x.Map.Sections[s.Key].BarCount)).ToArray();
             var trades = songs.SelectMany(x => x.Solos.Where(s => s.Value.TradesWithDrums).Select(s => x.Map.Sections[s.Key].BarCount)).ToArray();
             string Bars(int[] bars) => bars.Length == 0 ? "none" : $"{bars.Average():F1} bars ({bars.Min()}-{bars.Max()})";
-            Console.WriteLine($"  {genre ?? "the songs' own"}: a drum solo in {songs.Count(x => x.Solos.Values.Any(s => s.IsDrumSolo)) / 64.0:P0} of songs, {Bars(full)}; " +
+            var overHits = songs.Sum(x => x.Solos.Values.Count(s => s is { IsDrumSolo: true, HitEvery: > 0 }));
+            Console.WriteLine($"  {genre ?? "the songs' own"}: a drum solo in {songs.Count(x => x.Solos.Values.Any(s => s.IsDrumSolo)) / 64.0:P0} of songs, {Bars(full)}, over the band's hits {overHits} of {full.Length}; " +
                               $"trading with the drums in {songs.Count(x => x.Solos.Values.Any(s => s.TradesWithDrums)) / 64.0:P0}, {Bars(trades)}");
         }
 

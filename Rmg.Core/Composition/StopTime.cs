@@ -89,6 +89,16 @@ internal static class StopTime
     }
 
     /// <summary>
+    ///     Where the band strikes its hits under a drum solo over them, its whole section, a hit every bar or every second
+    ///     (<see cref="SoloPlan.HitEvery" />), the drums soloing between, as stop time is played but the solo its carrier.
+    /// </summary>
+    internal static (double Start, double End, double BarDuration)[] SoloHits(SongDecisions song) => song.StopTimeSkipped ? [] :
+    [
+        ..song.Solos.Where(x => x.Value is { IsDrumSolo: true, HitEvery: > 0 }).Select(x => (Span: song.Form.Map.Sections[x.Key], x.Value.HitEvery))
+            .Select(x => (x.Span.Start, x.Span.End, x.Span.Meter.BarDuration * x.HitEvery))
+    ];
+
+    /// <summary>
     ///     Where the band strikes ensemble hits: a section's last bar before a louder section, its start, end and bar, but
     ///     where a drop silences or filters it, stop time plays it, a solo plays or the song ends; a section's decision, from
     ///     a sequence of its own, drawn for every section.
@@ -129,14 +139,17 @@ internal static class StopTime
         var holds = draft.Holds(song);
         // and no hits in a section running a polymeter, whose cycle runs to its end
         var hitBars = song.EnsembleHits.Where(x => !holds.Meets(KeepsOutOf | Hold.Polymeter, x.Start, x.End)).ToImmutableArray();
-        var phrases = song.StopTime.Where(x => !holds.Meets(KeepsOutOf, x.Start, x.End)).Concat(hitBars).ToImmutableArray();
+        var drawn = song.StopTime.Where(x => !holds.Meets(KeepsOutOf, x.Start, x.End)).Concat(hitBars).ToImmutableArray();
+        // and a drum solo's hits, the solo carrying them, which are not the song's stop time
+        var soloHits = SoloHits(song);
+        var phrases = drawn.Concat(soloHits).ToImmutableArray();
         // where a section plays in stop time, as it is played: the starts of its appearances' phrases stopped, a phrase drawn
         // that nothing carries not
         void Record(Func<(double Start, double End, double BarDuration), bool> played)
         {
             foreach (var id in song.SectionIds.Distinct())
             {
-                ImmutableArray<double> stops = [..phrases.Where(p => song.Form.Map.Sections.Any(x => x.SectionId == id && Math.Abs(p.Start - x.Start) < 1e-9) && played(p)).Select(p => p.Start)];
+                ImmutableArray<double> stops = [..drawn.Where(p => song.Form.Map.Sections.Any(x => x.SectionId == id && Math.Abs(p.Start - x.Start) < 1e-9) && played(p)).Select(p => p.Start)];
                 StateTrace.RecordSection(TracePoints.StopTime, SectionGenerator.SectionTrace, id, string.Join(", ", stops), stops);
                 ImmutableArray<double> struck = [..hitBars.Where(p => song.Form.Map.Sections.Any(x => x.SectionId == id && x.IsWithin(p.Start)) && played(p)).Select(p => p.Start)];
                 StateTrace.RecordSection(TracePoints.EnsembleHits, SectionGenerator.SectionTrace, id, string.Join(", ", struck), struck);
@@ -162,7 +175,10 @@ internal static class StopTime
         // every stopped bar's carrier: the lines, or the drums keeping time; a phrase with a bar neither carries played as it
         // was, stop time being the phrase's device
         var carriers = new Dictionary<double, Carrier>();
-        foreach (var (start, end, bar) in phrases)
+        foreach (var (start, end, bar) in soloHits)
+            for (var at = start; at < end - 1e-9; at += bar)
+                carriers[Math.Round(at, 6)] = Carrier.Solo;
+        foreach (var (start, end, bar) in drawn)
         {
             var bars = new List<(double At, Carrier Carrier)>();
             for (var at = start; at < end - 1e-9; at += bar)
@@ -198,7 +214,7 @@ internal static class StopTime
                 {
                     var at = start + Math.Floor((position - start + 1e-6) / bar) * bar;
                     var carrier = carriers[Math.Round(at, 6)];
-                    if (carrier == Carrier.None || carrier == Carrier.Time && times.Contains(track))
+                    if (carrier == Carrier.None || carrier == Carrier.Time && times.Contains(track) || carrier == Carrier.Solo && song.Tracks.Definitions[track].Role == TrackRole.Drum)
                         return (false, 0, [], false);
                     var hits = HitsOf(at, Math.Min(end, at + bar));
                     return (true, at, hits, hits.Any(x => Math.Abs(x - position) < 2e-6));
@@ -264,7 +280,10 @@ internal static class StopTime
         Lines,
 
         /// <summary>The drums keeping time, playing on through it.</summary>
-        Time
+        Time,
+
+        /// <summary>A drum solo, its drums every one playing on through it.</summary>
+        Solo
     }
 
     /// <summary>How long a set of spans covers, their overlaps once.</summary>
