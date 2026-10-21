@@ -95,6 +95,34 @@ public sealed class DrumSoloTest
         await Assert.That(calmCrashed / (double)calm).IsLessThan(0.2);
     }
 
+    /// <summary>
+    ///     A kit's held gesture but a release a roll on one drum, its strokes growing or fading steadily through it, as a
+    ///     drummer swells into the next gesture or eases off, but for the beats' own accents on it, a 0.06 at most.
+    /// </summary>
+    [Test]
+    public async Task AKitsHeldGesture_IsARoll_SwellingOrFadingThroughIt()
+    {
+        var (kick, crash) = (DrumGroups.GetTrackNumber(DrumDefinitions.Kick), DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal));
+        var rolls = 0;
+        foreach (var song in Songs)
+        foreach (var (span, plan, _, _) in KitSolos(song))
+        foreach (var held in plan.Where(x => x.Gesture == SoloGesture.Held && !x.IsRelease && x.End - x.Start >= 1 - 1e-9))
+        {
+            var strokes = song.Song.Notes!.Where(x => song.IsDrum(x.Key) && x.Key != kick && x.Key != crash)
+                .SelectMany(x => x.Value.Select(n => (Track: x.Key, n.Position, Velocity: n.Value.Velocity)))
+                .Where(x => x.Position >= held.Start - 1e-9 && x.Position < held.End - 1e-9).OrderBy(x => x.Position).ToArray();
+            // but a keeper's and the feet's under it, which play their own
+            var rolled = strokes.GroupBy(x => x.Track).MaxBy(x => x.Count())!.ToArray();
+            rolls++;
+            await Assert.That(rolled.Length).IsGreaterThanOrEqualTo(4).Because($"seed {song.Seed} at {held.Start}");
+            var way = Math.Sign(rolled[^1].Velocity - rolled[0].Velocity);
+            await Assert.That(way).IsNotEqualTo(0).Because($"seed {song.Seed} at {held.Start}");
+            await Assert.That(rolled.Zip(rolled.Skip(1)).All(x => (x.Second.Velocity - x.First.Velocity) * way >= -0.06)).IsTrue().Because($"seed {song.Seed} at {held.Start}");
+        }
+
+        await Assert.That(rolls).IsGreaterThan(20);
+    }
+
     [Test]
     public async Task ADrumSolosRuns_GoRoundItsKit_InTheDrummersCells_TheirFirstHitsTheLouder_ItsPausesTheHandsSilent()
     {
@@ -287,6 +315,24 @@ public sealed class DrumSoloTest
         await Assert.That(solos.All(x => x.Solo.Answered.All(p => p > 0))).IsTrue();
     }
 
+    /// <summary>How often the songs of a genre, as they are drawn, play a drum solo or trade with the drums, and how long each is, in bars.</summary>
+    [Test]
+    [Explicit]
+    public async Task HowOftenReport()
+    {
+        foreach (var genre in new string?[] { null, "rock", "pop", "punk", "metal", "thrash", "funk", "blues", "jazz", "latin", "dnb" })
+        {
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, genre is null ? new SongOverrides() : new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(genre))));
+            var full = songs.SelectMany(x => x.Solos.Where(s => s.Value.IsDrumSolo).Select(s => x.Map.Sections[s.Key].BarCount)).ToArray();
+            var trades = songs.SelectMany(x => x.Solos.Where(s => s.Value.TradesWithDrums).Select(s => x.Map.Sections[s.Key].BarCount)).ToArray();
+            string Bars(int[] bars) => bars.Length == 0 ? "none" : $"{bars.Average():F1} bars ({bars.Min()}-{bars.Max()})";
+            Console.WriteLine($"  {genre ?? "the songs' own"}: a drum solo in {songs.Count(x => x.Solos.Values.Any(s => s.IsDrumSolo)) / 64.0:P0} of songs, {Bars(full)}; " +
+                              $"trading with the drums in {songs.Count(x => x.Solos.Values.Any(s => s.TradesWithDrums)) / 64.0:P0}, {Bars(trades)}");
+        }
+
+        await Task.CompletedTask;
+    }
+
     /// <summary>The drum solos' gestures, cells and hits a beat, and how far their intensity swings, of songs of wild solos.</summary>
     [Test]
     [Explicit]
@@ -329,6 +375,19 @@ public sealed class DrumSoloTest
         Console.WriteLine($"  the arc: by intensity, " + string.Join(", ", arc.GroupBy(x => Math.Min(2, (int)(x.Intensity * 3))).OrderBy(x => x.Key)
             .Select(x => $"third {x.Key + 1} {x.Average(y => y.ABeat):F2} hits a beat at {x.Average(y => y.Velocity):F2}")) + "; by place, intensity " +
             string.Join(", ", arc.GroupBy(x => Math.Min(2, (int)(x.Place * 3))).OrderBy(x => x.Key).Select(x => $"{x.Average(y => y.Intensity):F2}")));
+        // its loudness: the hands' hits by the solo's third, how widely they spread, a run's or a lick's loudest over its
+        // middle, and the crashes a solo
+        var crash = DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal);
+        var hands = solos.SelectMany(x => x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key) && n.Key != kick && n.Key != crash).SelectMany(n => n.Value)
+            .Where(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End)
+            .Select(h => (Place: (h.Position - x.Span.Start) / (x.Plan[^1].End - x.Span.Start), Velocity: Rmg.Core.Rendering.Render.ToMidiVelocity(h.Value.Velocity)))).ToArray();
+        var mean = hands.Average(x => x.Velocity);
+        var gaps = solos.SelectMany(x => x.Plan.Where(p => p.Gesture is SoloGesture.Run or SoloGesture.Lick).Select(p => x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key) && n.Key != kick && n.Key != crash)
+            .SelectMany(n => n.Value).Where(h => h.Position >= p.Start - 1e-9 && h.Position < p.End - 1e-9).Select(h => Rmg.Core.Rendering.Render.ToMidiVelocity(h.Value.Velocity)).Order().ToArray())
+            .Where(v => v.Length >= 4).Select(v => v[^1] - v[v.Length / 2])).ToArray();
+        var crashes = solos.Select(x => x.Song.Song.Notes!.GetValueOrDefault(crash)?.Count(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End) ?? 0).ToArray();
+        Console.WriteLine($"  loudness: the hands by the solo's third {string.Join(", ", hands.GroupBy(x => Math.Min(2, (int)(x.Place * 3))).OrderBy(x => x.Key).Select(x => $"{x.Average(y => y.Velocity):F2}"))}, " +
+                          $"spread {Math.Sqrt(hands.Average(x => (x.Velocity - mean) * (x.Velocity - mean))):F2}; a run's loudest over its middle {gaps.DefaultIfEmpty().Average():F2}; crashes {crashes.Average():F1} a solo, {crashes.Sum() / bars.Sum():F2} a bar");
         await Task.CompletedTask;
     }
 }

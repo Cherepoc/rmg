@@ -280,7 +280,8 @@ internal enum SongStream
     RiffTurnarounds = 125,
     TimeChanges = 126,
     Stops = 127,
-    StopReturns = 128
+    StopReturns = 128,
+    DrumSoloFlams = 129
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>
