@@ -72,7 +72,8 @@ public sealed class GateTest
 
     /// <summary>
     ///     A gate chops the parts its genre has it chop alone (<see cref="Expression.GateParts" />): a genre's riff, its held
-    ///     chord stuttering, never its chords; Djent's pad, never its riff; the songs' held chords, never a riff.
+    ///     chord stuttering, never its chords; Djent's pad, never its riff, of Djent songs whose strong effect is the gate, as
+    ///     few of its songs draw it (none of 64 at one corpus); the songs' held chords, never a riff.
     /// </summary>
     [Test]
     public async Task AGate_ChopsOnlyThePartsItsGenreNames()
@@ -82,9 +83,9 @@ public sealed class GateTest
             .SelectMany(song => song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)).Select(x => song.Song.TrackDefinitions[x.Key].Role));
 
         var riffs = Gated(new Genre(riffGating), 16).ToArray();
-        var djent = Gated(GenrePresets.Genre("djent"), 64).ToArray();
+        var djent = Gated(GenrePresets.With("djent", GenreChoices.StrongEffect, ("gate", 1)), 16).ToArray();
         var songs = Gated(Gating, 16).ToArray();
-        Console.WriteLine($"of 16 songs gating the riff, {riffs.Length} gated; of 64 Djent songs, {djent.Length} gating their pad");
+        Console.WriteLine($"of 16 songs gating the riff, {riffs.Length} gated; of 16 gating Djent songs, {djent.Length} gating their pad");
         await Assert.That(riffs).IsNotEmpty();
         await Assert.That(djent).IsNotEmpty();
         await Assert.That(songs).IsNotEmpty();

@@ -9,13 +9,14 @@ public sealed class TempoBandTest
 {
     private static double[] Tempos(Genre genre) =>
     [
-        ..TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
+        ..TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
             .Select(x => Meter.BeatsPerSecond(x.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(x.Map.Sections[0].Start)) * 60)
     ];
 
     /// <summary>
     ///     Jazz's songs fast oftener with its bands, against the same songs over its range whole: its burners, above 180, and
-    ///     its ballads, below 90, more, the space between them less.
+    ///     its ballads, below 90, more, the space between them less, over 256 songs, as 128 once measured the ballads fewer
+    ///     (seen at three corpora: above 180 17-25% against 9-12%, below 90 24-29% against 15-23%).
     /// </summary>
     [Test]
     public async Task JazzsBands_PlayBurnersAndBalladsOftener_ThanItsRangeWhole()

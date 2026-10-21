@@ -217,7 +217,7 @@ internal sealed class FillGenerator
         var play = line.HasFill ? DrawPlay(drummer, ending, tilt, direction, weight) : FillPlay.None;
         var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, meter);
         _lastRun = [];
-        var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId, meter, line.Room);
+        var span = Fill(song, edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId, meter, line.Room);
         // a run into a change of section, another appearance of the same section's too, which the lines walk with
         if (span > 0 && (line.Ending != line.Next || map.Sections.Any(x => Math.Abs(x.Start - line.Position) < 1e-9)) && !_lastRun.IsEmpty)
             Runs.Add(new PlayedRun(line.Position, _lastRun, lift * ending.Rhythm.Coupling));
@@ -333,7 +333,7 @@ internal sealed class FillGenerator
     )
     {
         var edits = new TimelineEdits(_line, _meter, null);
-        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0, _meter, double.PositiveInfinity);
+        Fill(song, edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0, _meter, double.PositiveInfinity);
         return edits.ApplyTo(song);
     }
 
@@ -411,6 +411,7 @@ internal sealed class FillGenerator
     /// </summary>
     /// <returns>How long the fill is, in beats; 0 for none.</returns>
     private double Fill(
+        TrackEventStateTimelineMap<StateMap> song,
         TimelineEdits edits,
         FillPlay play,
         double line,
@@ -437,6 +438,12 @@ internal sealed class FillGenerator
         // no further back than the line leaves it room
         span = Math.Min(span, room);
         var from = line - span;
+        // a kick-out only where the rest of the groove plays on into the line, the groove kept where the kick plays alone, as
+        // in an intro's bar of the kick and the bass, which taking it out would leave silent
+        var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
+        if (play.Treatment == GrooveTreatment.KickOut && !song.TrackTimelineMap.Any(t => t.Key >= DrumGroups.FirstTrackNumber && t.Key != kick
+                && t.Value.EventTimeline.Any(x => x.Position >= from - 1e-9 && x.Position < line - 1e-9 && edits.Strikes(song, t.Key, x.Position))))
+            play = play with { Treatment = GrooveTreatment.Keep };
 
         var cleared = play.Treatment switch
         {

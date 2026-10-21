@@ -228,6 +228,19 @@ internal static class DrumSolos
             // a solo traded with the drums their turns alone, the band laying out for them
             var drumsTurn = solo.Soloists.IndexOf(TrackRole.Drum);
             bool IsDrumsTurn(double position) => !solo.TradesWithDrums || solo.TurnAt(whole, position) == drumsTurn;
+            // the band laid out in every turn of the drums', a turn they leave to their fill among them, as a drum break
+            TrackEventStateTimelineMap<StateMap> LaidOut(TrackEventStateTimelineMap<StateMap> played, IGenerationContext context)
+            {
+                if (!solo.TradesWithDrums)
+                    return played;
+                var cleared = new TimelineEdits(context, meter, map);
+                for (var at = whole.Start; at < whole.End - 1e-9; at += SoloPlan.TurnOf(whole))
+                    if (IsDrumsTurn(at))
+                        foreach (var track in played.TrackTimelineMap.Keys.Where(x => x < DrumGroups.FirstTrackNumber))
+                            cleared.Clear(track, at, Math.Min(whole.End, at + SoloPlan.TurnOf(whole)));
+                return cleared.ApplyTo(played);
+            }
+
             // all but its last bar, a short one's, the fill's into the section after, and the bars a build rolls over into a
             // drop after it
             // nor where the form stops the drums, a stop ending's silence
@@ -239,7 +252,8 @@ internal static class DrumSolos
             RunSound[] Of(FillDrumRole role) => sounds.TryGetValue(role, out var all) ? [..all.Where(Plays).DistinctBy(x => x.Track)] : [];
             // the song's toms where the section's kit plays, its snare or its kick, every one of them by its note, as the toms are
             // one drum of several sounds, whether the groove there struck them or not; none in a section of percussion alone
-            var kitPlays = Of(FillDrumRole.Snare).Length > 0 || Of(FillDrumRole.Kick).Length > 0;
+            // a clap, which a kit and percussion both play, not the kit's
+            var kitPlays = Of(FillDrumRole.Snare).Concat(Of(FillDrumRole.Kick)).Any(x => !DrumGroups.GetDrum(x.Track).Family.HasFlag(DrumFamily.Percussion));
             RunSound[] kitToms = kitPlays && sounds.TryGetValue(FillDrumRole.Toms, out var tomSounds)
                 ? [..tomSounds.Where(x => song.TrackTimelineMap.ContainsKey(x.Track)).DistinctBy(x => x.Code)]
                 : [];
@@ -281,7 +295,10 @@ internal static class DrumSolos
 
             var keepers = band.Except(soloists).Where(_ => draws.TestProbability(KeepTime.At(facet))).ToHashSet();
             if (soloists.Count == 0)
+            {
+                song = LaidOut(song, streams(index));
                 continue;
+            }
 
             // the song's crash, whether its groove there played it or not
             var crash = sounds.TryGetValue(FillDrumRole.Cymbal, out var cymbals) ? cymbals.FirstOrDefault() : null;
@@ -317,20 +334,17 @@ internal static class DrumSolos
                 : plan;
             // a trade whose drums' turns fall in the bar the fill plays alone leaves them none
             if (played.Length == 0)
+            {
+                song = LaidOut(song, context);
                 continue;
+            }
             soloed.AddRange(played.Select(x => (x.Start, x.End)));
             StateTrace.RecordSection(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId,
                 $"{played.Length} segments, {soloists.Count} soloists {mode}{(feetTracks.Count > 0 ? ", the feet keeping time" : "")}",
                 new DrumSolo(index, played, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered));
 
+            song = LaidOut(song, context);
             var edits = new TimelineEdits(context, meter, map);
-            if (solo.TradesWithDrums)
-            {
-                for (var at = whole.Start; at < whole.End - 1e-9; at += turn)
-                    if (IsDrumsTurn(at))
-                        foreach (var track in song.TrackTimelineMap.Keys.Where(x => x < DrumGroups.FirstTrackNumber))
-                            edits.Clear(track, at, Math.Min(whole.End, at + turn));
-            }
 
             foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, _) in played)
             {

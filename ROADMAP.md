@@ -305,8 +305,11 @@ count of its own. In order:
 
 None at offsets 0, 1000000, 619000000, 716000000 and 942000000 (19 October 2026, every failure traced and fixed, the
 review of 16 October's #296 and #302 among them), and at 1000000 and 619000000 after the expressive lines (20 October,
-a climbing solo's ceiling over a narrow part's register fixed, Nu metal's dives counted over 128 songs); a new one checked against the committed code before it is recorded
-here. Left:
+a climbing solo's ceiling over a narrow part's register fixed, Nu metal's dives counted over 128 songs), and at
+1500000000 (21 October, five older than the steadiness plan: the band laid out in a drums' turn left to their fill, a
+clap not taken for the kit in a section of percussion alone, a kick-out only where the groove plays on, Jazz's tempo
+bands measured over 256 songs and Djent's gated pad over songs that gate); a new one checked against the committed
+code before it is recorded here. Left:
 
 - **A run into a note above its line's range:** a counter-melody's run at offset 942000000 (seed 29 into 256) rising to
   its range's top, 60, and landing on 67, a leap the run means to fill, its landing placed outside the range it runs in.
