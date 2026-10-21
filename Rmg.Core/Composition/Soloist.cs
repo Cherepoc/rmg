@@ -73,6 +73,16 @@ internal sealed record Soloist(
     public bool Ghosts { get; init; }
 
     /// <summary>
+    ///     The chance a phrase after its first comes in early, on a pickup half a beat to a beat and a half before its bar,
+    ///     out of the rest the phrase before leaves, as a blues or a jazz player leads into a line; a song's decision for its
+    ///     soloist (<see cref="PickupChances" />).
+    /// </summary>
+    public double PickupChance { get; init; }
+
+    /// <summary>The chance a soloist's phrase comes in on a pickup, by the melody facet; a genre's where it names it (<see cref="GenreChoices.SoloStyle" />).</summary>
+    public static ByConvention PickupChances { get; } = new(0.1, 0.3, 0.4);
+
+    /// <summary>
     ///     The chance a run's note on a change of chord's downbeat lands on the new chord's nearest note, as a player aims a
     ///     run at the change, by the melody facet: a convention, every time at the plain end, and never at the wild, whose
     ///     runs go where they go (<see cref="SoloLines" />).

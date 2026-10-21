@@ -142,6 +142,46 @@ public sealed class SoloTest
     private static (int Index, bool IsOwn, SoloLines.Segment[] Plan)[] Plans(CorpusSong song) =>
         [..song.Trace.Where(x => x.Point == TracePoints.SoloGestures).Select(x => ((int, bool, SoloLines.Segment[]))x.Value!)];
 
+    /// <summary>
+    ///     A solo's phrases, each its first segment, and whether it comes in on a pickup, before its bar, where a late
+    ///     phrase's first is the rest before it, on its bar.
+    /// </summary>
+    private static (SoloLines.Segment First, SoloLines.Segment? Before, bool Picks)[] Openings(CorpusSong song) =>
+    [
+        ..Plans(song).SelectMany(x =>
+        {
+            var (span, plan) = (song.Map.Sections[x.Index], x.Plan);
+            return plan.Select((s, i) => (s, i)).Where(y => y.i == 0 || y.s.Phrase != plan[y.i - 1].Phrase)
+                .Select(y => (y.s, y.i > 0 ? plan[y.i - 1] : null, Math.Abs(Math.IEEERemainder(y.s.Start - span.Start, span.Meter.BarDuration)) > 1e-6));
+        })
+    ];
+
+    /// <summary>
+    ///     A phrase coming in on a pickup comes out of the rest the phrase before leaves, half a beat of it left at least, or
+    ///     out of its release, cut short to a beat at least, so that it never sounds over the last phrase's notes; and the
+    ///     Blues' phrases come in on one oftener than with none, the same songs (seen 21% of 64 songs' phrases against none).
+    /// </summary>
+    [Test]
+    public async Task APickup_ComesOutOfTheRestBefore_AndTheBluesPlaysMore()
+    {
+        double Share(Genre genre)
+        {
+            var openings = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Openings(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).SelectMany(x => x).ToArray();
+            return openings.Count(x => x.Picks) / (double)Math.Max(1, openings.Length);
+        }
+
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))))
+        foreach (var (first, before, _) in Openings(song).Where(x => x.Picks))
+            await Assert.That(before is { } last && Math.Abs(last.End - first.Start) < 1e-9
+                              && (last.Gesture == SoloGesture.Pause && last.End - last.Start >= 0.5 - 1e-9 || last.IsRelease && last.End - last.Start >= 1 - 1e-9)).IsTrue()
+                .Because($"seed {song.Seed} at {first.Start}");
+
+        var (blues, none) = (Share(GenrePresets.Genre("blues")), Share(GenrePresets.With("blues", GenreChoices.SoloStyle, ("pickups", 0))));
+        Console.WriteLine($"  the Blues' phrases on a pickup: {blues:P0}, {none:P0} with none");
+        await Assert.That(none).IsEqualTo(0);
+        await Assert.That(blues).IsGreaterThan(0.05);
+    }
+
     /// <summary>Soloists trading take whole phrases in turn: no phrase of the line runs over a turn's end.</summary>
     [Test]
     public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()
@@ -290,6 +330,26 @@ public sealed class SoloTest
     }
 
     /// <summary>The solos' runs, by fifth of the melody facet: the sizes of their cells, their shapes, and the share grouping cells of several sizes.</summary>
+    /// <summary>
+    ///     A genre's solos on its melody: the share of pitched solos on the melody's line rather than their own, the folk
+    ///     genres', against the same songs at the songs' own chance.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task OwnReport()
+    {
+        foreach (var genre in new[] { "bluegrass", "celtic", "folk", "rock" })
+        {
+            double OnTheMelody(Genre given) => TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: given)))
+                .SelectMany(x => x.Solos.Values.Where(s => !s.IsDrumSolo)).ToArray() is var solos && solos.Length > 0 ? solos.Count(x => !x.IsOwn) / (double)solos.Length : 0;
+            var preset = GenrePresets.Genre(genre);
+            var songs = preset with { Choices = preset.Choices.SetItem(GenreChoices.Solos.Name, preset.Choices[GenreChoices.Solos.Name].SetItem("own", Solos.OwnChance)) };
+            Console.WriteLine($"  {genre}: solos on the melody {OnTheMelody(preset):P0}, {OnTheMelody(songs):P0} at the songs' own chance");
+        }
+
+        await Task.CompletedTask;
+    }
+
     [Test]
     [Explicit]
     public async Task CellReport()

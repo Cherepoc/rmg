@@ -180,7 +180,8 @@ public static class GenreChoices
     /// <summary>The chance a later appearance is a solo, as the songs have it by its role (<see cref="Composition.Solos.Chance" />).</summary>
     public static GenreChoice Solos { get; } = Chances("solos", "Solos",
         [("sections", "A section soloed", Composition.Solos.Chance), ("trades", "A solo trading with the drums", Composition.Solos.Trade),
-            ("twins", "A solo harmonised by a second part", Composition.Solos.Twin), ("hits", "A drum solo over the band's hits", Composition.Solos.Hits)]);
+            ("twins", "A solo harmonised by a second part", Composition.Solos.Twin), ("hits", "A drum solo over the band's hits", Composition.Solos.Hits),
+            ("own", "A solo of its own, not on the melody", Composition.Solos.OwnChance)]);
 
     /// <summary>Who solos (<see cref="Composition.Solos.Soloists" />).</summary>
     public static GenreChoice Soloists { get; } = Pool("soloists", "Soloists",
@@ -516,6 +517,9 @@ public static class GenreChoices
     public static GenreChoice BendTiming { get; } = Chances("bendTiming", "A bend's timing",
         [("slow", "Bends rising slowly, in time", Expression.SlowBendChance), ("late", "Bends held a beat before they rise", Expression.LateBendChance)]);
 
+    /// <summary>How a soloist phrases: its phrases coming in on a pickup (<see cref="Soloist.PickupChances" />).</summary>
+    public static GenreChoice SoloStyle { get; } = Chances("soloStyle", "A soloist's phrasing", [("pickups", "Phrases coming in on a pickup", Soloist.PickupChances)]);
+
     /// <summary>How wide a vibrato is and how fast, narrow to broad in cents, a step's slow or fast, or two steps' (<see cref="Expression.Vibratos" />).</summary>
     public static GenreChoice VibratoWidth { get; } = Pool("vibratoWidth", "A vibrato's width",
         Expression.Vibratos.Select(x => (Expression.NameOf(x.Width), Expression.LabelOf(x.Width), x.Weight)));
@@ -795,7 +799,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, RiffSection, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

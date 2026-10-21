@@ -241,6 +241,7 @@ internal static class DrumSolos
                 index => song.AppearanceStream(SongStream.DrumSoloFlams, index),
                 index => song.AppearanceStream(SongStream.DrumSoloThemes, index),
                 index => song.AppearanceStream(SongStream.DrumSoloSounds, index),
+                index => song.AppearanceStream(SongStream.DrumSoloPickups, index),
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
                 song.Form.Drops,
                 // where the form next stops the drums, which a drum solo keeps out of as every drum stage does
@@ -267,6 +268,7 @@ internal static class DrumSolos
     /// <param name="flams">A solo's draws of which gestures flam their accents, by its appearance's place.</param>
     /// <param name="themes">A solo's draws of which phrases vary its groove and how it builds, by its appearance's place.</param>
     /// <param name="colours">A solo's draws of which accents strike a cymbal of colour, and which, by its appearance's place.</param>
+    /// <param name="pickups">A solo's draws of which phrases come in on a pickup, by its appearance's place.</param>
     /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
     /// <param name="drops">Where the song drops, whose build a solo before it leaves to roll.</param>
@@ -287,6 +289,7 @@ internal static class DrumSolos
         Func<int, IGenerationContext> flams,
         Func<int, IGenerationContext> themes,
         Func<int, IGenerationContext> colours,
+        Func<int, IGenerationContext> pickups,
         Func<int, double> groove,
         IReadOnlyCollection<double> drops,
         Func<double, double> stopsAfter,
@@ -399,6 +402,7 @@ internal static class DrumSolos
             var common = song.CommonStateTimelineMap;
             var plan = SoloLines.Plan(
                 context,
+                pickups(index),
                 span,
                 drummer,
                 // the groove is there to quote throughout

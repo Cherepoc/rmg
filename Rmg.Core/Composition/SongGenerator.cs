@@ -284,7 +284,9 @@ internal enum SongStream
     DrumSoloFlams = 129,
     DrumSoloThemes = 130,
     DrumSoloSounds = 131,
-    SoloHits = 132
+    SoloHits = 132,
+    SoloPickups = 133,
+    DrumSoloPickups = 134
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

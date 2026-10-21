@@ -383,7 +383,8 @@ internal static class SongStages
                 song.Solos,
                 index => song.AppearanceStream(SongStream.SoloLines, index),
                 index => song.AppearanceStream(SongStream.SoloChords, index),
-                index => song.AppearanceStream(SongStream.SoloMotifs, index)
+                index => song.AppearanceStream(SongStream.SoloMotifs, index),
+                index => song.AppearanceStream(SongStream.SoloPickups, index)
             )
         };
 

@@ -172,7 +172,10 @@ internal static class Solos
         (SoloMode.Together, new ByConvention(1, 0.4, 1))
     ];
 
-    /// <summary>The chance a solo's line is its own rather than on the melody's, by the melody facet: never at the plain end, always at the wild.</summary>
+    /// <summary>
+    ///     The chance a solo's line is its own rather than on the melody's, by the melody facet: never at the plain end, always
+    ///     at the wild; a genre's where it names it, a folk tune's break on its melody the likelier.
+    /// </summary>
     public static ByConvention OwnChance { get; } = new(0, 0.5, 1);
 
     /// <summary>The steps from the first soloist the others play together: the same notes, a third or a sixth away.</summary>
@@ -202,8 +205,9 @@ internal static class Solos
     /// <param name="melody">Every appearance's melody facet.</param>
     /// <param name="parts">The parts the song has.</param>
     /// <param name="keepsOut">Whether each appearance plays no solo, a breakdown (<see cref="Breakdowns" />) or a calm section.</param>
+    /// <param name="genre">The genre, whose chance of a solo of its own the solo takes where it names it.</param>
     public static ImmutableArray<SoloPlan?> WithSoloist(IGenerationContext context, IReadOnlyList<SoloPlan?> solos, IReadOnlyList<SectionRole> roles, IReadOnlyList<double> melody,
-        IReadOnlyCollection<TrackRole> parts, IReadOnlyList<bool> keepsOut)
+        IReadOnlyCollection<TrackRole> parts, IReadOnlyList<bool> keepsOut, Genre genre)
     {
         var own = context.GenerateDouble();
         // a later appearance by its role's lean, never one that plays no solo
@@ -212,7 +216,7 @@ internal static class Solos
         if (place == 0 || !parts.Contains(TrackRole.Solo) || !parts.Contains(TrackRole.Melody) || solos[place]?.IsDrumSolo == true)
             return [..solos];
 
-        return [..solos.Select((x, i) => i == place ? new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, own < OwnChance.At(melody[i]), 0) : x)];
+        return [..solos.Select((x, i) => i == place ? new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, own < OwnChance.At(melody[i], genre.Chance(GenreChoices.Solos, "own")), 0) : x)];
     }
 
     /// <summary>An appearance's solo, drawn whatever it turns out to be, so that the draws stay as they are; none for no solo.</summary>
@@ -229,7 +233,7 @@ internal static class Solos
         var mode = context.Pick(ByConvention.Weigh(Modes, melody, genre.Pool<SoloMode>(GenreChoices.SoloShare)));
         var step = Steps[context.GenerateInt(0, Steps.Length)];
         // whether the solo is the soloist's own line, drawn before the soloists, whose draws a part held back changes
-        var isOwn = context.TestProbability(OwnChance.At(melody));
+        var isOwn = context.TestProbability(OwnChance.At(melody, genre.Chance(GenreChoices.Solos, "own")));
         var candidates = Soloists.Where(x => parts.Contains(x.Part)).ToList();
         var soloists = new List<TrackRole>();
         // a part a genre's pool leaves out never solos, and a song with none of its soloists has no solo
@@ -271,7 +275,8 @@ internal static class Solos
         IReadOnlyDictionary<int, SoloPlan> solos,
         Func<int, IGenerationContext> streams,
         Func<int, IGenerationContext> voicings,
-        Func<int, IGenerationContext> motifs
+        Func<int, IGenerationContext> motifs,
+        Func<int, IGenerationContext> pickups
     )
     {
         var trackOf = roles.TrackOf();
@@ -294,7 +299,7 @@ internal static class Solos
             // the solo's line, in the first soloist's vocabulary and range
             var first = trackOf[solo.Soloists[0]];
             var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
-            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, span.Start, soloists[solo.Soloists[0]], solo.IsOwn, solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), pickups(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, span.Start, soloists[solo.Soloists[0]], solo.IsOwn, solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
             StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
 
             // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart

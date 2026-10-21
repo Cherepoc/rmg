@@ -387,7 +387,8 @@ internal sealed record SongDecisions(
             [..played.Select(id => structure.Roles[id])],
             [..played.Select(id => generateSection(id).Facets[Facet.Melody])],
             [..SongParts.All.Except(absent)],
-            [..played.Select((_, index) => PlaysNoSolo(index))]
+            [..played.Select((_, index) => PlaysNoSolo(index))],
+            genre
         );
         // and none drawn where it plays none, the appearance played as it is, its draws made all the same
         drawnSolos = [..drawnSolos.Select((x, index) => PlaysNoSolo(index) ? null : x)];
@@ -463,7 +464,9 @@ internal sealed record SongDecisions(
             {
                 // and whether it ghosts its licks, a pitched soloist's, from a sequence of its own
                 Ghosts = role != TrackRole.Drum && SongGenerator.CreateStream(seed, SongStream.SoloGhosts, (int)role)
-                    .TestProbability(Articulations.SoloGhostChance.At(songUnconventionality[Facet.Sound], genre.Chance(GenreChoices.Articulation, "soloGhosts")))
+                    .TestProbability(Articulations.SoloGhostChance.At(songUnconventionality[Facet.Sound], genre.Chance(GenreChoices.Articulation, "soloGhosts"))),
+                // and how often its phrases come in on a pickup, a pitched soloist's, a drummer's opening on its groove at the bar
+                PickupChance = role == TrackRole.Drum ? 0 : Soloist.PickupChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "pickups"))
             });
         foreach (var (role, soloist) in soloists)
             StateTrace.RecordSong(TracePoints.Soloist, $"{role}", (role, soloist));

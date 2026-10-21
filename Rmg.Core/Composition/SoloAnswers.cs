@@ -19,6 +19,9 @@ internal static class SoloAnswers
     /// <summary>What an answer keeps out of: another part's answer to a calling verse.</summary>
     private const Hold KeepsOutOf = Hold.Answer;
 
+    /// <summary>The place an answer's draws of its pickups are derived from its line's by, a sequence of its own.</summary>
+    private const long PickupStream = 1;
+
     /// <summary>The chance a gap of an answering section is answered, so that the answers stay sparse.</summary>
     public const double GapChance = 0.5;
 
@@ -110,7 +113,8 @@ internal static class SoloAnswers
 
                 var gap = span with { Start = start, Duration = end - start };
                 // its strong beats on its section's bars
-                var (line, _) = SoloLines.Generate(new GenerationContext(Seeds.Derive(lineSeed, i)), new GenerationContext(Seeds.Derive(voicingSeed, i)), new GenerationContext(Seeds.Derive(motifSeed, i)), gap, gap.Duration, span.Start, answerer, true, false, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
+                var (line, _) = SoloLines.Generate(new GenerationContext(Seeds.Derive(lineSeed, i)), new GenerationContext(Seeds.Derive(voicingSeed, i)), new GenerationContext(Seeds.Derive(motifSeed, i)),
+                    new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, i), PickupStream)), gap, gap.Duration, span.Start, answerer, true, false, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
                 var lift = Solos.Lift(
                     Realizer.GetNoteStates(EventStateTimelineMap.Create(song.Duration, EventTimeline.Create(song.Duration, line), track.StateTimelineMap), definitions[soloTrack], song.CommonStateTimelineMap).ToArray(),
                     heard - Quieter);

@@ -83,6 +83,16 @@ internal static class SoloLines
     public const double BurstIntensity = 0.8;
 
     /// <summary>
+    ///     How far before its bar a pickup starts, in beats, as likely each; how much of the rest before it it leaves at least,
+    ///     in beats; and how fast it goes at most, in notes a beat: 8ths or 16ths leading in.
+    /// </summary>
+    private static readonly double[] PickupLeads = [0.5, 1, 1.5];
+
+    private const double PickupRoom = 0.5;
+
+    private const int PickupSpeed = 4;
+
+    /// <summary>
     ///     The solo's arc, which its phrases' peaks follow: where it starts, the climax it rises to at about 70% of the way,
     ///     and where it eases to by its end.
     /// </summary>
@@ -193,10 +203,12 @@ internal static class SoloLines
     /// <param name="definition">The soloist's definition, its range.</param>
     /// <param name="voicing">The sequence that draws which gestures the soloist stacks, a stream of its own.</param>
     /// <param name="motifs">The sequence that draws which phrases open on the phrase before's motif, a stream of its own.</param>
+    /// <param name="pickups">The sequence that draws which phrases come in on a pickup, a stream of its own.</param>
     public static (TimelineItem<StateMap>[] Line, Segment[] Segments) Generate(
         IGenerationContext context,
         IGenerationContext voicing,
         IGenerationContext motifs,
+        IGenerationContext pickups,
         SectionSpan span,
         double turn,
         double barOrigin,
@@ -294,6 +306,7 @@ internal static class SoloLines
 
         var plan = Plan(
             context,
+            pickups,
             span,
             soloist,
             // a quote wants the melody's notes there
@@ -492,7 +505,7 @@ internal static class SoloLines
     /// <param name="beatsASecond">The tempo at a position, in beats a second, which the speeds keep under the soloist's fastest.</param>
     /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
     /// <param name="barOrigin">Where the bars the span plays in start, its section's start, which its strong beats are counted from, as an answer's span starts off the bar.</param>
-    internal static Segment[] Plan(IGenerationContext context, SectionSpan span, Soloist soloist, Func<double, double, double> quoteWeight, Func<double, double> beatsASecond,
+    internal static Segment[] Plan(IGenerationContext context, IGenerationContext pickups, SectionSpan span, Soloist soloist, Func<double, double, double> quoteWeight, Func<double, double> beatsASecond,
         double turn, double barOrigin)
     {
         var bar = span.Meter.BarDuration;
@@ -529,6 +542,22 @@ internal static class SoloLines
             var isLate = context.TestProbability(soloist.OffBarChance);
             var late = context.GenerateInt(1, 3);
             var start = isLate && to - from >= 2 * bar ? from + late : from;
+            // or one after the first coming in early, on a pickup out of the rest the phrase before leaves or the end of its
+            // release, which it cuts short, half a beat of the rest left at least and a beat of the release, never at a turn's
+            // start nor over a note; drawn for every phrase
+            var (picks, lead) = (pickups.TestProbability(soloist.PickupChance), PickupLeads[pickups.GenerateInt(0, PickupLeads.Length)]);
+            var atTurn = Math.Abs((from - span.Start) / turn - Math.Round((from - span.Start) / turn)) < 1e-9;
+            if (picks && phrase > 0 && start == from && !atTurn && segments.Count > 0 && segments[^1] is var before && Math.Abs(before.End - from) < 1e-9
+                && before.End - before.Start >= lead + (before.Gesture == SoloGesture.Pause ? PickupRoom : 1) - 1e-9 && (before.Gesture == SoloGesture.Pause || before.IsRelease))
+            {
+                segments[^1] = before with { End = from - lead };
+                var pace = soloist.Speeds.Where(x => x <= PickupSpeed).DefaultIfEmpty(soloist.Speeds[0]).Max();
+                segments.Add(new Segment(from - lead, from, peak * Contour(contour, 0), SoloGesture.Run, pace, soloist.Shapes[0], soloist.Groups ? [..soloist.CellSizes] : [soloist.CellSizes[0]], false, phrase, false));
+                // the run it starts, which the phrase's first run goes on from, kept to the soloist's stamina with it
+                played.Clear();
+                played[pace] = lead;
+            }
+
             // and its release from the last strong beat a beat or more before its end, or, where it has none, as an answer in
             // a short gap, from its last half beat half a beat or more before its end; and whether a breath follows
             var releaseAt = Math.Max(start, LastStrong(from, to - 1) is var last && !double.IsNaN(last)
