@@ -517,8 +517,9 @@ public static class GenreChoices
     public static GenreChoice BendTiming { get; } = Chances("bendTiming", "A bend's timing",
         [("slow", "Bends rising slowly, in time", Expression.SlowBendChance), ("late", "Bends held a beat before they rise", Expression.LateBendChance)]);
 
-    /// <summary>How a soloist phrases: its phrases coming in on a pickup (<see cref="Soloist.PickupChances" />).</summary>
-    public static GenreChoice SoloStyle { get; } = Chances("soloStyle", "A soloist's phrasing", [("pickups", "Phrases coming in on a pickup", Soloist.PickupChances)]);
+    /// <summary>How a soloist phrases: its phrases coming in on a pickup, and leaving space (<see cref="Soloist.PickupChances" />, <see cref="Soloist.SpaceChances" />).</summary>
+    public static GenreChoice SoloStyle { get; } = Chances("soloStyle", "A soloist's phrasing",
+        [("pickups", "Phrases coming in on a pickup", Soloist.PickupChances), ("space", "A soloist leaving space, a call, an answer and a rest", Soloist.SpaceChances)]);
 
     /// <summary>How wide a vibrato is and how fast, narrow to broad in cents, a step's slow or fast, or two steps' (<see cref="Expression.Vibratos" />).</summary>
     public static GenreChoice VibratoWidth { get; } = Pool("vibratoWidth", "A vibrato's width",

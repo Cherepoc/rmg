@@ -466,7 +466,10 @@ internal sealed record SongDecisions(
                 Ghosts = role != TrackRole.Drum && SongGenerator.CreateStream(seed, SongStream.SoloGhosts, (int)role)
                     .TestProbability(Articulations.SoloGhostChance.At(songUnconventionality[Facet.Sound], genre.Chance(GenreChoices.Articulation, "soloGhosts"))),
                 // and how often its phrases come in on a pickup, a pitched soloist's, a drummer's opening on its groove at the bar
-                PickupChance = role == TrackRole.Drum ? 0 : Soloist.PickupChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "pickups"))
+                PickupChance = role == TrackRole.Drum ? 0 : Soloist.PickupChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "pickups")),
+                // and whether it leaves space, a pitched soloist's, from a sequence of its own
+                Spacious = role != TrackRole.Drum && SongGenerator.CreateStream(seed, SongStream.SoloSpace, (int)role)
+                    .TestProbability(Soloist.SpaceChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "space")))
             });
         foreach (var (role, soloist) in soloists)
             StateTrace.RecordSong(TracePoints.Soloist, $"{role}", (role, soloist));

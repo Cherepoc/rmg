@@ -182,6 +182,73 @@ public sealed class SoloTest
         await Assert.That(blues).IsGreaterThan(0.05);
     }
 
+    /// <summary>Blues songs whose soloists all leave space, or none does.</summary>
+    private static Genre Spaced(double space) => GenrePresets.With("blues", GenreChoices.SoloStyle, ("pickups", 0.5), ("space", space));
+
+    /// <summary>A solo's notes, the solo part's, in each of its solos, with the solo's span.</summary>
+    private static IEnumerable<(SectionSpan Span, TimelineItem<RealizedNote>[] Notes, SoloLines.Segment[] Plan)> SolosNotes(CorpusSong song) =>
+        Plans(song).Select(x => (Span: song.Map.Sections[x.Index], x.Plan))
+            .Select(x => (x.Span, song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Solo))?.Where(n => n.Position >= x.Span.Start - 1e-9 && n.Position < x.Span.End - 1e-9).ToArray() ?? [], x.Plan));
+
+    /// <summary>
+    ///     A spacious soloist rests each line's last bar, the band's, but for a pickup into the next line, and plays no run
+    ///     longer than a beat but a pickup.
+    /// </summary>
+    [Test]
+    public async Task ASpaciousSoloist_RestsEachLinesLastBar_AndRunsABeatAtMost()
+    {
+        var lines = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Spaced(1)))))
+        foreach (var (span, notes, plan) in SolosNotes(song).Where(x => x.Span.Meter.PhraseBars % 4 == 0 && x.Span.Cut == 0))
+        {
+            var bar = span.Meter.BarDuration;
+            for (var line = span.Start; line + 4 * bar <= span.End + 1e-9; line += 4 * bar)
+            {
+                lines++;
+                var rest = notes.Where(x => x.Position >= line + 3 * bar - 1e-9 && x.Position < line + 4 * bar - 1.5 - 1e-9).ToArray();
+                await Assert.That(rest).IsEmpty().Because($"seed {song.Seed}, the line at {line}");
+            }
+
+            foreach (var run in plan.Where(x => x.Gesture == SoloGesture.Run && x.End - x.Start > 1 + 1e-9))
+                await Assert.That(Math.Abs(Math.IEEERemainder(run.End - span.Start, bar)) < 1e-6 && run.End - run.Start <= 1.5 + 1e-9).IsTrue().Because($"seed {song.Seed}, a run at {run.Start}");
+        }
+
+        await Assert.That(lines).IsGreaterThan(20);
+    }
+
+    /// <summary>
+    ///     How a spacious soloist plays against one that is not, the same Blues songs: the share of its solos' time silent,
+    ///     its notes a bar, how long they last, and the share of its runs a beat or shorter.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task SoloSpaceReport()
+    {
+        foreach (var space in new[] { 0.0, 1.0 })
+        {
+            var solos = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SolosNotes(TestCorpus.Get(seed, new SongOverrides(Genre: Spaced(space)))).ToArray()).SelectMany(x => x).ToArray();
+            double Silent((SectionSpan Span, TimelineItem<RealizedNote>[] Notes, SoloLines.Segment[] Plan) solo)
+            {
+                var sounding = 0.0;
+                var reach = solo.Span.Start;
+                foreach (var note in solo.Notes.OrderBy(x => x.Position))
+                {
+                    var (from, to) = (Math.Max(reach, note.Position), Math.Min(solo.Span.End, note.Position + note.Value.Duration));
+                    sounding += Math.Max(0, to - from);
+                    reach = Math.Max(reach, to);
+                }
+
+                return 1 - sounding / solo.Span.Duration;
+            }
+
+            var runs = solos.SelectMany(x => x.Plan).Where(x => x.Gesture == SoloGesture.Run).ToArray();
+            Console.WriteLine($"  {(space > 0 ? "spacious" : "not spacious")}: {solos.Length} solos, silent {solos.Average(Silent):P0}, notes a bar {solos.Sum(x => x.Notes.Length) / solos.Sum(x => x.Span.Duration / x.Span.Meter.BarDuration):F1}, " +
+                              $"a note {solos.SelectMany(x => x.Notes).Average(x => x.Value.Duration):F2} beats, runs a beat or shorter {runs.Count(x => x.End - x.Start <= 1 + 1e-9) / (double)Math.Max(1, runs.Length):P0}");
+        }
+
+        await Task.CompletedTask;
+    }
+
     /// <summary>Soloists trading take whole phrases in turn: no phrase of the line runs over a turn's end.</summary>
     [Test]
     public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()

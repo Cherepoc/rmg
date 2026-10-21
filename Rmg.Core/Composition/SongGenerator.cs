@@ -286,7 +286,8 @@ internal enum SongStream
     DrumSoloSounds = 131,
     SoloHits = 132,
     SoloPickups = 133,
-    DrumSoloPickups = 134
+    DrumSoloPickups = 134,
+    SoloSpace = 135
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

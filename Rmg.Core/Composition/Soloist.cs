@@ -83,6 +83,22 @@ internal sealed record Soloist(
     public static ByConvention PickupChances { get; } = new(0.1, 0.3, 0.4);
 
     /// <summary>
+    ///     Whether the soloist leaves space, as a blues player does: its section's lines each a call of a bar, an answer on its
+    ///     motif and a rest the band fills, its gestures leaning to held notes and its runs a beat at most; a song's decision
+    ///     for its soloist (<see cref="SpaceChances" />).
+    /// </summary>
+    public bool Spacious { get; init; }
+
+    /// <summary>
+    ///     The chance a pitched soloist leaves space, by the melody facet, no more apt in a wild song than in a middling one;
+    ///     a genre's where it names it, the Blues' most.
+    /// </summary>
+    public static ByConvention SpaceChances { get; } = new(0.05, 0.1, 0.1);
+
+    /// <summary>How much a spacious soloist leans its gestures to the held and from the run, as odds, and how long its run is at most, in beats.</summary>
+    public const double SpaceOdds = 4, SpaceRun = 1;
+
+    /// <summary>
     ///     The chance a run's note on a change of chord's downbeat lands on the new chord's nearest note, as a player aims a
     ///     run at the change, by the melody facet: a convention, every time at the plain end, and never at the wild, whose
     ///     runs go where they go (<see cref="SoloLines" />).

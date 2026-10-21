@@ -92,6 +92,9 @@ internal static class SoloLines
 
     private const int PickupSpeed = 4;
 
+    /// <summary>A spacious soloist's line, in bars, its section's phrase where that is not a multiple of it, and its call's.</summary>
+    private const int SpaceLineBars = 4, SpaceCallBars = 1;
+
     /// <summary>
     ///     The solo's arc, which its phrases' peaks follow: where it starts, the climax it rises to at about 70% of the way,
     ///     and where it eases to by its end.
@@ -350,7 +353,8 @@ internal static class SoloLines
                     // a phrase's first opening on the phrase before's motif a step away now and then, its own the next's
                     if (phrase != motifPhrase && pitches.Length > 0)
                     {
-                        var answers = motifs.TestProbability(MotifChance);
+                        // a spacious soloist's answer always on its call's motif
+                        var answers = motifs.TestProbability(MotifChance) || soloist.Spacious && phrase % 2 == 1;
                         var step = motifs.GenerateInt(0, 2) * 2 - 1;
                         var inverts = motifs.TestProbability(soloist.MotifInversion);
                         // in the motif's own figure, a scale's answered by a scale
@@ -529,9 +533,19 @@ internal static class SoloLines
             // less than a bar
             var bars = context.Pick(soloist.PhraseBars.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
             var turnEnd = Math.Min(span.End, span.Start + (Math.Floor((from - span.Start) / turn + 1e-9) + 1) * turn);
+            // a spacious soloist's phrases by its section's lines instead: a call of a bar opening a line, an answer of a bar or
+            // two after it, and the rest of the line a rest, the band's, where the line has the bars for all three
+            var lineBars = span.Meter.PhraseBars % SpaceLineBars == 0 ? SpaceLineBars : span.Meter.PhraseBars;
+            var lineStart = barOrigin + Math.Floor((from - barOrigin) / (lineBars * bar) + 1e-9) * lineBars * bar;
+            var lineEnd = Math.Min(turnEnd, lineStart + lineBars * bar);
+            // and only a line that starts in the span, not an answer's gap in the middle of one
+            var spacious = soloist.Spacious && lineStart >= span.Start - 1e-9 && lineEnd - lineStart >= (SpaceCallBars + 2) * bar - 1e-9;
+            if (spacious)
+                bars = Math.Abs(from - lineStart) < 1e-9 ? SpaceCallBars : Math.Min(bars, (int)Math.Round((lineEnd - from) / bar) - 1);
             var to = Math.Min(turnEnd, from + bars * bar);
-            if (turnEnd - to < bar - 1e-9)
+            if (turnEnd - to < bar - 1e-9 && !spacious)
                 to = turnEnd;
+            var rests = spacious && Math.Abs(from - lineStart) > 1e-9;
 
             // its peak, on the way to the solo's climax or easing after it, and the shape of its intensity
             var place = ((from + to) / 2 - span.Start) / span.Duration;
@@ -591,7 +605,12 @@ internal static class SoloLines
                         _ => soloist.GestureWeights[x.Gesture]
                     },
                     x.Gesture));
-                var gesture = context.Pick(lean.Weigh(weights.Where(x => x.Weight > 0), x => Gestures.Single(g => g.Gesture == x).Lean));
+                // a spacious soloist's the likelier held, the less likely running
+                var gesture = context.Pick((soloist.Spacious ? new Tilt(lean.LogOdds + Tilt.Of(Soloist.SpaceOdds, -1).LogOdds) : lean)
+                    .Weigh(weights.Where(x => x.Weight > 0), x => Gestures.Single(g => g.Gesture == x).Lean));
+                // and its runs short, a burst into the next note
+                if (soloist.Spacious && gesture == SoloGesture.Run && length > Soloist.SpaceRun + 1e-9)
+                    (length, end) = (Soloist.SpaceRun, at + Soloist.SpaceRun);
                 // a run after a run in the phrase goes on, its shape and its cells as they were
                 var goingOn = gesture == SoloGesture.Run && previous is { Gesture: SoloGesture.Run };
                 if (!goingOn)
@@ -623,6 +642,13 @@ internal static class SoloLines
             segments.Add(new Segment(releaseAt, releaseEnd, releaseLevel, SoloGesture.Held, soloist.Speeds[0], soloist.Shapes[0], [soloist.CellSizes[0]], false, phrase, true));
             if (releaseEnd < to - 1e-9)
                 segments.Add(new Segment(releaseEnd, to, releaseLevel, SoloGesture.Pause, soloist.Speeds[0], soloist.Shapes[0], [soloist.CellSizes[0]], false, phrase, false));
+            // and an answer's line rested to its end, the band's
+            if (rests && lineEnd > to + 1e-9)
+            {
+                segments.Add(new Segment(to, lineEnd, releaseLevel, SoloGesture.Pause, soloist.Speeds[0], soloist.Shapes[0], [soloist.CellSizes[0]], false, phrase, false));
+                to = lineEnd;
+            }
+
             from = to;
         }
 

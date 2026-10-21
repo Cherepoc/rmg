@@ -140,7 +140,7 @@
       },
       "levels": { "drum": 40 },
       "solos": { "sections": [40, 50, 60], "trades": [30, 50, 60], "hits": [10, 20, 30], "own": [0, 50, 100] },
-      "soloStyle": { "pickups": [40, 50, 60] },
+      "soloStyle": { "pickups": [40, 50, 60], "space": [10, 20, 20] },
       "soloists": { "solo": 100, "chords": [70, 80, 80], "melody": [30, 30, 40], "bass": [0, 10, 20], "drum": [0, 10, 20] },
       "ending": { "button": 100, "ringOut": [80, 80, 60], "fade": [10, 10, 30], "stop": [0, 10, 30] },
       "drumRole": {
@@ -824,6 +824,7 @@
       "articulation": { "legato": [0, 30, 50], "stabs": [30, 40, 40], "roll": 0, "deadNotes": [40, 50, 60], "soloGhosts": [50, 60, 70] },
       "hook": { "choruses": [50, 60, 50], "sections": [50, 60, 50] },
       "solos": { "sections": [3, 5, 20], "trades": 0, "hits": [30, 40, 50], "own": [0, 50, 100] },
+      "soloStyle": { "pickups": [10, 30, 40], "space": [10, 20, 20] },
       "strongEffect": { "none": [100, 100, 40], "tremolo": [0, 10, 40], "echo": [0, 5, 30] },
       "phraseScheme": { "aaab": 100, "aaaa": [80, 80, 50], "abab": [30, 30, 40], "aaba": [20, 20, 30] },
       "space": { "drum": 25, "bass": 30, "chords": 30, "rhythm": 25, "riff": 30, "melody": 40 }
@@ -1122,7 +1123,7 @@
       "turnaround": { "sections": [40, 70, 70] },
       "riff": { "powerChords": [15, 25, 30], "hook": [100, 80, 0], "turnaround": [30, 40, 40] },
       "solos": { "sections": [20, 25, 35], "trades": 0, "hits": [10, 20, 30], "own": [0, 50, 100] },
-      "soloStyle": { "pickups": [40, 50, 60] },
+      "soloStyle": { "pickups": [40, 50, 60], "space": [40, 50, 60] },
       "soloists": { "solo": 100, "melody": [40, 40, 50], "chords": [10, 20, 30] },
       "ending": { "ringOut": 100, "button": [80, 80, 60], "stop": [0, 20, 40], "big": 40 },
       "rhythm": {
@@ -1315,6 +1316,7 @@
       "openingPart": { "chords": 100, "riff": 0 },
       "ending": { "fade": 100, "ringOut": [60, 60, 70], "button": [20, 20, 30], "big": 40 },
       "solos": { "sections": [10, 20, 30], "trades": 0, "hits": [0, 20, 30], "own": [0, 50, 100] },
+      "soloStyle": { "pickups": [10, 30, 40], "space": [20, 30, 30] },
       "instrument": {
         "melody": { "overdrivenGuitar": 100, "acousticGrandPiano": 60, "electricGuitarClean": 40, "lead6Voice": [0, 10, 20] },
         "chords": { "electricGuitarClean": 100, "acousticGrandPiano": 80, "acousticGuitarSteel": 60 },
@@ -2697,7 +2699,7 @@
       "formChances": { "forms": [100, 90, 60] },
       "ending": { "ringOut": 60, "fade": 100, "button": 40, "big": 30 },
       "solos": { "sections": [10, 15, 25], "trades": 0, "hits": [10, 20, 30], "own": [0, 50, 100] },
-      "soloStyle": { "pickups": [30, 40, 50] },
+      "soloStyle": { "pickups": [30, 40, 50], "space": [20, 30, 30] },
       "soloAnswers": { "sections": [30, 40, 50] }
     }
   },
@@ -2762,7 +2764,7 @@
       "formChances": { "forms": [100, 95, 70] },
       "ending": { "ringOut": 100, "button": 80, "big": 30 },
       "solos": { "sections": [30, 40, 50], "trades": 0, "hits": [0, 20, 30], "own": [0, 50, 100] },
-      "soloStyle": { "pickups": [30, 40, 50] },
+      "soloStyle": { "pickups": [30, 40, 50], "space": [5, 10, 10] },
       "soloists": { "solo": 100, "melody": 50, "counterMelody": 40 },
       "keyChanges": { "lastSection": [20, 30, 40], "sections": [0, 8, 100], "patterns": 0 },
       "passingChords": {},
