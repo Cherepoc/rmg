@@ -64,6 +64,51 @@ public sealed class StopsReportTest
         await Assert.That(all).IsGreaterThan(own + 0.15);
     }
 
+    /// <summary>Metal with every song stopping and every section in stop time, its later appearances' chance the one given.</summary>
+    private static Genre Stopping(double returns)
+    {
+        var metal = GenrePresets.Genre("metal");
+        ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention> Chances(params (string Option, double Chance)[] options) =>
+            options.ToImmutableDictionary(x => x.Option, x => new Rmg.Core.Probabilities.ByConvention(x.Chance, x.Chance, x.Chance));
+        return metal with
+        {
+            Choices = metal.Choices.SetItem(GenreChoices.Stops.Name, Chances(("songs", 1))).SetItem(GenreChoices.StopTime.Name, Chances(("sections", 1), ("returns", returns)))
+        };
+    }
+
+    /// <summary>A stop-time section whose later appearances never stop again stops in its first alone.</summary>
+    [Test]
+    public async Task AStopTimeSection_ThatNeverStopsAgain_StopsInItsFirstAppearanceAlone()
+    {
+        var stopped = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Stopping(0)))))
+        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.StopTime))
+        {
+            var starts = (ImmutableArray<double>)entry.Value!;
+            stopped += starts.Length;
+            var first = song.Map.Sections.First(x => x.SectionId == entry.Section).Start;
+            await Assert.That(starts.All(x => Math.Abs(x - first) < 1e-6)).IsTrue().Because($"seed {song.Seed}, section {entry.Section}: {string.Join(", ", starts)}");
+        }
+
+        await Assert.That(stopped).IsGreaterThan(20);
+    }
+
+    /// <summary>
+    ///     A stop-time section stops again in some of its later appearances, far fewer than with every one stopping, the same
+    ///     songs, every section of every song in stop time (seen 5.3 stopped phrases a song of 32 Metal songs, against 9.9 with
+    ///     every appearance stopping and 3.5 with the first alone).
+    /// </summary>
+    [Test]
+    public async Task AStopTimeSection_StopsAgainNowAndThen()
+    {
+        double Phrases(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
+            .Average(x => x.Trace.Where(t => t.Point == TracePoints.StopTime).Sum(t => ((ImmutableArray<double>)t.Value!).Length));
+        var (own, every, none) = (Phrases(Stopping(0.3)), Phrases(Stopping(1)), Phrases(Stopping(0)));
+        Console.WriteLine($"  stopped phrases a song: {own:F1} at the songs' own chance, {every:F1} with every appearance stopping, {none:F1} with the first alone");
+        await Assert.That(own).IsGreaterThan(none);
+        await Assert.That(own).IsLessThan(every);
+    }
+
     [Test]
     [Explicit]
     public async Task Report()

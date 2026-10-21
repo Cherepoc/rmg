@@ -82,7 +82,7 @@ public static class GenreChoiceDescriptions
         ["breakdown"] = "How often a bridge, or a section of a free form, is a heavy band's breakdown: the drums in half time, the kick striking with the riff, the riff chugging on its lowest note, the melody, the counter-melody and the pad laying out.",
         ["openingAlone"] = "How often a song opens on one part alone, the band coming in part by part after it, as a riff-driven band's song does on its riff, in place of the genre's other intro.",
         ["openingPart"] = "The part a song opening on one alone opens on: its riff, or the drums setting the groove, the bass, the chords as a pianist plays the first bars, or the pad.",
-        ["stopTime"] = "How often a section's first phrase plays in stop time, the band hitting once a bar under the melody, as the blues and rock do.",
+        ["stopTime"] = "How often a section's first phrase plays in stop time, the band hitting once a bar under the melody, as the blues and rock do, and how often it stops again when it comes back, every verse in the blues, once or twice in a rock song.",
         ["ensembleHits"] = "How often a section's last bar before a louder one is struck in ensemble hits, the band hitting with the kick and resting between, as funk and horn bands do.",
         ["stops"] = "How often a song stops at all, its sections then playing stop time and ensemble hits by their chances, as a band stops in one place or two as a feature rather than in section after section.",
         ["push"] = "How often a section plays its chord changes an 8th early, an anticipation that pushes the groove forward.",

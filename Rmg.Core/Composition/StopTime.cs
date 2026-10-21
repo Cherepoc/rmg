@@ -28,6 +28,12 @@ internal static class StopTime
     /// </summary>
     public static ByConvention SongChance { get; } = new(0, 0.5, 0.5);
 
+    /// <summary>
+    ///     The chance a stop-time section's later appearance stops again, its first always stopping: no more apt in a wild song
+    ///     than a plain one, a stop being a feature in one place or two; a genre's where it names it, every verse of the blues'.
+    /// </summary>
+    public static ByConvention ReturnChance { get; } = new(0.3, 0.3, 0.3);
+
     /// <summary>Whether the song stops at all, from a sequence of its own (<see cref="SongChance" />).</summary>
     internal static bool Stops(SongDecisions song) =>
         song.Stream(SongStream.Stops).TestProbability(SongChance.At(song.Facets[Facet.Form], song.Genre.Chance(GenreChoices.Stops, "songs")));
@@ -50,7 +56,10 @@ internal static class StopTime
     /// </summary>
     public const double CarriedShare = 0.5;
 
-    /// <summary>Where the song plays in stop time: every stop-time section's appearances' first phrase, but a solo's, its start, end and bar.</summary>
+    /// <summary>
+    ///     Where the song plays in stop time: a stop-time section's first appearance's first phrase, and a later one's by its
+    ///     chance, from a sequence of its own for each, but a solo's; its start, end and bar.
+    /// </summary>
     internal static (double Start, double End, double BarDuration)[] Phrases(SongDecisions song)
     {
         // in a song that stops at all, every section drawn all the same
@@ -66,10 +75,15 @@ internal static class StopTime
         // its hits to none
         var intro = song.Form.Map.Intro;
         var built = intro.Kind == IntroKind.Entries && !intro.Window.IsBefore ? song.Form.Map.Sections[0] : null;
+        // a later appearance by its chance, drawn for every one
+        var sections = song.Form.Map.Sections;
+        bool[] again = [..sections.Select((x, i) => song.AppearanceStream(SongStream.StopReturns, i)
+            .TestProbability(ReturnChance.At(song.SectionOf(x.SectionId).Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "returns"))))];
+        bool Stopped(SectionSpan span, int index) => stopping[span.SectionId] && (again[index] || !sections.Take(index).Any(x => x.SectionId == span.SectionId));
         // and but in a solo, whose soloists play over the band as loud as it was measured, as a push leaves a solo be
         return
         [
-            ..song.Form.Map.Sections.Where((x, i) => stopping[x.SectionId] && x != built && !song.Solos.ContainsKey(i))
+            ..sections.Where((x, i) => Stopped(x, i) && x != built && !song.Solos.ContainsKey(i))
                 .Select(x => (x.Start, Math.Min(x.End, x.Start + x.Meter.PhraseDuration), x.Meter.BarDuration))
         ];
     }

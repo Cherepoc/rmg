@@ -291,9 +291,10 @@ count of its own. In order:
   sections: a song in stop time, the songs' own 18% to 11%, Metal's 67% to 25%, Rock's 48% to 22%, Funk's 45% to 41%;
   silences of a beat or more Metal's 3.1 to 2.2 a song. Doom's 5.2 and Black metal's 6.3 not stops but a section's
   parts all resting at a phrase's end where one plays alone or the drums rest, the next step's. Metal's stops and
-  Thrash's breakdowns, 2.7 a song, heard and kept (the tenth round, 6-0 and 5-1). Left: stop time in only some of a
-  section's appearances, should a stopped verse every time be heard too often, as the round heard a section's first
-  stop alone.
+  Thrash's breakdowns, 2.7 a song, heard and kept (the tenth round, 6-0 and 5-1). A stop-time section's later
+  appearances stopping again by a chance of their own (built 21 October 2026, `stopTime.returns`, the songs' own 30%,
+  the Blues' 100%, Funk's 80%), its first always: stopped phrases a song, Metal's 0.8 to 0.4, Rock's 0.6 to 0.3,
+  Thrash's 2.0 to 1.5, Funk's and the Blues' as they were.
 - **One part alone, short** (built 21 October 2026): one part alone for an appearance's first phrase, the band coming
   in after it, the whole appearance only where it plays one phrase, and a pre-chorus never thinning nor playing one
   part alone: silences of a beat or more, Black metal's 6.3 to 2.0 a song, Doom's 5.2 to 3.0, the songs' own 2.3 to
@@ -316,7 +317,8 @@ code before it is recorded here. Left:
 - **Three page tests seen failing once each,** their messages not kept: the seek readout's
   (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), the length's
   (`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`) and the bar dragged by hand's
-  (`TheKeyAndChord_FollowTheBar_AsAHandDragsIt(True)`, 19 and 21 October 2026, passing twice after each time), to read when they fail
+  (`TheKeyAndChord_FollowTheBar_AsAHandDragsIt(True)`, 19 and twice on 21 October 2026, only in the whole run, passing
+  alone four times of four), to read when they fail
   again.
 
 ### Put off, with their reasons

@@ -231,8 +231,12 @@ public static class GenreChoices
     /// <summary>The chance a bridge or a section of a free form is a heavy band's breakdown (<see cref="Breakdowns.Chance" />).</summary>
     public static GenreChoice Breakdown { get; } = Chances("breakdown", "Breakdowns", [("sections", "Bridges broken down", Breakdowns.Chance)]);
 
-    /// <summary>The chance a section plays its first phrase in stop time, the band hitting once a bar under the lines (<see cref="StopTime.Chance" />).</summary>
-    public static GenreChoice StopTime { get; } = Chances("stopTime", "Stop time", [("sections", "Sections in stop time", Composition.StopTime.Chance)]);
+    /// <summary>
+    ///     The chance a section plays its first phrase in stop time, the band hitting once a bar under the lines, and the chance
+    ///     its later appearances do too (<see cref="StopTime.Chance" />, <see cref="StopTime.ReturnChance" />).
+    /// </summary>
+    public static GenreChoice StopTime { get; } = Chances("stopTime", "Stop time",
+        [("sections", "Sections in stop time", Composition.StopTime.Chance), ("returns", "Their later appearances in it too", Composition.StopTime.ReturnChance)]);
 
     /// <summary>The chance a song stops at all, its sections then drawing stop time and ensemble hits (<see cref="Composition.StopTime.SongChance" />).</summary>
     public static GenreChoice Stops { get; } = Chances("stops", "Stops", [("songs", "Songs that stop", Composition.StopTime.SongChance)]);
