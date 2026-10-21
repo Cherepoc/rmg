@@ -319,7 +319,9 @@ internal static class Expression
         (new Vibrato(60, 0, 5.5, true), new ByConvention(0, 0.15, 0.2)),
         (new Vibrato(0, 1, 4.5, false), new ByConvention(0, 0.01, 0.125)),
         (new Vibrato(0, 1, 6.5, true), new ByConvention(0, 0.01, 0.125)),
-        (new Vibrato(0, 2, 5, true), new ByConvention(0, 0, 0.15))
+        (new Vibrato(0, 2, 5, true), new ByConvention(0, 0, 0.15)),
+        // a whammy bar's dip, a step down and back, a surf guitar's, a genre's alone
+        (new Vibrato(0, -1, 4.5, false), new ByConvention(0, 0, 0))
     ];
 
     /// <summary>
@@ -340,6 +342,7 @@ internal static class Expression
     public static string NameOf(Vibrato width) => width switch
     {
         { Steps: 2 } => "twoSteps",
+        { Steps: -1 } => "dip",
         { Steps: 1, Rate: < 5.5 } => "slowStep",
         { Steps: 1 } => "fastStep",
         { Cents: <= 15 } => "narrow",
@@ -348,10 +351,10 @@ internal static class Expression
     };
 
     public static string LabelOf(Vibrato width) =>
-        $"{(width.Steps switch { 0 => $"{width.Cents} cents", 1 => "A step", _ => $"{width.Steps} steps" })} at {width.Rate} a second";
+        $"{(width.Steps switch { 0 => $"{width.Cents} cents", 1 => "A step", -1 => "A whammy's dip, a step down", _ => $"{width.Steps} steps" })} at {width.Rate} a second";
 
     /// <summary>How far a width leans to the wide side, for a strength or an energy to lean it.</summary>
-    private static double Lean(Vibrato width) => width.Steps > 0 ? 0.5 * width.Steps : width.Cents / 60.0 - 1;
+    private static double Lean(Vibrato width) => width.Steps != 0 ? 0.5 * Math.Abs(width.Steps) : width.Cents / 60.0 - 1;
 
     /// <summary>The narrow vibrato a note plays in place of a wide one it cannot, a note off the scale or an instrument it does not suit: broad on a sound that sustains, medium on one that rings.</summary>
     private static Vibrato NarrowFor(int program) => Vibratos.Select(x => x.Width).Last(x => x.Steps == 0 && Suits(x, program));
@@ -958,10 +961,10 @@ internal static class Expression
                     // and whether it sings a vibrato at all likewise, where its pitch holds long enough for one after its bend
                     // a wide one between the note and a scale note above it, so the note must be on the scale, and the note's
                     // instrument, where the part switches, suiting it
-                    var width = !Suits(noteVibrato, noteProgram) || noteVibrato.Steps > 0 && !IsOnScale(note.Value) ? NarrowFor(noteProgram) : noteVibrato;
+                    var width = !Suits(noteVibrato, noteProgram) || noteVibrato.Steps != 0 && !IsOnScale(note.Value) ? NarrowFor(noteProgram) : noteVibrato;
                     var sings = InstrumentTraits.Has(noteProgram, InstrumentTrait.SingsVibrato);
                     if ((soloist is null ? vibrates : soloist.Vibrates && !echoes) && isLine && Bends(noteProgram) && HoldsVibrato(shape, rise, seconds, eighth, width.Rate, sings))
-                        state = (width.Steps > 0
+                        state = (width.Steps != 0
                                 ? state.With(CompositionStateKinds.WideVibrato, ScaleDistance(note.Value, width.Steps))
                                 : state.With(CompositionStateKinds.Vibrato, width.Cents))
                             .With(CompositionStateKinds.VibratoRate, (int)Math.Round(10 * width.Rate))

@@ -156,13 +156,13 @@ internal static class ExpressionRender
             var rise = state.GetStateValue(CompositionStateKinds.BendRise) / 1000.0;
             var rate = state.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0;
             var wait = state.GetStateValue(CompositionStateKinds.VibratoDelay) / 10.0;
-            if ((vibrato > 0 || wide > 0) && (rate <= 0 || wait <= 0) || bend is not (BendKind.None or BendKind.Dive) && rise <= 0)
+            if ((vibrato > 0 || wide != 0) && (rate <= 0 || wait <= 0) || bend is not (BendKind.None or BendKind.Dive) && rise <= 0)
                 throw new InvalidOperationException($"A note at {note.Position} bends or sings a vibrato with no rise, rate or wait.");
             // and the tape's drift and the part's detune under them, in semitones, the drift by the time since the song's start
             var wow = state.GetStateValue(CompositionStateKinds.Wow);
             var detune = state.GetStateValue(CompositionStateKinds.Detune);
             double Offset(double at) => (detune + wow * (0.6 * Math.Sin(2 * Math.PI * at / WowCycle) + 0.4 * Math.Sin(2 * Math.PI * at / SlowWowCycle))) / 100.0;
-            var shaped = bend != BendKind.None || vibrato > 0 || wide > 0;
+            var shaped = bend != BendKind.None || vibrato > 0 || wide != 0;
             if (shaped || wow > 0)
             {
                 // the note's moves in seconds, as a player times them, whatever the tempo
@@ -198,7 +198,8 @@ internal static class ExpressionRender
                     var growth = Math.Clamp(grown / Composition.Expression.VibratoGrowthCycles, 0, 1);
                     var cycles = (start + t - origin) * perBeat;
                     semitones += vibrato / 100.0 * growth * Math.Sin(2 * Math.PI * cycles);
-                    // a wide one bends up from the note to its top and back, as a guitar's does, never below it
+                    // a wide one bends up from the note to its top and back, as a guitar's does, never below it, or a whammy's
+                    // dip down to a scale step below and back, never above
                     semitones += wide * growth * (0.5 - 0.5 * Math.Cos(2 * Math.PI * cycles));
                     bends.Add((start + t, ToBend(semitones + Offset(start + t))));
                 }
