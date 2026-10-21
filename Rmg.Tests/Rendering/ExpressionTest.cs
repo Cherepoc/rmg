@@ -56,21 +56,48 @@ public sealed class ExpressionTest
         await Assert.That(wild.SelectMany(x => x).Any(p => gentle.Count(i => p[i]) >= 2)).IsTrue();
     }
 
-    /// <summary>A tremolo moves a held note alone, a beat or longer, as a gate chops a held chord, never a run's notes.</summary>
+    /// <summary>Songs whose strong effect is the tremolo.</summary>
+    private static readonly Genre Trembling = new(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+        .Add(GenreChoices.StrongEffect.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(GenreChoices.Name(nameof(StrongEffect.Tremolo)), new(1, 1, 1))));
+
+    /// <summary>A part's notes in each appearance, but a riser's, with whether each trembles.</summary>
+    private static IEnumerable<(int Track, SectionSpan Span, (double Position, double Duration, bool Trembles)[] Notes)> TremoloSections(CorpusSong song) =>
+        from track in song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Tremolo) > 0))
+        from span in song.Map.Sections
+        let notes = track.Value.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9 && !Risers.IsRiser(x.Value.State))
+            .Select(x => (x.Position, x.Value.Duration, x.Value.State.GetStateValue(CompositionStateKinds.Tremolo) > 0)).ToArray()
+        where notes.Length > 0
+        select (track.Key, span, notes);
+
+    /// <summary>
+    ///     A tremolo plays a whole appearance of its part or none of it, and only one whose every note is held a beat or
+    ///     longer, as a held chord trembles and a riff or a run never does.
+    /// </summary>
     [Test]
-    public async Task ATremolo_MovesHeldNotesAlone()
+    public async Task ATremolo_PlaysAWholeSectionOfHeldNotes_OrNone()
     {
-        var trembling = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
-            .Add(GenreChoices.StrongEffect.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(GenreChoices.Name(nameof(StrongEffect.Tremolo)), new(1, 1, 1))));
-        var held = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: trembling))))
-        foreach (var note in song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Tremolo) > 0))
+        var trembling = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Trembling))))
+        foreach (var (track, span, notes) in TremoloSections(song).Where(x => x.Notes.Any(n => n.Trembles)))
         {
-            await Assert.That(note.Value.Duration).IsGreaterThanOrEqualTo(1 - 1e-9).Because($"seed {song.Seed} at {note.Position}");
-            held++;
+            trembling++;
+            await Assert.That(notes.All(x => x.Trembles && x.Duration >= 1 - 1e-9)).IsTrue().Because($"seed {song.Seed}, track {track} at {span.Start}");
         }
 
-        await Assert.That(held).IsGreaterThan(0);
+        await Assert.That(trembling).IsGreaterThan(5);
+    }
+
+    /// <summary>How a tremolo plays: the songs that play it anywhere, its sections, and how often it turns on or off within one.</summary>
+    [Test]
+    [Explicit]
+    public async Task TremoloReport()
+    {
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Trembling)));
+        var sections = songs.SelectMany(TremoloSections).ToArray();
+        var playing = sections.Where(x => x.Notes.Any(n => n.Trembles)).ToArray();
+        Console.WriteLine($"  of 64 songs, {songs.Count(x => TremoloSections(x).Any())} play a tremolo; {playing.Length} sections of its part of {sections.Length} play it, " +
+                          $"{playing.Count(x => x.Notes.Any(n => !n.Trembles))} of them on and off, {playing.Sum(x => x.Notes.Zip(x.Notes.Skip(1)).Count(p => p.First.Trembles != p.Second.Trembles)) / (double)Math.Max(1, playing.Length):F1} switches a section");
+        await Task.CompletedTask;
     }
 
     [Test]

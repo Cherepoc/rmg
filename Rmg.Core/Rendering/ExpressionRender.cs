@@ -224,7 +224,8 @@ internal static class ExpressionRender
                 {
                     var t = at - start;
                     var swell = swells ? Math.Min(1, 0.25 + 0.75 * t / Math.Min(1, duration / 2)) : 1;
-                    var shake = 1 - tremolo / 100.0 * (0.5 + 0.5 * Math.Sin(2 * Math.PI * t / 0.25));
+                    // in 16ths of the song's grid, as a sweep is, so that a chord struck again keeps the pulse it shook in
+                    var shake = 1 - tremolo / 100.0 * (0.5 + 0.5 * Math.Sin(2 * Math.PI * at / 0.25));
                     // ducked on the bar's pulse and swelling back over it
                     var duck = pump > 0 ? 1 - pump / 100.0 * Math.Pow(1 - SincePulse(map, at), 2) : 1;
                     return swell * shake * duck;

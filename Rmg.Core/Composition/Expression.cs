@@ -92,13 +92,13 @@ internal static class Expression
 
     /// <summary>
     ///     Whether a strong effect suits a part, which plays it the likelier: an echo a lead's or a comping part's, a dub's
-    ///     skank's, a tremolo a guitar's, an
-    ///     electric piano's or an organ's, a sweep a pad's, a synth's or an organ's.
+    ///     skank's, a tremolo a held chord's, a pad's or the chords' on a guitar, an electric piano or an organ, a sweep a pad's, a
+    ///     synth's or an organ's.
     /// </summary>
     private static bool Suits(StrongEffect effect, TrackRole role, int program) => effect switch
     {
         StrongEffect.Echo => role is TrackRole.Melody or TrackRole.Rhythm,
-        StrongEffect.Tremolo => InstrumentTraits.Has(program, InstrumentTrait.Tremolo),
+        StrongEffect.Tremolo => role == TrackRole.Pad || role == TrackRole.Chords && InstrumentTraits.Has(program, InstrumentTrait.Tremolo),
         StrongEffect.Sweep => role == TrackRole.Pad || InstrumentTraits.Has(program, InstrumentTrait.Sweeps),
         StrongEffect.Pump => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Bass or TrackRole.Rhythm,
         StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening => InstrumentTraits.Has(program, InstrumentTrait.Filters),
@@ -132,14 +132,12 @@ internal static class Expression
     ];
 
     /// <summary>
-    ///     A note in the steady sound of another's state, a tremolo's on a held note alone, as everywhere, at the part's own
-    ///     depth, whatever the length of the note it copies.
+    ///     A note in the steady sound of another's state, its tremolo among it, the section's it copies.
     /// </summary>
-    private static StateMap Steady(RealizedNote note, StateMap source, int tremolo) =>
-        note.State.MergeWith(source.Subset(SteadyKinds)).With(CompositionStateKinds.Tremolo, note.Duration >= 1 - 1e-9 ? tremolo : 0);
+    private static StateMap Steady(RealizedNote note, StateMap source) => note.State.MergeWith(source.Subset(SteadyKinds));
 
-    /// <summary>Whether a strong effect is played only by a part it suits: a filter's, a synth's, and a gate's, held chords'.</summary>
-    private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect == StrongEffect.Gate;
+    /// <summary>Whether a strong effect is played only by a part it suits: a filter's, a synth's, and a gate's and a tremolo's, held chords'.</summary>
+    private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect is StrongEffect.Gate or StrongEffect.Tremolo;
 
     /// <summary>Whether a part may echo: one that plays lines, or the rhythm part, whose stabs a dub echoes.</summary>
     private static bool EchoesFrom(TrackRole role) => role.PlaysLine() || role == TrackRole.Rhythm;
@@ -296,7 +294,7 @@ internal static class Expression
 
     /// <summary>
     ///     How much likelier a part the song's strong effect suits is to be the one that plays it than any other that may:
-    ///     an echo goes to a line, and a tremolo and a sweep to any pitched part.
+    ///     an echo goes to a line, and a sweep to any pitched part.
     /// </summary>
     public const double SuitedStrongWeight = 4;
 
@@ -845,6 +843,10 @@ internal static class Expression
                 var tone = toned ? (int)Math.Round(ToneReach * toneDepth * (3 - Math.Clamp(energies[index], -1, 1)) / 4) : 0;
                 // every note's draws by its place, so that a note a stage before took out leaves the others' as they were
                 var noteSeed = context.GenerateSeed();
+                // a tremolo the whole section's where the part holds every note there a beat or longer, as a held chord trembles,
+                // and none where it plays anything faster, a riff's or a run's, so that it never turns on and off within it
+                var trembles = tremolo > 0 && Enumerable.Range(first(span.Start), timeline.Count - first(span.Start)).TakeWhile(i => timeline[i].Position < span.End - 1e-9)
+                    .Where(i => !dropped[i]).All(i => timeline[i].Value.Duration >= 1 - 1e-9);
 
                 // the notes in the section, in order, the timeline's being
                 for (var i = first(span.Start); i < timeline.Count && timeline[i].Position < span.End - 1e-9; i++)
@@ -950,9 +952,8 @@ internal static class Expression
                             ? note.Value.State.GetStateValue(StateKinds.HeldDuration) > 0 && note.Value.Duration >= LineSwellBeats && !InstrumentTraits.Has(noteProgram, InstrumentTrait.Decays)
                             : note.Value.Duration >= 1))
                         state = state.With(CompositionStateKinds.Swell, 1);
-                    // a tremolo moving a held note alone, as a gate chops a held chord, never a run's
                     if (role != TrackRole.Drum)
-                        state = state.With(CompositionStateKinds.Tremolo, note.Value.Duration >= 1 - 1e-9 ? tremolo : 0).With(CompositionStateKinds.AutoPan, sweeps);
+                        state = state.With(CompositionStateKinds.Tremolo, trembles ? tremolo : 0).With(CompositionStateKinds.AutoPan, sweeps);
                     if (pumps && kicked.Contains(BarStart(note.Position)))
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
                     // but a chord cycled at the frame rate, whose cycle an echo would blur
@@ -1036,14 +1037,14 @@ internal static class Expression
                 && Enumerable.Range(0, timeline.Count).FirstOrDefault(i => states[i] is not null && introSource.IsWithin(timeline[i].Position), firstPlayed) is var sourced)
                 for (var i = 0; i < timeline.Count && timeline[i].Position < map.Origin - 1e-9; i++)
                     if (states[i] is null)
-                        states[i] = Steady(timeline[i].Value, states[sourced]!, tremolo);
+                        states[i] = Steady(timeline[i].Value, states[sourced]!);
 
             // the ending's notes, the final chord, in the sound the last section left the part in: its sends, its tone, its
             // tape and its steady effects, none of a note's own gestures
             if (Array.FindLastIndex(states, x => x is not null) is var lastPlayed and >= 0 && timeline[lastPlayed].Position >= map.Sections[^1].Start - 1e-9)
                 for (var i = lastPlayed + 1; i < timeline.Count; i++)
                     if (states[i] is null && timeline[i].Position >= map.Ending.Start - 1e-9)
-                        states[i] = Steady(timeline[i].Value, states[lastPlayed]!, tremolo);
+                        states[i] = Steady(timeline[i].Value, states[lastPlayed]!);
 
             result[track] = EventTimeline.Create(
                 timeline.Duration,
