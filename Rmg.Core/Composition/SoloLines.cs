@@ -75,6 +75,14 @@ internal static class SoloLines
     public const double RunSpeedOdds = 3;
 
     /// <summary>
+    ///     The fastest a soloist plays but in a burst, in notes a beat, and how intense a segment is at least to burst faster,
+    ///     as a player saves 32nds for the peak, a run of them through a whole solo blurring.
+    /// </summary>
+    public const int BurstSpeed = 8;
+
+    public const double BurstIntensity = 0.8;
+
+    /// <summary>
     ///     The solo's arc, which its phrases' peaks follow: where it starts, the climax it rises to at about 70% of the way,
     ///     and where it eases to by its end.
     /// </summary>
@@ -559,9 +567,11 @@ internal static class SoloLines
                 var goingOn = gesture == SoloGesture.Run && previous is { Gesture: SoloGesture.Run };
                 if (!goingOn)
                     played.Clear();
-                // the speed, faster the more intense and a run's the faster, of those the soloist can play at the tempo there and keep up
+                // the speed, faster the more intense and a run's the faster, of those the soloist can play at the tempo there and keep up,
+                // the fastest a burst of the most intense alone
                 var speeds = soloist.Speeds
-                    .Where(x => x * beatsASecond(at) <= soloist.MaxNotesASecond + 1e-9 && played.GetValueOrDefault(x) + length <= soloist.BeatsAt(x) + 1e-9)
+                    .Where(x => x * beatsASecond(at) <= soloist.MaxNotesASecond + 1e-9 && played.GetValueOrDefault(x) + length <= soloist.BeatsAt(x) + 1e-9
+                                && (x <= BurstSpeed || level >= BurstIntensity - 1e-9))
                     .DefaultIfEmpty(soloist.Speeds[0])
                     .ToArray();
                 var speedLean = gesture == SoloGesture.Run ? new Tilt(lean.LogOdds + Tilt.Of(RunSpeedOdds, 1).LogOdds) : lean;
