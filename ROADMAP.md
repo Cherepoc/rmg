@@ -330,13 +330,15 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
   part asks `blues-space`, `blues-pickups`, `funk-rhythm` and `folk-melody`; Jazz's chromatic approach measured too
   faint to ask (0.03). Left: the climax's top note bent and shaken (8-15% bent), a climbing repeated lick, the
   enclosure.
-- **Surf rock** (a new preset, as the owner asked on 21 October 2026): instrumental surf, clean bright guitars in a
-  plate's heavy send (no spring among the synthesizer's rooms), a tremolo-picked melody, minor and Phrygian lines,
-  a driving picked bass and the toms, 140 to 180 a minute, straight:
-  - The double harmonic scale (1, b2, 3, 4, 5, b6, 7) and a vibrato a step down and back, a whammy's dip, a genre's.
-  - The preset, its every choice data.
-  - The surf drop, a falling tremolo-picked slide on a guitar into a louder section or the song, a riser's kind.
-  - The tom among the timekeepers by a genre's weight, the hi-hat's pattern on the floor tom; then a listening round.
+- **Surf rock** (built 22 October 2026, a new preset as the owner asked): instrumental surf, clean bright guitars in
+  a plate's heavy send (no spring among the synthesizer's rooms, so no drip), the double harmonic scale already one of
+  the songs' (`doubleHarmonicMajor`), a whammy's dip a step down (`vibratoWidth.dip`), a tremolo-picked riff now and
+  then, a surf drop into a louder section (`surfDrop.lifts`): 163 a minute on the average, sections tremolo-picked
+  11%, 29 drops in 64 songs. The twelfth round asks `surf-tremolo`; the drop measured too faint to ask (0.05, a bar in
+  a stretch), to be heard by hand. Put off: the tom among the timekeepers, a hi-hat's pattern on the floor tom: a
+  genre's pool of the time role gives the tom the role, but the section's lead in it goes first to the drum whose own
+  role it is, the hi-hat, so that the tom would need a genre's lean in the lead's choice (`DrumKitGenerator.SelectKit`),
+  a mechanism of its own for one genre.
 
 Put off: a drum solo's hand ostinato, a ride under the solo (Jazz's trades play over the band already); a separate
 theme composed for a drum solo (the groove is its theme); vocal surf, General MIDI having no singer.

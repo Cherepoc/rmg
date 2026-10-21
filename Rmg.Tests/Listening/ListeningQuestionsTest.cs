@@ -77,8 +77,19 @@ public sealed class ListeningQuestionsTest
         new("folk-melody", "A Bluegrass break playing the tune's melody, decorated, rather than a line of its own: the tune's break, or a missed solo?",
             "How often a folk genre's solo is on the melody (solos.own, Bluegrass's 0-20-40), against the songs' own chance (0-50-100).", "bluegrass", [],
             new() { ["solos"] = new() { ["own"] = new[] { 0, 50, 100 } } },
-            x => SoloPlans(x).Select(p => (double?)x.Map.Sections[p.Index].Start).Min(), (x, span) => Soloed(x).Contains(span.SectionId))
+            x => SoloPlans(x).Select(p => (double?)x.Map.Sections[p.Index].Start).Min(), (x, span) => Soloed(x).Contains(span.SectionId)),
+        new("surf-tremolo", "A Surf riff tremolo-picked, every 16th on the note: the surf sound, or a buzz?",
+            "How often a Surf riff is tremolo-picked (figure.riff.tremolo, 30-40-50), against never.", "surf", [],
+            new() { ["figure.riff"] = new() { ["own"] = 100, ["tremolo"] = 0 } },
+            x => FirstOf(x, Tremolo(x)), (x, span) => Tremolo(x).Contains(span.SectionId))
     ];
+
+    /// <summary>Where a song first plays a section of those, in beats; none where it plays none.</summary>
+    private static double? FirstOf(CorpusSong song, HashSet<int> sections) => song.Map.Sections.FirstOrDefault(x => sections.Contains(x.SectionId))?.Start;
+
+    /// <summary>The sections whose riff is tremolo-picked.</summary>
+    private static HashSet<int> Tremolo(CorpusSong song) =>
+        [..song.Trace.Where(x => x.Point == TracePoints.Figures && ((ImmutableDictionary<FigurePlayer, string>)x.Value!).GetValueOrDefault(FigurePlayer.Riff) == "tremolo").Select(x => x.Section)];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

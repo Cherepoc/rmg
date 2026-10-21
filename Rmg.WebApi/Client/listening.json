@@ -254,5 +254,72 @@
         ]
       }
     ]
+  },
+  {
+    "id": "surf-tremolo",
+    "question": "A Surf riff tremolo-picked, every 16th on the note: the surf sound, or a buzz?",
+    "decides": "How often a Surf riff is tremolo-picked (figure.riff.tremolo, 30-40-50), against never.",
+    "genre": "surf",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.riff": {
+          "own": 100,
+          "tremolo": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "F",
+        "at": 109.5,
+        "listen": [
+          "Riff (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 20.7,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "X",
+        "at": 95.3,
+        "listen": [
+          "Riff (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 3.2,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "s",
+        "at": 0,
+        "listen": [
+          "Riff (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "x",
+        "at": 41.4,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      }
+    ]
   }
 ]
