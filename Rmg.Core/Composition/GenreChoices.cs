@@ -521,7 +521,7 @@ public static class GenreChoices
     public static GenreChoice SoloStyle { get; } = Chances("soloStyle", "A soloist's phrasing",
         [
             ("pickups", "Phrases coming in on a pickup", Soloist.PickupChances), ("space", "A soloist leaving space, a call, an answer and a rest", Soloist.SpaceChances),
-            ("rhythm", "A soloist riffing on the band's rhythm", Soloist.RiffChances)
+            ("rhythm", "A soloist riffing on the band's rhythm", Soloist.RiffChances), ("chromatic", "A run approaching a note on the beat chromatically", Soloist.ChromaticChances)
         ]);
 
     /// <summary>How wide a vibrato is and how fast, narrow to broad in cents, a step's slow or fast, or two steps' (<see cref="Expression.Vibratos" />).</summary>

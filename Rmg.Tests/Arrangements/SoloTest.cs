@@ -362,6 +362,73 @@ public sealed class SoloTest
         await Assert.That(riffing).IsGreaterThan(none);
     }
 
+    /// <summary>
+    ///     How a solo's climax is played, Rock's, Metal's and the Blues': of the phrase holding its highest note, the share
+    ///     of its gestures each, whether that note is the phrase's release, and whether it is bent and shakes a vibrato.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task ClimaxDevicesReport()
+    {
+        foreach (var genre in new[] { "rock", "metal", "blues" })
+        {
+            var (solos, released, bent, shaken) = (0, 0, 0, 0);
+            var gestures = new Dictionary<SoloGesture, double>();
+            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+            foreach (var (_, notes, plan) in SolosNotes(song).Where(x => x.Notes.Length > 0))
+            {
+                var top = notes.MaxBy(x => x.Value.Pitches.Max());
+                var at = plan.FirstOrDefault(x => top.Position >= x.Start - 1e-9 && top.Position < x.End - 1e-9);
+                if (at is null)
+                    continue;
+                solos++;
+                foreach (var segment in plan.Where(x => x.Phrase == at.Phrase))
+                    gestures[segment.Gesture] = gestures.GetValueOrDefault(segment.Gesture) + (segment.End - segment.Start);
+                released += at.IsRelease ? 1 : 0;
+                bent += top.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0 ? 1 : 0;
+                shaken += top.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || top.Value.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0 ? 1 : 0;
+            }
+
+            var total = gestures.Values.Sum();
+            Console.WriteLine($"  {genre}: {solos} solos; the climax's phrase {string.Join(", ", gestures.OrderByDescending(x => x.Value).Select(x => $"{x.Key} {x.Value / total:P0}"))}; " +
+                              $"its top note the release {released / (double)Math.Max(1, solos):P0}, bent {bent / (double)Math.Max(1, solos):P0}, shaken {shaken / (double)Math.Max(1, solos):P0}");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     A solo's chromatic note, its scale's step altered, approaches the next on the beat a semitone from it, in whatever
+    ///     octave the line's register puts that note, played off the beat itself; Jazz's solos play them and Celtic's, which
+    ///     keep to their mode, never (seen 2.9% of Jazz's solo notes).
+    /// </summary>
+    [Test]
+    public async Task AChromaticNote_ApproachesTheNextOnTheBeat_JazzsAndNeverCeltics()
+    {
+        double Share(string genre, bool rule)
+        {
+            var (notes, chromatic) = (0, 0);
+            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+            foreach (var (span, solo, _) in SolosNotes(song))
+            for (var i = 0; i < solo.Length; i++)
+            {
+                notes++;
+                if (solo[i].Value.State.GetStateValue(StateKinds.Alteration) == 0 || solo[i].Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) == 0)
+                    continue;
+                chromatic++;
+                if (rule && (i + 1 >= solo.Length || (solo[i + 1].Value.Pitches[0] - solo[i].Value.Pitches[0]).Mod(12) is not (1 or 11) || Math.Abs(Math.IEEERemainder(solo[i].Position - span.Start, 1)) < 1e-6))
+                    throw new InvalidOperationException($"{genre} seed {song.Seed} at {solo[i].Position}: a chromatic note approaching nothing on the beat");
+            }
+
+            return chromatic / (double)Math.Max(1, notes);
+        }
+
+        var (jazz, celtic) = (Share("jazz", true), Share("celtic", false));
+        Console.WriteLine($"  chromatic notes of the solos: Jazz's {jazz:P1}, Celtic's {celtic:P1}");
+        await Assert.That(jazz).IsGreaterThan(0.005);
+        await Assert.That(celtic).IsEqualTo(0);
+    }
+
     /// <summary>Soloists trading take whole phrases in turn: no phrase of the line runs over a turn's end.</summary>
     [Test]
     public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()

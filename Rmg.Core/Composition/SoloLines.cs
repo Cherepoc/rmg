@@ -218,6 +218,9 @@ internal static class SoloLines
     /// <summary>How many scale steps a run's note on a change moves to land at most: one to a triad's note, two to a power chord's.</summary>
     private const int LandingSteps = 2;
 
+    /// <summary>The place a note's draw of whether it approaches its next chromatically is derived from its key by, a sequence of its own.</summary>
+    private const int ChromaticStream = 3;
+
     /// <summary>The steps above a chord's root a triad's notes are, the root, the third and the fifth, where no part carries the chord's shape.</summary>
     private static readonly int[] ChordSteps = [0, 2, 4];
 
@@ -302,13 +305,13 @@ internal static class SoloLines
         var planned = new List<PlannedNote>();
         var placing = 0;
         void Add(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false, bool ghosts = false, bool run = false) =>
-            planned.Add(new PlannedNote(position, pitch, intensity, held, accented, release, stacked, octave, ghosts, run, placing));
+            planned.Add(new PlannedNote(position, pitch, intensity, held, accented, release, stacked, octave, ghosts, run, placing, false));
 
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there,
         // its key by its place in the line
         TimelineItem<StateMap> Place(PlannedNote note, int index)
         {
-            var (position, pitch, intensity, held, accented, release, stacked, octave, _, _, _) = note;
+            var (position, pitch, intensity, held, accented, release, stacked, octave, _, _, _, chromatic) = note;
             var sung = MelodyAt(position);
             // in octaves as the soloist plays them, not as the melody it takes over did; a note of its own, the melody's
             // beat where it starts with the melody's note, the weakest elsewhere, its own key from that note's and its place
@@ -318,8 +321,10 @@ internal static class SoloLines
                 .With(CompositionStateKinds.BeatRank, Math.Abs(sung.Position - position) < 1e-9 ? sung.Value.GetStateValue(CompositionStateKinds.BeatRank) : DyadicRankDistribution.MaxRank)
                 .With(CompositionStateKinds.NoteKey, Seeds.Key(sung.Value.GetStateValue(CompositionStateKinds.NoteKey), index + 1));
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0));
-            state = state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(Chord(state, position), pitch))
-                .With(StateKinds.Alteration, 0)
+            // a chromatic note the scale's step beside it, altered onto it
+            var step = LinePlacement.GetScaleStep(Chord(state, position), pitch);
+            state = state.With(StateKinds.ScaleStep, step)
+                .With(StateKinds.Alteration, chromatic ? pitch - Chord(state, position).GetPitch(step) : 0)
                 .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100))
                 .With(CompositionStateKinds.SoloRelease, release ? 1 : 0);
             // a stacked note the band's chord there under it, or the chord's shape planed (Realizer): the chords' note sounding
@@ -350,6 +355,8 @@ internal static class SoloLines
         // a riff where the band gives it onsets enough, a lick where it holds, as the plan then has it
         double[] OnsetsIn(double start, double end) => [..groove.Where(x => x >= start - 1e-9 && x < end - 1e-9).Distinct().Order()];
         plan = [..plan.Select(x => x.Gesture == SoloGesture.Rhythm && OnsetsIn(x.Start, x.End).Length < RhythmOnsets ? x with { Gesture = SoloGesture.Lick } : x)];
+        // the phrase of the solo's most intense moment, its climax
+        var climax = plan.Length > 0 ? plan.MaxBy(x => x.Intensity)!.Phrase : -1;
         var current = Nearest(ChordNotes(span.Start), middle);
         CellCursor? cursor = null;
         // the phrase before's motif, its first run's or lick's first cell, as its first note and the scale steps of the others
@@ -372,7 +379,10 @@ internal static class SoloLines
             switch (gesture)
             {
                 case SoloGesture.Held:
-                    current = Nearest(ChordNotes(start), current);
+                    // the climax's phrase released on the highest note of the chord under the register's top there, the
+                    // solo's peak held, as a rock player ends the build on a high bent note; the others the nearest
+                    current = isRelease && phrase == climax && climbs ? ChordNotes(start).Where(x => x <= TopAt(start)).DefaultIfEmpty(Nearest(ChordNotes(start), current)).Max()
+                        : Nearest(ChordNotes(start), current);
                     Add(start, current, level, end - start, release: isRelease, stacked: stacks, octave: true);
                     break;
                 case SoloGesture.Run:
@@ -518,6 +528,23 @@ internal static class SoloLines
             if (planned[k].Run && chordChanges.Any(x => Math.Abs(x - planned[k].Position) < 1e-9) && Lands(k))
                 Land(k);
 
+        // a run's note off the beat into its next on the beat a whole step away played the semitone beside that note now and
+        // then, a chromatic approach into it, as a jazz line puts its chord's notes on the beats, by its own key's draw
+        bool OnBeat(double position) => Math.Abs(position - barOrigin - Math.Round(position - barOrigin)) < 1e-9;
+        bool Chromatic(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), k + 1), ChromaticStream))
+            .TestProbability(soloist.ChromaticChance);
+        // the notes as they sound, each kept as its scale step over the chord it plays under, a new chord's at the beat
+        int Sounding(int k)
+        {
+            var chord = Chord(MelodyAt(planned[k].Position).Value, planned[k].Position);
+            return chord.GetPitch(LinePlacement.GetScaleStep(chord, planned[k].Pitch));
+        }
+
+        for (var k = 0; k + 1 < planned.Count; k++)
+            if (planned[k].Run && planned[k + 1].Run && planned[k].Phrase == planned[k + 1].Phrase && !OnBeat(planned[k].Position) && OnBeat(planned[k + 1].Position)
+                && Math.Abs(Sounding(k + 1) - Sounding(k)) == 2 && Chromatic(k))
+                planned[k] = planned[k] with { Pitch = Sounding(k + 1) - Math.Sign(Sounding(k + 1) - Sounding(k)), Chromatic = true };
+
         int FoldTowards(int pitch, int towards) => pitch + 12 * (int)Math.Round((towards - pitch) / 12.0);
         static bool Ghosted(StateMap note) => new GenerationContext(Seeds.Derive((ulong)note.GetStateValue(CompositionStateKinds.NoteKey), GhostStream)).TestProbability(GhostRate);
         // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc); and a stacked
@@ -539,7 +566,7 @@ internal static class SoloLines
     }
 
     /// <summary>A note of a solo's line as planned, before it is placed: where it starts, its pitch, and how it is played.</summary>
-    private sealed record PlannedNote(double Position, int Pitch, double Intensity, double Held, bool Accented, bool Release, bool Stacked, bool Octave, bool Ghosts, bool Run, int Phrase);
+    private sealed record PlannedNote(double Position, int Pitch, double Intensity, double Held, bool Accented, bool Release, bool Stacked, bool Octave, bool Ghosts, bool Run, int Phrase, bool Chromatic);
 
     /// <summary>Where a run is in its cells: on which cell, on which note of it, from which note the cell starts and which way it goes.</summary>
     internal sealed class CellCursor(int root)

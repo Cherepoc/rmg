@@ -185,7 +185,9 @@ public sealed class ScalesTest
                                                            || sounding?.Value.State.GetStateValue(CompositionStateKinds.BassPedal) > 0);
             // a line keeping a scale of its own, its ornaments' neighbours in it too
             var ownScale = sounding?.Value.State.GetStateValue(CompositionStateKinds.LineScale) > (int)LineScale.Pentatonic;
-            if (isChromaticApproach || isPedal || ownScale || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End) || pinched.Any(x => Math.Abs(x - note.Position) < 1e-3) || planed.Any(x => Math.Abs(x - note.Position) < 1e-3))
+            // a solo's run approaching its next note on the beat chromatically, its scale step altered, on purpose (SoloLines)
+            var soloApproach = sounding?.Value.State is { } state && state.GetStateValue(CompositionStateKinds.SoloIntensity) > 0 && state.GetStateValue(StateKinds.Alteration) != 0;
+            if (isChromaticApproach || isPedal || ownScale || soloApproach || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End) || pinched.Any(x => Math.Abs(x - note.Position) < 1e-3) || planed.Any(x => Math.Abs(x - note.Position) < 1e-3))
                 continue;
 
             var scale = Rmg.Core.Composition.Realizer.AlterScaleSteps(offsets.GetEffectiveValueAt(note.Position), AlteredAt(note.Position));
