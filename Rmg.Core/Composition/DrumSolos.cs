@@ -107,6 +107,20 @@ internal static class DrumSolos
     /// </summary>
     public const double BuildFrom = 0.5, BuildTo = 0.95, BuildRollChance = 1 / 3.0;
 
+    /// <summary>
+    ///     The chance a loud accent of the kit's run or lick, as loud as heard as this at least, strikes a cymbal of colour
+    ///     with it, by the groove facet: never at the plain end; and the cymbals, of those the song's kit has: the china, the
+    ///     splash, the open hi-hat and the ride's bell.
+    /// </summary>
+    public static ByConvention StabChance { get; } = new(0, 0.2, 0.3);
+
+    public const double StabLoudness = 0.7;
+
+    private static readonly int[] Stabs = [DrumSounds.China, DrumSounds.Splash, DrumSounds.OpenHiHat, DrumSounds.RideBell];
+
+    /// <summary>How quiet a snare's tap is, as heard, to be played on its rim, the cross-stick, where the snare has one.</summary>
+    public const double CrossStickBelow = 0.4;
+
     /// <summary>How many bars a solo has at least to build at its end, and how many to build over two.</summary>
     private const int BuildingBars = 3, LongBuildBars = 8;
 
@@ -226,6 +240,7 @@ internal static class DrumSolos
                 index => song.AppearanceStream(SongStream.DrumSoloMotifs, index),
                 index => song.AppearanceStream(SongStream.DrumSoloFlams, index),
                 index => song.AppearanceStream(SongStream.DrumSoloThemes, index),
+                index => song.AppearanceStream(SongStream.DrumSoloSounds, index),
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
                 song.Form.Drops,
                 // where the form next stops the drums, which a drum solo keeps out of as every drum stage does
@@ -251,6 +266,7 @@ internal static class DrumSolos
     /// <param name="motifs">A solo's draws of which phrases restate the phrase before's motif, by its appearance's place.</param>
     /// <param name="flams">A solo's draws of which gestures flam their accents, by its appearance's place.</param>
     /// <param name="themes">A solo's draws of which phrases vary its groove and how it builds, by its appearance's place.</param>
+    /// <param name="colours">A solo's draws of which accents strike a cymbal of colour, and which, by its appearance's place.</param>
     /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
     /// <param name="drops">Where the song drops, whose build a solo before it leaves to roll.</param>
@@ -270,6 +286,7 @@ internal static class DrumSolos
         Func<int, IGenerationContext> motifs,
         Func<int, IGenerationContext> flams,
         Func<int, IGenerationContext> themes,
+        Func<int, IGenerationContext> colours,
         Func<int, double> groove,
         IReadOnlyCollection<double> drops,
         Func<double, double> stopsAfter,
@@ -424,6 +441,15 @@ internal static class DrumSolos
             }
 
             var buildsWithRoll = themeDraws.TestProbability(BuildRollChance);
+            // the kit's cymbals of colour, and its snare's rim, where the song's kit has them
+            var colourDraws = colours(index);
+            // never a drum the feet keep time on, nor the open hi-hat where they keep time at all, a foot opening it
+            RunSound[] stabs = [..sounds.Values.SelectMany(x => x).Where(x => Stabs.Contains(x.Code) && song.TrackTimelineMap.ContainsKey(x.Track) && !feetTracks.Contains(x.Track)
+                                                                              && !(x.Code == DrumSounds.OpenHiHat && feetTracks.Count > 0)).DistinctBy(x => x.Code)];
+            var snareDrum = hands.Length > 0 ? DrumGroups.GetDrum(hands[0].Track) : null;
+            RunSound? rim = snareDrum is not null && snareDrum.ArticulationCodes.Contains(DrumSounds.CrossStick)
+                ? hands[0] with { Articulation = snareDrum.GetArticulationIndex(DrumSounds.CrossStick), Code = DrumSounds.CrossStick }
+                : null;
             (double From, double To)? build = builds ? (buildFrom, whole.End) : null;
             soloed.AddRange(played.Select(x => (x.Start, x.End)));
             if (build is { } built)
@@ -630,7 +656,11 @@ internal static class DrumSolos
                                 else
                                     sound = snare;
                                 var accent = i % limbs.Length == 0;
-                                Strike(sound, positions[i], accent ? accented : tapped);
+                                // a quiet tap on the snare played on its rim
+                                Strike(!accent && sound == snare && rim is not null && tapped < CrossStickBelow ? rim : sound, positions[i], accent ? accented : tapped);
+                                // a loud accent striking a cymbal of colour with it now and then, but where the climax's crash does
+                                if (accent && accented >= StabLoudness && stabs.Length > 0 && !(i == 0 && level >= ClimaxIntensity) && colourDraws.TestProbability(StabChance.At(facet)))
+                                    Strike(stabs[colourDraws.GenerateInt(0, stabs.Length)], positions[i], accented);
                                 // an accent on a drum the hands play flammed, at a pace that leaves room for its grace, the grace within
                                 // the gesture, never in a pause before it
                                 if (accent && flamsHere && speedOf <= FlamSpeed && limb != 'K' && positions[i] - FlamLead >= start - 1e-9)

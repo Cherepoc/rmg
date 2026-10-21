@@ -182,9 +182,11 @@ public sealed class DrumSoloTest
 
                     await Assert.That(drummer.Shapes).Contains(segment.Shape);
                     await Assert.That(segment.Sizes.All(drummer.CellSizes.Contains)).IsTrue();
-                    // and a climax's gesture its crash on its first hit, a displaced motif's a 16th after the segment's start
+                    // and a climax's gesture its crash on its first hit, a displaced motif's a 16th after the segment's start, and a
+                    // loud accent's cymbal of colour, the china's, the splash's, the open hi-hat's or the ride's bell
                     bool OnFirst(double position) => Math.Abs(position - segment.Start) < 1e-9 || Math.Abs(position - segment.Start - 0.25) < 1e-9;
-                    foreach (var (track, _) in hits.Where(x => !(segment.Intensity >= Rmg.Core.Composition.DrumSolos.ClimaxIntensity && OnFirst(x.Note.Position) && x.Track == DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal))))
+                    foreach (var (track, _) in hits.Where(x => !(segment.Intensity >= Rmg.Core.Composition.DrumSolos.ClimaxIntensity && OnFirst(x.Note.Position) && x.Track == DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal))
+                                                              && x.Note.Value.Pitches[0] is not (52 or 55 or 46 or 53)))
                         await Assert.That(DrumGroups.GroupOf(DrumGroups.GetDrum(track)) is var group && (group == DrumGroups.Snare || group == DrumGroups.Toms || group == DrumGroups.Kick)).IsTrue()
                             .Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {segment.Start}");
                     // a lick's cell on every note's place: the first of every cell the louder
@@ -419,6 +421,11 @@ public sealed class DrumSoloTest
         var crashes = solos.Select(x => x.Song.Song.Notes!.GetValueOrDefault(crash)?.Count(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End) ?? 0).ToArray();
         Console.WriteLine($"  the theme: solos opening on the groove {solos.Count(x => x.Plan.FirstOrDefault(p => p.Gesture != SoloGesture.Pause)?.Gesture == SoloGesture.Quote) / (double)solos.Length:P0}, " +
                           $"quotes a solo {solos.Average(x => x.Plan.Count(p => p.Gesture == SoloGesture.Quote)):F1}; building into the next section {solos.Count(x => x.Solo.Build is not null) / (double)solos.Length:P0}");
+        // its colours: the cymbals of colour and the snare's rim struck in it, by their notes
+        int Struck(params int[] codes) => solos.Sum(x => x.Song.Song.Notes!.Where(n => x.Song.IsDrum(n.Key)).SelectMany(n => n.Value)
+            .Count(h => h.Position >= x.Span.Start && h.Position < x.Plan[^1].End && codes.Contains(h.Value.Pitches[0])));
+        Console.WriteLine($"  colours a solo: the china {Struck(52) / (double)solos.Length:F1}, the splash {Struck(55) / (double)solos.Length:F1}, the open hi-hat {Struck(46) / (double)solos.Length:F1}, " +
+                          $"the ride's bell {Struck(53) / (double)solos.Length:F1}, the snare's rim {Struck(37) / (double)solos.Length:F1}");
         Console.WriteLine($"  loudness: the hands by the solo's third {string.Join(", ", hands.GroupBy(x => Math.Min(2, (int)(x.Place * 3))).OrderBy(x => x.Key).Select(x => $"{x.Average(y => y.Velocity):F2}"))}, " +
                           $"spread {Math.Sqrt(hands.Average(x => (x.Velocity - mean) * (x.Velocity - mean))):F2}; a run's loudest over its middle {gaps.DefaultIfEmpty().Average():F2}; crashes {crashes.Average():F1} a solo, {crashes.Sum() / bars.Sum():F2} a bar");
         await Task.CompletedTask;

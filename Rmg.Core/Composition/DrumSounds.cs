@@ -14,6 +14,7 @@ internal static class DrumSounds
     public const int CrossStick = 37;
     public const int RideBell = 53;
     public const int China = 52;
+    public const int Splash = 55;
 
     /// <summary>The sounds a genre leans (<see cref="GenreChoices.DrumSounds" />), by its names for them.</summary>
     public static ImmutableArray<(string Name, string Label, int Code)> Leaned { get; } =
