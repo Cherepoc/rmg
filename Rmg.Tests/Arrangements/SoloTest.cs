@@ -277,6 +277,50 @@ public sealed class SoloTest
         await Assert.That(displaced).IsLessThan(restated);
     }
 
+    /// <summary>
+    ///     A solo of two choruses or more, its pattern's repeats of eight bars or longer, by chorus: the intensity at each
+    ///     chorus's start, its first quarter, and its highest; and the same of the whole.
+    /// </summary>
+    private static (double Start, double Peak)[][] Choruses(IEnumerable<CorpusSong> songs) =>
+    [
+        ..songs.SelectMany(song => Plans(song).Select(x => (Span: song.Map.Sections[x.Index], x.Plan)))
+            .Where(x => x.Span.Meter.PatternBarCount >= 8 && x.Span.Duration >= 2 * x.Span.Meter.PatternDuration - 1e-9)
+            .Select(x => Enumerable.Range(0, (int)(x.Span.Duration / x.Span.Meter.PatternDuration + 1e-9)).Select(k =>
+            {
+                var (from, length) = (x.Span.Start + k * x.Span.Meter.PatternDuration, x.Span.Meter.PatternDuration);
+                var chorus = x.Plan.Where(s => s.Start >= from - 1e-9 && s.Start < from + length - 1e-9 && s.Gesture != SoloGesture.Pause).ToArray();
+                return (chorus.Where(s => s.Start < from + length / 4).Select(s => s.Intensity).DefaultIfEmpty().Average(), chorus.Select(s => s.Intensity).DefaultIfEmpty().Max());
+            }).ToArray())
+    ];
+
+    /// <summary>
+    ///     A solo of two choruses builds in each: its second starts back down, well under where its first peaked, and peaks
+    ///     at least as high (seen in Jazz: starting at 0.32 against a first peak of 0.84, peaking at 0.87).
+    /// </summary>
+    [Test]
+    public async Task ASoloOfTwoChoruses_BuildsInEach()
+    {
+        var solos = Choruses(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz"))))).Where(x => x.Length >= 2).ToArray();
+        await Assert.That(solos.Length).IsGreaterThan(20);
+        await Assert.That(solos.Average(x => x[1].Start)).IsLessThan(solos.Average(x => x[0].Peak) - 0.2);
+        await Assert.That(solos.Average(x => x[1].Peak)).IsGreaterThanOrEqualTo(solos.Average(x => x[0].Peak) - 1e-9);
+    }
+
+    /// <summary>How a long solo's intensity goes chorus by chorus, Jazz's, whose solos play two choruses the oftenest.</summary>
+    [Test]
+    [Explicit]
+    public async Task WaveReport()
+    {
+        var solos = Choruses(TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz")))));
+        foreach (var k in Enumerable.Range(0, 3))
+        {
+            var at = solos.Where(x => x.Length > k).Select(x => x[k]).ToArray();
+            Console.WriteLine($"  chorus {k + 1} of {at.Length} solos: starting at {at.Average(x => x.Start):F2}, peaking at {at.Average(x => x.Peak):F2}");
+        }
+
+        await Task.CompletedTask;
+    }
+
     /// <summary>Soloists trading take whole phrases in turn: no phrase of the line runs over a turn's end.</summary>
     [Test]
     public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()

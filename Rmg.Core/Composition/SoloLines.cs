@@ -95,6 +95,14 @@ internal static class SoloLines
     /// <summary>A spacious soloist's line, in bars, its section's phrase where that is not a multiple of it, and its call's.</summary>
     private const int SpaceLineBars = 4, SpaceCallBars = 1;
 
+    /// <summary>
+    ///     How long a solo's chorus is at least, in bars, to build in each of several, and how much of its own arc the whole
+    ///     solo's leaves its quietest chorus.
+    /// </summary>
+    private const int WaveBars = 8;
+
+    private const double WaveFloor = 0.7;
+
     /// <summary>How much later a displaced motif plays, in beats, as likely each: an 8th, or a beat.</summary>
     private static readonly double[] DisplaceShifts = [0.5, 1];
 
@@ -566,9 +574,13 @@ internal static class SoloLines
                 to = turnEnd;
             var rests = spacious && Math.Abs(from - lineStart) > 1e-9;
 
-            // its peak, on the way to the solo's climax or easing after it, and the shape of its intensity
+            // its peak, on the way to the solo's climax or easing after it, and the shape of its intensity; in a solo of
+            // choruses, each building in turn under the whole's arc, as a player drops back and builds again
             var place = ((from + to) / 2 - span.Start) / span.Duration;
-            var arc = Arc(place);
+            var pattern = span.Meter.PatternDuration;
+            var arc = span.Meter.PatternBarCount >= WaveBars && span.Duration >= 2 * pattern - 1e-9
+                ? Arc(((from + to) / 2 - span.Start) % pattern / pattern) * (WaveFloor + (1 - WaveFloor) * Arc(place))
+                : Arc(place);
             var peak = Math.Clamp(arc + soloist.Volatility * Drift * Generators.SplineValue()(context), 0.05, 1);
             var contour = context.Pick(Contours);
             // a wild soloist's coming in a beat or two late, where the phrase has a bar to spare
