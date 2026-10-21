@@ -45,7 +45,40 @@ public sealed class ListeningQuestionsTest
         Dictionary<string, int>? Without = null
     );
 
-    private static readonly Question[] Questions = [];
+    private static HashSet<int> SectionsOf(CorpusSong song, string point, Func<StateTraceEntry, bool>? takes = null) =>
+        [..song.Trace.Where(x => x.Point == point && (takes?.Invoke(x) ?? true)).Select(x => x.Section)];
+
+    /// <summary>Where a song first plays a section of those, in beats; none where it plays none.</summary>
+    private static double? FirstOf(CorpusSong song, HashSet<int> sections) => song.Map.Sections.FirstOrDefault(x => sections.Contains(x.SectionId))?.Start;
+
+    /// <summary>The sections that leave the song's time, in half or double time.</summary>
+    private static HashSet<int> Departing(CorpusSong song) => SectionsOf(song, TracePoints.TimeFeel, x => (int)x.Value! != 0);
+
+    /// <summary>The sections that play stop time.</summary>
+    private static HashSet<int> Stopping(CorpusSong song) => SectionsOf(song, TracePoints.StopTime, x => ((ImmutableArray<double>)x.Value!).Length > 0);
+
+    /// <summary>The sections broken down.</summary>
+    private static HashSet<int> BrokenDown(CorpusSong song) => SectionsOf(song, TracePoints.Breakdown, x => x.Value is true);
+
+    private static readonly Question[] Questions =
+    [
+        new("metal-feel", "A Metal song's section leaving its time, in half or double time, and coming back: a lift, or the song losing its footing?",
+            "Metal's share of songs leaving their time (timeChanges, 30-40-45), against none.", "metal", [],
+            new() { ["timeChanges"] = new() { ["songs"] = 0 } },
+            x => FirstOf(x, Departing(x)), (x, span) => Departing(x).Contains(span.SectionId)),
+        new("thrash-feel", "Thrash's sections changing between half, double and its own time: riffs driving on, or too restless?",
+            "Thrash's share of songs leaving their time (timeChanges, 80-90-90), against none.", "thrash", [],
+            new() { ["timeChanges"] = new() { ["songs"] = 0 } },
+            x => FirstOf(x, Departing(x)), (x, span) => Departing(x).Contains(span.SectionId)),
+        new("metal-stops", "A Metal song's section in stop time, the band striking together and leaving gaps, each time it comes back: a punch, or the song breaking up?",
+            "Metal's share of songs that stop (stops, 30-40-40), against none, and whether stop time is to play in only some of a section's appearances.", "metal", [],
+            new() { ["stops"] = new() { ["songs"] = 0 } },
+            x => FirstOf(x, Stopping(x)), (x, span) => Stopping(x).Contains(span.SectionId)),
+        new("thrash-breakdown", "Thrash's bridge broken down, slow and heavy: a weight before the last charge, or a drag?",
+            "Thrash's breakdowns (breakdown, 20-30-40), 2.7 a song, against none.", "thrash", [],
+            new() { ["breakdown"] = new() { ["sections"] = 0 } },
+            x => FirstOf(x, BrokenDown(x)), (x, span) => BrokenDown(x).Contains(span.SectionId))
+    ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

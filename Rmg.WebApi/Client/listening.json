@@ -1,1 +1,298 @@
-[]
+[
+  {
+    "id": "metal-feel",
+    "question": "A Metal song's section leaving its time, in half or double time, and coming back: a lift, or the song losing its footing?",
+    "decides": "Metal's share of songs leaving their time (timeChanges, 30-40-45), against none.",
+    "genre": "metal",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "timeChanges": {
+          "songs": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "C",
+        "at": 124,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 18.3,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))",
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 120.1,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Kick",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 76,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Riff's twin (Distortion Guitar)",
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "l",
+        "at": 50.6,
+        "listen": [
+          "Ride",
+          "Melody (Lead 2 (sawtooth))",
+          "Chords (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "s",
+        "at": 141.2,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))",
+          "Riff (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "thrash-feel",
+    "question": "Thrash's sections changing between half, double and its own time: riffs driving on, or too restless?",
+    "decides": "Thrash's share of songs leaving their time (timeChanges, 80-90-90), against none.",
+    "genre": "thrash",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "timeChanges": {
+          "songs": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 119.4,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Kick",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 135.4,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Kick",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 49.1,
+        "listen": [
+          "Melody (Distortion Guitar)",
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 125.5,
+        "listen": [
+          "Kick",
+          "Melody (Lead 5 (charang))",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 256,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Chords (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 155.8,
+        "listen": [
+          "Chords (Overdriven Guitar)",
+          "Rhythm part (Overdriven Guitar)",
+          "Riff (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "metal-stops",
+    "question": "A Metal song's section in stop time, the band striking together and leaving gaps, each time it comes back: a punch, or the song breaking up?",
+    "decides": "Metal's share of songs that stop (stops, 30-40-40), against none, and whether stop time is to play in only some of a section's appearances.",
+    "genre": "metal",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "stops": {
+          "songs": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "A",
+        "at": 99.6,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Hi-Hat",
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "C",
+        "at": 60,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Rhythm part (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 281.2,
+        "listen": [
+          "Kick",
+          "Ride",
+          "Riff (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "P",
+        "at": 62,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Riff (Overdriven Guitar)",
+          "Riff's twin (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1N",
+        "at": 159.7,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "1O",
+        "at": 12.6,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Kick",
+          "Bass (Electric Bass (pick))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "thrash-breakdown",
+    "question": "Thrash's bridge broken down, slow and heavy: a weight before the last charge, or a drag?",
+    "decides": "Thrash's breakdowns (breakdown, 20-30-40), 2.7 a song, against none.",
+    "genre": "thrash",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "breakdown": {
+          "sections": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 153.5,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Melody (Lead 5 (charang))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 8,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Hi-Hat",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "K",
+        "at": 20.7,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Cymbal",
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 6.7,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "P",
+        "at": 144.6,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "T",
+        "at": 46.3,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))",
+          "Kick"
+        ]
+      }
+    ]
+  }
+]

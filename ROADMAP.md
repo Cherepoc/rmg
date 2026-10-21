@@ -41,7 +41,7 @@ each section's chords, came across as no riff at all, see *The riff's uses*), a 
 change in Rock (`solo-landing`, 0.29) and a melody's later bar on its first's rhythm in Pop (`melody-sequence`, 0.20);
 the riff's turnaround in the Blues measured too faint to ask (0.07, from 0.02), and the melody's phrase swell, the
 solo's ceiling and the riff's power chords by the section's energy no choice's to switch off; retired on 21 October,
-both its questions not told apart and kept, to be heard again. A question listens only in the sections its device plays in, not
+both its questions not told apart and kept, to be heard again. The tenth round (21 October 2026) asks four of the steadiness plan's, each against none: Metal's songs leaving their time (`metal-feel`, 1.28), Thrash's (`thrash-feel`, 1.21), Metal's stops (`metal-stops`, 0.37, whether stop time on every return is too often) and Thrash's breakdowns (`thrash-breakdown`, 0.84). A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -311,7 +311,7 @@ here. Left:
 - **Three page tests seen failing once each,** their messages not kept: the seek readout's
   (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), the length's
   (`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`) and the bar dragged by hand's
-  (`TheKeyAndChord_FollowTheBar_AsAHandDragsIt(True)`, 19 October 2026, passing twice after), to read when they fail
+  (`TheKeyAndChord_FollowTheBar_AsAHandDragsIt(True)`, 19 and 21 October 2026, passing twice after each time), to read when they fail
   again.
 
 ### Put off, with their reasons
