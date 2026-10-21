@@ -303,6 +303,53 @@ count of its own. In order:
 - **A song's own feel** (P3, deferred): a whole song in half time, Djent's and Trap's, or in double time, a skate punk
   song's, as the song's feel rather than its sections' departures.
 
+### Solos, drum solos and Surf rock (the plan of 21 October 2026)
+
+Drum solos heard as boring and underwhelming, a blues soloist heard to play too much, and Surf rock asked for as a new
+genre; the sources on how solos and drum solos are built read, by genre. Measured first (158 drum solos of 128
+songs): a third of the drum solos' segments a crash ringing with the kick, 17% the hands silent, their velocity 0.64
+to 0.69 from the calmest third of intensity to the most intense, their intensity by place 0.52, 0.61 and 0.62, and 12
+notes a beat their commonest speed. Each step one mechanism reused, a new decision from a stream of its own; the
+soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromatic). In order:
+
+- **Drum solos** (`DrumSolos`; the solo report extended by velocity by place and intensity, the accent's gap over the
+  taps, crash segments, rolls, flams and stabs a solo, the speeds, the groove's return):
+  - How often and how long, by genre, full solos and trades: a report first, deciding the last step's data.
+  - Dynamics and rolls: the solo's arc by its place in the hits' loudness, a cell's first stroke over taps near a
+    ghost's, a flam's grace before an accent at six a beat or slower, a held gesture a roll swelling or fading on the
+    snare or the floor tom, the crash only on a loud release and the climax's first stroke.
+  - Theme and build: the solo opening on the section's groove, a later phrase opening on it varied round the kit, now
+    and then in triplets, the last before the build on it again; the solo to its section's end, its last bar or two a
+    crescendo down the toms or a snare roll into the landing the band comes back on.
+  - The fastest speeds a burst, every soloist's: above eight a beat only at an intensity of 0.8 or more
+    (`SoloLines.Plan`), the drums' and Metal's guitars' speeds measured before and after.
+  - Cymbal stabs on loud accents and side-stick taps in quiet passages, of the song's own kit.
+  - A solo over the band's hits (`solos.hits`): the band kept and played as stop time carried by the drums, on every
+    bar's first beat or every second's.
+  - The data the report asks for, should rock's and pop's drum solos be too many or too long; then a listening round.
+- **Pitched solos** (`SoloLines`, `Soloist`; a solo space report):
+  - A solo on the melody a genre's (`solos.own`, `Solos.OwnChance`): Bluegrass's, Celtic's, Folk's and Medieval's.
+  - Pickups: a phrase starting half a beat to a beat and a half early, out of the rest before it, never over a note.
+  - The spacious soloist (`soloStyle.space`, the Blues' 40-50-60): the section's lines as a call of a bar, an answer
+    on its motif and a rest to the line's end; the held note leaned to, a run a beat at most.
+  - A restated motif displaced by an 8th or a beat now and then.
+  - Waves: a solo of two choruses or more building in each, under its whole arc.
+  - The rhythm gesture (`soloStyle.rhythm`, Funk's and Latin's): a note or two on the band's own onsets, short and
+    accented, a lick where the band holds.
+  - The climax: a report first, of the licks, their climb and the release at the top, built only for a gap it shows.
+  - Chromatic passing notes (`soloStyle.chromatic`), then the run aimed into its landing and the enclosure, as
+    *Expressive lines* has them; then a listening round.
+- **Surf rock** (a new preset, as the owner asked on 21 October 2026): instrumental surf, clean bright guitars in a
+  plate's heavy send (no spring among the synthesizer's rooms), a tremolo-picked melody, minor and Phrygian lines,
+  a driving picked bass and the toms, 140 to 180 a minute, straight:
+  - The double harmonic scale (1, b2, 3, 4, 5, b6, 7) and a vibrato a step down and back, a whammy's dip, a genre's.
+  - The preset, its every choice data.
+  - The surf drop, a falling tremolo-picked slide on a guitar into a louder section or the song, a riser's kind.
+  - The tom among the timekeepers by a genre's weight, the hi-hat's pattern on the floor tom; then a listening round.
+
+Put off: a drum solo's hand ostinato, a ride under the solo (Jazz's trades play over the band already); a separate
+theme composed for a drum solo (the groove is its theme); vocal surf, General MIDI having no singer.
+
 ### Older rule failures
 
 None at offsets 0, 1000000, 619000000, 716000000 and 942000000 (19 October 2026, every failure traced and fixed, the
