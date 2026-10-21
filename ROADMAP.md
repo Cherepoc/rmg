@@ -41,7 +41,7 @@ each section's chords, came across as no riff at all, see *The riff's uses*), a 
 change in Rock (`solo-landing`, 0.29) and a melody's later bar on its first's rhythm in Pop (`melody-sequence`, 0.20);
 the riff's turnaround in the Blues measured too faint to ask (0.07, from 0.02), and the melody's phrase swell, the
 solo's ceiling and the riff's power chords by the section's energy no choice's to switch off; retired on 21 October,
-both its questions not told apart and kept, to be heard again. The tenth round (21 October 2026) asks four of the steadiness plan's, each against none: Metal's songs leaving their time (`metal-feel`, 1.28), Thrash's (`thrash-feel`, 1.21), Metal's stops (`metal-stops`, 0.37, whether stop time on every return is too often) and Thrash's breakdowns (`thrash-breakdown`, 0.84). A question listens only in the sections its device plays in, not
+both its questions not told apart and kept, to be heard again. The tenth round (21 October 2026) asks four of the steadiness plan's, each against none: Metal's songs leaving their time (`metal-feel`, 1.28), Thrash's (`thrash-feel`, 1.21), Metal's stops (`metal-stops`, 0.37, whether stop time on every return is too often) and Thrash's breakdowns (`thrash-breakdown`, 0.84); retired the same day, each kept, the songs with preferred 6-0, 5-1, 6-0 and 5-1. A question listens only in the sections its device plays in, not
 every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -285,13 +285,15 @@ count of its own. In order:
   14% and Black metal's 3% to 19%, theirs changing as their riffs do; and a section's own tempo, meter and short bar in a song that leaves
   its time alone, the song's draw made before its meters, Orchestral's, Fusion's and IDM's raised: a song whose feel,
   tempo and meter never change, the songs' own 35% to 66%, Metal's 12% to 61%, Rock's 31% to 64%. Thrash's 12 feel
-  changes a song and Black metal's 5 left to listening.
+  changes a song and Metal's departures heard and kept (the tenth round, 6-0 and 5-1).
 - **The song's stops** (built 21 October 2026): a song stopping at all drawn first (`stops`, the songs' own 0-50-50,
   Funk's 80-90-90, the Blues' and Latin's 70-80-80, Doom's 10-20-20), stop time and ensemble hits then drawn by its
   sections: a song in stop time, the songs' own 18% to 11%, Metal's 67% to 25%, Rock's 48% to 22%, Funk's 45% to 41%;
   silences of a beat or more Metal's 3.1 to 2.2 a song. Doom's 5.2 and Black metal's 6.3 not stops but a section's
-  parts all resting at a phrase's end where one plays alone or the drums rest, the next step's. Left: stop time in only
-  some of a section's appearances, should a stopped verse every time be heard too often; Thrash's breakdowns, 2.7 a song.
+  parts all resting at a phrase's end where one plays alone or the drums rest, the next step's. Metal's stops and
+  Thrash's breakdowns, 2.7 a song, heard and kept (the tenth round, 6-0 and 5-1). Left: stop time in only some of a
+  section's appearances, should a stopped verse every time be heard too often, as the round heard a section's first
+  stop alone.
 - **One part alone, short** (built 21 October 2026): one part alone for an appearance's first phrase, the band coming
   in after it, the whole appearance only where it plays one phrase, and a pre-chorus never thinning nor playing one
   part alone: silences of a beat or more, Black metal's 6.3 to 2.0 a song, Doom's 5.2 to 3.0, the songs' own 2.3 to
