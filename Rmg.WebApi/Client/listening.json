@@ -1,1 +1,258 @@
-[]
+[
+  {
+    "id": "blues-space",
+    "question": "A Blues soloist leaving space, each line a short call, an answer and a rest for the band, its notes long: a singing solo, or too little played?",
+    "decides": "How often a soloist leaves space (soloStyle.space, the Blues' 40-50-60), against never.",
+    "genre": "blues",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "soloStyle": {
+          "space": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 51.5,
+        "listen": [
+          "Chords (Honky-tonk Piano)",
+          "Melody (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "4",
+        "at": 76,
+        "listen": [
+          "Solo (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 35.3,
+        "listen": [
+          "Solo (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 148.2,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 140,
+        "listen": [
+          "Solo (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "e",
+        "at": 66.2,
+        "listen": [
+          "Chords (Drawbar Organ)",
+          "Solo (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "blues-pickups",
+    "question": "A Blues soloist's phrases coming in early, on a pickup before the bar: leading into the line, or rushing it?",
+    "decides": "How often a phrase comes in on a pickup (soloStyle.pickups, the Blues' 40-50-60), against never.",
+    "genre": "blues",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "soloStyle": {
+          "pickups": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 91.2,
+        "listen": [
+          "Solo (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 35.3,
+        "listen": [
+          "Solo (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 73.6,
+        "listen": [
+          "Melody (Harmonica)"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 90.3,
+        "listen": [
+          "Melody (Harmonica)"
+        ]
+      },
+      {
+        "seed": "X",
+        "at": 159.9,
+        "listen": [
+          "Melody (Harmonica)"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 47.9,
+        "listen": [
+          "Solo (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "funk-rhythm",
+    "question": "A Funk soloist riffing on the band's rhythm, a note or two struck short on its onsets: in the groove, or a soloist gone quiet?",
+    "decides": "How often a soloist riffs on the band's rhythm (soloStyle.rhythm, Funk's 30-40-50), against never.",
+    "genre": "funk",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "soloStyle": {
+          "rhythm": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 97.1,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "g",
+        "at": 129.3,
+        "listen": [
+          "Solo (Trumpet)"
+        ]
+      },
+      {
+        "seed": "1H",
+        "at": 78.3,
+        "listen": [
+          "Melody (Tenor Sax)",
+          "Riff (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "1l",
+        "at": 191.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "1w",
+        "at": 5.7,
+        "listen": [
+          "Solo (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1x",
+        "at": 78.6,
+        "listen": [
+          "Chords (Drawbar Organ)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "folk-melody",
+    "question": "A Bluegrass break playing the tune's melody, decorated, rather than a line of its own: the tune's break, or a missed solo?",
+    "decides": "How often a folk genre's solo is on the melody (solos.own, Bluegrass's 0-20-40), against the songs' own chance (0-50-100).",
+    "genre": "bluegrass",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "solos": {
+          "own": [
+            0,
+            50,
+            100
+          ]
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 151.1,
+        "listen": [
+          "Rhythm part (Banjo)"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 103,
+        "listen": [
+          "Rhythm part (Banjo)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 138.5,
+        "listen": [
+          "Rhythm part (Banjo)"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 4.6,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 21,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 51.7,
+        "listen": [
+          "Counter-melody (Banjo)"
+        ]
+      }
+    ]
+  }
+]

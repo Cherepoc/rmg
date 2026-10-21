@@ -320,18 +320,16 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
   of colour and the snare's rim; a solo over the band's hits (`solos.hits`). Left to listening by hand, a question of
   them finding too few songs among the corpus's first (a drum solo over hits in one Jazz song of 128 and three Rock):
   how the build, the rolls and the taps near a ghost's sound, the taps' floor among them.
-- **Pitched solos** (`SoloLines`, `Soloist`; a solo space report):
-  - A solo on the melody a genre's (`solos.own`, `Solos.OwnChance`): Bluegrass's, Celtic's, Folk's and Medieval's.
-  - Pickups: a phrase starting half a beat to a beat and a half early, out of the rest before it, never over a note.
-  - The spacious soloist (`soloStyle.space`, the Blues' 40-50-60): the section's lines as a call of a bar, an answer
-    on its motif and a rest to the line's end; the held note leaned to, a run a beat at most.
-  - A restated motif displaced by an 8th or a beat now and then.
-  - Waves: a solo of two choruses or more building in each, under its whole arc.
-  - The rhythm gesture (`soloStyle.rhythm`, Funk's and Latin's): a note or two on the band's own onsets, short and
-    accented, a lick where the band holds.
-  - The climax: a report first, of the licks, their climb and the release at the top, built only for a gap it shows.
-  - Chromatic passing notes (`soloStyle.chromatic`), then the run aimed into its landing and the enclosure, as
-    *Expressive lines* has them; then a listening round.
+- **Pitched solos** (built 21 and 22 October 2026): a folk genre's solo on its melody (`solos.own`, Bluegrass's 49%
+  to 76%); pickups out of the rest or the release before (`soloStyle.pickups`, the Blues' phrases on one none to 21%);
+  the spacious soloist (`soloStyle.space`, a spacious Blues solo silent 57% to 71% of its time, 4.1 notes a bar to 1.6);
+  a restated motif displaced (113 of 369 in the wildest songs); a solo of two choruses building in each (Jazz's second
+  starting at 0.56 to 0.32); a soloist riffing on the band's onsets (`soloStyle.rhythm`, Funk's notes on them 38% to
+  45%); the climax's release on its highest chord note (the top note the release 2-8% to 17-23%); a run's chromatic
+  approach into its note on the beat (`soloStyle.chromatic`, 2.9% of Jazz's solo notes). The eleventh round's second
+  part asks `blues-space`, `blues-pickups`, `funk-rhythm` and `folk-melody`; Jazz's chromatic approach measured too
+  faint to ask (0.03). Left: the climax's top note bent and shaken (8-15% bent), a climbing repeated lick, the
+  enclosure.
 - **Surf rock** (a new preset, as the owner asked on 21 October 2026): instrumental surf, clean bright guitars in a
   plate's heavy send (no spring among the synthesizer's rooms), a tremolo-picked melody, minor and Phrygian lines,
   a driving picked bass and the toms, 140 to 180 a minute, straight:
