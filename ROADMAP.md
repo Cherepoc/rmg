@@ -337,7 +337,15 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
   the tune's), the solo's own gestures not played; only over a section an appearance before sang, and
   the tune as the first such appearance sang it, not as the solo's appearance would vary it (a section's repeats
   varying their tune, 20 of 49 alike), which left the listener nothing to match the break to; to be asked as
-  `folk-tune` (0.71) against every break its own; `funk-rhythm` still asked. Left: the breaks passed round the band, each
+  `folk-tune` (0.71) against every break its own, then withdrawn the same day unanswered, the preset around it hiding
+  any break: more than half its sections breaks, the tune on the breaks' own instruments, sparse. Bluegrass reworked
+  the same day (`BluegrassReportTest`): breaks 52% of the sections after the first to 35%, songs with more breaks than
+  sung sections 19 of 64 to 5; the tune on the fiddle alone, a singer's stand-in, and the breaks on the banjo, the
+  rhythm part, and the guitar, the chords' and the solo part's, none on the tune's instrument (76 of 229 before); one
+  banjo a song (57 of 64 with two before); the melody faster and fuller (4.2 notes a bar where it sings, from 3.1);
+  verse and chorus three times first, a bridge in 3 songs of 64 (54 before); its description no longer promising a
+  mandolin, which General MIDI lacks, nor playing ahead of the beat, which the pocket cannot. `funk-rhythm` still
+  asked; `folk-tune` to be asked again on the reworked preset. Left: the breaks passed round the band, each
   break another soloist's, as a bluegrass band takes turns (seed 6's banjo took four of five); the kickoff, an intro
   played as a break on the tune before it is sung, which the rule of a tune sung before leaves out. Left: the climax's top note bent and shaken (8-15% bent), a climbing repeated lick, the
   enclosure.

@@ -61,16 +61,8 @@ public sealed class ListeningQuestionsTest
         new("funk-rhythm", "A Funk soloist riffing on the band's rhythm, a note or two struck short on its onsets: in the groove, or a soloist gone quiet?",
             "How often a soloist riffs on the band's rhythm (soloStyle.rhythm, Funk's 30-40-50), against never.", "funk", [],
             new() { ["soloStyle"] = new() { ["rhythm"] = 0 } },
-            x => FirstSegment(x, s => s.Gesture == SoloGesture.Rhythm), (x, span) => Soloed(x).Contains(span.SectionId)),
-        new("folk-tune", "A Bluegrass break playing the tune sung before, every note of it, decorated between them, rather than a line of its own: the tune's break, or a missed solo?",
-            "Whether a folk genre's solo is on the melody (solos.own, Bluegrass's 0-20-40), against every solo its own.", "bluegrass", [],
-            new() { ["solos"] = new() { ["own"] = 100 } },
-            x => Tune(x).Select(i => (double?)x.Map.Sections[i].Start).Min(), (x, span) => Tune(x).Select(i => x.Map.Sections[i].SectionId).Contains(span.SectionId))
+            x => FirstSegment(x, s => s.Gesture == SoloGesture.Rhythm), (x, span) => Soloed(x).Contains(span.SectionId))
     ];
-
-    /// <summary>The places of a song's pitched solos on the melody, which play its tune.</summary>
-    private static int[] Tune(CorpusSong song) =>
-        [..song.Trace.Where(x => x.Point == TracePoints.SoloGestures).Select(x => ((int Index, bool IsOwn, SoloLines.Segment[]))x.Value!).Where(x => !x.IsOwn).Select(x => x.Index)];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()
