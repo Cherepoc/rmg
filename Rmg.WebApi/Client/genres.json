@@ -632,7 +632,7 @@
   {
     "id": "dub",
     "name": "Dub",
-    "description": "Reggae taken apart at the desk: the riddim's drums and bass carrying long stretches alone, the voice and the horns in fragments, echo and a spring reverb leading, the filter sweeping, one riddim looped the whole track, the steppers' kick now and then.",
+    "description": "Reggae taken apart at the desk: the riddim's drums and bass carrying long stretches alone, the voice and the horns in fragments, the echo leading, the filter sweeping, one riddim looped the whole track, the steppers' kick now and then.",
     "choices": {
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
