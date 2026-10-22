@@ -195,6 +195,10 @@ musicality named), written in `$R/plan/plan.md`, every finding put in its packag
 - **Taste waits in a queue.** The findings of taste go to the package `listening`, not one worked in order: each is
   given its status as it is planned, "open: to ask" or "open: needs code", and asked in rounds as the user listens.
   The review is done when the other packages are, the queue listed open in the record.
+- **The frame before its devices.** A genre's mistakes of the song as a whole (its solos against its sung sections,
+  its lead's instrument, its forms as drawn) are planned before the taste findings of the devices inside it: a device
+  asked or tuned inside a wrong frame is heard through it, and three rounds once went to a break on the tune that the
+  genre's frame hid.
 
 ```
 python3 $S/scripts/status.py $R init
@@ -216,7 +220,11 @@ package's commit with `status.py $R package <package> <commit> "<songs changed>"
   `Write` prints how far its songs differ; one under about 0.1 is not asked, as listeners have not told such apart.
   That measure counts the notes that differ, not the quality asked of them: a question of a colour, a mood or a
   brightness, measures the colour first (a song's major chords at each end), as songs a mood moved by its draws alone
-  were measured apart and heard the same. Ask the first-ranked first, a round of ten at most, the answers
+  were measured apart and heard the same. A question of a device that refers to other music (a break on the tune, a
+  quote) checks that what it refers to is there to hear in its songs: the tune sung before, dense enough to follow, on
+  an instrument the device is not. A question answered "can't tell" twice is not asked again, nor its device changed,
+  until its songs are looked at: what the device plays there against what the question says it does (two such
+  questions failed for causes found only by looking at the songs, neither the device's amount). Ask the first-ranked first, a round of ten at most, the answers
   collected from the test instance's dashboard (`/admin/api/summary`, its `verdicts`) before the next; a question
   needing code has it built only when its round comes. A question not asked by the record stays open in it, not
   queued in the roadmap unasked. A **mistake** is fixed.

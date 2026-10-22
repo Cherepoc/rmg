@@ -7,7 +7,8 @@ namespace Rmg.Tests.Genres;
 
 /// <summary>
 ///     How often every preset plays each of the engine's devices, beside the songs with no genre: its harmony's colours, its
-///     form's devices and its parts' expression, so that a genre playing a device its style does not use shows; a value
+///     form's devices and its parts' expression, and the song as a whole, its solos against its sung sections, its parts'
+///     instruments and its melody's notes, so that a genre playing a device its style does not use shows; a value
 ///     marked * the preset inherits, its choice unnamed, the songs' own.
 /// </summary>
 public sealed class GenreDevicesReportTest
@@ -40,6 +41,14 @@ public sealed class GenreDevicesReportTest
         var tempos = (ImmutableArray<double>)song.Trace.Single(x => x.Point == TracePoints.SectionTempo).Value!;
         var meter = (Meter)song.Trace.Single(x => x.Point == TracePoints.Meter).Value!;
         // a piano's chords held a beat or longer, which its part rolls or strikes together
+        // the song as a whole: its parts' instruments, the melody's, and the melody's notes a bar where it plays and no solo does
+        int? Program(TrackRole role) => song.Song.TrackDefinitions.Values.FirstOrDefault(x => x.Role == role) is PitchInstrumentTrack p ? p.InstrumentCode : null;
+        var programs = song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().Where(x => song.Song.Notes!.GetValueOrDefault(song.Track(x.Role))?.Count > 0).Select(x => x.InstrumentCode).ToArray();
+        var pitchedSolos = song.Solos.Values.Where(x => !x.IsDrumSolo).ToArray();
+        var melodyNotes = song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody));
+        var sung = sections.Select((span, i) => (span, i)).Where(x => !song.Solos.ContainsKey(x.i))
+            .Select(x => (melodyNotes?.Count(n => n.IsWithin(x.span.Start, x.span.End)) ?? 0) / (x.span.Duration / x.span.Meter.BarDuration)).Where(x => x > 0).ToArray();
+        var form = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
         var held = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value.Where(n =>
             n.Value.Pitches.Length >= 3 && n.Value.Duration >= 1 - 1e-9
             && InstrumentsOverTime.ProgramOf(n.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode) is >= 0 and <= 7)).ToArray();
@@ -71,6 +80,13 @@ public sealed class GenreDevicesReportTest
                 ? verses.Average(x => song.Resting(x.span).Contains(TrackRole.Melody) ? 1.0 : 0)
                 : double.NaN,
             ["songs with a solo"] = song.Solos.Count > 0 ? 1 : 0,
+            ["sections after the first soloed"] = sections.Length > 1 ? song.Solos.Count / (double)(sections.Length - 1) : double.NaN,
+            ["songs soloing more than singing"] = song.Solos.Count > sections.Length - song.Solos.Count ? 1 : 0,
+            ["solos on the melody's instrument"] = pitchedSolos.Length > 0 ? pitchedSolos.Average(x => Program(x.Soloists[0]) == Program(TrackRole.Melody) ? 1.0 : 0) : double.NaN,
+            ["songs of one instrument on 3 parts"] = programs.GroupBy(x => x).Any(x => x.Count() >= 3) ? 1 : 0,
+            ["melody notes a bar where it plays"] = sung.Length > 0 ? sung.Average() : double.NaN,
+            ["songs with a bridge"] = form.Roles.Values.Contains(SectionRole.Bridge) ? 1 : 0,
+            ["songs with a chorus"] = form.Roles.Values.Contains(SectionRole.Chorus) ? 1 : 0,
             ["sections ghosting"] = Sections(TracePoints.Ghosts, x => (bool)x!),
             ["sections whose groove mutates"] = Sections(TracePoints.Mutations, x => (((int, int Made))x!).Made > 0),
             ["sections with a figure"] = Sections(TracePoints.Figures, x => ((System.Collections.ICollection)x!).Count > 0),
@@ -178,7 +194,9 @@ public sealed class GenreDevicesReportTest
         ["sections over a pedal"] = "harmonyDevices", ["songs reharmonising"] = "harmonyDevices", ["songs changing key"] = "keyChanges",
         ["sections in stop time"] = "stopTime", ["sections pushing"] = "push", ["lifts dropped"] = "drop", ["sections of 16 bars or more"] = "sectionLength",
         ["sections of 32 bars"] = "sectionLength", ["appearances building or thinning"] = "texture", ["verses without a melody"] = "voice",
-        ["songs with a solo"] = "solos", ["sections ghosting"] = "ghosts", ["sections whose groove mutates"] = "mutation",
+        ["songs with a solo"] = "solos", ["sections after the first soloed"] = "solos", ["songs soloing more than singing"] = "solos",
+        ["solos on the melody's instrument"] = "instrument", ["songs of one instrument on 3 parts"] = "instrument", ["melody notes a bar where it plays"] = "rhythm.melody",
+        ["songs with a bridge"] = "form", ["songs with a chorus"] = "form", ["sections ghosting"] = "ghosts", ["sections whose groove mutates"] = "mutation",
         ["sections in half or double time"] = "feelChances", ["songs flamming or dragging"] = "rudiments", ["songs whose drums mark the form"] = "drumJob",
         ["songs swung"] = "feelChances", ["songs swung in 16ths"] = "feelValues",
         ["sections heavy, their clean guitars driven"] = "louderForms", ["sections calm, their driven guitars acoustic"] = "louderForms",
@@ -216,7 +234,7 @@ public sealed class GenreDevicesReportTest
     private static bool Names(GenrePresets.Preset preset, string choice) => preset.Choices.Keys.Any(x => x == choice || x.StartsWith(choice + "."));
 
     /// <summary>The measures that are numbers rather than shares.</summary>
-    private static readonly HashSet<string> Numbers = ["reverb sent", "unconventionality"];
+    private static readonly HashSet<string> Numbers = ["reverb sent", "unconventionality", "melody notes a bar where it plays"];
 
     /// <summary>
     ///     The device and idiom reports measure a song of every preset and of none, which the review and listening read,

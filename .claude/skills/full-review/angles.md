@@ -194,7 +194,9 @@ choice and every stage of the family. The id is `device-<family>`. For every dev
 - **As it sounds.** What the device does to the music, whether a player would do it so, and where its amounts would
   sound wrong; with the parts it sounds against, from `run/sounding.txt` and the primer's musicality lines: a device
   that copies or moves notes (doubling, imitation, quotes, polymeters) judged where its notes land, against the line
-  still playing there. Where a rule the code or the music states settles it (notes against the chord, a device playing where
+  still playing there; and one that refers to other music (a break on the tune, a quote, a hook intro, an answer)
+  judged against what the listener heard there, the appearance as it played, not the state it was made from: a break
+  playing its own appearance's varied melody quoted a tune no one heard, as a section's repeats vary their tune. Where a rule the code or the music states settles it (notes against the chord, a device playing where
   its doc says it does not), it is a mistake. Otherwise it is `kind: "taste"` with a proposed listening question (see
   the primer's output): at most three for the family, ranked (`listen.rank`), the coverage check refusing more.
 - **Worth keeping.** Whether the device earns its place, from the review folder's `ledger.md` (written by
@@ -224,6 +226,16 @@ end), `run/sounding.txt` (how each preset's parts sound together: a note held in
 parts, its own notes' and a doubling's, a strong note off its chord or on a chord's missing third), and each preset in `Client/genres.json` with its description, every choice it names read against `GenreChoices`
 and the code of the devices it switches on or leaves. Then, for each genre of the cluster:
 
+- **The song as a whole, first.** Before any single choice, whether the songs are shaped as the style's are, from
+  `genre-devices.txt`'s rows of the song's shape: the sections soloed after the first and the songs soloing more than
+  singing (a style of sung verses with breaks between is mostly sung), the solos on the melody's own instrument (with no
+  singer in General MIDI, the lead stands in for one and must sound apart from the soloists), the songs of one
+  instrument on three parts (a band of one player to an instrument), the melody's notes a bar where it plays (a tune to
+  follow, not a few notes a phrase), and the songs with a bridge or a chorus (the forms the style writes in). A frame
+  wrong here makes every device inside it inaudible: a break on the tune could not be heard where half the sections
+  were breaks, the tune on the breaks' own instrument and four notes a phrase. Each such finding is a `mistake` with
+  its row's number, and comes before the cluster's findings of single devices.
+
 - **Inherited where it does not belong.** A device the genre plays by the songs' own amounts (`*`) that its style would
   not play: a short bar in a genre built on square sections, a solo in a genre without soloists. The fix is the option
   named at 0, the choice's other options named at the songs' own amounts so that they keep playing.
@@ -232,8 +244,13 @@ and the code of the devices it switches on or leaves. Then, for each genre of th
   the engine has; a device it does not have is an idiom gap for the roadmap, said as such.
 - **Mis-set.** Amounts against the genre: a plain end playing what a plain song of the genre never does, a wild end
   losing the genre, a pool whose weights contradict the description, an instrument, a kit, a tempo, a meter or a form
-  the style would not take.
-- **Against the description.** What the preset's description says against what its choices do.
+  the style would not take. A pool is judged by what the songs draw, not by its weights: some draws weigh it again (a
+  form by how near its length comes to the song's), so that a preset's weights can say one thing and its songs play
+  another (a preset weighing a form without a bridge first still played a bridge in 54 of 64 songs).
+- **Against the description.** What the preset's description says against what its choices do, and against what the
+  engine can play at all: an instrument or a sound General MIDI has none of (a singer, a mandolin, a spring reverb), or
+  a feel no choice reaches (playing ahead of the beat, which the pocket's tight-to-laid-back cannot). A description
+  promising one is a `mistake`, its fix the description.
 - **Its conventionality.** The plain end the genre's most typical song, the middle a good one of it, the wild end still
   the genre: a device that should be the genre's plainest habit left to its wild end, or a wild device leaking into
   its plain end.

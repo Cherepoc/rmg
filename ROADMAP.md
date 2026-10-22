@@ -339,7 +339,7 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
   varying their tune, 20 of 49 alike), which left the listener nothing to match the break to; to be asked as
   `folk-tune` (0.71) against every break its own, then withdrawn the same day unanswered, the preset around it hiding
   any break: more than half its sections breaks, the tune on the breaks' own instruments, sparse. Bluegrass reworked
-  the same day (`BluegrassReportTest`): breaks 52% of the sections after the first to 35%, songs with more breaks than
+  the same day (measured over 64 songs; the song-shape rows now in `GenreDevicesReportTest` for every preset): breaks 52% of the sections after the first to 35%, songs with more breaks than
   sung sections 19 of 64 to 5; the tune on the fiddle alone, a singer's stand-in, and the breaks on the banjo, the
   rhythm part, and the guitar, the chords' and the solo part's, none on the tune's instrument (76 of 229 before); one
   banjo a song (57 of 64 with two before); the melody faster and fuller (4.2 notes a bar where it sings, from 3.1);
