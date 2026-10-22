@@ -81,13 +81,6 @@
     },
     "seeds": [
       {
-        "seed": "2",
-        "at": 83.2,
-        "listen": [
-          "Rhythm part (Banjo)"
-        ]
-      },
-      {
         "seed": "3",
         "at": 53.9,
         "listen": [
@@ -103,14 +96,21 @@
       },
       {
         "seed": "B",
-        "at": 126.1,
+        "at": 119.9,
         "listen": [
           "Rhythm part (Banjo)"
         ]
       },
       {
         "seed": "R",
-        "at": 128.2,
+        "at": 121.6,
+        "listen": [
+          "Rhythm part (Banjo)"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 138.9,
         "listen": [
           "Rhythm part (Banjo)"
         ]

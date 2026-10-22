@@ -474,13 +474,13 @@ public sealed class SoloTest
 
     /// <summary>
     ///     A break on the melody plays the tune whole: a lone soloist sounds every note of the melody it takes, at the note's
-    ///     start, in the pitch it plays it at; and the rest are its decorations, between the tune's notes. Measured over 64
-    ///     Bluegrass songs: SHARE of a break's notes the tune's.
+    ///     start, in the pitch it plays it at, louder than its fill between them. Measured over 64 Bluegrass songs: 50%
+    ///     of a break's notes the tune's; the tune at 0.80 as heard, the fill at 0.69.
     /// </summary>
     [Test]
-    public async Task ABreakOnTheMelody_PlaysTheTuneWhole()
+    public async Task ABreakOnTheMelody_PlaysTheTuneWhole_OverItsFill()
     {
-        var (tuneNotes, played) = (0, 0);
+        var (tuneVelocities, fillVelocities) = (new List<double>(), new List<double>());
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("bluegrass")))))
         {
             var tunes = song.Trace.Where(x => x.Point == TracePoints.SoloTune).Select(x => ((double Position, int Pitch)[])x.Value!).ToArray();
@@ -491,12 +491,16 @@ public sealed class SoloTest
                 var solo = song.Song.Notes![song.Track(song.Solos[index].Soloists[0])].Where(n => n.IsWithin(span.Start, span.End)).ToArray();
                 foreach (var (position, pitch) in tune)
                     await Assert.That(solo.Any(n => Math.Abs(n.Position - position) < 1e-6 && n.Value.Pitches.Any(p => (p - pitch).Mod(12) == 0))).IsTrue().Because($"seed {song.Seed} at {position}");
-                (tuneNotes, played) = (tuneNotes + tune.Length, played + solo.Length);
+                foreach (var note in solo)
+                    (tune.Any(x => Math.Abs(x.Position - note.Position) < 1e-6) ? tuneVelocities : fillVelocities).Add(Rmg.Core.Rendering.Render.ToMidiVelocity(note.Value.Velocity));
             }
         }
 
-        Console.WriteLine($"  {tuneNotes} of {played} notes of the breaks on the melody the tune's ({tuneNotes / (double)Math.Max(1, played):P0})");
-        await Assert.That(tuneNotes).IsGreaterThan(0);
+        Console.WriteLine($"  {tuneVelocities.Count} of {tuneVelocities.Count + fillVelocities.Count} notes of the breaks on the melody the tune's ({tuneVelocities.Count / (double)Math.Max(1, tuneVelocities.Count + fillVelocities.Count):P0}); " +
+                          $"the tune at {tuneVelocities.DefaultIfEmpty().Average():F2}, the fill at {fillVelocities.DefaultIfEmpty().Average():F2}");
+        await Assert.That(tuneVelocities.Count).IsGreaterThan(0);
+        await Assert.That(fillVelocities.Count).IsGreaterThan(0);
+        await Assert.That(tuneVelocities.Average()).IsGreaterThan(fillVelocities.Average());
     }
 
     [Test]

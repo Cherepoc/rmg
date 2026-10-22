@@ -331,10 +331,13 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
   faint to ask (0.03). Retired on 22 October: `blues-space` (11-1), `blues-pickups` (6-0) and `surf-tremolo` (6-0)
   accepted and kept as built; `folk-melody` not told apart, the break on the melody a paraphrase (8-33% of its time
   quoting the tune, its notes sounding the tune's hardly oftener than a line of its own's, a third of them over a
-  section never sung), rebuilt the same day: a break on the melody plays the tune whole, moved by octaves into the
-  part's range and its blue notes kept, its runs and licks only after a tune's note has sounded half the time to the
-  next or half a beat, and only over a section an appearance before sang (71% of its notes the tune's), asked again
-  as `folk-tune` (0.66) against every break its own; `funk-rhythm` still asked. Left: the climax's top note bent and shaken (8-15% bent), a climbing repeated lick, the
+  section never sung), rebuilt the same day: a break on the melody plays the tune whole, accented, moved by octaves into
+  the part's range and its blue notes kept, and between its notes a steady fill on the 8ths, the chord's notes on the
+  way to the next and a scale step beside it last, softer (the tune at 0.80 as heard, the fill at 0.69, half the notes
+  the tune's), the solo's own gestures not played; only over a section an appearance before sang; to be asked as
+  `folk-tune` (0.72) against every break its own; `funk-rhythm` still asked. Left: the breaks passed round the band, each
+  break another soloist's, as a bluegrass band takes turns (seed 6's banjo took four of five); the kickoff, an intro
+  played as a break on the tune before it is sung, which the rule of a tune sung before leaves out. Left: the climax's top note bent and shaken (8-15% bent), a climbing repeated lick, the
   enclosure.
 - **Surf rock** (built 22 October 2026, a new preset as the owner asked): instrumental surf, clean bright guitars in
   a plate's heavy send (no spring among the synthesizer's rooms, so no drip), the double harmonic scale already one of

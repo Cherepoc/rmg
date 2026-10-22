@@ -47,7 +47,7 @@ public enum SoloGesture
 ///     more intense, a held note or a pause the less, from the soloist's vocabulary (<see cref="Soloist" />), a run going
 ///     on over the bar lines in the phrase. A new run sets out the way to where the gesture ends, without aiming to land
 ///     there: a note of the chord there, higher the more intense, in a solo of its own, or the melody's note there in one
-///     on the melody, which plays the tune's every note and its runs and licks only between them. Every note is a scale note in the soloist's range, as its chord there
+///     on the melody, which plays the tune's every note, accented, and a steady fill of 8ths between them. Every note is a scale note in the soloist's range, as its chord there
 ///     has it, kept as its scale step over that chord, so that a run crossing a change of chord stays on the scale.
 /// </summary>
 internal static class SoloLines
@@ -73,8 +73,14 @@ internal static class SoloLines
 
     public const double MelodyQuoteWeight = 2;
 
-    /// <summary>How long a solo on the melody holds a tune's note before it decorates it, in beats, at least, or half the time to the tune's next note where that is longer.</summary>
-    public const double TuneHeld = 0.5;
+    /// <summary>
+    ///     How far apart a solo on the melody's fill strikes between the tune's notes, in beats, an 8th, as a picker's roll
+    ///     keeps going, and how near a tune's note it strikes at the closest.
+    /// </summary>
+    public const double FillStep = 0.5, FillGap = 0.25;
+
+    /// <summary>How much softer a solo on the melody's fill plays than the tune it rolls around, as a velocity sum, so that the tune is heard through it.</summary>
+    public const double FillSofter = 0.4;
 
     /// <summary>The odds the most intense gesture has over the calmest at an intensity of 1, and the other way at 0.</summary>
     public const double IntensityOdds = 16;
@@ -307,14 +313,14 @@ internal static class SoloLines
         // what comes after it
         var planned = new List<PlannedNote>();
         var placing = 0;
-        void Add(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false, bool ghosts = false, bool run = false) =>
-            planned.Add(new PlannedNote(position, pitch, intensity, held, accented, release, stacked, octave, ghosts, run, placing, false));
+        void Add(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false, bool ghosts = false, bool run = false, double lift = 0) =>
+            planned.Add(new PlannedNote(position, pitch, intensity, held, accented, release, stacked, octave, ghosts, run, placing, false, lift));
 
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there,
         // its key by its place in the line
         TimelineItem<StateMap> Place(PlannedNote note, int index)
         {
-            var (position, pitch, intensity, held, accented, release, stacked, octave, _, _, _, chromatic) = note;
+            var (position, pitch, intensity, held, accented, release, stacked, octave, _, _, _, altered, lift) = note;
             var sung = MelodyAt(position);
             // in octaves as the soloist plays them, not as the melody it takes over did; a note of its own, the melody's
             // beat where it starts with the melody's note, the weakest elsewhere, its own key from that note's and its place
@@ -323,11 +329,11 @@ internal static class SoloLines
                 .With(CompositionStateKinds.Octave, octave && soloist.Octaves ? 1 : 0)
                 .With(CompositionStateKinds.BeatRank, Math.Abs(sung.Position - position) < 1e-9 ? sung.Value.GetStateValue(CompositionStateKinds.BeatRank) : DyadicRankDistribution.MaxRank)
                 .With(CompositionStateKinds.NoteKey, Seeds.Key(sung.Value.GetStateValue(CompositionStateKinds.NoteKey), index + 1));
-            state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0));
-            // a chromatic note the scale's step beside it, altered onto it
+            state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0) + lift);
+            // a note off the scale the scale's step beside it, altered onto it
             var step = LinePlacement.GetScaleStep(Chord(state, position), pitch);
             state = state.With(StateKinds.ScaleStep, step)
-                .With(StateKinds.Alteration, chromatic ? pitch - Chord(state, position).GetPitch(step) : 0)
+                .With(StateKinds.Alteration, altered ? pitch - Chord(state, position).GetPitch(step) : 0)
                 .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100))
                 .With(CompositionStateKinds.SoloRelease, release ? 1 : 0);
             // a stacked note the band's chord there under it, or the chord's shape planed (Realizer): the chords' note sounding
@@ -366,7 +372,8 @@ internal static class SoloLines
         // from it, so that a scale over another chord takes its figure whole, and the phrase whose motif is taken
         (int First, int[] Steps)? motif = null;
         var (motifPhrase, motifShape) = (-1, SoloShape.Scale);
-        foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, isRelease) in plan)
+        // a solo of its own playing its gestures; one on the melody plays the tune instead
+        foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, isRelease) in plan.Where(_ => isOwn))
         {
             placing = phrase;
             // whether the soloist stacks the gesture, the likelier the more it leans to it and the more intense
@@ -480,44 +487,72 @@ internal static class SoloLines
             }
         }
 
-        // a solo on the melody playing the tune whole, every note of it moved by the octaves that bring the tune's middle
-        // nearest the part's, so that it keeps its shape, a note that would leave the part's range folded back into it; and of
-        // its own runs and licks only those after a note of the tune has sounded a while, decorating it on the way to the next,
-        // and before the tune's first note, leading into it
-        if (!isOwn)
+        // a solo on the melody playing the tune whole, every note of it accented and moved by the octaves that bring the
+        // tune's middle nearest the part's, so that it keeps its shape, a note that would leave the part's range folded back
+        // into it; and between its notes, and before its first, a fill on the 8ths of the bar, as a picker rolls through a
+        // break, each of the chord's notes there nearest the way from the tune's note to its next, never the one before
+        // again, and the last a scale step beside the next, leading into it
+        if (!isOwn && melody.Count > 0)
         {
             Segment? SegmentAt(double position) => plan.LastOrDefault(x => x.Start <= position + 1e-9);
-            double[] onsets = [..melody.Select(x => x.Position)];
-            bool Decorates(PlannedNote note)
+            void Play(double position, int pitch, bool accented)
             {
-                if (SegmentAt(note.Position)?.Gesture is not (SoloGesture.Run or SoloGesture.Lick or SoloGesture.Rhythm))
-                    return false;
-                var sung = Array.FindLastIndex(onsets, x => x <= note.Position + 1e-9);
-                if (sung < 0)
-                    return true;
-                var next = sung + 1 < onsets.Length ? onsets[sung + 1] : span.End;
-                return note.Position >= onsets[sung] + Math.Max(TuneHeld, (next - onsets[sung]) / 2) - 1e-9;
+                placing = SegmentAt(position)?.Phrase ?? 0;
+                Add(position, pitch, SegmentAt(position)?.Intensity ?? 0.5, accented: accented, octave: accented, lift: accented ? 0 : -FillSofter);
             }
 
-            var decorations = planned.Where(Decorates).ToArray();
-            planned.Clear();
             int[] tune = [..melody.Select(MelodyPitch)];
-            var shift = tune.Length == 0 ? 0 : 12 * (int)Math.Round((middle - (tune.Min() + tune.Max()) / 2.0) / 12);
-            foreach (var (note, pitch) in melody.Zip(tune))
+            var shift = 12 * (int)Math.Round((middle - (tune.Min() + tune.Max()) / 2.0) / 12);
+            int Moved(int pitch)
             {
                 var moved = pitch + shift;
                 while (moved > high)
                     moved -= 12;
                 while (moved < low)
                     moved += 12;
-                placing = SegmentAt(note.Position)?.Phrase ?? 0;
-                Add(note.Position, moved, SegmentAt(note.Position)?.Intensity ?? 0.5, octave: true);
-                // a note the melody alters off the scale, a blue note, altered as it sings it
-                planned[^1] = planned[^1] with { Chromatic = note.Value.GetStateValue(StateKinds.Alteration) != 0 };
+                return moved;
             }
 
-            StateTrace.RecordSection(TracePoints.SoloTune, SectionGenerator.SectionTrace, span.SectionId, $"{planned.Count} notes", planned.Select(x => (x.Position, x.Pitch)).ToArray());
-            planned.AddRange(decorations);
+            (double Position, int Pitch)[] notes = [..melody.Zip(tune, (x, pitch) => (x.Position, Moved(pitch)))];
+            void Fill(double from, int pitch, double to, int? next)
+            {
+                var previous = pitch;
+                var first = barOrigin + Math.Ceiling((from + FillGap - barOrigin) / FillStep - 1e-9) * FillStep;
+                for (var position = first; position < to - FillGap + 1e-9; position += FillStep)
+                {
+                    var target = next ?? pitch;
+                    int filled;
+                    if (next is not null && position + FillStep >= to - FillGap + 1e-9)
+                    {
+                        // the last, a scale step beside the next, from the side the fill comes from
+                        var scale = ScaleNotes(position);
+                        var at = Array.IndexOf(scale, Nearest(scale, target));
+                        var beside = previous > target ? at + 1 : at - 1;
+                        filled = scale.Length == 0 ? target : scale[Math.Clamp(beside, 0, scale.Length - 1)];
+                    }
+                    else
+                    {
+                        var share = (position - from) / (to - from);
+                        var towards = (int)Math.Round(pitch + (target - pitch) * share);
+                        var chord = ChordNotes(position).Where(x => x != previous).ToArray();
+                        filled = Nearest(chord, towards);
+                    }
+
+                    Play(position, filled, false);
+                    previous = filled;
+                }
+            }
+
+            Fill(span.Start - FillGap, notes[0].Pitch, notes[0].Position, notes[0].Pitch);
+            for (var i = 0; i < notes.Length; i++)
+            {
+                Play(notes[i].Position, notes[i].Pitch, true);
+                // a note the melody alters off the scale, a blue note, altered as it sings it
+                planned[^1] = planned[^1] with { Altered = melody[i].Value.GetStateValue(StateKinds.Alteration) != 0 };
+                Fill(notes[i].Position, notes[i].Pitch, i + 1 < notes.Length ? notes[i + 1].Position : span.End, i + 1 < notes.Length ? notes[i + 1].Pitch : null);
+            }
+
+            StateTrace.RecordSection(TracePoints.SoloTune, SectionGenerator.SectionTrace, span.SectionId, $"{notes.Length} notes", notes);
             planned.Sort((a, b) => a.Position.CompareTo(b.Position));
         }
 
@@ -587,7 +622,7 @@ internal static class SoloLines
         for (var k = 0; k + 1 < planned.Count; k++)
             if (planned[k].Run && planned[k + 1].Run && planned[k].Phrase == planned[k + 1].Phrase && !OnBeat(planned[k].Position) && OnBeat(planned[k + 1].Position)
                 && Math.Abs(Sounding(k + 1) - Sounding(k)) == 2 && Chromatic(k))
-                planned[k] = planned[k] with { Pitch = Sounding(k + 1) - Math.Sign(Sounding(k + 1) - Sounding(k)), Chromatic = true };
+                planned[k] = planned[k] with { Pitch = Sounding(k + 1) - Math.Sign(Sounding(k + 1) - Sounding(k)), Altered = true };
 
         int FoldTowards(int pitch, int towards) => pitch + 12 * (int)Math.Round((towards - pitch) / 12.0);
         static bool Ghosted(StateMap note) => new GenerationContext(Seeds.Derive((ulong)note.GetStateValue(CompositionStateKinds.NoteKey), GhostStream)).TestProbability(GhostRate);
@@ -609,8 +644,12 @@ internal static class SoloLines
         ], plan);
     }
 
-    /// <summary>A note of a solo's line as planned, before it is placed: where it starts, its pitch, and how it is played.</summary>
-    private sealed record PlannedNote(double Position, int Pitch, double Intensity, double Held, bool Accented, bool Release, bool Stacked, bool Octave, bool Ghosts, bool Run, int Phrase, bool Chromatic);
+    /// <summary>
+    ///     A note of a solo's line as planned, before it is placed: where it starts, its pitch, how it is played, and whether
+    ///     its pitch is off the scale, a chromatic approach's or a tune's blue note, and how much louder it plays than its
+    ///     intensity has it, a velocity sum.
+    /// </summary>
+    private sealed record PlannedNote(double Position, int Pitch, double Intensity, double Held, bool Accented, bool Release, bool Stacked, bool Octave, bool Ghosts, bool Run, int Phrase, bool Altered, double Lift);
 
     /// <summary>Where a run is in its cells: on which cell, on which note of it, from which note the cell starts and which way it goes.</summary>
     internal sealed class CellCursor(int root)
