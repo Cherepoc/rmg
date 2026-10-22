@@ -334,8 +334,10 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
   section never sung), rebuilt the same day: a break on the melody plays the tune whole, accented, moved by octaves into
   the part's range and its blue notes kept, and between its notes a steady fill on the 8ths, the chord's notes on the
   way to the next and a scale step beside it last, softer (the tune at 0.80 as heard, the fill at 0.69, half the notes
-  the tune's), the solo's own gestures not played; only over a section an appearance before sang; to be asked as
-  `folk-tune` (0.72) against every break its own; `funk-rhythm` still asked. Left: the breaks passed round the band, each
+  the tune's), the solo's own gestures not played; only over a section an appearance before sang, and
+  the tune as the first such appearance sang it, not as the solo's appearance would vary it (a section's repeats
+  varying their tune, 20 of 49 alike), which left the listener nothing to match the break to; to be asked as
+  `folk-tune` (0.71) against every break its own; `funk-rhythm` still asked. Left: the breaks passed round the band, each
   break another soloist's, as a bluegrass band takes turns (seed 6's banjo took four of five); the kickoff, an intro
   played as a break on the tune before it is sung, which the rule of a tune sung before leaves out. Left: the climax's top note bent and shaken (8-15% bent), a climbing repeated lick, the
   enclosure.

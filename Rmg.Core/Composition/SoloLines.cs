@@ -235,6 +235,7 @@ internal static class SoloLines
 
     /// <summary>A solo's line, and every segment's intensity and gesture, by its start.</summary>
     /// <param name="melody">The melody's notes in the solo, which a solo on the melody aims at and quotes, and every note takes its state from.</param>
+    /// <param name="tune">The tune a solo on the melody plays, as an appearance before sang it, moved to the solo: its notes' starts and pitches; none for a solo of its own.</param>
     /// <param name="band">The chords' notes in the solo, the band's chord a stacked note stacks; the melody's where they rest.</param>
     /// <param name="groove">Where the band strikes in the solo, the rhythm part's onsets or, where it has none, the chords', which a riff strikes on.</param>
     /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
@@ -257,6 +258,7 @@ internal static class SoloLines
         bool isOwn,
         bool climbs,
         IReadOnlyList<TimelineItem<StateMap>> melody,
+        IReadOnlyList<(double Position, int Pitch)> tune,
         IReadOnlyList<TimelineItem<StateMap>> band,
         IReadOnlyList<double> groove,
         EventStateTimelineMap<StateMap> track,
@@ -492,7 +494,7 @@ internal static class SoloLines
         // into it; and between its notes, and before its first, a fill on the 8ths of the bar, as a picker rolls through a
         // break, each of the chord's notes there nearest the way from the tune's note to its next, never the one before
         // again, and the last a scale step beside the next, leading into it
-        if (!isOwn && melody.Count > 0)
+        if (!isOwn && tune.Count > 0)
         {
             Segment? SegmentAt(double position) => plan.LastOrDefault(x => x.Start <= position + 1e-9);
             void Play(double position, int pitch, bool accented)
@@ -501,8 +503,7 @@ internal static class SoloLines
                 Add(position, pitch, SegmentAt(position)?.Intensity ?? 0.5, accented: accented, octave: accented, lift: accented ? 0 : -FillSofter);
             }
 
-            int[] tune = [..melody.Select(MelodyPitch)];
-            var shift = 12 * (int)Math.Round((middle - (tune.Min() + tune.Max()) / 2.0) / 12);
+            var shift = 12 * (int)Math.Round((middle - (tune.Min(x => x.Pitch) + tune.Max(x => x.Pitch)) / 2.0) / 12);
             int Moved(int pitch)
             {
                 var moved = pitch + shift;
@@ -513,7 +514,7 @@ internal static class SoloLines
                 return moved;
             }
 
-            (double Position, int Pitch)[] notes = [..melody.Zip(tune, (x, pitch) => (x.Position, Moved(pitch)))];
+            (double Position, int Pitch)[] notes = [..tune.Select(x => (x.Position, Moved(x.Pitch)))];
             void Fill(double from, int pitch, double to, int? next)
             {
                 var previous = pitch;
@@ -547,8 +548,9 @@ internal static class SoloLines
             for (var i = 0; i < notes.Length; i++)
             {
                 Play(notes[i].Position, notes[i].Pitch, true);
-                // a note the melody alters off the scale, a blue note, altered as it sings it
-                planned[^1] = planned[^1] with { Altered = melody[i].Value.GetStateValue(StateKinds.Alteration) != 0 };
+                // a note off the scale here, a blue note, altered as it was sung
+                var chord = Chord(MelodyAt(notes[i].Position).Value, notes[i].Position);
+                planned[^1] = planned[^1] with { Altered = chord.GetPitch(LinePlacement.GetScaleStep(chord, notes[i].Pitch)) != notes[i].Pitch };
                 Fill(notes[i].Position, notes[i].Pitch, i + 1 < notes.Length ? notes[i + 1].Position : span.End, i + 1 < notes.Length ? notes[i + 1].Pitch : null);
             }
 

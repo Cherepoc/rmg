@@ -474,13 +474,16 @@ public sealed class SoloTest
 
     /// <summary>
     ///     A break on the melody plays the tune whole: a lone soloist sounds every note of the melody it takes, at the note's
-    ///     start, in the pitch it plays it at, louder than its fill between them. Measured over 64 Bluegrass songs: 50%
-    ///     of a break's notes the tune's; the tune at 0.80 as heard, the fill at 0.69.
+    ///     start, in the pitch it plays it at, louder than its fill between them; and the tune it takes is the one the
+    ///     section's first appearance sang, its notes there at their places in the solo in their pitch classes. Measured
+    ///     over 64 Bluegrass songs: 47% of a break's notes the tune's; the tune at 0.80 as heard, the fill at 0.70; every
+    ///     note sung first in the tune.
     /// </summary>
     [Test]
     public async Task ABreakOnTheMelody_PlaysTheTuneWhole_OverItsFill()
     {
         var (tuneVelocities, fillVelocities) = (new List<double>(), new List<double>());
+        var (sungNotes, inTune) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("bluegrass")))))
         {
             var tunes = song.Trace.Where(x => x.Point == TracePoints.SoloTune).Select(x => ((double Position, int Pitch)[])x.Value!).ToArray();
@@ -493,11 +496,19 @@ public sealed class SoloTest
                     await Assert.That(solo.Any(n => Math.Abs(n.Position - position) < 1e-6 && n.Value.Pitches.Any(p => (p - pitch).Mod(12) == 0))).IsTrue().Because($"seed {song.Seed} at {position}");
                 foreach (var note in solo)
                     (tune.Any(x => Math.Abs(x.Position - note.Position) < 1e-6) ? tuneVelocities : fillVelocities).Add(Rmg.Core.Rendering.Render.ToMidiVelocity(note.Value.Velocity));
+                var sung = song.Map.Sections.Where((x, j) => j < index && x.SectionId == span.SectionId && !song.Solos.ContainsKey(j)
+                                                             && song.Song.Notes![song.Track(TrackRole.Melody)].Any(n => n.IsWithin(x.Start, x.End))).First();
+                foreach (var note in song.Song.Notes![song.Track(TrackRole.Melody)].Where(n => n.IsWithin(sung.Start, sung.End) && n.Position - sung.Start < span.Duration - 1e-9))
+                {
+                    sungNotes++;
+                    inTune += tune.Any(x => Math.Abs(x.Position - span.Start - (note.Position - sung.Start)) < 1e-6 && (x.Pitch - note.Value.Pitches[0]).Mod(12) == 0) ? 1 : 0;
+                }
             }
         }
 
         Console.WriteLine($"  {tuneVelocities.Count} of {tuneVelocities.Count + fillVelocities.Count} notes of the breaks on the melody the tune's ({tuneVelocities.Count / (double)Math.Max(1, tuneVelocities.Count + fillVelocities.Count):P0}); " +
-                          $"the tune at {tuneVelocities.DefaultIfEmpty().Average():F2}, the fill at {fillVelocities.DefaultIfEmpty().Average():F2}");
+                          $"the tune at {tuneVelocities.DefaultIfEmpty().Average():F2}, the fill at {fillVelocities.DefaultIfEmpty().Average():F2}; {inTune} of {sungNotes} notes sung first in the tune ({inTune / (double)Math.Max(1, sungNotes):P0})");
+        await Assert.That(inTune / (double)Math.Max(1, sungNotes)).IsGreaterThan(0.8);
         await Assert.That(tuneVelocities.Count).IsGreaterThan(0);
         await Assert.That(fillVelocities.Count).IsGreaterThan(0);
         await Assert.That(tuneVelocities.Average()).IsGreaterThan(fillVelocities.Average());
