@@ -47,7 +47,7 @@ public enum SoloGesture
 ///     more intense, a held note or a pause the less, from the soloist's vocabulary (<see cref="Soloist" />), a run going
 ///     on over the bar lines in the phrase. A new run sets out the way to where the gesture ends, without aiming to land
 ///     there: a note of the chord there, higher the more intense, in a solo of its own, or the melody's note there in one
-///     on the melody, which quotes it the more. Every note is a scale note in the soloist's range, as its chord there
+///     on the melody, which plays the tune's every note and its runs and licks only between them. Every note is a scale note in the soloist's range, as its chord there
 ///     has it, kept as its scale step over that chord, so that a run crossing a change of chord stays on the scale.
 /// </summary>
 internal static class SoloLines
@@ -72,6 +72,9 @@ internal static class SoloLines
     public const double OwnQuoteWeight = 0.15;
 
     public const double MelodyQuoteWeight = 2;
+
+    /// <summary>How long a solo on the melody holds a tune's note before it decorates it, in beats, at least, or half the time to the tune's next note where that is longer.</summary>
+    public const double TuneHeld = 0.5;
 
     /// <summary>The odds the most intense gesture has over the calmest at an intensity of 1, and the other way at 0.</summary>
     public const double IntensityOdds = 16;
@@ -475,6 +478,47 @@ internal static class SoloLines
 
                     break;
             }
+        }
+
+        // a solo on the melody playing the tune whole, every note of it moved by the octaves that bring the tune's middle
+        // nearest the part's, so that it keeps its shape, a note that would leave the part's range folded back into it; and of
+        // its own runs and licks only those after a note of the tune has sounded a while, decorating it on the way to the next,
+        // and before the tune's first note, leading into it
+        if (!isOwn)
+        {
+            Segment? SegmentAt(double position) => plan.LastOrDefault(x => x.Start <= position + 1e-9);
+            double[] onsets = [..melody.Select(x => x.Position)];
+            bool Decorates(PlannedNote note)
+            {
+                if (SegmentAt(note.Position)?.Gesture is not (SoloGesture.Run or SoloGesture.Lick or SoloGesture.Rhythm))
+                    return false;
+                var sung = Array.FindLastIndex(onsets, x => x <= note.Position + 1e-9);
+                if (sung < 0)
+                    return true;
+                var next = sung + 1 < onsets.Length ? onsets[sung + 1] : span.End;
+                return note.Position >= onsets[sung] + Math.Max(TuneHeld, (next - onsets[sung]) / 2) - 1e-9;
+            }
+
+            var decorations = planned.Where(Decorates).ToArray();
+            planned.Clear();
+            int[] tune = [..melody.Select(MelodyPitch)];
+            var shift = tune.Length == 0 ? 0 : 12 * (int)Math.Round((middle - (tune.Min() + tune.Max()) / 2.0) / 12);
+            foreach (var (note, pitch) in melody.Zip(tune))
+            {
+                var moved = pitch + shift;
+                while (moved > high)
+                    moved -= 12;
+                while (moved < low)
+                    moved += 12;
+                placing = SegmentAt(note.Position)?.Phrase ?? 0;
+                Add(note.Position, moved, SegmentAt(note.Position)?.Intensity ?? 0.5, octave: true);
+                // a note the melody alters off the scale, a blue note, altered as it sings it
+                planned[^1] = planned[^1] with { Chromatic = note.Value.GetStateValue(StateKinds.Alteration) != 0 };
+            }
+
+            StateTrace.RecordSection(TracePoints.SoloTune, SectionGenerator.SectionTrace, span.SectionId, $"{planned.Count} notes", planned.Select(x => (x.Position, x.Pitch)).ToArray());
+            planned.AddRange(decorations);
+            planned.Sort((a, b) => a.Position.CompareTo(b.Position));
         }
 
         // a run's note on a change's downbeat landing there now and then, by its own key's draw, the key it is placed with

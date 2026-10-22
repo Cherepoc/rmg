@@ -56,40 +56,21 @@ public sealed class ListeningQuestionsTest
     private static double? FirstSegment(CorpusSong song, Func<SoloLines.Segment, bool> takes) =>
         SoloPlans(song).SelectMany(x => x.Plan).Where(takes).Select(x => (double?)x.Start).Min();
 
-    /// <summary>Whether a song's soloist leaves space (<see cref="Soloist.Spacious" />).</summary>
-    private static bool Spacious(CorpusSong song) => song.Soloists.Values.Any(x => x.Spacious);
-
     private static readonly Question[] Questions =
     [
-        new("blues-space", "A Blues soloist leaving space, each line a short call, an answer and a rest for the band, its notes long: a singing solo, or too little played?",
-            "How often a soloist leaves space (soloStyle.space, the Blues' 40-50-60), against never.", "blues", [],
-            new() { ["soloStyle"] = new() { ["space"] = 0 } },
-            x => Spacious(x) ? SoloPlans(x).Select(p => (double?)x.Map.Sections[p.Index].Start).Min() : null, (x, span) => Soloed(x).Contains(span.SectionId)),
-        new("blues-pickups", "A Blues soloist's phrases coming in early, on a pickup before the bar: leading into the line, or rushing it?",
-            "How often a phrase comes in on a pickup (soloStyle.pickups, the Blues' 40-50-60), against never.", "blues", [],
-            new() { ["soloStyle"] = new() { ["pickups"] = 0 } },
-            x => FirstSegment(x, s => s.Gesture == SoloGesture.Run && Math.Abs(s.Start - Math.Round(s.Start)) > 1e-9 && s.End - s.Start <= 1.5 + 1e-9) is { } at ? at - 4 : null,
-            (x, span) => Soloed(x).Contains(span.SectionId)),
         new("funk-rhythm", "A Funk soloist riffing on the band's rhythm, a note or two struck short on its onsets: in the groove, or a soloist gone quiet?",
             "How often a soloist riffs on the band's rhythm (soloStyle.rhythm, Funk's 30-40-50), against never.", "funk", [],
             new() { ["soloStyle"] = new() { ["rhythm"] = 0 } },
             x => FirstSegment(x, s => s.Gesture == SoloGesture.Rhythm), (x, span) => Soloed(x).Contains(span.SectionId)),
-        new("folk-melody", "A Bluegrass break playing the tune's melody, decorated, rather than a line of its own: the tune's break, or a missed solo?",
-            "How often a folk genre's solo is on the melody (solos.own, Bluegrass's 0-20-40), against the songs' own chance (0-50-100).", "bluegrass", [],
-            new() { ["solos"] = new() { ["own"] = new[] { 0, 50, 100 } } },
-            x => SoloPlans(x).Select(p => (double?)x.Map.Sections[p.Index].Start).Min(), (x, span) => Soloed(x).Contains(span.SectionId)),
-        new("surf-tremolo", "A Surf riff tremolo-picked, every 16th on the note: the surf sound, or a buzz?",
-            "How often a Surf riff is tremolo-picked (figure.riff.tremolo, 30-40-50), against never.", "surf", [],
-            new() { ["figure.riff"] = new() { ["own"] = 100, ["tremolo"] = 0 } },
-            x => FirstOf(x, Tremolo(x)), (x, span) => Tremolo(x).Contains(span.SectionId))
+        new("folk-tune", "A Bluegrass break playing the tune sung before, every note of it, decorated between them, rather than a line of its own: the tune's break, or a missed solo?",
+            "Whether a folk genre's solo is on the melody (solos.own, Bluegrass's 0-20-40), against every solo its own.", "bluegrass", [],
+            new() { ["solos"] = new() { ["own"] = 100 } },
+            x => Tune(x).Select(i => (double?)x.Map.Sections[i].Start).Min(), (x, span) => Tune(x).Select(i => x.Map.Sections[i].SectionId).Contains(span.SectionId))
     ];
 
-    /// <summary>Where a song first plays a section of those, in beats; none where it plays none.</summary>
-    private static double? FirstOf(CorpusSong song, HashSet<int> sections) => song.Map.Sections.FirstOrDefault(x => sections.Contains(x.SectionId))?.Start;
-
-    /// <summary>The sections whose riff is tremolo-picked.</summary>
-    private static HashSet<int> Tremolo(CorpusSong song) =>
-        [..song.Trace.Where(x => x.Point == TracePoints.Figures && ((ImmutableDictionary<FigurePlayer, string>)x.Value!).GetValueOrDefault(FigurePlayer.Riff) == "tremolo").Select(x => x.Section)];
+    /// <summary>The places of a song's pitched solos on the melody, which play its tune.</summary>
+    private static int[] Tune(CorpusSong song) =>
+        [..song.Trace.Where(x => x.Point == TracePoints.SoloGestures).Select(x => ((int Index, bool IsOwn, SoloLines.Segment[]))x.Value!).Where(x => !x.IsOwn).Select(x => x.Index)];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

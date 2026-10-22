@@ -296,14 +296,18 @@ internal static class Solos
                 song = TrackEventStateTimelineMap.Create(song.Duration, song.TrackTimelineMap.SetItem(soloist, EventStateTimelineMap.Create(
                     song.Duration, EventTimeline.Create<StateMap>(song.Duration), song.TrackTimelineMap[trackOf[TrackRole.Melody]].StateTimelineMap)), song.CommonStateTimelineMap);
 
-            // the solo's line, in the first soloist's vocabulary and range
+            // the solo's line, in the first soloist's vocabulary and range, on the melody only where an appearance before it
+            // sang that melody, which the solo is then heard to be of, and its own where none did
             var first = trackOf[solo.Soloists[0]];
+            var sung = map.Sections.Take(index).Select((x, j) => (x, j)).Any(x => x.x.SectionId == span.SectionId && !solos.ContainsKey(x.j)
+                && song.TrackTimelineMap[trackOf[TrackRole.Melody]].EventTimeline.Any(n => n.IsWithin(x.x.Start, x.x.End)));
+            var isOwn = solo.IsOwn || !sung;
             var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
             // where the band strikes, the rhythm part's onsets, or the chords' where it plays none, which a riff strikes on
             var rhythm = trackOf.TryGetValue(TrackRole.Rhythm, out var rhythmTrack) && song.TrackTimelineMap.TryGetValue(rhythmTrack, out var comping) ? comping.EventTimeline.Where(IsIn).Select(x => x.Position).ToArray() : [];
             double[] groove = rhythm.Length > 0 ? rhythm : [..chordsHeld.Select(x => x.Position)];
-            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), pickups(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, span.Start, soloists[solo.Soloists[0]], solo.IsOwn, solo.IsOwn, melody, chordsHeld, groove, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
-            StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
+            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), pickups(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, span.Start, soloists[solo.Soloists[0]], isOwn, isOwn, melody, chordsHeld, groove, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(isOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, isOwn, segments));
 
             // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart
             var band = song.TrackTimelineMap

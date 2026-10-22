@@ -185,9 +185,12 @@ public sealed class SoloTest
     /// <summary>Blues songs whose soloists all leave space, or none does.</summary>
     private static Genre Spaced(double space) => GenrePresets.With("blues", GenreChoices.SoloStyle, ("pickups", 0.5), ("space", space));
 
-    /// <summary>A solo's notes, the solo part's, in each of its solos, with the solo's span.</summary>
+    /// <summary>
+    ///     A solo's notes, the solo part's, in each of its solos of its own, with the solo's span, the soloist's vocabulary
+    ///     played; a solo on the melody plays the tune whole instead.
+    /// </summary>
     private static IEnumerable<(SectionSpan Span, TimelineItem<RealizedNote>[] Notes, SoloLines.Segment[] Plan)> SolosNotes(CorpusSong song) =>
-        Plans(song).Select(x => (Span: song.Map.Sections[x.Index], x.Plan))
+        Plans(song).Where(x => x.IsOwn).Select(x => (Span: song.Map.Sections[x.Index], x.Plan))
             .Select(x => (x.Span, song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Solo))?.Where(n => n.Position >= x.Span.Start - 1e-9 && n.Position < x.Span.End - 1e-9).ToArray() ?? [], x.Plan));
 
     /// <summary>
@@ -451,16 +454,49 @@ public sealed class SoloTest
         await Assert.That(trading).IsGreaterThan(0);
     }
 
+    /// <summary>A plain solo on the melody where an appearance before it sang the melody, and its own where none did; a wild one its own.</summary>
     [Test]
-    public async Task APlainSolo_IsOnTheMelody_AndAWildOne_ItsOwn()
+    public async Task APlainSolo_IsOnTheMelodySungBefore_AndAWildOne_ItsOwn()
     {
-        var plain = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Gestures(TestCorpus.Get(seed, Facets(1, 0)))).SelectMany(x => x).ToArray();
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Facets(1, 0)) is var song ? Gestures(song).Select(x => (x.IsOwn, Sung: Sung(song, x.Index))) : []).SelectMany(x => x).ToArray();
         var wild = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Gestures(TestCorpus.Get(seed, Facets(1, 1)))).SelectMany(x => x).ToArray();
 
-        await Assert.That(plain.Length).IsGreaterThan(0);
-        await Assert.That(plain.All(x => !x.IsOwn)).IsTrue();
+        await Assert.That(plain.Count(x => x.Sung)).IsGreaterThan(0);
+        await Assert.That(plain.All(x => x.IsOwn != x.Sung)).IsTrue();
         await Assert.That(wild.Length).IsGreaterThan(0);
         await Assert.That(wild.All(x => x.IsOwn)).IsTrue();
+    }
+
+    /// <summary>Whether an appearance before a song's appearance at a place sang its section's melody, playing no solo.</summary>
+    private static bool Sung(CorpusSong song, int index) =>
+        Enumerable.Range(0, index).Any(j => song.Map.Sections[j].SectionId == song.Map.Sections[index].SectionId && !song.Solos.ContainsKey(j)
+                                            && song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Any(x => x.IsWithin(song.Map.Sections[j].Start, song.Map.Sections[j].End)) == true);
+
+    /// <summary>
+    ///     A break on the melody plays the tune whole: a lone soloist sounds every note of the melody it takes, at the note's
+    ///     start, in the pitch it plays it at; and the rest are its decorations, between the tune's notes. Measured over 64
+    ///     Bluegrass songs: SHARE of a break's notes the tune's.
+    /// </summary>
+    [Test]
+    public async Task ABreakOnTheMelody_PlaysTheTuneWhole()
+    {
+        var (tuneNotes, played) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("bluegrass")))))
+        {
+            var tunes = song.Trace.Where(x => x.Point == TracePoints.SoloTune).Select(x => ((double Position, int Pitch)[])x.Value!).ToArray();
+            foreach (var (index, _, _) in Plans(song).Where(x => !x.IsOwn && song.Solos[x.Index].Soloists.Length == 1))
+            {
+                var span = song.Map.Sections[index];
+                var tune = tunes.Single(x => x.Length > 0 && x[0].Position >= span.Start - 1e-9 && x[0].Position < span.End - 1e-9);
+                var solo = song.Song.Notes![song.Track(song.Solos[index].Soloists[0])].Where(n => n.IsWithin(span.Start, span.End)).ToArray();
+                foreach (var (position, pitch) in tune)
+                    await Assert.That(solo.Any(n => Math.Abs(n.Position - position) < 1e-6 && n.Value.Pitches.Any(p => (p - pitch).Mod(12) == 0))).IsTrue().Because($"seed {song.Seed} at {position}");
+                (tuneNotes, played) = (tuneNotes + tune.Length, played + solo.Length);
+            }
+        }
+
+        Console.WriteLine($"  {tuneNotes} of {played} notes of the breaks on the melody the tune's ({tuneNotes / (double)Math.Max(1, played):P0})");
+        await Assert.That(tuneNotes).IsGreaterThan(0);
     }
 
     [Test]
