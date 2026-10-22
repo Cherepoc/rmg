@@ -13,7 +13,7 @@ internal static class SurfDrops
     /// <summary>The chance a lift into a louder section takes a surf drop, by the next section's form facet: a genre's alone, Surf rock's.</summary>
     public static ByConvention Chance { get; } = new(0, 0, 0);
 
-    /// <summary>How far above its landing a drop starts, in semitones, an octave down the neck.</summary>
+    /// <summary>How far above its landing a drop starts at most, in semitones, an octave down the neck; a bar too short for it a semitone a stroke.</summary>
     public const int Fall = 12;
 
     /// <summary>How much softer a drop starts than the note before it and how much louder it ends, as a velocity sum, a swell into the section.</summary>
@@ -29,7 +29,7 @@ internal static class SurfDrops
     ///     The song with a surf drop into every louder section that draws one, from a sequence of its own by the section's
     ///     appearance, drawn for every one: the riff's guitar, or the melody's where no riff plays a guitar, its notes in the
     ///     bar before taken out and its 16ths there sliding down by semitones from an octave above the next section's first
-    ///     note to a semitone above it.
+    ///     note, or as far as a bar too short for it reaches a semitone a 16th, to a semitone above it.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
@@ -53,10 +53,11 @@ internal static class SurfDrops
                 continue;
             var before = timeline.LastOrDefault(x => x.Position < from - 1e-9) is { Value: not null } last ? last : landing;
             var strokes = (int)Math.Round((to - from) * 4);
+            var fall = Math.Min(Fall, strokes);
             var slide = Enumerable.Range(0, strokes).Select(k =>
             {
                 var share = strokes == 1 ? 1 : k / (double)(strokes - 1);
-                var pitch = landing.Value.Pitches.Max() + Fall - (int)Math.Round((Fall - 1) * share);
+                var pitch = landing.Value.Pitches.Max() + fall - (int)Math.Round((fall - 1) * share);
                 var state = before.Value.State.With(CompositionStateKinds.PalmMute, 1);
                 return new RealizedNote([pitch], before.Value.Velocity - FromSofter + (FromSofter + ToLouder) * share, 0.25, state).ToTimelineItem(from + k * 0.25);
             });

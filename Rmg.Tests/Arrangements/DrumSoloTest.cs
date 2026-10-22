@@ -383,7 +383,7 @@ public sealed class DrumSoloTest
     [Explicit]
     public async Task HowOftenReport()
     {
-        foreach (var genre in new string?[] { null, "rock", "pop", "punk", "metal", "thrash", "funk", "blues", "jazz", "latin", "dnb" })
+        foreach (var genre in new string?[] { null, "rock", "pop", "punk", "metal", "thrash", "funk", "blues", "jazz", "latin", "dnb", "surf" })
         {
             var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, genre is null ? new SongOverrides() : new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(genre))));
             var full = songs.SelectMany(x => x.Solos.Where(s => s.Value.IsDrumSolo).Select(s => x.Map.Sections[s.Key].BarCount)).ToArray();

@@ -2623,7 +2623,7 @@
       "effects": { "vibrato": [30, 50, 70], "bends": [0, 10, 20], "soloBends": [20, 30, 40], "dive": 0, "chorus": 0, "tone": 0, "tape": 0, "pinch": 0, "swell": 0 },
       "vibratoWidth": { "dip": 40, "slowStep": 30, "narrow": 30 },
       "solos": { "sections": [30, 40, 50], "trades": 0, "hits": [30, 40, 50], "own": [0, 50, 100] },
-      "soloists": { "solo": 100, "counterMelody": 30, "drum": 15 },
+      "soloists": { "solo": 100, "melody": 60, "riff": [20, 30, 40], "counterMelody": 30, "drum": [0, 5, 10] },
       "stops": { "songs": [30, 40, 40] },
       "stopTime": { "sections": [10, 15, 20], "returns": 30 },
       "drumSetup": { "kit": 100 },
