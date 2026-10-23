@@ -439,6 +439,43 @@ public sealed class SoloTest
         await Assert.That(celtic).IsEqualTo(0);
     }
 
+    /// <summary>
+    ///     A guitar solo leads high in the guitar's range whichever part plays it, a riff's tuned down raised by octaves
+    ///     into it, as a guitarist solos up the neck, and never past the instrument's top (measured: the riff part's solo notes'
+    ///     median 47-52 before, about 71-75 since, the solo part's 64-65 before, about 70-71 since).
+    /// </summary>
+    [Test]
+    [Arguments("metal")]
+    [Arguments("thrash")]
+    public async Task AGuitarSolo_LeadsHighInItsRange_WhicheverPartPlaysIt(string preset)
+    {
+        var pitches = new List<int>();
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
+        foreach (var (index, solo) in song.Solos.Where(x => !x.Value.IsDrumSolo))
+        foreach (var role in solo.Soloists.Where(x => x != TrackRole.Drum))
+        {
+            var track = song.Track(role);
+            var own = ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+            var span = song.Map.Sections[index];
+            foreach (var note in song.Song.Notes![track].Where(x => x.IsWithin(span.Start, span.End) && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) != 0))
+            {
+                var program = InstrumentsOverTime.ProgramOf(note.Value.State, own);
+                if (!InstrumentTraits.IsGuitar(program))
+                    continue;
+                // the line's note, an accent's octave above it apart
+                var pitch = note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0 ? note.Value.Pitches.Min() : note.Value.Pitches.Max();
+                pitches.Add(pitch);
+                await Assert.That(pitch).IsLessThanOrEqualTo(InstrumentRanges.Of(program).High).Because($"seed {song.Seed}, {role} at {note.Position}");
+            }
+        }
+
+        pitches.Sort();
+        var median = pitches[pitches.Count / 2];
+        Console.WriteLine($"  {preset}: {pitches.Count} guitar solo notes, median {median}");
+        await Assert.That(pitches.Count).IsGreaterThan(500);
+        await Assert.That(median).IsGreaterThanOrEqualTo(64);
+    }
+
     /// <summary>Soloists trading take whole phrases in turn: no phrase of the line runs over a turn's end.</summary>
     [Test]
     public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()

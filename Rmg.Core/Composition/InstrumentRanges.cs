@@ -39,6 +39,8 @@ public static class InstrumentRanges
         [21] = (53, 89), // accordion
         [22] = (60, 84), // harmonica
         [23] = (53, 89), // tango accordion
+        [29] = (40, 88), // overdriven guitar, its lead to the top fret's E
+        [30] = (40, 88), // distortion guitar
         [40] = (55, 100), // violin
         [41] = (48, 88), // viola
         [42] = (36, 76), // cello

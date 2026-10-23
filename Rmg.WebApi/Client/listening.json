@@ -25,6 +25,13 @@
         ]
       },
       {
+        "seed": "R",
+        "at": 244.7,
+        "listen": [
+          "Bass (Slap Bass 1)"
+        ]
+      },
+      {
         "seed": "a",
         "at": 191.9,
         "listen": [
@@ -35,14 +42,7 @@
         "seed": "g",
         "at": 129.3,
         "listen": [
-          "Solo (Trumpet)"
-        ]
-      },
-      {
-        "seed": "1H",
-        "at": 87.4,
-        "listen": [
-          "Melody (Tenor Sax)"
+          "Solo (Electric Guitar (clean))"
         ]
       },
       {
@@ -143,9 +143,16 @@
     "seeds": [
       {
         "seed": "1",
-        "at": 236,
+        "at": 301.5,
         "listen": [
           "Solo (Electric Guitar (jazz))"
+        ]
+      },
+      {
+        "seed": "2",
+        "at": 56,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
         ]
       },
       {
@@ -163,24 +170,17 @@
         ]
       },
       {
-        "seed": "B",
-        "at": 403.7,
-        "listen": [
-          "Chords (Electric Guitar (jazz))"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 125,
-        "listen": [
-          "Solo (Alto Sax)"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 146.2,
+        "seed": "A",
+        "at": 324.1,
         "listen": [
           "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 184,
+        "listen": [
+          "Chords (Electric Guitar (jazz))"
         ]
       }
     ]

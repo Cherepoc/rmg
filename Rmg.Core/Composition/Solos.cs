@@ -369,14 +369,21 @@ internal static class Solos
                 // a part trading its turns, its own line there, as a duel's players each play their own; a part together with
                 // the first: a unison doubling the line whole, its runs and its altered notes too, as two players doubling a line
                 // play it; a harmony leaving some out and the quick ones to the first, drawn all the same
+                // a part together played in the first's register, as twin guitars play a third apart, up by the octaves that
+                // bring it there but never past its instrument's top, its steps moved by the octaves the first's are raised by
+                // over its own (SoloLines.RaiseOf)
+                var firstRaise = SoloLines.RaiseOf((PitchInstrumentTrack)definitions[first]);
+                var raise = SoloLines.RaiseTo((PitchInstrumentTrack)definitions[trackOf[soloist]], (PitchInstrumentTrack)definitions[first], firstRaise);
+                var octaves = Scales.StepCount * (firstRaise - raise);
                 TimelineItem<StateMap>[] notes = solo.Mode == SoloMode.Trading
                     ? [..(place == 0 ? line : LineOf(soloist, place).Line).Where(x => solo.TurnAt(span, x.Position) == place)]
                     : place == 0
                         ? line
                         : line.Select((x, i) => (x, Kept: !context.TestProbability(LeftOutChance))).ToArray() is var drawn && solo.Step == 0
-                            ? line
+                            ? [..line.Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + octaves).With(CompositionStateKinds.LineRaise, raise).ToTimelineItem(x.Position))]
                             : [..drawn.Where((x, i) => x.Kept && (i + 1 >= line.Length || line[i + 1].Position - x.x.Position >= TogetherShortest - 1e-9))
-                                .Select(x => x.x.Value.With(StateKinds.ScaleStep, x.x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step).With(StateKinds.Alteration, 0).ToTimelineItem(x.x.Position))];
+                                .Select(x => x.x.Value.With(StateKinds.ScaleStep, x.x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step + octaves).With(StateKinds.Alteration, 0)
+                                    .With(CompositionStateKinds.LineRaise, raise).ToTimelineItem(x.x.Position))];
                 // over the band, however loud its part and its draws there, as a pad that solos is not comping any more
                 var track = song.TrackTimelineMap[trackOf[soloist]];
                 var heard = Realizer.GetNoteStates(

@@ -43,9 +43,11 @@ public sealed class SoloTwinTest
             {
                 var next = onsets.FirstOrDefault(x => x > at + 1e-6, double.PositiveInfinity);
                 await Assert.That(next - at).IsGreaterThanOrEqualTo(Rmg.Core.Composition.Solos.TogetherShortest - 1e-6).Because($"{because} at {at}");
-                // the first's note a third away, the first playing one with every note of the twin's
+                // the first's note a third away as heard, each part's steps played up by the octaves it is raised by, the first
+                // playing one with every note of the twin's
                 await Assert.That(first.TryGetValue(at, out var played)).IsTrue().Because($"{because} at {at}");
-                await Assert.That(state.GetStateValue(Rmg.Core.Events.StateKinds.ScaleStep) - played!.GetStateValue(Rmg.Core.Events.StateKinds.ScaleStep)).IsEqualTo(solo.Step).Because($"{because} at {at}");
+                int Heard(Rmg.Core.Events.StateMap note) => note.GetStateValue(Rmg.Core.Events.StateKinds.ScaleStep) + Rmg.Core.Composition.Scales.StepCount * note.GetStateValue(Rmg.Core.Composition.CompositionStateKinds.LineRaise);
+                await Assert.That(Heard(state) - Heard(played!)).IsEqualTo(solo.Step).Because($"{because} at {at}");
             }
         }
 

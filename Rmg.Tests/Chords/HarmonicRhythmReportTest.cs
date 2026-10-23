@@ -49,7 +49,8 @@ public sealed class HarmonicRhythmReportTest
         {
             var notes = song.Song.Notes![track];
             var (low, high) = Realizer.GetRange((Rmg.Core.Songs.PitchInstrumentTrack)song.Song.TrackDefinitions[track]);
-            await Assert.That(notes.All(x => x.Value.Pitches.All(p => p >= low - 12 && p <= high + 12))).IsTrue().Because($"seed {song.Seed}, track {track}");
+            // its range raised by the octaves a solo of its plays up (CompositionStateKinds.LineRaise)
+            await Assert.That(notes.All(x => x.Value.State.GetStateValue(CompositionStateKinds.LineRaise) * 12 is var raise && x.Value.Pitches.All(p => p >= low + raise - 12 && p <= high + raise + 12))).IsTrue().Because($"seed {song.Seed}, track {track}");
 
             var onsets = notes.Select(x => Math.Round(x.Position, 6)).ToHashSet();
             var through = song.ChordChanges.Where(x => x > notes[0].Position && x < notes[^1].Position).ToArray();

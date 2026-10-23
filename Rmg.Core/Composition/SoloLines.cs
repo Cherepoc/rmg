@@ -222,6 +222,33 @@ internal static class SoloLines
     /// <summary>The stream a lick's note draws whether it is a ghost from, by its key.</summary>
     private const int GhostStream = 1;
 
+    /// <summary>How far a soloist's register reaches either side of its middle, in semitones.</summary>
+    private static int Reach(Soloist soloist) => (int)Math.Round(soloist.RegisterSteps * 12 / 14.0);
+
+    /// <summary>
+    ///     The octaves a soloist's part plays its solo above its own range, high in its instrument's whatever part plays it,
+    ///     as a guitarist solos up the neck (<see cref="LeadShare" />): those that bring its range's middle nearest the lead
+    ///     where it lies under it, as a riff's tuned down does, but never its own top past the instrument's; played up by
+    ///     them (<see cref="CompositionStateKinds.LineRaise" />).
+    /// </summary>
+    internal static int RaiseOf(PitchInstrumentTrack definition)
+    {
+        var (ownLow, ownHigh) = Realizer.GetRange(definition);
+        var (instrumentLow, instrumentHigh) = InstrumentRanges.Of(definition.InstrumentCode);
+        var lead = instrumentLow + (int)Math.Round(LeadShare * (instrumentHigh - instrumentLow));
+        return Math.Clamp((int)Math.Round((lead - (ownLow + ownHigh) / 2.0) / 12), 0, Math.Max(0, (instrumentHigh - ownHigh) / 12));
+    }
+
+    /// <summary>The octaves a part plays a line up by to play it in another's register, raised as that one is, but never its own top past its instrument's.</summary>
+    internal static int RaiseTo(PitchInstrumentTrack definition, PitchInstrumentTrack other, int otherRaise)
+    {
+        var ((_, ownHigh), (_, otherHigh)) = (Realizer.GetRange(definition), Realizer.GetRange(other));
+        return Math.Clamp((int)Math.Round((otherHigh + 12 * otherRaise - ownHigh) / 12.0), 0, Math.Max(0, (InstrumentRanges.Of(definition.InstrumentCode).High - ownHigh) / 12));
+    }
+
+    /// <summary>How high in its instrument's range a soloist leads, as a share of it from its lowest note: two thirds up, a guitar's solo up the neck, a horn's in its bright upper register.</summary>
+    public const double LeadShare = 0.65;
+
     /// <summary>The stream a run's note on a change draws whether it lands there from, by its key (<see cref="Soloist.LandingChances" />).</summary>
     private const int LandingStream = 2;
 
@@ -271,12 +298,17 @@ internal static class SoloLines
         StateTimelineMap common
     )
     {
-        var (low, high) = Realizer.GetRange(definition);
-        // the soloist's register, its range in scale steps about the middle of the part's, a whole step inside the part's
-        // edges, as a note kept as its scale step moves by a step or so over the next chord and would fold an octave past one
-        var middle = (low + high) / 2;
-        var reach = (int)Math.Round(soloist.RegisterSteps * 12 / 14.0);
-        var (bottom, top) = (Math.Max(low + 2, middle - reach), Math.Min(high - 2, middle + reach));
+        // the soloist's register, its range in scale steps about where its instrument leads, a whole step inside its edges,
+        // as a note kept as its scale step moves by a step or so over the next chord and would fold an octave past one
+        var reach = Reach(soloist);
+        var raise = RaiseOf(definition);
+        var (ownLow, ownHigh) = Realizer.GetRange(definition);
+        var (instrumentLow, instrumentHigh) = InstrumentRanges.Of(definition.InstrumentCode);
+        var lead = instrumentLow + (int)Math.Round(LeadShare * (instrumentHigh - instrumentLow));
+        var (low, high) = (ownLow + 12 * raise, ownHigh + 12 * raise);
+        var middle = Math.Clamp(lead, Math.Min(low + reach, (low + high) / 2), Math.Max(high - reach, (low + high) / 2));
+        var bottom = Math.Max(low + 2, middle - reach);
+        var top = Math.Max(bottom, Math.Min(Math.Min(high, instrumentHigh) - 2, middle + reach));
 
         // the top of its register there: where the line climbs, a share of it the soloist's first phrase opens rising with the
         // solo's arc to the whole at its climax, so that its highest note comes there, and never under an octave over its bottom
@@ -337,10 +369,12 @@ internal static class SoloLines
                 .With(CompositionStateKinds.BeatRank, Math.Abs(sung.Position - position) < 1e-9 ? sung.Value.GetStateValue(CompositionStateKinds.BeatRank) : DyadicRankDistribution.MaxRank)
                 .With(CompositionStateKinds.NoteKey, KeyOf(position));
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0) + lift);
-            // a note off the scale the scale's step beside it, altered onto it
-            var step = LinePlacement.GetScaleStep(Chord(state, position), pitch);
+            // a note off the scale the scale's step beside it, altered onto it, kept under the octaves the line is raised by,
+            // which the note is played up by
+            var step = LinePlacement.GetScaleStep(Chord(state, position), pitch - 12 * raise);
             state = state.With(StateKinds.ScaleStep, step)
-                .With(StateKinds.Alteration, altered ? pitch - Chord(state, position).GetPitch(step) : 0)
+                .With(StateKinds.Alteration, altered ? pitch - 12 * raise - Chord(state, position).GetPitch(step) : 0)
+                .With(CompositionStateKinds.LineRaise, raise)
                 .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100))
                 .With(CompositionStateKinds.SoloRelease, release ? 1 : 0);
             // a stacked note the band's chord there under it, or the chord's shape planed (Realizer): the chords' note sounding

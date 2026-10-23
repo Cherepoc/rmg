@@ -192,8 +192,10 @@ internal static class InstrumentsOverTime
 
             result[track] = EventTimeline.Create(
                 notes[track].Duration,
-                // but a note in a section's form, calm or heavy (SectionForm), which keeps it
+                // but a note in a section's form, calm or heavy (SectionForm), which keeps it, and a soloist's, which plays its
+                // solo on the instrument its line was planned for, its own
                 notes[track].Select((x, i) => programs.TryGetValue(i, out var program) && program != pitched.InstrumentCode && x.Value.State.GetStateValue(CompositionStateKinds.Program) == 0
+                                              && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0
                     ? (x.Value with { State = x.Value.State.With(CompositionStateKinds.Program, program + 1) }).ToTimelineItem(x.Position)
                     : x)
             );
