@@ -61,9 +61,11 @@ internal static class Pocket
             bool WithKick(double position) => definition.Role == TrackRole.Bass && song.Form.Map.PlayingAt(position) is { Span: var span }
                                               && draft.Figures.GetValueOrDefault(span.SectionId)?.GetValueOrDefault(FigurePlayer.Bass) is { } figure
                                               && Figures.Of(FigurePlayer.Bass, figure)?.Follows == FigurePlayer.Ground;
+            // a drum in a fill or a drum solo, a run round the kit, all on the kick's time, so that its strokes keep together
+            bool Runs(double position) => definition.Role == TrackRole.Drum && holds.At(Hold.Fill | Hold.DrumSolo, position, track);
             // in beats at the tempo where the note plays
-            double Beats(double position) => holds.At(Hold.Stop, position) ? 0 : (WithKick(position) ? onKick : offset) * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position));
-            result[track] = EventTimeline.Create(timeline.Duration, timeline.Select(note => offset == 0 || Beats(note.Position) == 0
+            double Beats(double position) => holds.At(Hold.Stop, position) ? 0 : (WithKick(position) || Runs(position) ? onKick : offset) * Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position));
+            result[track] = EventTimeline.Create(timeline.Duration, timeline.Select(note => Beats(note.Position) == 0
                 ? note
                 : (note.Value with { State = note.Value.State.With(CompositionStateKinds.TimingOffset, Beats(note.Position)) }).ToTimelineItem(note.Position)));
         }

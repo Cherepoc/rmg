@@ -156,10 +156,12 @@ internal static class DrumMarks
                 marks[roller].AddRange(Roll(Typical(roller, span), span.Start, 1, 0, rate));
         }
 
+        // none in a part the form stops, a stop ending's silence, which a swell into it rolls up to
+        var holds = draft.Holds(song);
         var result = notes.ToBuilder();
         foreach (var track in drums)
             result[track] = EventTimeline.Create<RealizedNote>(notes[track].Duration,
-                marks.TryGetValue(track, out var own) ? own.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position) : []);
+                marks.TryGetValue(track, out var own) ? own.Where(x => !holds.At(Hold.Cut, x.Position, track)).GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position) : []);
         StateTrace.RecordSong(TracePoints.DrumMarks, string.Join(", ", marking), marking.ToImmutableArray());
         return draft with { Notes = result.ToImmutable() };
 

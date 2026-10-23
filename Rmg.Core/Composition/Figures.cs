@@ -88,6 +88,9 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 /// </summary>
 internal static class Figures
 {
+    /// <summary>What a drum's figure keeps out of: a drop's build roll, which the form wrote into its bars, and a part the form stops.</summary>
+    internal const Hold KeepsOutOf = Hold.Build | Hold.Cut;
+
     /// <summary>The players in the turns they play their figures in, each turn after what it follows.</summary>
     private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves, FigurePlayer.Chords], [FigurePlayer.Ground], [FigurePlayer.Bass]];
 
@@ -294,13 +297,16 @@ internal static class Figures
                                     : [..figure.Onsets.Select(x => x - (barsBefore[span] + index) % (figure.Sixteenths / span.Meter.Sixteenths) * span.Meter.Sixteenths)
                                         .Where(x => x >= 0 && x < span.Meter.Sixteenths).Select(x => bar + x * 0.25)];
                             onsets = [..onsets.Where(x => !holds.At(Hold.Cut, x, track))];
+                            var held = Drums.Contains(player) && holds.Meets(KeepsOutOf, bar, end, track);
                             // in a bar both play, each struck as the player's own note at or before it was; one around the kick
                             // where the kick plays, the player's own rhythm where it rests; and no drum's of fixed onsets in half
                             // or double time, whose figure is the drum's own rhythm stretched or pressed, as the time feel
                             // stretches the drums alone, but one that follows, whose notes are as what it follows plays them
                             // there, a breakdown's kick on its chugs, and the kick's steady step, a double kick's 16ths or a
                             // blast's 8ths, no groove the time feel stretches, under the backbeat it halves or doubles
-                            if (own.Length == 0 || onsets.Length == 0 || song.SectionOf(span.SectionId).TimeFeel != 0 && figure.Follows is null && Drums.Contains(player)
+                            // and a drum's never over a drop's build roll, which the form wrote into the bar
+                            if (own.Length == 0 || onsets.Length == 0 || held
+                                || song.SectionOf(span.SectionId).TimeFeel != 0 && figure.Follows is null && Drums.Contains(player)
                                 && !(player == FigurePlayer.Ground && figure.Step > 0)
                                 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
                                 continue;
@@ -368,6 +374,8 @@ internal static class Figures
         // the other drums, which play where the drums do
         var others = draft.Timeline.TrackTimelineMap.Keys.Where(x => song.Tracks.Definitions[x].Role == TrackRole.Drum && !snares.Contains(x)).ToArray();
         bool DrumsPlay(double start, double end) => others.Any(t => draft.Timeline.TrackTimelineMap[t].EventTimeline.Any(x => x.IsWithin(start, end)));
+        // and never in a part the form stops
+        var holds = draft.Holds(song);
 
         return draft with
         {
@@ -388,7 +396,8 @@ internal static class Figures
                         var (start, end) = span.Bar(bar);
                         if (played.Any(x => x.IsWithin(start, end)) || !DrumsPlay(start, end))
                             continue;
-                        played.AddRange(span.Meter.BackbeatsIn(song.SectionOf(span.SectionId).TimeFeel).Select(x => start + x).Where(x => x < end - 1e-9).Select(x => own.MergeWith(head).ToTimelineItem(x)));
+                        played.AddRange(span.Meter.BackbeatsIn(song.SectionOf(span.SectionId).TimeFeel).Select(x => start + x)
+                            .Where(x => x < end - 1e-9 && !holds.At(Hold.Cut, x, track)).Select(x => own.MergeWith(head).ToTimelineItem(x)));
                     }
                 }
 

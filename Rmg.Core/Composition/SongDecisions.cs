@@ -56,7 +56,7 @@ internal sealed record SongDecisions(
     public ImmutableArray<(double Start, double End, double BarDuration)> StopTime => _stopTime ??= StopTimeSkipped ? [] : [..Composition.StopTime.Phrases(this)];
 
     /// <summary>Whether the song is made without its stop time, as a listening test compares it, which every stage keeping to it then keeps to.</summary>
-    public bool StopTimeSkipped { get; init; }
+    public bool StopTimeSkipped { get; private init; }
 
     private ImmutableArray<(double Start, double End, double BarDuration)>? _stopTime;
 
@@ -121,8 +121,9 @@ internal sealed record SongDecisions(
     ///     were; what is given used in place of its draw, which is made all the same.
     /// </summary>
     /// <param name="overrides">What a test or a request sets in place of the song's own draws.</param>
+    /// <param name="stopTimeSkipped">Whether the song is made without its stop time, so that a drum solo over the band's hits rests the band as any drum solo does.</param>
     /// <param name="cancellation">Gives the song up between its sections, which draw nothing to check it.</param>
-    internal static SongDecisions Draw(ulong seed, SongOverrides overrides, CancellationToken cancellation)
+    internal static SongDecisions Draw(ulong seed, SongOverrides overrides, bool stopTimeSkipped, CancellationToken cancellation)
     {
         // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
         // stage draws leaves what the others draw as it was
@@ -398,9 +399,10 @@ internal sealed record SongDecisions(
         // and played by two parts together a third apart now and then, each from a sequence of its own
         drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTwin(SongGenerator.CreateStream(seed, SongStream.SoloTwins, AppearanceKey(played, index)), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
-        // and a drum solo over the band's hits now and then, from a sequence of its own
+        // and a drum solo over the band's hits now and then, from a sequence of its own, drawn all the same where the song
+        // plays no stop time to strike them, which leaves the solo as it is
         drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithHits(SongGenerator.CreateStream(seed, SongStream.SoloHits, AppearanceKey(played, index)), x,
-            generateSection(played[index]).Facets[Facet.Groove], genre))];
+            generateSection(played[index]).Facets[Facet.Groove], genre) is var hit && stopTimeSkipped ? x : hit)];
         // drums that only mark the form neither solo nor trade, as they play no groove to solo from, the appearance played as
         // it is, or by its pitched soloists alone
         if (drumJob != DrumJob.Groove)
@@ -493,7 +495,7 @@ internal sealed record SongDecisions(
             // the song's effects, decided before its notes, the part playing its strong one among those it plays
             Expression.DrawSound(Stream(SongStream.Effects), songUnconventionality[Facet.Sound], genre, tracks.Definitions,
                 tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).Select(x => x.Key).ToHashSet(),
-                effect => SongGenerator.CreateStream(seed, SongStream.StrongEffects, (int)effect)), mood);
+                effect => SongGenerator.CreateStream(seed, SongStream.StrongEffects, (int)effect)), mood) { StopTimeSkipped = stopTimeSkipped };
     }
 
     /// <summary>

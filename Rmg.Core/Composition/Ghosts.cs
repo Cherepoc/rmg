@@ -9,7 +9,7 @@ namespace Rmg.Core.Composition;
 internal static class Ghosts
 {
     /// <summary>What a ghost keeps out of: a fill, stop time, a drum solo and the snare stopped by the form.</summary>
-    private const Hold KeepsOutOf = Hold.Fill | Hold.Build | Hold.Stop | Hold.DrumSolo | Hold.Cut | Hold.Polymeter;
+    internal const Hold KeepsOutOf = Hold.Fill | Hold.Build | Hold.Stop | Hold.DrumSolo | Hold.Cut | Hold.Polymeter;
 
     /// <summary>The chance a section's snare plays ghost notes around its backbeat, by its groove facet: the songs' never; a genre's where it names it.</summary>
     public static ByConvention Chance { get; } = new(0, 0, 0);

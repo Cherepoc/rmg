@@ -80,6 +80,6 @@ internal static class CallAndResponse
             Rest(song.Tracks.Definitions[answering].Role, at => halves.Any(h => h.Answerer == answering && at >= h.Start - 1e-9 && at < h.Half - 1e-9));
         // the halves handed on, which the stages after keep out of: stop time out of the answer, the solo part's answers too
         ImmutableArray<HeldSpan> calls = [..halves.SelectMany(x => new[] { new HeldSpan(Hold.Call, x.Start, x.Half, melodyTrack), new HeldSpan(Hold.Answer, x.Half, x.End, x.Answerer) })];
-        return draft with { Timeline = draft.Timeline.MapTrackEvents(edits), Calls = calls };
+        return draft with { Timeline = draft.Timeline.MapTrackEvents(edits), Held = [..draft.Held, ..calls] };
     }
 }

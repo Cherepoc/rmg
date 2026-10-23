@@ -438,11 +438,13 @@ internal sealed class FillGenerator
         // no further back than the line leaves it room
         span = Math.Min(span, room);
         var from = line - span;
-        // a kick-out only where the rest of the groove plays on into the line, the groove kept where the kick plays alone, as
-        // in an intro's bar of the kick and the bass, which taking it out would leave silent
+        // a kick-out only where the kick plays into the line and the rest of the groove plays on, the groove kept where the
+        // kick plays alone, as in an intro's bar of the kick and the bass, which taking it out would leave silent, and where
+        // the kick plays none, which leaves nothing to take out
         var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
-        if (play.Treatment == GrooveTreatment.KickOut && !song.TrackTimelineMap.Any(t => t.Key >= DrumGroups.FirstTrackNumber && t.Key != kick
-                && t.Value.EventTimeline.Any(x => x.Position >= from - 1e-9 && x.Position < line - 1e-9 && edits.Strikes(song, t.Key, x.Position))))
+        bool Strikes(int track) => song.TrackTimelineMap.TryGetValue(track, out var timeline)
+                                   && timeline.EventTimeline.Any(x => x.Position >= from - 1e-9 && x.Position < line - 1e-9 && edits.Strikes(song, track, x.Position));
+        if (play.Treatment == GrooveTreatment.KickOut && (!Strikes(kick) || !_drumTracks.Any(x => x != kick && Strikes(x))))
             play = play with { Treatment = GrooveTreatment.Keep };
 
         var cleared = play.Treatment switch

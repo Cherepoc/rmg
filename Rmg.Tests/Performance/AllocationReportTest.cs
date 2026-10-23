@@ -20,7 +20,7 @@ public sealed class AllocationReportTest
         for (var seed = 0UL; seed < count; seed++)
         {
             var before = GC.GetAllocatedBytesForCurrentThread();
-            SongDecisions.Draw(seed, SongOverrides.None, CancellationToken.None);
+            SongDecisions.Draw(seed, SongOverrides.None, false, CancellationToken.None);
             decided += GC.GetAllocatedBytesForCurrentThread() - before;
         }
 

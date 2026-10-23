@@ -8,8 +8,8 @@ namespace Rmg.Core.Composition;
 /// <summary>The snare's flams and drags, a stage of the song after its notes are made (<see cref="SongStages" />).</summary>
 internal static class DrumOrnaments
 {
-    /// <summary>What a flam or a drag keeps out of: stop time, a drum solo, whose strokes are the drummer's own, and the snare stopped by the form.</summary>
-    private const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo | Hold.Cut;
+    /// <summary>What a flam or a drag keeps out of: stop time, a drum solo, whose strokes are the drummer's own, a drop's build roll and the snare stopped by the form.</summary>
+    internal const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo | Hold.Build | Hold.Cut;
 
     /// <summary>The chance a song's snare flams its beats in a fill, by its fills facet: never at the plain end, every song at the wild.</summary>
     public static ByConvention FlamChance { get; } = new(0, 0.25, 1);

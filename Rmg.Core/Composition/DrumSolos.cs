@@ -243,9 +243,8 @@ internal static class DrumSolos
                 index => song.AppearanceStream(SongStream.DrumSoloSounds, index),
                 index => song.AppearanceStream(SongStream.DrumSoloPickups, index),
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
-                song.Form.Drops,
-                // where the form next stops the drums, which a drum solo keeps out of as every drum stage does
-                position => song.Tracks.Definitions.Where(x => x.Value is PercussionInstrumentTrack).Select(x => holds.NextAfter(Hold.Cut, position, x.Key)).DefaultIfEmpty(double.PositiveInfinity).Min(),
+                // where the form next holds the drums, which a drum solo keeps out of as every drum stage does
+                position => song.Tracks.Definitions.Where(x => x.Value is PercussionInstrumentTrack).Select(x => holds.NextAfter(Hold.Build | Hold.Cut, position, x.Key)).DefaultIfEmpty(double.PositiveInfinity).Min(),
                 song.Genre,
                 song.Meter,
                 DrumSounds.OddsOf(song.Genre, GenreChoices.DrumSounds),
@@ -271,8 +270,7 @@ internal static class DrumSolos
     /// <param name="pickups">A solo's draws of which phrases come in on a pickup, by its appearance's place.</param>
     /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
-    /// <param name="drops">Where the song drops, whose build a solo before it leaves to roll.</param>
-    /// <param name="stopsAfter">Where the form next stops the drums after a position, a stop ending's silence, which a solo keeps out of.</param>
+    /// <param name="stopsAfter">Where the form next holds the drums after a position, a drop's build and its silent bar, a stop ending's silence, which a solo keeps out of.</param>
     private static TrackEventStateTimelineMap<StateMap> Play(
         TrackEventStateTimelineMap<StateMap> song,
         IEnumerable<PercussionInstrumentDefinition> songDrums,
@@ -291,7 +289,6 @@ internal static class DrumSolos
         Func<int, IGenerationContext> colours,
         Func<int, IGenerationContext> pickups,
         Func<int, double> groove,
-        IReadOnlyCollection<double> drops,
         Func<double, double> stopsAfter,
         Genre genre,
         Meter meter,
@@ -322,15 +319,14 @@ internal static class DrumSolos
                 return cleared.ApplyTo(played);
             }
 
-            // all but its last bar, a short one's, the fill's into the section after, and the bars a build rolls over into a
-            // drop after it
-            // nor where the form stops the drums, a stop ending's silence
-            var (dropsAfter, stopsAt) = (drops.Any(x => Math.Abs(x - whole.End) < 1e-9), stopsAfter(whole.Start));
+            // all but its last bar, a short one's, the fill's into the section after, nor where the form holds the drums, a
+            // drop's build and its silent bar, a stop ending's silence
+            var stopsAt = stopsAfter(whole.Start);
             // but the solo's own build in its last bars where it plays to the section's end, in the drums' turn, a solo of a
             // few bars or more, the fill's landing after it on the next section's first beat
             var buildFrom = whole.End - (whole.BarCount >= LongBuildBars ? 2 : 1) * whole.Meter.BarDuration;
-            var builds = !dropsAfter && stopsAt >= whole.End - 1e-9 && whole.Cut == 0 && whole.BarCount >= BuildingBars && IsDrumsTurn(buildFrom);
-            var until = builds ? buildFrom : Math.Min(dropsAfter ? whole.LastBar - FormLayers.BuildRollBars * whole.Meter.BarDuration : whole.LastBar, stopsAt);
+            var builds = stopsAt >= whole.End - 1e-9 && whole.Cut == 0 && whole.BarCount >= BuildingBars && IsDrumsTurn(buildFrom);
+            var until = builds ? buildFrom : Math.Min(whole.LastBar, stopsAt);
             var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, until - whole.Start), Cut = 0 };
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
                                           track.EventTimeline.Any(x => x.IsWithin(span.Start, span.End));

@@ -12,8 +12,8 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal static class StopTime
 {
-    /// <summary>What stop time keeps out of: a calling verse, its call and its answer.</summary>
-    private const Hold KeepsOutOf = Hold.Call | Hold.Answer;
+    /// <summary>What stop time keeps out of: a calling verse, its call and its answer, and a drop's build roll.</summary>
+    internal const Hold KeepsOutOf = Hold.Call | Hold.Answer | Hold.Build;
 
     /// <summary>
     ///     The chance a section of a song that stops plays its appearances' first phrase in stop time, by its form facet: never in the plainest
@@ -80,10 +80,13 @@ internal static class StopTime
         bool[] again = [..sections.Select((x, i) => song.AppearanceStream(SongStream.StopReturns, i)
             .TestProbability(ReturnChance.At(song.SectionOf(x.SectionId).Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "returns"))))];
         bool Stopped(SectionSpan span, int index) => stopping[span.SectionId] && (again[index] || !sections.Take(index).Any(x => x.SectionId == span.SectionId));
-        // and but in a solo, whose soloists play over the band as loud as it was measured, as a push leaves a solo be
+        // and but in a solo, whose soloists play over the band as loud as it was measured, as a push leaves a solo be, and an
+        // appearance whose texture leaves parts out of its first phrase, building or opening on one part alone, as the
+        // section an intro builds is left
+        bool Thinned(int index) => song.Sections[index].PhraseSilent is [{ Count: > 0 }, ..];
         return
         [
-            ..sections.Where((x, i) => Stopped(x, i) && x != built && !song.Solos.ContainsKey(i))
+            ..sections.Where((x, i) => Stopped(x, i) && x != built && !song.Solos.ContainsKey(i) && !Thinned(i))
                 .Select(x => (x.Start, Math.Min(x.End, x.Start + x.Meter.PhraseDuration), x.Meter.BarDuration))
         ];
     }

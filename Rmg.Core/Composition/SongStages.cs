@@ -30,13 +30,11 @@ internal sealed record SongDraft(
     /// </summary>
     public ImmutableArray<(double Start, double End, double BarDuration)> Stopped { get; init; } = [];
 
-    /// <summary>A calling verse's halves, the melody's call and a part's answer, which the stages after keep out of (<see cref="Composition.CallAndResponse" />).</summary>
-    public ImmutableArray<HeldSpan> Calls { get; init; } = [];
-
-    /// <summary>Where the drums take the kick out, which the bass leaves with it (<see cref="SongStages.KickOutBass" />).</summary>
-    public ImmutableArray<(double From, double To)> KickOuts { get; init; } = [];
-
-    /// <summary>The stretches the stages have made that the others keep out of, each written by the stage that made it: a fill, a kick-out.</summary>
+    /// <summary>
+    ///     The stretches the stages have made that the others keep out of, each written by the stage that made it: a fill, a
+    ///     kick-out, which the bass leaves with the kick (<see cref="SongStages.KickOutBass" />), a polymeter's sections, a
+    ///     drum solo's turns, a calling verse's call and its answer (<see cref="Composition.CallAndResponse" />).
+    /// </summary>
     public ImmutableArray<HeldSpan> Held { get; init; } = [];
 
     /// <summary>Where the drums fill, from a fill's start to its line, which the stages that play around a fill keep out of.</summary>
@@ -44,9 +42,9 @@ internal sealed record SongDraft(
 
     /// <summary>
     ///     What the song holds, which a stage keeps out of by the kinds it names (<see cref="Hold" />): what the stages wrote
-    ///     (<see cref="Held" />), a fill, a kick-out and a polymeter's sections, a drop's build, its stop time as played, its
-    ///     solos and its drum solos and trades,
-    ///     a calling verse's call and answer, and where the form stops a part (<see cref="TimelineEdits.StopsOf" />).
+    ///     (<see cref="Held" />), a fill, a kick-out, a polymeter's sections, a drum solo's turns and a calling verse's call
+    ///     and answer; a drop's build, its stop time as played, its solos, and where the form stops a part
+    ///     (<see cref="TimelineEdits.StopsOf" />).
     /// </summary>
     public Holds Holds(SongDecisions song) => new(
     [
@@ -54,8 +52,7 @@ internal sealed record SongDraft(
         ..song.Form.Builds.Select(x => new HeldSpan(Hold.Build, x.From, x.To, null)),
         ..Stopped.Select(x => new HeldSpan(Hold.Stop, x.Start, x.End, null)),
         ..song.Solos.Keys.Select(x => song.Form.Map.Sections[x]).Select(x => new HeldSpan(Hold.Solo, x.Start, x.End, null)),
-        ..song.Tracks.Definitions.Keys.SelectMany(track => song.Form.Edits.StopsOf(track).Select(x => new HeldSpan(Hold.Cut, x.From, x.To, track))),
-        ..Calls
+        ..song.Tracks.Definitions.Keys.SelectMany(track => song.Form.Edits.StopsOf(track).Select(x => new HeldSpan(Hold.Cut, x.From, x.To, track)))
     ]);
 }
 
@@ -282,13 +279,13 @@ internal static class SongStages
         return draft with
         {
             Timeline = timeline,
+            // none where the drums mark the form, which plays no fill nor kick-out
             Runs = song.DrumJob == DrumJob.Marks ? [] : fills.Runs,
-            KickOuts = [..fills.KickOuts],
             Held =
             [
                 ..draft.Held,
                 ..(song.DrumJob == DrumJob.Marks ? [] : fills.Spans).Select(x => new HeldSpan(Hold.Fill, x.From, x.To, null)),
-                ..fills.KickOuts.Select(x => new HeldSpan(Hold.KickOut, x.From, x.To, null))
+                ..(song.DrumJob == DrumJob.Marks ? [] : fills.KickOuts).Select(x => new HeldSpan(Hold.KickOut, x.From, x.To, null))
             ]
         };
     }
@@ -429,7 +426,7 @@ internal static class SongStages
         foreach (var track in song.Roles.Where(x => x.Value == TrackRole.Bass).Select(x => x.Key).Where(notes.ContainsKey))
         {
             var timeline = notes[track];
-            foreach (var (from, to) in draft.KickOuts)
+            foreach (var (_, from, to, _) in draft.Holds(song).Of(Hold.KickOut))
                 timeline = EventTimeline.Create(timeline.Duration, timeline.Where(x => x.Position < from - 1e-9 || x.Position >= to - 1e-9)
                     .Select(x => x.Position < from - 1e-9 && x.Position + x.Value.Duration > from + 1e-9 ? (x.Value with { Duration = from - x.Position }).ToTimelineItem(x.Position) : x));
             notes = notes.SetItem(track, timeline);

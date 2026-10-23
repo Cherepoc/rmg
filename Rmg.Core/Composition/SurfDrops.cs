@@ -23,7 +23,7 @@ internal static class SurfDrops
     private const int FirstGuitar = 24, LastGuitar = 31;
 
     /// <summary>What a drop keeps out of: stop time, a drum solo, a solo, a build into a drop and a cut.</summary>
-    private const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo | Hold.Solo | Hold.Build | Hold.Cut;
+    internal const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo | Hold.Solo | Hold.Build | Hold.Cut;
 
     /// <summary>
     ///     The song with a surf drop into every louder section that draws one, from a sequence of its own by the section's

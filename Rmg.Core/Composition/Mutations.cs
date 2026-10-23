@@ -42,6 +42,9 @@ public sealed record Mutation(MutationKind Kind, int Track, double At, double By
 /// </summary>
 internal static class Mutations
 {
+    /// <summary>What the edits keep out of: a polymeter's cycle, whose section plays none, a drop's build roll and a part the form stops.</summary>
+    internal const Hold KeepsOutOf = Hold.Build | Hold.Cut;
+
     /// <summary>The chance a bar adds an edit, by the groove facet: a wild song's alone, as often as a genre has it.</summary>
     public static ByConvention Chance { get; } = new(0, 0, 0.4);
 
@@ -106,12 +109,15 @@ internal static class Mutations
                 var count = context.TestProbability(chance) ? context.TestProbability(SecondEdit) ? 2 : 1 : 0;
                 // the edits kept from the bars before laid first, and every new edit drawn on what they leave, those that find
                 // something to edit made
-                foreach (var mutation in edits)
+                // but none in a stretch it keeps out of, a drop's build roll and a part the form stops, its draws made all the same
+                bool Free(Mutation mutation) => !holds.Meets(KeepsOutOf, start, barEnd, mutation.Track);
+                foreach (var mutation in edits.Where(Free))
                     Lay(mutation, played, own, start, length, span.Meter, kicks, snares, anchored);
                 for (var edit = 0; edit < count; edit++)
                     if (Draw(context, played, own, start, length, span.Meter, kicks, snares, anchored) is { } mutation)
                     {
-                        Lay(mutation, played, own, start, length, span.Meter, kicks, snares, anchored);
+                        if (Free(mutation))
+                            Lay(mutation, played, own, start, length, span.Meter, kicks, snares, anchored);
                         edits.Add(mutation);
                         made++;
                     }

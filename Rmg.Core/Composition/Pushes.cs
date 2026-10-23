@@ -33,14 +33,13 @@ internal static class Pushes
         // but in a solo, in a polymeter, whose cycle runs across the changes, and in stop time and out of it, whose hits stay
         // on the bar
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
-        var stopTime = draft.Stopped;
         // nor into a kick-out, where the kick and the bass leave the change they would push
         var holds = draft.Holds(song);
         // every stretch the song plays as a section, an intro's window and the ending as their sections
         var pushes = song.Form.Map.Plays.Select(x => x.Span).Where(x => pushing[x.SectionId] && !holds.Meets(Hold.Solo | Hold.Polymeter, x.Start, x.End))
             .SelectMany(span => changes.Where(x => span.Bars.Skip(1).Any(bar => Math.Abs(bar.Start - x) < 1e-6))
                 .Select(x => (At: x, span.Meter.BarDuration)))
-            .Where(x => !stopTime.Any(p => x.At >= p.Start - 1e-9 && x.At <= p.End + 1e-9) && !holds.Meets(Hold.KickOut, x.At - Early, x.At))
+            .Where(x => !holds.At(Hold.Stop, x.At) && !holds.At(Hold.Stop, x.At - 1e-6) && !holds.Meets(Hold.KickOut, x.At - Early, x.At))
             .ToArray();
         if (pushes.Length == 0)
             return draft;
