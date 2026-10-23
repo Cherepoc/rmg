@@ -61,8 +61,76 @@ public sealed class ListeningQuestionsTest
         new("funk-rhythm", "A Funk soloist riffing on the band's rhythm, a note or two struck short on its onsets: in the groove, or a soloist gone quiet?",
             "How often a soloist riffs on the band's rhythm (soloStyle.rhythm, Funk's 30-40-50), against never.", "funk", [],
             new() { ["soloStyle"] = new() { ["rhythm"] = 0 } },
-            x => FirstSegment(x, s => s.Gesture == SoloGesture.Rhythm), (x, span) => Soloed(x).Contains(x.Map.Sections.IndexOf(span)))
+            x => FirstSegment(x, s => s.Gesture == SoloGesture.Rhythm), (x, span) => Soloed(x).Contains(x.Map.Sections.IndexOf(span))),
+        new("surf-drop", "A Surf guitar's last bar before a louder section slid down the neck in palm-muted 16ths onto it: the surf drop, or a gimmick?",
+            "Whether a lift into a louder section takes a surf drop (surfDrop.lifts, Surf's 30-40-50), against none.", "surf", [],
+            new() { ["surfDrop"] = new() { ["lifts"] = 0 } },
+            x => Drops(x).Select(d => (double?)d.From - 2).Min(), (x, span) => Drops(x).Any(d => Math.Abs(d.To - span.End) < 1e-6)),
+        new("jazz-chromatic", "A Jazz soloist's run approaching its note on the beat from a half step away: a jazz line, or a wrong note?",
+            "How often a soloist's run approaches its note on the beat chromatically (soloStyle.chromatic, Jazz's 40-50-60), against never.", "jazz", [],
+            new() { ["soloStyle"] = new() { ["chromatic"] = 0 } },
+            x => FirstSegment(x, s => s.Gesture == SoloGesture.Run), (x, span) => Soloed(x).Contains(x.Map.Sections.IndexOf(span))),
+        new("idm-64ths", "An IDM hi-hat rolling in 64ths, a drill splintering the beat: the style's, or a buzz?",
+            "How often IDM's hat rolls drill in 64ths (hatRollRate.sixtyFourths, 0-20-60), against its 32nds and triplets alone.", "idm", [],
+            new() { ["hatRollRate"] = new() { ["sixtyFourths"] = 0 } },
+            x => x.Trace.Where(e => e.Point == TracePoints.HatRolls).SelectMany(e => (ImmutableArray<(double From, double To, int Rate)>)e.Value!).Where(r => r.Rate == 16).Select(r => (double?)r.From - 2).Min()),
+        new("rock-turnaround", "A Rock riff turning round into its next cycle, a walk up or down on its last beat: a riff band's, or a stumble?",
+            "How often a riff turns round where its pattern starts again (riff.turnaround, Rock's 30-40-40), against never.", "rock", [],
+            new() { ["riff"] = new() { ["turnaround"] = 0 } },
+            x => x.Trace.Where(e => e.Point == TracePoints.LineFill && e.Track == x.Track(TrackRole.Riff)).Select(e => (double?)(((double, double[]))e.Value!).Item1 - 2).Min()),
+        new("techno-kickout", "A Techno kick dropping out for a line before the next section, the band going on without it: a DJ's tension, or a hole?",
+            "How often the kick drops out for a phrase's last line (kickOut.lines, Techno's 20-30-40), against never.", "techno", [],
+            new() { ["kickOut"] = new() { ["lines"] = 0 } },
+            x => KickOuts(x).Select(k => (double?)k.From - 2).Min(), (x, span) => KickOuts(x).Any(k => k.From >= span.Start - 1e-9 && k.From < span.End - 1e-9)),
+        new("soul-reharmonised", "A Soul song's later chorus over new chords under the same melody: a lift, or the chorus lost?",
+            "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.", "soul", [],
+            new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
+            x => Reharmonised(x) is { } r ? r.Substitutes.Min() : null, (x, span) => Reharmonised(x) is { } r && x.Map.Sections.IndexOf(span) == r.Index),
+        new("metal-verse-riff", "A Metal verse sung over the intro's riff: the band's main riff carrying the song, or a verse with nothing of its own?",
+            "How often a verse plays over the intro's riff (riffSection.verses, Metal's 30-40-40), against a verse of its own.", "metal", [],
+            new() { ["riffSection"] = new() { ["verses"] = 0 } },
+            x => FirstOf(x, OverRiff(x)), (x, span) => OverRiff(x).Contains(span.SectionId)),
+        new("metal-riff-section", "A Metal song opening on its main riff and bringing it back between a chorus and a verse, and at its end: a riff band's song, or the same bars again?",
+            "How often a song is built on a riff section returning (riffSection.songs, Metal's 50-60-40), against the songs' own form.", "metal", [],
+            new() { ["riffSection"] = new() { ["songs"] = 0 } },
+            x => RiffReturns(x).Select(r => (double?)r.Start).Min(), (x, span) => RiffReturns(x).Any(r => Math.Abs(r.Start - span.Start) < 1e-6)),
+        new("darkjazz-half-time", "Dark jazz's drums in half time, the backbeat on 3, at an already slow tempo: the style's slow menace, or a pulse too slow to follow?",
+            "How often a Dark jazz section's drums play in half time (feelChances.halfTime, 0-70-80), against in time.", "darkJazz", [],
+            new() { ["feelChances"] = new() { ["halfTime"] = 0 } },
+            x => FirstOf(x, HalfTime(x)), (x, span) => HalfTime(x).Contains(span.SectionId))
     ];
+
+    /// <summary>Where a song first plays a section of those, in beats; none where it plays none.</summary>
+    private static double? FirstOf(CorpusSong song, HashSet<int> sections) => song.Map.Sections.FirstOrDefault(x => sections.Contains(x.SectionId))?.Start;
+
+    /// <summary>A song's surf drops, each its bar's start and end.</summary>
+    private static (double From, double To)[] Drops(CorpusSong song) =>
+        [..song.Trace.Where(x => x.Point == TracePoints.SurfDrop).Select(x => ((double From, double To))x.Value!)];
+
+    /// <summary>A song's kick-outs, each from where the kick drops out to where it plays again.</summary>
+    private static (double From, double To)[] KickOuts(CorpusSong song) =>
+        [..song.Trace.Where(x => x.Point == TracePoints.KickOuts).SelectMany(x => (ImmutableArray<(double From, double To)>)x.Value!)];
+
+    /// <summary>The appearance a song reharmonises, by its place, and where its substitutes start; none where it reharmonises none.</summary>
+    private static (int Index, ImmutableArray<double> Substitutes)? Reharmonised(CorpusSong song) =>
+        song.Trace.Where(x => x.Point == TracePoints.Reharmonisation).Select(x => x.Value).OfType<(int, ImmutableArray<double>)>().Select(x => ((int, ImmutableArray<double>)?)x).FirstOrDefault();
+
+    /// <summary>A song's form, as it drew it.</summary>
+    private static SongStructure FormOf(CorpusSong song) => (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+
+    /// <summary>The intro's section, where the song opens on one.</summary>
+    private static int? Intro(CorpusSong song) => FormOf(song).Roles.Where(x => x.Value == SectionRole.Intro).Select(x => (int?)x.Key).SingleOrDefault();
+
+    /// <summary>The verses a song plays over its intro's riff, by their sections.</summary>
+    private static HashSet<int> OverRiff(CorpusSong song) =>
+        [..song.Trace.Where(x => x.Point == TracePoints.LinesFrom && (int)x.Value! == Intro(song) && FormOf(song).Roles.GetValueOrDefault(x.Section) == SectionRole.Verse).Select(x => x.Section)];
+
+    /// <summary>A riff section's returns, the intro's section played again after the song opens on it.</summary>
+    private static SectionSpan[] RiffReturns(CorpusSong song) => Intro(song) is { } intro ? [..song.Map.Sections.Where(x => x.SectionId == intro).Skip(1)] : [];
+
+    /// <summary>The sections whose drums play in half time.</summary>
+    private static HashSet<int> HalfTime(CorpusSong song) => [..song.Trace.Where(x => x.Point == TracePoints.TimeFeel && (int)x.Value! == 1).Select(x => x.Section)];
+
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

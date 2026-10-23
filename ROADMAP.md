@@ -42,7 +42,13 @@ change in Rock (`solo-landing`, 0.29) and a melody's later bar on its first's rh
 the riff's turnaround in the Blues measured too faint to ask (0.07, from 0.02), and the melody's phrase swell, the
 solo's ceiling and the riff's power chords by the section's energy no choice's to switch off; retired on 21 October,
 both its questions not told apart and kept, to be heard again. The tenth round (21 October 2026) asks four of the steadiness plan's, each against none: Metal's songs leaving their time (`metal-feel`, 1.28), Thrash's (`thrash-feel`, 1.21), Metal's stops (`metal-stops`, 0.37, whether stop time on every return is too often) and Thrash's breakdowns (`thrash-breakdown`, 0.84); retired the same day, each kept, the songs with preferred 6-0, 5-1, 6-0 and 5-1. The eleventh round (21 October 2026) asks a stop-time section's later appearances stopping again now and then against every time, in Metal (`stop-returns`, 0.27); the Blues' late bends measured too faint to ask (0.06), a note's pitch alone differing, to be heard by hand. Retired the same day, `stop-returns` accepted by the owner and kept as built. A question listens only in the sections its device plays in, not
-every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none.
+every section of its kind: `celtic-solo` was heard at a violin's solo where the song with the harmonica played none. The review of 22 October's first round (23 October 2026) asks nine of its queue beside
+`funk-rhythm`, each against none in the genre whose idiom the device is, the devices of a few places asked however faint
+their measure, heard from where they play: the surf drop (`surf-drop`, 0.04), Jazz's chromatic approach
+(`jazz-chromatic`, 0.03), IDM's 64ths (`idm-64ths`, 0.05), Rock's riff turnaround (`rock-turnaround`, 0.11), Techno's
+kick-out (`techno-kickout`, 0.04), Soul's reharmonised chorus (`soul-reharmonised`, 0.33), Metal's verse over the
+intro's riff (`metal-verse-riff`, 0.92) and its riff section (`metal-riff-section`, 1.26), and Dark jazz's half time
+(`darkjazz-half-time`, 0.40); Hip-hop's verses resting the melody next.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 

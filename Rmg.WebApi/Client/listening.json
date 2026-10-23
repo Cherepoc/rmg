@@ -60,5 +60,610 @@
         ]
       }
     ]
+  },
+  {
+    "id": "surf-drop",
+    "question": "A Surf guitar's last bar before a louder section slid down the neck in palm-muted 16ths onto it: the surf drop, or a gimmick?",
+    "decides": "Whether a lift into a louder section takes a surf drop (surfDrop.lifts, Surf's 30-40-50), against none.",
+    "genre": "surf",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "surfDrop": {
+          "lifts": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 15,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 14.7,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 64.6,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 17.3,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "U",
+        "at": 14.1,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 22.1,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "jazz-chromatic",
+    "question": "A Jazz soloist's run approaching its note on the beat from a half step away: a jazz line, or a wrong note?",
+    "decides": "How often a soloist's run approaches its note on the beat chromatically (soloStyle.chromatic, Jazz's 40-50-60), against never.",
+    "genre": "jazz",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "soloStyle": {
+          "chromatic": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 236,
+        "listen": [
+          "Solo (Electric Guitar (jazz))"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 1.3,
+        "listen": [
+          "Solo (Alto Sax)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 147.6,
+        "listen": [
+          "Solo (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 403.7,
+        "listen": [
+          "Chords (Electric Guitar (jazz))"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 125,
+        "listen": [
+          "Solo (Alto Sax)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 146.2,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "idm-64ths",
+    "question": "An IDM hi-hat rolling in 64ths, a drill splintering the beat: the style's, or a buzz?",
+    "decides": "How often IDM's hat rolls drill in 64ths (hatRollRate.sixtyFourths, 0-20-60), against its 32nds and triplets alone.",
+    "genre": "idm",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "hatRollRate": {
+          "sixtyFourths": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "B",
+        "at": 134.4,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 213,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 4.1,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 193.9,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "S",
+        "at": 50.5,
+        "listen": [
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "a",
+        "at": 258,
+        "listen": [
+          "Hi-Hat"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rock-turnaround",
+    "question": "A Rock riff turning round into its next cycle, a walk up or down on its last beat: a riff band's, or a stumble?",
+    "decides": "How often a riff turns round where its pattern starts again (riff.turnaround, Rock's 30-40-40), against never.",
+    "genre": "rock",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "riff": {
+          "turnaround": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 164.8,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 0,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 5.1,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 52.5,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 188.8,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 154.7,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "techno-kickout",
+    "question": "A Techno kick dropping out for a line before the next section, the band going on without it: a DJ's tension, or a hole?",
+    "decides": "How often the kick drops out for a phrase's last line (kickOut.lines, Techno's 20-30-40), against never.",
+    "genre": "techno",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "kickOut": {
+          "lines": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 286.7,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 294.2,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Kick",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 405.4,
+        "listen": [
+          "Kick",
+          "Bass (Synth Bass 2)",
+          "Cymbal"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 0,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Kick",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "U",
+        "at": 258.3,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Kick",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "Y",
+        "at": 355.1,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Tom"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "soul-reharmonised",
+    "question": "A Soul song's later chorus over new chords under the same melody: a lift, or the chorus lost?",
+    "decides": "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.",
+    "genre": "soul",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "harmonyDevices": {
+          "reharmonised": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "I",
+        "at": 98.9,
+        "listen": [
+          "Melody (Trumpet)",
+          "Chords (Drawbar Organ)",
+          "Bass (Drawbar Organ)"
+        ]
+      },
+      {
+        "seed": "1D",
+        "at": 216.8,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Chords (Electric Piano 1)",
+          "Riff (Baritone Sax)"
+        ]
+      },
+      {
+        "seed": "1G",
+        "at": 177.3,
+        "listen": [
+          "Melody (Electric Guitar (clean))",
+          "Riff (Brass Section)",
+          "Counter-melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1j",
+        "at": 154.5,
+        "listen": [
+          "Chords (Drawbar Organ)",
+          "Melody (Electric Piano 1)",
+          "Bass (Drawbar Organ)"
+        ]
+      },
+      {
+        "seed": "1r",
+        "at": 141.6,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Drawbar Organ)",
+          "Melody (Alto Sax)"
+        ]
+      },
+      {
+        "seed": "1s",
+        "at": 116,
+        "listen": [
+          "Chords (Electric Piano 1)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "metal-verse-riff",
+    "question": "A Metal verse sung over the intro's riff: the band's main riff carrying the song, or a verse with nothing of its own?",
+    "decides": "How often a verse plays over the intro's riff (riffSection.verses, Metal's 30-40-40), against a verse of its own.",
+    "genre": "metal",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "riffSection": {
+          "verses": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 12.3,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Riff (Overdriven Guitar)",
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "U",
+        "at": 78,
+        "listen": [
+          "Melody (Lead 2 (sawtooth))",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "c",
+        "at": 3.3,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))",
+          "Melody (Lead 5 (charang))"
+        ]
+      },
+      {
+        "seed": "x",
+        "at": 15.6,
+        "listen": [
+          "Melody (Lead 5 (charang))",
+          "Chords (Acoustic Guitar (steel))"
+        ]
+      },
+      {
+        "seed": "16",
+        "at": 9.8,
+        "listen": [
+          "Solo (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1U",
+        "at": 15.6,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "metal-riff-section",
+    "question": "A Metal song opening on its main riff and bringing it back between a chorus and a verse, and at its end: a riff band's song, or the same bars again?",
+    "decides": "How often a song is built on a riff section returning (riffSection.songs, Metal's 50-60-40), against the songs' own form.",
+    "genre": "metal",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "riffSection": {
+          "songs": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 200.5,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Hi-Hat",
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "4",
+        "at": 323.3,
+        "listen": [
+          "Melody (Lead 5 (charang))",
+          "Chords (Distortion Guitar)",
+          "Tom"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 98.6,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)",
+          "Riff (Distortion Guitar)",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 65.2,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Riff (Overdriven Guitar)",
+          "Melody (Lead 5 (charang))"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 75.4,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Hi-Hat",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "Z",
+        "at": 61.8,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "darkjazz-half-time",
+    "question": "Dark jazz's drums in half time, the backbeat on 3, at an already slow tempo: the style's slow menace, or a pulse too slow to follow?",
+    "decides": "How often a Dark jazz section's drums play in half time (feelChances.halfTime, 0-70-80), against in time.",
+    "genre": "darkJazz",
+    "with": {
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "feelChances": {
+          "halfTime": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 148.4,
+        "listen": [
+          "Ride",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 76,
+        "listen": [
+          "Ride",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 301.5,
+        "listen": [
+          "Acoustic Snare",
+          "Hi-Hat",
+          "Kick"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 23.3,
+        "listen": [
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 0,
+        "listen": [
+          "Kick",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "M",
+        "at": 81.2,
+        "listen": [
+          "Acoustic Snare",
+          "Ride",
+          "Bass (Acoustic Bass)"
+        ]
+      }
+    ]
   }
 ]
