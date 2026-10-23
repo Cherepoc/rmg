@@ -79,9 +79,11 @@ internal static class SoloAnswers
             var melody = melodyTrack.EventTimeline.Where(IsIn).ToArray();
             // the chords, which an answer's stacked notes stack on
             var band = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
-            // an answer over the band, any part of it but the lines, none where the melody plays alone
-            var accompanied = song.TrackTimelineMap.Any(x => roles[x.Key] is not (TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Drum)
-                                                             && x.Value.EventTimeline.Any(IsIn));
+            // an answer over the band, any part of it but the lines, none where the melody plays alone, in the section or in
+            // the stretch it answers, as a texture's phrase of the voice alone
+            bool Accompanied(double from, double to) => song.TrackTimelineMap.Any(x => roles[x.Key] is not (TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Drum)
+                                                                                      && x.Value.EventTimeline.Any(n => n.IsWithin(from, to)));
+            var accompanied = Accompanied(span.Start, span.End);
             if (holds.Meets(Hold.Solo, span.Start, span.End) || !counterRests || melody.Length == 0 || !accompanied)
                 continue;
             if (traced)
@@ -109,7 +111,7 @@ internal static class SoloAnswers
                 // a short line, a bar or two at most, however long the gap
                 var end = Math.Min(onsets[i + 1] - Before, start + LongestBars * span.Meter.BarDuration);
                 // nor over another part's answer to a call
-                if (!answered || !BetweenPhrases(i) || end - start < 1 - 1e-9 || holds.Meets(KeepsOutOf, start, end))
+                if (!answered || !BetweenPhrases(i) || end - start < 1 - 1e-9 || holds.Meets(KeepsOutOf, start, end) || !Accompanied(start, end))
                     continue;
 
                 var gap = span with { Start = start, Duration = end - start };
