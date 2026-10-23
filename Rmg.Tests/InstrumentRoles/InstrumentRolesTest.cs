@@ -101,6 +101,20 @@ public sealed class InstrumentRolesTest
         await Assert.That(() => role.Pick(new GenerationContext(0), 0.5, null, 0)).Throws<InvalidOperationException>();
     }
 
+    /// <summary>
+    ///     A pool that keeps nothing apart from every part given lets its part share a sound, the first given kept apart the
+    ///     longest: a riff out of guitars of its own takes the chords' and never the melody's.
+    /// </summary>
+    [Test]
+    public async Task Pick_WithAPoolOfNothingElse_SharesTheLastGivensSound_NeverTheFirsts()
+    {
+        var role = new InstrumentRole("Riff", [new RoleInstrument(29, "Overdriven Guitar", 1), new RoleInstrument(30, "Distortion Guitar", 1)]);
+        var context = new GenerationContext(0);
+        var picks = Enumerable.Range(0, 64).Select(_ => role.Pick(context, 0.5, x => x.Program is 29 or 30 ? 1 : 0, 29, 30).Program).ToHashSet();
+
+        await Assert.That(picks.SetEquals([30])).IsTrue();
+    }
+
     /// <summary>The melody never on the chords' instrument (each on one of its role's, AnyInstrumentTest).</summary>
     [Test]
     public async Task Songs_PlayTheMelody_NotAsTheChords()
