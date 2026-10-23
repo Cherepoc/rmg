@@ -25,16 +25,26 @@ public sealed class CalibrationSamplesTest
                     continue;
                 // the method's body, to its closing brace
                 var (start, depth, end) = (source.IndexOf('{', test.Index + test.Length), 0, 0);
+                if (start < 0)
+                    continue;
                 for (end = start; end < source.Length; end++)
                     if (source[end] == '{') depth++;
                     else if (source[end] == '}' && --depth == 0) break;
                 var body = source[start..end];
-                var counts = Regex.Matches(body, @"(?:Enumerable\.Range\(0,\s*|TestCorpus\.Range\()(\d+)\)").Select(x => int.Parse(x.Groups[1].Value)).ToArray();
+                // its songs counted in its body, or where none is, in the class's helpers and fields it draws them through
+                var counts = Counts(body);
+                var helper = counts.Length == 0;
+                if (helper)
+                    counts = Counts(source);
                 if (body.Contains("Console.WriteLine") && counts.Length > 0 && counts.Max() < 64)
-                    Console.WriteLine($"{Path.GetRelativePath(tests, file)}: {test.Groups[2].Value}, {counts.Max()} songs");
+                    Console.WriteLine($"{Path.GetRelativePath(tests, file)}: {test.Groups[2].Value}, {counts.Max()} songs{(helper ? ", in a helper" : "")}");
             }
         }
 
         await Task.CompletedTask;
     }
+
+    /// <summary>The song counts a source draws: a range of seeds from 0, the corpus's range, or a corpus measured.</summary>
+    private static int[] Counts(string source) =>
+        Regex.Matches(source, @"(?:Enumerable\.Range\(0,\s*|TestCorpus\.Range\(|TestCorpus\.Measure\()(\d+)[),]").Select(x => int.Parse(x.Groups[1].Value)).ToArray();
 }

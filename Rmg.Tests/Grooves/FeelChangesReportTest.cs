@@ -11,7 +11,8 @@ public sealed class FeelChangesReportTest
     {
         var feels = song.Trace.Where(x => x.Point == TracePoints.TimeFeel).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => (int)x.Last().Value!);
         var tempos = (System.Collections.Immutable.ImmutableArray<double>)song.Trace.Single(x => x.Point == TracePoints.SectionTempo).Value!;
-        return [..song.PlayedSpans.Select((span, i) => (feels[span.SectionId], i < tempos.Length ? Math.Round(tempos[i], 3) : 1, span.Meter.ToString()))];
+        // a section's tempo by its place among the map's sections, which an intro played as one shares
+        return [..song.Map.Plays.Where(x => !x.IsEnding).Select(x => (feels[x.Span.SectionId], x.Index < tempos.Length ? Math.Round(tempos[x.Index], 3) : 1, x.Span.Meter.ToString()))];
     }
 
     private static string Line(string name, IReadOnlyList<CorpusSong> songs)

@@ -398,6 +398,7 @@ internal static class DrumSolos
             var motifDraws = motifs(index);
             var flamDraws = flams(index);
             var answered = new List<int>();
+            var playedStickings = new List<Sticking>();
             var stickingWeights = ByConvention.Weigh(Stickings, groove(index), genre.Pool<Sticking>(GenreChoices.Stickings));
             var common = song.CommonStateTimelineMap;
             var plan = SoloLines.Plan(
@@ -460,7 +461,7 @@ internal static class DrumSolos
                 soloed.Add(built);
             StateTrace.RecordSection(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId,
                 $"{played.Length} segments, {soloists.Count} soloists {mode}{(feetTracks.Count > 0 ? ", the feet keeping time" : "")}",
-                new DrumSolo(index, played, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered, build));
+                new DrumSolo(index, played, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered, build, playedStickings));
 
             song = LaidOut(song, context);
             var edits = new TimelineEdits(context, meter, map);
@@ -626,6 +627,7 @@ internal static class DrumSolos
                                 player.Motif = (phrase, rhythm, speedOf, sticking, at);
                             }
 
+                            playedStickings.Add(sticking);
                             // a cascade from the highest tom down
                             if (sticking == Sticking.Cascade)
                                 at = 0;
@@ -710,4 +712,5 @@ internal static class DrumSolos
 /// tracks, the kit's drummer first.</summary>
 /// <param name="Answered">The phrases whose first run or lick restates the phrase before's motif.</param>
 /// <param name="Build">Where the solo builds into the section after, after its gestures; none where it leaves its end to the fill.</param>
-internal sealed record DrumSolo(int Index, SoloLines.Segment[] Plan, bool Feet, int[] Soloists, SoloMode Mode, int[] Keepers, int[][] Tracks, IReadOnlyList<int> Answered, (double From, double To)? Build);
+/// <param name="Stickings">The sticking each of the kit's runs and licks plays, in turn.</param>
+internal sealed record DrumSolo(int Index, SoloLines.Segment[] Plan, bool Feet, int[] Soloists, SoloMode Mode, int[] Keepers, int[][] Tracks, IReadOnlyList<int> Answered, (double From, double To)? Build, IReadOnlyList<Sticking> Stickings);

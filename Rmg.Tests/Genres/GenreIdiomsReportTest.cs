@@ -65,10 +65,11 @@ public sealed class GenreIdiomsReportTest
         var drumVelocities = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack && notes.ContainsKey(x.Key)).SelectMany(x => notes[x.Key]).Select(x => 127 * Render.GetMidiVelocity(x.Value)).ToArray();
         var melodyVelocities = melody.Select(x => 127 * Render.GetMidiVelocity(x.Value)).ToArray();
         var moves = melody.Zip(melody.Skip(1)).Select(x => Math.Abs(x.Second.Value.Pitches[0] - x.First.Value.Pitches[0])).ToArray();
-        // a bar of the melody as the one before it, its notes where they fall in it and their pitches
+        // a bar of the melody as the one before it, its notes where they fall in it and their pitches, a short last bar against
+        // the start of the bar before
         string BarOf(double start, double length) =>
             string.Join(" ", melody.Where(x => x.Position >= start - 1e-9 && x.Position < start + length - 1e-9).Select(x => $"{Math.Round(x.Position - start, 3)}:{x.Value.Pitches[0]}"));
-        var melodyBars = map.Sections.SelectMany(x => x.Bars.Skip(1).Select(b => (b.Start, BarDuration: b.End - b.Start))).ToArray();
+        var melodyBars = map.Sections.SelectMany(x => x.Bars.Zip(x.Bars.Skip(1), (before, bar) => (bar.Start, BarDuration: bar.End - bar.Start, Before: before.Start))).ToArray();
         var played = melodyBars.Where(x => BarOf(x.Start, x.BarDuration).Length > 0).ToArray();
         var lineScales = song.Trace.Where(x => x.Point == TracePoints.LineScale && x.Track == song.Track(TrackRole.Melody)).Select(x => (LineScale)x.Value!).ToArray();
         // the bass where a chord changes: its note there on the chord's root, and the one before a step or a half step from it
@@ -88,7 +89,7 @@ public sealed class GenreIdiomsReportTest
         double RepeatedIn(SectionRole role)
         {
             var bars = played.Where(x => map.SectionAt(x.Start) is { } span && structure.Roles.GetValueOrDefault(span.SectionId) == role).ToArray();
-            return bars.Length > 0 ? bars.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Start - x.BarDuration, x.BarDuration)) / (double)bars.Length : double.NaN;
+            return bars.Length > 0 ? bars.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Before, x.BarDuration)) / (double)bars.Length : double.NaN;
         }
 
         // the melody's span in each section's appearance, its tenth highest note over its tenth lowest, on average
@@ -127,6 +128,10 @@ public sealed class GenreIdiomsReportTest
             ["chords on the offbeat 8ths"] = notes.GetValueOrDefault(song.Track(TrackRole.Chords)) is { Count: > 0 } chordNotes
                 ? chordNotes.Average(x => Math.Abs(map.BeatInBar(x.Position) % 1 - 0.5) < 0.05 ? 1.0 : 0)
                 : double.NaN,
+            // the skank of the fast count, on the bar's backbeats
+            ["chords on 2 and 4"] = notes.GetValueOrDefault(song.Track(TrackRole.Chords)) is { Count: > 0 } skanks
+                ? skanks.Average(x => map.BeatInBar(x.Position) is var beat && (Math.Abs(beat - 1) < 0.05 || Math.Abs(beat - 3) < 0.05) ? 1.0 : 0)
+                : double.NaN,
             ["time in the tresillo (1 and-of-2 4 alone)"] = bars.Length > 0 ? bars.Count(x => HitsAt(times, x) && HitsAt(times, x + 1.5) && HitsAt(times, x + 3) && !HitsAt(times, x + 1) && !HitsAt(times, x + 2)) / (double)bars.Length : double.NaN,
             ["chords stabbed (a 16th or shorter)"] = notes.GetValueOrDefault(song.Track(TrackRole.Chords)) is { Count: > 0 } chordStabs
                 ? chordStabs.Average(x => x.Value.Duration <= 0.25 + 1e-9 ? 1.0 : 0)
@@ -138,7 +143,7 @@ public sealed class GenreIdiomsReportTest
             ["snare on 2 and 4"] = bars.Length > 0 ? bars.Count(x => HitsAt(snares, x + 1) && HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
             ["chorus melody bars repeated"] = RepeatedIn(SectionRole.Chorus),
             ["verse melody bars repeated"] = RepeatedIn(SectionRole.Verse),
-            ["melody bars repeated"] = played.Length > 0 ? played.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Start - x.BarDuration, x.BarDuration)) / (double)played.Length : double.NaN,
+            ["melody bars repeated"] = played.Length > 0 ? played.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Before, x.BarDuration)) / (double)played.Length : double.NaN,
             ["melody pentatonic or blues"] = lineScales.Length > 0 ? lineScales.Count(x => x is LineScale.Pentatonic or LineScale.Blues) / (double)lineScales.Length : double.NaN,
             ["melody's range a section"] = MelodyRange(),
             ["melody mean move"] = moves.Length > 0 ? moves.Average() : double.NaN,
@@ -186,7 +191,7 @@ public sealed class GenreIdiomsReportTest
         ["rock"] = [("kick on 1", 0.85, 1), ("snare on 2 and 4", 0.85, 1), ("chords in 4 bars", 2, 4), ("melody pentatonic or blues", 0.5, 1)],
         ["latin"] = [("time in the tresillo (1 and-of-2 4 alone)", 0.5, 1), ("sections sharing a progression", 0.3, 1), ("melody bars repeated", 0.08, 1), ("solo appearances", 0.08, 0.3),
             ("ending a button or a stop", 0.5, 1)],
-        ["reggae"] = [("one drop (kick and snare on 3 alone)", 0.6, 1), ("chords on the offbeat 8ths", 0.7, 1), ("tempo", 60, 90), ("sections sharing a progression", 0.4, 1),
+        ["reggae"] = [("one drop (kick and snare on 3 alone)", 0.6, 1), ("chords on 2 and 4", 0.4, 1), ("tempo", 115, 150), ("sections sharing a progression", 0.4, 1),
             ("chords stabbed (a 16th or shorter)", 0.3, 1), ("ending a fade", 0.4, 1)],
         ["blues"] = [("melody pentatonic or blues", 0.6, 1), ("snare on 2 and 4", 0.8, 1)],
         ["jazz"] = [("chords in 4 bars", 4, 8), ("melody leaps past a fifth", 0.06, 0.2), ("time as the bar before", 0.8, 1)],

@@ -187,7 +187,8 @@ internal sealed class HeardDifference
                     for (var k = (int)Math.Ceiling(start / Sample); k < grid.Length && k * Sample < end; k++)
                         grid[k] = true;
                 Tracks[name] = new Track(
-                    NameOf(track.Role, track.IsPercussionInstrument, track.PitchInstrumentCode),
+                    // the kit's effects the whole kit's, its program no drum's note
+                    track.IsPercussionInstrument ? "Drums" : NameOf(track.Role, false, track.PitchInstrumentCode),
                     grid,
                     // in time, as MIDI plays them, each note having written its own to its end: the bends and controllers in
                     // the order of their times, the expression a position's latest written at or before it, as Midi merges it

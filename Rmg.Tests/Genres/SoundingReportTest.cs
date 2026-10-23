@@ -14,6 +14,9 @@ public sealed class SoundingReportTest
 {
     private const int Count = 32;
 
+    /// <summary>How far back, in beats, a note still held at a strong note's start is looked for: a held chord's two bars.</summary>
+    private const double HeldReach = 8;
+
     /// <summary>A song's share of each way of sounding, by its name.</summary>
     internal static Dictionary<string, double> Measure(CorpusSong song)
     {
@@ -43,12 +46,17 @@ public sealed class SoundingReportTest
         {
             var sounding = parts.Where(x => x.Definition != definition).SelectMany(x =>
             {
-                // the last note starting at or before it, the starts in order
+                // every note started at or before it and still held there, a ringing arpeggio's earlier notes among them, walked
+                // back from the last a few bars at most, the starts in order
                 var found = Array.BinarySearch(x.Starts, note.Position + 1e-9);
                 var at = (found >= 0 ? found : ~found) - 1;
                 while (at + 1 < x.Starts.Length && x.Starts[at + 1] <= note.Position + 1e-9)
                     at++;
-                return at >= 0 && x.Notes[at].Position + x.Notes[at].Value.Duration > note.Position + 1e-6 ? x.Notes[at].Value.Pitches : [];
+                var held = new List<int>();
+                for (var k = at; k >= 0 && x.Starts[k] > note.Position - HeldReach; k--)
+                    if (x.Notes[k].Position + x.Notes[k].Value.Duration > note.Position + 1e-6)
+                        held.AddRange(x.Notes[k].Value.Pitches);
+                return held;
             }).ToArray();
             // a semitone apart, but a chord's own notes, a major seventh's from its root
             var (chord, _, classes) = Realizer.GetChordNotes(note.Value.State);

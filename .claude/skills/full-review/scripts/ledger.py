@@ -48,10 +48,10 @@ for measure, choice in re.findall(r'\["([^"]+)"\] = "(\w+)"', report_cs):
     measure_of.setdefault(choice, []).append(measure)
 plays = {}
 report = os.path.join(R, 'run', 'genre-devices.txt')
-# the report's table: a label of 36 characters, then a cell of 11 for the songs' own and each preset, in GenrePresets'
-# order, a value as a share or a number with a * where the preset inherits the songs' amounts, blank or NaN where
-# nothing was measured (GenreDevicesReportTest.Report)
-LABEL, CELL = 36, 11
+# the report's table: a label as wide as the longest, then a cell of 11 for the songs' own and each preset, in
+# GenrePresets' order, a value as a share or a number with a * where the preset inherits the songs' amounts, blank or
+# NaN where nothing was measured (GenreDevicesReportTest.Report)
+CELL = 11
 
 
 def cell(text):
@@ -64,10 +64,11 @@ if os.path.exists(report):
     lines = open(report, encoding='utf-8', errors='ignore').read().splitlines()
     # the test runner's progress lines come before the table: start at its header
     lines = lines[next(k for k, line in enumerate(lines) if line.split()[:1] == ['none']):]
-    # counted on a row of numbers, as a long preset name runs into the next in the header
-    columns = (len(lines[1]) - LABEL + CELL - 1) // CELL
-    if columns != len(presets) + 1:
-        raise SystemExit(f"{report} has {columns - 1} presets' columns, genres.json {len(presets)}: run the report again")
+    # the label's width from a row of numbers, a cell for the songs' own and each preset after it
+    columns = len(presets) + 1
+    LABEL = len(lines[1]) - CELL * columns
+    if LABEL < 1 or lines[1][LABEL - 1] != ' ':
+        raise SystemExit(f"{report}'s rows do not hold {columns - 1} presets' columns, as genres.json does: run the report again")
     measures = {m for ms in measure_of.values() for m in ms}
     for line in lines[1:]:
         measure = line[:LABEL].strip()

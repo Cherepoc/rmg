@@ -31,6 +31,7 @@ public sealed class AllocationReportTest
         // the first stage's count holds the song's decisions, its sections and its assembly, which come before it
         var first = stages.Keys.First();
         stages[first] -= decided;
+        times[first] -= drawing.TotalMilliseconds;
         Console.WriteLine($"a song: {allocated / count / 1e6:F1} MB allocated in {generating.TotalMilliseconds / count:F0} ms, its decisions, sections and assembly "
                           + $"{decided / count / 1e6:F1} MB in {drawing.TotalMilliseconds / count:F0} ms");
         foreach (var (stage, bytes) in stages.OrderByDescending(x => x.Value).Where(x => x.Value / count > 100_000))

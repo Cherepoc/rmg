@@ -49,8 +49,8 @@ public sealed class ListeningQuestionsTest
     private static (int Index, SoloLines.Segment[] Plan)[] SoloPlans(CorpusSong song) =>
         [..song.Trace.Where(x => x.Point == TracePoints.SoloGestures).Select(x => ((int Index, bool, SoloLines.Segment[] Plan))x.Value!).Select(x => (x.Index, x.Plan))];
 
-    /// <summary>The sections a song plays its pitched solos in.</summary>
-    private static HashSet<int> Soloed(CorpusSong song) => [..SoloPlans(song).Select(x => song.Map.Sections[x.Index].SectionId)];
+    /// <summary>The appearances a song plays its pitched solos in, by their places among its sections, not every appearance of their sections.</summary>
+    private static HashSet<int> Soloed(CorpusSong song) => [..SoloPlans(song).Select(x => x.Index)];
 
     /// <summary>Where a song first plays a solo segment that takes a test, in beats; none where it plays none.</summary>
     private static double? FirstSegment(CorpusSong song, Func<SoloLines.Segment, bool> takes) =>
@@ -61,7 +61,7 @@ public sealed class ListeningQuestionsTest
         new("funk-rhythm", "A Funk soloist riffing on the band's rhythm, a note or two struck short on its onsets: in the groove, or a soloist gone quiet?",
             "How often a soloist riffs on the band's rhythm (soloStyle.rhythm, Funk's 30-40-50), against never.", "funk", [],
             new() { ["soloStyle"] = new() { ["rhythm"] = 0 } },
-            x => FirstSegment(x, s => s.Gesture == SoloGesture.Rhythm), (x, span) => Soloed(x).Contains(span.SectionId))
+            x => FirstSegment(x, s => s.Gesture == SoloGesture.Rhythm), (x, span) => Soloed(x).Contains(x.Map.Sections.IndexOf(span)))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

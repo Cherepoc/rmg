@@ -179,7 +179,7 @@
   {
     "id": "ghosts-left-out",
     "question": "Funk's ghost notes left out: does the groove miss them?",
-    "decides": "The quieter form's chances by genre.",
+    "decides": "Whether Funk's ghost notes earn their place.",
     "genre": "funk",
     "without": {
       "skip": [
@@ -192,43 +192,42 @@
         "seed": "D",
         "at": 97.1,
         "listen": [
-          "Riff (Acoustic Guitar (steel))",
-          "Riff's twin (Acoustic Guitar (steel))"
+          "Drums"
         ]
       },
       {
         "seed": "H",
         "at": 84.1,
         "listen": [
-          "Riff (Electric Guitar (clean))"
+          "Drums"
         ]
       },
       {
         "seed": "S",
         "at": 110.6,
         "listen": [
-          "Riff (Acoustic Guitar (steel))"
+          "Drums"
         ]
       },
       {
         "seed": "b",
         "at": 233.2,
         "listen": [
-          "Riff (Acoustic Guitar (steel))"
+          "Drums"
         ]
       },
       {
         "seed": "c",
         "at": 38.7,
         "listen": [
-          "Chords (Electric Guitar (clean))"
+          "Drums"
         ]
       },
       {
         "seed": "j",
         "at": 16.1,
         "listen": [
-          "Chords (Electric Guitar (clean))"
+          "Drums"
         ]
       }
     ]
@@ -250,43 +249,48 @@
         "seed": "D",
         "at": 97.1,
         "listen": [
-          "Riff (Acoustic Guitar (steel))",
-          "Riff's twin (Acoustic Guitar (steel))"
+          "Chords",
+          "Melody"
         ]
       },
       {
         "seed": "H",
         "at": 84.1,
         "listen": [
-          "Riff (Electric Guitar (clean))"
+          "Chords",
+          "Melody"
         ]
       },
       {
         "seed": "S",
         "at": 110.6,
         "listen": [
-          "Riff (Acoustic Guitar (steel))"
+          "Chords",
+          "Melody"
         ]
       },
       {
         "seed": "b",
         "at": 233.2,
         "listen": [
-          "Riff (Acoustic Guitar (steel))"
+          "Chords",
+          "Melody"
         ]
       },
       {
         "seed": "c",
         "at": 38.7,
         "listen": [
-          "Chords (Electric Guitar (clean))"
+          "Chords",
+          "Melody"
         ]
       },
       {
         "seed": "j",
         "at": 16.1,
         "listen": [
-          "Chords (Electric Guitar (clean))"
+          "Chords",
+          "Melody"
         ]
       }
     ],

@@ -33,12 +33,19 @@ public sealed class MoodReportTest
         Console.WriteLine($"{label}: chords sounding {string.Join(", ", chords.GroupBy(x => x.Quality).OrderByDescending(x => x.Sum(c => c.Duration)).Select(x => $"{x.Key} {x.Sum(c => c.Duration) / total:P0}"))}");
     }
 
-    /// <summary>How long a song's chords and pads sound major, of their triads.</summary>
+    /// <summary>
+    ///     How long a song's chords and pads sound major, of the chords with a third: each note's chord by its state, a major
+    ///     third over its root or a minor, whatever its part strikes of it, so that a seventh is its triad's and a chord
+    ///     broken into single notes is counted; a sus or a power chord, which has no third, is left out.
+    /// </summary>
     private static double Major(CorpusSong song)
     {
         var chords = song.Song.Notes!.Where(n => song.Song.TrackDefinitions[n.Key].Role is TrackRole.Chords or TrackRole.Pad).SelectMany(n => n.Value)
-            .Where(x => x.Value.Pitches.Length >= 3).Select(x => (Quality: Quality(x.Value.Pitches), x.Value.Duration)).Where(x => x.Quality is "major" or "minor").ToArray();
-        return chords.Length > 0 ? chords.Where(x => x.Quality == "major").Sum(x => x.Duration) / chords.Sum(x => x.Duration) : double.NaN;
+            .Select(x => (Chord: Realizer.GetChordNotes(x.Value.State), x.Value.Duration))
+            .Select(x => (Root: x.Chord.Chord.GetPitch(0), x.Chord.Classes, x.Duration))
+            .Select(x => (Major: x.Classes.Contains(((x.Root + 4) % 12 + 12) % 12), Minor: x.Classes.Contains(((x.Root + 3) % 12 + 12) % 12), x.Duration))
+            .Where(x => x.Major != x.Minor).ToArray();
+        return chords.Length > 0 ? chords.Where(x => x.Major).Sum(x => x.Duration) / chords.Sum(x => x.Duration) : double.NaN;
     }
 
     /// <summary>
