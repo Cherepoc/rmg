@@ -9,7 +9,7 @@ namespace Rmg.Core.Versions;
 ///     A fingerprint of the songs: a hash of the MIDI files of the corpus's seeds, written with no label, and of a few of
 ///     them played with values supplied (<see cref="Overrides" />) and in every genre given, so that it changes when the
 ///     songs do, their notes, tempo or fades, those of a song with a facet at an end, a tempo, a mood or a genre given too, and only
-///     then. A refactor keeps it; the
+///     then, a genre at a mood given among them. A refactor keeps it; the
 ///     deploy bumps the songs' version when it changes (<see cref="SongsVersion" />), and when the page's genres do.
 /// </summary>
 public static class SongFingerprint
@@ -77,10 +77,18 @@ public static class SongFingerprint
         Overrides.SelectMany((x, i) => Enumerable.Range(0, OverrideSeeds).Select(seed => (Name: $"overrides/{i}/{seed}", Seed: seed, Overrides: x))).AsParallel().AsOrdered()
             .Select(x => (x.Name, Write(x.Seed, x.Overrides)));
 
-    /// <summary>Each genre's songs of seeds 0 to <see cref="GenreSeeds" /> - 1, named "genre/seed", in order.</summary>
+    /// <summary>The moods a genre's first song is played at as well: its darkness's ends and its middle, given, which the page gives a genre.</summary>
+    private static readonly double[] GenreDarknesses = [-1, 0, 1];
+
+    /// <summary>
+    ///     Each genre's songs of seeds 0 to <see cref="GenreSeeds" /> - 1, named "genre/seed", and its first song at each of
+    ///     <see cref="GenreDarknesses" />, named "genre/darkness/value/0", so that a mood given past a genre's span is hashed,
+    ///     in order.
+    /// </summary>
     private static IEnumerable<(string Name, byte[] File)> GenreSongs(IReadOnlyList<(string Id, Genre Genre)> genres) =>
-        genres.SelectMany(x => Enumerable.Range(0, GenreSeeds).Select(seed => (Name: $"{x.Id}/{seed}", x.Genre, Seed: seed))).AsParallel().AsOrdered()
-            .Select(x => (x.Name, Write(x.Seed, new SongOverrides(Genre: x.Genre))));
+        genres.SelectMany(x => Enumerable.Range(0, GenreSeeds).Select(seed => (Name: $"{x.Id}/{seed}", x.Genre, Seed: seed, Darkness: (double?)null))
+                .Concat(GenreDarknesses.Select(darkness => (Name: $"{x.Id}/darkness/{darkness}/0", x.Genre, Seed: 0, Darkness: (double?)darkness)))).AsParallel().AsOrdered()
+            .Select(x => (x.Name, Write(x.Seed, new SongOverrides(Genre: x.Genre, Darkness: x.Darkness))));
 
     /// <summary>A song's MIDI file as the fingerprint hashes it, without the build's label.</summary>
     private static byte[] Write(int seed, SongOverrides overrides)
