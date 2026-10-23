@@ -81,42 +81,42 @@
     "seeds": [
       {
         "seed": "0",
-        "at": 15,
+        "at": 15.4,
         "listen": [
           "Melody (Electric Guitar (clean))"
         ]
       },
       {
-        "seed": "9",
-        "at": 14.7,
+        "seed": "5",
+        "at": 10.5,
         "listen": [
           "Riff (Electric Guitar (clean))"
         ]
       },
       {
-        "seed": "B",
-        "at": 64.6,
-        "listen": [
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "M",
-        "at": 17.3,
+        "seed": "Q",
+        "at": 10.6,
         "listen": [
           "Riff (Electric Guitar (clean))"
         ]
       },
       {
         "seed": "U",
-        "at": 14.1,
+        "at": 14.3,
         "listen": [
           "Riff (Electric Guitar (clean))"
         ]
       },
       {
+        "seed": "a",
+        "at": 101.9,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
         "seed": "d",
-        "at": 22.1,
+        "at": 23,
         "listen": [
           "Riff (Electric Guitar (clean))"
         ]
@@ -143,44 +143,44 @@
     "seeds": [
       {
         "seed": "1",
-        "at": 301.5,
+        "at": 239.3,
         "listen": [
           "Solo (Electric Guitar (jazz))"
         ]
       },
       {
-        "seed": "2",
-        "at": 56,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 1.3,
-        "listen": [
-          "Solo (Alto Sax)"
-        ]
-      },
-      {
         "seed": "6",
-        "at": 147.6,
+        "at": 136.1,
         "listen": [
           "Solo (Tenor Sax)"
         ]
       },
       {
         "seed": "A",
-        "at": 324.1,
+        "at": 74.8,
         "listen": [
           "Chords (Acoustic Grand Piano)"
         ]
       },
       {
         "seed": "B",
-        "at": 184,
+        "at": 188.4,
         "listen": [
           "Chords (Electric Guitar (jazz))"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 204.4,
+        "listen": [
+          "Solo (Alto Sax)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 385.6,
+        "listen": [
+          "Chords (Acoustic Grand Piano)"
         ]
       }
     ]
@@ -205,42 +205,42 @@
     "seeds": [
       {
         "seed": "B",
-        "at": 134.4,
+        "at": 130.9,
         "listen": [
           "Hi-Hat"
         ]
       },
       {
         "seed": "I",
-        "at": 213,
+        "at": 218.2,
         "listen": [
           "Hi-Hat"
         ]
       },
       {
         "seed": "L",
-        "at": 4.1,
+        "at": 6.2,
         "listen": [
           "Hi-Hat"
         ]
       },
       {
         "seed": "N",
-        "at": 193.9,
+        "at": 200.8,
         "listen": [
           "Hi-Hat"
         ]
       },
       {
         "seed": "S",
-        "at": 50.5,
+        "at": 49.3,
         "listen": [
           "Hi-Hat"
         ]
       },
       {
         "seed": "a",
-        "at": 258,
+        "at": 258.9,
         "listen": [
           "Hi-Hat"
         ]
@@ -267,14 +267,14 @@
     "seeds": [
       {
         "seed": "3",
-        "at": 0,
+        "at": 2.1,
         "listen": [
           "Riff (Distortion Guitar)"
         ]
       },
       {
         "seed": "5",
-        "at": 117.1,
+        "at": 121.2,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (pick))"
@@ -282,7 +282,7 @@
       },
       {
         "seed": "7",
-        "at": 115,
+        "at": 118.2,
         "listen": [
           "Riff (Distortion Guitar)",
           "Bass (Electric Bass (finger))"
@@ -290,22 +290,23 @@
       },
       {
         "seed": "D",
-        "at": 100.1,
+        "at": 106.9,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "L",
-        "at": 236,
+        "seed": "H",
+        "at": 53,
         "listen": [
-          "Riff (Distortion Guitar)"
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
         "seed": "T",
-        "at": 11.2,
+        "at": 14.4,
         "listen": [
           "Riff (Overdriven Guitar)",
           "Bass (Electric Bass (pick))"
@@ -333,15 +334,23 @@
     "seeds": [
       {
         "seed": "1",
-        "at": 286.7,
+        "at": 288.6,
         "listen": [
           "Bass (Synth Bass 2)",
           "Electric Snare"
         ]
       },
       {
+        "seed": "4",
+        "at": 13.7,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Tom"
+        ]
+      },
+      {
         "seed": "A",
-        "at": 294.2,
+        "at": 303.5,
         "listen": [
           "Bass (Synth Bass 1)",
           "Kick",
@@ -350,7 +359,7 @@
       },
       {
         "seed": "J",
-        "at": 405.4,
+        "at": 413.8,
         "listen": [
           "Kick",
           "Bass (Synth Bass 2)",
@@ -358,17 +367,8 @@
         ]
       },
       {
-        "seed": "O",
-        "at": 0,
-        "listen": [
-          "Bass (Synth Bass 2)",
-          "Kick",
-          "Electric Snare"
-        ]
-      },
-      {
         "seed": "U",
-        "at": 258.3,
+        "at": 266.3,
         "listen": [
           "Bass (Synth Bass 2)",
           "Kick",
@@ -377,84 +377,10 @@
       },
       {
         "seed": "Y",
-        "at": 355.1,
+        "at": 364.5,
         "listen": [
           "Bass (Synth Bass 2)",
           "Tom"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "soul-reharmonised",
-    "question": "A Soul song's later chorus over new chords under the same melody: a lift, or the chorus lost?",
-    "decides": "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.",
-    "genre": "soul",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "harmonyDevices": {
-          "reharmonised": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "I",
-        "at": 98.9,
-        "listen": [
-          "Melody (Trumpet)",
-          "Chords (Drawbar Organ)",
-          "Bass (Drawbar Organ)"
-        ]
-      },
-      {
-        "seed": "1D",
-        "at": 216.8,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Chords (Electric Piano 1)",
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "1G",
-        "at": 177.3,
-        "listen": [
-          "Melody (Electric Guitar (clean))",
-          "Riff (Brass Section)",
-          "Counter-melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "1g",
-        "at": 182.8,
-        "listen": [
-          "Melody (Electric Guitar (clean))",
-          "Rhythm part (Electric Guitar (muted))",
-          "Chords (Drawbar Organ)"
-        ]
-      },
-      {
-        "seed": "1j",
-        "at": 154.5,
-        "listen": [
-          "Chords (Drawbar Organ)",
-          "Melody (Electric Piano 1)",
-          "Bass (Drawbar Organ)"
-        ]
-      },
-      {
-        "seed": "1r",
-        "at": 141.6,
-        "listen": [
-          "Chords (Acoustic Grand Piano)",
-          "Melody (Alto Sax)",
-          "Bass (Drawbar Organ)"
         ]
       }
     ]

@@ -48,7 +48,12 @@ their measure, heard from where they play: the surf drop (`surf-drop`, 0.04), Ja
 (`jazz-chromatic`, 0.03), IDM's 64ths (`idm-64ths`, 0.05), Rock's riff turnaround (`rock-turnaround`, 0.11), Techno's
 kick-out (`techno-kickout`, 0.04), Soul's reharmonised chorus (`soul-reharmonised`, 0.33), Metal's verse over the
 intro's riff (`metal-verse-riff`, 0.92) and its riff section (`metal-riff-section`, 1.26), and Dark jazz's half time
-(`darkjazz-half-time`, 0.40); Hip-hop's verses resting the melody next.
+(`darkjazz-half-time`, 0.40); Hip-hop's verses resting the melody next. Answered on 24 October 2026, every device heard
+and kept: the surf drop 6-0, the chromatic approach 5-0, IDM's 64ths 5-1, the riff turnaround 4-0 (two the same, its
+strum turning the riff's every later stroke fixed since), the kick-out 6-0, the riff section 6-0 and the half time 6-0;
+Soul's reharmonised chorus skipped, its melody sung as before over the new chords since, to ask again; the verse over
+the intro's riff asked again, the intro playing the riff it repeats since; the devices of a few places heard from 8 s
+before one of their places since.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 

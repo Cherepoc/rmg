@@ -32,6 +32,11 @@ public sealed class ListeningQuestionsTest
     /// <param name="In">The sections the device plays in, where alone it is listened to; every section for none.</param>
     /// <param name="With">The settings the songs with the device are given, by the page's name, as its steps; none for none.</param>
     /// <param name="Without">The settings the songs without it are given, as <paramref name="With" />.</param>
+    /// <param name="Places">
+    ///     Where a device of a few places plays, in beats, each heard from a little before it rather than from a pattern's
+    ///     start, as the bar it plays in may not be the pattern's that differs the most; none for a device that plays
+    ///     throughout what it is heard in.
+    /// </param>
     private sealed record Question(
         string Id,
         string Text,
@@ -42,7 +47,8 @@ public sealed class ListeningQuestionsTest
         Func<CorpusSong, double?> At,
         Func<CorpusSong, SectionSpan, bool>? In = null,
         Dictionary<string, int>? With = null,
-        Dictionary<string, int>? Without = null
+        Dictionary<string, int>? Without = null,
+        Func<CorpusSong, double[]>? Places = null
     );
 
     /// <summary>A song's pitched solos' segments, by their sections' places, as the trace records them.</summary>
@@ -65,27 +71,26 @@ public sealed class ListeningQuestionsTest
         new("surf-drop", "A Surf guitar's last bar before a louder section slid down the neck in palm-muted 16ths onto it: the surf drop, or a gimmick?",
             "Whether a lift into a louder section takes a surf drop (surfDrop.lifts, Surf's 30-40-50), against none.", "surf", [],
             new() { ["surfDrop"] = new() { ["lifts"] = 0 } },
-            x => Drops(x).Select(d => (double?)d.From - 2).Min(), (x, span) => Drops(x).Any(d => Math.Abs(d.To - span.End) < 1e-6)),
+            x => Drops(x).Select(d => (double?)d.From - 2).Min(), (x, span) => Drops(x).Any(d => Math.Abs(d.To - span.End) < 1e-6), Places: x => [..Drops(x).Select(d => d.From)]),
         new("jazz-chromatic", "A Jazz soloist's run approaching its note on the beat from a half step away: a jazz line, or a wrong note?",
             "How often a soloist's run approaches its note on the beat chromatically (soloStyle.chromatic, Jazz's 40-50-60), against never.", "jazz", [],
             new() { ["soloStyle"] = new() { ["chromatic"] = 0 } },
-            x => FirstSegment(x, s => s.Gesture == SoloGesture.Run), (x, span) => Soloed(x).Contains(x.Map.Sections.IndexOf(span))),
+            x => FirstSegment(x, s => s.Gesture == SoloGesture.Run), (x, span) => Soloed(x).Contains(x.Map.Sections.IndexOf(span)), Places: Chromatic),
         new("idm-64ths", "An IDM hi-hat rolling in 64ths, a drill splintering the beat: the style's, or a buzz?",
             "How often IDM's hat rolls drill in 64ths (hatRollRate.sixtyFourths, 0-20-60), against its 32nds and triplets alone.", "idm", [],
             new() { ["hatRollRate"] = new() { ["sixtyFourths"] = 0 } },
-            x => x.Trace.Where(e => e.Point == TracePoints.HatRolls).SelectMany(e => (ImmutableArray<(double From, double To, int Rate)>)e.Value!).Where(r => r.Rate == 16).Select(r => (double?)r.From - 2).Min()),
+            x => x.Trace.Where(e => e.Point == TracePoints.HatRolls).SelectMany(e => (ImmutableArray<(double From, double To, int Rate)>)e.Value!).Where(r => r.Rate == 16).Select(r => (double?)r.From - 2).Min(),
+            Places: x => [..x.Trace.Where(e => e.Point == TracePoints.HatRolls).SelectMany(e => (ImmutableArray<(double From, double To, int Rate)>)e.Value!).Where(r => r.Rate == 16).Select(r => r.From)]),
         new("rock-turnaround", "A Rock riff turning round into its next cycle, a walk up or down on its last beat: a riff band's, or a stumble?",
             "How often a riff turns round where its pattern starts again (riff.turnaround, Rock's 30-40-40), against never.", "rock", [],
             new() { ["riff"] = new() { ["turnaround"] = 0 } },
-            x => x.Trace.Where(e => e.Point == TracePoints.LineFill && e.Track == x.Track(TrackRole.Riff)).Select(e => (double?)(((double, double[]))e.Value!).Item1 - 2).Min()),
+            x => x.Trace.Where(e => e.Point == TracePoints.LineFill && e.Track == x.Track(TrackRole.Riff)).Select(e => (double?)(((double, double[]))e.Value!).Item1 - 2).Min(),
+            Places: x => [..x.Trace.Where(e => e.Point == TracePoints.LineFill && e.Track == x.Track(TrackRole.Riff)).Select(e => (((double, double[]))e.Value!).Item2[0])]),
         new("techno-kickout", "A Techno kick dropping out for a line before the next section, the band going on without it: a DJ's tension, or a hole?",
             "How often the kick drops out for a phrase's last line (kickOut.lines, Techno's 20-30-40), against never.", "techno", [],
             new() { ["kickOut"] = new() { ["lines"] = 0 } },
-            x => KickOuts(x).Select(k => (double?)k.From - 2).Min(), (x, span) => KickOuts(x).Any(k => k.From >= span.Start - 1e-9 && k.From < span.End - 1e-9)),
-        new("soul-reharmonised", "A Soul song's later chorus over new chords under the same melody: a lift, or the chorus lost?",
-            "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.", "soul", [],
-            new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
-            x => Reharmonised(x) is { } r ? r.Substitutes.Min() : null, (x, span) => Reharmonised(x) is { } r && x.Map.Sections.IndexOf(span) == r.Index),
+            x => KickOuts(x).Select(k => (double?)k.From - 2).Min(), (x, span) => KickOuts(x).Any(k => k.From >= span.Start - 1e-9 && k.From < span.End - 1e-9),
+            Places: x => [..KickOuts(x).Select(k => k.From)]),
         new("metal-verse-riff", "A Metal verse sung over the intro's riff: the band's main riff carrying the song, or a verse with nothing of its own?",
             "How often a verse plays over the intro's riff (riffSection.verses, Metal's 30-40-40), against a verse of its own.", "metal", [],
             new() { ["riffSection"] = new() { ["verses"] = 0 } },
@@ -107,13 +112,17 @@ public sealed class ListeningQuestionsTest
     private static (double From, double To)[] Drops(CorpusSong song) =>
         [..song.Trace.Where(x => x.Point == TracePoints.SurfDrop).Select(x => ((double From, double To))x.Value!)];
 
+    /// <summary>Where a song's soloists play a note off the scale, a run's chromatic approach.</summary>
+    private static double[] Chromatic(CorpusSong song) =>
+    [
+        ..song.Solos.Where(x => !x.Value.IsDrumSolo).SelectMany(x => x.Value.Soloists.Where(r => r != TrackRole.Drum).SelectMany(r => song.Song.Notes!.GetValueOrDefault(song.Track(r))?.Where(n =>
+            n.IsWithin(song.Map.Sections[x.Key].Start, song.Map.Sections[x.Key].End) && n.Value.State.GetStateValue(StateKinds.Alteration) != 0
+            && n.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) > 0) ?? [])).Select(n => n.Position).Order()
+    ];
+
     /// <summary>A song's kick-outs, each from where the kick drops out to where it plays again.</summary>
     private static (double From, double To)[] KickOuts(CorpusSong song) =>
         [..song.Trace.Where(x => x.Point == TracePoints.KickOuts).SelectMany(x => (ImmutableArray<(double From, double To)>)x.Value!)];
-
-    /// <summary>The appearance a song reharmonises, by its place, and where its substitutes start; none where it reharmonises none.</summary>
-    private static (int Index, ImmutableArray<double> Substitutes)? Reharmonised(CorpusSong song) =>
-        song.Trace.Where(x => x.Point == TracePoints.Reharmonisation).Select(x => x.Value).OfType<(int, ImmutableArray<double>)>().Select(x => ((int, ImmutableArray<double>)?)x).FirstOrDefault();
 
     /// <summary>A song's form, as it drew it.</summary>
     private static SongStructure FormOf(CorpusSong song) => (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
@@ -209,6 +218,9 @@ public sealed class ListeningQuestionsTest
     /// <summary>How long before a pattern's start a song is listened from, in seconds, the page starting it a moment earlier still.</summary>
     private const double LeadIn = 4;
 
+    /// <summary>How long before a place of a device of a few places a song is listened from, in seconds, so that the bars leading into it are heard first.</summary>
+    private const double PlaceLead = 8;
+
     /// <summary>How many parts a song names to listen to at most, and how much of the most different's difference one makes at least to be named.</summary>
     private const int Listened = 3;
 
@@ -225,12 +237,14 @@ public sealed class ListeningQuestionsTest
     {
         var without = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), OverridesOf(question, true), question.Skip.ToImmutableHashSet(), CancellationToken.None);
         var difference = new HeardDifference(with.Rendered, Rmg.Core.Rendering.Render.RenderSong(without));
-        var places = with.Map.Sections
-            .Where(x => x.End > first + 1e-9 && (question.In?.Invoke(with, x) ?? true))
-            .SelectMany(x => x.Patterns.Where(p => p.End > first + 1e-9))
-            .Select(p => with.Rendered.SecondsAt(p.Start))
-            .Select(at => (Difference: difference.Between(at, at + Heard), At: at))
-            .ToArray();
+        // from a pattern's start, or a little before a place of a device of a few places, which the window then holds
+        var starts = question.Places is { } placesOf
+            ? placesOf(with).Where(x => x >= first - 1e-9).Select(x => Math.Max(0, with.Rendered.SecondsAt(x) - PlaceLead + LeadIn))
+            : with.Map.Sections
+                .Where(x => x.End > first + 1e-9 && (question.In?.Invoke(with, x) ?? true))
+                .SelectMany(x => x.Patterns.Where(p => p.End > first + 1e-9))
+                .Select(p => with.Rendered.SecondsAt(p.Start));
+        var places = starts.Select(at => (Difference: difference.Between(at, at + Heard), At: at)).ToArray();
         if (places.Length == 0)
             return null;
         var best = places.Max(x => x.Difference);
