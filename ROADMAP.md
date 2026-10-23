@@ -419,7 +419,11 @@ code before it is recorded here. Left:
 - **Four at 924000000** (the review of 16 October's holdout, 23 October 2026, each failing at ea7cd3f too, older than that
   review's fixes): the polymeter's chords off their cycle (seed 45 at 479.75, a 7-16th cell in a 16/16 bar, the chords'
   onsets in its second frame not on the first cell's, `PolymeterTest`); a drum doubling a lead off the lead's beats
-  (seed 26, section 9 at 672, a tambourine on the kick at 682 and 698, `DoublingTest`); a percussion-only section
+  (seed 26, section 9 at 672, a tambourine on the kick at 682 and 698, `DoublingTest`; traced on 23 October 2026 to
+  `Polymeter`, which lays a drum bound to the kick from its own first cell apart from the kick's, so that the tambourine
+  strikes a cell's start the kick no longer plays; to keep a doubling or accenting drum to its lead's notes as laid, the
+  section's bindings would need their kind, a figure of its own on the lead's feel kept apart; the same rule's failure
+  at 958000000, a doubler's own strong beats in a bar its lead left out, fixed in the section's drums, 920e1bb7); a percussion-only section
   playing three of the kit's notes (`PercussionSectionsTest`, its assertion naming no song yet); a calm section's drums
   not sparser (seed 14 at 712, `DroneAndQuieterFormTest`). Their songs change with the review of 22 October's packages: each to be
   read at the first offset it fails at after them.
