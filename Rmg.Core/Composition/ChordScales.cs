@@ -160,7 +160,7 @@ public static class ChordScales
         }
 
         // whether the chord before was made this one's dominant, which a borrowed scale lowering this one's root would leave
-        // resolving a semitone off
+        // resolving a semitone off, and lowering its fifth with no fifth to resolve to
         var resolvesHere = false;
         return
         [
@@ -203,7 +203,7 @@ public static class ChordScales
                     return minor;
                 if (borrowed is not null && borrows
                     && Heard(Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed), home + root) is { } lent
-                    && !(resolving && lent.Steps.Moves(Mod(home + root))))
+                    && !(resolving && (lent.Steps.Moves(Mod(home + root)) || IsDiminished(scale, home, root, lent))))
                     return lent;
                 return ownsScale && ownScale is not null ? ownScale : ChordScale.Section;
             })
