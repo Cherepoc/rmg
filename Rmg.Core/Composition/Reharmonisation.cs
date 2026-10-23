@@ -25,11 +25,12 @@ internal static class Reharmonisation
     /// <summary>
     ///     The substitutes, as the song's state: a root moved from each substituted chord to the
     ///     next change, never a chord moved by semitones; none where the song does not reharmonise or has no section heard
-    ///     again.
+    ///     again; and the appearance reharmonised, by its place, whose melody then sings its tune as heard before over them
+    ///     (<see cref="LinePattern.Place" />), none where none is.
     /// </summary>
     /// <param name="moved">Where a key change moves a chord or leads into one, which keeps it.</param>
     /// <param name="last">The last appearance played in full, by its place: the last section, or its drawn repeat, not the passes a fade or a strip adds after it.</param>
-    public static StateTimelineMap Apply(IGenerationContext context, double unconventionality, Genre genre, SongMap map, StateTimelineMap common, IEnumerable<double> moved, int last)
+    public static (StateTimelineMap Roots, int? Appearance) Apply(IGenerationContext context, double unconventionality, Genre genre, SongMap map, StateTimelineMap common, IEnumerable<double> moved, int last)
     {
         var reharmonises = context.TestProbability(Chance.At(unconventionality, genre.Chance(GenreChoices.HarmonyDevices, "reharmonised")));
         var sections = map.Sections;
@@ -74,11 +75,11 @@ internal static class Reharmonisation
         StateTrace.RecordSection(TracePoints.Reharmonisation, SectionGenerator.SectionTrace, later >= 0 ? sections[later].SectionId : 0,
             $"{roots.Count / 2} chords", roots.Count == 0 ? null : (later, roots.Where((_, j) => j % 2 == 0).Select(x => x.Position).ToImmutableArray()));
         if (roots.Count == 0)
-            return StateTimelineMap.Create(common.Duration);
+            return (StateTimelineMap.Create(common.Duration), null);
         static IEnumerable<TimelineItem<T>> Once<T>(IEnumerable<TimelineItem<T>> items) => items.GroupBy(x => x.Position).Select(x => x.Last()).OrderBy(x => x.Position);
-        return StateTimelineMap.Create(common.Duration,
+        return (StateTimelineMap.Create(common.Duration,
         [
             StateTimeline.Create(common.Duration, StateKinds.ChordRoot, Once(roots)).WithLayer("Reharmonisation")
-        ]);
+        ]), later);
     }
 }

@@ -120,7 +120,8 @@ internal sealed class LinePattern
         int trackNumber,
         PitchInstrumentTrack definition,
         LineProfile profile,
-        SongMap map
+        SongMap map,
+        (SectionSpan Span, SectionSpan Source)? resung
     )
     {
         var (low, high) = Realizer.GetRange(definition);
@@ -186,6 +187,8 @@ internal sealed class LinePattern
                              && (ChordArrival)lineNotes[i].State.GetStateValue(CompositionStateKinds.LineLanding) != ChordArrival.Free;
         Restate(notes, map, profile, Lands);
         Hook(notes, map, profile, Lands);
+        if (resung is var (span, source))
+            Resing(notes, span, source, Lands);
 
         for (var i = 0; i + 1 < notes.Length; i++)
         {
@@ -237,6 +240,22 @@ internal sealed class LinePattern
                         notes[i] = notes[i] with { Pitch = notes[first].Pitch };
                 }
         }
+    }
+
+    /// <summary>
+    ///     A reharmonised appearance's notes singing its source's, each where the source sang it, where it fits the new chord
+    ///     there as a hook's repeat does (<see cref="FitsHook" />), and the line's own where it does not, so that the tune is
+    ///     the one heard and the chords under it new; but a note that lands on its chord, which keeps its landing.
+    /// </summary>
+    /// <param name="span">The appearance reharmonised.</param>
+    /// <param name="source">Its section's appearance before it, whose tune it sings.</param>
+    private static void Resing((LineNote Note, int Rank, int Pitch)[] notes, SectionSpan span, SectionSpan source, Func<int, bool> lands)
+    {
+        var at = notes.Select((x, i) => (Position: Math.Round(x.Note.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
+        for (var i = 0; i < notes.Length; i++)
+            if (span.IsWithin(notes[i].Note.Position) && !lands(i) && at.TryGetValue(Math.Round(notes[i].Note.Position - span.Start + source.Start, 6), out var sung)
+                && FitsHook(notes[i], notes[sung].Pitch))
+                notes[i] = notes[i] with { Pitch = notes[sung].Pitch };
     }
 
     /// <summary>

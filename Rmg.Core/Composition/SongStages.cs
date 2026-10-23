@@ -37,6 +37,9 @@ internal sealed record SongDraft(
     /// </summary>
     public ImmutableArray<HeldSpan> Held { get; init; } = [];
 
+    /// <summary>The appearance reharmonised, by its place, whose melody sings its tune as heard before over the new chords (<see cref="SongStages.Lines" />); none where none is.</summary>
+    public int? Reharmonised { get; init; }
+
     /// <summary>Where the drums fill, from a fill's start to its line, which the stages that play around a fill keep out of.</summary>
     public (double From, double To)[] FillSpans => [..Held.Where(x => x.Kind == Hold.Fill).Select(x => (x.Start, x.End))];
 
@@ -217,12 +220,12 @@ internal static class SongStages
     }
 
     /// <summary>A later appearance's chords now and then substituted, from a stream of its own, before the lines are placed over them (<see cref="Reharmonisation" />).</summary>
-    internal static SongDraft Reharmonise(SongDecisions song, SongDraft draft) =>
-        draft with
-        {
-            Timeline = draft.Timeline.MergeStateTimelineMap(Reharmonisation.Apply(song.Stream(SongStream.Reharmonisation), song.Facets[Facet.Progression], song.Genre, song.Form.Map,
-                draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change)), LastFull(song)))
-        };
+    internal static SongDraft Reharmonise(SongDecisions song, SongDraft draft)
+    {
+        var (roots, appearance) = Reharmonisation.Apply(song.Stream(SongStream.Reharmonisation), song.Facets[Facet.Progression], song.Genre, song.Form.Map,
+            draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change)), LastFull(song));
+        return draft with { Timeline = draft.Timeline.MergeStateTimelineMap(roots), Reharmonised = appearance };
+    }
 
     /// <summary>
     ///     The last section's place, which a key lifts at and a reharmonisation takes: its repeat where it plays twice, before
@@ -316,23 +319,30 @@ internal static class SongStages
         var map = song.Form.Map;
         var hookChorus = song.FirstChorus?.Span.Start ?? 0;
         // each line's phrases louder at their peaks as far as the genre plays its parts' velocity (VelocityLayers.SpreadOf)
-        TrackEventStateTimelineMap<StateMap> Place(TrackEventStateTimelineMap<StateMap> timeline, KeyValuePair<int, IInstrumentTrack> track, LineProfile profile) =>
-            SongFormGenerator.QuoteHook(LinePattern.Place(timeline, track.Key, (PitchInstrumentTrack)track.Value, profile with { PhraseArc = profile.PhraseArc * VelocityLayers.SpreadOf(song.Genre), PhraseSwell = profile.PhraseSwell * VelocityLayers.SpreadOf(song.Genre) }, map),
+        TrackEventStateTimelineMap<StateMap> Place(TrackEventStateTimelineMap<StateMap> timeline, KeyValuePair<int, IInstrumentTrack> track, LineProfile profile,
+            (SectionSpan Span, SectionSpan Source)? resung) =>
+            SongFormGenerator.QuoteHook(LinePattern.Place(timeline, track.Key, (PitchInstrumentTrack)track.Value, profile with { PhraseArc = profile.PhraseArc * VelocityLayers.SpreadOf(song.Genre), PhraseSwell = profile.PhraseSwell * VelocityLayers.SpreadOf(song.Genre) }, map, resung),
                 track.Key, map, hookChorus);
         var (melody, bass, counter, riff) = (song.Track(TrackRole.Melody), song.Track(TrackRole.Bass), song.Track(TrackRole.CounterMelody), song.Track(TrackRole.Riff));
 
-        var timeline = Place(draft.Timeline, melody, MelodyLayers.LineOf(song.Genre));
-        timeline = Place(timeline, bass, BassLeadingLayers.Line);
+        // the melody of a reharmonised appearance singing its tune as its section's last appearance before sang it, as an
+        // arranger keeps the tune and changes the chords under it
+        (SectionSpan Span, SectionSpan Source)? resung = draft.Reharmonised is { } reharmonised
+                                                         && map.Sections.Take(reharmonised).LastOrDefault(x => x.SectionId == map.Sections[reharmonised].SectionId) is { } source
+            ? (map.Sections[reharmonised], source)
+            : null;
+        var timeline = Place(draft.Timeline, melody, MelodyLayers.LineOf(song.Genre), resung);
+        timeline = Place(timeline, bass, BassLeadingLayers.Line, null);
         (timeline, _) = LineFills.Apply(timeline, bass.Key, (PitchInstrumentTrack)bass.Value, draft.Runs, place => song.Stream(SongStream.BassFills, place), map, LineFills.Bass, ImmutableHashSet<double>.Empty);
         (timeline, var melodyWalks) = LineFills.Apply(timeline, melody.Key, (PitchInstrumentTrack)melody.Value, draft.Runs, place => song.Stream(SongStream.MelodyFills, place), map, LineFills.Melody, ImmutableHashSet<double>.Empty);
-        timeline = Place(timeline, counter, CounterLayers.Line);
+        timeline = Place(timeline, counter, CounterLayers.Line, null);
         (timeline, var counterWalks) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, draft.Runs, place => song.Stream(SongStream.CounterFills, place), map, LineFills.CounterMelody, melodyWalks);
         // and running into a change of section now and then, a genre's, the likelier the louder the section it runs into,
         // where neither line walks
         var changes = song.Form.Lines.Where(x => x.Ending != x.Next).Select(x => new PlayedRun(x.Position, [], x.Lift)).ToArray();
         (timeline, _) = LineFills.Apply(timeline, counter.Key, (PitchInstrumentTrack)counter.Value, changes, place => song.Stream(SongStream.CounterRuns, place), map,
             LineFills.Run with { Chance = LineFills.RunChance.At(song.Facets[Facet.Melody], song.Genre.Chance(GenreChoices.LineRun, "counterMelody")) }, melodyWalks.Union(counterWalks));
-        timeline = Place(timeline, riff, RiffLayers.Line);
+        timeline = Place(timeline, riff, RiffLayers.Line, null);
         // and the riff turning round into its next cycle now and then, where its section's pattern starts again within it, but
         // in a polymeter, whose cycle is not its bar's; its walk from the last pulse of the bar before, a dotted quarter in 6/8
         var restarts = map.Plays.Where(x => !x.IsEnding && !draft.Polymeters.Contains(x.Span.SectionId))

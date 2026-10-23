@@ -16,6 +16,41 @@ public sealed class ReharmonisationTest
         return (song, ((int, ImmutableArray<double>)?)trace.Entries.SingleOrDefault(x => x.Point == TracePoints.Reharmonisation)?.Value);
     }
 
+    /// <summary>
+    ///     A reharmonised appearance's melody sings the tune its section's appearance before sang, as an arranger keeps the
+    ///     tune and changes the chords under it: its notes over the substitutes the same as heard before, where they fit the
+    ///     new chord, but where it lands on a chord or leads into the next (measured over 64 songs: 59-68% at offsets 0 and a
+    ///     million, from 15-25% placed anew over them).
+    /// </summary>
+    [Test]
+    public async Task AReharmonisedAppearance_SingsItsTuneAsHeardBefore()
+    {
+        var (notes, kept) = (0, 0);
+        foreach (var (song, substitutes) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Generate(seed)))
+        {
+            if (substitutes is not { } found)
+                continue;
+            var span = song.Map!.Sections[found.Appearance];
+            var source = song.Map.Sections.Take(found.Appearance).Last(x => x.SectionId == span.SectionId);
+            var melody = song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
+            var sung = melody.GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.First().Value.Pitches[0]);
+            // the notes over a substitute, from its change to the next
+            var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).Append(span.End).ToArray();
+            bool OverSubstitute(double at) => found.At.Any(x => at >= x - 1e-9 && at < changes.First(c => c > x + 1e-9) - 1e-9);
+            foreach (var note in melody.Where(x => span.IsWithin(x.Position) && OverSubstitute(x.Position)))
+                if (sung.TryGetValue(Math.Round(note.Position - span.Start + source.Start, 6), out var before))
+                {
+                    notes++;
+                    kept += note.Value.Pitches[0] == before ? 1 : 0;
+                }
+        }
+
+        Console.WriteLine($"  {kept} of {notes} melody notes over a substitute as sung before ({kept / (double)Math.Max(1, notes):P0})");
+        await Assert.That(notes).IsGreaterThan(20);
+        await Assert.That(kept / (double)notes).IsGreaterThan(0.4);
+    }
+
     [Test]
     public async Task ASubstitute_IsAThirdFromTheChordItReplaces_InTheLaterAppearanceAlone()
     {

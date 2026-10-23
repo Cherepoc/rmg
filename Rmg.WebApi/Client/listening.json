@@ -418,7 +418,7 @@
         "listen": [
           "Bass (Electric Bass (finger))",
           "Chords (Electric Piano 1)",
-          "Riff (Baritone Sax)"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
@@ -428,6 +428,15 @@
           "Melody (Electric Guitar (clean))",
           "Riff (Brass Section)",
           "Counter-melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1g",
+        "at": 182.8,
+        "listen": [
+          "Melody (Electric Guitar (clean))",
+          "Rhythm part (Electric Guitar (muted))",
+          "Chords (Drawbar Organ)"
         ]
       },
       {
@@ -444,15 +453,8 @@
         "at": 141.6,
         "listen": [
           "Chords (Acoustic Grand Piano)",
-          "Bass (Drawbar Organ)",
-          "Melody (Alto Sax)"
-        ]
-      },
-      {
-        "seed": "1s",
-        "at": 116,
-        "listen": [
-          "Chords (Electric Piano 1)"
+          "Melody (Alto Sax)",
+          "Bass (Drawbar Organ)"
         ]
       }
     ]
