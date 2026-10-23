@@ -21,8 +21,8 @@ FAMILIES = {
     'form': {
         'choices': 'tempo length meter formChances form phrases phraseBars sectionLength phraseScheme texture alone loop drop dropKind breakdown stopTime '
                    'push intro openingAlone openingPart ensembleHits ending lastRepeat sectionChanges parts roleLength dynamics voice space rests '
-                   'tempoBand intensity',
-        'stages': 'Stop time|Pushes|Silent start|Lift cues|Risers|Key changes|Hook intro',
+                   'tempoBand intensity stops surfDrop riffSection',
+        'stages': 'Stop time|Pushes|Silent start|Lift cues|Risers|Surf drops|Key changes|Hook intro',
     },
     'harmony': {
         'choices': 'rootMotion rootDegree cadenceDegree cadenceRaise sectionHome chordScales ownMode passingChords passingKind planing harmonyDevices '
@@ -32,20 +32,20 @@ FAMILIES = {
     },
     'lines': {
         'choices': 'bass octaveBass alternatingBass bassLanding glide melodyRange lineScale riffScale riff register doubling ornaments tension '
-                   'hook appoggiatura callAndResponse sung glideRate lineRun',
+                   'hook appoggiatura callAndResponse sung glideRate lineRun sequence',
         'stages': 'Lines|Doubling|Chugs|Ornaments|Notes|Call and response|Kick-out bass',
     },
     'drums': {
         'choices': 'fills pocket grooveHold pins mutation ghosts rudiments hatRolls drumSounds drumStrokes drumJob marks kit drumSetup drumPieces '
-                   'polymeter polymeterCell feel feelChances feelValues ghostNotes hatRollRate kickOut',
+                   'polymeter polymeterCell feel feelChances feelValues ghostNotes hatRollRate kickOut timeChanges',
         'stages': 'Polymeter|Figures|Mutations|Fills|Drum marks|Hat rolls|Ghosts|Drum ornaments|Timing',
     },
     'solos': {
-        'choices': 'solos soloists soloCount soloShare drumSoloFeet sticking soloAnswers',
+        'choices': 'solos soloists soloCount soloShare drumSoloFeet sticking soloAnswers soloStyle soloLanding',
         'stages': 'Solos|Drum solos|Solo answers',
     },
     'sound': {
-        'choices': 'effects strongEffect echo louderForms instrumentSwitches room insertion pan mixFilter levels articulation',
+        'choices': 'effects strongEffect echo louderForms instrumentSwitches room insertion pan mixFilter levels articulation bendTiming vibratoWidth',
         'stages': 'Instruments|Articulation|Mix filter|Expression',
     },
 }
@@ -68,7 +68,7 @@ stale += [f'stage {x}' for d in FAMILIES.values() for x in d['stages'].split('|'
 
 # the genre presets by cluster of styles, a genre-fit reviewer each: the neighbours a preset is told apart from
 CLUSTERS = {
-    'rock-pop': 'rock pop ballad punk',
+    'rock-pop': 'rock pop ballad punk surf',
     'heavy': 'metal nuMetal djent blackMetal thrash doom symphonic',
     'blues-jazz': 'blues jazz fusion soul darkJazz jazzFunk',
     'groove': 'funk funkRock disco latin bossa reggae dub ska',

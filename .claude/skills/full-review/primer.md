@@ -27,6 +27,10 @@ RMG (`/home/glyge/Projects/sw/rmg`) is a random music generator in C# .NET 10 wi
 
 ### What plays where
 `SongMap.PlayAt` gives the appearance a position plays as: an intro made from a section plays as that section, a hook intro as its chorus, the ending as the last section. A stage that reads a section's decisions at a position asks it, never the section the position merely falls in. A stage that walks the sections walks `SongMap.Plays` (a hook intro and an intro of entries' window as their source, every section, the ending marked `IsEnding` as the last section, which a stage leaving a final chord alone skips), and asks `PlayingAt` of a position; one walking `Sections` alone, or asking `SectionAt` where an intro or the ending plays as a section, is a finding.
+The same holds of a section's lines made from another's: a looping section's riff and bass as the first section's, a
+riff section returning, a verse over the intro's riff, a break on the melody playing the tune as its section's first
+appearance sang it. Every stage treats such a copy as its source, and a device referring to it is judged against what
+the listener heard there.
 
 ### What the song holds
 `SongDraft.Holds(song)` lists the stretches the song holds (`HeldSpan`, by kind `Hold`: every fill, a kick-out, a drop's build, stop time as played and its ensemble hits, a solo, a drum solo's turns, a polymeter's sections, a part cut by the form, a call and its answer), and a stage keeps out of the kinds it names (`Holds.Meets`, `At`, `NextAfter`, `Of`). A stage that makes such a stretch writes it to `SongDraft.Held` (the fills, the kick-outs, the polymeter, the drum solos do); the form's own (a build, a cut) come from the assembly. A stage keeping out of a stretch by a list of its own, or one making a stretch others should keep out of without writing it, is a finding; `HoldsTest` checks the drum stages that add notes against the holds.
@@ -36,6 +40,11 @@ RMG (`/home/glyge/Projects/sw/rmg`) is a random music generator in C# .NET 10 wi
 - Choices lean through `ByConvention(plain, tuned, wild)` and `Tilt`.
 - A genre (`Genre`, from `Client/genres.json`, choices declared in `GenreChoices`) overrides options.
 - The mood (`Mood`): darkness and intensity, each from -1 to 1, drawn within a genre's span or given, beside the unconventionality. It never adds or removes an option: it leans the weights of those a genre's pool allows, by each option's lean in `Mood.Leans`, as energy leans. A choice the mood should lean and `Mood.Leans` does not name, or a lean applied by hand elsewhere, is a finding.
+- The song decides first, its sections then depart only where it does: whether the song leaves its time
+  (`Groove.DepartChance`, `timeChanges`) before a section's half or double time, own tempo, own meter or short bar;
+  whether it stops (`StopTime.SongChance`, `stops`) before a section's stop time or ensemble hits. A section-level
+  draw of such a departure made where the song's draw said no, or a song-level thing drawn section by section, is a
+  finding.
 - Figures (`Figures`) are data: a player's hand-written figure (four on the floor, the skank, the tresillo, the waltz, the boom-chicka, the jazz ride, the bass on the kick) with its genres' amounts and its energy lean; a figure written as a case in a stage, where the table would hold it, is a finding.
 
 ### Streams
