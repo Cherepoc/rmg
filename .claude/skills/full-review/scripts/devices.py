@@ -21,8 +21,8 @@ FAMILIES = {
     'form': {
         'choices': 'tempo length meter formChances form phrases phraseBars sectionLength phraseScheme texture alone loop drop dropKind breakdown stopTime '
                    'push intro openingAlone openingPart ensembleHits ending lastRepeat sectionChanges parts roleLength dynamics voice space rests '
-                   'tempoBand intensity stops surfDrop riffSection',
-        'stages': 'Stop time|Pushes|Silent start|Lift cues|Risers|Surf drops|Key changes|Hook intro',
+                   'tempoBand intensity stops riffSection',
+        'stages': 'Stop time|Pushes|Silent start|Lift cues|Risers|Key changes|Hook intro',
     },
     'harmony': {
         'choices': 'rootMotion rootDegree cadenceDegree cadenceRaise sectionHome chordScales ownMode passingChords passingKind planing harmonyDevices '

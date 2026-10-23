@@ -69,10 +69,9 @@ public sealed class RealizedNoteTest
         await Assert.That(stacked).IsGreaterThan(0);
     }
 
-    /// <summary>Every note's loudness its state's, a riser's and a surf drop's slide too, in the presets that drop and slide.</summary>
+    /// <summary>Every note's loudness its state's, a riser's too, in the presets that drop.</summary>
     [Test]
     [Arguments("trance", TracePoints.Drop)]
-    [Arguments("surf", TracePoints.SurfDrop)]
     public async Task ANoteAStageAdds_KeepsItsLoudnessInItsState(string preset, string point)
     {
         var added = 0;

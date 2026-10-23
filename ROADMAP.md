@@ -394,9 +394,8 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
 - **Surf rock** (built 22 October 2026, a new preset as the owner asked): instrumental surf, clean bright guitars in
   a plate's heavy send (no spring among the synthesizer's rooms, so no drip), the double harmonic scale already one of
   the songs' (`doubleHarmonicMajor`), a whammy's dip a step down (`vibratoWidth.dip`), a tremolo-picked riff now and
-  then, a surf drop into a louder section (`surfDrop.lifts`): 163 a minute on the average, sections tremolo-picked
-  11%, 29 drops in 64 songs. The twelfth round asks `surf-tremolo`; the drop measured too faint to ask (0.05, a bar in
-  a stretch), to be heard by hand. Put off: the tom among the timekeepers, a hi-hat's pattern on the floor tom: a
+  then: 163 a minute on the average, sections tremolo-picked 11%. The twelfth round asks `surf-tremolo`; the surf drop
+  into a louder section, measured too faint to ask twice (0.05, then 0.04 on 23 October 2026), cut on the owner's word. Put off: the tom among the timekeepers, a hi-hat's pattern on the floor tom: a
   genre's pool of the time role gives the tom the role, but the section's lead in it goes first to the drum whose own
   role it is, the hi-hat, so that the tom would need a genre's lean in the lead's choice (`DrumKitGenerator.SelectKit`),
   a mechanism of its own for one genre.
