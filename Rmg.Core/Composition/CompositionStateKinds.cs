@@ -195,6 +195,10 @@ internal static class CompositionStateKinds
     // 1 for a note of a solo's line, which any part plays as a line, one note at a time, rather than as its part would
     public static StateKind<int> LineSolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineSolo", StateScope.Render);
 
+    // 1 for a note of an answer to the melody (SoloAnswers), its level set under the melody's before it is slurred, as a
+    // solo's is over the band's
+    public static StateKind<int> LineAnswer { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineAnswer", StateScope.Render);
+
     // 1 for a solo's release, the held note a phrase ends on
     public static StateKind<int> SoloRelease { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoloRelease", StateScope.Render);
 

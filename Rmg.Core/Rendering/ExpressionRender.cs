@@ -20,6 +20,9 @@ internal static class ExpressionRender
     /// <summary>How finely a curve is written, in beats: a 32nd.</summary>
     private const double Step = 0.125;
 
+    /// <summary>A tremolo's cycle, in beats: a 16th.</summary>
+    private const double TremoloCycle = 0.25;
+
     /// <summary>The two cycles a tape's wow drifts in, in beats from the song's start, apart so that it never repeats as a vibrato does.</summary>
     private const double WowCycle = 2, SlowWowCycle = 3.3;
 
@@ -244,7 +247,7 @@ internal static class ExpressionRender
                     var t = at - start;
                     var swell = swells ? Math.Min(1, 0.25 + 0.75 * t / Math.Min(1, duration / 2)) : 1;
                     // in 16ths of the song's grid, as a sweep is, so that a chord struck again keeps the pulse it shook in
-                    var shake = 1 - tremolo / 100.0 * (0.5 + 0.5 * Math.Sin(2 * Math.PI * at / 0.25));
+                    var shake = 1 - tremolo / 100.0 * (0.5 + 0.5 * Math.Sin(2 * Math.PI * at / TremoloCycle));
                     // ducked on the bar's pulse and swelling back over it
                     var duck = pump > 0 ? 1 - pump / 100.0 * Math.Pow(1 - SincePulse(map, at), 2) : 1;
                     return swell * shake * duck;
@@ -259,7 +262,10 @@ internal static class ExpressionRender
                     return open;
                 }
 
-                var times = (moves ? Enumerable.Range(0, (int)Math.Ceiling((duration - 1e-9) / (Step / 2))).Select(i => start + i * Step / 2) : [])
+                // sampled at an eighth of a tremolo's cycle where it shakes, so that it throbs rather than steps, and at half a step
+                // for a swell or a pump alone
+                var every = tremolo > 0 ? TremoloCycle / 8 : Step / 2;
+                var times = (moves ? Enumerable.Range(0, (int)Math.Ceiling((duration - 1e-9) / every)).Select(i => start + i * every) : [])
                     .Concat(gateEdges.Select(x => x.At)).Where(x => x < end - 1e-9).Distinct().Order();
                 foreach (var at in times)
                     expression.Add((at, Moved(at) * Gated(at)));

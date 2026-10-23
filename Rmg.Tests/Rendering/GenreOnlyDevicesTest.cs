@@ -18,7 +18,7 @@ public sealed class GenreOnlyDevicesTest
     private static ImmutableDictionary<string, ByConvention> Only(string option, double amount = 1) =>
         ImmutableDictionary<string, ByConvention>.Empty.Add(option, new ByConvention(amount, amount, amount));
 
-    /// <summary>The chords struck as stabs: every note of the parts that hold chords a 16th at most before the ending, the pad's as it was.</summary>
+    /// <summary>The chords struck as stabs: every note of the parts that hold chords a 16th at most before the ending, the ending's held final chord and the pad's as they were.</summary>
     [Test]
     public async Task Stabs_StrikeTheChordsShort()
     {
@@ -33,14 +33,25 @@ public sealed class GenreOnlyDevicesTest
 
         await Assert.That(stabbed).IsGreaterThan(100);
 
-        // and the pad as the same songs play it without stabs
-        foreach (var seed in Enumerable.Range(0, 16))
+        // and the pad as the same songs play it without stabs, and the ending's final chord where the ending holds it
+        var held = 0;
+        foreach (var seed in Enumerable.Range(0, 32))
         {
             var (with, without) = (TestCorpus.Get(seed, new SongOverrides(Genre: With("reggae", GenreChoices.Articulation, Only("stabs")))), TestCorpus.Get(seed, new SongOverrides(Genre: With("reggae", GenreChoices.Articulation, Only("stabs", 0)))));
+            if (Rmg.Core.Composition.FormLayers.HoldsFinalChord(with.Map.Ending.Kind))
+                foreach (var (track, notes) in with.Song.Notes!.Where(x => with.Song.TrackDefinitions[x.Key].Role is TrackRole.Chords or TrackRole.Rhythm))
+                foreach (var note in notes.Where(x => x.Position >= with.Map.Ending.Start - 1e-9))
+                {
+                    held++;
+                    var own = without.Song.Notes![track].Single(x => Math.Abs(x.Position - note.Position) < 1e-9);
+                    await Assert.That(note.Value.Duration).IsEqualTo(own.Value.Duration).Because($"seed {seed}, track {track} at {note.Position}");
+                }
             if (with.Song.Notes!.GetValueOrDefault(with.Song.Track(TrackRole.Pad)) is { } pad)
                 await Assert.That(pad.Select(x => (x.Position, x.Value.Duration))).IsEquivalentTo(without.Song.Notes![without.Song.Track(TrackRole.Pad)].Select(x => (x.Position, x.Value.Duration)), CollectionOrdering.Matching)
                     .Because($"seed {seed}");
         }
+
+        await Assert.That(held).IsGreaterThan(0);
     }
 
     /// <summary>A part leveled up plays louder than as the songs have it, over the same songs.</summary>

@@ -137,8 +137,10 @@ public static class Render
                     if (note.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0)
                         (duration, velocity) = (Math.Max(MutedFloor, duration * MutedShare), velocity * MutedVelocity);
                     // a slurred note as General MIDI can play it, which has no legato: struck softer, the note before reaching it,
-                    // but a soloist's, whose margin over the band was set before its notes were slurred
-                    if (note.Value.State.GetStateValue(CompositionStateKinds.Legato) > 0 && note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
+                    // but a soloist's, whose margin over the band was set before its notes were slurred, and an answer's, whose
+                    // under the melody was
+                    if (note.Value.State.GetStateValue(CompositionStateKinds.Legato) > 0 && note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0
+                        && note.Value.State.GetStateValue(CompositionStateKinds.LineAnswer) == 0)
                         velocity *= SlurredVelocity;
                     // a strummed chord's strings struck one after another, down from the lowest or up from the highest, the up
                     // stroke a touch softer and thinner, a full chord's lowest string missed as the hand comes up
@@ -194,7 +196,11 @@ public static class Render
                 var pan = PanAt(0);
                 // how the part is played beyond its notes, its send to the delay that echoes it among them
                 var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pan, mixClosed);
-                var played = EventTimeline.Create(trackNotes.Duration, renderedNotes);
+                // a doubled part's first take, whose channel plays at the takes' level throughout, as loud where it plays alone,
+                // clean or muted, as the part, its notes there louder by as much, as channel volume and velocity are heard alike
+                var played = EventTimeline.Create(trackNotes.Duration, doubles
+                    ? renderedNotes.Select(x => Driven(x.Position) ? x : (x.Value with { Velocity = Math.Min(1, x.Value.Velocity / DoubleTracking.Level) }).ToTimelineItem(x.Position))
+                    : renderedNotes);
                 // a doubled part plays no sweep, its takes standing apart on either side, its first moving to its side and back
                 // where its sound changes
                 var controllers = doubles ? [..expression.Controllers.Where(x => x.Controller != 10)] : expression.Controllers;

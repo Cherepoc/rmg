@@ -124,6 +124,7 @@ internal static class SoloAnswers
                     .With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + lift)
                     .With(CompositionStateKinds.Octave, 0)
                     .With(CompositionStateKinds.SoloRelease, 0)
+                    .With(CompositionStateKinds.LineAnswer, 1)
                     .ToTimelineItem(x.Position)));
             }
         }

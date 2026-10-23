@@ -202,6 +202,7 @@ internal static class Arpeggios
     }
 
     /// <summary>The note of a voiced chord, low to high, that its note of the given place since the chord came in plays.</summary>
+    /// <param name="position">Where the note falls in its section's pattern, in beats, which a chord broken in no pattern's order draws its notes by, the same at every pass.</param>
     /// <param name="onBeat">Whether the note falls on a beat of its bar, its meter's pulses counted from the bar's start, where a montuno plays the root.</param>
     /// <param name="root">The chord's root, any octave of it, which the root and fifth and the pedal play on, as the voicing may put another note lowest.</param>
     /// <param name="order">The seed a chord broken in no pattern's order draws its notes by (<see cref="CompositionStateKinds.ArpeggioOrder" />).</param>
@@ -230,7 +231,7 @@ internal static class Arpeggios
             ArpeggioPattern.Alberti => notes[(place % 4) switch { 0 => 0, 2 => count / 2, _ => count - 1 }],
             ArpeggioPattern.Pairs => notes[place % 2 == 0 ? 0 : count - 1],
             ArpeggioPattern.RootFifth => notes[place % 2 == 0 ? low : fifth],
-            // an order of no pattern, the section's drawn, the same for the same place
+            // an order of no pattern, the section's drawn, the same for the same place in the pattern, at every pass
             ArpeggioPattern.Random => notes[(int)(Probabilities.Seeds.Derive((ulong)order, Probabilities.Seeds.Key((long)Math.Round(position * 1000), place)) % (ulong)count)],
             ArpeggioPattern.UpTwoOctaves => notes[place % count] + 12 * (place / count % 2),
             ArpeggioPattern.Pedal => notes[place % 2 == 0 ? low : others[place / 2 % others.Length]],

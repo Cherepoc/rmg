@@ -374,6 +374,7 @@ internal static class Expression
     /// <summary>The chance a song's bass glides from note to note, a genre's that the songs never play, and the share of its notes it slides into (<see cref="GenreChoices.Glide" />).</summary>
     public static ByConvention GlideChance { get; } = new(0, 0, 0);
 
+    /// <summary>The share of its notes a gliding part slides into, half, a genre's moving it to none or every one it may (<see cref="GenreChoices.GlideRate" />).</summary>
     public const double GlideRate = 0.5;
 
     /// <summary>How far after the note before, in beats, a gliding bass still slides from it, and the shortest note it slides into.</summary>
@@ -816,7 +817,7 @@ internal static class Expression
             var glideOption = role switch { TrackRole.Bass => "bass", TrackRole.Melody => "lead", _ => null };
             var glides = part.TestProbability(glideOption is null ? 0 : GlideChance.At(songSound, genre.Chance(GenreChoices.Glide, glideOption))) && glideOption is not null && !echoes && Bends(program);
             if (glides)
-                (slides, slideRate) = (true, genre.Names(GenreChoices.GlideRate) ? (genre.Shift(GenreChoices.GlideRate, "share") + 1) / 2 : GlideRate);
+                (slides, slideRate) = (true, GlideRate * (1 + genre.Shift(GenreChoices.GlideRate, "share")));
             // and from across a gap, into a short note too
             var (slideGap, shortestSlide) = glides ? (GlideGap, GlideShortest) : (SlideGap, 0.0);
             // and how far its filter closes, and a wobble's cycle, drawn last, so that the part's other draws stay
@@ -1068,9 +1069,9 @@ internal static class Expression
                             states[i] = states[i]!.With(CompositionStateKinds.Pump, PumpDepth);
                     }
 
-            // the ending's notes, the final chord, in the sound the last section left the part in: its sends, its tone, its
-            // tape and its steady effects, none of a note's own gestures
-            if (Array.FindLastIndex(states, x => x is not null) is var lastPlayed and >= 0 && timeline[lastPlayed].Position >= map.Sections[^1].Start - 1e-9)
+            // the ending's notes, the final chord, in the sound the part last played in, the last section's or before it where
+            // it rested there: its sends, its tone, its tape and its steady effects, none of a note's own gestures
+            if (Array.FindLastIndex(states, x => x is not null) is var lastPlayed and >= 0)
                 for (var i = lastPlayed + 1; i < timeline.Count; i++)
                     if (states[i] is null && timeline[i].Position >= map.Ending.Start - 1e-9)
                         states[i] = Steady(timeline[i].Value, states[lastPlayed]!);

@@ -187,7 +187,9 @@ internal static class Articulations
                 else if (rolls && !stabs && note.Value.Pitches.Length >= 3 && note.Value.Duration >= 1 - 1e-9 && InstrumentTraits.Has(program, InstrumentTrait.Rolls))
                     state = state.With(CompositionStateKinds.Strum, Beats(Roll));
 
-                var duration = stabs ? Math.Min(note.Value.Duration, StabLength) : note.Value.Duration;
+                // but the ending's final chord, held where the ending holds it, as the band holds it
+                var ending = song.Form.Map.Ending;
+                var duration = stabs && !(FormLayers.HoldsFinalChord(ending.Kind) && note.Position >= ending.Start - 1e-9) ? Math.Min(note.Value.Duration, StabLength) : note.Value.Duration;
                 played[i] = pitches;
                 return state == note.Value.State && pitches == note.Value.Pitches && duration == note.Value.Duration
                     ? note

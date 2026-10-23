@@ -69,6 +69,23 @@ public sealed class RealizedNoteTest
         await Assert.That(stacked).IsGreaterThan(0);
     }
 
+    /// <summary>Every note's loudness its state's, a riser's and a surf drop's slide too, in the presets that drop and slide.</summary>
+    [Test]
+    [Arguments("trance", TracePoints.Drop)]
+    [Arguments("surf", TracePoints.SurfDrop)]
+    public async Task ANoteAStageAdds_KeepsItsLoudnessInItsState(string preset, string point)
+    {
+        var added = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
+        {
+            added += song.Trace.Count(x => x.Point == point);
+            foreach (var (track, note) in song.Song.Notes!.SelectMany(t => t.Value.Select(x => (t.Key, x))))
+                await Assert.That(note.Value.State.GetStateValue(StateKinds.Velocity)).IsEqualTo(note.Value.Velocity).Because($"seed {song.Seed}, track {track} at {note.Position}");
+        }
+
+        await Assert.That(added).IsGreaterThan(0);
+    }
+
     [Test]
     public async Task Render_PlaysTheNotes_AsTheyAreAfterAChange()
     {

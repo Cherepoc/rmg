@@ -44,7 +44,7 @@ internal static class Risers
             var state = StateMap.Default.With(CompositionStateKinds.Program, Program + 1)
                 .With(CompositionStateKinds.Reverb, before.Value.State.GetStateValue(CompositionStateKinds.Reverb))
                 .With(CompositionStateKinds.Chorus, before.Value.State.GetStateValue(CompositionStateKinds.Chorus));
-            risers.Add(new RealizedNote([Pitch], before.Value.Velocity, drop - bar, state).ToTimelineItem(bar));
+            risers.Add(new RealizedNote([Pitch], 0, drop - bar, state).WithVelocity(before.Value.Velocity).ToTimelineItem(bar));
         }
 
         return draft with { Notes = notes.SetItem(track, EventTimeline.Create(notes[track].Duration, notes[track].Concat(risers).OrderBy(x => x.Position))) };
