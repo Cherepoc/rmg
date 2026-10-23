@@ -41,7 +41,7 @@ internal static class SurfDrops
         for (var i = 1; i < sections.Length; i++)
         {
             var drops = song.AppearanceStream(SongStream.SurfDrops, i).TestProbability(Chance.At(song.SectionOf(sections[i].SectionId).Facets[Facet.Form], song.Genre.Chance(GenreChoices.SurfDrop, "lifts")));
-            var louder = (song.Energies[i] - song.Energies[i - 1]) * song.SectionOf(sections[i - 1].SectionId).Rhythm.Coupling > LiftCues.Threshold;
+            var louder = song.LiftsInto(i - 1);
             if (!drops || !louder || guitar is not { } track)
                 continue;
             var (from, to) = sections[i - 1].Bar(sections[i - 1].BarCount - 1);

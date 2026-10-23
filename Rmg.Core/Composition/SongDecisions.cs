@@ -50,6 +50,13 @@ internal sealed record SongDecisions(
     public IReadOnlyList<double> Energies => field ??= [..Sections.Select(x => x.Energy)];
 
     /// <summary>
+    ///     Whether the appearance after one at a place is louder enough to be lifted into, as the sections give it: the energy's
+    ///     rise times the coupling of the section it lifts from, over the cues' threshold (<see cref="LiftCues.Threshold" />).
+    /// </summary>
+    public bool LiftsInto(int index) =>
+        index + 1 < Energies.Count && (Energies[index + 1] - Energies[index]) * SectionOf(Form.Map.Sections[index].SectionId).Rhythm.Coupling > LiftCues.Threshold;
+
+    /// <summary>
     ///     Where the song plays in stop time, its phrases' start, end and bar, as drawn, decided once for the stages before
     ///     stop time that keep to it (<see cref="Composition.StopTime" />); those after keep to what it played (<see cref="SongDraft.Stopped" />).
     /// </summary>

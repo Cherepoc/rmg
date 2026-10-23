@@ -117,7 +117,7 @@ internal static class StopTime
         [
             ..sections.Select((x, i) => (Span: x, Index: i))
                 .Where(x => x.Index + 1 < sections.Length && hits[x.Span.SectionId] && !song.Solos.ContainsKey(x.Index)
-                            && (song.Energies[x.Index + 1] - song.Energies[x.Index]) * song.SectionOf(x.Span.SectionId).Rhythm.Coupling > LiftCues.Threshold
+                            && song.LiftsInto(x.Index)
                             && !song.Form.Drops.Any(d => Math.Abs(d - sections[x.Index + 1].Start) < 1e-9))
                 .Select(x => (Bar: x.Span.Bar(x.Span.BarCount - 1), x.Span.Meter.BarDuration))
                 .Where(x => !song.StopTime.Any(s => s.Start < x.Bar.End - 1e-9 && s.End > x.Bar.Start + 1e-9))

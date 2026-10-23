@@ -78,7 +78,7 @@ internal static class MixFilter
         if (closes)
         {
             var last = map.Sections[^1];
-            ramps.Add((last.End - Math.Min(last.Duration, last.Meter.PhraseDuration), last.End, 0, closingDepth));
+            ramps.Add((last.Phrases.Last().Start, last.End, 0, closingDepth));
             // and closed through the ending
             ramps.Add((last.End, map.Duration, closingDepth, closingDepth));
         }

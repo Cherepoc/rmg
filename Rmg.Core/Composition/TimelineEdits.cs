@@ -23,6 +23,8 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
     private readonly Dictionary<int, List<TimelineItem<StateMap>>> _hits = [];
     private readonly Dictionary<int, List<double>> _cuts = [];
     private readonly Dictionary<int, List<(double From, double To)>> _silences = [];
+    // every track's rests, as the band stops (Rest)
+    private readonly Dictionary<int, List<(double From, double To)>> _stops = [];
 
     /// <summary>Takes a track's notes out from one position up to another; the fills' own hits stay.</summary>
     public void Clear(int track, double from, double to)
@@ -34,12 +36,12 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
 
     /// <summary>Whether a track strikes at a position once the edits are made: a hit of its own there, or the song's not cleared.</summary>
     public bool Strikes(TrackEventStateTimelineMap<StateMap> song, int track, double position) =>
-        _hits.GetValueOrDefault(track)?.Any(x => x.Position.IsEqualToByEpsilon(position)) == true
-        || song.TrackTimelineMap.TryGetValue(track, out var timeline) && timeline.EventTimeline.Any(x => x.Position.IsEqualToByEpsilon(position))
+        _hits.GetValueOrDefault(track)?.Any(x => Math.Abs(x.Position - position) < Epsilon) == true
+        || song.TrackTimelineMap.TryGetValue(track, out var timeline) && timeline.EventTimeline.Any(x => Math.Abs(x.Position - position) < Epsilon)
                                                                    && !(_cleared.GetValueOrDefault(track)?.Any(x => position >= x.From && position < x.To) ?? false);
 
     /// <summary>Makes a track's notes end by a position, its last one before it held until there, as the band stops.</summary>
-    public void Cut(int track, double position)
+    private void Cut(int track, double position)
     {
         if (!_cuts.TryGetValue(track, out var cuts))
             _cuts[track] = cuts = [];
@@ -50,7 +52,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
     ///     Makes a track rest from one position up to another once its notes are decided, whatever the stages after the
     ///     form put there, as the band does before a drop: cut there, its notes in it taken out.
     /// </summary>
-    public void Silence(int track, double from, double to)
+    private void Silence(int track, double from, double to)
     {
         Cut(track, from);
         if (!_silences.TryGetValue(track, out var spans))
@@ -61,6 +63,9 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
     /// <summary>A track falling silent from one position up to another, as the band stops: the drums cut there, their own hits after kept, a pitched part silenced.</summary>
     public void Rest(int track, TrackRole role, double from, double to)
     {
+        if (!_stops.TryGetValue(track, out var stops))
+            _stops[track] = stops = [];
+        stops.Add((from, to));
         Clear(track, from, to);
         if (role == TrackRole.Drum)
             Cut(track, from);
@@ -72,11 +77,10 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
     public IReadOnlyList<double> CutsOf(int track) => _cuts.GetValueOrDefault(track) ?? [];
 
     /// <summary>
-    ///     Where a track is silent as the band stops, from a cut to where it plays again: a pitched part's silences, and the
-    ///     drums' notes cleared from their cut, whose own hits land after.
+    ///     Where a track is silent as the band stops, from a cut to where it plays again, as it rests (<see cref="Rest" />): a
+    ///     pitched part's silences, and the drums' notes cleared from their cut, whose own hits land after.
     /// </summary>
-    public IEnumerable<(double From, double To)> StopsOf(int track) =>
-        (_silences.GetValueOrDefault(track) ?? []).Concat((_cleared.GetValueOrDefault(track) ?? []).Where(x => CutsOf(track).Any(c => Math.Abs(c - x.From) < Epsilon)));
+    public IEnumerable<(double From, double To)> StopsOf(int track) => _stops.GetValueOrDefault(track) ?? [];
 
     /// <summary>A hit of a track, in place of any it or a fill has there.</summary>
     /// <param name="articulation">The drum's sound, counted from 1; 0 for the groove's.</param>
@@ -95,7 +99,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         Clear(track, position, position + Epsilon);
         if (!_hits.TryGetValue(track, out var hits))
             _hits[track] = hits = [];
-        hits.RemoveAll(x => x.Position.IsEqualToByEpsilon(position));
+        hits.RemoveAll(x => Math.Abs(x.Position - position) < Epsilon);
         hits.Add(stateMap.ToTimelineItem(position));
     }
 
@@ -105,7 +109,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         Clear(track, note.Position, note.Position + Epsilon);
         if (!_hits.TryGetValue(track, out var hits))
             _hits[track] = hits = [];
-        hits.RemoveAll(x => x.Position.IsEqualToByEpsilon(note.Position));
+        hits.RemoveAll(x => Math.Abs(x.Position - note.Position) < Epsilon);
         hits.Add(note.Value.With(StateKinds.Velocity, velocity).ToTimelineItem(note.Position));
     }
 
