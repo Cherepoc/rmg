@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 
@@ -21,7 +22,7 @@ public sealed class SongDescriptionsTest
             foreach (var (section, span) in description.Sections.Zip(song.Map.Sections))
             {
                 var role = structure.Roles[span.SectionId];
-                await Assert.That(section.Name.StartsWith(role == SectionRole.Free ? "Section " : role == SectionRole.PreChorus ? "Pre-chorus" : role.ToString())).IsTrue();
+                await Assert.That(section.Name.StartsWith(role == SectionRole.Free ? "Section " : role == SectionRole.PreChorus ? "Pre-chorus" : role == SectionRole.PostChorus ? "Post-chorus" : role.ToString())).IsTrue();
                 await Assert.That(section.Bars).IsEqualTo(span.BarCount);
                 await Assert.That(section.Energy).IsIn(["quiet", "medium", "loud"]);
                 await Assert.That(section.TimeSignature is null).IsEqualTo(span.Meter.HasSameBar(song.Map.Meter));
@@ -44,10 +45,23 @@ public sealed class SongDescriptionsTest
         {
             var description = Describe(song);
             var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => ((System.Collections.Immutable.ImmutableArray<int>)x.First().Value!).Length);
+            var rhythms = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => (HarmonicRhythm)x.First().Value!);
+            var chords = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Chords).SelectMany(x => x.Value).ToArray();
             foreach (var (section, span) in description.Sections.Zip(song.Map.Sections))
             {
                 await Assert.That(section.Chords.Length).IsEqualTo(progressions.GetValueOrDefault(span.SectionId));
                 named += section.Chords.Count(x => x.Name is not null);
+                // named wherever the chords part plays two pitch classes or more over it in an appearance of its section
+                if (!rhythms.TryGetValue(span.SectionId, out var rhythm))
+                    continue;
+                for (var i = 0; i < section.Chords.Length; i++)
+                {
+                    var (at, length) = (rhythm.Changes[i], rhythm.LengthOf(i));
+                    var played = song.Map.Sections.Where(x => x.SectionId == span.SectionId).Any(x => chords.Where(n => n.IsWithin(x.Start + at, x.Start + at + length))
+                        .SelectMany(n => n.Value.Pitches).Select(p => p.Mod(12)).Distinct().Count() >= 2);
+                    if (played)
+                        await Assert.That(section.Chords[i].Name).IsNotNull().Because($"seed {song.Seed}, section {span.SectionId}, chord {i}");
+                }
             }
         }
 

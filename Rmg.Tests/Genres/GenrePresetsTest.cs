@@ -136,7 +136,7 @@ public sealed class GenrePresetsTest
         await Assert.That(wrong).IsEmpty();
     }
 
-    /// <summary>A polymeter at the plain end in a bar both of its plain lengths divide, 3/4's and 6/8's twelve 16ths, plays the middle's lengths.</summary>
+    /// <summary>A polymeter at the plain end in a bar both of its plain lengths divide, 3/4's and 6/8's twelve 16ths, makes songs with notes.</summary>
     [Test]
     public async Task APlainPolymeter_InABarOfTwelve_MakesSongs()
     {
@@ -144,11 +144,11 @@ public sealed class GenrePresetsTest
         {
             var option = Meter.Options.Select((x, i) => (x.Meter, i)).Single(x => x.Meter.Groups.SequenceEqual(groups)).i;
             foreach (var seed in Enumerable.Range(0, 8))
-                await Assert.That(TestCorpus.Get(seed, new SongOverrides(Base: 0, MeterOption: option, Genre: GenrePresets.Genre("djent"))).Song.Notes!.Count).IsGreaterThan(0);
+                await Assert.That(TestCorpus.Get(seed, new SongOverrides(Base: 0, MeterOption: option, Genre: GenrePresets.Genre("djent"))).Song.Notes!.Values.Sum(x => x.Count)).IsGreaterThan(0);
         }
     }
 
-    /// <summary>A genre that keeps its harmony to seconds and its homes to the wild end makes its songs at the plain end, doubling none and taking the wild end's homes.</summary>
+    /// <summary>A genre that keeps its harmony to seconds and its homes to the wild end makes its songs at the plain end, with notes and at the wild end's homes, the tonic.</summary>
     [Test]
     public async Task AGenre_KeepingAnEndEmpty_MakesSongs()
     {
@@ -159,8 +159,11 @@ public sealed class GenrePresetsTest
                 .SetItem(GenreChoices.HarmonyInterval.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("seconds", new ByConvention(1, 1, 1)))
                 .SetItem(GenreChoices.SectionHome.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("tonic", new ByConvention(0, 0, 1)))
         };
-        foreach (var seed in Enumerable.Range(0, 16))
-            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre)).Song.Notes!.Count).IsGreaterThan(0);
+        foreach (var song in Enumerable.Range(0, 16).Select(seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre))))
+        {
+            await Assert.That(song.Song.Notes!.Values.Sum(x => x.Count)).IsGreaterThan(0);
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.SectionHome).All(x => (int)x.Value! == 0)).IsTrue().Because($"seed {song.Seed}");
+        }
     }
 }
 

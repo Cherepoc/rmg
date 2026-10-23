@@ -199,7 +199,7 @@ public sealed class ServerSettingsTest
         var read = TryRead([("Listening", "sometimes")], out _, out var error);
 
         await Assert.That(read).IsFalse();
-        await Assert.That(error).IsNotNull();
+        await Assert.That(error).Contains("Listening");
     }
 
     [Test]

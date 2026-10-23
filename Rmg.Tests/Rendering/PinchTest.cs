@@ -50,16 +50,18 @@ public sealed class PinchTest
 
     /// <summary>
     ///     A riff's dive (<see cref="BendKind.Dive" />): its last held note before another section alone, in the section's last bar, falling an octave,
-    ///     held into the section, but where the band stops before it; the next appearance's being the louder, by the energies
-    ///     the song steps its appearances by, which the trace does not keep, not asserted.
+    ///     held into the section, but where the band stops before it; the next appearance the louder, by the energies the song
+    ///     steps its appearances by, as the octaves' trace keeps them.
     /// </summary>
     [Test]
     public async Task ADive_IsTheRiffsLastHeldNoteBeforeALouderSection()
     {
-        var (dives, songs, beats, reaching) = (0, 0, 0.0, 0);
+        var (dives, songs, beats, reaching, louder) = (0, 0, 0.0, 0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("nuMetal")))))
         {
             var any = false;
+            var energies = song.Trace.Where(x => x.Point == TracePoints.Octave).Select(x => ((int Index, TrackRole, double Energy, bool))x.Value!)
+                .GroupBy(x => x.Index).ToDictionary(x => x.Key, x => x.First().Energy);
             foreach (var (track, notes) in song.Song.Notes!)
             foreach (var (note, i) in notes.Select((x, i) => (x, i)).Where(x => x.x.Value.State.GetStateValue(CompositionStateKinds.Bend) == (int)BendKind.Dive))
             {
@@ -75,6 +77,11 @@ public sealed class PinchTest
                 await Assert.That(at + 1).IsLessThan(song.Map.Sections.Length).Because(because);
                 await Assert.That(i + 1 >= notes.Count || notes[i + 1].Position >= song.Map.Sections[at].End - 1e-9).IsTrue().Because(because);
                 await Assert.That(note.Position).IsGreaterThanOrEqualTo(song.Map.Sections[at].LastBar - 1e-9).Because(because);
+                if (energies.TryGetValue(at, out var before) && energies.TryGetValue(at + 1, out var after))
+                {
+                    louder++;
+                    await Assert.That(after).IsGreaterThan(before).Because(because);
+                }
                 // held into the section it dives into, but where the band stops before it
                 reaching += note.Position + note.Value.Duration >= song.Map.Sections[at].End - 1e-9 ? 1 : 0;
             }
@@ -86,5 +93,6 @@ public sealed class PinchTest
         // a rare device's count, 6 to 17 seen at the corpora's offsets
         await Assert.That(dives).IsGreaterThan(3);
         await Assert.That(reaching).IsGreaterThanOrEqualTo(dives * 3 / 4);
+        await Assert.That(louder).IsGreaterThan(0);
     }
 }

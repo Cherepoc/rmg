@@ -1,4 +1,5 @@
 using Rmg.Core.Composition;
+using Rmg.Core.Songs;
 using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Forms;
@@ -57,9 +58,12 @@ public sealed class RiffSectionReportTest
     public async Task ASectionOverTheIntrosRiff_IsAVerse_OfASongOpeningOnAnIntro()
     {
         var over = 0;
+        var bars = new List<(bool Rhythm, int Kept, int Notes)>();
         foreach (var genre in new[] { "metal", "rock", "thrash" })
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
+            // and its riff as heard the intro's, bar by bar
+            bars.AddRange(Rmg.Tests.Melodies.LoopLineReportTest.Bars(song, TrackRole.Riff));
             var form = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.LinesFrom))
             {
@@ -71,6 +75,12 @@ public sealed class RiffSectionReportTest
         }
 
         await Assert.That(over).IsGreaterThan(5);
+        var rhythm = bars.Count(x => x.Rhythm) / (double)Math.Max(1, bars.Count);
+        Console.WriteLine($"{over} verses over the intro's riff, {bars.Count} of their riff's bars, {rhythm:P0} on the intro's rhythm, {bars.Sum(x => x.Kept) / (double)Math.Max(1, bars.Sum(x => x.Notes)):P0} of their notes its");
+        // a calibration, short of every bar as a figure answering the kick plays its own (measured: 76% of 38 bars and 100% of
+        // 19, at offsets 0 and a million)
+        await Assert.That(bars.Count).IsGreaterThan(10);
+        await Assert.That(rhythm).IsGreaterThan(0.5);
     }
 
     /// <summary>A riff section plays its riff in most of its appearances, short of every one, as a section rests its riff now and then (seen 74% and 86% in 64 songs each of Rock and Metal).</summary>

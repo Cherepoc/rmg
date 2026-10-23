@@ -396,4 +396,19 @@ public sealed class TrackEventStateTimelineMapMergeTest
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
                 assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
     }
+
+    /// <summary>A map's common state merged with another, after its own, an order-sensitive kind's values its own first, and trimmed to the map's duration.</summary>
+    [Test]
+    public async Task MergeStateTimelineMap_PutsTheOtherAfterItsOwn_TrimmedToTheMap()
+    {
+        var own = new IStateTimeline[] { StateTimeline.Create(2, StateKind3, [new TimelineItem<ImmutableArray<int>>(0, [1])]) }.ToStateTimelineMap(2);
+        var other = new IStateTimeline[] { StateTimeline.Create(4, StateKind3, [new TimelineItem<ImmutableArray<int>>(0, [2, 3])]) }.ToStateTimelineMap(4);
+        var map = TrackEventStateTimelineMap.Create(2, new Dictionary<int, EventStateTimelineMap<int>>(), own);
+
+        var result = map.MergeStateTimelineMap(other);
+
+        await Assert.That(result.Duration).IsEqualTo(2);
+        await Assert.That(result.CommonStateTimelineMap.Duration).IsEqualTo(2);
+        await Assert.That(result.CommonStateTimelineMap.GetEffectiveStateMapAt(1).GetStateValue(StateKind3)).IsEquivalentTo([1, 2, 3], CollectionOrdering.Matching);
+    }
 }

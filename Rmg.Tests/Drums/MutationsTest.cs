@@ -104,7 +104,8 @@ public sealed class MutationsTest
             {
                 var first = Bar(song, span, 0);
                 var bars = span.BarCount;
-                foreach (var bar in new[] { 1, 2, 5, 9, 13 }.Where(x => x < bars))
+                // but a phrase's last bar, which its fill plays, whatever its phrases' length
+                foreach (var bar in new[] { 1, 2, 5, 9, 13 }.Where(x => x < bars && (x + 1) % span.Meter.PhraseBars != 0))
                 {
                     var hits = Bar(song, span, bar);
                     if (hits.Count > 0)

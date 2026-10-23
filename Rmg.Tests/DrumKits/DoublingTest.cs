@@ -123,7 +123,8 @@ public sealed class DoublingTest
         }
 
         await Assert.That(bars).IsGreaterThan(0);
-        // following the lead is the conventional choice, which the wildest sections never take
+        // following the lead is the conventional choice, which the wildest sections never take (measured: 82% to 83% at offsets 0 and a million)
+        Console.WriteLine($"{following} of {colours} colouring drums on their lead's feel ({following / (double)colours:P0})");
         await Assert.That(following / (double)colours).IsBetween(0.55, 0.95);
     }
 }

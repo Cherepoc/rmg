@@ -34,7 +34,10 @@ public sealed class AlternatingThumbTest
     public async Task TheThumb_StrikesEveryBarsFirstPulseAlike_UnderOneChord_InEveryMeter()
     {
         var (groups, triple) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("folk")))))
+        // Folk's songs, and some of them given 6/8, so that a meter of dotted pulses is met whatever the songs draw
+        var folk = GenrePresets.Genre("folk");
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: folk)))
+                     .Concat(TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: folk, Meter: Meter.SixEight)))))
         {
             var changes = song.ChordChanges;
             foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role is TrackRole.Chords or TrackRole.Rhythm))
@@ -53,5 +56,6 @@ public sealed class AlternatingThumbTest
 
         Console.WriteLine($"{groups} chords held over bars, {triple} in a meter of dotted pulses");
         await Assert.That(groups).IsGreaterThan(20);
+        await Assert.That(triple).IsGreaterThan(0);
     }
 }

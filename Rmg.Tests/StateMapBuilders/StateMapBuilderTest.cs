@@ -10,7 +10,6 @@ public sealed class StateMapBuilderTest
     // an additive kind of these tests alone, not shared
     private static readonly StateKind<int> OctaveOffset = StateKinds.CreateAdditive<int>("StateMapBuilderTest.OctaveOffset", StateScope.Render);
     private static readonly StateKind<double> Tempo = StateKinds.Tempo;
-    private static readonly StateKind<ImmutableArray<int>> ScaleOffsets = StateKinds.ScaleOffsets;
 
     private static readonly FakeGenerationContext Context = new() { NextDouble = 0.5 };
 

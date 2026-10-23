@@ -26,7 +26,7 @@ public sealed class FeelChangesReportTest
                $"feel changes a song {feelChanges.Average():F1}, any {anyChanges.Average():F1}";
     }
 
-    /// <summary>A song that keeps its time leaves it in no section, a calm one's and a breakdown's among them.</summary>
+    /// <summary>A song that keeps its time leaves it in no section, a calm one's among them: no half or double time, tempo or meter of a section's own, no short bar and no breakdown.</summary>
     [Test]
     public async Task ASongKeepingItsTime_LeavesItNowhere()
     {
@@ -38,6 +38,15 @@ public sealed class FeelChangesReportTest
             kept++;
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.TimeFeel))
                 await Assert.That((int)entry.Value!).IsEqualTo(0).Because($"seed {song.Seed}, section {entry.Section}");
+            // nor a tempo of its own, a meter of its own, a short bar or a breakdown, which the song's time changes gate too
+            await Assert.That(((System.Collections.Immutable.ImmutableArray<double>)song.Trace.Single(x => x.Point == TracePoints.SectionTempo).Value!).All(x => Math.Abs(x - 1) < 1e-9)).IsTrue().Because($"seed {song.Seed}");
+            foreach (var span in song.Map.Sections)
+            {
+                await Assert.That(span.Meter.HasSameBar(song.Map.Meter)).IsTrue().Because($"seed {song.Seed}, section {span.SectionId}");
+                await Assert.That(span.Cut).IsEqualTo(0).Because($"seed {song.Seed}, section {span.SectionId}");
+            }
+
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.Breakdown).Any(x => (bool)x.Value!)).IsFalse().Because($"seed {song.Seed}");
         }
 
         await Assert.That(kept).IsGreaterThan(10);

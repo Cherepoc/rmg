@@ -33,7 +33,8 @@ public sealed class RiffTurnaroundTest
                 if (last.Value is null || target.Value is null)
                     continue;
                 walks++;
-                stepping += Math.Abs(target.Value.Pitches[0] - last.Value.Pitches[0]) <= 3 ? 1 : 0;
+                // a step, not the note itself again
+                stepping += Math.Abs(target.Value.Pitches[0] - last.Value.Pitches[0]) is > 0 and <= 3 ? 1 : 0;
             }
         }
 

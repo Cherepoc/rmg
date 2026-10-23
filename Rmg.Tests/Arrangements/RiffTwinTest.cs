@@ -12,7 +12,7 @@ public sealed class RiffTwinTest
     [Test]
     public async Task ATwin_PlaysTheRiffsNotes_ByAStepOfItsOwn_AllTheWayToTheOtherSide()
     {
-        var twins = 0;
+        var (twins, matched) = (0, 0);
         foreach (var song in TestCorpus.Range(64))
         {
             var absent = song.Absent;
@@ -29,14 +29,17 @@ public sealed class RiffTwinTest
             await Assert.That(absent).DoesNotContain(TrackRole.Riff);
             await Assert.That(Math.Abs(riffPan)).IsEqualTo(1);
             await Assert.That(twinPan).IsEqualTo(-riffPan);
+            // a riff that plays no note has no twin to measure
+            var riff = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff))?.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State) ?? [];
             // every note where the riff plays one, but where the riff solos, which the twin keeps the riff under: its scale
             // step one of a twin's apart from the riff's, the same in a section
-            // a riff that plays no note has no twin to measure
-        var riff = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Riff))?.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State) ?? [];
             foreach (var span in song.Map.Sections)
             {
-                var apart = twin.Where(x => x.Position >= span.Start && x.Position < span.End && riff.TryGetValue(Math.Round(x.Position, 6), out var r) && r.GetStateValue(CompositionStateKinds.LineSolo) == 0)
-                    .Select(x => x.Value.State.GetStateValue(StateKinds.ScaleStep) - riff[Math.Round(x.Position, 6)].GetStateValue(StateKinds.ScaleStep))
+                var notes = twin.Where(x => x.Position >= span.Start && x.Position < span.End && !(riff.TryGetValue(Math.Round(x.Position, 6), out var r) && r.GetStateValue(CompositionStateKinds.LineSolo) != 0)).ToArray();
+                foreach (var note in notes)
+                    await Assert.That(riff.ContainsKey(Math.Round(note.Position, 6))).IsTrue().Because($"seed {song.Seed}, the twin at {note.Position}");
+                matched += notes.Length;
+                var apart = notes.Select(x => x.Value.State.GetStateValue(StateKinds.ScaleStep) - riff[Math.Round(x.Position, 6)].GetStateValue(StateKinds.ScaleStep))
                     .Distinct()
                     .ToArray();
                 await Assert.That(apart.Length <= 1 && apart.All(x => LineDoubling.TwinSteps.Any(t => t.Step == x))).IsTrue().Because($"seed {song.Seed} at {span.Start}");
@@ -44,6 +47,7 @@ public sealed class RiffTwinTest
         }
 
         await Assert.That(twins).IsGreaterThan(3);
+        await Assert.That(matched).IsGreaterThan(100);
     }
 
     /// <summary>

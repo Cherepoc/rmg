@@ -9,10 +9,6 @@ namespace Rmg.Tests.Drums;
 /// <summary>A genre's figures (<see cref="Figures" />): a player's rhythm in a section given by its figure, the kick with the riff, a double kick, a clave.</summary>
 public sealed class FiguresTest
 {
-    /// <summary>
-    ///     A loose figure (<see cref="Figures.Loosen" />) at the plain end's strictness is the figure exactly, its onsets kept and
-    ///     the player's own left out; and at any strictness a place both strike is kept.
-    /// </summary>
     /// <summary>A figure at a steady step on its meter's pulses where the step is a quarter or more, 6/8's boom on 1 and 4, its 8ths every 8th.</summary>
     [Test]
     public async Task AStepOfAQuarterOrMore_StrikesOnTheMetersPulses()
@@ -48,6 +44,10 @@ public sealed class FiguresTest
         await Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     A loose figure (<see cref="Figures.Loosen" />) at the plain end's strictness is the figure exactly, its onsets kept and
+    ///     the player's own left out; and at any strictness a place both strike is kept.
+    /// </summary>
     [Test]
     public async Task ALooseFigure_AtThePlainEnd_IsTheFigureExactly_AndKeepsWhereBothStrike()
     {
@@ -57,8 +57,11 @@ public sealed class FiguresTest
             double[] own = [..Enumerable.Range(0, 16).Where(_ => context.GenerateDouble() < 0.4).Select(x => x * 0.25)];
             double[] onsets = [..Enumerable.Range(0, 16).Where(_ => context.GenerateDouble() < 0.3).Select(x => x * 0.25)];
             await Assert.That(Figures.Loosen(own, onsets, Figures.Strictness.At(0), new GenerationContext((ulong)seed))).IsEquivalentTo(onsets, CollectionOrdering.Matching).Because($"seed {seed}");
-            var loose = Figures.Loosen(own, onsets, Figures.Strictness.At(1), new GenerationContext((ulong)seed));
-            await Assert.That(own.Intersect(onsets).All(loose.Contains)).IsTrue().Because($"seed {seed}");
+            foreach (var strictness in new[] { 0, 0.5, 1 })
+            {
+                var loose = Figures.Loosen(own, onsets, Figures.Strictness.At(strictness), new GenerationContext((ulong)seed));
+                await Assert.That(own.Intersect(onsets).All(loose.Contains)).IsTrue().Because($"seed {seed} at {strictness}");
+            }
         }
     }
 
@@ -118,7 +121,7 @@ public sealed class FiguresTest
 
     /// <summary>
     ///     A calibration: a figure of fixed onsets laid in a section, its player's hits there on the figure's 16ths, most
-    ///     of them, but where a fill takes the drums or a line walks (measured over 32, every figure 61% to 100%, the
+    ///     of them, but where a fill takes the drums or a line walks (measured over 32 at first, every figure 61% to 100%, the
     ///     waltz's bass, the chick on 2 and 4 and the bossa nova's clave the fewest, walking or filling between).
     /// </summary>
     [Test]
@@ -134,7 +137,7 @@ public sealed class FiguresTest
         };
         var onsets = figure.Onsets.Select(x => x % 16).ToHashSet();
         var (hits, on) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var tracks = player switch
             {
@@ -327,7 +330,7 @@ public sealed class FiguresTest
     public async Task AWaltz_StrikesItsChordsOn2And3_AndItsBassOn1()
     {
         var (notes, on, waltzes) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("country"), Meter: Meter.ThreeFour))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("country"), Meter: Meter.ThreeFour))))
         {
             var playing = Playing(song, FigurePlayer.Chords, "waltz");
             foreach (var span in song.Map.Sections.Where(x => playing.Contains(x.SectionId)))
@@ -345,7 +348,7 @@ public sealed class FiguresTest
         }
 
         Console.WriteLine($"{waltzes} waltzing sections, {on / (double)Math.Max(1, notes):P1} of their {notes} notes on the waltz's beats");
-        // measured 79.3% of 2266 notes in 58 sections, October 2026
+        // measured 79.3% of 2266 notes in 58 sections of 32 songs, October 2026; 79.3% to 80.2% over 64 at offsets 0 and a million
         await Assert.That(waltzes).IsGreaterThan(10);
         await Assert.That(on / (double)notes).IsGreaterThan(0.6);
     }

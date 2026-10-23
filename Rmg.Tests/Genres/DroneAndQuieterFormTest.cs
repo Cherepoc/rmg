@@ -99,9 +99,10 @@ public sealed class DroneAndQuieterFormTest
             }
         }
 
-        // the drums in half time and without a figure, against the mechanism breaking (measured: the drums 27% to 36% of the storm's, 90% to 96% of the guitar's notes an 8th or more apart, at offsets 0, a million and three million)
+        // the drums in half time and without a figure, against the mechanism breaking (measured: 197 to 221 calm sections,
+        // the drums 27% to 36% of the storm's, 90% to 96% of the guitar's notes an 8th or more apart, at offsets 0, a million
+        // and three million)
         Console.WriteLine($"{sections} calm sections, {guitarNotes} guitar notes, {gapsSlow / (double)Math.Max(1, gapsAll):P0} of them an 8th or more from the next; the drums {drumsCalm / Math.Max(1, drumsOwn):P0} of the storm's");
-        // measured 197 to 221 calm sections, 92% to 93% of the gaps slow, the drums 34% to 36% of the storm's, at offsets 0 and a million
         await Assert.That(sections).IsGreaterThan(5);
         await Assert.That(gapsSlow / (double)gapsAll).IsGreaterThan(0.85);
         await Assert.That(drumsCalm).IsLessThan(drumsOwn * 0.75);

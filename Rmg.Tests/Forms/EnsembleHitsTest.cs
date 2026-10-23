@@ -42,10 +42,13 @@ public sealed class EnsembleHitsTest
         {
             bars++;
             await Assert.That(kick.Length).IsGreaterThan(0).Because($"seed {song.Seed} at {start}");
-            // its section's last bar, before another section
-            var span = song.Map.Sections.First(x => x.IsWithin(start));
+            // its section's last bar, before another section, a louder one
+            var index = Array.FindIndex(song.Map.Sections.ToArray(), x => x.IsWithin(start));
+            var span = song.Map.Sections[index];
             await Assert.That(start).IsEqualTo(span.Bar(span.BarCount - 1).Start).Within(1e-6).Because($"seed {song.Seed} at {start}");
             await Assert.That(song.Map.Sections[^1]).IsNotEqualTo(span).Because($"seed {song.Seed} at {start}");
+            var energies = SongDecisions.Draw(TestCorpus.SongSeed(song.Seed), new SongOverrides(Genre: stopping), false, CancellationToken.None).Energies;
+            await Assert.That(energies[index + 1]).IsGreaterThan(energies[index]).Because($"seed {song.Seed} at {start}");
             foreach (var role in new[] { TrackRole.Chords, TrackRole.Pad, TrackRole.Riff, TrackRole.RiffTwin, TrackRole.Rhythm }.Where(x => !song.Absent.Contains(x)))
             foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Track(role))?.Where(n => n.Position >= start - 1e-9 && n.Position < (start + end) / 2 - 1e-9) ?? [])
                 await Assert.That(kick.Any(k => Math.Abs(k - note.Position) < 1e-6)).IsTrue().Because($"seed {song.Seed}, its {role} at {note.Position} in the bar struck at {start}");

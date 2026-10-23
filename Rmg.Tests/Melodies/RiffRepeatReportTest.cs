@@ -22,18 +22,15 @@ public sealed class RiffRepeatReportTest
             {
                 var first = group.First();
                 var bar = first.Meter.BarDuration;
-                (double Offset, int Pitch)[] Bar(SectionSpan span, int k) =>
-                [
-                    ..notes.Where(x => x.Position >= span.Start + k * bar - 1e-9 && x.Position < span.Start + (k + 1) * bar - 1e-9)
-                        .Select(x => (Math.Round(x.Position - span.Start - k * bar, 3), x.Value.Pitches[0]))
-                ];
                 var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
                 // the chords' roots and the key's over a bar, as its state has them
                 string Harmony(SectionSpan span, int k) => string.Join(",", Enumerable.Range(0, 8).Select(i => common.GetEffectiveStateMapAt(span.Start + k * bar + i * bar / 8) is var state
                     ? $"{state.GetStateValue(StateKinds.ChordRoot)}:{state.GetStateValue(StateKinds.KeyOffset)}:{state.GetStateValue(StateKinds.ChordShift)}" : ""));
-                return group.Skip(1).Where(x => x.Meter.Equals(first.Meter)).SelectMany(later => Enumerable.Range(0, first.Meter.PatternBarCount).Select(k => (Bar(first, k), Bar(later, k), Harmony(first, k) == Harmony(later, k))))
+                return group.Skip(1).Where(x => x.Meter.Equals(first.Meter)).SelectMany(later => Enumerable.Range(0, first.Meter.PatternBarCount).Select(k => (BarNotes.Of(notes, first, k), BarNotes.Of(notes, later, k), Harmony(first, k) == Harmony(later, k))))
                     .Where(x => x.Item1.Length >= 2 && x.Item2.Length >= 2)
-                    .Select(x => (x.Item3, x.Item1.Select(n => n.Offset).SequenceEqual(x.Item2.Select(n => n.Offset)), x.Item2.Count(n => x.Item1.Contains(n)), x.Item2.Count(n => x.Item1.Any(m => m.Offset == n.Offset && (m.Pitch - n.Pitch) % 12 == 0)), x.Item2.Length));
+                    .Select(x => BarNotes.Compare(x.Item1, x.Item2) is var (rhythm, kept, count)
+                        ? (x.Item3, rhythm, kept, x.Item2.Count(n => x.Item1.Any(m => m.Offset == n.Offset && (m.Pitch - n.Pitch) % 12 == 0)), count)
+                        : default);
             })
         ];
     }

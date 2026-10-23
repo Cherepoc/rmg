@@ -73,7 +73,9 @@ public sealed class PowerChordRiffTest
             }
         }
 
-        Console.WriteLine($"off the accents on the pedal {pedal / (double)weak:P0}; slow notes in chords {slowChords / (double)Math.Max(1, slowNotes):P0}; fast notes off the accents in chords {fastChordsOffAccents / (double)Math.Max(1, fastOffAccents):P0}");
+        Console.WriteLine($"off the accents on the pedal {pedal / (double)weak:P0}; slow notes in chords {slowChords / (double)Math.Max(1, slowNotes):P0} of {slowNotes}; fast notes off the accents in chords {fastChordsOffAccents / (double)Math.Max(1, fastOffAccents):P0} of {fastOffAccents}");
+        await Assert.That(slowNotes).IsGreaterThan(50);
+        await Assert.That(fastOffAccents).IsGreaterThan(50);
         // the pedal its share, the rest by its scale; a slow chug's every note a chord, but where a landing stacks the
         // band's or the range has no room; a fast one's single notes off its accents (measured: the pedal 59% to 68%, slow
         // notes in chords 87%, fast ones off the accents 1% to 2%, at offsets 0 and a million)

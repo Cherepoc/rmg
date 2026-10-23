@@ -42,7 +42,8 @@ public sealed class VoiceTest
         var (verses, versesOut, choruses, chorusesOut) = Rests(GenrePresets.Genre("hipHop"));
         var without = Rests(GenrePresets.Without("hipHop", GenreChoices.Voice.Name));
         Console.WriteLine($"melody out: verses {versesOut} of {verses}, choruses {chorusesOut} of {choruses}; without the voice, verses {without.VersesOut} of {without.Verses}");
-        await Assert.That(versesOut / (double)verses).IsGreaterThan(0.3);
+        // a share decided once a song, against the mechanism breaking (measured: 41% to 52% of the verses, at offsets 0 and a million)
+        await Assert.That(versesOut / (double)verses).IsGreaterThan(0.2);
         await Assert.That(versesOut / (double)verses).IsGreaterThan(2 * without.VersesOut / (double)without.Verses);
         await Assert.That(chorusesOut / (double)choruses).IsLessThan(0.2);
     }

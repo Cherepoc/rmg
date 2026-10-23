@@ -28,7 +28,7 @@ public sealed class ShapeTimingTest
                 continue;
             var shaped = notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Wow) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Detune) == 0
                                           && (x.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0 || x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0
-                                              || x.Value.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0)).ToArray();
+                                              || x.Value.State.GetStateValue(CompositionStateKinds.WideVibrato) != 0)).ToArray();
             if (shaped.Length == 0)
                 continue;
             var bends = ExpressionRender.Render(notes, song.Map, song.Swing, tempo, 0, []).Bends;
@@ -63,12 +63,13 @@ public sealed class ShapeTimingTest
         return landed is { At: var at } && (at > 0 || note.Pitch.Length > 0 && landed != note.Pitch[0] || note.Kind is BendKind.BendAndRelease or BendKind.ReleaseAndBend) ? at : null;
     }
 
-    /// <summary>The songs a rule is held to: the corpus's, and Metal's and Blues', which bend and shake the most.</summary>
+    /// <summary>The songs a rule is held to: the corpus's, and Metal's and Blues', which bend and shake the most, and Surf's, whose whammy dips.</summary>
     private static Shaped[] RuledNotes() =>
     [
         ..TestCorpus.InParallel(Enumerable.Range(0, 64), seed => ShapedNotes(TestCorpus.Get(seed)).ToArray()).SelectMany(x => x),
         ..TestCorpus.InParallel(Enumerable.Range(0, 32), seed => ShapedNotes(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))).ToArray()).SelectMany(x => x),
-        ..TestCorpus.InParallel(Enumerable.Range(0, 32), seed => ShapedNotes(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))).ToArray()).SelectMany(x => x)
+        ..TestCorpus.InParallel(Enumerable.Range(0, 32), seed => ShapedNotes(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))).ToArray()).SelectMany(x => x),
+        ..TestCorpus.InParallel(Enumerable.Range(0, 32), seed => ShapedNotes(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("surf")))).ToArray()).SelectMany(x => x)
     ];
 
     /// <summary>
@@ -255,58 +256,62 @@ public sealed class ShapeTimingTest
         await Task.CompletedTask;
     }
 
-    /// <summary>The vibratos of a song's guitars and synth leads, which may shake wide, by their width and rate: "35 cents", "a step at 6.5".</summary>
-    internal static IEnumerable<string> GuitarVibratos(CorpusSong song) => song.Song.Notes!
+    /// <summary>
+    ///     A note's vibrato as the table has it (<see cref="Expression.Vibratos" />): its width in cents, or a wide one's steps,
+    ///     up or a dip's down, by its sign and its rate; none for none, nor for a pinch's squeal, shaken at its own width.
+    /// </summary>
+    internal static Vibrato? WidthOf(StateMap state)
+    {
+        var (wide, cents, rate) = (state.GetStateValue(CompositionStateKinds.WideVibrato), state.GetStateValue(CompositionStateKinds.Vibrato), state.GetStateValue(CompositionStateKinds.VibratoRate));
+        if (wide == 0 && cents == 0 || state.GetStateValue(CompositionStateKinds.Pinch) != 0)
+            return null;
+        return Expression.Vibratos.Select(v => v.Width).Single(v => wide != 0
+            ? Math.Sign(v.Steps) == Math.Sign(wide) && Math.Abs(10 * v.Rate - rate) < 1e-9
+            : v.Steps == 0 && v.Cents == cents);
+    }
+
+    /// <summary>The vibratos of a song's guitars and synth leads, which may shake wide, each its table's entry.</summary>
+    internal static IEnumerable<Vibrato> GuitarVibratos(CorpusSong song) => song.Song.Notes!
         .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { InstrumentCode: >= 24 and <= 31 or >= 80 and <= 87 })
-        .SelectMany(x => x.Value).Select(x => x.Value.State)
-        .Where(x => x.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.GetStateValue(CompositionStateKinds.WideVibrato) > 0)
-        .Select(x => x.GetStateValue(CompositionStateKinds.WideVibrato) > 0
-            ? $"{(x.GetStateValue(CompositionStateKinds.WideVibrato) > 2 ? "wider" : "a step")} at {x.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0}"
-            : $"{x.GetStateValue(CompositionStateKinds.Vibrato)} cents");
+        .SelectMany(x => x.Value).Select(x => WidthOf(x.Value.State)).OfType<Vibrato>();
 
     [Test]
     public async Task AGenresVibratos_AreTheWidthsItNames_AJazzGuitarsNeverAStepWide_AMetalOnesOften()
     {
-        string[] Of(string genre) => [..TestCorpus.InParallel(Enumerable.Range(0, 32), seed => GuitarVibratos(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))).ToArray()).SelectMany(x => x)];
+        Vibrato[] Of(string genre) => [..TestCorpus.InParallel(Enumerable.Range(0, 32), seed => GuitarVibratos(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))).ToArray()).SelectMany(x => x)];
         var jazz = Of("jazz");
         await Assert.That(jazz.Length).IsGreaterThan(20);
-        await Assert.That(jazz.All(x => x.EndsWith("cents"))).IsTrue();
-        // Metal's a step fast, never slow, its pinches' 40 cents beside
+        await Assert.That(jazz.All(x => x.Steps == 0)).IsTrue();
+        // Metal's a step fast, never slow
         var metal = Of("metal");
-        Console.WriteLine($"Metal's guitars a step wide {metal.Count(x => !x.EndsWith("cents")) / (double)metal.Length:P0} of {metal.Length}");
-        await Assert.That(metal.Any(x => x.StartsWith("a step at 4.5"))).IsFalse();
-        await Assert.That(metal.Count(x => !x.EndsWith("cents"))).IsGreaterThan(metal.Length / 5);
+        Console.WriteLine($"Metal's guitars a step wide {metal.Count(x => x.Steps != 0) / (double)metal.Length:P0} of {metal.Length}");
+        await Assert.That(metal.Any(x => x is { Steps: 1, Rate: 4.5 })).IsFalse();
+        await Assert.That(metal.Count(x => x.Steps != 0)).IsGreaterThan(metal.Length / 5);
     }
 
     [Test]
     public async Task AVibrato_SuitsItsNotesInstrument_AStepWideOnlyAnElectricGuitarsOrALeads_ABroadOrAFastOneNeverOnAStringThatRings()
     {
         // the corpus's, and the presets' that name a fast step or play acoustic guitars
-        var genres = new[] { "metal", "doom", "folk", "country" };
+        var genres = new[] { "metal", "doom", "folk", "country", "surf" };
         var songs = TestCorpus.Range(64).Concat(genres.SelectMany(genre => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))))));
         var wrong = songs.AsParallel().Select(song => song.Song.Notes!
                 .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
                 .SelectMany(x => x.Value.Select(note => (Program: InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode), note.Value.State)))
-                // a pinch's squeal shaken at its own width, none of the table's
-                .Where(x => (x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0 || x.State.GetStateValue(CompositionStateKinds.Vibrato) > 0) && x.State.GetStateValue(CompositionStateKinds.Pinch) == 0)
-                .Select(x => (x.Program, Width: Expression.Vibratos.Select(v => v.Width).Single(v => x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0
-                    ? v.Steps > 0 && Math.Abs(10 * v.Rate - x.State.GetStateValue(CompositionStateKinds.VibratoRate)) < 1e-9
-                    : v.Steps == 0 && v.Cents == x.State.GetStateValue(CompositionStateKinds.Vibrato))))
-                .Where(x => !Expression.Suits(x.Width, x.Program))
-                .Select(x => $"{song.Seed}: {Expression.LabelOf(x.Width)} on program {x.Program}").ToArray())
+                // a dip's too, but a pinch's squeal, shaken at its own width, none of the table's
+                .Select(x => (x.Program, Width: WidthOf(x.State)))
+                .Where(x => x.Width is { } width && !Expression.Suits(width, x.Program))
+                .Select(x => $"{song.Seed}: {Expression.LabelOf(x.Width!.Value)} on program {x.Program}").ToArray())
             .SelectMany(x => x).ToArray();
         await Assert.That(wrong).IsEmpty().Because(string.Join("; ", wrong.Take(5)));
     }
 
-    /// <summary>A song's vibratos as <see cref="GuitarVibratos" /> words them, each with its note's instrument's sound: driven, a synth lead, clean, acoustic or other.</summary>
-    internal static IEnumerable<(string Sound, string Width)> VibratosBySound(CorpusSong song) => song.Song.Notes!
+    /// <summary>A song's vibratos, each its table's entry (<see cref="WidthOf" />) with its note's instrument's sound: driven, a synth lead, clean, acoustic or other.</summary>
+    internal static IEnumerable<(string Sound, Vibrato Width)> VibratosBySound(CorpusSong song) => song.Song.Notes!
         .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
-        .SelectMany(x => x.Value.Select(note => (Program: InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode), note.Value.State)))
-        .Where(x => x.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0)
-        .Select(x => (x.Program switch { 29 or 30 => "driven", >= 80 and <= 87 => "lead", >= 26 and <= 28 => "clean", 24 or 25 => "acoustic", _ => "other" },
-            x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0
-                ? $"{(x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 2 ? "wider" : "a step")} at {x.State.GetStateValue(CompositionStateKinds.VibratoRate) / 10.0}"
-                : $"{x.State.GetStateValue(CompositionStateKinds.Vibrato)} cents"));
+        .SelectMany(x => x.Value.Select(note => (Program: InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode), Width: WidthOf(note.Value.State))))
+        .Where(x => x.Width is not null)
+        .Select(x => (x.Program switch { 29 or 30 => "driven", >= 80 and <= 87 => "lead", >= 26 and <= 28 => "clean", 24 or 25 => "acoustic", _ => "other" }, x.Width!.Value));
 
     [Test]
     [Explicit]
@@ -317,8 +322,8 @@ public sealed class ShapeTimingTest
             var widths = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => VibratosBySound(name is null ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))).ToArray())
                 .SelectMany(x => x).ToArray();
             foreach (var sound in widths.GroupBy(x => x.Sound).Where(x => x.Key != "other").OrderBy(x => x.Key))
-                Console.WriteLine($"{name ?? "the corpus"} {sound.Key}: wide {sound.Count(x => !x.Width.EndsWith("cents")) / (double)sound.Count():P0} of {sound.Count()}; " +
-                                  string.Join(", ", sound.GroupBy(x => x.Width).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)sound.Count():P0}")));
+                Console.WriteLine($"{name ?? "the corpus"} {sound.Key}: wide {sound.Count(x => x.Width.Steps != 0) / (double)sound.Count():P0} of {sound.Count()}; " +
+                                  string.Join(", ", sound.GroupBy(x => Expression.LabelOf(x.Width)).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)sound.Count():P0}")));
         }
 
         await Task.CompletedTask;
@@ -332,8 +337,8 @@ public sealed class ShapeTimingTest
         {
             var widths = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => GuitarVibratos(name is null ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))).ToArray())
                 .SelectMany(x => x).ToArray();
-            Console.WriteLine($"{name ?? "the corpus"}: wide {widths.Count(x => !x.EndsWith("cents")) / (double)Math.Max(1, widths.Length):P0} of {widths.Length}; " +
-                              string.Join(", ", widths.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)widths.Length:P0}")));
+            Console.WriteLine($"{name ?? "the corpus"}: wide {widths.Count(x => x.Steps != 0) / (double)Math.Max(1, widths.Length):P0} of {widths.Length}; " +
+                              string.Join(", ", widths.GroupBy(Expression.LabelOf).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)widths.Length:P0}")));
         }
 
         await Task.CompletedTask;

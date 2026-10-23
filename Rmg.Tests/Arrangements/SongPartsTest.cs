@@ -59,6 +59,7 @@ public sealed class SongPartsTest
     [Test]
     public async Task APartGivenIn_IsInTheSong_AndGivenAsDrawn_LeavesTheSongAsItsSeedMadeIt()
     {
+        var played = 0;
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var drawn = TestCorpus.Get(seed);
@@ -66,8 +67,12 @@ public sealed class SongPartsTest
             var given = TestCorpus.Get(seed, Given(TrackRole.CounterMelody, true));
 
             await Assert.That(given.Absent.Contains(TrackRole.CounterMelody)).IsFalse();
+            played += Notes(given, TrackRole.CounterMelody);
             await Assert.That(Write(TestCorpus.Get(seed, Given(TrackRole.Pad, isIn)))).IsEquivalentTo(Write(drawn), CollectionOrdering.Matching);
         }
+
+        // and the part given in heard, its notes in the songs together, as a song may rest it throughout
+        await Assert.That(played).IsGreaterThan(0);
     }
 
     [Test]

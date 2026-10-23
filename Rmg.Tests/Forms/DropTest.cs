@@ -121,7 +121,7 @@ public sealed class DropTest
         int silent = 0, filtered = 0, playingOn = 0;
         // Techno's songs asked to drop at every lift, as its own drop seldom
         var genre = GenrePresets.With("techno", GenreChoices.Drop, ("lifts", 1), ("rolls", 1));
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
         foreach (var song in songs)
         {
             var risers = song.Rendered.Tracks.Where(x => x.IsRiser).ToArray();
@@ -157,8 +157,9 @@ public sealed class DropTest
             }
         }
 
-        Console.WriteLine($"of 32 Techno songs' drops, {silent} silent and {filtered} filtered, the riser's part playing on under {playingOn} of these");
-        // the riser's part playing on under a filtered drop, a calibration (measured over 32: 21 of 62, and 15 of some 65 at offset 716000000)
+        Console.WriteLine($"of 64 Techno songs' drops, {silent} silent and {filtered} filtered, the riser's part playing on under {playingOn} of these");
+        // the riser's part playing on under a filtered drop, a calibration (measured over 32: 21 of 62, and 15 of some 65 at
+        // offset 716000000; over 64: 36 of 103 and 34 of 90 at offsets 0 and a million)
         await Assert.That(playingOn).IsGreaterThan(filtered / 8);
         await Assert.That(silent).IsGreaterThan(5);
         await Assert.That(filtered).IsGreaterThan(5);

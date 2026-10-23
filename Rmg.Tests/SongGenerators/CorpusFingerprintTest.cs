@@ -27,7 +27,8 @@ public sealed class CorpusFingerprintTest
         foreach (var note in notes)
             text.Append($"{track} {note.Position:R} {note.Value.Velocity:R} {note.Value.Duration:R} {string.Join(",", note.Value.Pitches)};");
 
-        Console.WriteLine($"Corpus fingerprint without the melody: {Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())))[..16]}");
+        // the corpus's songs as the tests take them, moved by their offset, which the label names
+        Console.WriteLine($"Corpus fingerprint without the melody, at offset {TestCorpus.Offset}: {Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())))[..16]}");
         await Task.CompletedTask;
     }
 }

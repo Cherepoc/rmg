@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
+using Rmg.Core.Events;
 using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Arrangements;
@@ -187,7 +188,7 @@ public sealed class DrumSoloTest
     [Test]
     public async Task ADrumSolosRuns_GoRoundItsKit_InTheDrummersCells_TheirFirstHitsTheLouder_ItsPausesTheHandsSilent()
     {
-        var (solos, first, rest) = (0, new List<double>(), new List<double>());
+        var (solos, colours, first, rest) = (0, 0, new List<double>(), new List<double>());
         foreach (var song in Songs)
         {
             if (KitSolos(song).Length == 0)
@@ -215,18 +216,35 @@ public sealed class DrumSoloTest
                     // and a climax's gesture its crash on its first hit, a displaced motif's a 16th after the segment's start, and a
                     // loud accent's cymbal of colour, the china's, the splash's, the open hi-hat's or the ride's bell
                     bool OnFirst(double position) => Math.Abs(position - segment.Start) < 1e-9 || Math.Abs(position - segment.Start - 0.25) < 1e-9;
-                    foreach (var (track, _) in hits.Where(x => !(segment.Intensity >= Rmg.Core.Composition.DrumSolos.ClimaxIntensity && OnFirst(x.Note.Position) && x.Track == DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal))
-                                                              && x.Note.Value.Pitches[0] is not (52 or 55 or 46 or 53)))
-                        await Assert.That(DrumGroups.GroupOf(DrumGroups.GetDrum(track)) is var group && (group == DrumGroups.Snare || group == DrumGroups.Toms || group == DrumGroups.Kick)).IsTrue()
-                            .Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {segment.Start}");
+                    bool Hands(int track) => DrumGroups.GroupOf(DrumGroups.GetDrum(track)) is var group && (group == DrumGroups.Snare || group == DrumGroups.Toms || group == DrumGroups.Kick);
+                    double Heard(TimelineItem<RealizedNote> note) => Rmg.Core.Rendering.Render.ToMidiVelocity(note.Value.Velocity);
+                    foreach (var (track, note) in hits.Where(x => !(segment.Intensity >= Rmg.Core.Composition.DrumSolos.ClimaxIntensity && OnFirst(x.Note.Position) && x.Track == DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal))))
+                    {
+                        // a cymbal of colour struck with a loud accent of the hands, at its loudness
+                        if (note.Value.Pitches[0] is 52 or 55 or 46 or 53)
+                        {
+                            colours++;
+                            await Assert.That(Heard(note) >= Rmg.Core.Composition.DrumSolos.StabLoudness - 1e-6
+                                              && hits.Any(x => Hands(x.Track) && Math.Abs(x.Note.Position - note.Position) < 1e-9)).IsTrue().Because($"seed {song.Seed}, a colour at {note.Position}");
+                            continue;
+                        }
+
+                        await Assert.That(Hands(track)).IsTrue().Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {segment.Start}");
+                        // a tap on the snare's rim a quiet one
+                        if (note.Value.Pitches[0] == 37)
+                            await Assert.That(Heard(note)).IsLessThan(Rmg.Core.Composition.DrumSolos.CrossStickBelow + 1e-6).Because($"seed {song.Seed}, a rim at {note.Position}");
+                    }
                     // a lick's cell on every note's place: the first of every cell the louder
                     if (segment.Gesture == SoloGesture.Lick && !segment.GoesOn)
                     {
-                        // counted by onset, a kick stacked under another drum's accent one with it, each its loudest
-                        var size = segment.Sizes[0];
+                        // counted by onset, a kick stacked under another drum's accent one with it, each its loudest; its cells
+                        // of its sizes in turn, a grouping drummer's of several
+                        var starts = new HashSet<int>();
+                        for (var (at, cell) = (0, 0); at < 1000; at += segment.Sizes[cell++ % segment.Sizes.Length])
+                            starts.Add(at);
                         foreach (var (onset, i) in hits.Where(x => !(feet && x.Track == kick)).GroupBy(x => Math.Round(x.Note.Position, 6)).OrderBy(x => x.Key)
                                      .Select((x, i) => (x.Max(y => y.Note.Value.Velocity), i)))
-                            (i % size == 0 ? first : rest).Add(onset);
+                            (starts.Contains(i) ? first : rest).Add(onset);
                     }
                 }
             }
@@ -234,6 +252,7 @@ public sealed class DrumSoloTest
 
         await Assert.That(solos).IsGreaterThan(5);
         await Assert.That(first.Average()).IsGreaterThan(rest.Average());
+        Console.WriteLine($"{solos} drum solos, {colours} cymbals of colour");
     }
 
     [Test]

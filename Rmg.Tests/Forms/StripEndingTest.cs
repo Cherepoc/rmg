@@ -32,7 +32,8 @@ public sealed class StripEndingTest
                 .Select(x => x.SelectMany(t => t.Value).Max(n => n.Position + n.Value.Duration)).ToArray();
             var drumsToTheEnd = drums.Any(x => x.Position >= end - bar - 1e-6);
             await Assert.That(lasts.Count(x => x > end - bar + 1e-6)).IsLessThanOrEqualTo(drumsToTheEnd ? 0 : 1).Because($"seed {song.Seed}");
-            await Assert.That(lasts.Select(x => Math.Floor(x / bar + 1e-6)).Distinct().Count()).IsGreaterThan(1).Because($"seed {song.Seed}");
+            // each binned by the bar of the map it ends in, whatever bars of other meters or short ones came before
+            await Assert.That(lasts.Select(x => Math.Round(x - 1e-6 - song.Map.BeatInBar(x - 1e-6), 4)).Distinct().Count()).IsGreaterThan(1).Because($"seed {song.Seed}");
             if (drumsToTheEnd)
                 drummed++;
         }

@@ -89,6 +89,7 @@ public sealed class GlideTest
         var (leapShare, stepShare) = (leaps.Average(x => x ? 1.0 : 0), steps.Average(x => x ? 1.0 : 0));
         var (endShare, innerShare) = (ends.Average(x => x ? 1.0 : 0), inner.Average(x => x ? 1.0 : 0));
         Console.WriteLine($"a gliding bass slides into {leapShare:P0} of {leaps.Count} leaps and {stepShare:P0} of {steps.Count} steps, {endShare:P0} of {ends.Count} steps ending a phrase and {innerShare:P0} of {inner.Count} within one");
+        // a calibration, the lean's odds against the songs' own draws (measured: leaps 24% to 25% against steps 12% to 20%, a phrase's end 21% to 29% against within one 10% to 17%, at offsets 0 and a million)
         await Assert.That(leapShare).IsGreaterThan(stepShare);
         await Assert.That(endShare).IsGreaterThan(innerShare);
     }

@@ -171,6 +171,7 @@ public sealed class FillArchetypeTest
     [Test]
     public async Task Run_PlaysTheGroovesCycle_Finer()
     {
+        var offQuarters = 0;
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
@@ -179,7 +180,11 @@ public sealed class FillArchetypeTest
             // 16ths, two ranks finer than the backbeat's quarters, on its cycle
             await Assert.That(toms).IsNotEmpty();
             await Assert.That(toms.All(x => Math.Abs(x.Position * 4 - Math.Round(x.Position * 4)) < 1e-6)).IsTrue();
+            offQuarters += toms.Count(x => Math.Abs(x.Position - Math.Round(x.Position)) > 1e-6);
         }
+
+        // and finer than the quarters somewhere
+        await Assert.That(offQuarters).IsGreaterThan(0);
     }
 
     [Test]

@@ -21,8 +21,11 @@ public sealed class LiftReportTest
             foreach (var line in lines)
             {
                 var bar = song.Map.MeterAt(line - 1e-6).BarDuration;
-                // the open hi-hat, 46, on the last beat, and the snare's head, 38 or 40, over the last bar
-                var open = song.Song.Notes!.GetValueOrDefault(hiHat, Rmg.Core.Events.EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0)).Where(x => x.Position >= line - 1 - 1e-9 && x.Position < line - 1e-9).ToArray();
+                // the open hi-hat, 46, over the bar's last pulse, a beat in 4/4, a dotted quarter in 6/8, as the cue opens it,
+                // and the snare's head, 38 or 40, over the last bar
+                var start = line - song.Map.BarBefore(line);
+                var from = start + song.Map.MeterAt(start).Pulses[^1];
+                var open = song.Song.Notes!.GetValueOrDefault(hiHat, Rmg.Core.Events.EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0)).Where(x => x.Position >= from - 1e-9 && x.Position < line - 1e-9).ToArray();
                 foreach (var note in open)
                     await Assert.That(note.Value.Pitches[0]).IsEqualTo(46).Because($"seed {song.Seed} at {note.Position}");
                 opened += open.Length > 0 ? 1 : 0;

@@ -23,8 +23,8 @@ public sealed class DoubleTimeTest
         }
 
         Console.WriteLine($"{gaps} gaps between a time drum's notes in double time, {sixteenths / (double)Math.Max(1, gaps):P1} shorter than an 8th");
-        // measured 1.4% at offset 0, 53% of the hats. gaps 16ths before the cap; fills and rolls may add a few (3.4% at
-        // offset 0 and 6.0% at a million since a fierce mood's songs play double time oftener)
+        // measured 3.4% at offset 0 and 6.0% at a million, 53% of the hats' gaps 16ths before the cap; fills and rolls may
+        // add a few
         await Assert.That(gaps).IsGreaterThan(500);
         await Assert.That(sixteenths / (double)gaps).IsLessThan(0.1);
     }

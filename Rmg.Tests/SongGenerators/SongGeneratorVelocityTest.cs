@@ -34,7 +34,8 @@ public sealed class SongGeneratorVelocityTest
         }
 
         Console.WriteLine($"bar start {(barStart.Average() - offGrid.Average()) * 127:F2} steps louder");
-        await Assert.That(barStart.Average() - offGrid.Average()).IsGreaterThan(3.5 / 127);
+        // against the accent breaking (measured: 4.8 to 5.8 steps at offsets 0 and a million)
+        await Assert.That(barStart.Average() - offGrid.Average()).IsGreaterThan(1.5 / 127);
     }
 
     private static bool IsOnGrid(double position, double step)

@@ -51,6 +51,8 @@ public sealed class LiftTest
         await Assert.That(earlier).IsGreaterThan(0);
         await Assert.That((double)louder).IsGreaterThan(earlier * 0.95);
         Console.WriteLine($"{outside} notes elsewhere moved more than a hair");
+        // and none, or nearly, swelling outside its window, a lift that started too early (measured: 0 and 1 notes, at offsets 0 and a million)
+        await Assert.That(outside).IsLessThanOrEqualTo(earlier / 20);
     }
 
     /// <summary>

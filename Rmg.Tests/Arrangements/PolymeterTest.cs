@@ -22,8 +22,14 @@ public sealed class PolymeterTest
             .Add(GenreChoices.Meter.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("3/4", new(1, 1, 1)));
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: new Genre(choices))));
         var plans = songs.SelectMany(song => song.Map.Sections.Where(x => song.PolymeterPlans.ContainsKey(x.SectionId)).Select(x => (song.PolymeterPlans[x.SectionId], Bar: x.Meter.Groups.Sum()))).ToArray();
+        // a cycle drifting against the bar, the songs' cells', never one of the genre's dividing ones alone nor a composite of
+        // them only
         foreach (var (plan, bar) in plans)
-            await Assert.That(bar % plan.Sixteenths).IsNotEqualTo(0);
+        {
+            await Assert.That(bar % plan.Sixteenths != 0 && plan.Sixteenths % bar != 0).IsTrue();
+            await Assert.That(plan.Cells.All(x => x is 3 or 6)).IsFalse().Because(string.Join("+", plan.Cells));
+        }
+
         await Assert.That(plans.Length).IsGreaterThan(0);
     }
 

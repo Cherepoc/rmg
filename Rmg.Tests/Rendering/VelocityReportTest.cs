@@ -101,11 +101,14 @@ public sealed class VelocityReportTest
         var (bass, chords, melody, drums) = (m["Bass"], m["Chords"], m["Melody"], m["Drum"]);
 
         // a bass and chords accent their beats less than a melody or the drums
+        Console.WriteLine($"accents: melody {melody.Accent:F3}, drums {drums.Accent:F3}, bass {bass.Accent:F3}, chords {chords.Accent:F3}");
         await Assert.That(bass.Accent).IsLessThan(melody.Accent * 0.75);
         await Assert.That(chords.Accent).IsLessThan(melody.Accent * 0.75);
+        await Assert.That(bass.Accent).IsLessThan(drums.Accent);
+        await Assert.That(chords.Accent).IsLessThan(drums.Accent);
         // the melody and the bass lead the mix, about as loud, the bass a little quieter for its even beats, and the
         // chords and the drums under them
-        // within a few decibels against the mechanism breaking, the target of one in the Report
+        // within a few decibels against the mechanism breaking, the target of one in the Report (measured: the melody -7.6 to -7.8 dB, the bass -7.7 to -7.8, the chords -8.9, the drums -9.7, at offsets 0 and a million)
         Console.WriteLine($"melody {melody.Loudness:F1} dB, bass {bass.Loudness:F1}, chords {chords.Loudness:F1}, drums {drums.Loudness:F1}");
         await Assert.That(Math.Abs(melody.Loudness - bass.Loudness)).IsLessThan(4);
         await Assert.That(Math.Min(melody.Loudness, bass.Loudness)).IsGreaterThan(Math.Max(chords.Loudness, drums.Loudness));

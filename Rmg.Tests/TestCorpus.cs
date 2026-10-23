@@ -201,7 +201,7 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
 
     /// <summary>The phrase an appearance's drums come in at, a build bringing them in late, as its texture has it; 0 where they play from its start.</summary>
     public int DrumsFrom(int index) => Textures
-        .Where(x => x.Index == index).Select(x => x.PhraseSilent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max()).DefaultIfEmpty(0).First();
+        .Where(x => x.Index == index).Select(x => x.PhraseSilent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max()).Single();
 
     /// <summary>
     ///     Where the drums mark a line, as the song puts them: at every phrase from the first section on, the first after

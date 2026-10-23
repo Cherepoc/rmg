@@ -13,7 +13,7 @@ public sealed class TapeTest
     [Test]
     public async Task ATapesSong_DriftsEveryPitchedPartAlike_AndNoDrum_ALineADetuneAFewCents()
     {
-        var taped = 0;
+        var (taped, lines, detuned) = (0, 0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("idm")))))
         {
             if (Wows(song).Length == 0)
@@ -36,10 +36,17 @@ public sealed class TapeTest
                     await Assert.That(played.All(x => x.Value.State.GetStateValue(CompositionStateKinds.Detune) == 0)).IsTrue().Because($"seed {song.Seed}, track {track}");
                 // a part's detune the same throughout
                 await Assert.That(played.Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Detune)).Distinct().Count()).IsLessThanOrEqualTo(1);
+                if (isDrum || role == TrackRole.Pad || role.PlaysChords() || played.Length == 0)
+                    continue;
+                lines++;
+                detuned += played[0].Value.State.GetStateValue(CompositionStateKinds.Detune) != 0 ? 1 : 0;
             }
         }
 
         await Assert.That(taped).IsGreaterThan(5);
+        // a line detuned now and then, a calibration (measured: 17 of 51 and 18 of 55 lines, at offsets 0 and a million)
+        Console.WriteLine($"{taped} taped songs, {detuned} of their {lines} lines detuned");
+        await Assert.That(detuned).IsGreaterThan(0);
     }
 
     [Test]

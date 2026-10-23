@@ -65,6 +65,9 @@ public sealed class VoiceLeaderTest
         // every inversion keeps the notes of the chord
         await Assert.That(layouts.All(x => x.Select(n => n % 12).Order().SequenceEqual(new[] { 0, 4, 7 }))).IsTrue();
         await Assert.That(layouts.Select(x => (x[0] % 12)).Distinct().Order().ToArray()).IsEquivalentTo([0, 4, 7], CollectionOrdering.Matching);
+        // in every octave of 48 to 83 each fits in: the root position on C3, C4 and C5, the first inversion on E3 and E4,
+        // the second on G3 and G4
+        await Assert.That(layouts.Select(x => x[0]).Order().ToArray()).IsEquivalentTo([48, 52, 55, 60, 64, 67, 72], CollectionOrdering.Matching);
     }
 
     [Test]
@@ -137,7 +140,8 @@ public sealed class VoiceLeaderTest
                 .Select(x => x.Select(note => note.Value.Offset).ToArray())
                 .Where(x => x.Length >= 2)
                 .ToArray();
-            foreach (var (a, b) in chords.Zip(chords.Skip(1)))
+            // a change of chord, its notes another's, a chord struck again moving by construction never
+            foreach (var (a, b) in chords.Zip(chords.Skip(1)).Where(x => !x.First.Order().SequenceEqual(x.Second.Order())))
             {
                 changes++;
                 if (Math.Abs(b.Average() - a.Average()) >= 9)
@@ -147,7 +151,7 @@ public sealed class VoiceLeaderTest
 
         // only a bar that starts afresh jumps, by design
         Console.WriteLine($"{jumps} of {changes} chord changes jumping an octave's register");
-        // seen 0.4% to 1.1% over three corpora's 64 songs
+        // seen 0.4% to 1.1% over three corpora's 64 songs counting a chord struck again; 0.9% to 1.5% counting changes alone, at offsets 0 and a million
         await Assert.That(jumps / (double)changes).IsLessThan(0.05);
     }
 

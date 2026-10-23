@@ -5,7 +5,10 @@ using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Grooves;
 
-/// <summary>A drawn swing evening out with the tempo: its pair's second note never shorter than <see cref="Groove.ShortestSecondNote" />.</summary>
+/// <summary>
+///     A drawn swing evening out with the tempo: its pair's second note never shorter than <see cref="Groove.ShortestSecondNote" />
+///     at the song's tempo, a section at a faster tempo of its own playing it a little shorter.
+/// </summary>
 public sealed class SwingTempoTest
 {
     /// <summary>How long a song's swung pair's second note plays, in seconds; none for a straight song.</summary>
@@ -18,7 +21,7 @@ public sealed class SwingTempoTest
     }
 
     [Test]
-    public async Task ADrawnSwing_LeavesItsSecondNoteATenthOfASecond()
+    public async Task ADrawnSwing_LeavesItsSecondNoteATenthOfASecond_AtTheSongsTempo()
     {
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz"))));
         var swung = songs.Select(x => (Song: x, Second: SecondNote(x))).Where(x => x.Second is not null).ToArray();

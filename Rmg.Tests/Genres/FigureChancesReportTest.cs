@@ -52,6 +52,9 @@ public sealed class FigureChancesReportTest
     [Explicit]
     public async Task Report()
     {
+        // every loose figure measured, a figure added loose given a preset here
+        var missing = Figures.All.Where(x => x.Loose).Select(x => (x.Player, x.Name)).Except(Loose.Select(x => (x.Player, x.Figure))).ToArray();
+        await Assert.That(missing).IsEmpty().Because(string.Join(", ", missing));
         foreach (var (player, figure, genre) in Loose)
         foreach (var feel in new[] { 0.0, 0.5, 1 })
         {

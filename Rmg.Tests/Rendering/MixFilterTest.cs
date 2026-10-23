@@ -23,8 +23,10 @@ public sealed class MixFilterTest
             if (!Plan(song).Opening)
                 continue;
             opening++;
+            // over the intro, or the first phrase where there is none or only a count-in's clicks, as the mix filter's opening
             var first = song.Map.Sections[0];
-            var (start, opened) = (song.Map.Intro.Duration > 0 ? 0 : song.Swing.Apply(first.Start), song.Swing.Apply(song.Map.Intro.Duration > 0 ? first.Start : first.Start + 4 * first.Meter.BarDuration));
+            var overIntro = song.Map.Intro.Duration > 0 && song.Map.Intro.Kind != IntroKind.CountIn;
+            var (start, opened) = (overIntro ? 0 : song.Swing.Apply(first.Start), song.Swing.Apply(overIntro ? song.Map.Origin : first.Phrases.First().End));
             var half = (start + opened) / 2;
             foreach (var track in song.Rendered.Tracks.Where(x => x.NoteTimeline.Any(n => n.Position >= start - 1e-9 && n.Position < half - 1e-9)))
             {

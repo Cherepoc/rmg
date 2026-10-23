@@ -221,6 +221,8 @@ public sealed class LineTest
         var leaping = Enumerable.Range(0, drawCount).Select(_ => MelodyLayers.Line.GenerateStep(context, 0)).ToArray();
 
         await Assert.That(stepwise.Count(x => x.Step == 0) / (double)drawCount).IsEqualTo(MelodyLayers.Line.RepeatChance).Within(0.01);
+        // going on at the line's own chance where nothing pulls it, the turn drawn evenly to be held to it
+        await Assert.That(MelodyLayers.Line.GetContinueChance(0)).IsEqualTo(MelodyLayers.Line.ContinueChance);
         var moving = stepwise.Where(x => x.Step != 0).ToArray();
         await Assert.That(moving.Count(x => x.Turn < MelodyLayers.Line.GetContinueChance(0)) / (double)moving.Length)
             .IsEqualTo(MelodyLayers.Line.ContinueChance).Within(0.01);

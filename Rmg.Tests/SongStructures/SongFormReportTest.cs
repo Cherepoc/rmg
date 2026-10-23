@@ -19,7 +19,7 @@ public sealed class SongFormReportTest
         var genre = Rmg.Tests.Genres.GenrePresets.With("pop", GenreChoices.Form, ("vcqvcqbcq", 1), ("vpcvpcbc", 0), ("vcvcbc", 0), ("vpcvpcbcvpc", 0), ("cvcvbc", 0), ("vpcqvpcqbcq", 0));
         var (posts, hooks) = (0, 0);
         var (chorusBars, postBars) = (new List<double>(), new List<double>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var ids = structure.SectionIds;
@@ -38,8 +38,9 @@ public sealed class SongFormReportTest
         }
 
         Console.WriteLine($"{posts} songs with a post-chorus, {hooks} of them on a hook; a chorus {chorusBars.Average():0.0} bars, a post-chorus {postBars.Average():0.0}");
+        // (measured: 61 songs of 64 with a post-chorus, 49 on a hook, a post-chorus 6.7 to 7.6 bars against a chorus 14.0 to 14.6, at offsets 0 and a million)
         await Assert.That(postBars.Average()).IsLessThan(chorusBars.Average());
-        await Assert.That(posts).IsGreaterThan(16);
+        await Assert.That(posts).IsGreaterThan(32);
         await Assert.That(hooks).IsGreaterThan(posts / 3);
     }
 
@@ -66,6 +67,7 @@ public sealed class SongFormReportTest
         var hipHop = Measure(Rmg.Tests.Genres.GenrePresets.Genre("hipHop"));
         var own = Measure(Rmg.Tests.Genres.GenrePresets.Without("hipHop", GenreChoices.RoleLength.Name));
         Console.WriteLine($"Hip-hop: a verse {hipHop.Verse:0.0} bars, a chorus {hipHop.Chorus:0.0}, {hipHop.ThreeVerses} of 64 songs three verses; with the songs' own lengths a verse {own.Verse:0.0}, a chorus {own.Chorus:0.0}");
+        // (measured: a chorus 9.7 to 10.2 bars against a verse 15.8 to 15.9, 15 to 16 of 64 songs three verses, at offsets 0 and a million)
         await Assert.That(hipHop.Chorus).IsLessThan(hipHop.Verse * 0.8);
         await Assert.That(hipHop.Chorus).IsLessThan(own.Chorus);
         await Assert.That(hipHop.ThreeVerses).IsGreaterThan(5);

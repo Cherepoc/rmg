@@ -426,7 +426,7 @@ public sealed class GenreTest
         await Assert.That(octaves).IsGreaterThan(0);
     }
 
-    /// <summary>A song of a preset that names its intros opens on one of them, a hook intro among them only where it names it; opening on one part, its band entering, aside.</summary>
+    /// <summary>A genre naming every device at the songs' own amounts plays the songs' notes exactly, as no genre does.</summary>
     [Test]
     public async Task EveryDevice_NamedAsTheSongsHaveIt_PlaysAsNoGenre()
     {

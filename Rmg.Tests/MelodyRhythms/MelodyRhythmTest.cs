@@ -107,11 +107,11 @@ public sealed class MelodyRhythmTest
     }
 
     [Test]
-    public async Task Phrases_MostlyEndWithAHeldNote_AndARest()
+    public async Task Phrases_OftenEndWithAHeldNote_AndMostlyARest()
     {
-        int phrases = 0, held = 0, rested = 0;
-        for (var seed = 0; seed < 256; seed++)
+        var counts = TestCorpus.InParallel(Enumerable.Range(0, 256), seed =>
         {
+            int phrases = 0, held = 0, rested = 0;
             var melody = RenderUnornamentedMelody(seed);
             var map = TestCorpus.Get(seed).Map;
             // a walk into a section is the next phrase's pickup, not this one's end (LineFills), however swung
@@ -134,7 +134,10 @@ public sealed class MelodyRhythmTest
                 if (end - (note.Position + note.Value.Duration) >= MelodyLayers.PhraseEndRest - 1e-9)
                     rested++;
             }
-        }
+
+            return (phrases, held, rested);
+        });
+        var (phrases, held, rested) = (counts.Sum(x => x.phrases), counts.Sum(x => x.held), counts.Sum(x => x.rested));
 
         // a fifth of the phrases run on into the next, and a phrase ending late holds its note a short while: about half
         // end on a held note, a calibration's bound well under it

@@ -3,7 +3,7 @@ using Rmg.Core.Composition;
 namespace Rmg.Tests.DyadicRankTimelines;
 
 /// <summary>
-///     Where the drums' notes fall on the grid: how many fall off both the 16ths and the 8th triplets, as the
+///     Where the drums' notes fall on the grid: how many fall off both the 32nds and the 16th triplets, as the
 ///     quintuplets and septuplets do, and how many of a drum follow its note before by less than a 32nd, heard as a rush.
 /// </summary>
 public sealed class GridReportTest

@@ -94,17 +94,19 @@ public sealed class SoloistTest
         }, x.Value.Bends));
 
     [Test]
-    public async Task AGenresSoloists_BendAsItHasThem_NeverWhereItGivesThemNone_ABluesPlayerFarOftenerThanAJazzOne()
+    public async Task AGenresSoloists_BendAsItHasThem_NeverWhereItGivesThemNone_ABluesPlayerFarOftenerThanWithoutItsBends()
     {
-        IEnumerable<(string Family, bool Bends)> Of(string genre) =>
-            TestCorpus.InParallel(Enumerable.Range(0, 32), seed => SoloistsOf(TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))).ToArray()).SelectMany(x => x);
-        var bossa = Of("bossa").ToArray();
+        IEnumerable<(string Family, bool Bends)> Of(Genre genre) =>
+            TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistsOf(TestCorpus.Get(seed, new SongOverrides(Genre: genre))).ToArray()).SelectMany(x => x);
+        var bossa = Of(GenrePresets.Genre("bossa")).ToArray();
         await Assert.That(bossa.Length).IsGreaterThan(10);
         await Assert.That(bossa.Any(x => x.Bends)).IsFalse();
         static double Share(IEnumerable<(string, bool Bends)> some) => some.ToArray() is var all ? all.Count(x => x.Bends) / (double)Math.Max(1, all.Length) : 0;
-        var (blues, jazz) = (Share(Of("blues")), Share(Of("jazz")));
-        Console.WriteLine($"soloists bending: Blues {blues:P0}, Jazz {jazz:P0}");
-        await Assert.That(blues).IsGreaterThan(jazz + 0.3);
+        // the same songs with the Blues' soloists' bends and without
+        var (blues, without) = (Share(Of(GenrePresets.Genre("blues"))), Share(Of(GenrePresets.With("blues", GenreChoices.Effects, ("soloBends", 0)))));
+        Console.WriteLine($"soloists bending: Blues {blues:P0}, without its soloists' bends {without:P0}");
+        // (measured: Blues 90% against none without, at offsets 0 and a million)
+        await Assert.That(blues).IsGreaterThan(without + 0.3);
     }
 
     /// <summary>The soloists that bend at all, by genre and by their instrument's family.</summary>

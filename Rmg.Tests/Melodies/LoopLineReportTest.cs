@@ -27,14 +27,8 @@ public sealed class LoopLineReportTest
             {
                 if (firsts.FirstOrDefault(x => x.SectionId == (looping ? sources[span.SectionId] : sources.Values.First())) is not { } source || !source.Meter.Equals(span.Meter))
                     return [];
-                var bar = span.Meter.BarDuration;
-                (double Offset, int Pitch)[] Bar(SectionSpan at, int k) =>
-                [
-                    ..notes.Where(x => x.Position >= at.Start + k * bar - 1e-9 && x.Position < at.Start + (k + 1) * bar - 1e-9)
-                        .Select(x => (Math.Round(x.Position - at.Start - k * bar, 3), x.Value.Pitches[0]))
-                ];
-                return Enumerable.Range(0, span.Meter.PatternBarCount).Select(k => (Bar(source, k), Bar(span, k))).Where(x => x.Item1.Length >= 2 && x.Item2.Length >= 2)
-                    .Select(x => (x.Item1.Select(n => n.Offset).SequenceEqual(x.Item2.Select(n => n.Offset)), x.Item2.Count(n => x.Item1.Contains(n)), x.Item2.Length));
+                return Enumerable.Range(0, span.Meter.PatternBarCount).Select(k => (BarNotes.Of(notes, source, k), BarNotes.Of(notes, span, k))).Where(x => x.Item1.Length >= 2 && x.Item2.Length >= 2)
+                    .Select(x => BarNotes.Compare(x.Item1, x.Item2));
             })
         ];
     }

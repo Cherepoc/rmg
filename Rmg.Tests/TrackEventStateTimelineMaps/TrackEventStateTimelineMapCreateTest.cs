@@ -507,4 +507,28 @@ public sealed class TrackEventStateTimelineMapCreateTest
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(), assert => assert.IsEquivalentTo(trackTimelineMap, CollectionOrdering.Matching))
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
+
+    /// <summary>
+    ///     A track whose events are all mapped away stays in the map, as a part resting through a stretch keeps its state;
+    ///     a map made afresh then drops it where its state is the default, and keeps it where not.
+    /// </summary>
+    [Test]
+    public async Task ATrackMappedToNoEvents_StaysInTheMap_UntilAMapMadeAfreshDropsItAtTheDefault()
+    {
+        var events = EventTimeline.Create(2, new TimelineItem<int>[] { new(1, 1) });
+        var stated = new IStateTimeline[] { StateTimeline.Create(2, StateKind1, new TimelineItem<int>[] { new(0, 1) }) }.ToStateTimelineMap(2);
+        var tracks = new Dictionary<int, EventStateTimelineMap<int>>
+        {
+            [1] = EventStateTimelineMap.Create(2, events, StateTimelineMap.Create(2)),
+            [2] = EventStateTimelineMap.Create(2, events, stated)
+        };
+        var map = TrackEventStateTimelineMap.Create(2, tracks, StateTimelineMap.Create(2));
+
+        var mapped = map.MapTrackEvents(new Dictionary<int, Func<EventTimeline<int>, EventTimeline<int>>> { [1] = x => EventTimeline.Create<int>(x.Duration), [2] = x => EventTimeline.Create<int>(x.Duration) });
+
+        await Assert.That(mapped.TrackTimelineMap.Keys.Order()).IsEquivalentTo([1, 2], CollectionOrdering.Matching);
+        await Assert.That(mapped.TrackTimelineMap[2].StateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKind1)).IsEqualTo(1);
+        var made = TrackEventStateTimelineMap.Create(2, mapped.TrackTimelineMap, mapped.CommonStateTimelineMap);
+        await Assert.That(made.TrackTimelineMap.Keys.Order()).IsEquivalentTo([2], CollectionOrdering.Matching);
+    }
 }

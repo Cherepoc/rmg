@@ -8,8 +8,7 @@ namespace Rmg.Tests.Rendering;
 public sealed class ChugEnergyTest
 {
     /// <summary>
-    ///     Punk's and Metal's sections quieter than their song's middle chug oftener than its louder ones (measured over 64:
-    ///     Punk's 43% against 17%, Metal's 67% against 49%, and without the lean 31% against 22% and 64% against 62%).
+    ///     Punk's and Metal's sections quieter than their song's middle chug oftener than its louder ones.
     /// </summary>
     [Test]
     [Arguments("punk")]
@@ -28,8 +27,9 @@ public sealed class ChugEnergyTest
 
         var (quietShare, loudShare) = (quiet.Average(x => x ? 1.0 : 0), loud.Average(x => x ? 1.0 : 0));
         Console.WriteLine($"{preset}: chugs in {quietShare:P0} of {quiet.Count} quieter sections, {loudShare:P0} of {loud.Count} louder");
-        // by a gap the songs without the lean do not reach (measured: Punk 75% against 45%, Metal 67% against 49% at offset 0,
-        // 5.5 and 6.7 points in Metal at offsets 942000000 and 716000000; with the lean off, Punk 31% against 22%, Metal 64% against 62%)
+        // by a gap the songs without the lean do not reach (measured over 64: Punk 66% to 70% against 43% to 46%, Metal 59% to
+        // 61% against 40% to 47%, at offsets 0 and a million; 5.5 and 6.7 points in Metal at offsets 942000000 and 716000000
+        // once; with the lean off, Punk 31% against 22%, Metal 64% against 62%)
         await Assert.That(quietShare - loudShare).IsGreaterThan(preset == "punk" ? 0.12 : 0.04);
     }
 }

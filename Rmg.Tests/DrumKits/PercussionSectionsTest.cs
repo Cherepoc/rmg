@@ -36,12 +36,19 @@ public sealed class PercussionSectionsTest
     [Test]
     public async Task OnlyASongWithEnoughPercussion_HasSectionsOfIt()
     {
-        foreach (var song in TestCorpus.Range(128))
+        // the songs' own, and songs given the kit and a single hand drum, too few for a section of their own
+        var few = 0;
+        var given = new SongOverrides(DrumPieces: ["kick", "acousticSnare", "hiHat", "conga"]);
+        foreach (var song in TestCorpus.Range(128).Concat(TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, given))))
         {
             var percussion = song.Song.TrackDefinitions.Keys.Count(x => song.IsDrum(x) && IsPercussion(x));
-            if (percussion < PercussionSections.MinDrums)
-                await Assert.That(song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).Any(x => (bool)x.Value!)).IsFalse();
+            if (percussion is 0 or >= PercussionSections.MinDrums)
+                continue;
+            few++;
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).Any(x => (bool)x.Value!)).IsFalse().Because($"seed {song.Seed}");
         }
+
+        await Assert.That(few).IsGreaterThan(10);
     }
 
     [Test]

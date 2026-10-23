@@ -22,7 +22,7 @@ public sealed class BreakdownChorusTest
                 // an ending that adds no appearance, so that the first pass is the second last
                 .SetItem(GenreChoices.Ending.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("ringOut", new(1, 1, 1)))
         };
-        var (breakdowns, built) = (0, 0);
+        var (breakdowns, built, voiced) = (0, 0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             if (!(bool)song.Trace.Single(x => x.Point == TracePoints.BreakdownChorus).Value!)
@@ -35,13 +35,23 @@ public sealed class BreakdownChorusTest
                 continue;
             built++;
             await Assert.That(silent[0]).DoesNotContain(TrackRole.Melody).Because($"seed {song.Seed}");
-            // the drums, where they play in it, out of its first phrase
+            // the voice alone in its first phrase: no other part strikes a note in it, but a fill's last bar into the next
+            // phrase, the drums', and a held note's last beat, as a texture's rule allows
             var span = song.Map.Sections[index];
-            if (song.Song.Notes!.Any(x => song.IsDrum(x.Key) && x.Value.Any(n => n.IsWithin(span.Start, span.End))))
-                await Assert.That(silent[0]).Contains(TrackRole.Drum).Because($"seed {song.Seed}");
+            var phrase = span.Phrases.First();
+            if (!song.Song.Notes!.Any(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Melody && x.Value.Any(n => n.IsWithin(phrase.Start, phrase.End))))
+                continue;
+            voiced++;
+            foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role != TrackRole.Melody))
+            {
+                var allowance = song.Song.TrackDefinitions[track].Role == TrackRole.Drum ? span.Meter.BarDuration : 1;
+                await Assert.That(notes.Any(n => n.Position > phrase.Start + 1e-6 && n.Position < phrase.End - allowance - 1e-9)).IsFalse()
+                    .Because($"seed {song.Seed}, {song.Song.TrackDefinitions[track].Role}");
+            }
         }
 
-        Console.WriteLine($"{breakdowns} breakdown choruses, {built} built up");
+        Console.WriteLine($"{breakdowns} breakdown choruses, {built} built up, {voiced} from the voice");
         await Assert.That(built).IsGreaterThan(5);
+        await Assert.That(voiced).IsGreaterThan(5);
     }
 }

@@ -12,17 +12,28 @@ public sealed class SongStructureGeneratorTest
     [Arguments(1.0)]
     public async Task Parts_RespectLimits(double unconventionality)
     {
+        var (later, reusing) = (0, 0);
         for (var seed = 0; seed < 500; seed++)
         {
             var parts = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null, unconventionality);
 
             await Assert.That(parts.Length).IsBetween(4, 8);
+            foreach (var (part, i) in parts.Select((x, i) => (x, i)).Skip(1))
+                (later, reusing) = (later + 1, reusing + (part.SectionIds.Any(id => parts.Take(i).Any(earlier => earlier.SectionIds.Contains(id))) ? 1 : 0));
             foreach (var part in parts)
             {
                 await Assert.That(part.SectionIds.Length).IsBetween(1, 4);
                 await Assert.That(part.SectionIds.Distinct().Count()).IsBetween(1, 3);
             }
         }
+
+        // the plainest reusing a section of an earlier part wherever it can, nearly every part after the first, the
+        // wildest never
+        Console.WriteLine($"{reusing} of {later} parts after the first reuse a section");
+        if (unconventionality == 0)
+            await Assert.That(reusing).IsGreaterThan(later * 9 / 10);
+        if (unconventionality == 1)
+            await Assert.That(reusing).IsEqualTo(0);
     }
 
     /// <summary>No section plays twice in a row, within a part or across parts, at every unconventionality.</summary>

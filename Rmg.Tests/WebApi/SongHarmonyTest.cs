@@ -56,6 +56,15 @@ public sealed class SongHarmonyTest
             var first = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack && x.Value.Count > 0).Min(x => x.Value[0].Position);
             await Assert.That(harmony[0].Position).IsEqualTo(0).Because($"seed {song.Seed}");
             await Assert.That(harmony[0].Chord == SongHarmony.NoChord).IsEqualTo(harmony.Length > 1 && first >= harmony[1].Position - 1e-9).Because($"seed {song.Seed}");
+            // and every change no chord exactly where no pitched part sounds over its span, a note struck in it or held into it
+            var pitched = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value).ToArray();
+            for (var i = 0; i < harmony.Length; i++)
+            {
+                var (from, to) = (harmony[i].Position, i + 1 < harmony.Length ? harmony[i + 1].Position : double.MaxValue);
+                var sounds = pitched.Any(x => x.Position < to - 1e-9 && x.Position + x.Value.Duration > from + 1e-9);
+                await Assert.That(harmony[i].Chord == SongHarmony.NoChord).IsEqualTo(!sounds).Because($"seed {song.Seed} at {from}");
+            }
+
             foreach (var (before, after) in harmony.Zip(harmony.Skip(1)))
             {
                 await Assert.That(after.Position).IsGreaterThan(before.Position).Because($"seed {song.Seed}");

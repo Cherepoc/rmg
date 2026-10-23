@@ -6,7 +6,7 @@ using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Grooves;
 
-/// <summary>The snare's flams and drags: soft strokes of its head just before a note on a pulse, never in the plainest songs.</summary>
+/// <summary>The snare's flams and drags: soft strokes of its head just before a fill's note on an 8th or a backbeat, never in the plainest songs.</summary>
 public sealed class DrumOrnamentsTest
 {
     // a genre that flams and drags in every song
@@ -28,8 +28,8 @@ public sealed class DrumOrnamentsTest
     }
 
     /// <summary>
-    ///     An ornamented drum note is the snare's head in a section, its strokes too, a flam's one stroke on an 8th or a drag's
-    ///     two on a pulse, and sounds after its strokes, each its sound, softer, before it.
+    ///     An ornamented drum note is the snare's head in a section, its strokes too, a flam's one stroke on an 8th of a fill or
+    ///     a drag's two on a backbeat out of one, and sounds after its strokes, each its sound, softer, before it.
     /// </summary>
     [Test]
     public async Task ADrumsOrnament_IsTheSnaresHead_ItsStrokesSofterBeforeIt()
@@ -41,6 +41,10 @@ public sealed class DrumOrnamentsTest
             var map = song.Song.Map!;
             var swing = Rmg.Core.Rendering.Render.GetSwing(song.Song);
             var drums = song.Drums;
+            // the song's fills, as the stage reads them
+            SongDraft? drafted = null;
+            SongGenerator.GenerateSong(TestCorpus.SongSeed(song.Seed), new SongOverrides(Genre: Rudimental), ImmutableHashSet<string>.Empty, (stage, draft) => drafted = stage == "Drum ornaments" ? draft : drafted, CancellationToken.None);
+            var holds = drafted!.Holds(SongDecisions.Draw(TestCorpus.SongSeed(song.Seed), new SongOverrides(Genre: Rudimental), false, CancellationToken.None));
             foreach (var (track, notes) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
             foreach (var note in notes.Where(x => StrokesOf(x.Value) > 0))
             {
@@ -51,6 +55,8 @@ public sealed class DrumOrnamentsTest
                 await Assert.That(song.SpanAt(note.Position) is { } section && note.Position - strokes * note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep) >= section.Start - 1e-9)
                     .IsTrue().Because(because);
                 await Assert.That(strokes is DrumOrnaments.FlamStrokes or DrumOrnaments.DragStrokes).IsTrue().Because(because);
+                // a flam in a fill, a drag out of one
+                await Assert.That(holds.At(Hold.Fill, note.Position)).IsEqualTo(strokes == DrumOrnaments.FlamStrokes).Because(because);
                 // a flam on an 8th, a drag on the backbeat, the section's time feel's
                 var beat = map.BeatInBar(note.Position);
                 var feel = (int)song.Trace.First(t => t.Point == TracePoints.TimeFeel && t.Section == song.SpanAt(note.Position)!.SectionId).Value!;

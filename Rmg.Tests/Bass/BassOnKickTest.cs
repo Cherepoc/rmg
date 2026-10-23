@@ -32,13 +32,18 @@ public sealed class BassOnKickTest
     [Test]
     public async Task ABassOnTheKick_StrikesWithIt()
     {
+        static double Share((string?, double[] Bass, HashSet<double> Kick)[] of) => of.Sum(x => x.Bass.Count(b => x.Kick.Contains(Math.Round(b, 4)))) / (double)Math.Max(1, of.Sum(x => x.Bass.Length));
         var bars = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trap"))))
             .SelectMany(x => Bars(x).Where(b => b.Figure == "withKick").ToArray()).ToArray();
-        var share = bars.Sum(x => x.Bass.Count(b => x.Kick.Contains(Math.Round(b, 4)))) / (double)Math.Max(1, bars.Sum(x => x.Bass.Length));
-        Console.WriteLine($"{bars.Length} bars on the kick, {share:P0} of the bass's notes with it");
-        // measured 87% at offset 0 and 86% at a million
+        // and the same songs with the bass's figures the songs' own, which never follow the kick, every bar of theirs
+        var off = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without("trap", GenreChoices.Figures[FigurePlayer.Bass].Name))))
+            .SelectMany(x => Bars(x).ToArray()).ToArray();
+        var (share, without) = (Share(bars), Share(off));
+        Console.WriteLine($"{bars.Length} bars on the kick, {share:P0} of the bass's notes with it; without the figure {without:P0} of {off.Length} bars'");
+        // measured 87% to 90% at offsets 0 and a million; without the figure 30% to 43%
         await Assert.That(bars.Length).IsGreaterThan(500);
         await Assert.That(share).IsGreaterThan(0.75);
+        await Assert.That(share).IsGreaterThan(without + 0.15);
     }
 
     [Test]

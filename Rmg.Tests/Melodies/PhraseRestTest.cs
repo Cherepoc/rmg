@@ -58,14 +58,22 @@ public sealed class PhraseRestTest
         var seeds = Enumerable.Range(0, 64).ToArray();
         var sung = TestCorpus.InParallel(seeds, seed => TestCorpus.Get(seed, new SongOverrides(Genre: Sung(1))));
         var unsung = TestCorpus.InParallel(seeds, seed => TestCorpus.Get(seed, new SongOverrides(Genre: Sung(0))));
+        var halves = 0;
         foreach (var (on, off) in sung.Zip(unsung))
-        foreach (var ((bars, ends), (_, plain)) in Ends(on).Zip(Ends(off)))
+        {
+            // the same sections sung and not, every one traced in both
+            await Assert.That(Ends(on).Length).IsEqualTo(Ends(off).Length).Because($"seed {on.Seed}");
+            foreach (var ((bars, ends), (_, plain)) in Ends(on).Zip(Ends(off)))
             for (var bar = 0; bar < ends.Length; bar++)
             {
                 var (isHalf, isEnd) = (bars >= 4 && bar % bars == bars / 2 - 1, bar % bars == bars - 1);
+                halves += isHalf ? 1 : 0;
                 var at = $"bar {bar} of {string.Join(",", ends)} and {string.Join(",", plain)}, phrases of {bars}";
                 await Assert.That(isHalf ? ends[bar] > 0 && plain[bar] == 0 : isEnd ? ends[bar] == plain[bar] : ends[bar] == 0 && plain[bar] == 0).IsTrue().Because(at);
             }
+        }
+
+        await Assert.That(halves).IsGreaterThan(50);
 
         var (withRests, without) = (HalfRests(sung), HalfRests(unsung));
         Console.WriteLine($"a rest at half a phrase: sung {withRests:P0}, not {without:P0}");

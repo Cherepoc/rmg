@@ -239,6 +239,9 @@ public sealed class MelodyRepetitionTest
                 foreach (var (position, pitch) in melody.Where(x => x.Key >= first.Start && x.Key < first.End))
                 {
                     var offset = position - first.Start;
+                    // a later appearance compared over its own length, never past it into the next section
+                    if (span != first && offset >= span.Duration - 1e-9)
+                        continue;
                     var phraseHalf = offset % first.Meter.PatternDuration < first.Meter.PatternDuration / 2 ? 0 : 1;
                     if (span != first && improvises == 1)
                         onsets[phraseHalf]++;
@@ -318,7 +321,9 @@ public sealed class MelodyRepetitionTest
     public async Task APhraseThatStartsAgain_LeapsMostlyAfterARest()
     {
         var m = Measure(TestCorpus.Range(256));
+        Console.WriteLine($"of {m.JoinLeaps} leaps where a phrase starts again, {m.RestedJoinLeaps / (double)m.JoinLeaps:P0} after a rest");
 
+        // a calibration (measured: 80% to 83% at offsets 0 and a million)
         await Assert.That(m.RestedJoinLeaps / (double)m.JoinLeaps).IsGreaterThan(0.7);
     }
 
@@ -346,7 +351,7 @@ public sealed class MelodyRepetitionTest
                     continue;
 
                 var place = i == sections.Length - 1 ? 2 : span.Start < song.Map.Duration / 2 ? 0 : 1;
-                foreach (var (position, pitch) in melody.Where(x => x.Key >= first.Start && x.Key < first.End))
+                foreach (var (position, pitch) in melody.Where(x => x.Key >= first.Start && x.Key < first.Start + Math.Min(first.Duration, span.Duration) - 1e-9))
                     if (melody.TryGetValue(Math.Round(span.Start + position - first.Start, 6), out var again))
                     {
                         notes[place]++;

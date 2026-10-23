@@ -30,8 +30,9 @@ public sealed class LetRingTest
     [Test]
     public async Task ABrokenChordLetRing_SoundsOnToItsChange_ABarAtMost_NeverOverItsOwnPitchStruckAgain_OrUnder8ths()
     {
-        var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ringing(1)))).ToArray();
-        var unrung = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ringing(0)))).ToArray();
+        // the same 64 songs with ringing and without, for the rule and the calibration both
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ringing(1)))).ToArray();
+        var unrung = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ringing(0)))).ToArray();
         foreach (var (song, without) in songs.Zip(unrung))
         {
             var changes = song.ChordChanges;
@@ -54,8 +55,8 @@ public sealed class LetRingTest
         }
 
         // against the same songs with no ringing, over 64 (measured: 63% against 42% over 64, 64% to 73% against 48% to 54% over 16 at offsets 0 and a million)
-        var (rung, all) = Measure(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ringing(1)))));
-        var plain = Measure(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ringing(0)))));
+        var (rung, all) = Measure(songs);
+        var plain = Measure(unrung);
         Console.WriteLine($"{rung} of {all} broken chords' notes ringing over the next, against {plain.Ringing} of {plain.Notes} with none rung");
         await Assert.That(rung).IsGreaterThan(plain.Ringing + all / 10);
     }
