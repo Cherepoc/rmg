@@ -104,18 +104,6 @@ internal sealed record Soloist(
     /// <summary>The chance a pitched soloist riffs on the band's rhythm, by the melody facet: seldom; a genre's where it names it, Funk's the most.</summary>
     public static ByConvention RiffChances { get; } = new(0, 0.05, 0.1);
 
-    /// <summary>
-    ///     The chance a run's note off the beat approaches its next on the beat chromatically, a semitone beside it; a song's
-    ///     decision for its soloist (<see cref="ChromaticChances" />).
-    /// </summary>
-    public double ChromaticChance { get; init; }
-
-    /// <summary>
-    ///     The chance a soloist approaches a note chromatically, by the melody facet: never at the plain end; a genre's where it
-    ///     names it, Jazz's the most and the folk genres' never, whose lines keep to their mode.
-    /// </summary>
-    public static ByConvention ChromaticChances { get; } = new(0, 0.1, 0.2);
-
     /// <summary>The chance a phrase restating the phrase before's motif plays it displaced, later in the bar; a song's decision for its soloist (<see cref="DisplaceChances" />).</summary>
     public double DisplaceChance { get; init; }
 

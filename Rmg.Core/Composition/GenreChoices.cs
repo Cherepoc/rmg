@@ -528,14 +528,13 @@ public static class GenreChoices
 
 
     /// <summary>
-    ///     How a soloist phrases: its phrases coming in on a pickup, leaving space, riffing on the band's rhythm, and a run
-    ///     approaching its note on the beat chromatically (<see cref="Soloist.PickupChances" />, <see cref="Soloist.SpaceChances" />,
-    ///     <see cref="Soloist.RiffChances" />, <see cref="Soloist.ChromaticChances" />).
+    ///     How a soloist phrases: its phrases coming in on a pickup, leaving space and riffing on the band's rhythm
+    ///     (<see cref="Soloist.PickupChances" />, <see cref="Soloist.SpaceChances" />, <see cref="Soloist.RiffChances" />).
     /// </summary>
     public static GenreChoice SoloStyle { get; } = Chances("soloStyle", "A soloist's phrasing",
         [
             ("pickups", "Phrases coming in on a pickup", Soloist.PickupChances), ("space", "A soloist leaving space, a call, an answer and a rest", Soloist.SpaceChances),
-            ("rhythm", "A soloist riffing on the band's rhythm", Soloist.RiffChances), ("chromatic", "A run approaching a note on the beat chromatically", Soloist.ChromaticChances)
+            ("rhythm", "A soloist riffing on the band's rhythm", Soloist.RiffChances)
         ]);
 
     /// <summary>How wide a vibrato is and how fast, narrow to broad in cents, a step's slow or fast, or two steps' (<see cref="Expression.Vibratos" />).</summary>

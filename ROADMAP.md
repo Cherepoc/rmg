@@ -367,10 +367,9 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
   the spacious soloist (`soloStyle.space`, a spacious Blues solo silent 57% to 71% of its time, 4.1 notes a bar to 1.6);
   a restated motif displaced (113 of 369 in the wildest songs); a solo of two choruses building in each (Jazz's second
   starting at 0.56 to 0.32); a soloist riffing on the band's onsets (`soloStyle.rhythm`, Funk's notes on them 38% to
-  45%); the climax's release on its highest chord note (the top note the release 2-8% to 17-23%); a run's chromatic
-  approach into its note on the beat (`soloStyle.chromatic`, 2.9% of Jazz's solo notes). The eleventh round's second
-  part asks `blues-space`, `blues-pickups`, `funk-rhythm` and `folk-melody`; Jazz's chromatic approach measured too
-  faint to ask (0.03). Retired on 22 October: `blues-space` (11-1), `blues-pickups` (6-0) and `surf-tremolo` (6-0)
+  45%); the climax's release on its highest chord note (the top note the release 2-8% to 17-23%). The eleventh round's second
+  part asks `blues-space`, `blues-pickups`, `funk-rhythm` and `folk-melody`; a run's chromatic approach into its note on
+  the beat (2.9% of Jazz's solo notes) measured too faint to ask twice (0.03), cut on the owner's word (23 October 2026). Retired on 22 October: `blues-space` (11-1), `blues-pickups` (6-0) and `surf-tremolo` (6-0)
   accepted and kept as built; `folk-melody` not told apart, the break on the melody a paraphrase (8-33% of its time
   quoting the tune, its notes sounding the tune's hardly oftener than a line of its own's, a third of them over a
   section never sung), rebuilt the same day: a break on the melody plays the tune whole, accented, moved by octaves into

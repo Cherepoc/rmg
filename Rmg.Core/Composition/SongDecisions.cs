@@ -476,8 +476,6 @@ internal sealed record SongDecisions(
                     .TestProbability(Articulations.SoloGhostChance.At(songUnconventionality[Facet.Sound], genre.Chance(GenreChoices.Articulation, "soloGhosts"))),
                 // and how often its phrases come in on a pickup, a pitched soloist's, a drummer's opening on its groove at the bar
                 PickupChance = role == TrackRole.Drum ? 0 : Soloist.PickupChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "pickups")),
-                // and how often it approaches a note chromatically, a pitched soloist's
-                ChromaticChance = role == TrackRole.Drum ? 0 : Soloist.ChromaticChances.At(songUnconventionality[Facet.Melody], genre.Chance(GenreChoices.SoloStyle, "chromatic")),
                 // and how often it displaces a motif it restates, a pitched soloist's
                 DisplaceChance = role == TrackRole.Drum ? 0 : Soloist.DisplaceChances.At(songUnconventionality[Facet.Melody]),
                 // and whether it riffs on the band's rhythm, a pitched soloist's, from a sequence of its own
