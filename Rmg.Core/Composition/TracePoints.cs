@@ -181,7 +181,7 @@ internal static class TracePoints
     /// <summary>A solo's phrase restating the phrase before's motif: its gesture's start and how far later it plays it, 0 where in place (a tuple of two <c>double</c>s).</summary>
     public const string SoloMotif = "Solo motif";
 
-    /// <summary>A solo on the melody's tune, every note of the melody it plays: their starts and their pitches as the soloist plays them (an array of tuples of a <c>double</c> and an <c>int</c>).</summary>
+    /// <summary>A solo on the melody's tune, every note of the melody it plays: their starts, their pitches as the soloist plays them and their held lengths as sung (an array of tuples of a <c>double</c>, an <c>int</c> and a <c>double</c>).</summary>
     public const string SoloTune = "Solo tune";
 
     /// <summary>A surf drop, a guitar's slide down the neck into a louder section: the bar it plays, its start and its end (a tuple of two <c>double</c>s).</summary>

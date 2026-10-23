@@ -2893,7 +2893,7 @@
       "form": { "vcvcvc": 100, "vcvc": 70, "vvvv": [40, 50, 40], "vvvvvv": [20, 25, 20], "vcvcbc": [10, 15, 25] },
       "formChances": { "forms": [100, 95, 70] },
       "ending": { "ringOut": 100, "button": 80, "big": 30 },
-      "solos": { "sections": [20, 30, 40], "trades": 0, "hits": [0, 20, 30], "own": [0, 20, 40] },
+      "solos": { "sections": [20, 30, 40], "trades": 0, "hits": [0, 20, 30], "own": [0, 20, 40], "rolls": 100 },
       "soloStyle": { "pickups": [10, 30, 40], "space": [5, 10, 10], "rhythm": [0, 5, 10], "chromatic": 0 },
       "soloists": { "solo": 100, "rhythm": 100, "chords": 60 },
       "keyChanges": { "lastSection": [0, 5, 10], "sections": [0, 8, 100], "patterns": 0 },

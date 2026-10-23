@@ -22,7 +22,8 @@ public enum SoloMode
 /// <param name="Step">How many scale steps from the first the others play, playing together.</param>
 /// <param name="IsOwn">Whether its line is its own, over the chords, rather than on the melody's.</param>
 /// <param name="HitEvery">How many bars apart the band strikes its hits under a drum solo, its melody resting; 0 for none, the band resting.</param>
-public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode, int Step, bool IsOwn, int HitEvery)
+/// <param name="Rolls">Whether a solo on the melody rolls 8ths of its chords round the tune's notes, as a bluegrass picker's break does, rather than playing them as sung.</param>
+public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode, int Step, bool IsOwn, int HitEvery, bool Rolls)
 {
     /// <summary>Whether the drums solo alone, the band resting or striking its hits.</summary>
     public bool IsDrumSolo => Soloists is [TrackRole.Drum];
@@ -99,6 +100,16 @@ internal static class Solos
     ///     the songs' never; a genre's where it names it.
     /// </summary>
     public static ByConvention Twin { get; } = new(0, 0, 0);
+
+    /// <summary>
+    ///     The chance a solo on the melody rolls 8ths of its chords round the tune's notes, by the melody facet: a genre's
+    ///     alone, a bluegrass break's, the songs' playing the tune as it was sung, its rests left to the band.
+    /// </summary>
+    public static ByConvention Rolls { get; } = new(0, 0, 0);
+
+    /// <summary>A solo on the melody rolling round the tune now and then, from a sequence of its own; a solo of its own or none as it is.</summary>
+    public static SoloPlan? WithRolls(IGenerationContext context, SoloPlan? solo, double melody, Genre genre) =>
+        context.TestProbability(Rolls.At(melody, genre.Chance(GenreChoices.Solos, "rolls"))) && solo is { IsDrumSolo: false, IsOwn: false } ? solo with { Rolls = true } : solo;
 
     /// <summary>The parts that join a soloist as its twin, the first the song has that does not solo already.</summary>
     public static ImmutableArray<TrackRole> TwinParts { get; } = [TrackRole.Riff, TrackRole.Rhythm, TrackRole.Chords];
@@ -224,7 +235,7 @@ internal static class Solos
         if (place == 0 || !parts.Contains(TrackRole.Solo) || !parts.Contains(TrackRole.Melody) || solos[place]?.IsDrumSolo == true)
             return [..solos];
 
-        return [..solos.Select((x, i) => i == place ? new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, own < OwnChance.At(melody[i], genre.Chance(GenreChoices.Solos, "own")), 0) : x)];
+        return [..solos.Select((x, i) => i == place ? new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, own < OwnChance.At(melody[i], genre.Chance(GenreChoices.Solos, "own")), 0, false) : x)];
     }
 
     /// <summary>An appearance's solo, drawn whatever it turns out to be, so that the draws stay as they are; none for no solo.</summary>
@@ -257,9 +268,9 @@ internal static class Solos
             return null;
         // the drums solo where they alone are drawn, and leave the solo to the others where others are
         if (soloists is [TrackRole.Drum])
-            return new SoloPlan([TrackRole.Drum], SoloMode.Trading, 0, false, 0);
+            return new SoloPlan([TrackRole.Drum], SoloMode.Trading, 0, false, 0, false);
         soloists.Remove(TrackRole.Drum);
-        return parts.Contains(TrackRole.Melody) ? new SoloPlan([..soloists], mode, step, isOwn, 0) : null;
+        return parts.Contains(TrackRole.Melody) ? new SoloPlan([..soloists], mode, step, isOwn, 0, false) : null;
     }
 
     /// <summary>
@@ -314,11 +325,12 @@ internal static class Solos
             bool Sings(SectionSpan x, int j) => x.SectionId == span.SectionId && !solos.ContainsKey(j) && singer.EventTimeline.Any(n => n.IsWithin(x.Start, x.End));
             var sungAt = map.Sections.Take(index).Select((x, j) => (x, j)).Where(x => Sings(x.x, x.j)).Select(x => x.x).FirstOrDefault();
             int Key(double position) => song.CommonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.KeyOffset);
-            (double Position, int Pitch)[] tune = sungAt is null ? [] :
+            (double Position, int Pitch, double Held)[] tune = sungAt is null ? [] :
             [
                 ..singer.EventTimeline.Where(n => n.IsWithin(sungAt.Start, sungAt.End))
                     .Select(n => (Position: n.Position - sungAt.Start + span.Start,
-                        Pitch: LinePlacement.PitchOf(Realizer.ChordAt(n.Value, n.Position, singer, definitions[trackOf[TrackRole.Melody]], song.CommonStateTimelineMap), n.Value) + Key(span.Start) - Key(sungAt.Start)))
+                        Pitch: LinePlacement.PitchOf(Realizer.ChordAt(n.Value, n.Position, singer, definitions[trackOf[TrackRole.Melody]], song.CommonStateTimelineMap), n.Value) + Key(span.Start) - Key(sungAt.Start),
+                        Held: n.Value.GetStateValue(StateKinds.HeldDuration)))
                     .Where(x => x.Position < span.End - 1e-9)
             ];
             var isOwn = solo.IsOwn || tune.Length == 0;
@@ -335,7 +347,7 @@ internal static class Solos
             {
                 using var _ = place == 0 ? null : StateTrace.Pause();
                 return SoloLines.Generate(place == 0 ? context : streams(index, place), voicings(index, place), motifs(index, place), pickups(index, place), span, turn, span.Start, soloists[soloist], isOwn, isOwn,
-                    melody, tune, chordsHeld, ChordAt, groove, song.TrackTimelineMap[trackOf[soloist]], (PitchInstrumentTrack)definitions[trackOf[soloist]], song.CommonStateTimelineMap);
+                    melody, tune, solo.Rolls, chordsHeld, ChordAt, groove, song.TrackTimelineMap[trackOf[soloist]], (PitchInstrumentTrack)definitions[trackOf[soloist]], song.CommonStateTimelineMap);
             }
             var (line, segments) = LineOf(solo.Soloists[0], 0);
             StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(isOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, isOwn, segments));

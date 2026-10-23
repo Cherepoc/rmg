@@ -45,7 +45,7 @@ public sealed class SoloTest
     public async Task APitchedSolo_TradesOnlyAwayFromThePlainEnd_AndTheSongsNeverTwin()
     {
         var context = new GenerationContext(3);
-        var solo = new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, true, 0);
+        var solo = new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, true, 0, false);
         TrackRole[] parts = [..Band, TrackRole.Solo, TrackRole.Riff];
         await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.WithTrade(context, solo, 0, parts, Genre.None) == solo)).IsTrue();
         await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.WithTwin(context, solo, 0, parts, Genre.None) == solo && Solos.WithTwin(context, solo, 1, parts, Genre.None) == solo)).IsTrue();
@@ -493,13 +493,13 @@ public sealed class SoloTest
         var (sungNotes, inTune) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("bluegrass")))))
         {
-            var tunes = song.Trace.Where(x => x.Point == TracePoints.SoloTune).Select(x => ((double Position, int Pitch)[])x.Value!).ToArray();
+            var tunes = song.Trace.Where(x => x.Point == TracePoints.SoloTune).Select(x => ((double Position, int Pitch, double Held)[])x.Value!).ToArray();
             foreach (var (index, _, _) in Plans(song).Where(x => !x.IsOwn && song.Solos[x.Index].Soloists.Length == 1))
             {
                 var span = song.Map.Sections[index];
                 var tune = tunes.Single(x => x.Length > 0 && x[0].Position >= span.Start - 1e-9 && x[0].Position < span.End - 1e-9);
                 var solo = song.Song.Notes![song.Track(song.Solos[index].Soloists[0])].Where(n => n.IsWithin(span.Start, span.End)).ToArray();
-                foreach (var (position, pitch) in tune)
+                foreach (var (position, pitch, _) in tune)
                     await Assert.That(solo.Any(n => Math.Abs(n.Position - position) < 1e-6 && n.Value.Pitches.Any(p => (p - pitch).Mod(12) == 0))).IsTrue().Because($"seed {song.Seed} at {position}");
                 foreach (var note in solo)
                     (tune.Any(x => Math.Abs(x.Position - note.Position) < 1e-6) ? tuneVelocities : fillVelocities).Add(Rmg.Core.Rendering.Render.ToMidiVelocity(note.Value.Velocity));
@@ -523,6 +523,43 @@ public sealed class SoloTest
         await Assert.That(tuneVelocities.Count).IsGreaterThan(0);
         await Assert.That(fillVelocities.Count).IsGreaterThan(0);
         await Assert.That(tuneVelocities.Average()).IsGreaterThan(fillVelocities.Average());
+    }
+
+    /// <summary>
+    ///     A solo on the melody that does not roll, every genre's but a bluegrass break's, plays the tune as it was sung: a
+    ///     note at every one of the tune's places and none between them, its rests left to the band; Bluegrass's breaks roll.
+    /// </summary>
+    [Test]
+    public async Task ASoloOnTheMelody_PlaysTheTuneAsSung_ButABluegrassBreakRolls()
+    {
+        int Solos(string genre, bool rolls)
+        {
+            var solos = 0;
+            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+            {
+                var tunes = song.Trace.Where(x => x.Point == TracePoints.SoloTune).Select(x => ((double Position, int Pitch, double Held)[])x.Value!).ToArray();
+                foreach (var (index, _, _) in Plans(song).Where(x => !x.IsOwn && song.Solos[x.Index].Soloists.Length == 1))
+                {
+                    var span = song.Map.Sections[index];
+                    var tune = tunes.Single(x => x.Length > 0 && x[0].Position >= span.Start - 1e-9 && x[0].Position < span.End - 1e-9);
+                    var solo = song.Song.Notes![song.Track(song.Solos[index].Soloists[0])].Where(n => n.IsWithin(span.Start, span.End)).ToArray();
+                    if (song.Solos[index].Rolls != rolls)
+                        throw new InvalidOperationException($"{genre} seed {song.Seed}, section {index}: a break rolling {song.Solos[index].Rolls}");
+                    solos++;
+                    if (!rolls)
+                        foreach (var note in solo)
+                            if (!tune.Any(x => Math.Abs(x.Position - note.Position) < 1e-6))
+                                throw new InvalidOperationException($"{genre} seed {song.Seed} at {note.Position}: a note between the tune's");
+                }
+            }
+
+            return solos;
+        }
+
+        var (rock, bluegrass) = (Solos("rock", false), Solos("bluegrass", true));
+        Console.WriteLine($"  solos on the melody: Rock's {rock} as sung, Bluegrass's {bluegrass} rolling");
+        await Assert.That(rock).IsGreaterThan(0);
+        await Assert.That(bluegrass).IsGreaterThan(0);
     }
 
     [Test]

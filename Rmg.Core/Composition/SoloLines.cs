@@ -47,7 +47,7 @@ public enum SoloGesture
 ///     more intense, a held note or a pause the less, from the soloist's vocabulary (<see cref="Soloist" />), a run going
 ///     on over the bar lines in the phrase. A new run sets out the way to where the gesture ends, without aiming to land
 ///     there: a note of the chord there, higher the more intense. A solo on the melody plays the tune's every note instead,
-///     accented, and a steady fill of 8ths between them. Every note is a scale note in the soloist's range, as its chord there
+///     accented, as it was sung, or with a steady fill of 8ths between them where it rolls. Every note is a scale note in the soloist's range, as its chord there
 ///     has it, kept as its scale step over that chord, so that a run crossing a change of chord stays on the scale.
 /// </summary>
 internal static class SoloLines
@@ -236,7 +236,8 @@ internal static class SoloLines
 
     /// <summary>A solo's line, and every segment's intensity and gesture, by its start.</summary>
     /// <param name="melody">The melody's notes in the solo, which a solo on the melody aims at and quotes, and every note takes its state from.</param>
-    /// <param name="tune">The tune a solo on the melody plays, as an appearance before sang it, moved to the solo: its notes' starts and pitches; none for a solo of its own.</param>
+    /// <param name="tune">The tune a solo on the melody plays, as an appearance before sang it, moved to the solo: its notes' starts, pitches and held lengths; none for a solo of its own.</param>
+    /// <param name="rolls">Whether a solo on the melody rolls 8ths of its chords round the tune, a picker's break, rather than playing it as sung.</param>
     /// <param name="band">The chords' notes in the solo, the band's chord a stacked note stacks; the melody's where they rest.</param>
     /// <param name="chordAt">The chords part's state at a place, as it strikes its chord there (<see cref="Realizer.ChordStateAt" />), the chord's own notes; none where it strikes none.</param>
     /// <param name="groove">Where the band strikes in the solo, the rhythm part's onsets or, where it has none, the chords', which a riff strikes on.</param>
@@ -260,7 +261,8 @@ internal static class SoloLines
         bool isOwn,
         bool climbs,
         IReadOnlyList<TimelineItem<StateMap>> melody,
-        IReadOnlyList<(double Position, int Pitch)> tune,
+        IReadOnlyList<(double Position, int Pitch, double Held)> tune,
+        bool rolls,
         IReadOnlyList<TimelineItem<StateMap>> band,
         Func<double, StateMap?> chordAt,
         IReadOnlyList<double> groove,
@@ -493,22 +495,23 @@ internal static class SoloLines
 
         // a solo on the melody playing the tune whole, every note of it accented and moved by the octaves that bring the
         // tune's middle nearest the part's, so that it keeps its shape, a note that would leave the part's range folded back
-        // into it; and between its notes, and before its first, a fill on the 8ths of the bar, as a picker rolls through a
-        // break, each of the chord's notes there nearest the way from the tune's note to its next, never the one before
-        // again, and the last a scale step beside the next, leading into it
+        // into it; each held as it was sung, its rests left to the band, or where it rolls, between its notes and before its
+        // first, a fill on the 8ths of the bar, as a picker rolls through a break, each of the chord's notes there nearest the
+        // way from the tune's note to its next, never the one before again, and the last a scale step beside the next,
+        // leading into it
         if (!isOwn && tune.Count > 0)
         {
             Segment? SegmentAt(double position) => plan.LastOrDefault(x => x.Start <= position + 1e-9);
-            void Play(double position, int pitch, bool accented)
+            void Play(double position, int pitch, bool accented, double held = 0)
             {
                 placing = SegmentAt(position)?.Phrase ?? 0;
-                Add(position, pitch, SegmentAt(position)?.Intensity ?? 0.5, accented: accented, octave: accented, lift: accented ? 0 : -FillSofter);
+                Add(position, pitch, SegmentAt(position)?.Intensity ?? 0.5, held, accented: accented, octave: accented, lift: accented ? 0 : -FillSofter);
             }
 
             var shift = 12 * (int)Math.Round((middle - (tune.Min(x => x.Pitch) + tune.Max(x => x.Pitch)) / 2.0) / 12);
             int Moved(int pitch) => Realizer.IntoRange(pitch + shift, low, high);
 
-            (double Position, int Pitch)[] notes = [..tune.Select(x => (x.Position, Moved(x.Pitch)))];
+            (double Position, int Pitch, double Held)[] notes = [..tune.Select(x => (x.Position, Moved(x.Pitch), x.Held))];
             void Fill(double from, int pitch, double to, int? next)
             {
                 var previous = pitch;
@@ -544,14 +547,16 @@ internal static class SoloLines
                 }
             }
 
-            Fill(span.Start - FillGap, notes[0].Pitch, notes[0].Position, notes[0].Pitch);
+            if (rolls)
+                Fill(span.Start - FillGap, notes[0].Pitch, notes[0].Position, notes[0].Pitch);
             for (var i = 0; i < notes.Length; i++)
             {
-                Play(notes[i].Position, notes[i].Pitch, true);
+                Play(notes[i].Position, notes[i].Pitch, true, rolls ? 0 : notes[i].Held);
                 // a note off the scale here, a blue note, altered as it was sung
                 var chord = Chord(MelodyAt(notes[i].Position).Value, notes[i].Position);
                 planned[^1] = planned[^1] with { Altered = chord.GetPitch(LinePlacement.GetScaleStep(chord, notes[i].Pitch)) != notes[i].Pitch };
-                Fill(notes[i].Position, notes[i].Pitch, i + 1 < notes.Length ? notes[i + 1].Position : span.End, i + 1 < notes.Length ? notes[i + 1].Pitch : null);
+                if (rolls)
+                    Fill(notes[i].Position, notes[i].Pitch, i + 1 < notes.Length ? notes[i + 1].Position : span.End, i + 1 < notes.Length ? notes[i + 1].Pitch : null);
             }
 
             StateTrace.RecordSection(TracePoints.SoloTune, SectionGenerator.SectionTrace, span.SectionId, $"{notes.Length} notes", notes);

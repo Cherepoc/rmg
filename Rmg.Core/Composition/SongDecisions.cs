@@ -404,6 +404,9 @@ internal sealed record SongDecisions(
         drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTrade(SongGenerator.CreateStream(seed, SongStream.SoloTrades, AppearanceKey(played, index)), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
         // and played by two parts together a third apart now and then, each from a sequence of its own
+        // and a solo on the melody rolling round the tune now and then, each from a sequence of its own
+        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithRolls(SongGenerator.CreateStream(seed, SongStream.SoloRolls, AppearanceKey(played, index)), x,
+            generateSection(played[index]).Facets[Facet.Melody], genre))];
         drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTwin(SongGenerator.CreateStream(seed, SongStream.SoloTwins, AppearanceKey(played, index)), x,
             generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
         // and a drum solo over the band's hits now and then, from a sequence of its own, drawn all the same where the song

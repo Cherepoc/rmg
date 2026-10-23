@@ -181,7 +181,7 @@ public static class GenreChoices
     public static GenreChoice Solos { get; } = Chances("solos", "Solos",
         [("sections", "A section soloed", Composition.Solos.Chance), ("trades", "A solo trading with the drums", Composition.Solos.Trade),
             ("twins", "A solo harmonised by a second part", Composition.Solos.Twin), ("hits", "A drum solo over the band's hits", Composition.Solos.Hits),
-            ("own", "A solo of its own, not on the melody", Composition.Solos.OwnChance)]);
+            ("own", "A solo of its own, not on the melody", Composition.Solos.OwnChance), ("rolls", "A solo on the melody rolling round the tune", Composition.Solos.Rolls)]);
 
     /// <summary>Who solos (<see cref="Composition.Solos.Soloists" />).</summary>
     public static GenreChoice Soloists { get; } = Pool("soloists", "Soloists",

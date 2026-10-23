@@ -134,3 +134,10 @@ rejected while fixing: the place, what was decided, why.
   darkness, 91/42/13%; the reversal was the report's. Not raised again.
 - Ambient's narrow tempo range (#333 of 22 October 2026), 69-76 bpm, is its style's; its density by intensity is the
   foundations proposal #76's (ROADMAP). Not raised again.
+- The drum solo's double kick and bossa feet (`drumSoloFeet`, #19 of 22 October 2026) kept: each is its style's, a metal
+  drummer's 16ths under a solo and a bossa drummer's kick, rare only as their presets seldom solo the drums (Metal's and
+  Thrash's drums near the wild end alone), which is their style too; data alone, and too rare to be asked. Not a cut
+  candidate again.
+- The glide's share (`glideRate`, #29 of 22 October 2026, #35 of 16 October) kept beside the glide's chance: the chance
+  decides whether a part slides, the share how many of its changes, an 808's few (Trap's 20, Hip-hop's 30) against a
+  lead's half; without it a gliding Trap bass would slide into half its notes. Not a cut candidate again.
