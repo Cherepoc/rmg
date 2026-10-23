@@ -123,3 +123,14 @@ rejected while fixing: the place, what was decided, why.
   looping section's and a verse over the intro's riff's draws are keyed by `GeneratedSection.LinesFrom` where they
   decide the copied part (the key, the pedal, the polymeter, the figures; package 08, 6c4964d), the one copy the
   generator makes; a lookup by role waits for a copy of another kind.
+- Fills given the song's drawn stops (#130 of 22 October 2026) land a drum heard only there elsewhere for nothing,
+  harmless; left as it is. Not raised again.
+- The lifts walked by the sections, not the plays (#144 of 22 October 2026): a lift is between two sections' energies,
+  which an intro's window (its section's first bars) and the ending (its last's) never raise. Not raised again.
+- The break on the tune quoting a silent drop's bar or a surf drop's slide (#117 of 22 October 2026): a silent drop's
+  bar is rested by the form's edits before the stages run, so the quote cannot hold it; a surf drop is drawn after the
+  solos, in a song of instrumental breaks, its bar the melody's. Not raised again.
+- Funk's major chords by darkness (#321 of 22 October 2026): counted with their sevenths (645eddb) they fall with
+  darkness, 91/42/13%; the reversal was the report's. Not raised again.
+- Ambient's narrow tempo range (#333 of 22 October 2026), 69-76 bpm, is its style's; its density by intensity is the
+  foundations proposal #76's (ROADMAP). Not raised again.
