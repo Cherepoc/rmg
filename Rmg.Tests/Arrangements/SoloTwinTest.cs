@@ -58,7 +58,7 @@ public sealed class SoloTwinTest
     {
         Genre Thrash(double twins) => GenrePresets.With("thrash", GenreChoices.Solos, ("sections", 1), ("twins", twins), ("trades", 0));
         var duels = 0;
-        foreach (var (without, with) in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => (TestCorpus.Get(seed, new SongOverrides(Genre: Thrash(0))), TestCorpus.Get(seed, new SongOverrides(Genre: Thrash(1))))))
+        foreach (var (without, with) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => (TestCorpus.Get(seed, new SongOverrides(Genre: Thrash(0))), TestCorpus.Get(seed, new SongOverrides(Genre: Thrash(1))))))
         foreach (var (index, solo) in without.Solos.Where(x => !x.Value.IsDrumSolo && x.Value.Soloists.Length > 1))
         {
             duels++;
@@ -69,7 +69,9 @@ public sealed class SoloTwinTest
             await Assert.That(twinned.Step).IsEqualTo(solo.Step).Because(because);
         }
 
-        await Assert.That(duels).IsGreaterThan(8);
+        // (52 to 94 at offsets 0, a million and 958 million)
+        Console.WriteLine($"{duels} solos of several soloists in 64 Thrash songs");
+        await Assert.That(duels).IsGreaterThan(20);
     }
 
     /// <summary>How many of the presets' pitched solos are played by several parts, and how many of those together.</summary>

@@ -9,7 +9,7 @@ set -u
 repo=$(realpath "$1"); R=$(realpath "$2"); mode=${3:-}
 S=$(dirname "$(realpath "$0")")
 export PATH=$HOME/.dotnet:$PATH
-cap() { systemd-run --user --scope --quiet -p MemoryMax=8G -p MemorySwapMax=0 -p AllowedCPUs=0-$(( $(nproc) - 3 )) -- "$@"; }
+cap() { systemd-run --user --scope --quiet -p MemoryMax=8G -p MemorySwapMax=0 -p AllowedCPUs=0-$(( $(nproc) / 2 - 1 )) -- "$@"; }
 mkdir -p "$R/run"
 cd "$repo"
 cap dotnet build Rmg.slnx -c Release --nologo -v quiet > "$R/run/build.txt" 2>&1 || { echo "build failed: $R/run/build.txt"; exit 1; }

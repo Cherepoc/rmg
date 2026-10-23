@@ -68,7 +68,7 @@ public sealed class DrumOrnamentsTest
                     drags++;
 
                 // rendered: its strokes before it on its sound, softer
-                var at = swing.Apply(note.Position);
+                var at = GrooveTest.Swung(swing, note.Value, note.Position);
                 var played = drums.Where(x => x.Value.Offset == note.Value.Pitches[0] && x.Position > at - 0.5 && x.Position < at + 1e-6).ToArray();
                 var main = played.Last(x => Math.Abs(x.Position - at) < 1e-6);
                 var before = played.Where(x => x.Position < at - 1e-6).TakeLast(strokes).ToArray();
@@ -77,7 +77,7 @@ public sealed class DrumOrnamentsTest
                 // each a step apart, the last a step before the note
                 var step = note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep);
                 for (var i = 0; i < strokes; i++)
-                    await Assert.That(before[i].Position).IsEqualTo(swing.Apply(note.Position - (strokes - i) * step)).Within(1e-6).Because(because);
+                    await Assert.That(before[i].Position).IsEqualTo(GrooveTest.Swung(swing, note.Value, note.Position - (strokes - i) * step)).Within(1e-6).Because(because);
             }
         }
 

@@ -33,16 +33,16 @@ public sealed class MediantTest
     }
 
     /// <summary>
-    ///     A rule, and a calibration: the songs' iii and vi turned major now and then at the middle (4% seen, where applied
-    ///     dominants and borrowed chords come first and a minor home's are major already), Orchestral's 12%, the plainest
-    ///     songs' never.
+    ///     A rule, and a calibration: the songs' iii and vi turned major now and then at the middle (4.0-5.1% of 128 songs
+    ///     at offsets 0, a million and 958 million, where applied dominants and borrowed chords come first and a minor
+    ///     home's are major already), Orchestral's 13-15%, the plainest songs' never.
     /// </summary>
     [Test]
     public async Task AMediant_IsIiiOrViTurnedMajor_NowAndThenInMiddlingSongs_NeverInThePlainest()
     {
         foreach (var (name, songs) in new[]
                  {
-                     ("middling songs", TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0.5)))),
+                     ("middling songs", TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0.5)))),
                      ("orchestral", TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("orchestral"))))),
                      ("the plainest songs", TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
                  })

@@ -238,8 +238,8 @@ internal static class LineDoubling
                 var delay = bars * span.Meter.BarDuration;
                 if (block && Traces(TracePoints.BlockHarmony, targetTrack, index))
                     StateTrace.RecordSection(TracePoints.BlockHarmony, targetTrack, span.SectionId, $"{step}", index);
-                // in every pattern the doubled part plays, its own kept where a texture rests the doubled part
-                var patterns = span.Patterns.Select(p => (p.Start, p.End))
+                // in every phrase the doubled part plays, its own kept where a texture rests the doubled part, phrase by phrase
+                var phrases = span.Phrases.Select(p => (p.Start, p.End))
                     .Where(p => events[sourceTrack].EventTimeline.Any(x => x.IsWithin(p.Start, p.End)))
                     .ToArray();
                 // but from the doubling part's walk into the next section on, which it plays as its own, as LineFills placed it
@@ -248,7 +248,7 @@ internal static class LineDoubling
                 // nor its first note where its walk from the section before leads into it, the note the walk was aimed at
                 var walkedInto = events[targetTrack].EventTimeline.Where(x => x.Position < span.Start - 1e-9).Select(x => x.Value.GetStateValue(CompositionStateKinds.Walk)).LastOrDefault() > 0;
                 bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && position < walk - 1e-9 && !(walkedInto && Math.Abs(position - from) < 1e-9)
-                                                 && patterns.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
+                                                 && phrases.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
                 // in unison the source's alteration as it is, a chromatic riff's passing note too; a harmony a step away on the
                 // scale, off a third its chord leaves out, but a twin's, which keeps its step all the way
                 var doubled = events[sourceTrack].EventTimeline

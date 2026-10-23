@@ -1,11 +1,19 @@
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
+using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Grooves;
 
 public sealed class GrooveTest
 {
+    /// <summary>Where a place of a note sounds once swung: as the swing has it, or a run's even note's evenly between its run's ends as swung, as a hat roll's and a ratchet's are.</summary>
+    internal static double Swung(Swing swing, RealizedNote note, double at)
+    {
+        var (from, to) = (note.State.GetStateValue(CompositionStateKinds.EvenFrom), note.State.GetStateValue(CompositionStateKinds.EvenTo));
+        return to > from ? swing.Apply(from) + (at - from) / (to - from) * (swing.Apply(to) - swing.Apply(from)) : swing.Apply(at);
+    }
+
     [Test]
     public async Task ASwing_PlaysAPairsMiddleLate_AndLeavesItsEndsWhereTheyAre()
     {
@@ -52,10 +60,11 @@ public sealed class GrooveTest
             var drawn = (Swing)song.Trace.Single(x => x.Point == TracePoints.Swing).Value!;
             await Assert.That((drawn.Delay, drawn.Period)).IsEqualTo((swing.Delay, swing.Period));
 
-            // a note's own place, and its ornament's every step, after it on a line and before it on a drum
+            // a note's own place, and its ornament's every step, after it on a line and before it on a drum, a run's even notes
+            // evenly between its ends
             var generated = song.Song.Notes!.SelectMany(t => t.Value.Select(x => (Note: x, Direction: song.IsDrum(t.Key) ? -1 : 1))).SelectMany(x =>
                     Enumerable.Range(0, x.Note.Value.State.GetStateValue(CompositionStateKinds.Ornament) is { IsDefault: false } ornament ? ornament.Length + 1 : 1)
-                        .Select(i => Math.Round(swing.Apply(x.Note.Position + x.Direction * i * x.Note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep)), 6)))
+                        .Select(i => Math.Round(Swung(swing, x.Note.Value, x.Note.Position + x.Direction * i * x.Note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep)), 6)))
                 .ToHashSet();
             var rendered = song.Rendered.Tracks.SelectMany(x => x.NoteTimeline).Select(x => Math.Round(x.Position, 6));
             await Assert.That(rendered.All(generated.Contains)).IsTrue();

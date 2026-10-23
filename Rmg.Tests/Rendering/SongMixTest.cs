@@ -11,7 +11,8 @@ public sealed class SongMixTest
 
     private static SongMix Group(string name, DrumGroupMix group) => SongMix.None with { DrumGroups = ImmutableDictionary<string, DrumGroupMix>.Empty.Add(name, group) };
 
-    private static CorpusSong WithDrums() => TestCorpus.Range(8).First(x => x.PlaysDrums);
+    // a song whose kit has a kick, as a kit of brushes or hand drums may not
+    private static CorpusSong WithKick() => TestCorpus.Range(16).First(x => x.Drums.Any(n => DrumDefinitions.Kick.Sounds.Any(s => s.Code == n.Value.Offset)));
 
     [Test]
     public async Task APart_PlaysItsInstrument_AtItsVolumeAndPan_UnderTheSongs()
@@ -27,7 +28,7 @@ public sealed class SongMixTest
     [Test]
     public async Task ADrumGroup_PlaysAtItsVolume()
     {
-        var song = WithDrums().Song;
+        var song = WithKick().Song;
         double[] Kicks(RenderedSong rendered) =>
         [
             ..rendered.Tracks.Single(x => x.IsPercussionInstrument).NoteTimeline

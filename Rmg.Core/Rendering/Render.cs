@@ -125,7 +125,7 @@ public static class Render
                 {
                     var velocity = GetMidiVelocity(note.Value) * (group?.Volume ?? 1);
                     // swung, its end as its start, so that it still reaches the note it reached; a run's even notes, a hat
-                    // roll's or a ratchet's, evenly between its ends as swung
+                    // roll's or a ratchet's, evenly between its ends as swung, its ornament with it
                     var (evenFrom, evenTo) = (note.Value.State.GetStateValue(CompositionStateKinds.EvenFrom), note.Value.State.GetStateValue(CompositionStateKinds.EvenTo));
                     double Swung(double at) => evenTo > evenFrom
                         ? swing.Apply(evenFrom) + (at - evenFrom) / (evenTo - evenFrom) * (swing.Apply(evenTo) - swing.Apply(evenFrom))
@@ -154,14 +154,14 @@ public static class Render
                     {
                         var stroke = note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep);
                         return ornament.Select((x, i) => new RenderedNote(note.Value.Pitches[0] + x, velocity * GraceStrokeVelocity, stroke, shift)
-                                .ToTimelineItem(swing.Apply(note.Position - (ornament.Length - i) * stroke)))
+                                .ToTimelineItem(Swung(note.Position - (ornament.Length - i) * stroke)))
                             .Append(new RenderedNote(note.Value.Pitches[0], velocity, duration, shift).ToTimelineItem(position));
                     }
 
                     if (!ornament.IsDefaultOrEmpty)
                     {
                         var step = note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep);
-                        double At(int i) => swing.Apply(note.Position + i * step);
+                        double At(int i) => Swung(note.Position + i * step);
                         var start = At(ornament.Length);
                         // on every pitch of the note, a line doubled in octaves ornamented in both
                         return note.Value.Pitches.SelectMany(pitch =>
