@@ -106,7 +106,7 @@ public sealed class GenrePresetsTest
         await Assert.That(made.Where(x => x.Base == 0 && x.TimeFeels > 0 && !NamesAtThePlainEnd(x.Preset)).Select(x => $"{x.Preset.Name} {x.Seed}")).IsEmpty();
     }
 
-    /// <summary>Every setup a preset allows at an end is one its drum pieces kept there can make: kit and percussion a drum of the percussion group among them, percussion a drum outside the kit's family.</summary>
+    /// <summary>Every setup a preset allows at an end is one its drum pieces kept there can make: kit and percussion a drum of the percussion group among them, percussion a drum outside the kit's family; and the percussion's own drums kept only where a setup with percussion is allowed.</summary>
     [Test]
     public async Task APresetsDrumSetup_IsOneItsPiecesCanMake()
     {
@@ -125,6 +125,11 @@ public sealed class GenrePresetsTest
                     wrong.Add($"{preset.Id} kitAndPercussion at {end}");
                 if (setups.TryGetValue("percussion", out var alone) && alone.At(end) > 0 && !kept.Overlaps(outsideKit))
                     wrong.Add($"{preset.Id} percussion at {end}");
+                // and the other way: a drum of the percussion's own kept only where a setup with percussion may draw it, the
+                // kit alone never drawing one
+                var withPercussion = setups.Where(x => x.Key != "kit").Any(x => x.Value.At(end) > 0);
+                foreach (var piece in kept.Where(x => percussionGroup.Contains(x) && outsideKit.Contains(x)).Where(_ => !withPercussion))
+                    wrong.Add($"{preset.Id} {piece} at {end} with the kit alone");
             }
         }
 

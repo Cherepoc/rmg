@@ -150,7 +150,7 @@
       },
       "arpeggio": { "none": 100, "up": [0, 3, 10], "upTwoOctaves": [0, 1, 10] },
       "planing": { "sections": [0, 10, 30], "modes": 50 },
-      "harmonyDevices": { "reharmonised": [0, 40, 40], "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
+      "harmonyDevices": { "reharmonised": [0, 40, 40], "innerLine": 0, "pedal": [0, 6, 15] },
       "pins": { "time": [80, 80, 50] },
       "stopTime": { "sections": [5, 10, 15], "returns": 50 },
       "ensembleHits": { "sections": [10, 15, 20] },
@@ -341,7 +341,7 @@
       "passingChords": {},
       "turnaround": {},
       "keyChanges": {},
-      "rests": { "drum": 60, "melody": 85, "pad": 50 },
+      "rests": { "drum": 60, "melody": 85 },
       "tempo": { "from": [120, 124, 115], "to": [142, 145, 160] },
       "meter": { "4/4": [100, 100, 85], "7/8": [0, 0, 10], "5/4": [0, 0, 8] },
       "feel": { "straight": [100, 100, 70], "grouped3": [0, 0, 20], "tuplets3": [0, 0, 15] },
@@ -393,7 +393,7 @@
   {
     "id": "synthwave",
     "name": "Synthwave",
-    "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
+    "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 145, a lead's echo and a pad's chorus.",
     "choices": {
       "tempoBand": { "slow": 45, "middle": 10, "fast": 45 },
       "length": { "from": [200, 210, 180], "to": [330, 360, 420] },
@@ -476,7 +476,7 @@
   {
     "id": "hipHop",
     "name": "Hip-hop",
-    "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
+    "description": "Slow, lightly swung 16ths on a TR-808 or a sampled kit, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
       "roleLength": { "chorus": 25 },
       "form": { "vcvc": 100, "vcvcbc": [30, 30, 40], "cvcvbc": [10, 15, 20], "vcvcvc": [20, 30, 30] },
@@ -573,7 +573,7 @@
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },
       "ghosts": { "sections": [15, 30, 40] },
       "cadenceRaise": { "sections": 0 },
-      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 10, "tom": 50, "cymbal": 60, "conga": [10, 20, 30] },
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 10, "tom": 50, "cymbal": 60, "conga": [0, 20, 30] },
       "louderForms": { "guitars": 0 },
       "drumStrokes": { "crossStick": 85 },
       "rootMotion": { "fifthDown": 70, "fourthDown": 75 },
@@ -645,7 +645,7 @@
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },
       "ghosts": { "sections": [15, 30, 40] },
       "cadenceRaise": { "sections": 0 },
-      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 10, "tom": 50, "cymbal": 60, "conga": [10, 20, 30] },
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 10, "tom": 50, "cymbal": 60, "conga": [0, 20, 30] },
       "louderForms": { "guitars": 0 },
       "drumStrokes": { "crossStick": 85 },
       "rootMotion": { "fifthDown": 70, "fourthDown": 75 },
@@ -690,7 +690,7 @@
   {
     "id": "latin",
     "name": "Latin",
-    "description": "The kit and percussion, congas, bongos, claves, cowbell, timbales and a guiro, a time keeper in the tresillo's 3+3+2, the bass anticipating the beat, nylon guitar, piano and trumpet, minor and Dorian, fast.",
+    "description": "Congas, bongos, claves, cowbell, timbales and a guiro, the kit beside them now and then, a time keeper in the tresillo's 3+3+2, the bass anticipating the beat, nylon guitar, piano and trumpet, minor and Dorian, fast.",
     "choices": {
       "length": { "from": [240, 240, 200], "to": [420, 420, 540] },
       "sung": { "halves": [100, 80, 60], "eighths": [80, 50, 30] },
@@ -703,7 +703,8 @@
       "pins": { "time": [100, 100, 70], "ground": [80, 80, 50], "bass": [80, 80, 50] },
       "push": { "sections": [40, 50, 50] },
       "tempo": { "from": [90, 90, 80], "to": [118, 118, 135] },
-      "meter": { "4/4": [100, 100, 60], "6/8": [20, 25, 50], "7/8": [0, 0, 10] },
+      "meter": { "4/4": [100, 100, 60], "6/8": [0, 15, 40], "7/8": [0, 0, 10] },
+      "sectionChanges": { "tempo": [0, 0, 30], "modulation": [0, 5, 50], "meter": [0, 0, 15], "shortBar": 0, "eased": 50 },
       "scale": { "naturalMinor": [100, 100, 60], "dorian": [60, 80, 50], "major": [55, 55, 40], "harmonicMinor": [25, 30, 40], "phrygianDominant": [5, 12, 40] },
       "chordShape": { "seventh": [100, 100, 70], "triad": [90, 80, 50], "ninth": [40, 40, 50], "sixth": [25, 25, 20], "sevenFlatNine": [0, 0, 20] },
       "instrument": {
@@ -734,7 +735,7 @@
       "feelChances": { "swing": [0, 0, 10], "halfTime": [0, 8, 8], "doubleTime": [0, 2, 2] },
       "arpeggio": { "none": 100, "upDown": [20, 30, 40], "pairs": [10, 20, 30], "random": [0, 0, 15], "montuno": [30, 40, 40] },
       "chordScales": { "applied": [20, 40, 40], "borrowed": [0, 10, 10], "own": [0, 0, 30], "mediant": 0 },
-      "harmonyDevices": { "innerLine": [0, 15, 30], "pedal": [0, 6, 15], "reharmonised": 0 },
+      "harmonyDevices": { "innerLine": 0, "pedal": [0, 6, 15], "reharmonised": 0 },
       "loop": { "sections": [40, 50, 40] },
       "stopTime": { "sections": [5, 8, 10], "returns": 70 },
       "stops": { "songs": [70, 80, 80] },
@@ -966,7 +967,7 @@
   {
     "id": "folk",
     "name": "Folk",
-    "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
+    "description": "Steel and nylon guitars strummed or fingerpicked, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "cadenceRaise": { "sections": [10, 10, 0] },
@@ -1023,7 +1024,7 @@
   {
     "id": "celtic",
     "name": "Celtic",
-    "description": "Irish and Scottish tunes: a fiddle, a flute or a whistle and the pipes playing jigs and reels in unison, a bouzouki or a guitar droning beneath, Dorian and Mixolydian, cuts and rolls, sets of tunes changing key, a bodhrán or no drums, 100 to 190.",
+    "description": "Irish and Scottish tunes: a fiddle, a flute or a whistle and the pipes playing jigs and reels, a guitar or a dulcimer droning beneath, Dorian and Mixolydian, cuts and rolls, sets of tunes changing key, toms or no drums, 100 to 190.",
     "choices": {
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "cadenceRaise": { "sections": 0 },
@@ -1060,7 +1061,7 @@
       "grooveHold": { "held": 60 },
       "feelValues": { "sixteenths": 0 },
       "ending": { "ringOut": 100, "button": [60, 60, 50], "fade": [20, 20, 30] },
-      "rhythm": { "rhythm": { "speed": 69, "fullness": 82 } },
+      "rhythm": { "rhythm": { "speed": 69, "fullness": 82 }, "melody": { "speed": 70, "fullness": 85 } },
       "arpeggio": { "none": 100, "alberti": [40, 50, 50], "upDown": [30, 40, 40], "up": [20, 20, 30], "rootFifth": [0, 0, 20], "alternatingThumb": [60, 60, 50] },
       "effects": { "vibrato": [20, 50, 80], "bends": [0, 15, 40], "soloBends": [0, 10, 30], "swell": [0, 10, 40], "tone": [10, 20, 30], "chorus": 0, "tape": 0, "pinch": 0, "dive": 0 },
       "solos": { "sections": [0, 15, 25], "trades": 0, "hits": [0, 20, 30], "own": [0, 20, 40] },
@@ -1145,7 +1146,7 @@
   {
     "id": "ambient",
     "name": "Ambient",
-    "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
+    "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long or broken slowly, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "intensity": { "from": -100, "to": 0 },
@@ -1271,7 +1272,6 @@
       },
       "kit": { "standard": 100, "power": [20, 20, 30], "electronic": [30, 40, 50], "tr808": [0, 10, 25] },
       "drumSetup": { "kit": 100 },
-      "fills": { "amount": 50 },
       "dynamics": { "energy": 60, "contrast": 70, "lift": 70, "evenness": 75 },
       "phraseScheme": { "aaab": 100, "abab": [60, 60, 60], "aaaa": [40, 40, 30], "aaba": [40, 40, 40] },
       "arpeggio": { "none": 100, "up": [20, 20, 30], "upDown": [15, 15, 25], "alberti": [10, 10, 20], "upTwoOctaves": [0, 0, 15] },
@@ -1551,7 +1551,7 @@
       "strongEffect": { "none": 100, "echo": [0, 10, 30] },
       "ending": { "button": 100, "stop": [80, 80, 80], "ringOut": [60, 60, 60], "big": 60 },
       "levels": { "riff": 70, "drum": 65 },
-      "dynamics": { "energy": 90, "contrast": 50, "evenness": 80 },
+      "dynamics": { "energy": 90, "evenness": 80 },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [90, 90, 80], "twin": 50 },
       "instrument": {
         "melody": { "lead5Charang": 100, "lead2Sawtooth": [10, 20, 30] },
@@ -1759,7 +1759,7 @@
   {
     "id": "medieval",
     "name": "Medieval",
-    "description": "Calm and modal: recorders, flutes and a fiddle over a lute and a harp, a choir and a drone, open fifths, a second voice in fourths and fifths, 3/4 and 6/8, slow, a tambourine, a triangle and a frame drum marking the form.",
+    "description": "Calm and modal: recorders, flutes and a fiddle over a plucked guitar and a harp, a choir and a drone, open fifths, a second voice in fourths and fifths, 3/4 and 6/8, slow, a tambourine, a triangle and a tom marking the form.",
     "choices": {
       "intensity": { "from": -80, "to": 80 },
       "darkness": { "from": -80, "to": 80 },
@@ -2071,7 +2071,7 @@
       "drop": { "lifts": [20, 30, 30], "rolls": 100 },
       "solos": { "sections": [0, 2, 5], "trades": 0, "hits": [30, 40, 50], "own": [0, 50, 100] },
       "ending": { "stop": 100, "button": 60, "big": 30 },
-      "space": { "drum": 35, "riff": 30, "bass": 30, "melody": 50 },
+      "space": { "drum": 35, "riff": 30, "bass": 30 },
       "levels": { "riff": 65, "drum": 70, "bass": 65 },
       "hook": { "choruses": [70, 70, 50] },
       "formChances": { "forms": [100, 90, 60] },
@@ -2143,7 +2143,7 @@
       "fills": { "amount": 40 },
       "stopTime": { "sections": [5, 10, 15], "returns": 50 },
       "levels": { "bass": 65, "drum": 70 },
-      "dynamics": { "energy": 70, "contrast": 50, "evenness": 75 },
+      "dynamics": { "energy": 70, "evenness": 75 },
       "hook": { "choruses": [70, 70, 50] },
       "form": { "vpcvpcbc": 100, "vcvcbc": 70 },
       "formChances": { "forms": [100, 90, 60] },
@@ -2571,7 +2571,6 @@
       },
       "grooveHold": { "held": 90 },
       "pocket": { "laidBack": 10 },
-      "fills": { "amount": 50 },
       "dynamics": { "energy": 85, "contrast": 55 },
       "levels": { "riff": 65, "drum": 70 },
       "effects": { "vibrato": [0, 10, 20], "bends": [0, 10, 20], "soloBends": [10, 30, 50], "chorus": 0, "swell": 0, "tone": 0, "tape": 0, "pinch": 0, "dive": 0 },
@@ -2647,7 +2646,7 @@
     "choices": {
       "bass": { "leading": 65 },
       "harmonyInterval": { "thirds": 100, "fourths": [20, 40, 60] },
-      "harmonyDevices": { "reharmonised": [0, 25, 25], "innerLine": [0, 15, 30], "pedal": [10, 20, 30] },
+      "harmonyDevices": { "reharmonised": [0, 25, 25], "innerLine": 0, "pedal": [10, 20, 30] },
       "insertion": { "none": 100, "phaser": [10, 20, 30], "wah": [5, 10, 20] },
       "length": { "from": [210, 240, 240], "to": [420, 480, 600] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [60, 60, 60], "block": [0, 0, 0], "twin": 0 },
@@ -2845,9 +2844,8 @@
   {
     "id": "bluegrass",
     "name": "Bluegrass",
-    "description": "A string band with no drums: a fiddle carrying the tune where a singer would, a banjo rolling under it, a guitar's chop on 2 and 4, an upright bass on the root and the fifth, a break on the banjo or the guitar between the verses, a second fiddle's harmony, tight to the beat, 110 to 180.",
+    "description": "A string band with no drums: a fiddle carrying the tune where a singer would, a banjo rolling under it, a guitar picking with it, an upright bass on the root and the fifth, a break on the banjo or the guitar between the verses, a second fiddle's harmony, tight to the beat, 110 to 180.",
     "choices": {
-      "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "length": { "from": [120, 120, 100], "to": [200, 200, 240] },
       "strictness": { "rules": [50, 75, 70] },
       "chordScales": { "applied": [10, 25, 35], "borrowed": [0, 12, 12], "own": [0, 0, 30], "mediant": [0, 10, 10], "dominant": 0 },
@@ -2899,7 +2897,7 @@
   {
     "id": "bossa",
     "name": "Bossa nova",
-    "description": "A nylon guitar's syncopated chords, a flute or a sax, major sevenths and ninths moving by ii-V, the snare's cross-stick on a brush kit, a shaker, soft and straight, 100 to 140.",
+    "description": "A nylon guitar's syncopated chords, a flute or a sax, major sevenths and ninths moving by ii-V, the snare's cross-stick on a brush or a jazz kit, a shaker now and then, soft and straight, 100 to 140.",
     "choices": {
       "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
@@ -3019,12 +3017,12 @@
       "drumJob": { "marks": [80, 80, 50], "groove": [20, 20, 50] },
       "marks": { "often": 55, "swells": 70 },
       "doubling": { "octaves": [20, 30, 40], "harmony": [20, 30, 30], "riff": 0, "twin": 0, "imitation": [10, 20, 25] },
-      "dynamics": { "energy": 50, "contrast": 90, "lift": 100, "evenness": 40 },
+      "dynamics": { "contrast": 90, "lift": 100, "evenness": 40 },
       "texture": { "build": 100, "steady": 60, "thin": 40, "alone": [20, 30, 40] },
       "effects": { "vibrato": [40, 60, 80], "swell": [30, 50, 70], "bends": [0, 0, 10], "soloBends": 0, "chorus": 0, "tone": 0, "tape": 0, "pinch": 0, "dive": 0 },
       "strongEffect": { "none": 100 },
       "space": { "melody": 75, "chords": 75, "pad": 80, "counterMelody": 75, "bass": 60, "drum": 75 },
-      "levels": { "drum": 50, "pad": 55 },
+      "levels": { "pad": 55 },
       "intro": { "entries": 100, "cold": 40 },
       "ending": { "ringOut": 100, "stop": 40, "fade": 30, "big": [20, 30, 40], "button": [20, 30, 30] },
       "formChances": { "forms": [60, 40, 10] },
@@ -3037,7 +3035,7 @@
   {
     "id": "filmPiano",
     "name": "Cinematic piano",
-    "description": "A film's piano: a piano melody over a piano's arpeggios two octaves wide, strings swelling under it, a bass stepping down through the chords, add9, sus and seventh chords, major, minor and Lydian, AABA with a big return and the last section lifted a key, no drums, 60 to 90, or a bouncy 150.",
+    "description": "A film's piano: a piano melody over a piano's arpeggios two octaves wide, strings swelling under it, a bass stepping down through the chords, add9, sus and seventh chords, major, minor and Lydian, AABA with a big return and the last section lifted a key, no drums, 60 to 100.",
     "choices": {
       "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
@@ -3060,7 +3058,7 @@
       "sectionLength": { "bars8": [30, 30, 30], "bars16": 100, "bars32": [20, 30, 40] },
       "dynamics": { "energy": 35, "contrast": 60, "lift": 90, "evenness": 60 },
       "texture": { "steady": 100, "thin": [20, 30, 40] },
-      "doubling": { "octaves": [20, 30, 40], "harmony": 25, "riff": [100, 50, 0], "twin": 50 },
+      "doubling": { "octaves": [20, 30, 40], "harmony": 25, "riff": 0, "twin": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [70, 80, 80], "counterMelody": [30, 40, 50], "drum": 0, "riff": 0, "riffTwin": 0, "rhythm": 0, "solo": 0 },
       "arpeggio": { "upTwoOctaves": 100, "up": 60, "upDown": 30, "alberti": 10, "none": [20, 20, 30] },
       "articulation": { "legato": [50, 60, 60], "letRing": [30, 40, 40], "roll": [0, 10, 20], "stabs": 0, "soloGhosts": 0 },
@@ -3070,7 +3068,7 @@
       "room": { "hall": 100 },
       "intro": { "cold": 100, "entries": [40, 50, 50] },
       "ending": { "ringOut": 100 },
-      "solos": { "sections": 0, "trades": 0, "hits": [0, 20, 30], "own": [0, 50, 100] },
+      "solos": { "sections": 0, "trades": 0, "hits": 0, "own": 0 },
       "stopTime": { "sections": 0, "returns": 0 },
       "ensembleHits": { "sections": 0 },
       "push": { "sections": 0 }
@@ -3100,7 +3098,7 @@
       "scale": { "major": 100, "naturalMinor": 60, "harmonicMinor": 50 },
       "chordShape": { "triad": 100, "seventh": [20, 30, 40], "add9": [0, 10, 25], "sus4": [0, 10, 20] },
       "cadenceRaise": { "sections": [80, 90, 90] },
-      "rootMotion": { "fifthDown": 100, "stepUp": 50, "thirdDown": 50 },
+      "rootMotion": { "fifthDown": 100 },
       "harmonicRhythm": { "oneBar": 100, "halfBar": 60, "twoBars": 30 },
       "chordScales": { "applied": [30, 40, 50], "borrowed": [10, 25, 35], "own": 0, "mediant": [0, 10, 20] },
       "passingChords": { "chords": [10, 20, 30] },
@@ -3130,7 +3128,7 @@
       "room": { "hall": 100 },
       "intro": { "entries": 30, "cold": 100 },
       "ending": { "ringOut": 100, "stop": 60 },
-      "solos": { "sections": 0, "trades": 0, "hits": [0, 20, 30], "own": [0, 50, 100] },
+      "solos": { "sections": 0, "trades": 0, "hits": 0, "own": 0 },
       "feelChances": {},
       "melodyRange": { "wide": 75 }
     }
@@ -3253,7 +3251,6 @@
       "phraseScheme": { "aaaa": 100, "aaab": 40, "abab": 30 },
       "texture": { "steady": 100, "build": 60, "thin": 40, "alone": [10, 15, 30] },
       "ending": { "fade": 100, "ringOut": 50 },
-      "dynamics": { "contrast": 50 },
       "kit": { "tr808": 100, "electronic": 80, "standard": [50, 50, 30], "room": [30, 30, 20] },
       "drumSetup": { "kit": 100 },
       "solos": { "sections": [0, 1, 10], "trades": 0, "twins": 0, "hits": [0, 20, 30], "own": [0, 50, 100] },
@@ -3310,7 +3307,7 @@
       "intro": { "cold": 100, "entries": 20 },
       "ending": { "fade": 100, "button": [40, 40, 30], "ringOut": 20 },
       "kit": { "standard": 100, "electronic": 60, "tr808": [20, 30, 40], "power": [10, 20, 30] },
-      "drumPieces": { "kick": 100, "acousticSnare": 100, "electricSnare": 50, "hiHat": 100, "tom": [50, 60, 60], "cymbal": 60, "clap": [20, 30, 40], "conga": [10, 20, 20], "cowbell": [0, 10, 20] },
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "electricSnare": 50, "hiHat": 100, "tom": [50, 60, 60], "cymbal": 60, "clap": [20, 30, 40] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [10, 20, 30], "counterMelody": [40, 50, 60], "drum": 100, "riff": [30, 40, 50], "riffTwin": 0, "rhythm": 0, "solo": [10, 20, 30] },
       "instrument": { "melody": { "synthBrass1": [60, 70, 70], "lead2Sawtooth": 100, "lead1Square": 40, "electricPiano2": 40, "lead8BassAndLead": [20, 30, 40], "vibraphone": 15, "distortionGuitar": [0, 10, 25] }, "chords": { "electricPiano2": 100, "synthBrass1": 50, "synthStrings1": 40, "pad3Polysynth": 30, "orchestraHit": [5, 10, 20] }, "bass": { "synthBass2": 100, "slapBass2": 80, "slapBass1": 60, "synthBass1": [40, 50, 60] }, "counterMelody": { "lead1Square": 100, "synthBrass2": 50, "glockenspiel": 30 }, "riff": { "synthBrass1": 100, "lead1Square": 60, "orchestraHit": [10, 20, 30], "distortionGuitar": [0, 10, 30] }, "solo": { "lead2Sawtooth": 100, "distortionGuitar": [10, 30, 50], "synthBrass1": 40 }, "pad": { "synthStrings1": 100, "pad3Polysynth": 60, "pad2Warm": 30 } },
       "doubling": { "octaves": [10, 15, 20], "harmony": 25, "riff": [100, 50, 0], "block": 0, "twin": 0 }

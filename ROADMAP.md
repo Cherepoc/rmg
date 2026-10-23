@@ -94,7 +94,7 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   snare and a clap beside; a drum struck once, a fill's or a landing's alone, any other joining a groove.
 - **Tied and kept as they are:** Pop's held tones, Classical's cadence, the jazz ride, Pop's instrument switches,
   Black metal's two endings, Bossa nova's root and fifth (`bossa-root-fifth`, taken out on 11 October, back at
-  30-50-50 since the 14 October retune, tied in the sixth round).
+  30-50-50 since the 14 October retune, tied in the sixth round, at 50-50-40 since the 19 October conventions).
 
 ### The song and its sections
 

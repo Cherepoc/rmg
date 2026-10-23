@@ -187,7 +187,7 @@ public static class GenreChoices
     public static GenreChoice Soloists { get; } = Pool("soloists", "Soloists",
         Composition.Solos.Soloists.Select(x => (Name(x.Part.ToString()), Composition.Solos.LabelOf(x.Part), x.Weight)));
 
-    /// <summary>How the song starts before its first section (<see cref="FormLayers.Intros" />): the whole band, a count-in, or the parts one by one.</summary>
+    /// <summary>How the song starts before its first section (<see cref="FormLayers.Intros" />): the whole band, a count-in, the parts one by one, or the chorus's hook.</summary>
     public static GenreChoice Intro { get; } = Pool("intro", "Intro",
         FormLayers.IntroWeights.Select(x => (Name(x.Intro.ToString()), FormLayers.LabelOf(x.Intro), x.Weight)));
 
@@ -300,9 +300,18 @@ public static class GenreChoices
     /// <summary>The chance a song pins a part to its rhythm, every bar alike: each pitched part, and each drum role but the colour (<see cref="DrumRoles.Pins" />).</summary>
     public static GenreChoice Pins { get; } = Chances("pins", "Parts pinned", [..Composition.DrumRoles.PinnedParts.Select(x => (Name(x.ToString()), Composition.DrumRoles.PinLabelOf(x), Composition.DrumRoles.Pins))]);
 
-    /// <summary>How long a section plays, its pattern played over and over: four bars to thirty-two, a dance track's the longest, which the songs never play (<see cref="Composition.SectionLength" />).</summary>
+    /// <summary>
+    ///     How long a section plays, its pattern played over and over: once to eight times, a dance track's the longest, which
+    ///     the songs never play (<see cref="Composition.SectionLength" />); named by the bars a pattern of one four-bar phrase
+    ///     would make, as the stored genres name them.
+    /// </summary>
     public static GenreChoice SectionLength { get; } = Pool("sectionLength", "Section's length",
-        Composition.SectionLength.Options.Select(x => (Composition.SectionLength.NameOf(x.Plays), $"{x.Plays * Composition.Meter.DefaultPhraseBars} bars", x.Weight)));
+        Composition.SectionLength.Options.Select(x => (Composition.SectionLength.NameOf(x.Plays), x.Plays switch
+        {
+            1 => "Its pattern once",
+            2 => "Its pattern twice",
+            _ => $"Its pattern {x.Plays} times"
+        }, x.Weight)));
 
     /// <summary>How an appearance brings its parts in over its phrases: steady, building, thinning or one part alone (<see cref="Composition.Texture" />).</summary>
     public static GenreChoice Texture { get; } = Pool("texture", "Texture", Composition.Texture.Kinds.Select(x => (Name(x.Kind.ToString()), Composition.Texture.LabelOf(x.Kind), x.Weight)));
@@ -472,7 +481,7 @@ public static class GenreChoices
     /// <summary>How many of its notes a gliding part slides into, from 0, none, through 50, half, as the songs' do, to 100, every one it may (<see cref="Expression.GlideRate" />).</summary>
     public static GenreChoice GlideRate { get; } = Values("glideRate", "Glide's share", [("share", "Notes slid into")], Facet.Sound);
 
-    /// <summary>What the bass lands on in a new chord (<see cref="BassLeadingLayers.Arrivals" />): its root, its third, its fifth, or its figure's note.</summary>
+    /// <summary>What the bass lands on in a new chord (<see cref="BassLeadingLayers.Arrivals" />): its root, its third, its fifth, a step down onto it, or its figure's note.</summary>
     public static GenreChoice BassLanding { get; } = Pool("bassLanding", "Bass's landing",
         BassLeadingLayers.ArrivalWeights.Select(x => (Name(x.Arrival.ToString()), BassLeadingLayers.LabelOf(x.Arrival), x.Weight)));
 
@@ -520,7 +529,11 @@ public static class GenreChoices
     /// <summary>The chance a lift into a louder section takes a surf drop, a guitar's tremolo-picked slide down the neck (<see cref="SurfDrops" />).</summary>
     public static GenreChoice SurfDrop { get; } = Chances("surfDrop", "A surf drop", [("lifts", "A lift into a louder section slid down into", Composition.SurfDrops.Chance)]);
 
-    /// <summary>How a soloist phrases: its phrases coming in on a pickup, and leaving space (<see cref="Soloist.PickupChances" />, <see cref="Soloist.SpaceChances" />).</summary>
+    /// <summary>
+    ///     How a soloist phrases: its phrases coming in on a pickup, leaving space, riffing on the band's rhythm, and a run
+    ///     approaching its note on the beat chromatically (<see cref="Soloist.PickupChances" />, <see cref="Soloist.SpaceChances" />,
+    ///     <see cref="Soloist.RiffChances" />, <see cref="Soloist.ChromaticChances" />).
+    /// </summary>
     public static GenreChoice SoloStyle { get; } = Chances("soloStyle", "A soloist's phrasing",
         [
             ("pickups", "Phrases coming in on a pickup", Soloist.PickupChances), ("space", "A soloist leaving space, a call, an answer and a rest", Soloist.SpaceChances),
@@ -572,7 +585,7 @@ public static class GenreChoices
     /// <summary>The chance a melody's later letter plays its first's rhythm with notes of its own, a sequence (<see cref="MelodyLayers.SequenceChances" />).</summary>
     public static GenreChoice Sequence { get; } = Chances("sequence", "Sequences", [("bars", "A later bar on the first's rhythm", MelodyLayers.SequenceChances)]);
 
-    /// <summary>The chance a verse calls and its band answers, the melody singing each phrase's first half and the riff the second (<see cref="Composition.CallAndResponse" />).</summary>
+    /// <summary>The chance a verse calls and its band answers, the melody singing each phrase's first half and the riff, or the counter-melody where no riff plays, the second (<see cref="Composition.CallAndResponse" />).</summary>
     public static GenreChoice CallAndResponse { get; } = Chances("callAndResponse", "Call and response", [("sections", "Verses calling and answered", Composition.CallAndResponse.Chance)]);
 
     /// <summary>A song's intro coming back between its verses and closing it, a riff section, and its verses over the intro's riff (<see cref="SongForms.RiffSectionChance" />, <see cref="SongForms.VerseOverRiffChance" />).</summary>
