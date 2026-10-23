@@ -179,9 +179,9 @@ internal static class LineDoubling
             scaleStep.Mod(Scales.StepCount) == 2 && ShapeAt(position) is { } shape && !shape.Contains(2)
                 ? scaleStep + (shape.Contains(3) ? 1 : shape.Contains(1) ? -1 : 0)
                 : scaleStep;
-        // the parts that double or are doubled in a stretch the song plays as a section, by its start, which play no other
-        // doubling there
-        var doubling = new HashSet<(int Track, double Start)>();
+        // the parts that double or are doubled in an appearance, by its place, which play no other doubling in any stretch of
+        // it, the ending's among them
+        var doubling = new HashSet<(int Track, int Index)>();
         // every stretch the song plays as a section, an intro's window and the ending among them, drawn as the section it plays
         // as is; an appearance traced once, in the first stretch it doubles in
         var plays = map.Plays.Select(x => (x.Span, x.Index)).ToArray();
@@ -223,14 +223,14 @@ internal static class LineDoubling
                     continue;
 
                 // a section a pair doubles already, the counter-melody harmonising it, not imitated too
-                if (bars > 0 && doubling.Contains((targetTrack, span.Start)))
+                if (bars > 0 && doubling.Contains((targetTrack, index)))
                     continue;
                 if (bars > 0 && Traces(TracePoints.Imitation, targetTrack, index))
                     StateTrace.RecordSection(TracePoints.Imitation, targetTrack, span.SectionId, $"{source} {bars} bar later", (index, source, bars));
                 else if (bars == 0 && Traces(TracePoints.LineDoubling, targetTrack, index))
                     StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));
-                doubling.Add((sourceTrack, span.Start));
-                doubling.Add((targetTrack, span.Start));
+                doubling.Add((sourceTrack, index));
+                doubling.Add((targetTrack, index));
                 // where the doubling part plays in the section, from its first note to its last, so that it joins no earlier
                 // than it would, as into an intro that brings it in
                 var own = events[isTwin ? sourceTrack : targetTrack].EventTimeline.Where(x => x.IsWithin(span.Start, span.End)).Select(x => x.Position).ToArray();
@@ -324,7 +324,7 @@ internal static class LineDoubling
                 var context = streams(place, index);
                 var inOctaves = context.TestProbability(SectionEnergy.Tilt(energies[index], OctaveCoupling).Chance(OctaveChance.At(sound, genre.Chance(GenreChoices.Doubling, "octaves")), 1));
                 bool Plays() => song.TrackTimelineMap[track].EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
-                if (doubling.Contains((track, span.Start)) || !Plays())
+                if (doubling.Contains((track, index)) || !Plays())
                     continue;
 
                 if (Traces(TracePoints.Octave, track, index))

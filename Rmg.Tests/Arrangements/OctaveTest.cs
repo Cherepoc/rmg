@@ -63,20 +63,26 @@ public sealed class OctaveTest
     [Test]
     public async Task APartPlaysOneDoublingAtATime()
     {
-        var checkedOctaves = 0;
-        foreach (var song in TestCorpus.Range(128))
+        var (checkedOctaves, imitated) = (0, 0);
+        // the songs' own, and Chamber's imitating every section it may, an imitation a doubling of the counter-melody's
+        var chamber = Rmg.Tests.Genres.GenrePresets.With("chamber", GenreChoices.Doubling, ("imitation", 1));
+        foreach (var song in TestCorpus.Range(128).Concat(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: chamber)))))
         {
             var octaves = song.Trace.Where(x => x.Point == TracePoints.Octave).Select(x => ((int Index, TrackRole Role, double, bool InOctaves))x.Value!).Where(x => x.InOctaves).ToArray();
-            var pairs = song.Trace.Where(x => x.Point == TracePoints.LineDoubling).Select(x => ((int Index, TrackRole Source, TrackRole Target, int))x.Value!).ToArray();
+            var imitations = song.Trace.Where(x => x.Point == TracePoints.Imitation).Select(x => ((int Index, TrackRole Source, int))x.Value!).ToArray();
+            imitated += imitations.Length;
+            var pairs = song.Trace.Where(x => x.Point == TracePoints.LineDoubling).Select(x => ((int Index, TrackRole Source, TrackRole Target, int))x.Value!)
+                .Concat(imitations.Select(x => ((int Index, TrackRole Source, TrackRole Target, int))(x.Index, x.Source, TrackRole.CounterMelody, 0))).ToArray();
 
             foreach (var octave in octaves)
             {
                 checkedOctaves++;
-                await Assert.That(pairs.Any(x => x.Index == octave.Index && (x.Source == octave.Role || x.Target == octave.Role))).IsFalse();
+                await Assert.That(pairs.Any(x => x.Index == octave.Index && (x.Source == octave.Role || x.Target == octave.Role))).IsFalse().Because($"seed {song.Seed}, appearance {octave.Index}, the {octave.Role}");
             }
         }
 
         await Assert.That(checkedOctaves).IsGreaterThan(0);
+        await Assert.That(imitated).IsGreaterThan(0);
     }
 
     [Test]
