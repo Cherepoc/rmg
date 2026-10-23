@@ -428,6 +428,13 @@ Each taken up when its reason no longer holds or listening asks:
   later, by listening, Latin jazz, modern pop, ska punk, epic trailer, G-funk, tavern, alternative, drill'n'bass,
   groove metal, delta blues, big band, dub techno, drill, a Renaissance preset and a piano ballad. Not planned:
   symphonic black metal, gothic metal.
+- **A together harmony moved by whole octaves** (P3, the review of 22 October 2026, #118): soloists trading play
+  each their own line since, in their own vocabulary and range (`TradingSoloists_PlayTheirOwnLines_NoRunBrokenByAnOctave`,
+  Thrash's riff turns breaking runs by an octave before); a solo together still plays its second part's harmony on the
+  first's line, each note folded into the part's range alone, so that a run crossing the range's edge leaps an octave
+  in its middle, Symphonic's harmonised solos the most (89 of its 127 solos of several parts together). First how often
+  a together run breaks so, then the harmony moved by the octaves that fit the most of the line into the range, which
+  needs the line's pitches as placed in the first's range.
 
 ### Left of the built plans
 

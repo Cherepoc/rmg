@@ -393,10 +393,10 @@ internal static class SongStages
                 song.Form.Map,
                 song.Soloists,
                 song.Solos,
-                index => song.AppearanceStream(SongStream.SoloLines, index),
-                index => song.AppearanceStream(SongStream.SoloChords, index),
-                index => song.AppearanceStream(SongStream.SoloMotifs, index),
-                index => song.AppearanceStream(SongStream.SoloPickups, index)
+                (index, place) => place == 0 ? song.AppearanceStream(SongStream.SoloLines, index) : song.AppearanceStream(SongStream.SoloLines, index, place),
+                (index, place) => place == 0 ? song.AppearanceStream(SongStream.SoloChords, index) : song.AppearanceStream(SongStream.SoloChords, index, place),
+                (index, place) => place == 0 ? song.AppearanceStream(SongStream.SoloMotifs, index) : song.AppearanceStream(SongStream.SoloMotifs, index, place),
+                (index, place) => place == 0 ? song.AppearanceStream(SongStream.SoloPickups, index) : song.AppearanceStream(SongStream.SoloPickups, index, place)
             )
         };
 

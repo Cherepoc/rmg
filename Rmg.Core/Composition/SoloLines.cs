@@ -46,8 +46,8 @@ public enum SoloGesture
 ///     strong beat; within a phrase gestures of lengths of their own, picked by its intensity there, a run the likelier the
 ///     more intense, a held note or a pause the less, from the soloist's vocabulary (<see cref="Soloist" />), a run going
 ///     on over the bar lines in the phrase. A new run sets out the way to where the gesture ends, without aiming to land
-///     there: a note of the chord there, higher the more intense, in a solo of its own, or the melody's note there in one
-///     on the melody, which plays the tune's every note, accented, and a steady fill of 8ths between them. Every note is a scale note in the soloist's range, as its chord there
+///     there: a note of the chord there, higher the more intense. A solo on the melody plays the tune's every note instead,
+///     accented, and a steady fill of 8ths between them. Every note is a scale note in the soloist's range, as its chord there
 ///     has it, kept as its scale step over that chord, so that a run crossing a change of chord stays on the scale.
 /// </summary>
 internal static class SoloLines
@@ -68,10 +68,11 @@ internal static class SoloLines
         (SoloGesture.Rhythm, new ByConvention(1.6, 1.6, 1.6), 0.2)
     ];
 
-    /// <summary>How much a quote weighs in a solo of its own and in one on the melody, which paraphrases it.</summary>
-    public const double OwnQuoteWeight = 0.15;
+    /// <summary>How much a quote of the melody weighs among a solo's gestures.</summary>
+    public const double QuoteWeight = 0.15;
 
-    public const double MelodyQuoteWeight = 2;
+    /// <summary>A beat's places, which a solo note's draws are keyed by.</summary>
+    private const int PlacesPerBeat = 48;
 
     /// <summary>
     ///     How far apart a solo on the melody's fill strikes between the tune's notes, in beats, an 8th, as a picker's roll
@@ -318,9 +319,13 @@ internal static class SoloLines
         void Add(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false, bool ghosts = false, bool run = false, double lift = 0) =>
             planned.Add(new PlannedNote(position, pitch, intensity, held, accented, release, stacked, octave, ghosts, run, placing, false, lift));
 
+        // a note's place in the section, in places a beat from 1, which its draws are keyed by, so that a note added or
+        // left out before it, a pickup's or a displaced motif's, leaves them as they were
+        long PlaceOf(double position) => (long)Math.Round((position - span.Start) * PlacesPerBeat) + 1;
+
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there,
-        // its key by its place in the line
-        TimelineItem<StateMap> Place(PlannedNote note, int index)
+        // its key by its place
+        TimelineItem<StateMap> Place(PlannedNote note)
         {
             var (position, pitch, intensity, held, accented, release, stacked, octave, _, _, _, altered, lift) = note;
             var sung = MelodyAt(position);
@@ -330,7 +335,7 @@ internal static class SoloLines
                     CompositionStateKinds.LineVoices, CompositionStateKinds.LinePlanes])
                 .With(CompositionStateKinds.Octave, octave && soloist.Octaves ? 1 : 0)
                 .With(CompositionStateKinds.BeatRank, Math.Abs(sung.Position - position) < 1e-9 ? sung.Value.GetStateValue(CompositionStateKinds.BeatRank) : DyadicRankDistribution.MaxRank)
-                .With(CompositionStateKinds.NoteKey, Seeds.Key(sung.Value.GetStateValue(CompositionStateKinds.NoteKey), index + 1));
+                .With(CompositionStateKinds.NoteKey, Seeds.Key(sung.Value.GetStateValue(CompositionStateKinds.NoteKey), PlaceOf(position)));
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0) + lift);
             // a note off the scale the scale's step beside it, altered onto it
             var step = LinePlacement.GetScaleStep(Chord(state, position), pitch);
@@ -356,7 +361,7 @@ internal static class SoloLines
             span,
             soloist,
             // a quote wants the melody's notes there
-            (start, end) => !melody.Any(n => n.IsWithin(start, end)) ? 0 : isOwn ? OwnQuoteWeight : MelodyQuoteWeight,
+            (start, end) => !melody.Any(n => n.IsWithin(start, end)) ? 0 : QuoteWeight,
             position => Meter.BeatsPerSecond(common.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(position)),
             turn,
             barOrigin
@@ -382,11 +387,8 @@ internal static class SoloLines
             var stacks = voicing.TestProbability(new Tilt(Tilt.Of(ChordOdds, ChordLeans[gesture]).LogOdds + Tilt.Of(ChordOdds, 2 * level - 1).LogOdds).Chance(soloist.ChordRate, 1));
             // a run going on from the segment before keeps where it is in its cells
             cursor = goesOn && cursor is not null ? cursor : new CellCursor(current);
-            // and the way a new run sets out: towards a note of the chord where the gesture ends, higher the more intense, or
-            // the melody's there
-            var heading = isOwn
-                ? Nearest(ChordNotes(Math.Min(end, span.End - 1e-6)), (current + bottom + (int)Math.Round(level * (TopAt(start) - bottom))) / 2)
-                : Nearest(ScaleNotes(end - 1e-6), FoldTowards(MelodyPitch(MelodyAt(Math.Min(end, span.End - 1e-6))), current));
+            // and the way a new run sets out: towards a note of the chord where the gesture ends, higher the more intense
+            var heading = Nearest(ChordNotes(Math.Min(end, span.End - 1e-6)), (current + bottom + (int)Math.Round(level * (TopAt(start) - bottom))) / 2);
 
             switch (gesture)
             {
@@ -449,6 +451,8 @@ internal static class SoloLines
                     {
                         positions = [..positions.Select(x => x + shift).Where(x => x < end - 1e-9)];
                         (pitches, accents) = (pitches[..positions.Length], accents[..positions.Length]);
+                        // and a run going on from it set out afresh from its last note kept, never from the notes left out
+                        cursor = null;
                     }
 
                     // a run, too fast to play in octaves, alone; and a ghosting soloist's lick at 16ths or slower, not on a
@@ -565,7 +569,7 @@ internal static class SoloLines
         }
 
         // a run's note on a change's downbeat landing there now and then, by its own key's draw, the key it is placed with
-        bool Lands(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), k + 1), LandingStream))
+        bool Lands(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), PlaceOf(planned[k].Position)), LandingStream))
             .TestProbability(soloist.LandingChance);
 
         // a run's note on a change's downbeat landed on the new chord's nearest note, a scale step or two away, the way the run
@@ -620,7 +624,7 @@ internal static class SoloLines
         // on a pulse of its bar, the meter's beats, a dotted quarter's in 6/8 and an odd meter's groups, the bars counted from
         // the section's start
         bool OnBeat(double position) => span.Meter.Pulses.Any(x => Math.Abs((position - barOrigin).Mod(span.Meter.BarDuration) - x) < 1e-6);
-        bool Chromatic(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), k + 1), ChromaticStream))
+        bool Chromatic(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), PlaceOf(planned[k].Position)), ChromaticStream))
             .TestProbability(soloist.ChromaticChance);
         // the notes as they sound, each kept as its scale step over the chord it plays under, a new chord's at the beat
         int Sounding(int k)

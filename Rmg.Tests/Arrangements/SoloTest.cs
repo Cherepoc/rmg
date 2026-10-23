@@ -263,13 +263,16 @@ public sealed class SoloTest
         var (restated, displaced) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
         {
-            var notes = song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Solo))?.ToArray() ?? [];
             foreach (var (start, shift) in song.Trace.Where(x => x.Point == TracePoints.SoloMotif).Select(x => ((double Start, double Shift))x.Value!))
             {
                 restated++;
                 if (shift <= 0)
                     continue;
                 displaced++;
+                // the first soloist's notes of the solo, whose line the trace is of
+                var (index, solo) = song.Solos.First(x => song.Map.Sections[x.Key].IsWithin(start));
+                var notes = song.Song.Notes!.GetValueOrDefault(song.Track(solo.Soloists[0]))?
+                    .Where(x => song.Map.Sections[index].IsWithin(x.Position) && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) != 0).ToArray() ?? [];
                 await Assert.That(shift is 0.5 or 1).IsTrue();
                 await Assert.That(notes.Any(x => x.Position >= start - 1e-9 && x.Position < start + shift - 0.25 - 1e-9)).IsFalse().Because($"seed {song.Seed} at {start}");
             }
@@ -527,6 +530,43 @@ public sealed class SoloTest
         static double Swing((int, bool, (double, double, double Intensity, SoloGesture)[] Segments)[] solos) =>
             solos.SelectMany(x => x.Segments.Zip(x.Segments.Skip(1), (a, b) => Math.Abs(b.Intensity - a.Intensity))).Average();
         await Assert.That(Swing(wild)).IsGreaterThan(Swing(plain) * 1.5);
+    }
+
+    /// <summary>
+    ///     Soloists trading, as a duel's do, each playing its own line in its own range: no soloist's run breaks by an
+    ///     octave in its middle, stepping the same way before and after a leap of ten semitones or more, as a line planned in
+    ///     another part's range and folded note by note into its own would.
+    /// </summary>
+    [Test]
+    [Arguments("thrash")]
+    [Arguments("metal")]
+    public async Task TradingSoloists_PlayTheirOwnLines_NoRunBrokenByAnOctave(string preset)
+    {
+        var turns = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
+        foreach (var (index, solo) in song.Solos.Where(x => x.Value is { Mode: SoloMode.Trading, Soloists.Length: > 1, IsDrumSolo: false }))
+        {
+            var span = song.Map.Sections[index];
+            foreach (var (soloist, place) in solo.Soloists.Select((x, i) => (x, i)).Where(x => x.x != TrackRole.Drum))
+            {
+                var notes = song.Song.Notes![song.Track(soloist)]
+                    .Where(x => x.IsWithin(span.Start, span.End) && solo.TurnAt(span, x.Position) == place && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) != 0).ToArray();
+                turns += notes.Length > 0 && place > 0 ? 1 : 0;
+                // four quick notes in a row, a 16th apart or closer, over one chord
+                for (var i = 0; i + 3 < notes.Length; i++)
+                {
+                    var run = notes[i..(i + 4)];
+                    if (run[3].Position - run[0].Position > 0.75 + 1e-9 || run.Select(x => x.Value.State.GetStateValue(StateKinds.ChordChange)).Distinct().Count() > 1)
+                        continue;
+                    var steps = run.Zip(run.Skip(1), (a, b) => b.Value.Pitches[0] - a.Value.Pitches[0]).ToArray();
+                    var broken = Math.Abs(steps[0]) is >= 1 and <= 3 && Math.Abs(steps[2]) is >= 1 and <= 3 && Math.Sign(steps[0]) == Math.Sign(steps[2]) && Math.Abs(steps[1]) >= 10;
+                    await Assert.That(broken).IsFalse().Because($"seed {song.Seed}, {soloist} at {run[2].Position}");
+                }
+            }
+        }
+
+        Console.WriteLine($"{preset}: {turns} later soloists' turns");
+        await Assert.That(turns).IsGreaterThan(20);
     }
 
     [Test]
@@ -971,6 +1011,8 @@ public sealed class SoloTest
                     if (segment.Speed == soloist.Speeds[0])
                         continue;
                     await Assert.That(played[segment.Speed]).IsLessThanOrEqualTo(soloist.BeatsAt(segment.Speed) + 1e-9).Because($"seed {song.Seed} at {segment.Start}");
+                    // faster than a burst's speed only at a burst's intensity
+                    await Assert.That(segment.Speed <= SoloLines.BurstSpeed || segment.Intensity >= SoloLines.BurstIntensity - 1e-9).IsTrue().Because($"seed {song.Seed} at {segment.Start}");
                     await Assert.That(segment.Speed * beatsASecond).IsLessThanOrEqualTo(soloist.MaxNotesASecond + 1e-9);
                 }
             }

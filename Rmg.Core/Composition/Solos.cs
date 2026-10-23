@@ -263,9 +263,9 @@ internal static class Solos
     /// <param name="definitions">Every track's definition, the soloists' ranges.</param>
     /// <param name="soloists">Every part's soloist, whose vocabulary its solos are played in.</param>
     /// <param name="solos">Every solo, by its appearance's place among the song's sections.</param>
-    /// <param name="streams">A solo's sequence, by its appearance's place.</param>
-    /// <param name="voicings">A solo's sequence of the gestures its soloist stacks, by its appearance's place.</param>
-    /// <param name="motifs">A solo's sequence of the phrases opening on the phrase before's motif, by its appearance's place.</param>
+    /// <param name="streams">A solo's sequence, by its appearance's place and its soloist's, 0 the first's.</param>
+    /// <param name="voicings">A solo's sequence of the gestures its soloist stacks, by its appearance's place and its soloist's.</param>
+    /// <param name="motifs">A solo's sequence of the phrases opening on the phrase before's motif, by its appearance's place and its soloist's.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -273,17 +273,17 @@ internal static class Solos
         SongMap map,
         IReadOnlyDictionary<TrackRole, Soloist> soloists,
         IReadOnlyDictionary<int, SoloPlan> solos,
-        Func<int, IGenerationContext> streams,
-        Func<int, IGenerationContext> voicings,
-        Func<int, IGenerationContext> motifs,
-        Func<int, IGenerationContext> pickups
+        Func<int, int, IGenerationContext> streams,
+        Func<int, int, IGenerationContext> voicings,
+        Func<int, int, IGenerationContext> motifs,
+        Func<int, int, IGenerationContext> pickups
     )
     {
         var trackOf = roles.TrackOf();
         foreach (var (index, solo) in solos.Where(x => !x.Value.IsDrumSolo).OrderBy(x => x.Key))
         {
             var span = map.Sections[index];
-            var context = streams(index);
+            var context = streams(index, 0);
             bool IsIn(TimelineItem<StateMap> note) => note.IsWithin(span.Start, span.End);
             var melody = song.TrackTimelineMap[trackOf[TrackRole.Melody]].EventTimeline.Where(IsIn).ToArray();
             StateTrace.RecordSection(TracePoints.SoloLine, trackOf[TrackRole.Melody], span.SectionId, $"{melody.Length} notes", (index, melody.Length));
@@ -296,7 +296,7 @@ internal static class Solos
                 song = TrackEventStateTimelineMap.Create(song.Duration, song.TrackTimelineMap.SetItem(soloist, EventStateTimelineMap.Create(
                     song.Duration, EventTimeline.Create<StateMap>(song.Duration), song.TrackTimelineMap[trackOf[TrackRole.Melody]].StateTimelineMap)), song.CommonStateTimelineMap);
 
-            // the solo's line, in the first soloist's vocabulary and range, on the melody only where an appearance before it
+            // the solo's line, in its soloist's vocabulary and range, on the melody only where an appearance before it
             // sang that melody, which the solo is then heard to be of, and its own where none did: the tune as the first such
             // appearance sang it, not as this one would vary it, its notes moved to the solo, each its pitch as sung, moved
             // with the key from there to here, and none past the solo's end
@@ -317,7 +317,16 @@ internal static class Solos
             // where the band strikes, the rhythm part's onsets, or the chords' where it plays none, which a riff strikes on
             var rhythm = trackOf.TryGetValue(TrackRole.Rhythm, out var rhythmTrack) && song.TrackTimelineMap.TryGetValue(rhythmTrack, out var comping) ? comping.EventTimeline.Where(IsIn).Select(x => x.Position).ToArray() : [];
             double[] groove = rhythm.Length > 0 ? rhythm : [..chordsHeld.Select(x => x.Position)];
-            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), pickups(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, span.Start, soloists[solo.Soloists[0]], isOwn, isOwn, melody, tune, chordsHeld, groove, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            var turn = solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration;
+            // a soloist's line in its own vocabulary and range, from sequences of its own but the first's, the solo's; the
+            // first's traced, as the solo's plan is
+            (TimelineItem<StateMap>[] Line, SoloLines.Segment[] Segments) LineOf(TrackRole soloist, int place)
+            {
+                using var _ = place == 0 ? null : StateTrace.Pause();
+                return SoloLines.Generate(place == 0 ? context : streams(index, place), voicings(index, place), motifs(index, place), pickups(index, place), span, turn, span.Start, soloists[soloist], isOwn, isOwn,
+                    melody, tune, chordsHeld, groove, song.TrackTimelineMap[trackOf[soloist]], (PitchInstrumentTrack)definitions[trackOf[soloist]], song.CommonStateTimelineMap);
+            }
+            var (line, segments) = LineOf(solo.Soloists[0], 0);
             StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(isOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, isOwn, segments));
 
             // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart
@@ -334,10 +343,11 @@ internal static class Solos
             // the drums' turns the drums' own (DrumSolos)
             foreach (var (soloist, place) in solo.Soloists.Select((x, i) => (x, i)).Where(x => x.x != TrackRole.Drum))
             {
-                // a part together with the first: a unison doubling the line whole, its runs and its altered notes too, as two
-                // players doubling a line play it; a harmony leaving some out and the quick ones to the first, drawn all the same
+                // a part trading its turns, its own line there, as a duel's players each play their own; a part together with
+                // the first: a unison doubling the line whole, its runs and its altered notes too, as two players doubling a line
+                // play it; a harmony leaving some out and the quick ones to the first, drawn all the same
                 TimelineItem<StateMap>[] notes = solo.Mode == SoloMode.Trading
-                    ? [..line.Where(x => solo.TurnAt(span, x.Position) == place)]
+                    ? [..(place == 0 ? line : LineOf(soloist, place).Line).Where(x => solo.TurnAt(span, x.Position) == place)]
                     : place == 0
                         ? line
                         : line.Select((x, i) => (x, Kept: !context.TestProbability(LeftOutChance))).ToArray() is var drawn && solo.Step == 0
