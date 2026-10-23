@@ -124,9 +124,14 @@ public static class Render
             var renderedNotes = trackNotes.SelectMany(note =>
                 {
                     var velocity = GetMidiVelocity(note.Value) * (group?.Volume ?? 1);
-                    // swung, its end as its start, so that it still reaches the note it reached
-                    var position = swing.Apply(note.Position);
-                    var duration = swing.Apply(note.Position + note.Value.Duration) - position;
+                    // swung, its end as its start, so that it still reaches the note it reached; a run's even notes, a hat
+                    // roll's or a ratchet's, evenly between its ends as swung
+                    var (evenFrom, evenTo) = (note.Value.State.GetStateValue(CompositionStateKinds.EvenFrom), note.Value.State.GetStateValue(CompositionStateKinds.EvenTo));
+                    double Swung(double at) => evenTo > evenFrom
+                        ? swing.Apply(evenFrom) + (at - evenFrom) / (evenTo - evenFrom) * (swing.Apply(evenTo) - swing.Apply(evenFrom))
+                        : swing.Apply(at);
+                    var position = Swung(note.Position);
+                    var duration = Swung(note.Position + note.Value.Duration) - position;
                     // a palm-muted note as General MIDI can play it, which has no mute for a driven guitar: short and a touch
                     // softer; the one place a plugin's output would play it as its keyswitch or controller instead
                     if (note.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0)

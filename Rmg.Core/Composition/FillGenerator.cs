@@ -560,7 +560,7 @@ internal sealed class FillGenerator
 ///     How a fill is played: how long it is, none for the groove running on, what it does with the groove, its run, its
 ///     layer over the groove's rhythm, and whether it starts off the beat or fades.
 /// </summary>
-/// <param name="SpanShift">How many notes near an 8th it starts later, or earlier where negative.</param>
+/// <param name="SpanShift">How many notes near an 8th it starts earlier, or later where negative; a bar-long one always later.</param>
 internal sealed record FillPlay(
     double Span,
     GrooveTreatment Treatment,

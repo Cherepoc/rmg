@@ -55,7 +55,7 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Me
     /// <param name="groove">The state of the groove's rhythm.</param>
     /// <param name="layer">The fill's layer over it.</param>
     /// <param name="minNote">The shortest note the fill may play, in beats.</param>
-    /// <param name="meter">The meter the song's bars are in.</param>
+    /// <param name="meter">The meter of the bar that ends at the line, a section's own or a short bar's.</param>
     public static FillRhythm Of(StateMap groove, StateMap layer, double minNote, Meter meter)
     {
         var rhythm = ResolvedRhythm.Of(groove.MergeWith(layer), minNote);

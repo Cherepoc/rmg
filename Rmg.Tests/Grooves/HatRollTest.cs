@@ -86,6 +86,37 @@ public sealed class HatRollTest
         await Assert.That(rolled).IsGreaterThan(100);
     }
 
+    /// <summary>
+    ///     A roll's notes as heard in a swung song, Hip-hop's, even between its swung ends, a drill rather than a limp: the
+    ///     render spaces them from the roll's start to its end as swung, never note by note.
+    /// </summary>
+    [Test]
+    public async Task ARoll_InASwungSong_PlaysEvenlyAsHeard()
+    {
+        var hipHop = GenrePresets.With("hipHop", GenreChoices.HatRolls, ("bars", 1));
+        var (rolls, swung) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: hipHop))))
+        foreach (var (track, realized) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
+        {
+            foreach (var roll in realized.Select(x => (From: x.Value.State.GetStateValue(CompositionStateKinds.EvenFrom), To: x.Value.State.GetStateValue(CompositionStateKinds.EvenTo), Sound: x.Value.Pitches[0]))
+                         .Where(x => x.To > x.From).Distinct())
+            {
+                // its sound as heard among the drums', between its swung ends
+                var (from, to) = (song.Swing.Apply(roll.From), song.Swing.Apply(roll.To));
+                var notes = song.Drums.Where(x => x.Value.Offset == roll.Sound && x.Position >= from - 1e-6 && x.Position < to - 1e-6).Select(x => x.Position).Distinct().Order().ToArray();
+                if (notes.Length < 3)
+                    continue;
+                rolls++;
+                swung += Math.Abs(song.Swing.Apply(roll.From + 0.25) - song.Swing.Apply(roll.From) - 0.25) > 1e-6 ? 1 : 0;
+                var gaps = notes.Zip(notes.Skip(1), (a, b) => b - a).ToArray();
+                await Assert.That(gaps.Max() - gaps.Min()).IsLessThan(1e-6).Because($"seed {song.Seed}, track {track}, the roll from {roll.From}");
+            }
+        }
+
+        Console.WriteLine($"{rolls} rolls, {swung} of them swung");
+        await Assert.That(swung).IsGreaterThan(10);
+    }
+
     /// <summary>A drill, IDM's: its rolls in 64ths where its genre names them (`hatRollRate`), four notes a 64th apart, none without the stage.</summary>
     [Test]
     public async Task AnIdmHat_DrillsIn64ths_WhereItsGenreNamesThem()

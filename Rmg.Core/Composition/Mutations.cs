@@ -218,14 +218,18 @@ internal static class Mutations
                 break;
             }
             case MutationKind.Ratchet when at >= 0:
+            {
+                // its strokes even between its ends as swung, the hit's and the last stroke's end
+                var (from, to) = (start + mutation.At, start + mutation.At + (int)mutation.By * Sixteenth / 2);
                 for (var hit = 1; hit < (int)mutation.By; hit++)
                 {
                     var again = start + mutation.At + hit * Sixteenth / 2;
                     if (again < start + length - 1e-9 && notes.All(x => Math.Abs(x.Position - again) > 1e-9))
-                        notes.Add(notes[at].Value.ToTimelineItem(again));
+                        notes.Add(notes[at].Value.With(CompositionStateKinds.EvenFrom, from).With(CompositionStateKinds.EvenTo, to).ToTimelineItem(again));
                 }
 
                 break;
+            }
             case MutationKind.Swap:
                 foreach (var drum in drums)
                 {

@@ -95,7 +95,8 @@ internal static class HatRolls
                 own = (own.Value with { Pitches = [DrumGroups.GetDrum(track).Sounds[0].Code] }).ToTimelineItem(own.Position);
                 rolled.RemoveAll(x => x.IsWithin(from, to));
                 var count = (int)Math.Round((to - from) * rate);
-                rolled.AddRange(Enumerable.Range(0, count).Select(k => (own.Value with { Duration = Math.Min(own.Value.Duration, 1.0 / rate) })
+                // even between its ends as swung, a drill rather than a limp
+                rolled.AddRange(Enumerable.Range(0, count).Select(k => (own.Value with { Duration = Math.Min(own.Value.Duration, 1.0 / rate), State = own.Value.State.With(CompositionStateKinds.EvenFrom, from).With(CompositionStateKinds.EvenTo, to) })
                     .WithVelocity(Render.ScaleLoudness(own.Value.Velocity, From + (1 - From) * k / Math.Max(1, count - 1))).ToTimelineItem(from + k / (double)rate)));
             }
 

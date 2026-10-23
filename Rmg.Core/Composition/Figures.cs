@@ -27,7 +27,8 @@ public enum FigurePlayer
 /// <param name="AnswersKick">Whether it plays around the kick, between its beats, and so only in a bar the kick plays in, as a rolling bass does.</param>
 /// <param name="In">The meter of its bars, four's where none is given.</param>
 /// <param name="Exact">Whether it is played exactly at every end, as a clave, the swing ride or the waltz is, rather than as a player varies it (<see cref="Loose" />).</param>
-public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick, Meter? In = null, bool Exact = false)
+/// <param name="Heavy">Whether it is a ground heavy enough that the snare under it strikes its head, as the double kick, the blast and the kick with its riff are.</param>
+public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick, Meter? In = null, bool Exact = false, bool Heavy = false)
 {
     /// <summary>
     ///     Whether it is played as a player varies it, its onsets and the player's own notes each by a chance, by how
@@ -112,10 +113,13 @@ internal static class Figures
 
     /// <summary>
     ///     How strictly a section plays a loose figure, by its feel facet: exactly at the plain end, its onsets kept and
-    ///     the player's own notes left out; at the wild end the player's own rhythm more than the figure's. A note on both
+    ///     the player's own notes left out; at the wild end the player's own rhythm nearly as much as the figure's. A note on both
     ///     plays always; one on the figure alone by this chance, one of the player's own alone by its rest.
     /// </summary>
     public static ByConvention Strictness { get; } = new(1, 0.9, 0.6);
+
+    /// <summary>A bar's places a beat, which a loose figure's stream is keyed by (<see cref="SongMap.PlaceKey" />).</summary>
+    private const int PlacesPerBeat = 48;
 
     /// <summary>A player's own rhythm, as its pool names it.</summary>
     public const string Own = "own";
@@ -123,9 +127,9 @@ internal static class Figures
     /// <summary>Every figure, by its player.</summary>
     public static ImmutableArray<Figure> All { get; } =
     [
-        new("withRiff", "With the riff, wherever it plays", FigurePlayer.Ground, [], 0, FigurePlayer.Riff, 1, false),
-        new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, null, 1, false),
-        new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
+        new("withRiff", "With the riff, wherever it plays", FigurePlayer.Ground, [], 0, FigurePlayer.Riff, 1, false, Heavy: true),
+        new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, null, 1, false, Heavy: true),
+        new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false, Heavy: true),
         new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
         new("blast", "A blast beat, a cymbal riding it on every 8th", FigurePlayer.Time, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 1, false),
         // the swing ride, the skip played late by the song's swing
@@ -319,10 +323,10 @@ internal static class Figures
                             laid.Add((span.SectionId, player));
                             played.RemoveAll(x => In(x.Position));
                             // a loose figure's onsets and the player's own notes each kept by a chance, from a sequence of the
-                            // bar's and the track's own
+                            // bar's, by its place in its section, and the track's own
                             double[] kept = figure.Loose
                                 ? Loosen([..own.Select(x => x.Position)], [..onsets.Where(In)], Strictness.At(song.SectionOf(span.SectionId).Facets[Facet.Feel]),
-                                    song.Stream(SongStream.LooseFigures, (long)Math.Round(bar * 48), track))
+                                    song.Stream(SongStream.LooseFigures, song.Form.Map.PlaceKey(bar, PlacesPerBeat), track))
                                 : [..onsets.Where(In)];
                             played.AddRange(kept.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
                         }
@@ -360,9 +364,6 @@ internal static class Figures
         return HeavyBackbeat(song, draft with { Figures = figures });
     }
 
-    /// <summary>The ground's figures heavy enough that the snare under them strikes its head: the double kick, the blast and the kick with its riff.</summary>
-    private static readonly ImmutableHashSet<string> Heavy = ["doubleKick", "blast", "withRiff"];
-
     /// <summary>
     ///     A heavy figure's backbeat: the snare under it struck on its head, never its cross-stick, as a thrash or a
     ///     breakdown's drummer hits it; and from a section's second phrase on, a bar the snare would leave empty under it
@@ -373,7 +374,7 @@ internal static class Figures
     private static SongDraft HeavyBackbeat(SongDecisions song, SongDraft draft)
     {
         var map = song.Form.Map;
-        var spans = map.PlayedSections.Where(x => draft.Figures.GetValueOrDefault(x.SectionId)?.GetValueOrDefault(FigurePlayer.Ground) is { } ground && Heavy.Contains(ground)).ToArray();
+        var spans = map.PlayedSections.Where(x => draft.Figures.GetValueOrDefault(x.SectionId)?.GetValueOrDefault(FigurePlayer.Ground) is { } ground && Of(FigurePlayer.Ground, ground)?.Heavy == true).ToArray();
         var snares = DrumGroups.Snare.Tracks.Where(draft.Timeline.TrackTimelineMap.ContainsKey).ToArray();
         if (spans.Length == 0 || snares.Length == 0)
             return draft;

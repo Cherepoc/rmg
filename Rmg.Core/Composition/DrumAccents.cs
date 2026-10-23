@@ -45,8 +45,10 @@ internal static class DrumAccents
                 continue;
 
             // a weak beat leans to an accent that favours the weak ones, the offbeat the most and each finer one by the
-            // rank less, as an open hat opens on the 'and', and the strongest to one that favours it
-            var chance = new Tilt(Math.Log(odds(sound.Code))).Chance(Tilt.Of(BeatOdds, sound.AccentLean * (rank > 0 ? 1.0 / rank : -1)).Chance(sound.Accent, 1), 1);
+            // rank less, as an open hat opens on the 'and', and away from one that favours the strongest as far on every
+            // one, as a ride's bell sounds on the beat, and the strongest to it
+            var lean = rank == 0 ? -sound.AccentLean : sound.AccentLean > 0 ? sound.AccentLean / rank : sound.AccentLean;
+            var chance = new Tilt(Math.Log(odds(sound.Code))).Chance(Tilt.Of(BeatOdds, lean).Chance(sound.Accent, 1), 1);
             if (context.TestProbability(energy.Chance(chance, sound.Loudness)) && accent.IsDefault)
                 accent = DrumStrokes.At(StateDepths.Note, i);
         }

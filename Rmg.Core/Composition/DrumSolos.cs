@@ -53,11 +53,6 @@ public enum Sticking
 /// </summary>
 internal static class DrumSolos
 {
-    /// <summary>How loud a solo's hits are, the drums' run's loudness at its end, the drums keeping time under it softer.</summary>
-    public const double Loudness = FillLayers.RunEndVelocity - 0.1;
-
-    public const double IntensityVelocity = 0.3;
-
     /// <summary>
     ///     How loud a solo plays, as heard (<see cref="Rendering.Render.ToMidiVelocity" />): its base from its start's to its
     ///     climax's by the solo's arc at its place (<see cref="SoloLines.Arc" />), as a drummer builds a solo, moved by the
@@ -192,8 +187,11 @@ internal static class DrumSolos
     /// </summary>
     public const double MotifChance = SoloLines.MotifChance, DisplaceChance = 0.3;
 
-    /// <summary>How loud the drums keeping time under a solo are, softer than its calmest.</summary>
-    public const double TimeLoudness = Loudness - IntensityVelocity / 2 - 0.05;
+    /// <summary>
+    ///     How loud the drums keeping time under a solo strike their strongest beats, as heard, under its calmest accents
+    ///     (its start's less its intensity's reach, with the accent's gap), their weaker beats under it by their own accents.
+    /// </summary>
+    public const double TimeLoudness = 0.42;
 
     /// <summary>A solo's loudness as heard, the velocity sum that renders it, kept within the softest and the loudest.</summary>
     private static double Heard(double share) => Rendering.Render.FromMidiVelocity(Math.Clamp(share, Softest, Loudest));
@@ -268,7 +266,7 @@ internal static class DrumSolos
     /// <param name="themes">A solo's draws of which phrases vary its groove and how it builds, by its appearance's place.</param>
     /// <param name="colours">A solo's draws of which accents strike a cymbal of colour, and which, by its appearance's place.</param>
     /// <param name="pickups">A solo's draws of which phrases come in on a pickup, by its appearance's place.</param>
-    /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
+    /// <param name="genre">The genre, whose pools of the feet's patterns, the stickings and the solos' count and share are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
     /// <param name="stopsAfter">Where the form next holds the drums after a position, a drop's build and its silent bar, a stop ending's silence, which a solo keeps out of.</param>
     private static TrackEventStateTimelineMap<StateMap> Play(
@@ -357,12 +355,12 @@ internal static class DrumSolos
             var kit = new Player(feetKeepTime ? hands : [..hands, ..kicks.Take(1)], tracks.Except(percussion.SelectMany(x => x.Tracks)).ToHashSet(), true);
             Player[] band = [kit, ..percussion];
 
-            // the soloists, as many as the pitched solos have by the groove facet, among the players with a scale of two
+            // the soloists, as many as the pitched solos have by the groove facet and the genre's pools, among the players with a scale of two
             // sounds or more, or the kit's alone; the others keeping time or resting
             var draws = players(index);
             var facet = groove(index);
-            var count = draws.Pick(ByConvention.Weigh(Solos.Counts, facet));
-            var mode = draws.Pick(ByConvention.Weigh(Solos.Modes, facet));
+            var count = draws.Pick(ByConvention.Weigh(Solos.Counts, facet, genre.Pool<int>(GenreChoices.SoloCount, Solos.CountName)));
+            var mode = draws.Pick(ByConvention.Weigh(Solos.Modes, facet, genre.Pool<SoloMode>(GenreChoices.SoloShare)));
             var candidates = band.Where(x => x.Scale.Length >= 2).ToList();
             if (candidates.Count == 0)
                 candidates = kit.Scale.Length > 0 ? [kit] : [];
@@ -464,13 +462,16 @@ internal static class DrumSolos
 
             // a stroke as loud as heard, over the loudness the song and the drum's track already give it there, which adds to it,
             // so that a section's own dynamics cut across neither the solo's arc nor its build
-            void Strike(RunSound sound, double at, double share)
+            double Under(int track, double at)
             {
                 var under = song.CommonStateTimelineMap.GetEffectiveStateMapAt(at);
-                if (song.TrackTimelineMap.TryGetValue(sound.Track, out var own))
+                if (song.TrackTimelineMap.TryGetValue(track, out var own))
                     under = under.MergeWith(own.StateTimelineMap.GetEffectiveStateMapAt(at));
-                edits.Hit(sound.Track, at, Heard(share) - under.GetStateValue(StateKinds.Velocity), sound.Articulation, whole.SectionId, HitKind.DrumSolo);
+                return under.GetStateValue(StateKinds.Velocity);
             }
+
+            void Strike(RunSound sound, double at, double share) =>
+                edits.Hit(sound.Track, at, Heard(share) - Under(sound.Track, at), sound.Articulation, whole.SectionId, HitKind.DrumSolo);
 
             // its gestures, and its build after them, played as one of them
             SoloLines.Segment[] playing = build is var (from, to) ? [..played, new SoloLines.Segment(from, to, 1, SoloGesture.Run, drummer.Speeds[0], SoloShape.Scale, [drummer.CellSizes[0]], false, phrases[^1] + 1, false)] : played;
@@ -487,14 +488,15 @@ internal static class DrumSolos
                 // every drum cleared but the feet's where they replay the groove's kick
                 foreach (var track in tracks.Where(x => !feetTracks.Contains(x) || feetPattern != SoloFeet.Groove))
                     edits.Clear(track, start, end);
-                // the feet and the players keeping time, softer, their accents kept under it as the section's dynamics scale
-                // them, the strongest at the time's loudness, the feet by their pattern where it is not the groove's
+                // the feet and the players keeping time, softer, as heard as the solo is, their accents kept under it as the
+                // section's dynamics scale them, the strongest at the time's loudness, the feet by their pattern where it is
+                // not the groove's
                 foreach (var track in (feetPattern == SoloFeet.Groove ? feetTracks : []).Concat(keepers.SelectMany(x => x.Tracks)))
                 foreach (var note in song.TrackTimelineMap[track].EventTimeline.Where(IsIn))
                 {
                     var dynamics = song.CommonStateTimelineMap.GetEffectiveStateMapAt(note.Position)
                         .MergeWith(song.TrackTimelineMap[track].StateTimelineMap.GetEffectiveStateMapAt(note.Position)).GetStateValue(CompositionStateKinds.NoteDynamics);
-                    edits.Replay(track, note, note.Value.GetStateValue(StateKinds.Velocity) - VelocityLayers.Note * dynamics * BeatAccent.StrongestAccent + TimeLoudness);
+                    edits.Replay(track, note, note.Value.GetStateValue(StateKinds.Velocity) - VelocityLayers.Note * dynamics * BeatAccent.StrongestAccent + Heard(TimeLoudness) - Under(track, note.Position));
                 }
                 if (feetPattern != SoloFeet.Groove && feetTracks.Count > 0)
                 {
@@ -503,7 +505,7 @@ internal static class DrumSolos
                         : (kick!.Track, kick.Articulation);
                     foreach (var bar in whole.Bars.Where(x => x.End > start + 1e-9 && x.Start < end - 1e-9))
                     foreach (var onset in OnsetsOf(feetPattern).Select(x => bar.Start + x * 0.25).Where(x => x >= start - 1e-9 && x < end - 1e-9))
-                        edits.Hit(footTrack, onset, TimeLoudness, footSound, whole.SectionId, HitKind.DrumSolo);
+                        edits.Hit(footTrack, onset, Heard(TimeLoudness) - Under(footTrack, onset), footSound, whole.SectionId, HitKind.DrumSolo);
                 }
 
                 // how loud it plays, as heard: the solo's arc at its place, moved by its intensity, its accents over it and its

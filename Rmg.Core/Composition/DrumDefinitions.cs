@@ -162,8 +162,8 @@ internal static class DrumDefinitions
     // a hand drum's other tone: now and then its stroke, and an accent on the strong beats
     private static DrumSound OtherTone(int code) => new(code, 1, 0.2, 0.1, DrumAccents.HandDrum, -1);
 
-    // the calls grate in a groove of any length, so they play only bound to a lead, a share of its strongest beats, or
-    // as a landing (DrumGroups.Calls): the triangle on the timekeeper's beats, the cuica a squeak on the backbeat now and
+    // the calls grate in a groove of any length, so they play all but only bound to a lead, a share of its strongest
+    // beats, or as a landing, grooving now and then as colour on the downbeats alone (DrumGroups.Calls): the triangle on the timekeeper's beats, the cuica a squeak on the backbeat now and
     // then, the whistle only where a section lands; a kit's alone, as a section of percussion only binds no drum to a lead
     public static PercussionInstrumentDefinition Triangle { get; } = new(
         "Triangle",

@@ -106,6 +106,12 @@ internal static class CompositionStateKinds
 
     public static StateKind<double> OrnamentStep { get; } = StateKinds.CreateAdditive<double>(Prefix + "OrnamentStep", StateScope.Render);
 
+    // where a run of even notes starts and ends, in beats, a hat roll's or a ratchet's, which the rendering spaces evenly
+    // between the swung places of its ends rather than swings note by note; none, an end of 0, for a note of no such run
+    public static StateKind<double> EvenFrom { get; } = StateKinds.CreateAdditive<double>(Prefix + "EvenFrom", StateScope.Render);
+
+    public static StateKind<double> EvenTo { get; } = StateKinds.CreateAdditive<double>(Prefix + "EvenTo", StateScope.Render);
+
     // how many semitones a chord's root voice falls inside it, a chromatic line's, 1 to 3 a quarter of the chord, its scale
     // altered to hold it where it has it not; 0 for none (InnerLines.Apply)
     public static StateKind<int> InnerLine { get; } = StateKinds.CreateAdditive<int>(Prefix + "InnerLine", StateScope.Render);

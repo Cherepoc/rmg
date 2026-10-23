@@ -256,15 +256,24 @@ public sealed class DrumSoloTest
             var tracksOf = (int[] players) => players.SelectMany(x => solo.Tracks[x]).ToHashSet();
             var (soloTracks, keptTracks) = (tracksOf(solo.Soloists), tracksOf(solo.Keepers));
             foreach (var segment in plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick))
-            foreach (var (track, notes) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
-            foreach (var note in notes.Where(n => n.Position >= segment.Start - 1e-9 && n.Position < segment.End - 1e-9))
             {
-                await Assert.That(soloTracks.Contains(track) || keptTracks.Contains(track)).IsTrue().Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {note.Position}");
-                if (keptTracks.Contains(track))
-                    keeping.Add(note.Value.Velocity);
-                // the hands', but the kick where the feet keep time on it
-                else if (!(solo.Feet && DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Contains(track)))
-                    soloing.Add(note.Value.Velocity);
+                var (kept, soloed) = (new List<double>(), new List<double>());
+                foreach (var (track, notes) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
+                foreach (var note in notes.Where(n => n.Position >= segment.Start - 1e-9 && n.Position < segment.End - 1e-9))
+                {
+                    await Assert.That(soloTracks.Contains(track) || keptTracks.Contains(track)).IsTrue().Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {note.Position}");
+                    if (keptTracks.Contains(track))
+                        kept.Add(note.Value.Velocity);
+                    // the hands', but the kick where the feet keep time on it
+                    else if (!(solo.Feet && DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Contains(track)))
+                        soloed.Add(note.Value.Velocity);
+                }
+
+                // the time's strongest beat under the gesture's accents, as heard, however loud the section
+                if (kept.Count > 0 && soloed.Count > 0)
+                    await Assert.That(kept.Max()).IsLessThan(soloed.Max()).Because($"seed {song.Seed}, the gesture at {segment.Start}");
+                keeping.AddRange(kept);
+                soloing.AddRange(soloed);
             }
         }
 
