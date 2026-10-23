@@ -33,7 +33,7 @@ internal static class Reharmonisation
     {
         var reharmonises = context.TestProbability(Chance.At(unconventionality, genre.Chance(GenreChoices.HarmonyDevices, "reharmonised")));
         var sections = map.Sections;
-        var later = Enumerable.Range(0, last + 1).LastOrDefault(i => sections.Take(i).Any(x => x.SectionId == sections[i].SectionId), -1);
+        var later = Enumerable.Range(0, last + 1).LastOrDefault(i => map.TimesBefore(i) > 0, -1);
         var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         // and a chord moved by semitones or in a scale of its own, an applied dominant's, a borrowed chord's or the cadence's
         // raised fifth, whose colour a substitute would lose, kept, and the chord after it, which it slides or resolves into

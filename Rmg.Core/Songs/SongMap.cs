@@ -109,6 +109,12 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
         return Ending.Duration > 1e-9 && position < Ending.Start + Ending.Duration - 1e-9 ? Plays.Last() : null;
     }
 
+    /// <summary>How many times an appearance's section played before it, by its place among the song's appearances (<see cref="TimesBefore(IReadOnlyList{int}, int)" />).</summary>
+    public int TimesBefore(int index) => TimesBefore([..Sections.Select(x => x.SectionId)], index);
+
+    /// <summary>How many times an appearance's section played before it, by its place in the sections as played, by their ids.</summary>
+    public static int TimesBefore(IReadOnlyList<int> played, int index) => played.Take(index).Count(x => x == played[index]);
+
     /// <summary>How many places a beat a place's key tells apart (<see cref="PlaceKey" />), a 32nd triplet's and finer.</summary>
     public const int PlacesPerBeat = 96;
 

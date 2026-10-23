@@ -440,8 +440,7 @@ internal static class SongStages
         {
             var timeline = notes[track];
             foreach (var (_, from, to, _) in draft.Holds(song).Of(Hold.KickOut))
-                timeline = EventTimeline.Create(timeline.Duration, timeline.Where(x => x.Position < from - 1e-9 || x.Position >= to - 1e-9)
-                    .Select(x => x.Position < from - 1e-9 && x.Position + x.Value.Duration > from + 1e-9 ? (x.Value with { Duration = from - x.Position }).ToTimelineItem(x.Position) : x));
+                timeline = timeline.Cleared(from, to);
             notes = notes.SetItem(track, timeline);
         }
 

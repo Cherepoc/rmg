@@ -256,7 +256,7 @@ internal static class Polymeter
             int Bar(double position) => span.BarOf(position);
             // the notes before and after the section as they are, and the section's as played
             EventTimeline<StateMap> Within(EventTimeline<StateMap> notes, IEnumerable<TimelineItem<StateMap>> played) =>
-                EventTimeline.Create(notes.Duration, notes.Where(x => !x.IsWithin(span.Start, span.End)).Concat(played).OrderBy(x => x.Position));
+                EventTimeline.Create(notes.Duration, notes.RemoveSpan(span.Start, span.End).Concat(played).OrderBy(x => x.Position));
 
             song = song.MapTrackEvents(tracks.ToDictionary(x => x, track => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
             {

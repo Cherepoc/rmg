@@ -1113,7 +1113,7 @@ internal sealed record GeneratedSection(
             var (from, to) = (phrase * Meter.PhraseDuration, (phrase + 1) * Meter.PhraseDuration);
             timeline = timeline.MapTrackEvents(Timeline.TrackTimelineMap.Keys.Where(x => parts.Contains(Roles[x])).ToDictionary(
                 x => x,
-                _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => EventTimeline.Create(notes.Duration, notes.Where(n => n.Position < from - 1e-9 || n.Position >= to - 1e-9)))
+                _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => notes.RemoveSpan(from, to))
             ));
         }
 

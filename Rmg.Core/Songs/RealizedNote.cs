@@ -14,3 +14,14 @@ public sealed record RealizedNote(ImmutableArray<int> Pitches, double Velocity, 
     /// <summary>The note struck at another loudness, its state's velocity with it, as a stage after the notes sets it.</summary>
     public RealizedNote WithVelocity(double velocity) => this with { Velocity = velocity, State = State.With(StateKinds.Velocity, velocity) };
 }
+
+public static class RealizedNotes
+{
+    /// <summary>
+    ///     A part's notes with a span taken out: none struck in it, a hair early counting as at either end
+    ///     (<see cref="EventTimeline{T}.RemoveSpan" />), and a note before it that sounds into it ended where it starts.
+    /// </summary>
+    public static EventTimeline<RealizedNote> Cleared(this EventTimeline<RealizedNote> notes, double from, double to) =>
+        EventTimeline.Create(notes.Duration, notes.RemoveSpan(from, to)
+            .Select(x => x.Position < from - TimelineItem.Tolerance && x.Position + x.Value.Duration > from + TimelineItem.Tolerance ? (x.Value with { Duration = from - x.Position }).ToTimelineItem(x.Position) : x));
+}

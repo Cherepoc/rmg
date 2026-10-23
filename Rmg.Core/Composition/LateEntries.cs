@@ -40,7 +40,7 @@ internal static class LateEntries
     )
     {
         // the song's opening, to where a section first comes back, or all of it where none does
-        var firstReturn = Enumerable.Range(1, Math.Max(0, played.Count - 1)).FirstOrDefault(i => played.Take(i).Contains(played[i]), played.Count - 1);
+        var firstReturn = Enumerable.Range(1, Math.Max(0, played.Count - 1)).FirstOrDefault(i => SongMap.TimesBefore(played, i) > 0, played.Count - 1);
         ImmutableArray<Weighted<int>> entries = [..Enumerable.Range(1, Math.Max(0, firstReturn)).Select(i => new Weighted<int>(Tilt.Of(EnergyOdds, energies[i]).Weigh(1, 1), i))];
         var held = ImmutableDictionary.CreateBuilder<TrackRole, int>();
         foreach (var (part, chance) in Chances)

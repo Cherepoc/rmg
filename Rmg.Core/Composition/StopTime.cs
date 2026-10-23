@@ -79,7 +79,7 @@ internal static class StopTime
         var sections = song.Form.Map.Sections;
         bool[] again = [..sections.Select((x, i) => song.AppearanceStream(SongStream.StopReturns, i)
             .TestProbability(ReturnChance.At(song.SectionOf(x.SectionId).Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "returns"))))];
-        bool Stopped(SectionSpan span, int index) => stopping[span.SectionId] && (again[index] || !sections.Take(index).Any(x => x.SectionId == span.SectionId));
+        bool Stopped(SectionSpan span, int index) => stopping[span.SectionId] && (again[index] || song.Form.Map.TimesBefore(index) == 0);
         // and but in a solo, whose soloists play over the band as loud as it was measured, as a push leaves a solo be, and an
         // appearance whose texture leaves parts out of its first phrase, building or opening on one part alone, as the
         // section an intro builds is left

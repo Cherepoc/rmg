@@ -379,7 +379,7 @@ internal static class Solos
 
             // the melody rests where it is not a soloist
             if (!solo.Soloists.Contains(TrackRole.Melody))
-                moves[trackOf[TrackRole.Melody]] = own => EventTimeline.Create(own.Duration, own.Where(x => !IsIn(x)));
+                moves[trackOf[TrackRole.Melody]] = own => own.RemoveSpan(span.Start, span.End);
             song = song.MapTrackEvents(moves);
         }
 

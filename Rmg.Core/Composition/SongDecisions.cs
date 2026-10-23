@@ -98,7 +98,7 @@ internal sealed record SongDecisions(
     public IGenerationContext AppearanceStream(SongStream stream, int index, int other) => Stream(stream, AppearanceKey(Played, index), other);
 
     /// <summary>An appearance's key, by its section and how many times the section played before it.</summary>
-    internal static long AppearanceKey(IReadOnlyList<int> played, int index) => Seeds.Key(played[index], played.Take(index).Count(x => x == played[index]));
+    internal static long AppearanceKey(IReadOnlyList<int> played, int index) => Seeds.Key(played[index], SongMap.TimesBefore(played, index));
 
     /// <summary>A facet's value as the rhythm's unconventionality, for a choice that leans by it.</summary>
     public RhythmicUnconventionality Of(Facet facet) => new(Facets[facet]);
@@ -414,7 +414,7 @@ internal sealed record SongDecisions(
             var solo = drawnSolos[index];
             var energyStep = energySteps[index];
             var section = generateSection(id).Appear(
-                played.Take(index).Count(x => x == id),
+                SongMap.TimesBefore(played, index),
                 Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),
                 energyStep,
                 restedBefore.GetValueOrDefault(id, []),

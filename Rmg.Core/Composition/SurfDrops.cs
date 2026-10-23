@@ -60,10 +60,7 @@ internal static class SurfDrops
                 var state = before.Value.State.Except([CompositionStateKinds.Ornament, CompositionStateKinds.OrnamentStep, CompositionStateKinds.Legato]).With(CompositionStateKinds.PalmMute, 1);
                 return new RealizedNote([pitch], 0, 0.25, state).WithVelocity(before.Value.Velocity - FromSofter + (FromSofter + ToLouder) * share).ToTimelineItem(from + k * 0.25);
             });
-            result[track] = EventTimeline.Create(timeline.Duration, timeline
-                .Where(x => x.Position < from - 1e-9 || x.Position >= to - 1e-9)
-                .Select(x => x.Position < from - 1e-9 && x.Position + x.Value.Duration > from + 1e-6 ? (x.Value with { Duration = from - x.Position }).ToTimelineItem(x.Position) : x)
-                .Concat(slide).OrderBy(x => x.Position));
+            result[track] = EventTimeline.Create(timeline.Duration, timeline.Cleared(from, to).Concat(slide).OrderBy(x => x.Position));
             StateTrace.RecordSong(TracePoints.SurfDrop, $"{from}-{to}", (from, to));
         }
 
