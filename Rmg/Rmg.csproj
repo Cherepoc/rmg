@@ -8,6 +8,8 @@
         <Nullable>enable</Nullable>
         <!-- the fingerprint's and a batch's songs are made in parallel, and allocate a lot: server GC keeps the cores busy, 384 songs in 12 s rather than 20 -->
         <ServerGarbageCollection>true</ServerGarbageCollection>
+        <!-- a fingerprint's run is too short for profile-guided optimisation to pay for its instrumentation: 712 songs in 19.5 s without, 23.4 s with -->
+        <TieredPGO>false</TieredPGO>
     </PropertyGroup>
 
     <ItemGroup>

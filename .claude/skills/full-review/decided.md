@@ -108,3 +108,10 @@ rejected while fixing: the place, what was decided, why.
   across a vamp's marks of the same root plays the line no more often (Dark jazz 8% to 5% of its sections), as the line
   keeps to a held triad or power chord and the presets that name it play sevenths there; the line itself was kept on
   listening (18 October 2026). Not raised again.
+- Generation's time measured (the review of 22 October 2026, #246): a song 164 ms at ea7cd3f, 187 ms at 542a12a and
+  186 ms after its fixes (AllocationReportTest, 16 songs), 14% more, not the suite's 46%, which more tests and a
+  larger cached corpus account for. The one stage grown past 5% of a song is Expression (7.6 ms to 22.6, 12%), its
+  time spread across its notes' draws (a chord's classes, a bend's scale distance, the tempo's timeline each under 1%
+  of generation in a profile of the fingerprint): three such fixes measured no gain beyond the noise and were left out.
+  The mood factor's lookups (#47, #79) and the previews' weighing (#373) appear in no profile above 1%; the page's
+  range drag (#298) is not visibly slow. Not raised again until a profile names a path above 5%.
