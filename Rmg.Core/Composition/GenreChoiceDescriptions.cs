@@ -35,7 +35,6 @@ public static class GenreChoiceDescriptions
         ["passingChords"] = "How often a chord passes into the next through a chord between them, as the passing kind leads it, a jazz and soul colour.",
         ["planing"] = "How often a section slides its home chord's shape up and down by semitones, a modern, filmic colour, and how often its planed chords each take a mode of their own.",
         ["harmonyDevices"] = "Reharmonising a section when it comes back, a chromatic line moving inside a held chord, and a bass note held under a section's changing chords.",
-        ["hatRollRate"] = "How fast a hi-hat roll runs: in 32nds or 16th triplets as a trap beat's, or in 64ths, a drill, as an electronic record splinters it.",
         ["tempoBand"] = "Which third of the tempo range a song plays in, slow, middle or fast, as a jazz record is a ballad, a medium or a burner and seldom between.",
         ["roleLength"] = "How long a verse, a chorus or a bridge leans to be against the songs' own: lower halves it, higher doubles it, as a rap song's hook is half its verse.",
         ["keyLift"] = "How far a key change lifts the song, in semitones: a half step or a whole step as a last chorus goes, a third for a symphonic band's climax.",

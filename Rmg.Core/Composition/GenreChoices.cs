@@ -343,9 +343,6 @@ public static class GenreChoices
     /// <summary>The chance a bar's hi-hat rolls its last beat in 32nds or 16th triplets, the trap's (<see cref="HatRolls.Chance" />).</summary>
     public static GenreChoice HatRolls { get; } = Chances("hatRolls", "Hi-hat rolls", [("bars", "Bars ending on a roll", Composition.HatRolls.Chance)]);
 
-    /// <summary>How fast a hi-hat roll's notes come (<see cref="Composition.HatRolls.Rates" />): 32nds, 16th triplets, or 64ths, a drill, a genre's alone.</summary>
-    public static GenreChoice HatRollRate { get; } = Pool("hatRollRate", "A roll's speed",
-        Composition.HatRolls.Rates.Select(x => (Composition.HatRolls.NameOf(x.Rate), $"{x.Rate} a beat", x.Weight)));
 
     /// <summary>
     ///     How high each pitched part sits, from 0, an octave lower, as a guitar tuned down, through 50, as the songs have it,
@@ -816,7 +813,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, RiffSection, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

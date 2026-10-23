@@ -67,7 +67,7 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   inversion, the pinch's squeal; and of 18 October, Celtic's harmonica solo, and by the owner's ear the wah of the metal
   genres and of the acoustic guitars, and Djent's snare rolled into a drop (`drop.rolls`, Nu metal's kept).
 - **Let go of, not told apart or too faint to ask** (as they are): Djent's polymeter frames, `pop-melody-chords`,
-  `trance-raise`, `pop-eighths`, IDM's 64th rolls, Dark jazz's and Black metal's darker moods
+  `trance-raise`, `pop-eighths`, IDM's 64th rolls (measured again at 0.05 and cut, 23 October 2026), Dark jazz's and Black metal's darker moods
   (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard while a mood leaned only a genre's
   own pool (since built: the chords' degrees by darkness and a mood past a genre's span, heard in the sixth round);
   and of 19 October, measured too faint to ask: a blues soloist's bends (0.08), Celtic's vibrato (0.10, in 17 of 24

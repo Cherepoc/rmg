@@ -117,25 +117,6 @@ public sealed class HatRollTest
         await Assert.That(swung).IsGreaterThan(10);
     }
 
-    /// <summary>A drill, IDM's: its rolls in 64ths where its genre names them (`hatRollRate`), four notes a 64th apart, none without the stage.</summary>
-    [Test]
-    public async Task AnIdmHat_DrillsIn64ths_WhereItsGenreNamesThem()
-    {
-        var idm = GenrePresets.With("idm", GenreChoices.HatRolls, ("bars", 1));
-        idm = idm with { Choices = idm.Choices.SetItem(GenreChoices.HatRollRate.Name, GenrePresets.With("idm", GenreChoices.HatRollRate, ("sixtyFourths", 1)).Choices[GenreChoices.HatRollRate.Name]) };
-        static int Drills(Song song) => song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack d && DrumRoles.Of(d.StateMap) == DrumRole.Time)
-            .Sum(x => song.Notes!.TryGetValue(x.Key, out var notes) ? notes.Zip(notes.Skip(1)).Count(p => Math.Abs(p.Second.Position - p.First.Position - 1 / 16.0) < 1e-6) : 0);
-        var (with, without) = (0, 0);
-        foreach (var seed in Enumerable.Range(0, 16))
-        {
-            with += Drills(SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), new SongOverrides(Genre: idm), CancellationToken.None));
-            without += Drills(SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), new SongOverrides(Genre: idm), ImmutableHashSet.Create("Hat rolls"), CancellationToken.None));
-        }
-
-        Console.WriteLine($"64ths in a row: {with} with the rolls, {without} without");
-        await Assert.That(with).IsGreaterThan(without + 100);
-    }
-
     /// <summary>A roll rolls into a pulse of its bar, whatever the meter: 4/4's beats, 6/8's dotted quarters, a short bar's own.</summary>
     [Test]
     public async Task ARoll_EndsOnAPulseOfItsBar()

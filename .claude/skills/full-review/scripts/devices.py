@@ -37,7 +37,7 @@ FAMILIES = {
     },
     'drums': {
         'choices': 'fills pocket grooveHold pins mutation ghosts rudiments hatRolls drumSounds drumStrokes drumJob marks kit drumSetup drumPieces '
-                   'polymeter polymeterCell feel feelChances feelValues ghostNotes hatRollRate kickOut timeChanges',
+                   'polymeter polymeterCell feel feelChances feelValues ghostNotes kickOut timeChanges',
         'stages': 'Polymeter|Figures|Mutations|Fills|Drum marks|Hat rolls|Ghosts|Drum ornaments|Timing',
     },
     'solos': {

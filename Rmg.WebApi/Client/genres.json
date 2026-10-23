@@ -3214,7 +3214,6 @@
     "choices": {
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "intro": { "entries": 100, "cold": [20, 30, 40] },
-      "hatRollRate": { "thirtySeconds": 100, "tripletSixteenths": 50, "sixtyFourths": [0, 20, 60] },
       "rudiments": { "flams": 0, "drags": 0 },
       "length": { "from": [180, 150, 60], "to": [420, 480, 600] },
       "sung": { "halves": [10, 10, 10], "eighths": [20, 10, 0] },
