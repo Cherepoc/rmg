@@ -310,10 +310,9 @@ internal static class DrumSolos
                 if (!solo.TradesWithDrums)
                     return played;
                 var cleared = new TimelineEdits(context, meter, map);
-                for (var at = whole.Start; at < whole.End - 1e-9; at += SoloPlan.TurnOf(whole))
-                    if (IsDrumsTurn(at))
-                        foreach (var track in played.TrackTimelineMap.Keys.Where(x => x < DrumGroups.FirstTrackNumber))
-                            cleared.Clear(track, at, Math.Min(whole.End, at + SoloPlan.TurnOf(whole)));
+                foreach (var (start, end) in SoloPlan.Turns(whole).Where(x => IsDrumsTurn(x.Start)))
+                    foreach (var track in played.TrackTimelineMap.Keys.Where(x => x < DrumGroups.FirstTrackNumber))
+                        cleared.Clear(track, start, end);
                 return cleared.ApplyTo(played);
             }
 
@@ -406,11 +405,9 @@ internal static class DrumSolos
                 solo.TradesWithDrums ? SoloPlan.TurnOf(whole) : span.Duration,
                 span.Start
             );
-            var turn = SoloPlan.TurnOf(whole);
             // its segments in the drums' turns, a segment across a turn's end cut there
             var played = solo.TradesWithDrums
-                ? plan.SelectMany(x => Enumerable.Range(0, (int)Math.Ceiling((x.End - whole.Start) / turn))
-                        .Select(k => x with { Start = Math.Max(x.Start, whole.Start + k * turn), End = Math.Min(x.End, whole.Start + (k + 1) * turn) })
+                ? plan.SelectMany(x => SoloPlan.Turns(whole).Select(t => x with { Start = Math.Max(x.Start, t.Start), End = Math.Min(x.End, t.End) })
                         .Where(y => y.End > y.Start + 1e-9 && IsDrumsTurn(y.Start)))
                     .ToArray()
                 : plan;
@@ -519,18 +516,27 @@ internal static class DrumSolos
                     var scale = player.Scale;
                     // the player's drums from the highest to the lowest the hands play, a kit's toms, or a player's sounds
                     RunSound[] down = player.IsKit ? [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)] : scale;
+                    // a roll's rate, the fastest the drummer plays at the tempo there
+                    int RollRate()
+                    {
+                        var beatsASecond = Meter.BeatsPerSecond(song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(start));
+                        return RollRates.FirstOrDefault(x => x * beatsASecond <= drummer.MaxNotesASecond + 1e-9, RollRates[^1]);
+                    }
+                    // the gesture's strokes at a rate, evenly from its start, each with how far through them it is
+                    (double Position, double Share)[] Strokes(int rate)
+                    {
+                        var count = (int)Math.Round((end - start) * rate);
+                        return [..Enumerable.Range(0, count).Select(i => (start + i / (double)rate, count == 1 ? 1.0 : i / (double)(count - 1)))];
+                    }
                     if (isBuild)
                     {
                         // a build: a roll on the snare, or 16ths down the drums, swelling from the softest to the loudest
-                        var beatsASecond = Meter.BeatsPerSecond(song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(start));
                         var rolls = buildsWithRoll || down.Length == 0;
-                        var rate = rolls ? RollRates.FirstOrDefault(x => x * beatsASecond <= drummer.MaxNotesASecond + 1e-9, RollRates[^1]) : 4;
-                        var strokes = (int)Math.Round((end - start) * rate);
-                        for (var i = 0; i < strokes; i++)
+                        var strokes = Strokes(rolls ? RollRate() : 4);
+                        for (var i = 0; i < strokes.Length; i++)
                         {
-                            var share = strokes == 1 ? 1 : i / (double)(strokes - 1);
-                            var drum = rolls ? scale[0] : down[Math.Min(down.Length - 1, i * down.Length / strokes)];
-                            Strike(drum, start + i / (double)rate, BuildFrom + (BuildTo - BuildFrom) * share);
+                            var drum = rolls ? scale[0] : down[Math.Min(down.Length - 1, i * down.Length / strokes.Length)];
+                            Strike(drum, strokes[i].Position, BuildFrom + (BuildTo - BuildFrom) * strokes[i].Share);
                         }
 
                         continue;
@@ -577,28 +583,20 @@ internal static class DrumSolos
                         {
                             // a roll, on the snare or, low on the kit, the floor tom, at the fastest rate the drummer plays there,
                             // swelling into a louder gesture after it and fading into a quieter one
-                            RunSound[] rolled = [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)];
-                            var drum = rolled.Length > 0 && player.At >= rolled.Length / 2 ? rolled[^1] : scale[0];
-                            var beatsASecond = Meter.BeatsPerSecond(song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(start));
-                            var rate = RollRates.FirstOrDefault(x => x * beatsASecond <= drummer.MaxNotesASecond + 1e-9, RollRates[^1]);
+                            var drum = down.Length > 0 && player.At >= down.Length / 2 ? down[^1] : scale[0];
                             var swells = k + 1 < playing.Length && playing[k + 1].Intensity >= level;
-                            var strokes = (int)Math.Round((end - start) * rate);
-                            for (var i = 0; i < strokes; i++)
-                            {
-                                var share = strokes == 1 ? 1 : i / (double)(strokes - 1);
-                                Strike(drum, start + i / (double)rate, heard + RollSwell * (swells ? 2 * share - 1 : 1 - 2 * share));
-                            }
+                            foreach (var (position, share) in Strokes(RollRate()))
+                                Strike(drum, position, heard + RollSwell * (swells ? 2 * share - 1 : 1 - 2 * share));
 
                             break;
                         }
                         case SoloGesture.Held:
                         {
                             // a release, a loud one a crash with the kick, a quieter one the floor tom's; a player's its lowest sound
-                            RunSound[] lows = [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)];
                             var rings = player.IsKit && crash is not null && level >= CrashRelease;
                             if (rings)
                                 Strike(crash!, start, accented);
-                            var low = !player.IsKit ? scale[^1] : rings ? kick ?? scale[^1] : lows.LastOrDefault() ?? scale[^1];
+                            var low = !player.IsKit ? scale[^1] : rings ? kick ?? scale[^1] : down.LastOrDefault() ?? scale[^1];
                             Strike(low, start, accented);
                             if (player.IsKit && !rings && kick is not null && low.Track != kick.Track)
                                 Strike(kick, start, accented);
@@ -613,8 +611,7 @@ internal static class DrumSolos
                             ImmutableArray<Weighted<Sticking>> handsOnly = [..stickingWeights.Where(x => !LimbsOf(x.Value).Contains('K'))];
                             var sticking = sticks.Pick(kickFree ? stickingWeights : handsOnly.IsEmpty ? [new Weighted<Sticking>(1, Sticking.Singles)] : handsOnly);
                             var snare = scale[0];
-                            RunSound[] toms = [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)];
-                            var at = Math.Clamp(player.At, 0, Math.Max(0, toms.Length - 1));
+                            var at = Math.Clamp(player.At, 0, Math.Max(0, down.Length - 1));
                             var (rhythm, speedOf) = (gesture, speed);
                             var displaced = false;
                             // a phrase's first restating the phrase before's motif now and then, a drum round the kit, displaced
@@ -625,7 +622,7 @@ internal static class DrumSolos
                                 if (answers && player.Motif is { } motif && (!LimbsOf(motif.Sticking).Contains('K') || kickFree))
                                 {
                                     (rhythm, speedOf, sticking, displaced) = (motif.Gesture, motif.Speed, motif.Sticking, displaces);
-                                    at = toms.Length > 0 ? (motif.At + 1) % toms.Length : 0;
+                                    at = down.Length > 0 ? (motif.At + 1) % down.Length : 0;
                                     answered.Add(phrase);
                                 }
 
@@ -641,8 +638,8 @@ internal static class DrumSolos
                             var positions = SoloLines.Positions(start, end, rhythm, speedOf).Select(x => x + (displaced ? 0.25 : 0)).Where(x => x < end - 1e-9).ToArray();
                             // a run walks the toms to their other end, a lick rocks between two of them, inward from the lowest,
                             // as the gesture played has it, a motif's restated
-                            var step = at < toms.Length / 2 ? 1 : -1;
-                            var rock = at == toms.Length - 1 ? -1 : 1;
+                            var step = at < down.Length / 2 ? 1 : -1;
+                            var rock = at == down.Length - 1 ? -1 : 1;
                             var rights = 0;
                             for (var i = 0; i < positions.Length; i++)
                             {
@@ -652,14 +649,14 @@ internal static class DrumSolos
                                     continue;
                                 if (limb == 'K')
                                     sound = kick!;
-                                else if (limb is 'R' or 'T' && toms.Length > 0)
+                                else if (limb is 'R' or 'T' && down.Length > 0)
                                 {
-                                    sound = toms[rhythm == SoloGesture.Lick ? Math.Clamp(at + rock * (rights % 2), 0, toms.Length - 1) : at];
+                                    sound = down[rhythm == SoloGesture.Lick ? Math.Clamp(at + rock * (rights % 2), 0, down.Length - 1) : at];
                                     if (rhythm == SoloGesture.Run)
                                     {
-                                        if (at + step < 0 || at + step >= toms.Length)
+                                        if (at + step < 0 || at + step >= down.Length)
                                             step = -step;
-                                        at = Math.Clamp(at + step, 0, toms.Length - 1);
+                                        at = Math.Clamp(at + step, 0, down.Length - 1);
                                     }
 
                                     rights++;

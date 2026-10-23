@@ -40,6 +40,14 @@ public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode,
         : Math.Max(1, span.Meter.PatternBarCount / 2) * span.Meter.BarDuration;
 
     public int TurnAt(SectionSpan span, double position) => (int)Math.Floor((position - span.Start) / TurnOf(span) + 1e-9) % Soloists.Length;
+
+    /// <summary>A section's turns in order, from its start to its end, the last cut there.</summary>
+    public static IEnumerable<(double Start, double End)> Turns(SectionSpan span)
+    {
+        var turn = TurnOf(span);
+        for (var at = span.Start; at < span.End - 1e-9; at += turn)
+            yield return (at, Math.Min(span.End, at + turn));
+    }
 }
 
 /// <summary>
