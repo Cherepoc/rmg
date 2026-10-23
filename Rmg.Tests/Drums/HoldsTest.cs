@@ -19,7 +19,8 @@ public sealed class HoldsTest
         ("Mutations", Mutations.KeepsOutOf, true),
         ("Ghosts", Ghosts.KeepsOutOf, true),
         ("Hat rolls", HatRolls.KeepsOutOf, true),
-        ("Drum ornaments", DrumOrnaments.KeepsOutOf, true)
+        ("Drum ornaments", DrumOrnaments.KeepsOutOf, true),
+        ("Surf drops", SurfDrops.KeepsOutOf, false)
     ];
 
     /// <summary>A track's events after a stage, its notes once realized, its states before.</summary>

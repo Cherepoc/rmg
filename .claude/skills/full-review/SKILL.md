@@ -217,7 +217,11 @@ package's commit with `status.py $R package <package> <commit> "<songs changed>"
   change made only once the user has heard it. A question's song without changes the device alone: a patch on an option
   no other device shares (one switching the band's dead notes off asks nothing of a soloist's), never a pool emptied
   (refused) nor its weights made even (most songs then draw the same), so that what is heard apart is the device.
-  `Write` prints how far its songs differ; one under about 0.1 is not asked, as listeners have not told such apart.
+  `Write` prints how far its songs differ; one under about 0.1 is not asked, as listeners have not told such apart,
+  but a device of a few places (a bar's slide into a section, a note in a run, a roll at a bar's end) is asked whatever
+  its measure, its songs heard from its places: the measure takes 16 s around a moment of it, and a small place is
+  heard clearly (the owner kept the surf drop at 0.04, the chromatic approach at 0.03 and IDM's 64ths at 0.05 on
+  23 October 2026, to be asked). A measure is no reason to cut.
   That measure counts the notes that differ, not the quality asked of them: a question of a colour, a mood or a
   brightness, measures the colour first (a song's major chords at each end), as songs a mood moved by its draws alone
   were measured apart and heard the same. A question of a device that refers to other music (a break on the tune, a

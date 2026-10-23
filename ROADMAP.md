@@ -67,7 +67,8 @@ every section of its kind: `celtic-solo` was heard at a violin's solo where the 
   inversion, the pinch's squeal; and of 18 October, Celtic's harmonica solo, and by the owner's ear the wah of the metal
   genres and of the acoustic guitars, and Djent's snare rolled into a drop (`drop.rolls`, Nu metal's kept).
 - **Let go of, not told apart or too faint to ask** (as they are): Djent's polymeter frames, `pop-melody-chords`,
-  `trance-raise`, `pop-eighths`, IDM's 64th rolls (measured again at 0.05 and cut, 23 October 2026), Dark jazz's and Black metal's darker moods
+  `trance-raise`, `pop-eighths`, IDM's 64th rolls (0.05 again on 23 October 2026, kept to be asked, a device of few
+  places), Dark jazz's and Black metal's darker moods
   (`darkjazz-dark`, `blackmetal-minor`), and Trance's and Trap's mood ends, unheard while a mood leaned only a genre's
   own pool (since built: the chords' degrees by darkness and a mood past a genre's span, heard in the sixth round);
   and of 19 October, measured too faint to ask: a blues soloist's bends (0.08), Celtic's vibrato (0.10, in 17 of 24
@@ -367,9 +368,10 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
   the spacious soloist (`soloStyle.space`, a spacious Blues solo silent 57% to 71% of its time, 4.1 notes a bar to 1.6);
   a restated motif displaced (113 of 369 in the wildest songs); a solo of two choruses building in each (Jazz's second
   starting at 0.56 to 0.32); a soloist riffing on the band's onsets (`soloStyle.rhythm`, Funk's notes on them 38% to
-  45%); the climax's release on its highest chord note (the top note the release 2-8% to 17-23%). The eleventh round's second
-  part asks `blues-space`, `blues-pickups`, `funk-rhythm` and `folk-melody`; a run's chromatic approach into its note on
-  the beat (2.9% of Jazz's solo notes) measured too faint to ask twice (0.03), cut on the owner's word (23 October 2026). Retired on 22 October: `blues-space` (11-1), `blues-pickups` (6-0) and `surf-tremolo` (6-0)
+  45%); the climax's release on its highest chord note (the top note the release 2-8% to 17-23%); a run's chromatic
+  approach into its note on the beat (`soloStyle.chromatic`, 2.9% of Jazz's solo notes). The eleventh round's second
+  part asks `blues-space`, `blues-pickups`, `funk-rhythm` and `folk-melody`; Jazz's chromatic approach measured too
+  faint to ask (0.03, twice), kept on the owner's word to be asked (23 October 2026). Retired on 22 October: `blues-space` (11-1), `blues-pickups` (6-0) and `surf-tremolo` (6-0)
   accepted and kept as built; `folk-melody` not told apart, the break on the melody a paraphrase (8-33% of its time
   quoting the tune, its notes sounding the tune's hardly oftener than a line of its own's, a third of them over a
   section never sung), rebuilt the same day: a break on the melody plays the tune whole, accented, moved by octaves into
@@ -393,8 +395,10 @@ soloists' genre options one choice, `soloStyle` (space, pickups, rhythm, chromat
 - **Surf rock** (built 22 October 2026, a new preset as the owner asked): instrumental surf, clean bright guitars in
   a plate's heavy send (no spring among the synthesizer's rooms, so no drip), the double harmonic scale already one of
   the songs' (`doubleHarmonicMajor`), a whammy's dip a step down (`vibratoWidth.dip`), a tremolo-picked riff now and
-  then: 163 a minute on the average, sections tremolo-picked 11%. The twelfth round asks `surf-tremolo`; the surf drop
-  into a louder section, measured too faint to ask twice (0.05, then 0.04 on 23 October 2026), cut on the owner's word. Put off: the tom among the timekeepers, a hi-hat's pattern on the floor tom: a
+  then, a surf drop into a louder section (`surfDrop.lifts`): 163 a minute on the average, sections tremolo-picked
+  11%, 29 drops in 64 songs. The twelfth round asks `surf-tremolo`; the drop measured too faint to ask (0.05, a bar in
+  a stretch, and 0.04 on 23 October 2026), kept on the owner's word to be asked at its bar, a device of few places
+  that a measure over 16 s underrates. Put off: the tom among the timekeepers, a hi-hat's pattern on the floor tom: a
   genre's pool of the time role gives the tom the role, but the section's lead in it goes first to the drum whose own
   role it is, the hi-hat, so that the tom would need a genre's lean in the lead's choice (`DrumKitGenerator.SelectKit`),
   a mechanism of its own for one genre.

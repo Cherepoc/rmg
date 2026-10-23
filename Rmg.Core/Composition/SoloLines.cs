@@ -228,6 +228,9 @@ internal static class SoloLines
     /// <summary>How many scale steps a run's note on a change moves to land at most: one to a triad's note, two to a power chord's.</summary>
     private const int LandingSteps = 2;
 
+    /// <summary>The place a note's draw of whether it approaches its next chromatically is derived from its key by, a sequence of its own.</summary>
+    private const int ChromaticStream = 3;
+
     /// <summary>The steps above a chord's root a triad's notes are, the root, the third and the fifth, where no part carries the chord's shape.</summary>
     private static readonly int[] ChordSteps = [0, 2, 4];
 
@@ -605,6 +608,24 @@ internal static class SoloLines
             if (planned[k].Run && chordChanges.Any(x => Math.Abs(x - planned[k].Position) < 1e-9) && Lands(k))
                 Land(k);
 
+        // a run's note off the beat into its next on the beat a whole step away played the semitone beside that note now and
+        // then, a chromatic approach into it, as a jazz line puts its chord's notes on the beats, by its own key's draw
+        // on a pulse of its bar, the meter's beats, a dotted quarter's in 6/8 and an odd meter's groups, the bars counted from
+        // the section's start
+        bool OnBeat(double position) => span.Meter.Pulses.Any(x => Math.Abs((position - barOrigin).Mod(span.Meter.BarDuration) - x) < 1e-6);
+        bool Chromatic(int k) => Draws(planned[k].Position, ChromaticStream, soloist.ChromaticChance);
+        // the notes as they sound, each kept as its scale step over the chord it plays under, a new chord's at the beat
+        int Sounding(int k)
+        {
+            var chord = Chord(MelodyAt(planned[k].Position).Value, planned[k].Position);
+            return chord.GetPitch(LinePlacement.GetScaleStep(chord, planned[k].Pitch));
+        }
+
+        for (var k = 0; k + 1 < planned.Count; k++)
+            if (planned[k].Run && planned[k + 1].Run && planned[k].Phrase == planned[k + 1].Phrase && !OnBeat(planned[k].Position) && OnBeat(planned[k + 1].Position)
+                && Math.Abs(Sounding(k + 1) - Sounding(k)) == 2 && Chromatic(k))
+                planned[k] = planned[k] with { Pitch = Sounding(k + 1) - Math.Sign(Sounding(k + 1) - Sounding(k)), Altered = true };
+
         int FoldTowards(int pitch, int towards) => pitch + 12 * (int)Math.Round((towards - pitch) / 12.0);
         // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc); and a stacked
         // note off the beat that leads into a chord change planed into it, an approach, where the soloist approaches
@@ -626,7 +647,7 @@ internal static class SoloLines
 
     /// <summary>
     ///     A note of a solo's line as planned, before it is placed: where it starts, its pitch, how it is played, and whether
-    ///     its pitch is off the scale, a tune's blue note, and how much louder it plays than its
+    ///     its pitch is off the scale, a chromatic approach's or a tune's blue note, and how much louder it plays than its
     ///     intensity has it, a velocity sum.
     /// </summary>
     private sealed record PlannedNote(double Position, int Pitch, double Intensity, double Held, bool Accented, bool Release, bool Stacked, bool Octave, bool Ghosts, bool Run, int Phrase, bool Altered, double Lift);

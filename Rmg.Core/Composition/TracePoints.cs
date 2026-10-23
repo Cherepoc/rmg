@@ -184,6 +184,8 @@ internal static class TracePoints
     /// <summary>A solo on the melody's tune, every note of the melody it plays: their starts and their pitches as the soloist plays them (an array of tuples of a <c>double</c> and an <c>int</c>).</summary>
     public const string SoloTune = "Solo tune";
 
+    /// <summary>A surf drop, a guitar's slide down the neck into a louder section: the bar it plays, its start and its end (a tuple of two <c>double</c>s).</summary>
+    public const string SurfDrop = "Surf drop";
 
     /// <summary>A solo's run landing on a change of chord: the note's place and how many scale steps its cell moved (a tuple of a <c>double</c> and an <c>int</c>).</summary>
     public const string SoloLanding = "Solo landing";

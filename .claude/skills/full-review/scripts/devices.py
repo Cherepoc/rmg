@@ -21,8 +21,8 @@ FAMILIES = {
     'form': {
         'choices': 'tempo length meter formChances form phrases phraseBars sectionLength phraseScheme texture alone loop drop dropKind breakdown stopTime '
                    'push intro openingAlone openingPart ensembleHits ending lastRepeat sectionChanges parts roleLength dynamics voice space rests '
-                   'tempoBand intensity stops riffSection',
-        'stages': 'Stop time|Pushes|Silent start|Lift cues|Risers|Key changes|Hook intro',
+                   'tempoBand intensity stops surfDrop riffSection',
+        'stages': 'Stop time|Pushes|Silent start|Lift cues|Risers|Surf drops|Key changes|Hook intro',
     },
     'harmony': {
         'choices': 'rootMotion rootDegree cadenceDegree cadenceRaise sectionHome chordScales ownMode passingChords passingKind planing harmonyDevices '
@@ -37,7 +37,7 @@ FAMILIES = {
     },
     'drums': {
         'choices': 'fills pocket grooveHold pins mutation ghosts rudiments hatRolls drumSounds drumStrokes drumJob marks kit drumSetup drumPieces '
-                   'polymeter polymeterCell feel feelChances feelValues ghostNotes kickOut timeChanges',
+                   'polymeter polymeterCell feel feelChances feelValues ghostNotes hatRollRate kickOut timeChanges',
         'stages': 'Polymeter|Figures|Mutations|Fills|Drum marks|Hat rolls|Ghosts|Drum ornaments|Timing',
     },
     'solos': {
