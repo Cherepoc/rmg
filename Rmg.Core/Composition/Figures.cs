@@ -60,12 +60,18 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
     /// <summary>
     ///     Where it strikes in a bar of the meter at its steady step, in beats: a step of a quarter or more on the bar's
     ///     pulses, as many of them as it strikes of 4/4's, so that 6/8's boom and kick fall on its dotted quarters, 1 and 4;
-    ///     a finer one every 8th or 16th, the meter's own.
+    ///     a half's or more in a bar of uneven groups on the groups' starts, 5/4's 2+3 on 1 and 3; a finer one every 8th or
+    ///     16th, the meter's own.
     /// </summary>
     public IEnumerable<double> StepsIn(Meter meter)
     {
         if (Step < 4)
             return Enumerable.Range(0, meter.Sixteenths).Where(x => x % Step == 0).Select(x => x * 0.25);
+        if (Step >= 8 && meter.Groups.Distinct().Count() > 1)
+        {
+            var every = Math.Max(1, (int)Math.Round(Step / meter.Groups.Average(), MidpointRounding.AwayFromZero));
+            return meter.Groups.Select((_, i) => meter.Groups.Take(i).Sum() * 0.25).Where((_, i) => i % every == 0);
+        }
         var stride = Math.Max(1, (int)Math.Round(meter.Pulses.Length * Step / 16.0, MidpointRounding.AwayFromZero));
         return meter.Pulses.Where((_, i) => i % stride == 0);
     }

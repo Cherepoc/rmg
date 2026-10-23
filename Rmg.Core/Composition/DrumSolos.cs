@@ -540,10 +540,17 @@ internal static class DrumSolos
                         // the lowest, the others' on the drums in turn from the highest, on the triplets now and then, the loud
                         // among them accents, one at a place; the feet's left to the feet
                         var triplets = varied[Math.Round(start, 6)];
+                        // a stroke on the triplet of its beat, its beats counted from its bar's start, as a bar of 7/8 starts on a half beat
+                        double Triplet(double position)
+                        {
+                            var bar = whole.Bar(whole.BarOf(position)).Start;
+                            var beat = bar + Math.Floor(position - bar + 1e-9);
+                            return beat + Math.Round((position - beat) * 3) / 3;
+                        }
                         var snares = Of(FillDrumRole.Snare).Select(x => x.Track).ToHashSet();
                         var strokes = song.TrackTimelineMap.Where(x => tracks.Contains(x.Key) && !feetTracks.Contains(x.Key))
                             .SelectMany(x => x.Value.EventTimeline.Where(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9)
-                                .Select(n => (Track: x.Key, Position: triplets ? Math.Floor(n.Position + 1e-9) + Math.Round((n.Position - Math.Floor(n.Position + 1e-9)) * 3) / 3 : n.Position,
+                                .Select(n => (Track: x.Key, Position: triplets ? Triplet(n.Position) : n.Position,
                                     Velocity: n.Value.GetStateValue(StateKinds.Velocity))))
                             .Where(x => x.Position < end - 1e-9)
                             .GroupBy(x => Math.Round(x.Position, 6)).Select(x => x.OrderBy(y => snares.Contains(y.Track) ? 0 : kick is not null && y.Track == kick.Track ? 1 : 2).First())

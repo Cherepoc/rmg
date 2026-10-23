@@ -334,9 +334,10 @@ internal static class SongStages
             LineFills.Run with { Chance = LineFills.RunChance.At(song.Facets[Facet.Melody], song.Genre.Chance(GenreChoices.LineRun, "counterMelody")) }, melodyWalks.Union(counterWalks));
         timeline = Place(timeline, riff, RiffLayers.Line);
         // and the riff turning round into its next cycle now and then, where its section's pattern starts again within it, but
-        // in a polymeter, whose cycle is not its bar's
-        var restarts = map.Plays.Where(x => !x.IsEnding && !draft.Polymeters.Contains(x.Span.SectionId)).SelectMany(play => Enumerable.Range(1, Math.Max(0, (int)Math.Round(play.Span.Duration / play.Span.Meter.PatternDuration) - 1))
-            .Select(k => play.Span.Start + k * play.Span.Meter.PatternDuration)).Select(x => new PlayedRun(x, [x - 1, x - LineFills.ShortestNote], 0)).ToArray();
+        // in a polymeter, whose cycle is not its bar's; its walk from the last pulse of the bar before, a dotted quarter in 6/8
+        var restarts = map.Plays.Where(x => !x.IsEnding && !draft.Polymeters.Contains(x.Span.SectionId))
+            .SelectMany(play => play.Span.Patterns.Skip(1).Select(pattern => (pattern.Start, play.Span.Meter)))
+            .Select(x => new PlayedRun(x.Start, [x.Start - (x.Meter.BarDuration - x.Meter.Pulses[^1]), x.Start - LineFills.ShortestNote], 0)).ToArray();
         (timeline, _) = LineFills.Apply(timeline, riff.Key, (PitchInstrumentTrack)riff.Value, restarts, place => song.Stream(SongStream.RiffTurnarounds, place), map,
             LineFills.Riff with { Chance = LineFills.TurnaroundChance.At(song.Facets[Facet.Melody], song.Genre.Chance(GenreChoices.Riff, "turnaround")) }, ImmutableHashSet<double>.Empty);
         return draft with { Timeline = timeline };

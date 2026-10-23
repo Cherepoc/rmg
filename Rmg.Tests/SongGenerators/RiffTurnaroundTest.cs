@@ -7,7 +7,7 @@ namespace Rmg.Tests.SongGenerators;
 public sealed class RiffTurnaroundTest
 {
     /// <summary>
-    ///     A riff's turnaround walks its cycle's last beat and ends, most of the time, a scale step from the note the cycle
+    ///     A riff's turnaround walks its cycle's last pulse and ends, most of the time, a scale step from the note the cycle
     ///     starts on as played, three semitones at most, harmonic minor's augmented second, where no stage after the lines moved
     ///     that note, as a pedal or a riff's chords may (seen 97%, of 62 turnarounds into 452 restarts in 64 songs).
     /// </summary>
@@ -23,7 +23,10 @@ public sealed class RiffTurnaroundTest
             restarts += song.PlayedSpans.Sum(x => Math.Max(0, (int)Math.Round(x.Duration / x.Meter.PatternDuration) - 1));
             foreach (var (line, positions) in song.Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == riff).Select(x => ((double Line, double[] Positions))x.Value!))
             {
-                await Assert.That(positions.All(x => x >= line - 1 - 1e-9 && x < line)).IsTrue().Because($"seed {song.Seed} into {line}");
+                // its last pulse, a beat in 4/4, a dotted quarter in 6/8
+                var meter = song.PlayedSpans.First(x => line > x.Start + 1e-9 && line <= x.End + 1e-9).Meter;
+                var walk = meter.BarDuration - meter.Pulses[^1];
+                await Assert.That(positions.All(x => x >= line - walk - 1e-9 && x < line)).IsTrue().Because($"seed {song.Seed} into {line}");
                 // as played, but where a later stage took a note out or moved the cycle's first, as a stop or a push does
                 var last = notes.LastOrDefault(n => Math.Abs(n.Position - positions[^1]) < 1e-6);
                 var target = notes.FirstOrDefault(n => Math.Abs(n.Position - line) < 1e-6);

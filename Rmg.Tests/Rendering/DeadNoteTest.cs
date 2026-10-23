@@ -25,7 +25,8 @@ public sealed class DeadNoteTest
             foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
             {
                 dead++;
-                var between = Math.Abs(Math.IEEERemainder(note.Position - 0.25, 0.5)) < 0.05;
+                // between its bar's 8ths, counted from the bar's start
+                var between = Math.Abs(Math.IEEERemainder(song.Map.PlaceOf(note.Position).Beat - 0.25, 0.5)) < 0.05;
                 await Assert.That(between).IsTrue().Because($"seed {song.Seed}, {role} at {note.Position}");
             }
         }

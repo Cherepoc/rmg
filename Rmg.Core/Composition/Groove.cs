@@ -76,8 +76,9 @@ internal static class Groove
     public const double ShortestSwungNote = 0.14;
 
     /// <summary>
-    ///     The shortest a swung pair's second note plays, in seconds: a drawn swing lighter where it would play it shorter,
-    ///     as a drummer's swing evens out the faster the tempo, nearly straight at the fastest.
+    ///     The shortest a swung pair's second note plays, in seconds, at the song's tempo: a drawn swing lighter where it
+    ///     would play it shorter, as a drummer's swing evens out the faster the tempo, nearly straight at the fastest; a
+    ///     section at a faster tempo of its own plays it a little shorter.
     /// </summary>
     public const double ShortestSecondNote = 0.1;
 

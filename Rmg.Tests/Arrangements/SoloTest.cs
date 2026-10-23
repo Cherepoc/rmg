@@ -402,7 +402,7 @@ public sealed class SoloTest
 
     /// <summary>
     ///     A solo's chromatic note, its scale's step altered, approaches the next on the beat a semitone from it, in whatever
-    ///     octave the line's register puts that note, played off the beat itself; Jazz's solos play them and Celtic's, which
+    ///     octave the line's register puts that note, played off its bar's pulses itself; Jazz's solos play them and Celtic's, which
     ///     keep to their mode, never (seen 2.9% of Jazz's solo notes).
     /// </summary>
     [Test]
@@ -419,7 +419,7 @@ public sealed class SoloTest
                 if (solo[i].Value.State.GetStateValue(StateKinds.Alteration) == 0 || solo[i].Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) == 0)
                     continue;
                 chromatic++;
-                if (rule && (i + 1 >= solo.Length || (solo[i + 1].Value.Pitches[0] - solo[i].Value.Pitches[0]).Mod(12) is not (1 or 11) || Math.Abs(Math.IEEERemainder(solo[i].Position - span.Start, 1)) < 1e-6))
+                if (rule && (i + 1 >= solo.Length || (solo[i + 1].Value.Pitches[0] - solo[i].Value.Pitches[0]).Mod(12) is not (1 or 11) || span.Meter.Pulses.Any(x => Math.Abs((solo[i].Position - span.Start).Mod(span.Meter.BarDuration) - x) < 1e-6)))
                     throw new InvalidOperationException($"{genre} seed {song.Seed} at {solo[i].Position}: a chromatic note approaching nothing on the beat");
             }
 

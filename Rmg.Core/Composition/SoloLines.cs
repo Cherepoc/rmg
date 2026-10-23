@@ -518,12 +518,18 @@ internal static class SoloLines
             void Fill(double from, int pitch, double to, int? next)
             {
                 var previous = pitch;
-                var first = barOrigin + Math.Ceiling((from + FillGap - barOrigin) / FillStep - 1e-9) * FillStep;
-                for (var position = first; position < to - FillGap + 1e-9; position += FillStep)
+                // the 8ths of every bar it fills, each bar's counted from its own start, as an odd meter's bar ends on a 16th
+                var bar = span.Meter.BarDuration;
+                var positions = new List<double>();
+                for (var barStart = barOrigin + Math.Floor((from + FillGap - barOrigin) / bar + 1e-9) * bar; barStart < to - FillGap + 1e-9; barStart += bar)
+                    for (var position = barStart; position < Math.Min(barStart + bar - 1e-9, to - FillGap + 1e-9); position += FillStep)
+                        if (position >= from + FillGap - 1e-9)
+                            positions.Add(position);
+                foreach (var (position, k) in positions.Select((x, k) => (x, k)))
                 {
                     var target = next ?? pitch;
                     int filled;
-                    if (next is not null && position + FillStep >= to - FillGap + 1e-9)
+                    if (next is not null && k == positions.Count - 1)
                     {
                         // the last, a scale step beside the next, from the side the fill comes from
                         var scale = ScaleNotes(position);
@@ -611,7 +617,9 @@ internal static class SoloLines
 
         // a run's note off the beat into its next on the beat a whole step away played the semitone beside that note now and
         // then, a chromatic approach into it, as a jazz line puts its chord's notes on the beats, by its own key's draw
-        bool OnBeat(double position) => Math.Abs(position - barOrigin - Math.Round(position - barOrigin)) < 1e-9;
+        // on a pulse of its bar, the meter's beats, a dotted quarter's in 6/8 and an odd meter's groups, the bars counted from
+        // the section's start
+        bool OnBeat(double position) => span.Meter.Pulses.Any(x => Math.Abs((position - barOrigin).Mod(span.Meter.BarDuration) - x) < 1e-6);
         bool Chromatic(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), k + 1), ChromaticStream))
             .TestProbability(soloist.ChromaticChance);
         // the notes as they sound, each kept as its scale step over the chord it plays under, a new chord's at the beat

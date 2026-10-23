@@ -18,7 +18,9 @@ public sealed class ChordScalesReportTest
         int clashes = 0, notes = 0;
         foreach (var note in tracks.Where(x => x.Role == TrackRole.Melody).SelectMany(x => x.NoteTimeline))
         {
-            if (Math.Abs(note.Position - Math.Round(note.Position)) > 1e-6)
+            // on a pulse of its bar, its meter's, counted from the bar's start
+            var place = song.Map.PlaceOf(note.Position);
+            if (!song.Map.MeterAt(note.Position).Pulses.Any(x => Math.Abs(x - place.Beat) < 1e-6))
                 continue;
             var held = chords.Where(x => x.Position <= note.Position + 1e-6 && x.Position + x.Value.Duration > note.Position + 1e-6).ToArray();
             if (held.Length == 0)

@@ -28,7 +28,7 @@ internal sealed class PatternGenerator
     private readonly Meter _meter;
     private readonly Genre _genre;
 
-    /// <param name="meter">The meter the song's bars are in.</param>
+    /// <param name="meter">The meter the bars it makes are in, its section's.</param>
     /// <param name="genre">The genre whose pool of the feels a bar's change keeps to.</param>
     public PatternGenerator(IGenerationContext context, ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions, Meter meter, Genre genre)
     {
@@ -288,7 +288,8 @@ internal sealed class PatternGenerator
 
         var patternSeeds = CreatePatternSeeds(stateMap.GetStateValue(CompositionStateKinds.ValueSeed));
         var changingContext = _context.CreateContext(patternSeeds.StateChanges);
-        var changingStateTimelineMap = Generators.SequentialTimeline(CreateBeatLayerGenerator(stateMap), 1, 4)(changingContext)
+        // a beat's settings for every beat of the bar, a bar of seven or of three as long as it is
+        var changingStateTimelineMap = Generators.SequentialTimeline(CreateBeatLayerGenerator(stateMap), 1, (int)Math.Ceiling(_meter.BarDuration - 1e-9))(changingContext)
             .ToStateTimelineMap();
 
         var articulationOffsetGenerator = changingStateTimelineMap.ToIncrementalGenerator(
