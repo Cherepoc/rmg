@@ -179,13 +179,14 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
     /// </summary>
     public Genre AtMood(Mood mood, double conventionality)
     {
-        if (mood == default)
-            return this;
         var (from, to, _) = Range(GenreChoices.Darkness, conventionality) ?? Mood.SongsSpan;
         var (darkest, brightest) = (Mood.OfAmount(to), Mood.OfAmount(from));
-        var past = mood.Darkness > darkest + 1e-9 ? (mood.Darkness - darkest) / (1 - darkest)
-            : mood.Darkness < brightest - 1e-9 ? (brightest - mood.Darkness) / (brightest + 1)
-            : 0;
+        // how far past the span the darkness is, and on which side, the darker or the brighter
+        var (past, side) = mood.Darkness > darkest + 1e-9 ? ((mood.Darkness - darkest) / (1 - darkest), 1)
+            : mood.Darkness < brightest - 1e-9 ? ((brightest - mood.Darkness) / (brightest + 1), -1)
+            : (0.0, 0);
+        if (mood == default && past == 0)
+            return this;
         var choices = Choices;
         foreach (var (choice, lean, asSongs) in Mood.Leans)
         {
@@ -199,12 +200,12 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
             else if (choice.Kind is GenreChoiceKind.Range or GenreChoiceKind.Values)
                 options = options.AddRange(choice.Options.Where(x => !options.ContainsKey(x.Name) && lean(x.Name) != default).Select(x => KeyValuePair.Create(x.Name, x.Own)));
 
-            // a pool the darkness leans, past the genre's span, blended with the songs' own options that lean the mood's
-            // way, so that past its darkest a genre grows no brighter, where their own amounts are the songs' draw, as the
+            // a pool the darkness leans, past the genre's span, blended with the songs' own options that lean to the side
+            // it passed, so that past its darkest a genre grows no brighter, where their own amounts are the songs' draw, as the
             // scales' are and the chord shapes', drawn by their levels first, are not; each pool's weights a share of its own
             // at every end
             else if (choice.Kind == GenreChoiceKind.Pool && asSongs && past > 0 && choice.Options.Any(x => lean(x.Name).Darkness != 0))
-                options = Blended(options, choice.Options.Where(x => Math.Sign(lean(x.Name).Darkness) == Math.Sign(mood.Darkness)).ToImmutableDictionary(x => x.Name, x => x.Own), past);
+                options = Blended(options, choice.Options.Where(x => Math.Sign(lean(x.Name).Darkness) == side).ToImmutableDictionary(x => x.Name, x => x.Own), past);
 
             ByConvention Each(ByConvention value, Func<double, double> at) => new(at(value.Plain), at(value.Tuned), at(value.Wild));
             options = choice.Kind switch

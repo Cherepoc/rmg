@@ -136,7 +136,7 @@ internal static class Figures
         new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, null, 0, false),
         new("reverseGallop", "A reverse gallop, two 16ths and an 8th a beat", FigurePlayer.Riff, [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14], 16, null, 0, false),
         new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, null, 0, false),
-        new("arpeggio16", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, null, 0, false),
+        new("arpeggio16", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, null, 1, false),
         // a ska's or a reggae's chop on the 8ths' offbeats, and a swing band's Charleston comp, on 1 and the 2-and
         new("skank", "The skank, on the 8ths' offbeats", FigurePlayer.Chords, [2, 6, 10, 14], 16, null, 0, false),
         new("charleston", "The Charleston, on 1 and the 2-and", FigurePlayer.Chords, [0, 6], 16, null, 0, false),
@@ -144,7 +144,7 @@ internal static class Figures
         new("backbeat", "The chick, on 2 and 4", FigurePlayer.Chords, [4, 12], 16, null, 0, false),
         // the waltz, the bass's oom on 1 and the chords' pah-pah on 2 and 3, drawn by the chords and played by both
         new("waltz", "The waltz, the pah-pah on 2 and 3", FigurePlayer.Chords, [4, 8], 12, null, 0, false, Meter.ThreeFour, Exact: true),
-        new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, null, 0, true),
+        new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, null, 1, true),
         new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, null, 0, true),
         // a pulse, the root hammered in even 8ths or 16ths, a disco's, a synthwave's, a darksynth's
         new("halves", "The boom, on 1 and 3", FigurePlayer.Bass, [0, 8], 16, null, 0, false),

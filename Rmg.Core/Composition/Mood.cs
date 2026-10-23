@@ -36,8 +36,9 @@ public readonly record struct Mood(double Darkness, double Intensity)
     ///     otherwise, as their kit by their drums' job. The scales by their darkness, a minor third's dark and a major's
     ///     bright, Lydian the brightest and Locrian the darkest (<see cref="Scale.Darkness" />); the fiercer, the likelier
     ///     the power kit, double time, a riff that chugs or plays power chords, a driven instrument, a loud section's figure,
-    ///     and the calmer the brushes, the jazz kit and half time; a tempo's range leaning to its fast end the fiercer; a
-    ///     chord shape by its darkness; fills the more the fiercer, a value as a range's lean.
+    ///     hat rolls, ghost notes and drops, and the calmer the brushes, the jazz kit and half time; a tempo's range leaning
+    ///     to its fast end the fiercer, and its fast third; a chord shape and a chord's own mode by its darkness; fills the
+    ///     more the fiercer, a value as a range's lean.
     /// </summary>
     // built when first asked, as the choices it names take the songs' span of a mood from here
     public static ImmutableArray<(GenreChoice Choice, Func<string, (double Darkness, double Intensity)> Lean, bool AsSongs)> Leans => field.IsDefault ? field =
@@ -47,11 +48,19 @@ public readonly record struct Mood(double Darkness, double Intensity)
         (GenreChoices.FeelChances, name => (0, name switch { "doubleTime" => 1, "halfTime" => -0.5, _ => 0 }), true),
         (GenreChoices.Riff, name => (0, name switch { "chugs" => 1, "powerChords" => 0.5, _ => 0 }), true),
         (GenreChoices.Tempo, name => (0, name == "lean" ? 1 : 0), false),
+        // and a genre's thirds of its tempo range, the fast the fiercer and the slow the calmer
+        (GenreChoices.TempoBand, name => (0, name switch { "fast" => 1, "slow" => -1, _ => 0 }), false),
         // fills the more the fiercer, a value moved as a range's lean is
         (GenreChoices.Fills, name => (0, 1), true),
         // the chord shapes by their darkness, a Phrygian or a diminished chord the darker and a Lydian or a six-nine the
         // brighter, where a genre names its pool, as the songs draw theirs by levels first
         (GenreChoices.ChordShape, name => (ChordShapes.All.Single(x => GenreChoices.Name(x.Name) == name).Darkness, 0), false),
+        // a chord's own mode by its darkness, as the scales are, where a genre names its pool
+        (GenreChoices.OwnMode, name => (ChordScales.OwnModes.Single(x => GenreChoices.Name(x.Mode.Name) == name).Mode.Darkness, 0), false),
+        // the drums' energy, the more the fiercer, where a genre names it: rolls on the hi-hat, ghost notes, builds to a drop
+        (GenreChoices.HatRolls, _ => (0, 1), false),
+        (GenreChoices.Ghosts, _ => (0, 1), false),
+        (GenreChoices.Drop, name => (0, name == "lifts" ? 1 : 0), false),
         // every player's figures by how a loud section leans them, a double kick or four on the floor the fiercer
         ..Enum.GetValues<FigurePlayer>().Select(player => (GenreChoices.Figures[player],
             (Func<string, (double, double)>)(name => (0, Figures.Of(player, name)?.EnergyLean ?? 0)), false)),

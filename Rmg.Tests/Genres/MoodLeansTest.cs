@@ -40,6 +40,38 @@ public sealed class MoodLeansTest
         await Assert.That(brightest.Where(x => !own.Contains(x)).All(x => DarknessOf(x) < 0)).IsTrue();
     }
 
+    /// <summary>
+    ///     A mood past a dark genre's span on its bright side reaches the songs' brighter scales, whatever the mood's sign: a
+    ///     darkness above 0 but brighter than the span, and the middle mood, (0, 0), which the page's middle step gives.
+    /// </summary>
+    [Test]
+    public async Task AMoodPastAGenresBrightSide_ReachesTheBrighterScales_EvenAboveTheMiddle()
+    {
+        var genre = GenrePresets.Genre("blackMetal");
+        var own = genre.Choices[GenreChoices.Scale.Name].Where(x => x.Value.Tuned > 0).Select(x => x.Key).ToHashSet();
+        var (from, _, _) = genre.Range(GenreChoices.Darkness, 0.5)!.Value;
+        double DarknessOf(string name) => Rmg.Core.Composition.Scales.All.Single(x => GenreChoices.Name(x.Name) == name).Darkness;
+        var brightest = Mood.OfAmount(from);
+        foreach (var darkness in new[] { 0, (brightest + Math.Max(0, brightest - 0.2)) / 2 }.Where(x => x < brightest - 1e-6))
+        {
+            var reached = genre.AtMood(new Mood(darkness, 0), 0.5).Choices[GenreChoices.Scale.Name].Where(x => x.Value.Tuned > 0 && !own.Contains(x.Key)).Select(x => x.Key).ToArray();
+            await Assert.That(reached).IsNotEmpty().Because($"darkness {darkness}");
+            await Assert.That(reached.All(x => DarknessOf(x) < 0)).IsTrue().Because($"darkness {darkness}");
+        }
+    }
+
+    /// <summary>A fierce mood leans a genre's tempo to its fast third and its drums to more rolls, ghosts and drops, a calm one away.</summary>
+    [Test]
+    public async Task AFierceMood_LeansTheFastBand_AndTheDrumsEnergy()
+    {
+        var (fierce, calm) = (new Mood(0, 1), new Mood(0, -1));
+        var synthwave = GenrePresets.Genre("synthwave");
+        await Assert.That(Ratio(synthwave, fierce, "tempoBand", "fast", "slow")).IsGreaterThan(Ratio(synthwave, calm, "tempoBand", "fast", "slow"));
+        double Chance(Genre genre, Mood mood, string choice, string option) => genre.AtMood(mood, 0.5).Choices[choice][option].Tuned;
+        var trap = GenrePresets.Genre("trap");
+        await Assert.That(Chance(trap, fierce, "hatRolls", "bars")).IsGreaterThan(Chance(trap, calm, "hatRolls", "bars"));
+    }
+
     [Test]
     public async Task AFierceMood_LeansToALoudSectionsFigures_ACalmOneAway()
     {
