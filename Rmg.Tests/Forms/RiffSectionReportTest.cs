@@ -51,8 +51,8 @@ public sealed class RiffSectionReportTest
     }
 
     /// <summary>
-    ///     A section over the intro's riff is a verse of a song that opens on an intro, in genres that do not loop otherwise
-    ///     (<see cref="GenreChoices.Loop" />).
+    ///     A section over the intro's riff is a verse of a song that opens on an intro playing that riff, so that the verse is
+    ///     heard to play it again, in genres that do not loop otherwise (<see cref="GenreChoices.Loop" />).
     /// </summary>
     [Test]
     public async Task ASectionOverTheIntrosRiff_IsAVerse_OfASongOpeningOnAnIntro()
@@ -71,6 +71,8 @@ public sealed class RiffSectionReportTest
                 await Assert.That(form.Roles[entry.Section]).IsEqualTo(SectionRole.Verse).Because($"{genre} seed {song.Seed}");
                 await Assert.That((int)entry.Value!).IsEqualTo(form.SectionIds[0]).Because($"{genre} seed {song.Seed}");
                 await Assert.That(form.Roles[form.SectionIds[0]]).IsEqualTo(SectionRole.Intro).Because($"{genre} seed {song.Seed}");
+                var intro = song.Map.Sections[0];
+                await Assert.That(song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Riff))?.Any(n => n.IsWithin(intro.Start, intro.End)) == true).IsTrue().Because($"{genre} seed {song.Seed}: the intro's riff heard");
             }
         }
 

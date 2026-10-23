@@ -378,9 +378,14 @@ internal sealed record SongDecisions(
             songUnconventionality[Facet.Form],
             absent
         );
-        // but the part the song opens on alone, which plays from the start, its draws made all the same
+        // but the part the song opens on alone, which plays from the start, its draws made all the same; and the riff of an
+        // intro a verse plays over, which the intro plays steady, its riff in it whatever it draws, so that the verse is heard
+        // to play it again
         if (plan.First is { } opening)
             lateEntries = lateEntries.Remove(opening);
+        var riffIntro = structure.Roles[played[0]] == SectionRole.Intro && played.Any(id => generateSection(id).LinesFrom == played[0]);
+        if (riffIntro)
+            lateEntries = lateEntries.Remove(TrackRole.Riff);
         StateTrace.RecordSong(TracePoints.LateEntries, string.Join(", ", lateEntries.Select(x => $"{x.Key} at {x.Value}")), lateEntries);
         // every appearance's parts, a part held back yet soloing no sooner than it comes in
         IReadOnlyCollection<TrackRole>[] partsAt = [..played.Select((_, index) => SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray())];
@@ -428,12 +433,12 @@ internal sealed record SongDecisions(
                 Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),
                 energyStep,
                 restedBefore.GetValueOrDefault(id, []),
-                // an intro of entries builds the first section's parts up itself
-                index == 0 && plan.Intro == IntroKind.Entries,
+                // an intro of entries builds the first section's parts up itself, and an intro a verse plays over plays steady
+                index == 0 && (plan.Intro == IntroKind.Entries || riffIntro),
                 solo,
                 [..lateEntries.Where(x => index < x.Value).Select(x => x.Key)],
                 // and the part the song opens on alone in the first
-                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key), ..index == 0 && plan.First is { } first ? [first] : Array.Empty<TrackRole>()],
+                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key), ..index == 0 && plan.First is { } first ? [first] : Array.Empty<TrackRole>(), ..index == 0 && riffIntro ? [TrackRole.Riff] : Array.Empty<TrackRole>()],
                 breakdownChorus && index == sectionIds.Length - 1
             );
             // as loud as its energy's step from the section's, by the lift's measure of loudness, so that its last chorus

@@ -149,6 +149,10 @@ internal sealed class SectionGenerator
     // the song's first section's role, an intro's whose riff its verses may play over
     private SectionRole? _firstRole;
 
+    // whether the song's first section's form leaves its riff out wherever it plays, a calm intro's, whose riff no verse
+    // plays over, as none heard it
+    private bool _firstLeavesRiff;
+
     // the song's first section's riff and bass, by track, its bars and its line, and the devices they play, which a section
     // of a loop plays
     private readonly Dictionary<int, (GeneratedBars Bars, SectionLine Line)> _firstLines = [];
@@ -312,6 +316,8 @@ internal sealed class SectionGenerator
         // the parts the section leaves out the first time it plays
         var arrangementSeed = StreamSeed(sectionId, SectionStream.Arrangement);
         var resting = FirstRests(sectionId, plan.Role, tilt);
+        if (plan.KeepsSongScale)
+            _firstLeavesRiff = form.Leaves.Contains(TrackRole.Riff);
         ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
         var section = new GeneratedSection(
             timeline,
@@ -437,9 +443,10 @@ internal sealed class SectionGenerator
         // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
         // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
         var loops = Stream(sectionId, SectionStream.Loop).TestProbability(Loop.At(facets[Facet.Form], _genre.Chance(GenreChoices.Loop, "sections")));
-        // or a verse over the intro's riff where the song opens on one, a genre's, from a sequence of its own
+        // or a verse over the intro's riff where the song opens on one whose form plays it, the intro then playing its riff
+        // (SongDecisions), a genre's, from a sequence of its own
         loops |= Stream(sectionId, SectionStream.VerseOverRiff).TestProbability(SongForms.VerseOverRiffChance.At(facets[Facet.Form], _genre.Chance(GenreChoices.RiffSection, "verses")))
-                 && plan.Role == SectionRole.Verse && _firstRole == SectionRole.Intro;
+                 && plan.Role == SectionRole.Verse && _firstRole == SectionRole.Intro && !_firstLeavesRiff;
         var harmony = new SectionHarmony(scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, planes);
         if (plan.KeepsSongScale)
             (_firstHarmony, _firstRole) = ((harmony, meter), plan.Role);

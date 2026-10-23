@@ -219,7 +219,9 @@ internal sealed class SongFormGenerator
             IntroKind.Hook => hook.Section.Timeline.Trim(hook.Section.Meter.PhraseDuration),
             _ => null
         };
-        ImmutableArray<IntroEntry> entries = plan.Intro == IntroKind.Entries ? DrawEntries(first, plan.Window, plan.First) : [];
+        // its riff first where a verse plays over it, which the verse is then heard to play again
+        var riffFirst = first.Role == SectionRole.Intro && sections.Any(x => x.Role == SectionRole.Verse && x.LinesFrom is not null);
+        ImmutableArray<IntroEntry> entries = plan.Intro == IntroKind.Entries ? DrawEntries(first, plan.Window, plan.First, riffFirst) : [];
 
         // the first section starts after the intro's bars, and the ending after the last
         var origin = introBlock?.Duration ?? 0;
@@ -474,7 +476,8 @@ internal sealed class SongFormGenerator
     ///     number of them, at least one and one fewer than all, come in over the window, spread evenly from its start,
     ///     and the rest together at its end, so that the window never plays the whole band.
     /// </summary>
-    internal ImmutableArray<IntroEntry> DrawEntries(GeneratedSection first, IntroWindow window, TrackRole? opening)
+    /// <param name="riffFirst">Whether the riff comes in first after the part the song opens on alone, an intro's a verse plays over.</param>
+    internal ImmutableArray<IntroEntry> DrawEntries(GeneratedSection first, IntroWindow window, TrackRole? opening, bool riffFirst)
     {
         var windowDuration = window.Bars * first.Meter.BarDuration;
         // but drums that only mark the form, which play in the sections alone
@@ -502,9 +505,11 @@ internal sealed class SongFormGenerator
             ..(weighed.Length == 0 ? [] : ByConvention.Weigh(weighed.Select(x => (x.Part, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))), _songRhythm.Value)).OrderByDescending(Key).Select(x => x.Value),
             ..playing.Except(weighed).Select(x => new Weighted<IntroPart>(x.Weight, x.Part)).OrderByDescending(Key).Select(x => x.Value)
         ];
-        // the part the song opens on alone first, the drums' every one, the rest in the order drawn
+        // the part the song opens on alone first, the drums' every one, then a riff a verse plays again, the rest in the order
+        // drawn
         var alone = order.Where(x => x.Role == opening).ToArray();
-        order = [..alone, ..order.Except(alone)];
+        var riff = riffFirst ? order.Where(x => x.Role == TrackRole.Riff).Except(alone).ToArray() : [];
+        order = [..alone, ..riff, ..order.Except(alone).Except(riff)];
 
         var inWindow = order.Count <= 1 ? order.Count : Generators.Int(1, order.Count)(new GenerationContext(countSeed));
         return
