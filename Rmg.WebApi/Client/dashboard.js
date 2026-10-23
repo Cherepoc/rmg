@@ -534,7 +534,9 @@ function drawRated() {
         return;
     }
 
-    elements.ratedHint.textContent = `The songs of ${summary.ratedVersion} rated, the most liked first. A seed is this song only in this version.`;
+    // a long list's middle left out, said so, so that the two ends are not read as one list
+    const left = summary.ratedCount - summary.rated.length;
+    elements.ratedHint.textContent = `The songs of ${summary.ratedVersion} rated, the most liked first${left > 0 ? `: the ${summary.rated.length / 2} most liked and the ${summary.rated.length / 2} least of ${summary.ratedCount}, ${left} between them left out` : ""}. A seed is this song only in this version.`;
     elements.rated.replaceChildren(table(
         ["Song", "Settings given", "Genre", "Liked", "Disliked"],
         summary.rated.map((seed) => [seed.seed, seed.identity === "" ? "drawn" : seed.identity, seed.genre === "" ? "none" : seed.genre, String(seed.likes), String(seed.dislikes)])

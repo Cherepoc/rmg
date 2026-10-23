@@ -130,7 +130,8 @@ public sealed record ServerSummary(
 /// <param name="Seeds">Which songs held attention.</param>
 /// <param name="Versions">How each songs' version was listened to, the latest first.</param>
 /// <param name="RatedVersion">The latest songs' version any song was rated in, which <paramref name="Rated" /> is of.</param>
-/// <param name="Rated">The songs of it rated, the most liked first and the most disliked last.</param>
+/// <param name="Rated">The songs of it rated, the most liked first and the most disliked last, the middle left out of a long list.</param>
+/// <param name="RatedCount">How many songs of it were rated, of which <paramref name="Rated" /> lists the ends where there are more than it holds.</param>
 /// <param name="RatedFifths">Its songs' ratings by how plain or wild they are, given apart from drawn.</param>
 /// <param name="RatedGenres">Its songs' ratings by their genre.</param>
 /// <param name="VerdictVersion">The latest songs' version a verdict was given in, which <paramref name="Verdicts" /> are of.</param>
@@ -150,6 +151,7 @@ public sealed record AnalyticsSummary(
     IReadOnlyList<VersionListening> Versions,
     string? RatedVersion,
     IReadOnlyList<RatedSeed> Rated,
+    int RatedCount,
     IReadOnlyList<RatedFifth> RatedFifths,
     IReadOnlyList<RatedGenre> RatedGenres,
     string? VerdictVersion,

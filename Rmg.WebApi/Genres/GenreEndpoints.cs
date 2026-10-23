@@ -29,7 +29,7 @@ public static class GenreEndpoints
 
     /// <summary>
     ///     A kept genre's canonical form without the choices and the options <see cref="GenreChoices" /> no longer has, and
-    ///     without a choice left with none of the options it named, or a range without both its ends, which its songs then
+    ///     without a choice left with none of the options it named, a pool left with none that weighs, or a range without both its ends, which its songs then
     ///     play as the songs have it; a choice the genre itself names with none kept as it is.
     /// </summary>
     public static string Known(string body)
@@ -41,9 +41,15 @@ public static class GenreEndpoints
             .Where(x => x.Choice is not null)
             .Select(x => (x.Choice, Named: x.Value.EnumerateObject().Count(), Kept: (IReadOnlyDictionary<string, JsonElement>)x.Value.EnumerateObject()
                 .Where(o => x.Choice!.Options.Any(c => c.Name == o.Name)).ToDictionary(o => o.Name, o => o.Value.Clone())))
-            .Where(x => (x.Named == 0 || x.Kept.Count > 0) && (x.Choice!.Kind != GenreChoiceKind.Range || x.Named == 0 || x.Kept.ContainsKey("from") && x.Kept.ContainsKey("to")))
+            .Where(x => (x.Named == 0 || x.Kept.Count > 0) && (x.Choice!.Kind != GenreChoiceKind.Range || x.Named == 0 || x.Kept.ContainsKey("from") && x.Kept.ContainsKey("to"))
+                        // and a pool whose options kept all weigh nothing, which no song could draw from
+                        && (x.Choice.Kind != GenreChoiceKind.Pool || x.Named == 0 || x.Kept.Values.Any(Weighs)))
             .ToDictionary(x => x.Choice!.Name, x => x.Kept);
         return GenreStore.Canonical(root.GetProperty("name").GetString()!, choices);
+
+        static bool Weighs(JsonElement amounts) => amounts.ValueKind == JsonValueKind.Array
+            ? amounts.EnumerateArray().Any(x => x.ValueKind == JsonValueKind.Number && x.GetDouble() > 0)
+            : amounts.ValueKind == JsonValueKind.Number && amounts.GetDouble() > 0;
     }
 
     /// <summary>How many numbers a range's scale is told by, evenly along its amounts, which the page draws it on.</summary>

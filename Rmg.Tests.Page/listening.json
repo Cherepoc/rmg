@@ -1,5 +1,28 @@
 [
   {
+    "id": "rock-quieter",
+    "question": "Rock's quieter sections turning their guitars clean: heard, or not?",
+    "decides": "A test's question, whose genre's other option of the choice patched is not zero.",
+    "genre": "rock",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "quieter": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "D",
+        "at": 30,
+        "listen": [
+          "Chords"
+        ]
+      }
+    ]
+  },
+  {
     "id": "quieter-form",
     "question": "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
     "decides": "The quieter form's chances by genre.",

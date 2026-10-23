@@ -66,17 +66,22 @@ internal static class Cdn
     {
         var name = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(url)))[..32];
         var (path, typePath) = (Path.Combine(Directory, name), Path.Combine(Directory, name + ".type"));
-        if (File.Exists(path) && File.Exists(typePath))
-            return (await File.ReadAllBytesAsync(path), await File.ReadAllTextAsync(typePath));
+        // an empty type, a run's broken off as it wrote it, as none
+        if (File.Exists(path) && File.Exists(typePath) && await File.ReadAllTextAsync(typePath) is { Length: > 0 } kept && !string.IsNullOrWhiteSpace(kept))
+            return (await File.ReadAllBytesAsync(path), kept);
 
         using var response = await Client.GetAsync(url);
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadAsByteArrayAsync();
         var type = response.Content.Headers.ContentType?.ToString() ?? throw new InvalidOperationException($"{url} came with no content type.");
         System.IO.Directory.CreateDirectory(Directory);
-        // the type last, so that a body half written is never read as whole
-        await File.WriteAllBytesAsync(path, body);
-        await File.WriteAllTextAsync(typePath, type);
+        // each written whole under a name of its own and moved into place, the type last, so that neither is ever read half
+        // written, by this run broken off or by another run beside it
+        var temporary = Path.Combine(Directory, $"{name}.{Guid.NewGuid():N}");
+        await File.WriteAllBytesAsync(temporary, body);
+        File.Move(temporary, path, true);
+        await File.WriteAllTextAsync(temporary, type);
+        File.Move(temporary, typePath, true);
         return (body, type);
     }
 }

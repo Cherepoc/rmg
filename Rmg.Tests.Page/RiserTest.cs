@@ -26,6 +26,7 @@ public sealed class RiserTest(Site site)
         string? seed = null;
         // the songs the route has answered, which the page's own requests, routed past, do not show
         var answered = 0;
+        var searched = false;
         await page.Page.RouteAsync("**/api/songs/generate", async route =>
         {
             var body = JsonNode.Parse(route.Request.PostData ?? "{}")!.AsObject();
@@ -42,12 +43,14 @@ public sealed class RiserTest(Site site)
                 }
             }
 
+            searched = true;
             await route.FulfillAsync(new RouteFulfillOptions { Response = response });
             Interlocked.Increment(ref answered);
         });
         await page.Page.ReloadAsync();
+        // as long as the search takes, a song made for every seed tried before the page has its first
+        await page.Until(() => Task.FromResult(Volatile.Read(ref searched)), "a Techno song whose pad carries a riser, searched for over seeds 0 to 63", 60);
         await page.FirstSong();
-        await page.Until(() => Task.FromResult(report is not null), "the song's report");
 
         var pad = JsonDocument.Parse(report!).RootElement.GetProperty("parts").GetProperty("pad");
         await Assert.That(pad.GetProperty("riser").ValueKind).IsEqualTo(JsonValueKind.Number).Because(report!);

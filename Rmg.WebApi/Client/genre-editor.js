@@ -1,6 +1,6 @@
 import { button, downloadJson, jsonFileInput } from "./dialog-parts.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
-import { endsOf, genreProblem, isPresetName, nestedChoices, NOT_A_GENRE, ownOf, readGenreFile, sameName } from "./genres.js";
+import { endsOf, genreProblem, isPresetName, nestedChoices, NOT_A_GENRE, ownOf, readImport, sameName } from "./genres.js";
 import { ADDED_WEIGHT, createGenreTune } from "./genre-tune.js";
 import { byMiddle, COLOURS, drawBand, drawLines, drawShares, ENDS, endsInWords, labelOf, svg } from "./genre-charts.js";
 
@@ -453,24 +453,34 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     problem.setAttribute("role", "alert");
     problem.hidden = true;
 
-    const exported = button("Export JSON", "Save this genre as a JSON file", () => downloadJson(`${draft.name.trim() || "genre"}.json`, asFile(finishedOrDraft())), "genre-export");
+    const exported = button("Export JSON", "Save this genre as a JSON file", () => {
+        const genre = finishedOrDraft();
+        // a choice keeping none beside its parts' own, which a file of families cannot hold apart from them, refused
+        // rather than written as another genre
+        const lost = Object.keys(genre.choices).find((x) => !x.includes(".") && Object.keys(genre.choices[x]).length === 0 && Object.keys(genre.choices).some((y) => y.startsWith(`${x}.`)));
+        if (lost !== undefined) showProblem(`${choices.get(lost)?.label ?? lost} keeps none of its options beside its parts' own, which a file cannot hold: give it one or take it out before exporting.`, false);
+        else downloadJson(`${genre.name.trim() || "genre"}.json`, asFile(genre));
+    }, "genre-export");
 
     const file = jsonFileInput((text) => {
         // a choice the server knows, and an option of it
-        const read = readGenreFile(text, (choice, option) => choices.has(choice) && (option === undefined || choices.get(choice).options.some((x) => x.name === option)));
-        // a list of genres, every one of them, kept among one's own, none where one is no genre the server plays; one genre
-        // opened as the draft, its problem said
-        const refused = read?.genres?.find((x) => problemOf(x) !== null);
-        if (refused) showProblem(`${refused.name}: ${problemOf(refused)}`, false);
-        else if (read?.genres) {
+        const read = readImport(text, (choice, option) => choices.has(choice) && (option === undefined || choices.get(choice).options.some((x) => x.name === option)), (name) => choices.get(name));
+        // a list of genres, every one of them, kept among one's own, none where one is no genre the server plays, the
+        // earlier word of an import let go of; one genre opened as the draft, its problem said
+        if (read?.genres && read.refusal === null) {
             told.textContent = `${onKeepAll(read.genres)} kept among yours.`;
             told.hidden = false;
-        } else if (read?.genre) {
+            showProblem();
+            return;
+        }
+        if (read?.genre) {
             // a genre of its own, which a save keeps beside the one the editor was opened on
             origin = null;
             load(read.genre);
+            return;
         }
-        else showProblem(NOT_A_GENRE, false);
+        told.hidden = true;
+        showProblem(read === null ? NOT_A_GENRE : read.refusal, false);
     });
     const imported = button("Import JSON", "Open a genre saved as a JSON file, or keep every one of a list of them", () => file.click());
 

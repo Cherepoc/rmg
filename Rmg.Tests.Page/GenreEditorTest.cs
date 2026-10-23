@@ -83,6 +83,9 @@ public sealed class GenreEditorTest(Site site)
         var names = await page.Page.EvaluateAsync<string[]>("async () => (await (await fetch('api/genres/choices')).json()).map(x => x.name)");
         // a part's instrument, rhythm, feel or drum role, and the kit's pieces, are its tabs'
         string[] tabs = ["kit", "drumPieces", "drumSetup"];
+        // choices of the song's own and a part's both, so that the walks below walk something
+        await Assert.That(names.Any(x => x.Contains('.'))).IsTrue();
+        await Assert.That(names.Count(x => !x.Contains('.'))).IsGreaterThan(10);
         var missing = new List<string>();
         foreach (var name in names.Where(x => !x.Contains('.') && !tabs.Contains(x)))
             if (await dialog.Locator($".genre-tile[data-choice='{name}']").CountAsync() == 0)
@@ -644,15 +647,16 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await Tile(time, "length").Locator(".genre-ends > span").First.TextContentAsync()).Matches(@"^Plainest: \d+:\d\d–\d+:\d\d$");
         // the effects, a vibrato and the rest, as the songs have them
         await Assert.That(await Tile(await Section(dialog, "Sound"), "effects").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
-        // the chords off the scale, none in the plainest songs, applied dominants the commonest in a middling one
+        // the chords off the scale, none in the plainest songs, the commonest said in a middling one, whatever the generator's
+        // tuning makes it
         var offTheScale = Tile(await Section(dialog, "Harmony"), "chordScales");
         await page.Until(async () => await offTheScale.Locator(".genre-ends > span").CountAsync() == 3, "the chords off the scale said");
         await Assert.That(await offTheScale.Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
-        await Assert.That(await offTheScale.Locator(".genre-ends > span").Nth(1).TextContentAsync()).Matches(@"^Middling: Applied dominants \d+%$");
-        // the lines' scales, the plainest songs' pentatonic the commonest
+        await Assert.That(await offTheScale.Locator(".genre-ends > span").Nth(1).TextContentAsync()).Matches(@"^Middling: .+ \d+%$");
+        // the lines' scales, the plainest songs' commonest said
         var lineScale = Tile(await Section(dialog, "Harmony"), "lineScale");
         await page.Until(async () => await lineScale.Locator(".genre-ends > span").CountAsync() == 3, "the lines' scales said");
-        await Assert.That(await lineScale.Locator(".genre-ends > span").First.TextContentAsync()).StartsWith("Plainest: Pentatonic");
+        await Assert.That(await lineScale.Locator(".genre-ends > span").First.TextContentAsync()).Matches(@"^Plainest: .+");
         await Assert.That(await Tile(await Section(dialog, "Harmony"), "harmonicRhythm").IsVisibleAsync()).IsTrue();
         // a turnaround, a reharmonisation, never at the plain end
         await Assert.That(await Tile(await Section(dialog, "Harmony"), "turnaround").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
@@ -777,6 +781,13 @@ public sealed class GenreEditorTest(Site site)
         // a list of genres keeps none where one of them has a problem
         await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "list.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""[{ "name": "Fine", "choices": {} }, { "name": "Empty", "choices": { "meter": { "4/4": 0 } } }]""") });
         await page.Until(async () => await dialog.Locator("footer .warning").TextContentAsync() == "Empty: Meter keeps none of its options.", "the list's problem said");
+        // and a list kept after it said alone, the refusal let go of, and a refusal after it said alone too
+        await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "list.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""[{ "name": "Fine A", "choices": {} }, { "name": "Fine B", "choices": {} }]""") });
+        await page.Until(async () => await dialog.Locator(".genre-told").IsVisibleAsync(), "the list kept");
+        await Assert.That(await dialog.Locator("footer .warning").IsVisibleAsync()).IsFalse();
+        await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "list.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""[{ "name": "Empty", "choices": { "meter": { "4/4": 0 } } }]""") });
+        await page.Until(async () => await dialog.Locator("footer .warning").IsVisibleAsync(), "the refusal said");
+        await Assert.That(await dialog.Locator(".genre-told").IsVisibleAsync()).IsFalse();
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -844,7 +855,11 @@ public sealed class GenreEditorTest(Site site)
         var scale = await Change(harmony, "scale");
         var dorian = await Pick(scale, "dorian");
         await page.Until(() => dorian.IsVisibleAsync(), "the scales listed");
-        await Assert.That(await scale.Locator(".tune-picks label[data-option='dorian']").GetAttributeAsync("title")).IsEqualTo("Minor with a raised sixth: dark but hopeful, at home in funk, folk and jazz. On C: C D E♭ F G A B♭.");
+        // its description as the server has it, and its notes on C
+        var described = await page.Page.EvaluateAsync<string>("async () => (await (await fetch('api/genres/choices')).json()).find(x => x.name === 'scale').options.find(x => x.name === 'dorian').description");
+        var title = await scale.Locator(".tune-picks label[data-option='dorian']").GetAttributeAsync("title");
+        await Assert.That(title).StartsWith(described.TrimEnd());
+        await Assert.That(title).EndsWith("On C: C D E♭ F G A B♭.");
         await scale.Locator(".genre-close").ClickAsync();
 
         var shapes = await Change(harmony, "chordShape");
@@ -1093,8 +1108,10 @@ public sealed class GenreEditorTest(Site site)
         // a lean's handle taken chooses its tab, and up leans longer, its handle higher
         await lean.FocusAsync();
         await Assert.That(await tune.Locator(".tune-row[data-option='lean']").GetAttributeAsync("aria-current")).IsEqualTo("true");
+        var started = int.Parse(await tune.Locator("input[aria-label='Lean, middling']").InputValueAsync());
         for (var i = 0; i < 3; i++) await lean.PressAsync("PageUp");
-        await Assert.That(await tune.Locator("input[aria-label='Lean, middling']").InputValueAsync()).IsEqualTo("30");
+        // three steps of ten up from wherever the songs' own lean starts it
+        await Assert.That(int.Parse(await tune.Locator("input[aria-label='Lean, middling']").InputValueAsync())).IsEqualTo(Math.Min(100, started + 30));
         var above = double.Parse(await tune.Locator(".tune-handle[data-option='lean'][data-end='1']").GetAttributeAsync("cy") ?? "", System.Globalization.CultureInfo.InvariantCulture);
         await Assert.That(above).IsLessThan(below - 5);
         // the lean's handle follows its ends'

@@ -205,7 +205,7 @@ public sealed class EventStore
             // what a visitor tells on purpose, a rating or a verdict, counted apart from what the page tells by itself, so
             // that a long session's telemetry never crowds out its ratings
             using var counting = connection.CreateCommand();
-            counting.CommandText = $"SELECT COUNT(*) FROM events WHERE visitor = $visitor AND day = $day AND (name IN ('{EventNames.Rated}', '{EventNames.Verdict}')) = $deliberate";
+            counting.CommandText = $"SELECT COUNT(*) FROM events WHERE visitor = $visitor AND day = $day AND (name IN ({EventNames.DeliberateSql})) = $deliberate";
             counting.Parameters.AddWithValue("$visitor", stored.Visitor);
             counting.Parameters.AddWithValue("$day", stored.Day);
             counting.Parameters.AddWithValue("$deliberate", EventNames.IsDeliberate(stored.Name) ? 1 : 0);
@@ -222,7 +222,7 @@ public sealed class EventStore
             if (!_today.ContainsKey(deliberate))
             {
                 using var all = connection.CreateCommand();
-                all.CommandText = $"SELECT COUNT(*) FROM events WHERE day = $day AND (name IN ('{EventNames.Rated}', '{EventNames.Verdict}')) = $deliberate";
+                all.CommandText = $"SELECT COUNT(*) FROM events WHERE day = $day AND (name IN ({EventNames.DeliberateSql})) = $deliberate";
                 all.Parameters.AddWithValue("$day", stored.Day);
                 all.Parameters.AddWithValue("$deliberate", deliberate ? 1 : 0);
                 _today[deliberate] = Convert.ToInt64(all.ExecuteScalar());

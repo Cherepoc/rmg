@@ -147,6 +147,17 @@ export function readGenreFile(text, knows) {
 }
 
 /**
+ *     A JSON file imported, as both the editor and the manager read it: its genres (readGenreFile), and the first of them
+ *     the server would refuse, said by its name and its problem, or null; null for a file that is no genre.
+ */
+export function readImport(text, knows, choiceOf) {
+    const read = readGenreFile(text, knows);
+    if (read === null) return null;
+    const refused = (read.genres ?? [read.genre]).find((x) => genreProblem(x, choiceOf) !== null);
+    return { ...read, refusal: refused === undefined ? null : `${refused.name}: ${genreProblem(refused, choiceOf)}` };
+}
+
+/**
  *     What the server would refuse a genre for, said as the page says it, or null: a name too long, or a pool keeping no
  *     option, or none that weighs anything at any end; by the server's choices, each its label and kind, by its name.
  */

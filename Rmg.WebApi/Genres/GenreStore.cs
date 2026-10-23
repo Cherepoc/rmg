@@ -10,7 +10,9 @@ namespace Rmg.WebApi.Genres;
 /// <summary>
 ///     The genres songs were asked for in, kept so that a link can carry one by a short key: every genre by the key of its
 ///     canonical form (<see cref="Canonical" />), written once, never changed, and never let go of, as a link may name it
-///     for as long as it is kept; as many new ones a day as honest use asks at most (<see cref="DailyNew" />). Beside the analytics, in a file of its own, and kept whether anything is counted or not,
+///     for as long as it is kept; as many new ones a day as honest use asks at most (<see cref="DailyNew" />), of as many
+///     bytes (<see cref="DailyBytes" />), and of one network as one honest visitor asks (<see cref="NetworkNew" />), so that
+///     the file grows by a few tens of MB a day at the most and no client takes the day's new genres from the others. Beside the analytics, in a file of its own, and kept whether anything is counted or not,
 ///     as it is what makes a link play: it knows a genre, never who asked for it.
 /// </summary>
 public sealed class GenreStore
@@ -29,24 +31,35 @@ public sealed class GenreStore
     /// <summary>How many genres not kept before are kept in one day, well above honest use, so that the file cannot be grown without bound.</summary>
     public const int DailyNew = 10_000;
 
+    /// <summary>How many bytes of new genres are kept in one day, so that genres of every program in every pool cannot grow the file fast.</summary>
+    public const long DailyBytes = 20_000_000;
+
+    /// <summary>How many new genres one network has kept in one day, far above what one visitor's editing asks.</summary>
+    public const int NetworkNew = 200;
+
     private readonly string _connectionString;
     private readonly Lock _keeping = new();
 
-    // how many new genres today's day has kept, counted once from the file and then as they are kept
-    private (string Day, long Count)? _today;
+    // how many new genres today's day has kept, and their bytes, counted once from the file and then as they are kept
+    private (string Day, long Count, long Bytes)? _today;
+
+    // the networks' new genres today
+    private readonly Analytics.AnalyticsEndpoints.NetworkCount _networks = new();
 
     private readonly int _dailyNew;
+    private readonly long _dailyBytes;
+    private readonly int _networkNew;
 
-    private GenreStore(string connectionString, int dailyNew)
+    private GenreStore(string connectionString, int dailyNew, long dailyBytes, int networkNew)
     {
         _connectionString = connectionString;
-        _dailyNew = dailyNew;
+        (_dailyNew, _dailyBytes, _networkNew) = (dailyNew, dailyBytes, networkNew);
     }
 
-    public static GenreStore Create(string directory, int dailyNew = DailyNew)
+    public static GenreStore Create(string directory, int dailyNew = DailyNew, long dailyBytes = DailyBytes, int networkNew = NetworkNew)
     {
         Directory.CreateDirectory(directory);
-        var store = new GenreStore(new SqliteConnectionStringBuilder { DataSource = Path.Combine(directory, FileName), Mode = SqliteOpenMode.ReadWriteCreate }.ToString(), dailyNew);
+        var store = new GenreStore(new SqliteConnectionStringBuilder { DataSource = Path.Combine(directory, FileName), Mode = SqliteOpenMode.ReadWriteCreate }.ToString(), dailyNew, dailyBytes, networkNew);
         using var connection = store.Open();
         using var command = connection.CreateCommand();
         command.CommandText = """
@@ -113,9 +126,10 @@ public sealed class GenreStore
 
     /// <summary>
     ///     Keeps a genre's canonical form, once, and gives its key; none where another genre has the key already, or where
-    ///     the day has kept as many new genres as it keeps (<see cref="DailyNew" />) and this one is new.
+    ///     this one is new and the day has kept as many new genres or bytes as it keeps, or its network as many genres.
     /// </summary>
-    public string? Keep(string canonical)
+    /// <param name="address">The address of the client asking for it, whose network's new genres are counted.</param>
+    public string? Keep(string canonical, System.Net.IPAddress? address)
     {
         var key = KeyOf(canonical);
         if (Find(key) is { } known)
@@ -129,12 +143,15 @@ public sealed class GenreStore
             if (_today?.Day != day)
             {
                 using var counting = connection.CreateCommand();
-                counting.CommandText = "SELECT COUNT(*) FROM genres WHERE created >= $day";
+                counting.CommandText = "SELECT COUNT(*), COALESCE(SUM(LENGTH(CAST(body AS BLOB))), 0) FROM genres WHERE created >= $day";
                 counting.Parameters.AddWithValue("$day", day);
-                _today = (day, Convert.ToInt64(counting.ExecuteScalar()));
+                using var reader = counting.ExecuteReader();
+                reader.Read();
+                _today = (day, reader.GetInt64(0), reader.GetInt64(1));
             }
 
-            if (_today.Value.Count >= _dailyNew)
+            var bytes = Encoding.UTF8.GetByteCount(canonical);
+            if (_today.Value.Count >= _dailyNew || _today.Value.Bytes + bytes > _dailyBytes || !_networks.Admit(day, address, false, _networkNew))
                 return null;
 
             using var insert = connection.CreateCommand();
@@ -142,7 +159,8 @@ public sealed class GenreStore
             insert.Parameters.AddWithValue("$key", key);
             insert.Parameters.AddWithValue("$body", canonical);
             insert.Parameters.AddWithValue("$created", now.ToString("O"));
-            _today = (day, _today.Value.Count + insert.ExecuteNonQuery());
+            var kept = insert.ExecuteNonQuery();
+            _today = (day, _today.Value.Count + kept, _today.Value.Bytes + kept * bytes);
         }
 
         return Find(key) == canonical ? key : null;

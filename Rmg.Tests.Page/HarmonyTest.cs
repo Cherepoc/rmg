@@ -78,7 +78,8 @@ public sealed class HarmonyTest(Site site)
         var seen = new List<string>();
         await page.Page.Mouse.MoveAsync((float)X(0.1), (float)y);
         await page.Page.Mouse.DownAsync();
-        foreach (var share in new[] { 0.3, 0.6, 0.9 })
+        // nine places of a random song, so that a song on one chord at a few of them still shows another at some
+        foreach (var share in new[] { 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9 })
         {
             await page.Page.Mouse.MoveAsync((float)X(share), (float)y, new() { Steps = 4 });
             seen.Add((await harmony.TextContentAsync())!);

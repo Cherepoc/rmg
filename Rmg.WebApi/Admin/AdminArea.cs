@@ -16,8 +16,9 @@ public static class AdminArea
     public const string User = "admin";
 
     /// <summary>
-    ///     How long a wrong password is answered after, one at a time for everyone, so that guessing it goes a guess a
-    ///     second however many are asked at once, should the area face the internet without a proxy's own limit.
+    ///     How long a wrong password is answered after, every offered password checked one at a time for everyone, so that
+    ///     guessing it goes a guess a second however many are asked at once, should the area face the internet without a
+    ///     proxy's own limit.
     /// </summary>
     public static readonly TimeSpan WrongPasswordPause = TimeSpan.FromSeconds(1);
 
@@ -42,22 +43,27 @@ public static class AdminArea
                 return;
             }
 
-            if (!IsAllowed(context, password))
+            // every request offering credentials checked one at a time, a wrong one holding the turn for the pause whether
+            // its asker waits or not, so that a right guess sent beside wrong ones waits its turn as they do; a browser's
+            // first request, which offers none, answered at once
+            var allowed = false;
+            if (context.Request.Headers.Authorization.Count > 0)
             {
-                // a browser's first request, which offers none, answered at once
-                if (context.Request.Headers.Authorization.Count > 0)
+                await Guessing.WaitAsync(context.RequestAborted);
+                try
                 {
-                    await Guessing.WaitAsync(context.RequestAborted);
-                    try
-                    {
-                        await Task.Delay(WrongPasswordPause, context.RequestAborted);
-                    }
-                    finally
-                    {
-                        Guessing.Release();
-                    }
+                    allowed = IsAllowed(context, password);
+                    if (!allowed)
+                        await Task.Delay(WrongPasswordPause, CancellationToken.None);
                 }
+                finally
+                {
+                    Guessing.Release();
+                }
+            }
 
+            if (!allowed)
+            {
                 context.Response.Headers.WWWAuthenticate = "Basic realm=\"RMG admin\", charset=\"UTF-8\"";
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return;

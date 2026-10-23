@@ -155,7 +155,8 @@ public sealed class ListeningTest(Site site)
     [Test]
     public async Task AQuestionsSongWithout_KeepsTheGenresOtherOptions()
     {
-        await using var page = await SongPage.Open(site, "?listen=quieter-form");
+        // Rock's, whose other option of the choice its question patches is not 0, as a patch zeroing the choice would make it
+        await using var page = await SongPage.Open(site, "?listen=rock-quieter");
         var strip = page.Page.Locator("section.listening");
         await page.Until(() => strip.IsVisibleAsync(), "the question asked");
         // the first song's B the one without
@@ -163,11 +164,9 @@ public sealed class ListeningTest(Site site)
         await strip.GetByRole(AriaRole.Button, new() { Name = "Play B" }).ClickAsync();
         await page.Until(() => page.Requests.Count > count, "B asked for");
         // its patch laid over the genre's choice, the choice's other options as the genre has them
-        var genre = page.Requests[^1].Body.GetProperty("genre");
-        await Assert.That(genre.GetProperty("louderForms").GetProperty("quieter").GetInt32()).IsEqualTo(0);
-        await Assert.That(genre.GetProperty("louderForms").TryGetProperty("guitars", out var guitars) && guitars.GetInt32() == 0).IsTrue();
-        await page.Settled();
-        await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();
+        var forms = page.Requests[^1].Body.GetProperty("genre").GetProperty("louderForms");
+        await Assert.That(forms.GetProperty("quieter").GetInt32()).IsEqualTo(0);
+        await Assert.That(forms.GetProperty("guitars").EnumerateArray().Select(x => x.GetInt32()).ToArray()).IsEquivalentTo([20, 50, 60], CollectionOrdering.Matching);
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -211,9 +210,15 @@ public sealed class ListeningTest(Site site)
     public async Task AQuestionsSongWithout_LeavesOutItsStages()
     {
         await using var page = await SongPage.Open(site, "?listen=ghosts-left-out");
+        // the events the page tells, which a song no name names tells without its seed
+        var told = new System.Collections.Concurrent.ConcurrentQueue<System.Text.Json.JsonElement>();
+        await page.Page.RouteAsync("**/api/tally", async route =>
+        {
+            told.Enqueue(System.Text.Json.JsonDocument.Parse(route.Request.PostData ?? "{}").RootElement.Clone());
+            await route.ContinueAsync();
+        });
         var strip = page.Page.Locator("section.listening");
         await page.Until(() => strip.IsVisibleAsync(), "the question asked");
-        var (listed, linked) = (0, "");
         foreach (var (letter, skips) in new[] { ("A", false), ("B", true) })
         {
             var count = page.Requests.Count;
@@ -224,19 +229,14 @@ public sealed class ListeningTest(Site site)
             await Assert.That(body.TryGetProperty("skip", out var skip) ? skip.EnumerateArray().Select(x => x.GetString()).ToArray() : [])
                 .IsEquivalentTo(skips ? ["Ghosts"] : Array.Empty<string?>(), CollectionOrdering.Matching);
             await page.Settled();
-            // the song without, which its seed and settings do not name, neither rated, nor linked, nor listed
+            // the song without, which its seed and settings do not name, not rated; a question's songs, A's too, neither
+            // linked nor listed whatever their name
             if (skips)
-            {
                 await Assert.That(await page.Page.Locator("#like").IsDisabledAsync()).IsTrue();
-                await Assert.That(page.Page.Url).IsEqualTo(linked);
-                await Assert.That(await page.Page.Locator("#history > *").CountAsync()).IsEqualTo(listed);
-                // nor linked once its mix is moved, which keeps the address a moment later
-                await page.Page.EvaluateAsync("() => { const volume = document.getElementById('volume'); volume.value = String(Number(volume.value) - 0.1); volume.dispatchEvent(new Event('input')); }");
-                await Task.Delay(600);
-                await Assert.That(page.Page.Url).IsEqualTo(linked);
-            }
-            else
-                (listed, linked) = (await page.Page.Locator("#history > *").CountAsync(), page.Page.Url);
+            // and its arrival told without its seed, as A's with it
+            await page.Until(() => told.Count(x => x.GetProperty("name").GetString() == "song_generated") >= (skips ? 2 : 1), $"{letter}'s arrival told");
+            var generated = told.Last(x => x.GetProperty("name").GetString() == "song_generated");
+            await Assert.That(generated.TryGetProperty("seed", out var seed) && seed.ValueKind == System.Text.Json.JsonValueKind.String).IsEqualTo(!skips).Because(letter);
         }
 
         await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();

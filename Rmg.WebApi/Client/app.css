@@ -398,6 +398,12 @@ summary .work {
     border-color: var(--accent);
 }
 
+/* its input hidden, the keyboard's focus on it shown as every other button's is */
+.file-button:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 .field {
     display: inline-flex;
     align-items: center;
@@ -1255,7 +1261,7 @@ html:has(dialog:modal) {
 
 /* a part or drum group the song on the page does not play, still set here for the songs after it */
 .mixer tr.absent th,
-.mixer tr.absent .pulse {
+.mixer tr.absent td.pulse {
     opacity: 0.45;
 }
 
@@ -1343,7 +1349,7 @@ html:has(dialog:modal) {
     padding-right: 6px;
 }
 
-.mixer .pulse {
+.mixer td.pulse {
     padding-right: 0;
 }
 
@@ -1822,7 +1828,7 @@ canvas.pulse {
         grid-area: 2 / 5;
     }
 
-    .mixer .pulse {
+    .mixer td.pulse {
         grid-area: 2 / 6;
     }
 

@@ -48,8 +48,14 @@ public static class EventNames
         return name is not null && All.Contains(name);
     }
 
-    /// <summary>Whether a visitor tells it on purpose, a rating or a verdict, rather than its page by itself; the caps count the two apart.</summary>
-    public static bool IsDeliberate(string? name) => name is Rated or Verdict;
+    /// <summary>The events a visitor tells on purpose, a rating and a verdict, rather than its page by itself; the caps count the two apart.</summary>
+    public static IReadOnlyList<string> Deliberate { get; } = [Rated, Verdict];
+
+    /// <summary>Whether a visitor tells it on purpose (<see cref="Deliberate" />).</summary>
+    public static bool IsDeliberate(string? name) => name is not null && Deliberate.Contains(name);
+
+    /// <summary>The deliberate events as an SQL list, for a query that counts them apart.</summary>
+    public static string DeliberateSql { get; } = string.Join(", ", Deliberate.Select(x => $"'{x}'"));
 }
 
 /// <param name="Name">One of <see cref="EventNames" />. Anything else is refused.</param>

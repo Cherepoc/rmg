@@ -151,6 +151,8 @@ let hasSoundFont = false;
 // the soundfont in use, by name and as a Blob, which the browser may keep on disk rather than in memory;
 // an export or a later opt-in to keeping it reads it from here rather than fetching it again
 let source = null;
+// the soundfont the player last took, which one that will not load gives way back to
+let played = null;
 let loading = Promise.resolve();
 let hasSong = false;
 let pendingSoundFont = null;
@@ -428,6 +430,12 @@ elements.keep.addEventListener("change", async () => {
         return;
     }
 
+    // unticked while it saved: forgotten again, as the untick's own forgetting came before the save ended
+    if (!elements.keep.checked) {
+        await forget().catch(() => {});
+        return;
+    }
+
     saving.isStored = true;
     announce(`${saving.name} will load next time.`);
 });
@@ -477,7 +485,7 @@ async function loadSoundFont(name, read, origin, isStored = false) {
 
     hideSoundFontWork();
 
-    // kept only once the player has taken it, so a file that will not load never replaces one that does
+    // the page's soundfont now, the one the player took before kept to go back to should this one not load
     source = { name, blob, isStored };
     pendingSoundFont = soundFont;
     hasSoundFont = true;
@@ -530,12 +538,23 @@ async function deliverPending() {
             // a kept one that would not load would only fail again on the next visit; any other kept one
             // is still good, and stays
             if (loaded.isStored) await forget().catch(() => {});
-            if (source === loaded) clearSoundFont();
-
             // the song never reached the player, so it waits for the next soundfont
             if (song !== null) pendingSong ??= song;
-            return;
+            if (source !== loaded) return;
+            // the one the player played before back in its place, its blob still in hand, or none
+            if (played === null || played === loaded) {
+                clearSoundFont();
+                return;
+            }
+            source = played;
+            pendingSoundFont = await played.blob.arrayBuffer();
+            elements.soundFont.value = "";
+            selectInLibrary(played.name);
+            setSoundFontState(played.name);
+            return deliverPending();
         }
+
+        played = loaded;
 
         // not waited for: saving hundreds of megabytes has no business holding up the first note
         if (isKeeping() && !loaded.isStored) keepLoaded(loaded);
@@ -607,7 +626,7 @@ async function download(file, name) {
         try {
             const response = await fetch(address, got > 0 ? { headers: { Range: `bytes=${got}-` } } : {});
             if (!response.ok) {
-                const refusal = new Error(await describeFailure(response));
+                const refusal = new Error(await describeFailure(response, false));
 
                 // a server that says no will say no again; only a failing server is worth asking twice
                 refusal.isFinal = response.status < 500;
@@ -887,13 +906,17 @@ function songLink() {
     return address.toString();
 }
 
-/** What every event about the song on the page carries: which song it is, and what it was heard with. */
+/**
+ *     What every event about the song on the page carries: which song it is, and what it was heard with; none of it for a
+ *     song no name names (isNamed), whose events would count towards the song of the same seed and settings.
+ */
 function aboutSong(measurements = {}) {
+    const named = songSeed !== null && isNamed();
     return {
-        seed: songSeed,
+        seed: named ? songSeed : null,
         version: songVersion,
-        settings: songSeed === null ? null : formatSettings(settings),
-        genre: songSeed === null ? null : songGenreKey,
+        settings: named ? formatSettings(settings) : null,
+        genre: named ? songGenreKey : null,
         ...measurements,
     };
 }
@@ -988,10 +1011,13 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
     try {
         // a new song's stages as asked, a remake's as its song's
         const skip = isRemade ? songSkipped : skipped;
-        const response = await requestSong(withSkip(requestFor(seed, settings), skip), signal);
+        // the settings it is asked with, which name it when it comes, whatever is changed on the page meanwhile, a copy, as
+        // a slider writes the page's in place
+        const requested = structuredClone(settings);
+        const response = await requestSong(withSkip(requestFor(seed, requested), skip), signal);
         if (!response.ok) {
             if (signal?.aborted) return false;
-            setStatus(`Could not generate a song: ${await describeFailure(response)}`, true);
+            setStatus(`Could not generate a song: ${await describeFailure(response, true)}`, true);
             track("song_failed", { detail: `http ${response.status}` });
             return false;
         }
@@ -1008,8 +1034,13 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
             startedListening = performance.now();
         }
 
+        // a song made again into another, its settings or its genre named otherwise, listened to as the one it was up to here
+        const heard = isRemade && startedListening !== null ? { about: aboutSong(), name: currentSong() } : null;
+        // settings changed on the page while it came that make another song than it, by its name, put back once it is named
+        // and made again; a mix moved, which names no other song, taken as it is
+        const newer = identityOf(settings) !== identityOf(requested) || !isSameGenre(settings.genre, requested.genre) ? settings : null;
         // only once the whole song is here: a body that fails halfway leaves the old song as it was
-        const made = applyReport(settings, report);
+        const made = applyReport(newer === null ? settings : requested, report);
         ({ settings, channels, levels, others, own } = made);
         partsInSong = made.plays;
         drumGroupsPresent = made.drumGroups;
@@ -1022,6 +1053,10 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         songSkipped = skip;
         // a preset by its id, which a link reads as it is, another genre by the key the server keeps it by
         songGenreKey = presetOf(settings.genre)?.id ?? response.headers.get("X-Genre-Key");
+        if (heard !== null && heard.name !== currentSong()) {
+            reportListening(heard.about);
+            startedListening = performance.now();
+        }
         songVersion = response.headers.get("X-Song-Version");
         elements.seed.value = songSeed;
         showSections(report);
@@ -1045,6 +1080,13 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         } else {
             announce(`Generated song ${songSeed}.`);
             track("song_generated", aboutSong({ ms: since() }));
+        }
+
+        if (newer !== null) {
+            settings = newer;
+            keepCurrentSettings();
+            showSettings();
+            scheduleRegeneration();
         }
 
         pendingSong = song;
@@ -1154,9 +1196,10 @@ function explain(error) {
         : "the download would not start. Try again.";
 }
 
-async function describeFailure(response) {
-    if (response.status === 503) return "the server is busy making other songs. Try again in a moment.";
-    if (response.status === 429) return "songs are being asked for faster than they can be made. Try again in a moment.";
+/** A refusal in words, a song's or a soundfont file's, by what was asked for: a busy server or too many asks said as such. */
+async function describeFailure(response, isSong) {
+    if (response.status === 503) return isSong ? "the server is busy making other songs. Try again in a moment." : "the server is busy. Try again in a moment.";
+    if (response.status === 429) return isSong ? "songs are being asked for faster than they can be made. Try again in a moment." : "files are being asked for faster than they can be sent. Try again in a moment.";
     try {
         const body = await response.json();
         return body.error ?? body.detail ?? body.title ?? response.statusText;
@@ -1341,7 +1384,19 @@ function updateWalkButtons() {
 /** A song of the list, asked for as it was heard, in its genre, keeping its place on it. */
 async function playFromList(item, origin) {
     const { seed, entrySettings, genreKey } = readEntry(item.dataset.entry);
-    playNew(seed, origin, await withGenre(entrySettings, genreKey), { keepsPlace: true });
+    const listed = await listedSettings(entrySettings, genreKey);
+    if (listed !== null) playNew(seed, origin, listed, { keepsPlace: true });
+}
+
+/**
+ *     A listed song's settings in its genre; none, said, where its genre cannot be fetched, as asking for it in no
+ *     genre would be another song.
+ */
+async function listedSettings(entrySettings, genreKey) {
+    const listed = await withGenre(entrySettings, genreKey);
+    if (genreKey === null || hasAGenre(listed.genre)) return listed;
+    setStatus("That song's genre could not be fetched, so it is not played. Try again in a moment.", true);
+    return null;
 }
 
 /**
@@ -1421,7 +1476,10 @@ function createHistoryItem(entry) {
     button.dataset.label = isGiven ? `Song ${seedText}, with its settings` : `Song ${seedText}`;
     showRatingInList(button);
 
-    button.addEventListener("click", async () => playNew(seed, "history", await withGenre(entrySettings, genreKey)));
+    button.addEventListener("click", async () => {
+        const listed = await listedSettings(entrySettings, genreKey);
+        if (listed !== null) playNew(seed, "history", listed);
+    });
 
     return button;
 }
@@ -1535,7 +1593,7 @@ async function exportMp3() {
 
     try {
         const response = await requestSong(withSkip(requestFor(songSeed, settings), songSkipped));
-        if (!response.ok) throw new Error(await describeFailure(response));
+        if (!response.ok) throw new Error(await describeFailure(response, true));
 
         const song = await response.arrayBuffer();
         const soundFont = await exporting.blob.arrayBuffer();
@@ -1650,13 +1708,14 @@ function showMedia(player, position = player.currentTime) {
  *     How long the last unbroken stretch of playing lasted. Reported when it stops rather than while it
  *     runs, so listening costs one event however long it goes on for.
  */
-function reportListening() {
+function reportListening(heard = null) {
     if (startedListening === null) return;
 
     const seconds = (performance.now() - startedListening) / 1000;
     startedListening = null;
 
-    const about = heardSettings === null ? aboutSong({ seconds }) : { ...aboutSong({ seconds }), settings: heardSettings };
+    // the song heard as it was named, a remade one's before it was made again
+    const about = heard !== null ? { ...heard, seconds } : heardSettings === null ? aboutSong({ seconds }) : { ...aboutSong({ seconds }), settings: heardSettings };
     heardSettings = null;
     if (seconds >= 1) track("listened", about);
 }
@@ -1676,6 +1735,12 @@ elements.stop.addEventListener("click", async () => {
     }, "Playback failed");
 });
 
+/** The time the song is at, under the bar, and the bar's own, which a screen reader says rather than its share. */
+function showElapsed(text) {
+    elements.elapsed.textContent = text;
+    elements.seek.setAttribute("aria-valuetext", text);
+}
+
 // a Tab away from the bar is let go of on the next element, so leaving the bar ends the seek too
 elements.seek.addEventListener("pointerdown", () => {
     isSeeking = true;
@@ -1693,7 +1758,7 @@ elements.seek.addEventListener("pointercancel", () => {
     if (seekedFrom === null) return;
 
     elements.seek.value = seekedFrom.value;
-    elements.elapsed.textContent = seekedFrom.elapsed;
+    showElapsed(seekedFrom.elapsed);
     seekedFrom = null;
 });
 
@@ -1701,14 +1766,14 @@ elements.seek.addEventListener("pointercancel", () => {
 // sequencer is moved once, when the bar is let go of
 elements.seek.addEventListener("input", async () => {
     // where it would go, whether or not the player has the song yet
-    elements.elapsed.textContent = minutesAndSeconds(timeAt(Number(elements.seek.value)));
+    showElapsed(minutesAndSeconds(timeAt(Number(elements.seek.value))));
     showHarmony(timeAt(Number(elements.seek.value)));
 });
 
 elements.seek.addEventListener("change", async () => {
     // shown at once, the ticks leaving it until the player is there
     settlesAt = performance.now() + SETTLE_MS;
-    elements.elapsed.textContent = minutesAndSeconds(timeAt(Number(elements.seek.value)));
+    showElapsed(minutesAndSeconds(timeAt(Number(elements.seek.value))));
     showHarmony(timeAt(Number(elements.seek.value)));
     await withPlayer((player) => {
         // where the bar was let go of, or where the song starts once the player has it, whenever that is
@@ -1731,7 +1796,7 @@ elements.volume.addEventListener("input", async () => {
 // every value's name and what it does, which is shown under the pointer rather than taking a line of its own
 const SETTING_NAMES = {
     unconventionality: ["How experimental", "How far the whole song strays from convention. Every facet below is drawn around it, so that a song can be plain in one way and experimental in another; a facet given is set outright."],
-    tempo: ["Tempo", "The song's tempo, in beats a minute: 60 at the left, 120 in the middle and 240 at the right. Its sections may change it, as its feel allows, and an ending may slow it."],
+    tempo: ["Tempo", "The song's tempo, in beats a minute: 40 at the left, 120 in the middle and 240 at the right. Its sections may change it, as its feel allows, and an ending may slow it."],
     key: ["Key", "The key the song starts in. Its key changes, as its scale allows, move on from it."],
     mode: ["Mode", "The scale the song starts in, on its key: major, minor, a mode or a stranger scale. Its sections may change it, as its scale allows."],
     meter: ["Meter", "The beats of the first section's bars. Its later sections may change the meter, as its feel allows."],
@@ -2635,8 +2700,8 @@ function createOption(value, name) {
 }
 
 /**
- *     Puts the mix on the page back onto the player after a new sound bank, which a new song's file needs no help with,
- *     carrying its instruments, volumes and pans. A bank resets every channel to the first program, so what the song
+ *     Puts the mix on the page onto the player, after a new sound bank and after every new song, whose file sets its own
+ *     channels as written, carrying its instruments, volumes and pans. A bank resets every channel to the first program, so what the song
  *     asked for is as lost as what anybody picked, and the drum channel forgets it is one. Every channel is told what it
  *     plays, how loud and where, but only a choice made here is locked, so a channel the song owns is still the song's
  *     to set when it starts over.
@@ -2697,7 +2762,7 @@ async function refreshDownload() {
     downloadRefresh = refresh;
     try {
         const response = await requestSong(withSkip(requestFor(songSeed, settings), songSkipped), refresh.signal);
-        if (!response.ok) throw new Error(await describeFailure(response));
+        if (!response.ok) throw new Error(await describeFailure(response, true));
 
         offerDownload(await response.arrayBuffer());
     } catch (error) {
@@ -2757,7 +2822,7 @@ function render(player, given = null) {
     // but a position given, which is the player's now
     if (!isSeeking && (given !== null || performance.now() >= settlesAt)) {
         if (duration > 0) elements.seek.value = String(time / duration);
-        elements.elapsed.textContent = minutesAndSeconds(time);
+        showElapsed(minutesAndSeconds(time));
         showHarmony(time);
     }
 

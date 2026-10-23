@@ -1,5 +1,5 @@
 import { button, downloadJson, jsonFileInput } from "./dialog-parts.js";
-import { byName, genreProblem, NOT_A_GENRE, readGenreFile } from "./genres.js";
+import { byName, NOT_A_GENRE, readImport } from "./genres.js";
 
 /**
  *     The window of every genre, a popup over the page: the presets, each to be duplicated, and one's own, each to be
@@ -32,11 +32,10 @@ export function createGenreManager({ presets, own, current, onKeep, onNew, onDup
     };
 
     const file = jsonFileInput((text) => {
-        const read = readGenreFile(text, knows);
-        // a genre the server would refuse every song of told, as the editor's import tells it, and none kept
-        const problem = read === null ? null : (read.genres ?? [read.genre]).map((x) => genreProblem(x, choiceOf)).find((x) => x !== null) ?? null;
+        const read = readImport(text, knows, choiceOf);
+        // a genre the server would refuse every song of told by its name, as the editor's import tells it, and none kept
         if (read === null) tell(NOT_A_GENRE);
-        else if (problem !== null) tell(problem);
+        else if (read.refusal !== null) tell(read.refusal);
         else tell(`${onKeepAll(read.genres ?? [read.genre])} kept among yours.`);
     });
     const imported = button("Import JSON", "Keep a genre saved as a JSON file, or every one of a list of them, among yours", () => file.click(), "genre-export");

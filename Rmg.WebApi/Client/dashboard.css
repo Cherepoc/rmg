@@ -17,21 +17,13 @@
 }
 
 @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-theme="light"])) .viz {
+    .viz {
         --surface: #1e1e24;
         --grid: #32323c;
         --series-1: #3987e5;
         --series-2: #d95926;
         --series-3: #199e70;
     }
-}
-
-:root[data-theme="dark"] .viz {
-    --surface: #1e1e24;
-    --grid: #32323c;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
 }
 
 main.viz {
@@ -342,6 +334,3 @@ button.small {
     resize: vertical;
 }
 
-#description[hidden] {
-    display: none;
-}

@@ -32,7 +32,7 @@ namespace Rmg.WebApi.Songs;
 ///     its setup.
 /// </param>
 /// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
-/// <param name="Tempo">The tempo, by its step from 0, 60 beats a minute, through 31, 120, to 61, 240 (<see cref="TempoScale" />).</param>
+/// <param name="Tempo">The tempo, by its step from 0, 40 beats a minute, through 31, 120, to 61, 240 (<see cref="TempoScale" />).</param>
 /// <param name="Key">The key, as semitones above C, from 0 to 11.</param>
 /// <param name="Meter">The meter, by its place among the meters a song may play in (<c>/api/songs/options</c>).</param>
 /// <param name="Mode">The scale the song starts in, on its key, by its place among the scales (<c>/api/songs/options</c>).</param>

@@ -36,6 +36,26 @@ public sealed class WalkingTheListTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A listed song whose genre cannot be fetched is not played in no genre, which would be another song, but said so.</summary>
+    [Test]
+    public async Task AListedSongWhoseGenreCannotBeFetched_IsNotPlayed_ButSaidSo()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Generate();
+        await page.Settled();
+        // the older entry's genre a key the server keeps no genre by
+        var entry = page.Page.Locator("#history button[data-entry]").Last;
+        await entry.EvaluateAsync("x => x.dataset.entry = `${x.dataset.entry.split(':').slice(0, 2).join(':')}:0000000000Z`");
+        // walked back to by Previous, which reads the entry as the list holds it
+        var count = page.Requests.Count;
+        await page.Page.Locator("#previous").ClickAsync();
+        await page.Until(async () => (await page.Status()).Contains("could not be fetched"), "the refusal said");
+        await Assert.That(page.Requests.Count).IsEqualTo(count);
+        // but the browser's word of the genre not found, which the page asked for
+        await Assert.That(page.Errors.Where(x => !x.Contains("api/genres/"))).IsEmpty();
+    }
+
     [Test]
     public async Task Previous_WalksDownTheList_KeepingItsOrder()
     {

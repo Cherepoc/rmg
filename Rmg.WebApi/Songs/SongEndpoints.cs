@@ -121,7 +121,7 @@ public static class SongEndpoints
         if (ended == SongOutcome.Made && request.Genre is { } genre)
             try
             {
-                if (genres.Keep(Genres.GenreStore.Canonical(request.GenreName?.Trim() ?? "", genre)) is { } genreKey)
+                if (genres.Keep(Genres.GenreStore.Canonical(request.GenreName?.Trim() ?? "", genre), context.Connection.RemoteIpAddress) is { } genreKey)
                     context.Response.Headers["X-Genre-Key"] = genreKey;
             }
             catch (Exception ex)

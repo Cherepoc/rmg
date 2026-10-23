@@ -190,11 +190,9 @@ export function createGenreTune() {
                 amounts[other] = written(others);
             }
         }
+        // while dragged, followed alone, overridden only where its letting go finds anything changed
         if (dragging === null) edited();
-        else {
-            overridden = override.checked = true;
-            follow(points);
-        }
+        else follow(points);
     }
 
     /**
@@ -557,12 +555,13 @@ export function createGenreTune() {
             setEnd(end, endsOf(amounts[name])[end] + by);
             chart.querySelector(`[data-option="${CSS.escape(name)}"][data-end="${end}"]`)?.focus();
         });
-        // a drag's amount before it, so that a click that moves nothing overrides nothing
+        // the amounts before a drag, every option's, a range's other end pushed by it too, so that a click that moves nothing
+        // overrides nothing and a drag that came back still draws what it pushed
         let before = null;
         element.addEventListener("pointerdown", (event) => {
             choose();
             dragging = end;
-            before = JSON.stringify(amounts[name]);
+            before = JSON.stringify(amounts);
             element.setPointerCapture(event.pointerId);
         });
         element.addEventListener("pointermove", (event) => {
@@ -574,7 +573,7 @@ export function createGenreTune() {
         const letGo = () => {
             if (dragging !== end) return;
             dragging = null;
-            if (JSON.stringify(amounts[name]) !== before) edited();
+            if (JSON.stringify(amounts) !== before) edited();
             if (isRedrawWaiting) redraw();
         };
         for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) element.addEventListener(type, letGo);

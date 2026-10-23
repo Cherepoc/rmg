@@ -12,8 +12,14 @@ using Rmg.WebApi.SoundFonts;
 var builder = WebApplication.CreateBuilder(args);
 
 // appsettings.json holds the settings and their defaults; the environment beats it, as RMG_PORT and
-// the like, which keeps a secret out of a file that is in the repository; the command line beats both
-builder.Configuration.AddEnvironmentVariables("RMG_").AddCommandLine(args);
+// the like, which keeps a secret out of a file that is in the repository; the command line beats both. Nothing
+// else is read: a host's own PORT or LISTENING, unprefixed, which the builder would read by default, is not ours
+builder.Configuration.Sources.Clear();
+builder.Configuration
+    .AddJsonFile(Path.Combine(builder.Environment.ContentRootPath, "appsettings.json"), optional: false)
+    .AddJsonFile(Path.Combine(builder.Environment.ContentRootPath, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true)
+    .AddEnvironmentVariables("RMG_")
+    .AddCommandLine(args);
 
 if (!ServerSettings.TryRead(
         builder.Configuration,

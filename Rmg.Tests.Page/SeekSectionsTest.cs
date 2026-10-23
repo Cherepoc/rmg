@@ -27,4 +27,21 @@ public sealed class SeekSectionsTest(Site site)
         await page.Until(async () => await page.Page.Locator("#seek").GetAttributeAsync("title") == name, "the section under the pointer named");
         await Assert.That(page.Errors).IsEmpty();
     }
+
+    /// <summary>The seek bar says where it is as a time, a screen reader's words for it, not its share of the song.</summary>
+    [Test]
+    public async Task TheSeekBar_SaysItsPlaceAsATime()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        var seek = page.Page.Locator("#seek");
+        await seek.FocusAsync();
+        await seek.PressAsync("ArrowRight");
+        await seek.EvaluateAsync("x => { x.value = '0.5'; x.dispatchEvent(new Event('input')); }");
+        await page.Until(async () => await seek.GetAttributeAsync("aria-valuetext") is { } text && System.Text.RegularExpressions.Regex.IsMatch(text, @"^\d+:\d\d$"), "the bar's place said as a time");
+        // read at once, as the page's ticks write both
+        var read = await page.Page.EvaluateAsync<string[]>("() => [document.getElementById('seek').getAttribute('aria-valuetext'), document.getElementById('elapsed').textContent]");
+        await Assert.That(read[0]).IsEqualTo(read[1]);
+        await Assert.That(page.Errors).IsEmpty();
+    }
 }

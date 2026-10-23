@@ -32,6 +32,7 @@ public static class EventStoreSummary
             Versions(connection, since, ratings),
             ratedVersion,
             RatedSeeds(ratings, ratedVersion),
+            ratings.Count(x => x.Version == ratedVersion && x.Likes + x.Dislikes > 0),
             RatedFifths(ratings, ratedVersion),
             RatedGenres(ratings, ratedVersion),
             verdictVersion,

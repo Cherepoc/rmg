@@ -93,7 +93,8 @@ public sealed class GenreManagerTest(Site site)
         await Import("""{ "name": "Dark", "choices": { "darkness": { "from": -80, "to": 90 } } }""");
         await page.Until(async () => await told.TextContentAsync() == "One genre kept among yours.", "the dark genre kept");
         await Import("""{ "name": "Nothing", "choices": { "meter": { "4/4": 0 } } }""");
-        await page.Until(async () => (await told.TextContentAsync() ?? "").Contains("keeps none of its options"), "the empty pool refused");
+        // the genre refused named, as the editor's import names it
+        await page.Until(async () => (await told.TextContentAsync() ?? "") == "Nothing: Meter keeps none of its options.", "the empty pool refused");
         await Import("""{ "name": "Null", "choices": { "feel": null } }""");
         await page.Until(async () => (await told.TextContentAsync() ?? "").Contains("not a genre"), "the malformed file refused");
         await Assert.That(await manager.Locator("ul[aria-label='Yours'] li").CountAsync()).IsEqualTo(1);

@@ -37,6 +37,18 @@ public sealed class AdminTest(Site site)
         request = new HttpRequestMessage(HttpMethod.Get, path);
         request.Headers.Authorization = new("Basic", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"admin:{Site.Token}")));
         await Assert.That((int)(await client.SendAsync(request)).StatusCode).IsEqualTo(200);
+
+        // a right guess sent beside a wrong one answered after the wrong one's pause, not at once
+        var wrong = new HttpRequestMessage(HttpMethod.Get, path);
+        wrong.Headers.Authorization = new("Basic", Convert.ToBase64String("admin:guess"u8.ToArray()));
+        var waiting = client.SendAsync(wrong);
+        await Task.Delay(200);
+        var right = new HttpRequestMessage(HttpMethod.Get, path);
+        right.Headers.Authorization = new("Basic", Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"admin:{Site.Token}")));
+        var answering = System.Diagnostics.Stopwatch.StartNew();
+        await Assert.That((int)(await client.SendAsync(right)).StatusCode).IsEqualTo(200);
+        await Assert.That(answering.Elapsed).IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(0.6));
+        await waiting;
     }
 
     [Test]

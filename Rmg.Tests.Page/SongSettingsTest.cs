@@ -38,4 +38,32 @@ public sealed class SongSettingsTest(Site site)
         await Assert.That(spans.Select(x => Math.Round(x[1])).Distinct().Count()).IsEqualTo(1);
         await Assert.That(page.Errors).IsEmpty();
     }
+
+    /// <summary>
+    ///     A setting changed while a new song is on its way names the song as it was asked for, listed without the setting,
+    ///     and makes it again with the setting once it is here.
+    /// </summary>
+    [Test]
+    public async Task ASettingChangedWhileASongComes_NamesTheSongAsAsked_ThenMakesItAgain()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Settled();
+        page.Slow = TimeSpan.FromSeconds(2);
+        var count = page.Requests.Count;
+        await page.Page.Locator("#generate").ClickAsync();
+        await page.Until(() => page.Requests.Count > count, "the song asked for");
+        await Assert.That(page.Requests[^1].Body.TryGetProperty("tempo", out var asked) && asked.ValueKind == System.Text.Json.JsonValueKind.Number).IsFalse();
+        await page.SetSetting("tempo", 40);
+        page.Slow = TimeSpan.Zero;
+        // made again with the tempo once the song is here, the song as it came listed as it was asked for
+        await page.Until(() => page.Requests.Count > count + 1 && page.Requests[^1].Body.TryGetProperty("tempo", out var tempo) && tempo.ValueKind == System.Text.Json.JsonValueKind.Number && tempo.GetInt32() == 40,
+            "the song made again with the tempo", 20);
+        var arrived = await page.Page.Locator("#history button[data-entry]").First.GetAttributeAsync("data-song");
+        await page.Settled(20);
+        await page.Until(async () => await page.IsGenerateEnabled(), "the song made again");
+        // named as it came, without the tempo, and again with it once made again
+        await Assert.That(await page.Page.Locator("#history button[data-entry]").First.GetAttributeAsync("data-song")).IsNotEqualTo(arrived);
+        await Assert.That(page.Errors).IsEmpty();
+    }
 }
