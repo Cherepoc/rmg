@@ -87,7 +87,7 @@ public sealed class RenderSongTest
                 StateKinds.ScaleOffsets.CreateState([0, 2, 4, 5, 7, 9, 11]),
                 StateKinds.ChordRoot.CreateState(chordRoot),
                 StateKinds.ChordNotePitchOffsets.CreateState([0.0]),
-                StateKinds.OctaveOffset.CreateState(7),
+                StateKinds.KeyOffset.CreateState(7 * 12),
             ]
         );
         var song = CreateSong(1, PitchTrack(), stateMap.ToTimelineItem(0));

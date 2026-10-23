@@ -21,21 +21,21 @@ public sealed record HarmonicUnconventionality(double Chords, Genre Genre)
 
     /// <summary>
     ///     A chord: a shape of a level drawn by the chords facet, laid out by a voicing, as the heights of its notes above
-    ///     the root in fractions of an octave, which <c>Render</c> snaps to the scale.
+    ///     the root in fractions of an octave, which <see cref="Realizer.GetChordNotes" /> snaps to the scale.
     /// </summary>
     public Chord GenerateChord(IGenerationContext context)
     {
         return Voice(context, ChordShapes.Pick(context, ChordShapes.Levels, Chords, Pool, isOwn: false, Genre.Mood));
     }
 
-    /// <summary>The home chord of a phrase, which stays plain for the release but in the wildest songs (<see cref="ChordShapes.HomeLevels" />).</summary>
+    /// <summary>The home chord of a pattern, its first, which stays plain for the release but in the wildest songs (<see cref="ChordShapes.HomeLevels" />).</summary>
     public Chord GenerateHomeChord(IGenerationContext context)
     {
         return Voice(context, ChordShapes.Pick(context, ChordShapes.HomeLevels, Chords, Pool, isOwn: true, Genre.Mood));
     }
 
     /// <summary>
-    ///     The cadence chord of a phrase, which pulls towards home, a shape made for it, or keeps a strange song's
+    ///     The cadence chord of a pattern, its last, which pulls towards home, a shape made for it, or keeps a strange song's
     ///     strangeness there (<see cref="ChordShapes.CadenceLevels" />).
     /// </summary>
     public Chord GenerateCadenceChord(IGenerationContext context)

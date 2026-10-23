@@ -53,8 +53,11 @@ public static class SongHarmony
         {
             var (start, end) = (changes[i], i + 1 < changes.Length ? changes[i + 1] : double.MaxValue);
             // the first note of a part that plays the chord, of the first part that does, a broken chord's one note too, its
-            // state the chord's: one struck in the chord's span, or one held into it
-            var note = parts.Select(x => NoteAt(x.Notes, x.Starts, start, end)).FirstOrDefault(x => x is not null);
+            // state the chord's: one struck in the chord's span, or one held into it that was struck for it, as a push is; or
+            // where no part strikes the chord, the one held over it, which is what sounds
+            var mark = common.GetEffectiveStateMapAt(start).GetStateValue(StateKinds.ChordChange);
+            var note = parts.Select(x => NoteAt(x.Notes, x.Starts, start, end, mark)).FirstOrDefault(x => x is not null)
+                       ?? parts.Select(x => NoteAt(x.Notes, x.Starts, start, end, null)).FirstOrDefault(x => x is not null);
             var name = NoChord;
             if (note is not null)
             {
@@ -76,13 +79,19 @@ public static class SongHarmony
         return result.ToImmutable();
     }
 
-    /// <summary>A part's first note struck in a span, or the one before it where it is held into the span; none for none.</summary>
-    private static RealizedNote? NoteAt(TimelineItem<RealizedNote>[] notes, double[] starts, double start, double end)
+    /// <summary>
+    ///     A part's first note struck in a span, or the one before it where it is held into the span and was struck for its
+    ///     chord, its change's mark the span's, or any held into it where no mark is asked; none for none.
+    /// </summary>
+    private static RealizedNote? NoteAt(TimelineItem<RealizedNote>[] notes, double[] starts, double start, double end, int? mark)
     {
         var found = Array.BinarySearch(starts, start - 1e-9);
         var index = found >= 0 ? found : ~found;
         if (index < notes.Length && notes[index].Position < end - 1e-9)
             return notes[index].Value;
-        return index > 0 && notes[index - 1].Position + notes[index - 1].Value.Duration > start + 1e-9 ? notes[index - 1].Value : null;
+        return index > 0 && notes[index - 1].Position + notes[index - 1].Value.Duration > start + 1e-9
+                         && (mark is null || notes[index - 1].Value.State.GetStateValue(StateKinds.ChordChange) == mark)
+            ? notes[index - 1].Value
+            : null;
     }
 }

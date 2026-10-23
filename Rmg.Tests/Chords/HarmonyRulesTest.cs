@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Chords;
 
@@ -111,6 +112,65 @@ public sealed class HarmonyRulesTest
         }
 
         await Assert.That(dominants).IsGreaterThan(20);
+    }
+
+    /// <summary>
+    ///     A dominant of a scale of its own, an applied one, a passing one or its tritone substitute, as the band plays it
+    ///     in a reharmonised appearance after the stages that change chords, leads into a diminished chord only where its
+    ///     section first played it so, a borrowed chord's resolution in an exotic scale of its own harmony.
+    /// </summary>
+    [Test]
+    public async Task ADominant_AsPlayed_NeverLeadsIntoADiminishedChord()
+    {
+        var (dominants, reharmonised) = (0, 0);
+        var all = ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty;
+        var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+            .Add(GenreChoices.ChordScales.Name, all.Add("applied", new(1, 1, 1)))
+            .Add(GenreChoices.HarmonyDevices.Name, all.Add("reharmonised", new(1, 1, 1))));
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            if (song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is not (int later, ImmutableArray<double>))
+                continue;
+            reharmonised++;
+            var timeline = song.Song.TrackEventStateTimelineMap;
+            var common = timeline.CommonStateTimelineMap;
+            // every note of the parts that play the chord, the bass's and the chords', as the realizer reads them
+            var notes = song.Song.TrackDefinitions.Where(x => (x.Value.Role.PlaysChords() || x.Value.Role == TrackRole.Bass) && timeline.TrackTimelineMap.ContainsKey(x.Key))
+                .SelectMany(x => Realizer.GetNoteStates(timeline.TrackTimelineMap[x.Key], x.Value, common)).OrderBy(x => x.Position).ToArray();
+            var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+            // a change's chord, by the first note struck in it, its notes above its root as pitch classes, and whether it is
+            // in a scale of its own or moved by semitones; none where no part strikes it
+            (HashSet<int> Classes, bool Own)? ChordAt(double at)
+            {
+                var index = Array.FindLastIndex(changes, x => x <= at + 1e-9);
+                var end = index + 1 < changes.Length ? changes[index + 1] : double.MaxValue;
+                if (index < 0 || notes.FirstOrDefault(x => x.Position >= changes[index] - 1e-9 && x.Position < end - 1e-9) is not { Value: { } state })
+                    return null;
+                var (chord, _, classes) = Realizer.GetChordNotes(state);
+                var own = state.GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } alterations && alterations.Value != StepAlterations.None
+                          || state.GetStateValue(StateKinds.ChordShift) != 0;
+                return (classes.Select(x => (x - chord.Root).Mod(12)).ToHashSet(), own);
+            }
+
+            bool Diminished((HashSet<int> Classes, bool Own)? chord) => chord is { } c && c.Classes.IsSupersetOf([3, 6]) && !c.Classes.Contains(7);
+            var sections = song.Map.Sections;
+            for (var i = 0; i + 1 < changes.Length; i++)
+            {
+                if (ChordAt(changes[i]) is not { Own: true } dominant || !dominant.Classes.IsSupersetOf([4, 7]) || ChordAt(changes[i + 1]) is not { } next
+                    || !sections[later].IsWithin(changes[i + 1]))
+                    continue;
+                var span = sections[later];
+                dominants++;
+                // the same place in the section's first appearance, as drawn
+                var first = sections.First(x => x.SectionId == span.SectionId);
+                var (was, then) = (first.Start + (changes[i] - span.Start), first.Start + (changes[i + 1] - span.Start));
+                await Assert.That(Diminished(next) && !(ChordAt(was) is { Own: true } d && d.Classes.IsSupersetOf([4, 7]) && Diminished(ChordAt(then))))
+                    .IsFalse().Because($"seed {song.Seed}, at {changes[i + 1]}");
+            }
+        }
+
+        await Assert.That(dominants).IsGreaterThan(20);
+        await Assert.That(reharmonised).IsGreaterThan(4);
     }
 
     /// <summary>

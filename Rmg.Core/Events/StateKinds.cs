@@ -13,7 +13,6 @@ public static class StateKinds
     // Render rounds to whole sounds each and adds, so that a layer moves every note under it alike
     public static readonly StateKind<ImmutableArray<double>> ArticulationOffset = CreateCollection<double>("ArticulationOffset", StateScope.Render);
     public static readonly StateKind<int> KeyOffset = CreateAdditive<int>("KeyOffset", StateScope.Render, isShared: true);
-    public static readonly StateKind<int> OctaveOffset = CreateAdditive<int>("OctaveOffset", StateScope.Render);
     // a chord's shape, the heights of its notes above its root: one value, set by one layer, whose kind would join two
     // layers' shapes into one (SingleValuedListsTest); a layer that replaces it, as an ending's home chord does, takes
     // the note's out first, and should one ever lean on a deeper layer's, it would be a kind the lowest layer sets

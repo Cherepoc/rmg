@@ -4,7 +4,7 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     A chord as drawn: the heights of its notes above the root in fractions of an octave, laid out by a voicing,
-///     which <c>Render</c> snaps to the scale.
+///     which <see cref="Realizer.GetChordNotes" /> snaps to the scale.
 /// </summary>
 /// <param name="IsVoicingFixed">
 ///     Whether the layout is what the chord is, such as a quartal stack or a cluster, so that it is moved only by whole

@@ -137,17 +137,15 @@ internal static class Realizer
                 // where the track plays on within a bar, as it played, not a solo's line, which holds its note as a line does,
                 // nor into one
                 if (index + 1 >= events.Count || events[index + 1].Position >= change + placeOf(change).Meter.BarDuration - 1e-9
-                    || events[index].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1 || events[index + 1].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1
-                    // nor a pedal, which holds its note across the chords
-                    || events[index].Value.GetStateValue(CompositionStateKinds.BassPedal) == 1)
+                    || events[index].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1 || events[index + 1].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1)
                     continue;
 
                 var (note, next) = (events[index].Value, events[index + 1]);
-                // the new root in the octave nearest the note it goes on from, by how far the root moved, a line's step counting
-                // whole octaves of the scale
+                // the new root in the octave nearest the note it goes on from, by how far the root moved, read over the track's
+                // whole state, the section's home among it, a line's step counting whole octaves of the scale
                 if (track.Role == TrackRole.Bass)
                 {
-                    int RootAt(double position) => commonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
+                    int RootAt(double position) => merged.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
                     var moved = (RootAt(change) - RootAt(events[index].Position)).Mod(Scales.StepCount);
                     moved -= moved > Scales.StepCount / 2 ? Scales.StepCount : 0;
                     var octave = (int)Math.Round((note.GetStateValue(StateKinds.ScaleStep) - moved) / (double)Scales.StepCount);
@@ -284,7 +282,7 @@ internal static class Realizer
         var isLine = role.PlaysLine() || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1;
         if (heldDuration > 0)
             duration = heldDuration;
-        else if (isLine && role != TrackRole.Bass)
+        else if (isLine && (role != TrackRole.Bass || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1))
             duration = Math.Min(duration, nextNoteDuration);
         else
             // a note that plays the chord, the chords' or the bass's, ends where the chord changes, rather than sound the
@@ -397,8 +395,7 @@ internal static class Realizer
         // the chord root, in scale steps
         var rootIndex = stateMap.GetStateValue(StateKinds.ChordRoot);
         // a chord moved by semitones, every note over it with it
-        var basePitch = stateMap.GetStateValue(StateKinds.KeyOffset) + stateMap.GetStateValue(StateKinds.ChordShift)
-                        + stateMap.GetStateValue(StateKinds.OctaveOffset) * OctaveNoteCount;
+        var basePitch = stateMap.GetStateValue(StateKinds.KeyOffset) + stateMap.GetStateValue(StateKinds.ChordShift);
         return (scaleOffsets, rootIndex, new ChordContext(step => basePitch + GetScalePitch(scaleOffsets, rootIndex + step), rootIndex));
     }
 

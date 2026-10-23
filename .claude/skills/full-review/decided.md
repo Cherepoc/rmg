@@ -104,3 +104,7 @@ rejected while fixing: the place, what was decided, why.
 - The shared solo played together (`soloShare.together`, #136) kept beside the twin solo (`solos.twins`): the drawn
   songs' twin chance is 0, so the share is their only way to play a solo together; the twin no longer sets a solo of
   several soloists together over the share, joining a soloist alone (19 October 2026). Not a cut candidate again.
+- The inner line over a vamp's marks (#73 of 16 October, #57 of 22 October) left as it is: measured, a held chord run
+  across a vamp's marks of the same root plays the line no more often (Dark jazz 8% to 5% of its sections), as the line
+  keeps to a held triad or power chord and the presets that name it play sevenths there; the line itself was kept on
+  listening (18 October 2026). Not raised again.

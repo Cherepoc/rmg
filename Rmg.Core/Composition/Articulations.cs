@@ -159,9 +159,19 @@ internal static class Articulations
                     && pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.BassPedal) == 0)
                 {
                     // its sixth and seventh a boogie's over the root, the major sixth and the flat seventh, whatever the
-                    // chord's scale has there, and the chord's own root, third and fifth
-                    var chord = Realizer.GetChord(note.Value.State).Chord;
-                    var target = step switch { 5 => chord.GetPitch(0) + 9, 6 => chord.GetPitch(0) + 10, _ => chord.GetPitch(step) };
+                    // chord's scale has there, and the chord's own root, third and fifth, as the band's chord holds them: a sus
+                    // chord's fourth or second in place of the third it leaves out, a power chord's fifth, as a shuffle walks
+                    // root, fifth and sixth over one; the scale's where no chord sounds, its root alone, or the chord leaves out its root
+                    var (chord, _, classes) = Realizer.GetChordNotes(note.Value.State);
+                    var root = chord.GetPitch(0);
+                    int[] offsets = step switch { 2 => [4, 3, 5, 2, 7, 0], 4 => [7, 6, 8, 0], _ => [] };
+                    var target = step switch
+                    {
+                        5 => root + 9,
+                        6 => root + 10,
+                        2 or 4 when classes.Count > 1 => offsets.Where(x => classes.Contains((root + x).Mod(12))).Select(x => root + x).DefaultIfEmpty(chord.GetPitch(step)).First(),
+                        _ => chord.GetPitch(step)
+                    };
                     var last = played[Array.LastIndexOf(strongPlaces, strongPlaces[i] - 1, i)].Min();
                     var under = last - (last - target).Mod(12);
                     var nearest = last - under <= under + 12 - last ? under : under + 12;

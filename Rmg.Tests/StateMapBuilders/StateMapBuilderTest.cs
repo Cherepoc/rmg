@@ -7,7 +7,8 @@ namespace Rmg.Tests.StateMapBuilders;
 public sealed class StateMapBuilderTest
 {
     private static readonly StateKind<int> KeyOffset = StateKinds.KeyOffset;
-    private static readonly StateKind<int> OctaveOffset = StateKinds.OctaveOffset;
+    // an additive kind of these tests alone, not shared
+    private static readonly StateKind<int> OctaveOffset = StateKinds.CreateAdditive<int>("StateMapBuilderTest.OctaveOffset", StateScope.Render);
     private static readonly StateKind<double> Tempo = StateKinds.Tempo;
     private static readonly StateKind<ImmutableArray<int>> ScaleOffsets = StateKinds.ScaleOffsets;
 

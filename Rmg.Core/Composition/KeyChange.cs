@@ -143,10 +143,12 @@ public sealed record KeyChange(double Position, int Semitones)
                 lift += step;
 
             // a key as a step from the song's own, the one nearest the key before, so that a lift is heard as a lift, and within
-            // a fifth of the song's either way, so that the band's register stays near where the song put it
+            // a fifth of the song's either way, so that the band's register stays near where the song put it, but for a lift from
+            // within it, which goes on up past it and is brought back at the next change
             var next = key + ((lift + ownKeys[section.SectionId] - key + 6).Mod(12) - 6);
-            next = next > 7 ? next - 12 : next < -7 ? next + 12 : next;
-            if (next == key) continue;
+            next = isChanging && next > key && key <= 7 ? next : next > 7 ? next - 12 : next < -7 ? next + 12 : next;
+            // nor the same key an octave away, which brings a lift's key back only at a change that moves it
+            if ((next - key).Mod(12) == 0) continue;
 
             key = next;
             changes.Add(new KeyChange(start, key));

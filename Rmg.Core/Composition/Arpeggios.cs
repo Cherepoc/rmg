@@ -160,7 +160,10 @@ internal static class Arpeggios
         {
             var (chordScale, _, _) = Realizer.GetChord(state);
             var scale = state.GetStateValue(StateKinds.ScaleOffsets);
-            int[] steps = colour == ChordColour.Held ? [1, 2] : scale[5] - scale[4] == 1 || scale[1] - scale[0] != 1 ? [4, 5] : [0, 1];
+            // the dark's two neighbours a semitone apart, the fifth and the sixth where they are, the first two where those are,
+            // and the next such pair where neither is, a rub in every scale of one
+            int[] steps = colour == ChordColour.Held ? [1, 2]
+                : new[] { 4, 0, 2, 1, 3, 5, 6 }.Where(x => x < scale.Length && (scale[(x + 1) % scale.Length] - scale[x]).Mod(12) == 1).Select(x => new[] { x, (x + 1) % scale.Length }).FirstOrDefault() ?? [4, 5];
             // the key's own, neither moved with a chord a chromatic passing chord shifts by semitones nor by a step its own
             // scale moves
             var tonic = state.GetStateValue(StateKinds.KeyOffset);
@@ -236,11 +239,17 @@ internal static class Arpeggios
                 ? notes[low]
                 : notes[others[(place % Math.Max(1, 2 * others.Length - 2)) is var step && step < others.Length ? step : 2 * others.Length - 2 - step]],
             // the thumb on the beat, the root on its bar's even pulses and the fifth on the odd, the fingers off it on the
-            // notes above the fifth by turns, or above the root where the fifth is the top
+            // notes above the fifth by turns, or the chord's others where the fifth or the root is the top, its third among them
             ArpeggioPattern.AlternatingThumb => onBeat
                 ? notes[pulse % 2 == 0 ? low : fifth]
-                : notes[Enumerable.Range(0, count).Where(x => x > fifth).DefaultIfEmpty(count - 1).ToArray() is var upper ? upper[place / 2 % upper.Length] : 0],
+                : notes[Fingers(count, low, fifth) is var fingers ? fingers[place / 2 % fingers.Length] : 0],
             _ => throw new ArgumentOutOfRangeException(nameof(pattern), pattern, null)
         };
     }
+
+    /// <summary>An alternating thumb's fingers: the notes above the fifth but the root, or where none is the notes neither thumb plays, or the top.</summary>
+    private static int[] Fingers(int count, int low, int fifth) =>
+        Enumerable.Range(0, count).Where(x => x > fifth && x != low).ToArray() is { Length: > 0 } upper ? upper
+        : Enumerable.Range(0, count).Where(x => x != low && x != fifth).ToArray() is { Length: > 0 } others ? others
+        : [count - 1];
 }

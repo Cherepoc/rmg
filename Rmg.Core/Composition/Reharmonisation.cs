@@ -35,12 +35,12 @@ internal static class Reharmonisation
         var sections = map.Sections;
         var later = Enumerable.Range(0, last + 1).LastOrDefault(i => sections.Take(i).Any(x => x.SectionId == sections[i].SectionId), -1);
         var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
-        // and a chord moved by semitones, and the chord it slides into, kept, and a chord in a scale of its own, an applied
-        // dominant's, a borrowed chord's or the cadence's raised fifth, whose colour a substitute would lose
+        // and a chord moved by semitones or in a scale of its own, an applied dominant's, a borrowed chord's or the cadence's
+        // raised fifth, whose colour a substitute would lose, kept, and the chord after it, which it slides or resolves into
         var leading = moved.ToHashSet();
-        var kept = leading.Concat(changes.Where((x, i) => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordShift) != 0
-                                                       || i > 0 && common.GetEffectiveStateMapAt(changes[i - 1]).GetStateValue(StateKinds.ChordShift) != 0
-                                                       || common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } own && own.Value != StepAlterations.None)).ToHashSet();
+        bool Own(double at) => common.GetEffectiveStateMapAt(at) is var state
+                               && (state.GetStateValue(StateKinds.ChordShift) != 0 || state.GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } own && own.Value != StepAlterations.None);
+        var kept = leading.Concat(changes.Where((x, i) => Own(x) || i > 0 && Own(changes[i - 1]))).ToHashSet();
         var roots = new List<TimelineItem<int>>();
         // a section on one chord, a vamp, which a substitute would undo, left as it is, but the chords leading into a key change
         bool OneChord(SectionSpan first) => changes.Where(x => first.IsWithin(x) && !leading.Contains(x)).Select(x => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordRoot)).Distinct().Count() <= 1;

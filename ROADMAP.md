@@ -755,6 +755,12 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   (`Planing.Moves`), which favour small steps so that the voices slide. Should the modes be heard as aimless, the move
   is the lever, a planed chord's move drawn with its mode, or a chord keeping the mode of the one before now and then;
   symmetric cycles (major or minor thirds) left out, Planing's moves holding minor thirds already.
+- **A key change's chain into a diminished chord** (P3, the review of 22 October 2026): a key change led into by a chain
+  of chords (`KeyChange.PrepareChance`) may put a dominant of a scale of its own before a diminished chord, as the
+  corpus seed 46 at 184 does with every chord scale applied (C♯ into D° on the way to E♭ melodic minor); the reharmonisation
+  keeps the chord after an own-scale one since, and its rule reads the reharmonised appearance alone
+  (`HarmonyRulesTest.ADominant_AsPlayed_NeverLeadsIntoADiminishedChord`). First how often the chain does it, over the
+  songs that change key, then the chain's last chords kept off a diminished one after a dominant, should it be heard.
 
 ### Tooling and tests
 
