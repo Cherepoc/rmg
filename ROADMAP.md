@@ -374,6 +374,16 @@ code before it is recorded here. Left:
 
 - **A run into a note above its line's range:** a counter-melody's run at offset 942000000 (seed 29 into 256) rising to
   its range's top, 60, and landing on 67, a leap the run means to fill, its landing placed outside the range it runs in.
+- **Four at 924000000** (the review of 16 October's holdout, 23 October 2026, each failing at ea7cd3f too, older than that
+  review's fixes): the polymeter's chords off their cycle (seed 45 at 479.75, a 7-16th cell in a 16/16 bar, the chords'
+  onsets in its second frame not on the first cell's, `PolymeterTest`); a drum doubling a lead off the lead's beats
+  (seed 26, section 9 at 672, a tambourine on the kick at 682 and 698, `DoublingTest`); a percussion-only section
+  playing three of the kit's notes (`PercussionSectionsTest`, its assertion naming no song yet); a calm section's drums
+  not sparser (seed 14 at 712, `DroneAndQuieterFormTest`). Their songs change with the review of 22 October's packages: each to be
+  read at the first offset it fails at after them.
+- **The suite's memory at 924000000:** about 240 tests ran out of the 8 GB cap there (23 October 2026), every one
+  passing alone; the corpus's songs cached by the tests, larger there, are the likely cause, with the suite's slowing
+  (the review of 22 October's #246).
 - **Three page tests seen failing once each,** their messages not kept: the seek readout's
   (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), the length's
   (`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`) and the bar dragged by hand's
