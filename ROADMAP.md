@@ -231,6 +231,48 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   is song-wide state, and a clamp per section a swing of the section's own, put off until a fast swung section is
   heard rushed.
 
+### From the review of 22 October 2026
+
+The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its proposals, reviewed as plans:
+
+- **Plays as the only walk** (#161, the architecture reviewer): `SongMap.Plays` the one walk and `PlayingAt` the one
+  lookup, both one `Play` record, `SectionAt` and `PlayedSections` gone (16 uses left in Core), the render's rule that an
+  intro of its own sounds as its source named, and a rule test that every stage edits the entries' window as it edits
+  the first section's first bars; it closes the class package 06 fixed stage by stage (fills, stop time, pushes and the
+  pedal still miss the window, `WindowStagesReportTest`).
+- **A form as a cycle** (#122, the foundations reviewer), an experiment: Jazz's AABA as a form the song's length
+  repeats, a form option beside `vvbv` asked against it by ear, before any migration; Jazz plays a bridge in 38% of its
+  songs, its lengths beyond any fixed AABA's.
+- **Intensity moving the energy** (#76, the foundations reviewer), an experiment: the mood's intensity a value of
+  Trance's dynamics, the sections' energy drawn around it, asked against the current model; in 28 of 49 presets the
+  notes a beat at intensity -1 and 1 differ by 2% or less, the tempo all that moves.
+- **The 6/8 frame** (#329, #320): two rows of `Figures.All`, no stage: a chords figure in 6/8, the chord on the 8ths
+  between the bass's 1 and 4 (onsets 2, 4, 8, 10 of 12), loose as the chick is (Celtic, Folk, Medieval); and the 6/8
+  bell on the claves over two bars (Latin), kept by `Fits` where a 6/8 section draws its claves.
+- **A part's own arpeggio, and the roll** (#102, #357): the arpeggio pool nested by role as the figures' and the
+  instruments' are, the shared one where a role is not named (Bluegrass's chop under the banjo, #356); then a roll,
+  another `ArpeggioPattern`, three of the chord's notes cycling 3+3+2 8ths from the bar's start, the forward roll at the
+  plain end (Bluegrass, Country, Folk, Celtic).
+- **Tempo at a phrase's edges** (#302, #360, then #365): one tempo edit as the ritardando's: the part alone at the
+  opening pushing and broadening each phrase into the band's entrance in tempo (`openingAlone`, a slow tempo leaning
+  it), and a section's closing bar broadening into the next (the breath, before a return at the plain end, any section
+  at the wild); later the cadenza, an `EndingKind` holding the last dominant as a stop while the lead runs alone over
+  it, should the breath be heard to work.
+- **The drums:** a tom groove keeping time, the tom an option of `drumRole.time` leaned to quiet and building sections
+  by energy (#344, Nu metal, Doom, Symphonic, Surf rock); a fill's feet, the drum solo's `SoloFeet` under a fill's run
+  (#338, the metal presets); a jazz drummer's comping, a colour figure of soft off-beat snare and kick strokes played
+  loose (#305, Jazz, Dark jazz, Fusion; *Ghost notes beyond the backbeat*).
+- **The comp in clave** (#316): a chords figure following the claves, or the snare where it plays the bossa clave, the
+  chords player's turn after the claves' (Latin, Bossa nova).
+- **A club intro of entries** (#307): the entries' window a genre pool, its options the present ones and the first
+  section whole with a part entering each pattern (House, Techno, Trance, Psytrance, Drum and bass); first measured,
+  how many bars the club intros' entries take now with texture's build.
+- **A tremolo-picked line** (#352): an `articulation` option, a line's note of a beat or longer re-struck every 16th
+  (Surf rock's lead, Black metal's melody, Lyrical guitar, Medieval, Dungeon synth), the riff's tremolo figure heard and
+  kept (`surf-tremolo`).
+- **Put off:** the game loop (#369), the body replayed from its loop point into the fade as `PlayAt` plays a source:
+  two presets, whose fade already replays their last section; taken up should listening ask for the loop.
+
 ### Genre conventions (the listening review of 19 October 2026)
 
 The review of 16 October's unasked questions and every earlier verdict judged against the genres' conventions (19

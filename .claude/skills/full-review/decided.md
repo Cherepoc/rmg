@@ -115,3 +115,11 @@ rejected while fixing: the place, what was decided, why.
   of generation in a profile of the fingerprint): three such fixes measured no gain beyond the noise and were left out.
   The mood factor's lookups (#47, #79) and the previews' weighing (#373) appear in no profile above 1%; the page's
   range drag (#298) is not visibly slow. Not raised again until a profile names a path above 5%.
+- A hold naming the tracks it holds (#126 of 22 October 2026) not built: 7 of the 10 kinds are the whole band's by
+  nature, so a track list would say little the kind does not; package 07 kept each stage out by its own kinds instead,
+  and `HoldsTest` reads each stage's kinds against the song's whole holds, which keeps the class closed. Not raised
+  again unless a hold of some parts alone is needed.
+- A copied part's source as a lookup of its own (#103 of 22 October 2026, `SourceOf(sectionId, role)`) not built: a
+  looping section's and a verse over the intro's riff's draws are keyed by `GeneratedSection.LinesFrom` where they
+  decide the copied part (the key, the pedal, the polymeter, the figures; package 08, 6c4964d), the one copy the
+  generator makes; a lookup by role waits for a copy of another kind.
