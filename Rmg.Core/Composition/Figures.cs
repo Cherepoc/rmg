@@ -118,9 +118,6 @@ internal static class Figures
     /// </summary>
     public static ByConvention Strictness { get; } = new(1, 0.9, 0.6);
 
-    /// <summary>A bar's places a beat, which a loose figure's stream is keyed by (<see cref="SongMap.PlaceKey" />).</summary>
-    private const int PlacesPerBeat = 48;
-
     /// <summary>A player's own rhythm, as its pool names it.</summary>
     public const string Own = "own";
 
@@ -326,7 +323,7 @@ internal static class Figures
                             // bar's, by its place in its section, and the track's own
                             double[] kept = figure.Loose
                                 ? Loosen([..own.Select(x => x.Position)], [..onsets.Where(In)], Strictness.At(song.SectionOf(span.SectionId).Facets[Facet.Feel]),
-                                    song.Stream(SongStream.LooseFigures, song.Form.Map.PlaceKey(bar, PlacesPerBeat), track))
+                                    song.Stream(SongStream.LooseFigures, song.Form.Map.PlaceKey(bar), track))
                                 : [..onsets.Where(In)];
                             played.AddRange(kept.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
                         }

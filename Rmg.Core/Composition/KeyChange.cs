@@ -17,8 +17,6 @@ namespace Rmg.Core.Composition;
 /// <param name="Semitones">The new key, as its step from the song's own, from -7 to 7, the step nearest the key before.</param>
 public sealed record KeyChange(double Position, int Semitones)
 {
-    /// <summary>How finely a key change's place keys its draws: a 96th of a beat.</summary>
-    private const int PlacesPerBeat = 96;
 
     /// <summary>How a key change is led into, where it is: a chain of chords, or a pivot chord both keys share.</summary>
     public enum Device
@@ -255,7 +253,7 @@ public sealed record KeyChange(double Position, int Semitones)
         for (var i = 0; i < changes.Length; i++)
         {
             // each change's from a sequence of its own, by its place, so that a change before it leaves it as it was
-            var context = streams(map.PlaceKey(changes[i].Position, PlacesPerBeat));
+            var context = streams(map.PlaceKey(changes[i].Position));
             var prepares = context.TestProbability(PrepareChance);
             var length = context.Pick(ByConvention.Weigh(ChainLengths, unconventionality));
             var (keyFromNext, rootStep) = context.Pick(ByConvention.Weigh(Links, unconventionality));

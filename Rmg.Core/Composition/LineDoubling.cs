@@ -299,7 +299,6 @@ internal static class LineDoubling
                     if (In(bassTrack, start, end).Length > 0 || In(riffTrack, start, end) is not { Length: > 0 } riff)
                         continue;
 
-                    StateTrace.RecordSection(TracePoints.RiffBass, bassTrack, span.SectionId, $"{start}", (index, start));
                     filled.AddRange(riff.Where(x => !bassSilent(index, span.PhraseOf(x.Position))).Select(x => x.Value.With(CompositionStateKinds.SoundsAs, 0).With(CompositionStateKinds.Doubled, 1)
                         // in its own register, never the twin's raise the riff took
                         .With(CompositionStateKinds.LineRaise, 0).ToTimelineItem(x.Position)));

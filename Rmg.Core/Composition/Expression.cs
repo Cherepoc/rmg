@@ -203,9 +203,6 @@ internal static class Expression
     /// </summary>
     public const double PinchChance = 0.18;
 
-    /// <summary>How finely a note's place keys its pinch's and its dive's draws: a 96th of a beat.</summary>
-    private const int NotePlacesPerBeat = 96;
-
     /// <summary>The shortest note a pinch takes, in seconds, long enough to be heard, and the most notes a beat around it.</summary>
     public const double PinchShortest = 0.6, PinchBusiest = 2.5;
 
@@ -841,7 +838,7 @@ internal static class Expression
             // leaves the others' draws as they were, one a phrase at most
             var pinchSeed = pinchStreams(track).GenerateSeed();
             IGenerationContext Pinching(double position, int decision) =>
-                new GenerationContext(Seeds.Derive(Seeds.Derive(pinchSeed, map.PlaceKey(position, NotePlacesPerBeat)), decision));
+                new GenerationContext(Seeds.Derive(Seeds.Derive(pinchSeed, map.PlaceKey(position)), decision));
             var pinchedPhrases = new HashSet<(int, int)>();
             // the widths the genre's vibratos take
             var widths = genre.Pool<Vibrato>(GenreChoices.VibratoWidth, NameOf);
@@ -874,7 +871,7 @@ internal static class Expression
                         continue;
                     var note = timeline[i];
 
-                    var drawing = new GenerationContext(Seeds.Derive(noteSeed, map.PlaceKey(note.Position, NotePlacesPerBeat)));
+                    var drawing = new GenerationContext(Seeds.Derive(noteSeed, map.PlaceKey(note.Position)));
                     var noteProgram = ProgramOf(note.Value, program);
                     // one note at a time, or in octaves, which bend and echo together
                     var isLine = (note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
@@ -910,7 +907,7 @@ internal static class Expression
                     // a held note's bend made to wait a beat and rise slowly up, staying bent, where the note is long enough, whatever
                     // the bend drawn but a fall-off, which ends its phrase, and a release's, which bends into its note; from a
                     // sequence of its own, drawn for every note, before its size, which a bend up leans to the chord's notes by
-                    var late = new GenerationContext(Seeds.Derive(Seeds.Derive(noteSeed, map.PlaceKey(note.Position, NotePlacesPerBeat)), LateBendDecision))
+                    var late = new GenerationContext(Seeds.Derive(Seeds.Derive(noteSeed, map.PlaceKey(note.Position)), LateBendDecision))
                         .TestProbability(LateBendChance.At(u, genre.Chance(GenreChoices.BendTiming, "late")));
                     if (late && !isRelease && kind != BendKind.FallOff && Fits(BendKind.LateBend, Math.Round(Math.Max(eighth, quick), 3), seconds, eighth))
                         kind = BendKind.LateBend;

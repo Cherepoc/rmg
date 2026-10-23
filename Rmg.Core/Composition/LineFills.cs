@@ -38,9 +38,6 @@ internal static class LineFills
     /// </summary>
     public static ByConvention TurnaroundChance { get; } = new(0.25, 0.3, 0.3);
 
-    /// <summary>How finely a run's line keys its stream: a 96th of a beat.</summary>
-    private const int PlacesPerBeat = 96;
-
     /// <summary>The shortest a walk's note is, in beats: an 8th.</summary>
     public const double ShortestNote = 0.5;
 
@@ -80,7 +77,7 @@ internal static class LineFills
         var events = track.EventTimeline.ToList();
         foreach (var run in runs)
         {
-            if (!streams(map.PlaceKey(run.Line, PlacesPerBeat)).TestProbability(Tilt.Of(SectionEnergy.HighOdds, run.Lift).Chance(way.Chance, 1)))
+            if (!streams(map.PlaceKey(run.Line)).TestProbability(Tilt.Of(SectionEnergy.HighOdds, run.Lift).Chance(way.Chance, 1)))
                 continue;
 
             var sweeps = way.Runs;

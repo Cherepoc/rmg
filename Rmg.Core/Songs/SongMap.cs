@@ -109,15 +109,18 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
         return Ending.Duration > 1e-9 && position < Ending.Start + Ending.Duration - 1e-9 ? Plays.Last() : null;
     }
 
+    /// <summary>How many places a beat a place's key tells apart (<see cref="PlaceKey" />), a 32nd triplet's and finer.</summary>
+    public const int PlacesPerBeat = 96;
+
     /// <summary>
     ///     A place's key, by the section it is in or after, the intro's for none, and how far into it, in places a beat:
     ///     a stream keyed by it stays as it was where something before the section moves, such as an intro's length or a
     ///     short bar.
     /// </summary>
-    public long PlaceKey(double position, int placesPerBeat)
+    public long PlaceKey(double position)
     {
         var index = IndexAt(position + 1e-9);
-        return Seeds.Key(index, (long)Math.Round((position - (index >= 0 ? Sections[index].Start : 0)) * placesPerBeat));
+        return Seeds.Key(index, (long)Math.Round((position - (index >= 0 ? Sections[index].Start : 0)) * PlacesPerBeat));
     }
 
     /// <summary>
@@ -191,15 +194,6 @@ public readonly record struct Place(int Bar, int PatternBar, double Beat, Meter 
     /// <summary>Whether it is on a pulse of its bar, as a note on the beat is.</summary>
     public bool OnPulse => SincePulse < 1e-6;
 
-    /// <summary>Whether it is on its bar's backbeat (<see cref="Meter.Backbeats" />): 4/4's 2 and 4, 6/8's fourth 8th.</summary>
-    public bool OnBackbeat
-    {
-        get
-        {
-            var beat = Beat;
-            return Meter.Backbeats.Any(x => Math.Abs(x - beat) < 1e-6);
-        }
-    }
 }
 
 /// <summary>A stretch of a section, a bar, a phrase or a play of its pattern, by its index from the section's start, the last cut at the section's end.</summary>

@@ -19,9 +19,6 @@ internal static class SurfDrops
     /// <summary>How much softer a drop starts than the note before it and how much louder it ends, as a velocity sum, a swell into the section.</summary>
     public const double FromSofter = 0.2, ToLouder = 0.1;
 
-    /// <summary>The guitars' programs, the nylon guitar's to the harmonics', which a drop is played on.</summary>
-    private const int FirstGuitar = 24, LastGuitar = 31;
-
     /// <summary>What a drop keeps out of: stop time, a drum solo, a solo, a build into a drop and a cut.</summary>
     internal const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo | Hold.Solo | Hold.Build | Hold.Cut;
 
@@ -36,7 +33,8 @@ internal static class SurfDrops
         var notes = SongStages.NotesOf(draft);
         var holds = draft.Holds(song);
         var sections = song.Form.Map.Sections;
-        bool Guitar(int track) => song.Tracks.Definitions[track] is PitchInstrumentTrack { InstrumentCode: >= FirstGuitar and <= LastGuitar };
+        // a guitar, which a drop is played on
+        bool Guitar(int track) => song.Tracks.Definitions[track] is PitchInstrumentTrack { InstrumentCode: var program } && InstrumentTraits.IsGuitar(program);
         var guitar = new[] { TrackRole.Riff, TrackRole.Melody }.SelectMany(role => song.Playing.Where(x => x.Value == role).Select(x => x.Key))
             .Where(x => notes.TryGetValue(x, out var played) && played.Count > 0 && Guitar(x)).Select(x => (int?)x).FirstOrDefault();
         var result = notes.ToBuilder();

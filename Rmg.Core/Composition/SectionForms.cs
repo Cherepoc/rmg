@@ -47,9 +47,6 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
     /// <summary>The programs a heavy section's clean, jazz or muted guitars play, the driven guitars.</summary>
     public static ImmutableArray<int> HeavyPrograms { get; } = [..Enumerable.Range(0, 128).Where(x => InstrumentTraits.Has(x, InstrumentTrait.Driven))];
 
-    /// <summary>The guitars' programs, the nylon guitar's to the harmonics', which a calm section rests but the one breaking its chords.</summary>
-    private const int FirstGuitar = 24, LastGuitar = 31;
-
     /// <summary>The guitars a heavy section turns: the clean, the jazz and the muted guitar.</summary>
     private static readonly ImmutableHashSet<int> Clean = [26, 27, 28];
 
@@ -79,7 +76,8 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
         var clean = guitars.Where(x => Clean.Contains(x.Value.Program)).ToArray();
         // the guitar breaking the chords, the chords' or the rhythm part's, clean or driven, and every other guitar resting, so
         // that nothing plays a riff's tremolo or chugs under the broken chords; none calm where no guitar plays the chords
-        var strung = guitars.Where(x => x.Value.Program is >= FirstGuitar and <= LastGuitar).ToArray();
+        // the guitars, which a calm section rests but the one breaking its chords
+        var strung = guitars.Where(x => InstrumentTraits.IsGuitar(x.Value.Program)).ToArray();
         var breaker = strung.Where(x => x.Value.Role is TrackRole.Chords or TrackRole.Rhythm).OrderBy(x => x.Value.Role != TrackRole.Chords).Select(x => (int?)x.Key).FirstOrDefault();
         if (!breakdown && energy < -1e-9 && calms && driven.Length > 0 && breaker is { } broken)
             return new SectionForm(SectionFormKind.Calm, CalmPrograms[(int)(programDraw * CalmPrograms.Length)], [..driven.Select(x => x.Key)], broken,

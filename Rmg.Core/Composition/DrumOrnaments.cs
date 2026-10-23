@@ -23,9 +23,6 @@ internal static class DrumOrnaments
     /// <summary>How many grace strokes a flam and a drag play before their note.</summary>
     public const int FlamStrokes = 1, DragStrokes = 2;
 
-    // how finely the places of a note are told apart, a draw keyed by its place
-    private const int PlacesPerBeat = 96;
-
     /// <summary>How many grace strokes a drum plays a second: a flam's grace about 35 ms before its note.</summary>
     public const double Rate = 28;
 
@@ -68,7 +65,7 @@ internal static class DrumOrnaments
                     return note;
                 var (plays, share, strokes) = inFill ? (flams, FlamShare, FlamStrokes) : (drags, DragShare, DragStrokes);
                 // drawn by the note's place, so that a song made again plays it alike
-                if (!plays || song.Stream(SongStream.DrumOrnaments, track, map.PlaceKey(position, PlacesPerBeat)).GenerateDouble() >= share)
+                if (!plays || song.Stream(SongStream.DrumOrnaments, track, map.PlaceKey(position)).GenerateDouble() >= share)
                     return note;
                 var step = Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)) / Rate;
                 // its strokes in its section, none before a section's first note, and clear of the drum's own notes, which a

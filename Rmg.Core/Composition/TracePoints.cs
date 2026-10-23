@@ -66,9 +66,6 @@ internal static class TracePoints
     /// <summary>The part the song opens on alone, none where it opens otherwise (a <see cref="Songs.TrackRole" />?).</summary>
     public const string OpeningAlone = "Opening alone";
 
-    /// <summary>Whether a section moves a chromatic line inside its held chords (a <c>bool</c>).</summary>
-    public const string InnerLine = "Inner line";
-
     /// <summary>The figures a section's players play in place of their own rhythms, by their players (an <c>ImmutableDictionary</c> of <see cref="FigurePlayer" /> and the figure's name, <see cref="Composition.Figures" />).</summary>
     public const string Figures = "Figures";
 
@@ -156,12 +153,6 @@ internal static class TracePoints
     ///     place in the song (an <c>int</c>).
     /// </summary>
     public const string BlockHarmony = "Block harmony";
-
-    /// <summary>
-    ///     The bass playing a driven riff's phrase it would rest in: the section's place in the song and the phrase's start
-    ///     (a tuple of an <c>int</c> and a <c>double</c>).
-    /// </summary>
-    public const string RiffBass = "Riff bass";
 
     /// <summary>
     ///     Whether a section the solo part may answer the melody in does, outside its solos and where the counter-melody
@@ -349,17 +340,11 @@ internal static class TracePoints
     /// <summary>How a section's drums play the bars of its later letters (a <see cref="BarDrums" />).</summary>
     public const string DrumPresence = "Drum presence";
 
-    /// <summary>A section's chance of its melody leading into a chord change within a phrase (a <c>double</c>).</summary>
-    public const string MelodyLeading = "Melody leading";
-
     /// <summary>The chance a note of a section's melody's answer is mutated from the question's (a <c>double</c>).</summary>
     public const string MelodyAnswer = "Melody answer";
 
     /// <summary>How much a song improvises its melody as its sections recur (a <c>double</c>, <see cref="Composition.MelodyLayers.Improvisation" />).</summary>
     public const string MelodyImprovisation = "Melody improvisation";
-
-    /// <summary>How freely a section's melody changes register where a phrase starts (a <c>double</c>, <see cref="Composition.SectionLine.RegisterFreedom" />).</summary>
-    public const string LineRegisterFreedom = "Line register freedom";
 
     /// <summary>A bar pattern's state, with its phrase scheme.</summary>
     public const string BarPattern = "Bar pattern";
@@ -372,9 +357,6 @@ internal static class TracePoints
 
     /// <summary>A fill's hit, or a landing's, by its kind in words.</summary>
     public const string Fill = "Fill";
-
-    /// <summary>How the song starts, in words.</summary>
-    public const string SongIntro = "Song intro";
 
     /// <summary>A section's appearance's drum edits, its place and how many (a <c>(int, int)</c>; <see cref="Composition.Mutations" />).</summary>
     public const string Mutations = "Mutations";
@@ -415,6 +397,4 @@ internal static class TracePoints
     /// <summary>Whether the song's snare flams in its fills and drags into its backbeats (a <c>(bool Flams, bool Drags)</c>; <see cref="Composition.DrumOrnaments" />).</summary>
     public const string DrumOrnaments = "Drum ornaments";
 
-    /// <summary>How the song ends, in words.</summary>
-    public const string SongEnding = "Song ending";
 }

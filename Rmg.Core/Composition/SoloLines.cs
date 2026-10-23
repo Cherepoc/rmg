@@ -322,6 +322,10 @@ internal static class SoloLines
         // a note's place in the section, in places a beat from 1, which its draws are keyed by, so that a note added or
         // left out before it, a pickup's or a displaced motif's, leaves them as they were
         long PlaceOf(double position) => (long)Math.Round((position - span.Start) * PlacesPerBeat) + 1;
+        // a note's key, its melody note's and its place, which its own draws are made by
+        long KeyOf(double position) => Seeds.Key(MelodyAt(position).Value.GetStateValue(CompositionStateKinds.NoteKey), PlaceOf(position));
+        // a note's draw of a decision, by its key and the decision's stream
+        bool Draws(double position, long stream, double chance) => new GenerationContext(Seeds.Derive((ulong)KeyOf(position), stream)).TestProbability(chance);
 
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there,
         // its key by its place
@@ -335,7 +339,7 @@ internal static class SoloLines
                     CompositionStateKinds.LineVoices, CompositionStateKinds.LinePlanes])
                 .With(CompositionStateKinds.Octave, octave && soloist.Octaves ? 1 : 0)
                 .With(CompositionStateKinds.BeatRank, Math.Abs(sung.Position - position) < 1e-9 ? sung.Value.GetStateValue(CompositionStateKinds.BeatRank) : DyadicRankDistribution.MaxRank)
-                .With(CompositionStateKinds.NoteKey, Seeds.Key(sung.Value.GetStateValue(CompositionStateKinds.NoteKey), PlaceOf(position)));
+                .With(CompositionStateKinds.NoteKey, KeyOf(position));
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0) + lift);
             // a note off the scale the scale's step beside it, altered onto it
             var step = LinePlacement.GetScaleStep(Chord(state, position), pitch);
@@ -352,7 +356,7 @@ internal static class SoloLines
 
             var placed = (held > 0 ? state.With(StateKinds.HeldDuration, held) : state).ToTimelineItem(position);
             // a ghosting lick's unaccented note muted now and then, by its own key's draw
-            return note.Ghosts && Ghosted(placed.Value) ? placed.Value.With(CompositionStateKinds.PalmMute, 1).ToTimelineItem(position) : placed;
+            return note.Ghosts && Draws(position, GhostStream, GhostRate) ? placed.Value.With(CompositionStateKinds.PalmMute, 1).ToTimelineItem(position) : placed;
         }
 
         var plan = Plan(
@@ -569,8 +573,7 @@ internal static class SoloLines
         }
 
         // a run's note on a change's downbeat landing there now and then, by its own key's draw, the key it is placed with
-        bool Lands(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), PlaceOf(planned[k].Position)), LandingStream))
-            .TestProbability(soloist.LandingChance);
+        bool Lands(int k) => Draws(planned[k].Position, LandingStream, soloist.LandingChance);
 
         // a run's note on a change's downbeat landed on the new chord's nearest note, a scale step or two away, the way the run
         // goes where two are as near: the run moved by as many steps from it on, leaping onto the chord's note as a player does
@@ -624,8 +627,7 @@ internal static class SoloLines
         // on a pulse of its bar, the meter's beats, a dotted quarter's in 6/8 and an odd meter's groups, the bars counted from
         // the section's start
         bool OnBeat(double position) => span.Meter.Pulses.Any(x => Math.Abs((position - barOrigin).Mod(span.Meter.BarDuration) - x) < 1e-6);
-        bool Chromatic(int k) => new GenerationContext(Seeds.Derive((ulong)Seeds.Key(MelodyAt(planned[k].Position).Value.GetStateValue(CompositionStateKinds.NoteKey), PlaceOf(planned[k].Position)), ChromaticStream))
-            .TestProbability(soloist.ChromaticChance);
+        bool Chromatic(int k) => Draws(planned[k].Position, ChromaticStream, soloist.ChromaticChance);
         // the notes as they sound, each kept as its scale step over the chord it plays under, a new chord's at the beat
         int Sounding(int k)
         {
@@ -639,7 +641,6 @@ internal static class SoloLines
                 planned[k] = planned[k] with { Pitch = Sounding(k + 1) - Math.Sign(Sounding(k + 1) - Sounding(k)), Altered = true };
 
         int FoldTowards(int pitch, int towards) => pitch + 12 * (int)Math.Round((towards - pitch) / 12.0);
-        static bool Ghosted(StateMap note) => new GenerationContext(Seeds.Derive((ulong)note.GetStateValue(CompositionStateKinds.NoteKey), GhostStream)).TestProbability(GhostRate);
         // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc); and a stacked
         // note off the beat that leads into a chord change planed into it, an approach, where the soloist approaches
         var line = planned.Select(Place).ToArray();

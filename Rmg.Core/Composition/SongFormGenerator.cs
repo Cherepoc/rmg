@@ -20,9 +20,6 @@ internal sealed class SongFormGenerator
     // the sequence an intro's entries are drawn from, apart from the rest of the form
     private readonly IGenerationContext _introContext;
 
-    // how finely a line's place keys its drop's sequences
-    private const int LinePlacesPerBeat = 48;
-
     // the sequence whether a lift is built to and dropped at is drawn from (FormLayers.Drop)
     private readonly IGenerationContext _dropContext;
 
@@ -272,7 +269,6 @@ internal sealed class SongFormGenerator
         var edits = new TimelineEdits(_context, meter, map);
         var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
         var songState = StateTimelineMap.Create(end);
-        var introDescription = $"{plan.Intro} intro, {origin} beats";
 
         switch (plan.Intro)
         {
@@ -283,7 +279,6 @@ internal sealed class SongFormGenerator
             // the hook's drums fill into the first section, as the chorus's would into the section after it
             case IntroKind.Hook when fillSections[0].HasDrums && fillSections[0].DrumsFrom == 0:
                 lines.Insert(0, new FillLine(origin, fillSections[hook.Index], fillSections[0], 0));
-                introDescription += $", the chorus's first phrase, section {hook.Index}";
                 break;
             case IntroKind.Entries:
             {
@@ -310,15 +305,10 @@ internal sealed class SongFormGenerator
                         lines.Insert(lines.Count(x => x.Position < windowEnd), landing);
                 }
 
-                introDescription += $", {plan.Window.Bars} bars {(plan.Window.IsBefore ? "before the first section" : "into it")}: " +
-                                    string.Join(", ", entries.Select(x => $"{x.Part} at {x.Entry}"));
                 break;
             }
         }
 
-        StateTrace.RecordSection(TracePoints.SongIntro, FillGenerator.DrumsTrace, sectionIds[0], introDescription, null);
-
-        var description = $"{plan.Ending} ending";
         if (FormLayers.HasFinalChord(plan.Ending))
         {
             // a big ending's held chord, then its last hit, a button's
@@ -332,7 +322,6 @@ internal sealed class SongFormGenerator
                 // the band stops before the line, every part of it, a soloist too, and the drums land on it with the rest; a
                 // pitched part kept silent there once its notes are decided, as a held note struck again at a change would sound
                 var stop = end - plan.Stop;
-                description += $", stopping {plan.Stop} beats before it";
                 foreach (var (track, role) in _roles)
                     edits.Rest(track, role, stop, end);
             }
@@ -365,15 +354,10 @@ internal sealed class SongFormGenerator
                 }
 
                 lines.Add(new FillLine(end + held, fillSections[^1], fillSections[^1], 0, false, IsLandingForced: true));
-                description += ", the drums rolling over it into a last hit";
             }
 
-            description += $", at beat {end}, held {held} beats";
             if (plan.SlowsDown)
-            {
                 songState = songState.MergeWith(CreateRitardando(end, end + held, last.BarDuration));
-                description += ", slowing down";
-            }
         }
 
         // a fading song plays its last section once more, as the song plans it, and fades out over it, over two plays of
@@ -382,7 +366,6 @@ internal sealed class SongFormGenerator
         {
             var fadeStart = Math.Min(spans[^1].Start, end - 2 * last.PatternDuration);
             songState = songState.MergeWith(CreateFade(fadeStart, end));
-            description += $", fading from beat {fadeStart} to {end}";
         }
 
         // a stripped song plays its last section once more and its pitched parts leave one by one over its last two patterns,
@@ -406,12 +389,9 @@ internal sealed class SongFormGenerator
                 var exit = barLines[(i + 1) * barLines.Length / (leaving + 1)];
                 foreach (var (track, role) in _roles.Where(x => x.Value.Source() == parts[i]))
                     edits.Rest(track, role, exit, end);
-
-                description += $", {parts[i]} out at {exit}";
             }
         }
 
-        StateTrace.RecordSection(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], description, null);
         // a lift the drums announce built to and dropped at, now and then, a genre's: the band out for the bar before it, the
         // lines that walk into the section with it, but for the drums' fill into it, and the drums landing on it
         var drop = FormLayers.Drop.At(_songRhythm.Value, _genre.Chance(GenreChoices.Drop, "lifts"));
@@ -429,7 +409,7 @@ internal sealed class SongFormGenerator
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
-            var place = map.PlaceKey(line.Position, LinePlacesPerBeat);
+            var place = map.PlaceKey(line.Position);
             var dropping = new GenerationContext(Seeds.Derive(dropSeed, place)).TestProbability(drop);
             var kind = new GenerationContext(Seeds.Derive(kindSeed, place)).Pick(kinds);
             var rolls = snare >= 0 && new GenerationContext(Seeds.Derive(rollSeed, place)).TestProbability(roll);

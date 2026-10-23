@@ -19,10 +19,6 @@ internal sealed class FillGenerator
     /// <summary>The track of a trace entry that records a decision for all the drums, such as a line's fill.</summary>
     public const int DrumsTrace = -1;
 
-
-    /// <summary>How finely a line's place keys its stream: a 96th of a beat.</summary>
-    private const int LinePlacesPerBeat = 96;
-
     private readonly IGenerationContext _context;
 
     /// <summary>
@@ -48,7 +44,6 @@ internal sealed class FillGenerator
 
     // the song's drums' own state, before any section's
     private readonly FillGrooves _songDrums;
-
 
     // the meter the song's bars are in
     private readonly Meter _meter;
@@ -110,7 +105,7 @@ internal sealed class FillGenerator
         var lineSeed = _context.GenerateSeed();
         foreach (var line in lines)
         {
-            var key = map.PlaceKey(line.Position, LinePlacesPerBeat);
+            var key = map.PlaceKey(line.Position);
             (_line, _landing, _kickOut) = (new GenerationContext(Seeds.Derive(lineSeed, key)), new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, key), LandingStream)),
                 new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, key), KickOutStream)));
             MarkLine(song, edits, line, MinNote(line.Position), drummer, map);

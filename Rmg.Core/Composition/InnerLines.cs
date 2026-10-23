@@ -28,7 +28,6 @@ internal static class InnerLines
         var lining = song.SectionIds.Distinct().ToDictionary(id => id, id =>
         {
             var lines = song.Stream(SongStream.InnerLines, id).TestProbability(Chance.At(song.SectionOf(id).Facets[Facet.Chords], song.Genre.Chance(GenreChoices.HarmonyDevices, "innerLine")));
-            StateTrace.RecordSection(TracePoints.InnerLine, SectionGenerator.SectionTrace, id, $"{lines}", lines);
             return lines;
         });
         var common = draft.Timeline.CommonStateTimelineMap;

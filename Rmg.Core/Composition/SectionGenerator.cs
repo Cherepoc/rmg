@@ -724,7 +724,6 @@ internal sealed class SectionGenerator
             // leading into the chord changes within a phrase as often as the section has it
             var leadingContext = Stream(sectionId, SectionStream.MelodyLeading);
             var leading = Math.Clamp(MelodyLayers.Leading + Generators.SplineValue()(leadingContext) * MelodyLayers.LeadingSpread, 0, 1);
-            StateTrace.RecordSection(TracePoints.MelodyLeading, SectionTrace, sectionId, $"{leading:F2}", leading);
             // how freely the melody changes register where a phrase starts: the line's, as the song and the section move it
             var freedomContext = Stream(sectionId, SectionStream.RegisterFreedom);
             var freedom = Math.Clamp(
@@ -732,7 +731,6 @@ internal sealed class SectionGenerator
                 0,
                 1
             );
-            StateTrace.RecordSection(TracePoints.LineRegisterFreedom, SectionTrace, sectionId, $"{freedom:F2}", freedom);
             // a later appearance builds its bars afresh where its rhythm is improvised, as recorded the first time
             var melody = new SectionLine(
                 trackNumber,
