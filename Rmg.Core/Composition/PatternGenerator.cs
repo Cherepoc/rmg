@@ -128,7 +128,8 @@ internal sealed class PatternGenerator
                     var (seeds, rhythmSeeds) = (trackSeedMaps[letter], trackSeedMaps[scheme.RhythmOf(letter)]);
                     var barFeels = new List<BarFeel>();
                     var bars = new Dictionary<int, EventStateTimelineMap<StateMap>>();
-                    foreach (var x in seeds.OrderBy(x => feelLeads.ContainsKey(x.Key)))
+                    // the leads first, then the drums on their feel, then those doubling them, which keep to their beats
+                    foreach (var x in seeds.OrderBy(x => doubles.TryGetValue(x.Key, out var bound) && bound.Binding != DrumBinding.Figure ? 2 : feelLeads.ContainsKey(x.Key) ? 1 : 0))
                     {
                         // and its lead's bar pattern layer, held as the lead's role holds it
                         var patternOf = doubles.TryGetValue(x.Key, out var doubling) && doubling.Binding != DrumBinding.Figure ? doubling.Lead : x.Key;
@@ -150,6 +151,7 @@ internal sealed class PatternGenerator
                                 sectionRhythm.Scheme,
                                 sectionRhythm.Energy,
                                 doubles.GetValueOrDefault(x.Key),
+                                patternOf != x.Key ? bars[patternOf].EventTimeline.Select(n => Math.Round(n.Position, 6)).ToHashSet() : null,
                                 feelLeads.TryGetValue(x.Key, out var feelLead) ? barFeels.Single(feel => feel.Track == feelLead).Rhythm : null,
                                 barFeels,
                                 sectionRhythm.Facets[Facet.Feel]
@@ -207,6 +209,7 @@ internal sealed class PatternGenerator
         PhraseScheme scheme,
         Tilt energy,
         Doubling? doubling,
+        IReadOnlySet<double>? leadOnsets,
         StateMap? leadFeel,
         List<BarFeel> feels,
         double feelUnconventionality
@@ -249,12 +252,13 @@ internal sealed class PatternGenerator
         var notes = isResting
             ? EventTimeline.Create<StateMap>(_meter.BarDuration)
             : GenerateNotes(stateMap, barStateTimelineMap, patternBar * _meter.BarDuration, trackNumber, sectionId, patternBar, energy).GeneratedTimeline;
-        // a drum bound to a lead plays its strong beats, and one that accents it a share of them, the same ones wherever
-        // its bar pattern plays, by a draw keyed by the drum and the beat's place, and the last of them where the draw
-        // picks none, as a tambourine on the snare's 4, so that a bar a plain section plays over and over is not silent
+        // a drum bound to a lead plays its strong beats, those the lead plays in the bar where it plays the lead's rhythm,
+        // and one that accents it a share of them, the same ones wherever its bar pattern plays, by a draw keyed by the drum
+        // and the beat's place, and the last of them where the draw picks none, as a tambourine on the snare's 4, so that a
+        // bar a plain section plays over and over is not silent
         if (doubling is not null)
         {
-            var strong = notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank).ToArray();
+            var strong = notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank && (leadOnsets?.Contains(Math.Round(x.Position, 6)) ?? true)).ToArray();
             var played = doubling.Binding != DrumBinding.Accent ? strong : strong.Where(x => IsAccented(seed, trackNumber, x.Position, DrumKitGenerator.AccentShare)).ToArray();
             notes = EventTimeline.Create(notes.Duration, played.Length > 0 || strong.Length == 0 ? played : [strong[^1]]);
         }
