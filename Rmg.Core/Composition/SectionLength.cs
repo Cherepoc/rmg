@@ -69,11 +69,14 @@ internal static class SectionLength
 
     private static ImmutableArray<Weighted<int>> Weights(double unconventionality, SectionRole role, double lean, Genre genre)
     {
-        // the plays the role leans to, halved or doubled by a genre's, as a hip-hop hook is half its verse
-        var rolePlays = GetRolePlays(role) is { } plays && LengthRoles.Contains(role)
-            ? Math.Clamp((int)(plays * Math.Pow(2, Math.Round(2 * genre.Shift(GenreChoices.RoleLength, GenreChoices.Name(role.ToString()))))), Options[0].Plays, Options[^1].Plays)
-            : GetRolePlays(role);
+        // the plays the role leans to, halved or doubled by a genre's, as a hip-hop hook is half its verse, within the
+        // lengths the genre's pool keeps
         var weights = ByConvention.Weigh(Options, unconventionality, genre.Pool<int>(GenreChoices.SectionLength, NameOf));
+        var kept = weights.Where(x => x.Weight > 0).Select(x => x.Value).DefaultIfEmpty(Options[0].Plays).ToArray();
+        var rolePlays = GetRolePlays(role) is { } plays && LengthRoles.Contains(role)
+            && Math.Round(2 * genre.Shift(GenreChoices.RoleLength, GenreChoices.Name(role.ToString()))) is var doublings and not 0
+            ? Math.Clamp((int)(plays * Math.Pow(2, doublings)), kept.Min(), kept.Max())
+            : GetRolePlays(role);
         weights = Tilt.Of(RoleOdds, 1).Weigh(weights, plays => plays == rolePlays ? 1 : 0);
         return lean == 0 ? weights : Tilt.Of(LengthOdds, lean).Weigh(weights, plays => Math.Log2(plays) - 1);
     }

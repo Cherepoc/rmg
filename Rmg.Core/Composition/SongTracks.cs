@@ -144,8 +144,9 @@ internal sealed class SongTracks
         var counterInstrument = InstrumentRoles.CounterMelody.Pick(counterContext, sound, Pool(TrackRole.CounterMelody), melodyInstrument.Program, chordsInstrument.Program);
         // and the riff one of its own, apart from the melody's and the chords'
         var riffInstrument = InstrumentRoles.Riff.Pick(riffContext, sound, Pool(TrackRole.Riff), melodyInstrument.Program, chordsInstrument.Program);
-        // and the rhythm part comps in a sound of its own, apart from the chords' and the riff's, in a register of its own
-        var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, sound, Pool(TrackRole.Rhythm), chordsInstrument.Program, riffInstrument.Program);
+        // and the rhythm part comps in a sound of its own, apart from the melody's, the chords' and the riff's, in a register of
+        // its own
+        var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, sound, Pool(TrackRole.Rhythm), melodyInstrument.Program, chordsInstrument.Program, riffInstrument.Program);
 
         // and the solo part a lead of its own, apart from the melody's, which it takes over from
         var soloInstrument = InstrumentRoles.Solo.Pick(soloContext, sound, Pool(TrackRole.Solo), melodyInstrument.Program);

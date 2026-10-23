@@ -75,18 +75,21 @@ public sealed class InstrumentRole
 
     /// <summary>
     ///     An instrument of the role, the heavier ones being more likely, by their weights at the song's sound facet or a
-    ///     pool's, such as a genre's, other than the ones given, which a pool that keeps nothing else lets play.
+    ///     pool's, such as a genre's, other than the ones given; where a pool keeps nothing else, apart from as many of them
+    ///     as it can, the first given kept apart the longest, so that a part never takes the melody's sound where another
+    ///     part's would do.
     /// </summary>
     /// <param name="sound">The sound facet, which the role's own weights lean by.</param>
     /// <param name="pool">An instrument's weight in the pool, in place of its own, from 0, out of it, to 1; none for the role's own.</param>
+    /// <param name="excludedPrograms">The programs the part keeps apart from, the one it must the most first.</param>
     public RoleInstrument Pick(IGenerationContext context, double sound, Func<RoleInstrument, double>? pool, params IEnumerable<int> excludedPrograms)
     {
-        var excluded = excludedPrograms.ToHashSet();
+        var excluded = excludedPrograms.ToArray();
         var weight = pool ?? Own(sound);
         var kept = Of(pool).Select(x => (Instrument: x, Weight: weight(x))).Where(x => x.Weight > 0).ToArray();
         var candidates = kept.Where(x => !excluded.Contains(x.Instrument.Program)).ToArray();
-        if (candidates.Length == 0 && pool is not null)
-            candidates = kept;
+        for (var apart = excluded.Length - 1; candidates.Length == 0 && pool is not null && apart >= 0; apart--)
+            candidates = kept.Where(x => !excluded.Take(apart).Contains(x.Instrument.Program)).ToArray();
         if (candidates.Length == 0)
             throw new InvalidOperationException($"Every instrument of the {Name} role is excluded.");
 
@@ -195,7 +198,7 @@ internal static class InstrumentRoles
             new(7, "Clavinet", 0.3),
             new(4, "Electric Piano 1", 0.3),
             new(18, "Rock Organ", 0.2, VoiceLeadingLayers.Sustained),
-            new(105, "Banjo", 0.1, VoiceLeadingLayers.Guitar),
+            new(105, "Banjo", new ByConvention(0, 0.1, 0.1), VoiceLeadingLayers.Guitar),
             new(3, "Honky-tonk Piano", new ByConvention(0, 0.08, 0.2)),
             new(23, "Tango Accordion", new ByConvention(0, 0.03, 0.15), VoiceLeadingLayers.Sustained)
         ]
@@ -302,10 +305,10 @@ internal static class InstrumentRoles
             new(80, "Lead 1 (square)", 0.4, MelodyLayers.Mixed),
             new(81, "Lead 2 (sawtooth)", 0.4, MelodyLayers.Mixed),
             new(84, "Lead 5 (charang)", 0.15, MelodyLayers.Mixed),
-            new(104, "Sitar", 0.1, MelodyLayers.Mixed),
-            new(105, "Banjo", 0.1, MelodyLayers.Mixed),
-            new(108, "Kalimba", 0.2, MelodyLayers.Leaping),
-            new(110, "Fiddle", 0.1, MelodyLayers.Stepwise),
+            new(104, "Sitar", new ByConvention(0, 0.1, 0.1), MelodyLayers.Mixed),
+            new(105, "Banjo", new ByConvention(0, 0.1, 0.1), MelodyLayers.Mixed),
+            new(108, "Kalimba", new ByConvention(0, 0.2, 0.2), MelodyLayers.Leaping),
+            new(110, "Fiddle", new ByConvention(0, 0.1, 0.1), MelodyLayers.Stepwise),
             new(10, "Music Box", new ByConvention(0, 0.05, 0.2), MelodyLayers.Leaping),
             new(14, "Tubular Bells", new ByConvention(0, 0.02, 0.15), MelodyLayers.Leaping),
             new(15, "Dulcimer", new ByConvention(0, 0.03, 0.15), MelodyLayers.Mixed),
