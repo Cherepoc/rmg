@@ -266,13 +266,6 @@
     },
     "seeds": [
       {
-        "seed": "0",
-        "at": 164.8,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
         "seed": "3",
         "at": 0,
         "listen": [
@@ -280,31 +273,42 @@
         ]
       },
       {
-        "seed": "9",
-        "at": 5.1,
+        "seed": "5",
+        "at": 117.1,
         "listen": [
-          "Riff (Overdriven Guitar)"
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
-        "seed": "G",
-        "at": 52.5,
+        "seed": "7",
+        "at": 115,
+        "listen": [
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "D",
+        "at": 100.1,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 236,
         "listen": [
           "Riff (Distortion Guitar)"
         ]
       },
       {
-        "seed": "H",
-        "at": 188.8,
+        "seed": "T",
+        "at": 11.2,
         "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 154.7,
-        "listen": [
-          "Riff (Distortion Guitar)"
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
         ]
       }
     ]
@@ -547,7 +551,7 @@
         "listen": [
           "Rhythm part (Electric Guitar (clean))",
           "Hi-Hat",
-          "Riff (Overdriven Guitar)"
+          "Kick"
         ]
       },
       {

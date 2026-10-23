@@ -106,8 +106,9 @@ internal static class Articulations
             var octaved = new bool[timeline.Count];
             var played = new ImmutableArray<int>[timeline.Count];
             // the strumming grid, the shortest step between the part's chords, a 16th at the finest, a strum down on its
-            // even steps and up on its odd
-            var strummed = timeline.Where(x => x.Value.Pitches.Length > 1).Select(x => x.Position).ToArray();
+            // even steps and up on its odd; its own chords', not a walk's into a change, which its few quick chords would
+            // set the whole song's hand by
+            var strummed = timeline.Where(x => x.Value.Pitches.Length > 1 && x.Value.State.GetStateValue(CompositionStateKinds.Walk) == 0).Select(x => x.Position).ToArray();
             var grid = Math.Max(0.25, strummed.Zip(strummed.Skip(1), (a, b) => b - a).Where(x => x > 1e-6).DefaultIfEmpty(0.5).Min());
 
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
