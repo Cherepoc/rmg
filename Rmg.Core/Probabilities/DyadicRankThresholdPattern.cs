@@ -37,8 +37,9 @@ public sealed class DyadicRankThresholdPattern
         ArgumentOutOfRangeException.ThrowIfGreaterThan(variation, 1);
 
         var seededGenerationContext = generationContext.CreateContext(generationSeed);
-        // every slot's last draw, and the cycle it was drawn in, by its rank too, so that a cycle of another shape, an
-        // uneven meter's longer group, repeats no draw made for another place
+        // every slot's last draw, and the cycle it was drawn in, by its rank too: a cycle of another shape, an uneven
+        // meter's longer group, repeats the draws of the slots of the same index and rank as the shorter's, starting as it
+        // did, and draws the rest afresh
         var decisions = new Dictionary<(int Slot, int Rank), (bool IsKept, int Cycle)>();
         var kept = new List<TimelineItem<KeptBeat>>();
         var cycle = -1;

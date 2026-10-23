@@ -376,8 +376,8 @@ internal sealed class SongFormGenerator
             }
         }
 
-        // a fading song plays its last section once more, as the song plans it, and fades out over it, over eight bars
-        // at least, a section of one play's pattern played twice
+        // a fading song plays its last section once more, as the song plans it, and fades out over it, over two plays of
+        // its pattern at least, a section of one play's pattern played twice
         if (plan.Ending == EndingKind.Fade)
         {
             var fadeStart = Math.Min(spans[^1].Start, end - 2 * last.PatternDuration);
@@ -452,7 +452,7 @@ internal sealed class SongFormGenerator
             // the build: the song's snare rolling over the bars before the silent one, where it rolls, its notes twice as
             // fast each bar and louder as it goes, within the section
             var bar = line.Ending.Meter.BarDuration;
-            var rollFrom = Math.Max(gap - FormLayers.BuildRollBars * bar, i > 0 ? lines[i - 1].Position : 0);
+            var rollFrom = Math.Max(gap - FormLayers.BuildRollBars * bar, map.Sections.Where(x => x.Start < gap - 1e-9).Select(x => x.Start).DefaultIfEmpty(0).Max());
             // each bar of the roll at its own rate, every hit counted
             // the snare rolling into the drop whether the drums played the bars before it or not, as a dance track's build
             // brings the drums back over a breakdown

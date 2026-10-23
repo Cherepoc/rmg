@@ -57,7 +57,7 @@ internal static class Texture
     ///     out in each phrase; a texture that needs more phrases or parts than the appearance has plays steady.
     /// </summary>
     /// <param name="form">The form facet of the section's unconventionality.</param>
-    /// <param name="phrases">How many patterns the appearance plays.</param>
+    /// <param name="phrases">How many phrases the appearance plays, its pattern's every play's.</param>
     /// <param name="playing">The parts the appearance plays, of those the song has.</param>
     /// <param name="genre">The genre whose pool of textures it is drawn among, where it names one.</param>
     /// <param name="energy">The appearance's energy, which the textures of fewer parts lean against.</param>
@@ -98,9 +98,9 @@ internal static class Texture
         // metal's clean arpeggio, an ambient piece's pad
         TrackRole[] carrying = [..playing.Where(x => x != TrackRole.Drum || !drumsMark).Order()];
         var pool = genre.Pool<TrackRole>(GenreChoices.Alone);
-        ImmutableArray<Weighted<TrackRole>> weighed = pool is not null
-            ? [..carrying.Select(x => new Weighted<TrackRole>(pool(x)?.At(form) ?? 0, x)).Where(x => x.Weight > 0)]
-            : [];
+        // the parts the genre names that play, at its weights by the form facet, an end it leaves empty playing the nearer's
+        TrackRole[] named = pool is null ? [] : [..carrying.Where(x => pool(x) is { } weight && (weight.Plain > 0 || weight.Tuned > 0 || weight.Wild > 0))];
+        var weighed = named.Length > 0 ? ByConvention.Weigh(named.Select(x => (x, new ByConvention(1, 1, 1))), form, pool) : [];
         TrackRole? alone = weighed.IsEmpty ? null : context.Pick(weighed);
         // and none of a genre's that names none that plays, the section steady
         if (weighed.IsEmpty)

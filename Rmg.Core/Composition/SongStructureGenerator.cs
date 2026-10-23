@@ -23,8 +23,16 @@ internal static class SongStructureGenerator
     private static readonly Func<IGenerationContext, int> PartLengthGenerator =
         Generators.Int(MinPartLength, MaxPartLength + 1);
 
-    private static readonly Func<IGenerationContext, SectionBrush> BrushGenerator =
-        Generators.ItemSelector(SectionBrush.All);
+    /// <summary>
+    ///     A part's brush, the order its sections come in, by the form facet: the plainest songs alternating or going back
+    ///     and forth, the wildest the likelier in a random order, each as likely in a middling song.
+    /// </summary>
+    public static ImmutableArray<(SectionBrush Brush, ByConvention Weight)> Brushes { get; } =
+    [
+        (SectionBrush.Alternation, new ByConvention(1, 1, 0.5)),
+        (SectionBrush.PingPong, new ByConvention(1, 1, 1)),
+        (SectionBrush.Random, new ByConvention(0, 1, 2))
+    ];
 
     /// <summary>The most parts a free form draws where a song's length is given, which it keeps as many of as come nearest.</summary>
     public const int MaxPartCountForLength = 32;
@@ -71,7 +79,7 @@ internal static class SongStructureGenerator
                 }
             }
 
-            var brush = BrushGenerator(context);
+            var brush = context.Pick(ByConvention.Weigh(Brushes, unconventionality));
             var sectionIndexes = brush.Paint(distinctCount, length, context);
 
             // nor can a longer part: the sections of its first two slots trade places, which keeps the brush's law,

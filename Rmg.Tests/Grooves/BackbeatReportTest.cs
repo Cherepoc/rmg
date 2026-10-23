@@ -79,8 +79,8 @@ public sealed class BackbeatReportTest
             DrumRole RoleOf(int track) =>
                 changed.TryGetValue(track, out var role) ? role : (DrumRole)song.Song.TrackDefinitions[track].StateMap.GetStateValue(CompositionStateKinds.DrumRole).Value;
 
-            // from where a build brings its drums in, the play of its pattern (DrumsFrom)
-            var drumsFrom = song.DrumsFrom(Array.IndexOf(song.Map.Sections.ToArray(), span)) * span.Meter.PatternBarCount;
+            // from where a build brings its drums in, its phrase (DrumsFrom)
+            var drumsFrom = song.DrumsFrom(Array.IndexOf(song.Map.Sections.ToArray(), span)) * span.Meter.PhraseBars;
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Section == span.SectionId && x.Bar % span.Meter.PhraseBars != span.Meter.PhraseBars - 1 && x.Bar >= drumsFrom))
             {
                 var track = entry.Track;

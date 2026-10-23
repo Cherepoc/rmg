@@ -996,10 +996,10 @@ internal sealed record GeneratedSection(
     /// <summary>Whether a part has notes in the section, as the riff's twin, the solo part or a line whose patterns came out empty have none.</summary>
     public bool HasNotes(TrackRole role) => Roles.Any(x => x.Value == role && Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
 
-    /// <summary>The play of the pattern the drums come in at, a build bringing them in late; 0 where they play from the start.</summary>
+    /// <summary>The phrase the drums come in at, a build bringing them in late; 0 where they play from the start.</summary>
     public int DrumsFrom => PhraseSilent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max();
 
-    /// <summary>The parts each play of the appearance's pattern leaves out, over those it rests throughout (<see cref="Composition.Texture" />).</summary>
+    /// <summary>The parts each phrase of the appearance leaves out, over those it rests throughout (<see cref="Composition.Texture" />).</summary>
     public ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent { get; init; } = [];
 
     /// <summary>How the appearance brings its parts in over its phrases.</summary>
@@ -1032,7 +1032,7 @@ internal sealed record GeneratedSection(
         SoloPlan? solo,
         ImmutableHashSet<TrackRole> held,
         ImmutableHashSet<TrackRole> entering,
-        bool breakdownChorus = false
+        bool breakdownChorus
     )
     {
         // the appearance's energy, the section's and its step, leaning its rests and its texture
@@ -1061,9 +1061,10 @@ internal sealed record GeneratedSection(
         // how the parts come in over its phrases, from a sequence of its own, by the form facet
         // of the parts that have notes in the section, so that a part alone is never one that has none
         var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x) && HasNotes(x)).ToArray();
-        var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing, Genre,
+        var phrases = Plays * Meter.Phrases;
+        var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], phrases, playing, Genre,
             tilt, DrumJob == DrumJob.Marks, Role, breakdownChorus);
-        ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
+        ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, phrases)];
         // a breakdown played steady, its riff through
         if (keepsTexture || Breakdown)
             texture = (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, steady);
@@ -1111,7 +1112,7 @@ internal sealed record GeneratedSection(
         // and a phrase's silent parts play nothing in it
         foreach (var (parts, phrase) in PhraseSilent.Select((x, i) => (x, i)).Where(x => !x.x.IsEmpty))
         {
-            var (from, to) = (phrase * Meter.PatternDuration, (phrase + 1) * Meter.PatternDuration);
+            var (from, to) = (phrase * Meter.PhraseDuration, (phrase + 1) * Meter.PhraseDuration);
             timeline = timeline.MapTrackEvents(Timeline.TrackTimelineMap.Keys.Where(x => parts.Contains(Roles[x])).ToDictionary(
                 x => x,
                 _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => EventTimeline.Create(notes.Duration, notes.Where(n => n.Position < from - 1e-9 || n.Position >= to - 1e-9)))

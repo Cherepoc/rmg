@@ -157,7 +157,7 @@ public sealed class TextureTest
 
             // the drums' notes before the phrase they come in at, but in its last bar before, the fill's, and on its first
             // beat, where the section before's fill lands before they drop out
-            var entry = span.Start + from * span.Meter.PatternDuration;
+            var entry = span.Start + from * span.Meter.PhraseDuration;
             var before = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum).SelectMany(x => x.Value)
                 .Count(x => x.Position > span.Start + 1e-9 && x.Position < entry - span.Meter.BarDuration - 1e-9);
             await Assert.That(before).IsEqualTo(0).Because($"seed {song.Seed} at {span.Start}");

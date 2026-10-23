@@ -161,8 +161,6 @@ internal sealed class BarStateGenerator
         );
     }
 
-    private double LastBarPosition => (_meter.PatternBarCount - 1) * _meter.BarDuration;
-
     /// <summary>
     ///     The bars whose first chord starts afresh in its own register, by the chords facet: never in the plainest
     ///     songs, whose chords are all led from the one before; now and then at the middle, most often the pattern's

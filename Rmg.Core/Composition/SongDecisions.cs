@@ -342,7 +342,7 @@ internal sealed record SongDecisions(
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), songUnconventionality[Facet.Melody]);
         StateTrace.RecordSection(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, $"{improvisation:F2}", improvisation);
         // a song that fades out plays its last section once more, over which it fades, twice where it plays its pattern
-        // only once, so that the fade takes eight bars at least
+        // only once, so that the fade takes two plays of its pattern at least
         var fading = Fading(plan.Ending, generateSection(sectionIds[^1]).Plays);
         // and a last section that came back before played once more now and then, as a last chorus is, where it does not
         // fade, from a stream of its own, the last section's lift moving to it

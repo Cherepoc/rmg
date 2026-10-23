@@ -6,8 +6,9 @@ using Rmg.Core.Songs;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The tracks of a song: the chords, the melody and the bass, each with an instrument of its role, and the drums
-///     of the song, which share their rhythm as a group. Every track draws its own state for the whole song.
+///     The tracks of a song: every part it has (<see cref="SongParts" />), the chords, the melody, the bass, the pad,
+///     the counter-melody, the riff and its twin, the rhythm part and the solo part, each with an instrument of its role,
+///     and the drums of the song, which share their rhythm as a group. Every track draws its own state for the whole song.
 /// </summary>
 internal sealed class SongTracks
 {

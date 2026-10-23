@@ -84,7 +84,7 @@ public static class ProbabilityThreshold
             return [];
 
         var result = new ProbabilityThreshold<T>[weights.Length];
-        var weightSum = weights.Sum(x => x.Weight);
+        var weightSum = weights.Sum(x => x.Weight < 0 ? throw new ArgumentException($"A weight of {x.Weight} is below none.", nameof(weights)) : x.Weight);
         // weights of no sum, or of none a number, have no option to pick, which is a choice gone wrong
         if (!(weightSum > 0) || double.IsInfinity(weightSum))
             throw new InvalidOperationException($"The options' weights sum to {weightSum}, which picks none.");

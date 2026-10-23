@@ -58,10 +58,10 @@ internal static class CompositionStateKinds
     // how a line's note's bar leads out into the next chord (a ChordApproach), and what its first note lands on (a
     // ChordArrival), the line's own, where bar state would be every track's
     public static StateKind<int> LineApproach { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineApproach", StateScope.Render);
+    public static StateKind<int> LineLanding { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineLanding", StateScope.Render);
 
     // the notes a line's passing notes take (a LineScale), a melody's or a riff's (Line), 0 for all of the section's scale
     public static StateKind<int> LineScale { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineScale", StateScope.Render);
-    public static StateKind<int> LineLanding { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineLanding", StateScope.Render);
 
     // how a note is played beyond its pitch, as Expression decides it: its vibrato in cents, how it bends (a BendKind),
     // 1 for a swell, its tremolo's and its sweep's depth in percent, its echo's delay in 16ths, and its reverb, 1 more

@@ -100,7 +100,7 @@ public sealed class KitRolesTest
             var label = (Section<bool>(TracePoints.Breakdown, span.SectionId) ? ", a breakdown" : "") + (Section<System.Collections.Immutable.ImmutableArray<double>>(TracePoints.StopTime, span.SectionId).Length > 0 ? ", stop time" : "");
             var from = song.DrumsFrom(index);
             var bars = span.BarCount;
-            for (var bar = from * span.Meter.PatternBarCount; bar < bars; bar++)
+            for (var bar = from * span.Meter.PhraseBars; bar < bars; bar++)
             {
                 var (start, end) = span.Bar(bar);
                 var sounding = drums.Where(t => notes[t].Any(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9)).ToArray();

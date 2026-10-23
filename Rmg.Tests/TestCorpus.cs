@@ -226,7 +226,7 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
         {
             var index = Array.FindLastIndex(Spans, s => s.Start <= line + 1e-9);
             var span = Map.Sections[index];
-            return (int)Math.Floor((line - span.Start) / span.Meter.PatternDuration + 1e-9) >= DrumsFrom(index);
+            return (int)Math.Floor((line - span.Start) / span.Meter.PhraseDuration + 1e-9) >= DrumsFrom(index);
         }
 
         // none in a song without drums

@@ -58,7 +58,8 @@ internal static class SurfDrops
             {
                 var share = strokes == 1 ? 1 : k / (double)(strokes - 1);
                 var pitch = landing.Value.Pitches.Max() + fall - (int)Math.Round((fall - 1) * share);
-                var state = before.Value.State.With(CompositionStateKinds.PalmMute, 1);
+                // the note before's instrument and sends, never its ornament or its slur, which every stroke would play
+                var state = before.Value.State.Except([CompositionStateKinds.Ornament, CompositionStateKinds.OrnamentStep, CompositionStateKinds.Legato]).With(CompositionStateKinds.PalmMute, 1);
                 return new RealizedNote([pitch], before.Value.Velocity - FromSofter + (FromSofter + ToLouder) * share, 0.25, state).ToTimelineItem(from + k * 0.25);
             });
             result[track] = EventTimeline.Create(timeline.Duration, timeline
