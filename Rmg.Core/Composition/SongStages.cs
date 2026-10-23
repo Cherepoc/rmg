@@ -489,10 +489,12 @@ internal static class SongStages
             Notes = NotesOf(draft).ToImmutableSortedDictionary(x => x.Key, x =>
             {
                 var anticipates = Anticipates(x.Value);
+                // the quote's first note sliding in from the chorus's note before it, which the quote leaves out, struck plain
+                var quoted = x.Value.Where(n => n.IsWithin(chorus.Start, chorus.Start + lead)).Select((n, i) => (i == 0 && n.Value.State.GetStateValue(CompositionStateKinds.Bend) == (int)BendKind.Slide
+                    ? n.Value with { State = n.Value.State.With(CompositionStateKinds.Bend, 0).With(CompositionStateKinds.BendDepth, 0).With(CompositionStateKinds.BendRise, 0) }
+                    : n.Value).ToTimelineItem(n.Position - chorus.Start));
                 return EventTimeline.Create(x.Value.Duration,
-                    x.Value.Where(n => !n.IsWithin(0, lead) && !(anticipates && Math.Abs(n.Position - lead) < 1e-6))
-                        .Concat(x.Value.Where(n => n.IsWithin(chorus.Start, chorus.Start + lead)).Select(n => n.Value.ToTimelineItem(n.Position - chorus.Start)))
-                        .OrderBy(n => n.Position));
+                    x.Value.Where(n => !n.IsWithin(0, lead) && !(anticipates && Math.Abs(n.Position - lead) < 1e-6)).Concat(quoted).OrderBy(n => n.Position));
             })
         };
     }

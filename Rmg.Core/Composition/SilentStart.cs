@@ -22,10 +22,13 @@ internal static class SilentStart
         if (first < bar - 1e-9)
             return draft;
         // the pitched parts by their first notes, a holder within a bar of the earliest before a line: of an intro of
-        // entries, those it brings in first, as a song opening on one part alone opens on it, none another
+        // entries, those it brings in first, as a song opening on one part alone opens on it, none another; an intro
+        // opening on its drums alone, the pitched parts of the earliest entry that brings one in
+        bool Sounds(int track) => notes.TryGetValue(track, out var x) && x.Count > 0 && song.Tracks.Definitions[track] is PitchInstrumentTrack;
         var entries = song.Form.Map.Intro.Entries;
-        var firstIn = entries.IsDefaultOrEmpty ? null : entries.Where(x => x.Entry <= 1e-9).SelectMany(x => x.Tracks).ToHashSet();
-        var pitched = notes.Where(x => x.Value.Count > 0 && song.Tracks.Definitions[x.Key] is PitchInstrumentTrack && (firstIn is null || firstIn.Contains(x.Key))).ToArray();
+        var firstIn = entries.IsDefaultOrEmpty ? null
+            : entries.OrderBy(x => x.Entry).GroupBy(x => x.Entry).Select(x => x.SelectMany(e => e.Tracks).Where(Sounds).ToHashSet()).FirstOrDefault(x => x.Count > 0);
+        var pitched = notes.Where(x => Sounds(x.Key) && (firstIn is null || firstIn.Contains(x.Key))).ToArray();
         if (pitched.Length == 0)
             return draft;
         var earliest = pitched.Min(x => x.Value[0].Position);
