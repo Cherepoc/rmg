@@ -162,16 +162,11 @@ internal static class LineDoubling
         // the steps of the chords part's shape at a position, from the chord's root, as its note there reads them; none where
         // it strikes no chord since the change
         var changes = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
-        IReadOnlySet<int>? ShapeAt(double position)
-        {
-            if (!trackOf.TryGetValue(TrackRole.Chords, out var chords) || !song.TrackTimelineMap.TryGetValue(chords, out var timeline))
-                return null;
-            var since = changes.LastOrDefault(x => x <= position + 1e-9);
-            if (timeline.EventTimeline.LastOrDefault(x => x.Position <= position + 1e-9) is not { Value: { } struck } note || note.Position < since - 1e-9)
-                return null;
-            var state = Realizer.StateAt(struck, position, timeline, definitions[chords], song.CommonStateTimelineMap);
-            return state.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty ? null : Realizer.GetChordNotes(state).Steps.Select(x => x.Mod(Scales.StepCount)).ToHashSet();
-        }
+        IReadOnlySet<int>? ShapeAt(double position) =>
+            trackOf.TryGetValue(TrackRole.Chords, out var chords) && song.TrackTimelineMap.TryGetValue(chords, out var timeline)
+            && Realizer.ChordStateAt(timeline, definitions[chords], song.CommonStateTimelineMap, changes, position) is { } state
+                ? Realizer.GetChordNotes(state).Steps.Select(x => x.Mod(Scales.StepCount)).ToHashSet()
+                : null;
 
         // a harmony's note on its chord's third where the chord leaves it out, a sus chord's, moved to the chord's note
         // beside it, the fourth or the second, as a second voice keeps to the chord the band plays

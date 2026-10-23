@@ -280,6 +280,7 @@ internal static class Solos
     )
     {
         var trackOf = roles.TrackOf();
+        double[] changes = [..song.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)];
         foreach (var (index, solo) in solos.Where(x => !x.Value.IsDrumSolo).OrderBy(x => x.Key))
         {
             var span = map.Sections[index];
@@ -314,6 +315,8 @@ internal static class Solos
             ];
             var isOwn = solo.IsOwn || tune.Length == 0;
             var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
+            // the chords part's chord as it strikes it, over its own track
+            StateMap? ChordAt(double position) => chords is null ? null : Realizer.ChordStateAt(chords, definitions[trackOf[TrackRole.Chords]], song.CommonStateTimelineMap, changes, position);
             // where the band strikes, the rhythm part's onsets, or the chords' where it plays none, which a riff strikes on
             var rhythm = trackOf.TryGetValue(TrackRole.Rhythm, out var rhythmTrack) && song.TrackTimelineMap.TryGetValue(rhythmTrack, out var comping) ? comping.EventTimeline.Where(IsIn).Select(x => x.Position).ToArray() : [];
             double[] groove = rhythm.Length > 0 ? rhythm : [..chordsHeld.Select(x => x.Position)];
@@ -324,7 +327,7 @@ internal static class Solos
             {
                 using var _ = place == 0 ? null : StateTrace.Pause();
                 return SoloLines.Generate(place == 0 ? context : streams(index, place), voicings(index, place), motifs(index, place), pickups(index, place), span, turn, span.Start, soloists[soloist], isOwn, isOwn,
-                    melody, tune, chordsHeld, groove, song.TrackTimelineMap[trackOf[soloist]], (PitchInstrumentTrack)definitions[trackOf[soloist]], song.CommonStateTimelineMap);
+                    melody, tune, chordsHeld, ChordAt, groove, song.TrackTimelineMap[trackOf[soloist]], (PitchInstrumentTrack)definitions[trackOf[soloist]], song.CommonStateTimelineMap);
             }
             var (line, segments) = LineOf(solo.Soloists[0], 0);
             StateTrace.RecordSection(TracePoints.SoloGestures, first, span.SectionId, $"{(isOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, isOwn, segments));

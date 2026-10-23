@@ -238,6 +238,7 @@ internal static class SoloLines
     /// <param name="melody">The melody's notes in the solo, which a solo on the melody aims at and quotes, and every note takes its state from.</param>
     /// <param name="tune">The tune a solo on the melody plays, as an appearance before sang it, moved to the solo: its notes' starts and pitches; none for a solo of its own.</param>
     /// <param name="band">The chords' notes in the solo, the band's chord a stacked note stacks; the melody's where they rest.</param>
+    /// <param name="chordAt">The chords part's state at a place, as it strikes its chord there (<see cref="Realizer.ChordStateAt" />), the chord's own notes; none where it strikes none.</param>
     /// <param name="groove">Where the band strikes in the solo, the rhythm part's onsets or, where it has none, the chords', which a riff strikes on.</param>
     /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
     /// <param name="barOrigin">Where the bars the span plays in start, its section's start (<see cref="Plan" />).</param>
@@ -261,6 +262,7 @@ internal static class SoloLines
         IReadOnlyList<TimelineItem<StateMap>> melody,
         IReadOnlyList<(double Position, int Pitch)> tune,
         IReadOnlyList<TimelineItem<StateMap>> band,
+        Func<double, StateMap?> chordAt,
         IReadOnlyList<double> groove,
         EventStateTimelineMap<StateMap> track,
         PitchInstrumentTrack definition,
@@ -296,16 +298,8 @@ internal static class SoloLines
         int[] ScaleNotes(double position) => Notes(position, Enumerable.Range(-4 * Scales.StepCount, 12 * Scales.StepCount));
         // the chord's own notes, as the band's shape has them, a sus or a power chord's without the third it leaves out; the
         // triad's where no part carries a shape there
+        int[] ShapeSteps(double position) => chordAt(position) is { } state ? [..Realizer.GetChordNotes(state).Steps] : ChordSteps;
         var chordChanges = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
-        int[] ShapeSteps(double position)
-        {
-            // the band's note struck under the chord there, read as a note there reads its state
-            var since = chordChanges.LastOrDefault(x => x <= position + 1e-9);
-            if (band.LastOrDefault(x => x.Position <= position + 1e-9) is not { Value: { } struck } note || note.Position < since - 1e-9)
-                return ChordSteps;
-            var state = Realizer.StateAt(struck, position, track, definition, common);
-            return state.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty ? ChordSteps : [..Realizer.GetChordNotes(state).Steps];
-        }
         int[] ChordNotes(double position) => Notes(position, Enumerable.Range(-4, 12).SelectMany(octave => ShapeSteps(position).Select(x => x + octave * Scales.StepCount)));
         int Nearest(int[] notes, int pitch) => notes.Length == 0 ? Math.Clamp(pitch, bottom, top) : notes.MinBy(x => Math.Abs(x - pitch));
 
@@ -512,15 +506,7 @@ internal static class SoloLines
             }
 
             var shift = 12 * (int)Math.Round((middle - (tune.Min(x => x.Pitch) + tune.Max(x => x.Pitch)) / 2.0) / 12);
-            int Moved(int pitch)
-            {
-                var moved = pitch + shift;
-                while (moved > high)
-                    moved -= 12;
-                while (moved < low)
-                    moved += 12;
-                return moved;
-            }
+            int Moved(int pitch) => Realizer.IntoRange(pitch + shift, low, high);
 
             (double Position, int Pitch)[] notes = [..tune.Select(x => (x.Position, Moved(x.Pitch)))];
             void Fill(double from, int pitch, double to, int? next)

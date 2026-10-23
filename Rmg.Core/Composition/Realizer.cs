@@ -297,10 +297,7 @@ internal static class Realizer
 
         // a line's note in the track's range, moved by octaves where its step lands outside it over a chord other than
         // the one it was placed over
-        int InRange(int note) =>
-            note < range.Low ? note + OctaveNoteCount * (int)Math.Ceiling((range.Low - note) / (double)OctaveNoteCount)
-            : note > range.High ? note - OctaveNoteCount * (int)Math.Ceiling((note - range.High) / (double)OctaveNoteCount)
-            : note;
+        int InRange(int note) => IntoRange(note, range.Low, range.High);
 
         // how a track plays its chord is its role's: a line, the melody's or the bass's, the note placed for it before,
         // as its scale step above the chord's root and its alteration; the chords the whole chord, led from the one before
@@ -375,6 +372,26 @@ internal static class Realizer
     /// </summary>
     internal static ChordContext ChordAt(StateMap note, double position, EventStateTimelineMap<StateMap> track, IInstrumentTrack definition, StateTimelineMap common) =>
         GetChord(StateAt(note, position, track, definition, common)).Chord;
+
+    /// <summary>
+    ///     The state of the chords part's note sounding at a place, struck at or before it since the chord changed, read as
+    ///     a note there reads it, over the chords' own track and definition; none where it strikes no shaped chord since.
+    /// </summary>
+    /// <param name="changes">Where the song's chords change, in order.</param>
+    internal static StateMap? ChordStateAt(EventStateTimelineMap<StateMap> chords, IInstrumentTrack definition, StateTimelineMap common, IReadOnlyList<double> changes, double position)
+    {
+        var since = changes.LastOrDefault(x => x <= position + 1e-9);
+        if (chords.EventTimeline.LastOrDefault(x => x.Position <= position + 1e-9) is not { Value: { } struck } note || note.Position < since - 1e-9)
+            return null;
+        var state = StateAt(struck, position, chords, definition, common);
+        return state.GetStateValue(StateKinds.ChordNotePitchOffsets).IsDefaultOrEmpty ? null : state;
+    }
+
+    /// <summary>A pitch moved by whole octaves into a range, the fewest it takes, up past its low end or down past its high.</summary>
+    internal static int IntoRange(int pitch, int low, int high) =>
+        pitch < low ? pitch + OctaveNoteCount * (int)Math.Ceiling((low - pitch) / (double)OctaveNoteCount)
+        : pitch > high ? pitch - OctaveNoteCount * (int)Math.Ceiling((pitch - high) / (double)OctaveNoteCount)
+        : pitch;
 
     /// <summary>A stored note's state at its place, as the realizer reads it: its own, its track's, its definition's and the song's.</summary>
     internal static StateMap StateAt(StateMap note, double position, EventStateTimelineMap<StateMap> track, IInstrumentTrack definition, StateTimelineMap common) =>

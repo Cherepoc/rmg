@@ -68,6 +68,7 @@ internal static class SoloAnswers
         var track = song.TrackTimelineMap.GetValueOrDefault(soloTrack)
                     ?? EventStateTimelineMap.Create(song.Duration, EventTimeline.Create<StateMap>(song.Duration), melodyTrack.StateTimelineMap);
         var answers = new List<TimelineItem<StateMap>>();
+        double[] changes = [..song.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)];
         var melodyHeard = new Lazy<TimelineItem<StateMap>[]>(() => [..Realizer.GetNoteStates(melodyTrack, definitions[trackOf[TrackRole.Melody]], song.CommonStateTimelineMap)]);
         // every stretch the song plays as a section, an intro's window as its section, but the ending's final chord
         foreach (var (index, span, traced) in map.Plays.Where(x => !x.IsEnding).Select(x => (x.Index, x.Span, Math.Abs(x.Span.Start - map.Sections[x.Index].Start) < 1e-9)))
@@ -79,6 +80,8 @@ internal static class SoloAnswers
             var melody = melodyTrack.EventTimeline.Where(IsIn).ToArray();
             // the chords, which an answer's stacked notes stack on
             var band = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
+            // the chords part's chord as it strikes it, over its own track
+            StateMap? ChordAt(double position) => chords is null ? null : Realizer.ChordStateAt(chords, definitions[trackOf[TrackRole.Chords]], song.CommonStateTimelineMap, changes, position);
             // an answer over the band, any part of it but the lines, none where the melody plays alone, in the section or in
             // the stretch it answers, as a texture's phrase of the voice alone
             bool Accompanied(double from, double to) => song.TrackTimelineMap.Any(x => roles[x.Key] is not (TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Drum)
@@ -117,7 +120,7 @@ internal static class SoloAnswers
                 var gap = span with { Start = start, Duration = end - start };
                 // its strong beats on its section's bars
                 var (line, _) = SoloLines.Generate(new GenerationContext(Seeds.Derive(lineSeed, i)), new GenerationContext(Seeds.Derive(voicingSeed, i)), new GenerationContext(Seeds.Derive(motifSeed, i)),
-                    new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, i), PickupStream)), gap, gap.Duration, span.Start, answerer, true, false, melody, [], band, [..band.Select(x => x.Position)], track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
+                    new GenerationContext(Seeds.Derive(Seeds.Derive(lineSeed, i), PickupStream)), gap, gap.Duration, span.Start, answerer, true, false, melody, [], band, ChordAt, [..band.Select(x => x.Position)], track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
                 var lift = Solos.Lift(
                     Realizer.GetNoteStates(EventStateTimelineMap.Create(song.Duration, EventTimeline.Create(song.Duration, line), track.StateTimelineMap), definitions[soloTrack], song.CommonStateTimelineMap).ToArray(),
                     heard - Quieter);
