@@ -79,8 +79,8 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
         {
             if (Sections.IsEmpty)
                 yield break;
-            if (Origin > 1e-9 && (Intro.Kind == IntroKind.Hook || Window is not null))
-                yield return (Intro.Kind == IntroKind.Hook ? Intro.Source : 0, Sections[Intro.Kind == IntroKind.Hook ? Intro.Source : 0] with { Start = 0, Duration = Origin, Cut = 0 }, false);
+            if (IntroPlay is { } intro)
+                yield return intro;
             for (var i = 0; i < Sections.Length; i++)
                 yield return (i, Sections[i], false);
             if (Ending.Duration > 1e-9)
@@ -88,13 +88,22 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
         }
     }
 
+    /// <summary>
+    ///     An intro played as a section, a hook's as its chorus and an intro of entries' window as the first section, its
+    ///     source's span moved there (<see cref="Window" />); none for an intro of its own.
+    /// </summary>
+    private (int Index, SectionSpan Span, bool IsEnding)? IntroPlay =>
+        Intro.Kind == IntroKind.Hook && Origin > 1e-9 ? (Intro.Source, Sections[Intro.Source] with { Start = 0, Duration = Origin, Cut = 0 }, false)
+        : Window is { } window ? (0, window, false)
+        : null;
+
     /// <summary>The stretch a position plays in as a section (<see cref="Plays" />); none in an intro of its own, a count-in's or a cold one's.</summary>
     public (int Index, SectionSpan Span, bool IsEnding)? PlayingAt(double position)
     {
         if (Sections.IsEmpty)
             return null;
         if (position < Origin - 1e-9)
-            return Plays.First() is var intro && intro.Span.IsWithin(position) && (Intro.Kind == IntroKind.Hook || Window is not null) ? intro : null;
+            return IntroPlay is { } intro && intro.Span.IsWithin(position) ? intro : null;
         if (SectionAt(position) is { } span)
             return (IndexAt(position + 1e-9), span, false);
         return Ending.Duration > 1e-9 && position < Ending.Start + Ending.Duration - 1e-9 ? Plays.Last() : null;

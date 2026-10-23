@@ -253,11 +253,13 @@ internal sealed class LinePattern
         for (var i = 0; i < notes.Length; i++)
         {
             var letter = notes[i].Note.State.GetStateValue(CompositionStateKinds.LineHookBar);
-            if (letter == 0 || map.SectionAt(notes[i].Note.Position) is not { } span)
+            // the stretch it plays in as a section, an intro's window as its section's first bars, its patterns counted from
+            // the stretch's start
+            if (letter == 0 || map.PlayingAt(notes[i].Note.Position) is not { Span: var span })
                 continue;
             var position = notes[i].Note.Position;
             var pattern = span.Start + span.PatternOf(position) * span.Meter.PatternDuration;
-            var bar = map.PlaceOf(position).PatternBar;
+            var bar = span.BarOf(position) - span.PatternOf(position) * span.Meter.PatternBarCount;
             if (!firsts.TryGetValue((pattern, letter), out var first))
             {
                 firsts[(pattern, letter)] = bar;

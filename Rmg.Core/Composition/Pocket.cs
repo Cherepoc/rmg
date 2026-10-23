@@ -58,7 +58,7 @@ internal static class Pocket
             var offset = Played(OffsetOf(definition.Role, definition.Role == TrackRole.Drum ? DrumRoles.Of(definition.StateMap) : null));
             // but a bass playing the kick's figure, note for note with it, in the kick's place
             var onKick = Played(OffsetOf(TrackRole.Drum, DrumRole.Ground));
-            bool WithKick(double position) => definition.Role == TrackRole.Bass && song.Form.Map.SectionAt(position) is { } span
+            bool WithKick(double position) => definition.Role == TrackRole.Bass && song.Form.Map.PlayingAt(position) is { Span: var span }
                                               && draft.Figures.GetValueOrDefault(span.SectionId)?.GetValueOrDefault(FigurePlayer.Bass) is { } figure
                                               && Figures.Of(FigurePlayer.Bass, figure)?.Follows == FigurePlayer.Ground;
             // in beats at the tempo where the note plays

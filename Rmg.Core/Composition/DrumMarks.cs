@@ -109,7 +109,6 @@ internal static class DrumMarks
             var energy = section.EnergyTilt;
             var plays = Plays(span);
             // the section's places, each at its strongest: its start, its phrases' and its chords' changes
-            var phrase = span.Meter.PhraseDuration;
             var places = new SortedDictionary<double, int> { [span.Start] = 0 };
             foreach (var (_, at, _) in span.Phrases.Skip(1))
                 places.TryAdd(at, 1);
@@ -120,7 +119,7 @@ internal static class DrumMarks
             {
                 var ending = map.Plays.Last().Span;
                 places.TryAdd(ending.Start, 0);
-                for (var at = ending.Start + phrase; at < ending.End - 1e-9; at += phrase)
+                foreach (var (_, at, _) in ending.Phrases.Skip(1))
                     places.TryAdd(at, 1);
                 foreach (var at in changes.Where(x => x > ending.Start + 1e-9 && x < ending.End - 1e-9))
                     places.TryAdd(at, 2);

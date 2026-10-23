@@ -1061,7 +1061,12 @@ internal static class Expression
                 && Enumerable.Range(0, timeline.Count).FirstOrDefault(i => states[i] is not null && introSource.IsWithin(timeline[i].Position), firstPlayed) is var sourced)
                 for (var i = 0; i < timeline.Count && timeline[i].Position < map.Origin - 1e-9; i++)
                     if (states[i] is null)
+                    {
                         states[i] = Steady(timeline[i].Value, states[sourced]!);
+                        // and ducking under the kick where it strikes the bar, as the section's notes do
+                        if (pumps && kicked.Contains(BarStart(timeline[i].Position)))
+                            states[i] = states[i]!.With(CompositionStateKinds.Pump, PumpDepth);
+                    }
 
             // the ending's notes, the final chord, in the sound the last section left the part in: its sends, its tone, its
             // tape and its steady effects, none of a note's own gestures

@@ -250,7 +250,8 @@ internal static class SongStages
         return draft with
         {
             Polymeters = [..polymeters.Keys],
-            Held = [..draft.Held, ..song.Form.Map.Sections.Where(x => polymeters.ContainsKey(x.SectionId)).Select(x => new HeldSpan(Hold.Polymeter, x.Start, x.End, null))],
+            // held where it plays, an intro's window as its section's first bars
+            Held = [..draft.Held, ..song.Form.Map.PlayedSections.Where(x => polymeters.ContainsKey(x.SectionId)).Select(x => new HeldSpan(Hold.Polymeter, x.Start, x.End, null))],
             Timeline = Composition.Polymeter.Apply(
                 draft.Timeline,
                 song.Playing,
@@ -405,7 +406,6 @@ internal static class SongStages
                 song.Roles,
                 song.Tracks.Definitions,
                 song.Form.Map,
-                song.Solos,
                 song.Soloists[TrackRole.Solo],
                 index => song.Sections[index].Facets[Facet.Melody],
                 index => (song.AppearanceStream(SongStream.SoloAnswers, index), song.AppearanceStream(SongStream.SoloAnswerVoicings, index), song.AppearanceStream(SongStream.SoloAnswerMotifs, index)),

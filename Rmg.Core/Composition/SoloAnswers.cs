@@ -17,7 +17,7 @@ internal static class SoloAnswers
     public static ByConvention Chance { get; } = new(0, 0.3, 0.3);
 
     /// <summary>What an answer keeps out of: another part's answer to a calling verse.</summary>
-    private const Hold KeepsOutOf = Hold.Answer;
+    internal const Hold KeepsOutOf = Hold.Answer;
 
     /// <summary>The place an answer's draws of its pickups are derived from its line's by, a sequence of its own.</summary>
     private const long PickupStream = 1;
@@ -47,13 +47,12 @@ internal static class SoloAnswers
     /// <param name="melodyFacet">Every section's melody facet, by its place among the song's sections.</param>
     /// <param name="streams">A section's sequence, by its place, and its answers' voicings' and motifs', each of its own.</param>
     /// <param name="genre">The genre whose chance of answering a section draws (<see cref="GenreChoices.SoloAnswers" />).</param>
-    /// <param name="holds">What the song holds, a calling verse's answer among it, which the answers keep out of.</param>
+    /// <param name="holds">What the song holds, a solo and a calling verse's answer among it, which the answers keep out of.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
         IReadOnlyDictionary<int, IInstrumentTrack> definitions,
         SongMap map,
-        IReadOnlyDictionary<int, SoloPlan> solos,
         Soloist answerer,
         Func<int, double> melodyFacet,
         Func<int, (IGenerationContext Answers, IGenerationContext Voicing, IGenerationContext Motifs)> streams,
@@ -70,7 +69,8 @@ internal static class SoloAnswers
                     ?? EventStateTimelineMap.Create(song.Duration, EventTimeline.Create<StateMap>(song.Duration), melodyTrack.StateTimelineMap);
         var answers = new List<TimelineItem<StateMap>>();
         var melodyHeard = new Lazy<TimelineItem<StateMap>[]>(() => [..Realizer.GetNoteStates(melodyTrack, definitions[trackOf[TrackRole.Melody]], song.CommonStateTimelineMap)]);
-        foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
+        // every stretch the song plays as a section, an intro's window as its section, but the ending's final chord
+        foreach (var (index, span, traced) in map.Plays.Where(x => !x.IsEnding).Select(x => (x.Index, x.Span, Math.Abs(x.Span.Start - map.Sections[x.Index].Start) < 1e-9)))
         {
             var (context, voicing, motifs) = streams(index);
             var answering = context.TestProbability(Chance.At(melodyFacet(index), genre.Chance(GenreChoices.SoloAnswers, "sections")));
@@ -82,9 +82,10 @@ internal static class SoloAnswers
             // an answer over the band, any part of it but the lines, none where the melody plays alone
             var accompanied = song.TrackTimelineMap.Any(x => roles[x.Key] is not (TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Drum)
                                                              && x.Value.EventTimeline.Any(IsIn));
-            if (solos.ContainsKey(index) || !counterRests || melody.Length == 0 || !accompanied)
+            if (holds.Meets(Hold.Solo, span.Start, span.End) || !counterRests || melody.Length == 0 || !accompanied)
                 continue;
-            StateTrace.RecordSection(TracePoints.SoloAnswers, soloTrack, span.SectionId, $"{answering}", (index, answering));
+            if (traced)
+                StateTrace.RecordSection(TracePoints.SoloAnswers, soloTrack, span.SectionId, $"{answering}", (index, answering));
             if (!answering)
                 continue;
 

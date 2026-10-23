@@ -177,8 +177,14 @@ internal static class LineDoubling
             scaleStep.Mod(Scales.StepCount) == 2 && ShapeAt(position) is { } shape && !shape.Contains(2)
                 ? scaleStep + (shape.Contains(3) ? 1 : shape.Contains(1) ? -1 : 0)
                 : scaleStep;
-        // the parts that double or are doubled in a section, by its place, which play no other doubling there
-        var doubling = new HashSet<(int Track, int Section)>();
+        // the parts that double or are doubled in a stretch the song plays as a section, by its start, which play no other
+        // doubling there
+        var doubling = new HashSet<(int Track, double Start)>();
+        // every stretch the song plays as a section, an intro's window and the ending among them, drawn as the section it plays
+        // as is; an appearance traced once, in the first stretch it doubles in
+        var plays = map.Plays.Select(x => (x.Span, x.Index)).ToArray();
+        var traced = new HashSet<(string Point, int Track, int Index)>();
+        bool Traces(string point, int track, int index) => traced.Add((point, track, index));
         foreach (var ((source, target, steps, chance, option, isTwin, bars), pair) in Pairs.Select((x, i) => (x, i)))
         {
             // the pair's own steps leaned by a genre's intervals over the songs', so that a genre naming the songs' amounts
@@ -197,7 +203,7 @@ internal static class LineDoubling
                 song = TrackEventStateTimelineMap.Create(song.Duration, song.TrackTimelineMap.SetItem(targetTrack, twin), song.CommonStateTimelineMap);
             }
 
-            foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
+            foreach (var (span, index) in plays)
             {
                 var context = streams(pair, index);
                 var isDoubled = context.TestProbability(chance.At(melody, option is null ? null : genre.Chance(GenreChoices.Doubling, option)));
@@ -215,14 +221,14 @@ internal static class LineDoubling
                     continue;
 
                 // a section a pair doubles already, the counter-melody harmonising it, not imitated too
-                if (bars > 0 && doubling.Contains((targetTrack, index)))
+                if (bars > 0 && doubling.Contains((targetTrack, span.Start)))
                     continue;
-                if (bars > 0)
+                if (bars > 0 && Traces(TracePoints.Imitation, targetTrack, index))
                     StateTrace.RecordSection(TracePoints.Imitation, targetTrack, span.SectionId, $"{source} {bars} bar later", (index, source, bars));
-                else
+                else if (bars == 0 && Traces(TracePoints.LineDoubling, targetTrack, index))
                     StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));
-                doubling.Add((sourceTrack, index));
-                doubling.Add((targetTrack, index));
+                doubling.Add((sourceTrack, span.Start));
+                doubling.Add((targetTrack, span.Start));
                 // where the doubling part plays in the section, from its first note to its last, so that it joins no earlier
                 // than it would, as into an intro that brings it in
                 var own = events[isTwin ? sourceTrack : targetTrack].EventTimeline.Where(x => x.IsWithin(span.Start, span.End)).Select(x => x.Position).ToArray();
@@ -233,7 +239,7 @@ internal static class LineDoubling
                 var block = source == TrackRole.Melody && !isTwin && bars == 0 && blocks(index).TestProbability(BlockChance.At(melody, genre.Chance(GenreChoices.Doubling, "block")));
                 // an imitation's notes the bars later it plays them
                 var delay = bars * span.Meter.BarDuration;
-                if (block)
+                if (block && Traces(TracePoints.BlockHarmony, targetTrack, index))
                     StateTrace.RecordSection(TracePoints.BlockHarmony, targetTrack, span.SectionId, $"{step}", index);
                 // in every pattern the doubled part plays, its own kept where a texture rests the doubled part
                 var patterns = span.Patterns.Select(p => (p.Start, p.End))
@@ -274,7 +280,7 @@ internal static class LineDoubling
         // riff plays without it it plays with it, in unison, as the pair does; but in the song's opening, which a riff may
         // start alone, and in a section it sits out whole, left to the guitars
         if (trackOf.TryGetValue(TrackRole.Riff, out var riffTrack) && trackOf.TryGetValue(TrackRole.Bass, out var bassTrack))
-            foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)).Skip(1).Where(x => drivenRiff(x.i)))
+            foreach (var (span, index) in plays.Where(x => x.Index > 0 && drivenRiff(x.Index)))
             {
                 var events = song.TrackTimelineMap;
                 TimelineItem<StateMap>[] In(int track, double start, double end) => [..events[track].EventTimeline.Where(x => x.IsWithin(start, end))];
@@ -307,15 +313,16 @@ internal static class LineDoubling
             if (!trackOf.TryGetValue(role, out var track))
                 continue;
 
-            foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
+            foreach (var (span, index) in plays)
             {
                 var context = streams(place, index);
                 var inOctaves = context.TestProbability(SectionEnergy.Tilt(energies[index], OctaveCoupling).Chance(OctaveChance.At(sound, genre.Chance(GenreChoices.Doubling, "octaves")), 1));
                 bool Plays() => song.TrackTimelineMap[track].EventTimeline.Any(x => x.IsWithin(span.Start, span.End));
-                if (doubling.Contains((track, index)) || !Plays())
+                if (doubling.Contains((track, span.Start)) || !Plays())
                     continue;
 
-                StateTrace.RecordSection(TracePoints.Octave, track, span.SectionId, $"{role} {inOctaves} {energies[index]:F2}", (index, role, energies[index], inOctaves));
+                if (Traces(TracePoints.Octave, track, index))
+                    StateTrace.RecordSection(TracePoints.Octave, track, span.SectionId, $"{role} {inOctaves} {energies[index]:F2}", (index, role, energies[index], inOctaves));
                 if (!inOctaves)
                     continue;
 

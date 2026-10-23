@@ -40,7 +40,8 @@ internal static class CallAndResponse
         // plays its own line in its second half; a phrase none answers, or whose melody does not call, left whole, as the
         // melody cut there would leave a gap
         var holds = draft.Holds(song);
-        var halves = song.Form.Map.Sections.Where(x => calling[x.SectionId] && !holds.Meets(Hold.Solo, x.Start, x.End))
+        // every stretch the song plays as a section, an intro's window as its section's first bars
+        var halves = song.Form.Map.Plays.Where(x => !x.IsEnding).Select(x => x.Span).Where(x => calling[x.SectionId] && !holds.Meets(Hold.Solo, x.Start, x.End))
             .SelectMany(span => span.Phrases.Select(p => (p.Start, Half: p.Start + span.Meter.PhraseBars / 2 * span.Meter.BarDuration, p.End)))
             .Select(x => (x.Start, x.Half, x.End, Answerer: answerers.Where(track => Plays(track, x.Half, x.End)).Select(track => (int?)track).FirstOrDefault()))
             .Where(x => x.Answerer is not null && Plays(melodyTrack, x.Start, x.Half))

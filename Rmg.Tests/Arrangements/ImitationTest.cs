@@ -49,12 +49,13 @@ public sealed class ImitationTest
         var (notes, rubbing) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
-            var imitated = song.Trace.Where(x => x.Point == TracePoints.Imitation).Select(x => x.Section).ToHashSet();
+            // the appearances imitated, by their places, which a section's other appearances need not be
+            var imitated = song.Trace.Where(x => x.Point == TracePoints.Imitation).Select(x => (((int Index, TrackRole, int))x.Value!).Index).ToHashSet();
             if (imitated.Count == 0)
                 continue;
             var melody = song.Song.Notes![song.Track(TrackRole.Melody)].ToArray();
             foreach (var note in song.Song.Notes![song.Track(TrackRole.CounterMelody)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Doubled) > 0
-                                                                                                && song.Map.SectionAt(x.Position) is { } span && imitated.Contains(span.SectionId)))
+                                                                                                && song.Map.PlayingAt(x.Position) is { } play && imitated.Contains(play.Index)))
             {
                 var at = Array.FindLastIndex(melody, x => x.Position <= note.Position + 1e-9);
                 if (at < 0 || melody[at].Position + melody[at].Value.Duration <= note.Position + 1e-9)
