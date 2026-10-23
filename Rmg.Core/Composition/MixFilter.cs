@@ -12,21 +12,21 @@ public sealed record MixFilterPlan(bool Opening, ImmutableArray<double> Dips, bo
 ///     The whole mix filtered, every part's brightness and the drums' closed together, a form device: the song opening up
 ///     from muffled over its intro, or its first phrase where it has none; a section's last bar or two closing, the
 ///     likelier the louder the next, and opening at once as it starts; and the last section's last phrase closing as the
-///     song ends. Each by the form facet and a genre's chances, the songs' seldom and no oftener in a wild song than a
-///     middling one; its depth drawn. A stage of the song after it is put together (<see cref="SongStages" />), as a
+///     song ends. Each by the form facet and a genre's chances, a production's of the club and its kin alone, the songs'
+///     never, as an acoustic band's mix is not swept; no oftener in a wild song than a middling one; its depth drawn. A stage of the song after it is put together (<see cref="SongStages" />), as a
 ///     timeline of how closed the mix is, stepped as a fade is (<see cref="CompositionStateKinds.MixClosed" />).
 /// </summary>
 internal static class MixFilter
 {
-    public static ByConvention OpeningChance { get; } = new(0, 0.05, 0.05);
+    public static ByConvention OpeningChance { get; } = new(0, 0, 0);
 
     /// <summary>The chance a section's end dips, before the next section, at an energy as high as its own.</summary>
-    public static ByConvention DipChance { get; } = new(0, 0.008, 0.008);
+    public static ByConvention DipChance { get; } = new(0, 0, 0);
 
     /// <summary>The odds a dip's chance is leaned by, to the power of how much louder the next section is than its own.</summary>
     private const double DipOdds = 4;
 
-    public static ByConvention ClosingChance { get; } = new(0, 0.04, 0.04);
+    public static ByConvention ClosingChance { get; } = new(0, 0, 0);
 
     /// <summary>The odds the closing's chance is leaned by against an ending on a hit (<see cref="FormLayers.HitEndings" />), whose last chord it would muffle.</summary>
     private const double ClosingOdds = 8;

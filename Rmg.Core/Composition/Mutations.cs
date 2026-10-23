@@ -35,8 +35,8 @@ public sealed record Mutation(MutationKind Kind, int Track, double At, double By
 ///     edit or two now and then, by a vocabulary as data (<see cref="MutationKind" />), and keeps every edit made before it,
 ///     so that the groove strays further from its own as the section goes on, each bar its own pattern with the edits laid
 ///     on it; at a phrase's start it snaps back to its own now and then, the likelier the plainer. The downbeat's kick and
-///     the backbeat's snare kept but at the wild end. Each bar's chance by the groove facet, none at the plain end and the
-///     middle, a genre's, an IDM or a drum and bass track's, and leaned by the section's energy. A stage of the song after
+///     the backbeat's snare kept but at the wild end. Each bar's chance by the groove facet, a genre's alone, an IDM or a drum and bass track's, the
+///     songs' never, as a played groove is not resequenced, and leaned by the section's energy. A stage of the song after
 ///     its figures and before its fills, which play over it (<see cref="SongStages" />), from a sequence of its own an
 ///     appearance.
 /// </summary>
@@ -45,8 +45,8 @@ internal static class Mutations
     /// <summary>What the edits keep out of: a polymeter's cycle, whose section plays none, a drop's build roll and a part the form stops.</summary>
     internal const Hold KeepsOutOf = Hold.Build | Hold.Cut;
 
-    /// <summary>The chance a bar adds an edit, by the groove facet: a wild song's alone, as often as a genre has it.</summary>
-    public static ByConvention Chance { get; } = new(0, 0, 0.4);
+    /// <summary>The chance a bar adds an edit, by the groove facet: a genre's alone, a programmed break's.</summary>
+    public static ByConvention Chance { get; } = new(0, 0, 0);
 
     /// <summary>The edits, and how likely each is.</summary>
     public static ImmutableArray<Weighted<MutationKind>> Kinds { get; } =

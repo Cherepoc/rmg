@@ -139,7 +139,7 @@
         "ground": { "fullness": 19 }
       },
       "levels": { "drum": 40 },
-      "solos": { "sections": [40, 50, 60], "trades": [30, 50, 60], "hits": [10, 20, 30], "own": [0, 50, 100] },
+      "solos": { "sections": [40, 50, 60], "trades": [20, 25, 40], "hits": [10, 20, 30], "own": [0, 50, 100] },
       "soloStyle": { "pickups": [40, 50, 60], "space": [10, 20, 20], "rhythm": [0, 5, 10], "chromatic": [40, 50, 60] },
       "soloists": { "solo": 100, "chords": [70, 80, 80], "melody": [30, 30, 40], "bass": [0, 10, 20], "drum": [0, 10, 20] },
       "ending": { "button": 100, "ringOut": [80, 80, 60], "fade": [10, 10, 30], "stop": [0, 10, 30] },
@@ -222,6 +222,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight or its 16ths lightly swung, 118 to 128, minor and Dorian, minor sevenths and ninths, piano, organ and Rhodes stabs, a shaker in 16ths, a drop into the chorus.",
     "choices": {
+      "soloAnswers": { "sections": [0, 0, 15] },
       "length": { "from": [300, 330, 240], "to": [450, 480, 540] },
       "kickOut": { "lines": [20, 30, 40] },
       "sung": { "halves": [40, 30, 20], "eighths": [80, 50, 30] },
@@ -258,7 +259,7 @@
       "keyChanges": {},
       "rests": { "drum": 70, "melody": 65, "pad": 35 },
       "tempo": { "from": [118, 118, 115], "to": [128, 128, 135] },
-      "meter": { "4/4": [100, 100, 85], "7/8": [0, 0, 10], "5/4": [0, 0, 8] },
+      "meter": { "4/4": 100 },
       "feel": { "straight": [100, 100, 70], "grouped3": [0, 0, 20], "tuplets3": [0, 0, 15] },
       "feelChances": { "swing": [35, 45, 50], "halfTime": [0, 8, 8], "doubleTime": [0, 5, 5] },
       "scale": { "naturalMinor": [100, 100, 60], "phrygian": [0, 10, 30], "dorian": [60, 70, 50], "major": [40, 45, 30] },
@@ -291,7 +292,7 @@
       "fills": { "amount": 10 },
       "hook": { "choruses": [70, 70, 50], "sections": [70, 70, 50] },
       "intro": { "entries": 100, "cold": [20, 20, 40] },
-      "ending": { "fade": 100, "open": [10, 20, 40], "stop": [0, 10, 30], "strip": [60, 70, 70] },
+      "ending": { "strip": 100, "fade": [50, 50, 40], "open": [10, 20, 40], "stop": [0, 10, 30] },
       "rhythm": {
         "chords": { "speed": 100, "offbeat": 76, "fineness": 0, "repetition": 82 },
         "bass": { "repetition": 92, "fullness": 69 },
@@ -307,6 +308,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 124 to 145, the pads and bass pumping.",
     "choices": {
+      "soloAnswers": { "sections": [0, 0, 15] },
       "kickOut": { "lines": [20, 30, 40] },
       "length": { "from": [360, 360, 300], "to": [540, 540, 600] },
       "sung": { "halves": [10, 10, 10], "eighths": [20, 10, 0] },
@@ -343,7 +345,7 @@
       "keyChanges": {},
       "rests": { "drum": 60, "melody": 85 },
       "tempo": { "from": [120, 124, 115], "to": [142, 145, 160] },
-      "meter": { "4/4": [100, 100, 85], "7/8": [0, 0, 10], "5/4": [0, 0, 8] },
+      "meter": { "4/4": 100 },
       "feel": { "straight": [100, 100, 70], "grouped3": [0, 0, 20], "tuplets3": [0, 0, 15] },
       "feelChances": { "swing": [0, 0, 10], "halfTime": 5, "doubleTime": 5 },
       "scale": { "naturalMinor": [100, 100, 60], "phrygian": [40, 60, 80], "dorian": [40, 50, 50] },
@@ -378,7 +380,7 @@
       "fills": { "amount": 5 },
       "hook": { "choruses": [80, 80, 60], "sections": [80, 80, 60] },
       "intro": { "entries": 100, "cold": [10, 10, 30] },
-      "ending": { "fade": 100, "open": [20, 30, 40], "strip": [80, 90, 90] },
+      "ending": { "strip": 100, "fade": [50, 50, 40], "open": [20, 30, 40] },
       "rhythm": {
         "chords": { "speed": 100, "offbeat": 76, "fineness": 0, "repetition": 92 },
         "bass": { "repetition": 100, "fullness": 76 },
@@ -540,7 +542,7 @@
       "levels": { "melody": 25, "chords": 35, "bass": 70, "drum": 95 },
       "grooveHold": { "held": 85 },
       "pocket": { "laidBack": 85 },
-      "drop": { "lifts": [20, 30, 40], "rolls": 100 },
+      "drop": { "lifts": [20, 30, 40], "rolls": 0 },
       "fills": { "amount": 15 },
       "hook": { "choruses": [80, 80, 60], "sections": [80, 80, 60] },
       "intro": { "entries": 100, "cold": [30, 30, 40] },
@@ -839,6 +841,7 @@
     "name": "Funk rock",
     "description": "Funk's slap bass, 16th hats, ghost notes and a muted 16th guitar, with an overdriven guitar riff and choruses opening into big distorted chords, sevenths, 7♯9 and power chords, Dorian and Mixolydian, no horns nor keys, the power kit, 88 to 110.",
     "choices": {
+      "keyChanges": { "lastSection": [0, 5, 20], "sections": [0, 5, 30], "patterns": 0 },
       "length": { "from": [180, 200, 210], "to": [300, 330, 400] },
       "alone": { "drum": 100, "bass": 50, "rhythm": 30 },
       "texture": { "steady": [100, 82, 100], "build": [0, 10, 100], "thin": [0, 4, 100], "alone": [5, 10, 15] },
@@ -1397,6 +1400,7 @@
     "name": "Heavy metal",
     "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4 or on 3 in its half-time sections, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
+      "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
       "insertion": { "none": 100, "phaser": [0, 0, 30] },
@@ -1489,6 +1493,7 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
       "insertion": { "none": 100, "phaser": [0, 0, 30] },
@@ -1584,6 +1589,7 @@
     "name": "Symphonic metal",
     "description": "Distorted guitars and a double kick under a choir, strings and a church organ, a soaring melody on a violin or a voice-like lead, harmonic minor's raised cadence, keyboard and guitar solos, a lifted last chorus.",
     "choices": {
+      "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "ensembleHits": { "sections": [15, 20, 25] },
       "octaveBass": { "sections": 0 },
@@ -1674,6 +1680,7 @@
     "name": "Doom metal",
     "description": "Slow and crushing: low power chords held and left to ring over a heavy, sparse beat, long stretches on one chord creeping by half steps, the tritone and Phrygian, an organ, a mournful lead, few solos, long songs.",
     "choices": {
+      "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
       "insertion": { "none": 100, "phaser": [0, 0, 30] },
@@ -1830,6 +1837,7 @@
     "name": "Dungeon synth",
     "description": "Dark and slow: a harpsichord's ostinato under a celesta or a horn, synth strings, choirs and brass, minor and harmonic minor triads, drones and a deep reverb, a timpani and a snare's roll marking the form.",
     "choices": {
+      "form": { "vvvv": 100, "vbv": 70, "vvbv": 50, "vvvvvv": [20, 30, 40] },
       "intensity": { "from": -100, "to": 20 },
       "darkness": { "from": 0, "to": 100 },
       "loop": { "sections": [30, 40, 40] },
@@ -2239,6 +2247,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "soloAnswers": { "sections": [0, 0, 15] },
       "intensity": { "from": -20, "to": 100 },
       "darkness": { "from": -80, "to": 40 },
       "glide": { "lead": [0, 10, 20] },
@@ -2315,6 +2324,7 @@
     "name": "Psytrance",
     "description": "Goa and full-on: a rolling bass, kick then three notes, under a one-chord vamp, Phrygian dominant, acid lines squelching, 16th sequenced riffs calling and answering, few pads, 140 to 148, six to nine minutes.",
     "choices": {
+      "soloAnswers": { "sections": [0, 0, 15] },
       "callAndResponse": { "sections": [20, 35, 50] },
       "length": { "from": [360, 360, 360], "to": [540, 540, 540] },
       "doubling": { "octaves": [7, 11, 15], "harmony": [10, 20, 30], "block": 0, "riff": [100, 50, 0], "twin": 0 },
@@ -2377,6 +2387,7 @@
     "name": "Drum and bass",
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
+      "soloAnswers": { "sections": [0, 0, 15] },
       "texture": { "steady": 100, "build": [60, 70, 70], "thin": [10, 20, 30], "alone": [0, 5, 10] },
       "length": { "from": [240, 240, 210], "to": [360, 390, 480] },
       "kickOut": { "lines": [10, 20, 30] },
@@ -2435,7 +2446,7 @@
       "strongEffect": { "none": [80, 70, 50], "opening": [20, 30, 40], "echo": [10, 20, 30], "wobble": [0, 5, 10] },
       "hook": { "choruses": [70, 70, 50] },
       "phraseScheme": { "aaaa": 100, "aaab": 40 },
-      "ending": { "strip": [60, 70, 70], "fade": 100, "stop": [20, 20, 40] },
+      "ending": { "strip": 100, "fade": [60, 60, 50], "stop": [20, 20, 40] },
       "intro": { "entries": 100 },
       "solos": { "sections": [0, 0, 5], "trades": 0, "hits": [0, 20, 30], "own": [0, 50, 100] },
       "keyChanges": {},
@@ -2600,7 +2611,7 @@
       "feelChances": { "swing": 0, "halfTime": 0, "doubleTime": [0, 5, 10] },
       "timeChanges": { "songs": [10, 20, 30] },
       "intensity": { "from": -20, "to": 80 },
-      "scale": { "naturalMinor": 80, "major": 70, "phrygianDominant": 50, "harmonicMinor": 40, "doubleHarmonicMajor": 30, "mixolydian": 30 },
+      "scale": { "naturalMinor": 80, "major": 70, "phrygianDominant": [20, 50, 60], "harmonicMinor": [20, 40, 40], "doubleHarmonicMajor": [5, 30, 40], "mixolydian": 30 },
       "chordShape": { "triad": 100, "powerChord": 40, "seventh": 30, "minorMajorSeventh": [5, 10, 20] },
       "harmonicRhythm": { "oneBar": 100, "halfBar": 40 },
       "rootMotion": { "fourthDown": 80, "stepUp": 60, "stepDown": 60 },
@@ -3093,7 +3104,7 @@
       "push": { "sections": 0 },
       "tempo": { "from": [66, 60, 60], "to": [165, 170, 180] },
       "length": { "from": [180, 210, 180], "to": [420, 480, 600] },
-      "sectionLength": { "bars8": [10, 10, 20], "bars16": 100, "bars32": [60, 60, 60] },
+      "sectionLength": { "bars8": [30, 40, 40], "bars16": 100, "bars32": [20, 25, 30] },
       "meter": { "4/4": 100, "3/4": 70, "6/8": 40, "12/8": [10, 20, 30] },
       "scale": { "major": 100, "naturalMinor": 60, "harmonicMinor": 50 },
       "chordShape": { "triad": 100, "seventh": [20, 30, 40], "add9": [0, 10, 25], "sus4": [0, 10, 20] },
@@ -3138,6 +3149,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "keyChanges": { "lastSection": 0, "sections": [0, 2, 30], "patterns": [0, 0, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
@@ -3213,6 +3225,7 @@
     "name": "IDM",
     "description": "Warm and warped at its plainest, a slow swung breakbeat under detuned pads, an electric piano and a music box, sevenths and Dorian; wilder, an acid bass squelching and gliding, odd meters, tuplets and polymeters, and drums splintering into rolls.",
     "choices": {
+      "soloAnswers": { "sections": [0, 10, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "intro": { "entries": 100, "cold": [20, 30, 40] },
       "hatRollRate": { "thirtySeconds": 100, "tripletSixteenths": 50, "sixtyFourths": [0, 20, 60] },
