@@ -222,13 +222,15 @@ internal sealed class Line
     }
 
     /// <summary>
-    ///     An echo: the note of the scale step, from the chord's root, and on a strong beat, which takes a note of the
-    ///     chord as it would by the rules, the note of the chord nearest it if it misses the chord; the nearest in the
-    ///     range if it leaves it.
+    ///     An echo: the note of the scale step, from the chord's root, the line's nearest in the range if it leaves it, and
+    ///     on a strong beat, which takes a note of the chord as it would by the rules, the note of the chord nearest it if
+    ///     it misses the chord.
     /// </summary>
     private int PlaceEcho(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step)
     {
         var note = chord.GetPitch(step);
+        if (note < _low || note > _high)
+            note = GetNearest(GetLineNotes(chord), note);
         var isStrong = beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0;
         if (isStrong && !chordToneClasses.Contains(note.Mod(OctaveNoteCount)))
             note = GetNearest(GetChordTones(chordToneClasses), note);
@@ -236,7 +238,7 @@ internal sealed class Line
         if (!Takes(note))
             note = GetNearest(Allowed(isStrong ? GetChordTones(chordToneClasses) : GetLineNotes(chord)), note);
 
-        return note >= _low && note <= _high ? note : GetNearest(GetLineNotes(chord), note);
+        return note;
     }
 
     /// <summary>The singable range in the middle of a track's, or all of the track's if it is narrower.</summary>
@@ -252,8 +254,8 @@ internal sealed class Line
     ///     was placed, so that it never leaps an octave: by a scale step, the note as it is, if it is a step (one or two
     ///     semitones) from the next already, or the note nearest it that is, a step from it at most, so that it bends
     ///     rather than jumps, a note of its line's scale on a weak beat and of its chord on a strong one, where it would sound
-    ///     against its own chord, or the note as it is, where no note is; a semitone below or above the next chord's root
-    ///     nearest the next note, its fifth nearest that root, or the root itself, a little early.
+    ///     against its own chord, or the note as it is, where no note is; a semitone below or above the next note, the next
+    ///     chord's fifth nearest its root nearest the next note, or the next note itself, a little early.
     /// </summary>
     /// <param name="chordToneClasses">The pitch classes of the note's own chord's notes.</param>
     /// <param name="beatRank">How strong the note's beat is, 0 the strongest.</param>
@@ -279,18 +281,18 @@ internal sealed class Line
         {
             ChordApproach.None => note,
             ChordApproach.ScaleStep => ApproachByStep(chord, chordToneClasses, beatRank, note, next),
-            ChordApproach.HalfStepBelow => root - 1,
-            ChordApproach.HalfStepAbove => root + 1,
+            ChordApproach.HalfStepBelow => next - 1,
+            ChordApproach.HalfStepAbove => next + 1,
             // the next chord's fifth where the line's scale over this chord has it, as a chromatic chord's may not, sounding
             // before its chord over another; a step from the side the line comes from where not
             ChordApproach.Fifth => InScale(chord, nextChord.GetPitch(4)) ? NearestOfClass(nextChord.GetPitch(4), root) : ApproachByStep(chord, chordToneClasses, beatRank, note, next),
-            ChordApproach.Anticipation => root,
+            ChordApproach.Anticipation => next,
             _ => throw new ArgumentOutOfRangeException(nameof(approach), approach, null)
         };
-        // a half step past the range's edge taken from the root's other side, a half step still; another approach past it
-        // moves an octave into it, as close to the edge as it can
+        // a half step past the range's edge taken from the next note's other side, a half step still; another approach past
+        // it moves an octave into it, as close to the edge as it can
         if (approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove && (approached < _low || approached > _high))
-            approached = 2 * root - approached;
+            approached = 2 * next - approached;
         while (approached < _low)
             approached += OctaveNoteCount;
         while (approached > _high)

@@ -34,7 +34,8 @@ internal static class PhraseLengths
     {
         3 => "Three bars",
         4 => "Four bars",
-        _ => "Four and two"
+        6 => "Four and two",
+        _ => throw new ArgumentOutOfRangeException(nameof(bars), bars, null)
     };
 
     /// <summary>A section's phrase length, by the form facet and the genre's pool; four for a pattern of several phrases, drawn all the same.</summary>

@@ -456,7 +456,7 @@ internal sealed class LinePattern
     /// <param name="phraseBars">How many bars the answer's phrase has.</param>
     public static MelodyAnswer DrawAnswer(IGenerationContext context, double amount, int questionEnd, int phraseBars)
     {
-        ImmutableArray<bool> rhythm = [..Enumerable.Range(0, phraseBars).Select(bar => context.TestProbability(MelodyLayers.AnswerShare(bar, phraseBars) * amount * MelodyLayers.AnswerRhythm))];
+        ImmutableArray<bool> rhythm = [..Enumerable.Range(0, phraseBars).Select(bar => context.TestProbability(MelodyLayers.AnswerShare(bar, phraseBars) > 0 ? amount : 0))];
         var endsAfresh = context.TestProbability(amount);
         ImmutableArray<Weighted<int>> ends = [..MelodyLayers.PhraseEnds.Where(x => x.Value != questionEnd)];
         var end = context.Pick(ends);
@@ -554,7 +554,7 @@ internal sealed record SectionLine(
             [
                 ..Enumerable.Range(0, 2 * Letters.Length).Select(bar =>
                     {
-                        var chance = amount * MelodyLayers.ImprovisedRhythm * MelodyLayers.AnswerShare(bar, HarmonicRhythm.Meter.PhraseBars);
+                        var chance = MelodyLayers.AnswerShare(bar, HarmonicRhythm.Meter.PhraseBars) > 0 ? Tilt.Of(MelodyLayers.ImprovisedRhythm, 1).Chance(amount, 1) : 0;
                         return draws[Letters[bar % Letters.Length]] < chance ? appearance : 0;
                     }
                 )

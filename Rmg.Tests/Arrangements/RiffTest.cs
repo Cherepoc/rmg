@@ -138,6 +138,10 @@ public sealed class RiffTest
             double[] At(TrackRole role) => [..song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == role).Value
                 .Where(x => x.Position >= span.Start && x.Position < span.End && x.Value.State.GetStateValue(CompositionStateKinds.Walk) == 0).Select(x => x.Position)];
             var (sourceAt, targetAt) = (At(source), At(target));
+            // and its first note where its walk from the section before leads into it, the note the walk was aimed at
+            var targetNotes = song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == target).Value;
+            if (targetNotes.Where(x => x.Position < span.Start - 1e-9).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Walk)).LastOrDefault() > 0)
+                targetAt = [..targetAt.Skip(1)];
             if (targetAt.Length == 0)
                 continue;
 

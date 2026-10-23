@@ -69,12 +69,6 @@ internal static class MelodyLayers
     // how much of a bar in the answer's second half is changed
     private const double ChangedShare = 0.8;
 
-    /// <summary>
-    ///     How likely an answer's changing bar is to draw its rhythm afresh, over the bar's share of the answer
-    ///     (<see cref="AnswerShare" />) and the answer's amount: half the time at the amount with no lean.
-    /// </summary>
-    public const double AnswerRhythm = 1.25;
-
     /// <summary>The chance a note of the answer's changing bars is mutated, at the middle of the melody facet.</summary>
     public const double AnswerAmount = 0.5;
 
@@ -108,8 +102,8 @@ internal static class MelodyLayers
     public const double ImprovisationGrowth = 3;
 
     /// <summary>
-    ///     How likely a bar of a section's later appearance is to draw its melody's rhythm afresh, over the song's
-    ///     improvisation and where a phrase varies (<see cref="AnswerShare" />).
+    ///     How much likelier a bar of a section's later appearance, where its phrase varies (<see cref="AnswerShare" />), is
+    ///     to draw its melody's rhythm afresh than the song's improvisation: the odds of the improvisation times this.
     /// </summary>
     public const double ImprovisedRhythm = 2;
 
@@ -164,10 +158,10 @@ internal static class MelodyLayers
     /// <summary>
     ///     The chance a melody's later letter, off a hook, plays its first's rhythm with notes of its own, as a tune's next
     ///     line keeps its first's rhythm and moves its notes, which over another chord sounds as a sequence (<see cref="PhraseScheme.Borrowed" />),
-    ///     by the melody facet: a plain tune's the oftenest, development being its convention, a wild one's seldom, each line
+    ///     by the melody facet: a plain tune's the oftenest, development being its convention, a wild one's never, each line
     ///     drawn afresh.
     /// </summary>
-    public static ByConvention SequenceChances { get; } = new(0.4, 0.3, 0.1);
+    public static ByConvention SequenceChances { get; } = new(0.4, 0.3, 0);
 
     /// <summary>How far a genre widens or narrows the melody's range at its most, as a factor (<see cref="GenreChoices.MelodyRange" />).</summary>
     public const double GenreRangeReach = 1.5;

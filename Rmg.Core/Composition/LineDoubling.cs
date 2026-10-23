@@ -14,9 +14,9 @@ namespace Rmg.Core.Composition;
 ///     driven guitar the bass plays every phrase of a section it plays in, the riff's where it would rest. A twin, the riff's,
 ///     plays the whole line wherever it plays, in every section, a third above or a sixth below, having no notes of its
 ///     own; or by its own part an octave apart, the melody's, the counter-melody's or the riff's, the likelier the louder
-///     the section, and in a plain song as in a wild one, a part playing one doubling at a time. Neither plainer nor
-///     stranger, a doubling by another part does not lean by the song's unconventionality, but the twin's
-///     interval, by the song's melody facet: a third or a sixth in a middling song, and the wilder the song, the oftener a
+///     the section and a little the wilder the song, a part playing one doubling at a time. The bass with the riff is a
+///     convention, always in the plainest songs and never in the wildest, the harmony alike at every end, and the twin's
+///     interval leans by the song's melody facet: a third or a sixth in a middling song, and the wilder the song, the oftener a
 ///     fourth, a fifth, a second or a seventh. A twin harmonises a lead line, up the neck, in the sections it leads
 ///     (<see cref="TwinLeadChance" />), and where a genre tunes its riff down, the riff and its twin play an octave up where the twin plays, where
 ///     the songs' riffs do, rather than thirds in the mud.
@@ -250,7 +250,10 @@ internal static class LineDoubling
                 // but from the doubling part's walk into the next section on, which it plays as its own, as LineFills placed it
                 var walk = events[targetTrack].EventTimeline.Where(x => x.IsWithin(span.Start, span.End) && x.Value.GetStateValue(CompositionStateKinds.Walk) > 0)
                     .Select(x => x.Position).DefaultIfEmpty(double.MaxValue).Min();
-                bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && position < walk - 1e-9 && patterns.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
+                // nor its first note where its walk from the section before leads into it, the note the walk was aimed at
+                var walkedInto = events[targetTrack].EventTimeline.Where(x => x.Position < span.Start - 1e-9).Select(x => x.Value.GetStateValue(CompositionStateKinds.Walk)).LastOrDefault() > 0;
+                bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && position < walk - 1e-9 && !(walkedInto && Math.Abs(position - from) < 1e-9)
+                                                 && patterns.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
                 // in unison the source's alteration as it is, a chromatic riff's passing note too; a harmony a step away on the
                 // scale, off a third its chord leaves out, but a twin's, which keeps its step all the way
                 var doubled = events[sourceTrack].EventTimeline
