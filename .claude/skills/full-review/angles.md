@@ -34,6 +34,7 @@ You review one concern across the whole codebase rather than one slice.
 
 4. **duplicates.** Mechanisms implemented twice, or nearly twice:
    - several "parts by role" lookups, several "notes in a span" helpers, several bar-iteration loops, several ways of finding the bar before a line;
+   - the newest devices first, which the review of 22 October found copying their neighbours (a span cleared, "has this section played before", the band's chord at a position, the guitar's programs, the lift into a louder section): a device written since the last review against the helpers the primer's checklist names;
    - families `decided.md` keeps apart are not findings.
    - Name each family, its members (file and line) and a concrete merge or generalisation, with what it would save. Only real duplication: the same logic, not a similar shape.
 
