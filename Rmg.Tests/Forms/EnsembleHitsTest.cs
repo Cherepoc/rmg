@@ -25,7 +25,10 @@ public sealed class EnsembleHitsTest
     private static CorpusSong[] Songs(string genre, int count) =>
         TestCorpus.InParallel(Enumerable.Range(0, count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))));
 
-    /// <summary>A struck bar's band, its chords, pad, riff and rhythm guitar, strikes only where the kick does, before the bar's last half, which the drums fill.</summary>
+    /// <summary>
+    ///     A struck bar's band, its chords, pad, riff and rhythm guitar, strikes only where the kick does, before the bar's last
+    ///     half, which the drums fill; of a genre's songs that stop, as a song strikes hits only where it stops at all.
+    /// </summary>
     [Test]
     [Arguments("funk")]
     [Arguments("rock")]
@@ -33,7 +36,8 @@ public sealed class EnsembleHitsTest
     public async Task AStruckBarsBand_StrikesOnlyWithTheKick(string genre)
     {
         var bars = 0;
-        foreach (var song in Songs(genre, 64))
+        var stopping = GenrePresets.With(genre, GenreChoices.Stops, ("songs", 1));
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: stopping))))
         foreach (var (start, end, kick) in Struck(song))
         {
             bars++;

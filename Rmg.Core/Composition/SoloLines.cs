@@ -712,8 +712,10 @@ internal static class SoloLines
             var lineBars = span.Meter.PhraseBars % SpaceLineBars == 0 ? SpaceLineBars : span.Meter.PhraseBars;
             var lineStart = barOrigin + Math.Floor((from - barOrigin) / (lineBars * bar) + 1e-9) * lineBars * bar;
             var lineEnd = Math.Min(turnEnd, lineStart + lineBars * bar);
-            // and only a line that starts in the span, not an answer's gap in the middle of one
-            var spacious = soloist.Spacious && lineStart >= span.Start - 1e-9 && lineEnd - lineStart >= (SpaceCallBars + 2) * bar - 1e-9;
+            // and only a line that starts in the span, not an answer's gap in the middle of one, and where a phrase before
+            // ran into the line, only with a bar's answer and a bar's rest left of it
+            var spacious = soloist.Spacious && lineStart >= span.Start - 1e-9 && lineEnd - lineStart >= (SpaceCallBars + 2) * bar - 1e-9
+                           && (Math.Abs(from - lineStart) < 1e-9 || lineEnd - from >= 2 * bar - 1e-9);
             if (spacious)
                 bars = Math.Abs(from - lineStart) < 1e-9 ? SpaceCallBars : Math.Min(bars, (int)Math.Round((lineEnd - from) / bar) - 1);
             var to = Math.Min(turnEnd, from + bars * bar);
