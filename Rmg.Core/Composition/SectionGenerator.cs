@@ -248,9 +248,11 @@ internal sealed class SectionGenerator
         var (sectionStrokes, barDrums) = _drums.DrawDrumBars(sectionId, activeDrumTrackNumbers, kit, scheme, rhythm, tilt);
 
         // a heavy band's breakdown now and then, a genre's, from a sequence of its own
-        // in a song that leaves its time, whose departure a breakdown in half time is
+        // in a song that leaves its time, whose departure a breakdown in half time is; but a section looping another's lines,
+        // which plays its source's riff as it is
         var breakdown = Breakdowns.MayBreakDown(plan.Role, plan.KeepsSongScale)
-                        && Stream(sectionId, SectionStream.Breakdown).TestProbability(Breakdowns.Chance.At(facets[Facet.Form], _genre.Chance(GenreChoices.Breakdown, "sections"))) && _departs;
+                        && Stream(sectionId, SectionStream.Breakdown).TestProbability(Breakdowns.Chance.At(facets[Facet.Form], _genre.Chance(GenreChoices.Breakdown, "sections"))) && _departs
+                        && !looped;
         StateTrace.RecordSection(TracePoints.Breakdown, SectionTrace, sectionId, $"{breakdown}", breakdown);
         // its form, calm or heavy, from a sequence of its own, by its energy against the song's
         var form = SectionForm.Draw(Stream(sectionId, SectionStream.Form), _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy), facets[Facet.Sound], _genre,
@@ -274,7 +276,7 @@ internal sealed class SectionGenerator
         // a section its riff's twin leads in, in a song with a twin, from a sequence of its own: the riff in single notes, never
         // in power chords nor chugs, but a breakdown's
         var twinLead = Stream(sectionId, SectionStream.TwinLead).TestProbability(LineDoubling.TwinLeadChance.At(facets[Facet.Melody], _genre.Chance(GenreChoices.Doubling, "twin")))
-                       && !_absent.Contains(TrackRole.RiffTwin) && !breakdown;
+                       && !_absent.Contains(TrackRole.RiffTwin) && !breakdown && !looped;
         StateTrace.RecordSection(TracePoints.TwinLead, SectionTrace, sectionId, $"{twinLead}", twinLead);
         (powerChords, chugs) = (powerChords && !twinLead, chugs && !twinLead);
         StateTrace.RecordSection(TracePoints.RiffPowerChords, SectionTrace, sectionId, $"{powerChords}", powerChords);

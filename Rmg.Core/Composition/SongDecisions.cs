@@ -216,7 +216,7 @@ internal sealed record SongDecisions(
         var length = target is { } seconds
             ? new SongLength(seconds, (role, lean) => SecondsOf(SectionLength.Expected(songUnconventionality[Facet.Form], role, lean, genre) * meter.PatternDuration))
             : null;
-        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form], length, genre);
+        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form], length, genre, !absent.Contains(TrackRole.Riff));
         StateTrace.RecordSong(TracePoints.SongForm, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
         var sectionIds = structure.SectionIds.ToArray();
 

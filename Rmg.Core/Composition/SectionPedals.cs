@@ -31,6 +31,8 @@ internal static class SectionPedals
             StateTrace.RecordSection(TracePoints.SectionPedal, SectionGenerator.SectionTrace, id, pedals ? $"{place}" : "none", pedals ? place : null);
             return pedals ? place : (PedalPlace?)null;
         });
+        // a section that loops another's lines held as its source is, its own drawn all the same
+        pedalling = pedalling.ToDictionary(x => x.Key, x => song.SectionOf(x.Key).LinesFrom is { } source ? pedalling[source] : x.Value);
         // a pedal under chords that change, none under a vamp or a home held, which it would only flatten onto one note
         var common = draft.Timeline.CommonStateTimelineMap;
         // a chord's root and its move by semitones, a planed chord's

@@ -19,6 +19,11 @@ public sealed class DrivenRiffBassTest
     private static bool Sounds(CorpusSong song, int track, double start, double end) =>
         song.Song.Notes!.GetValueOrDefault(track)?.Any(x => x.Position < end - 1e-9 && x.Position + x.Value.Duration > start + 1e-6) ?? false;
 
+    /// <summary>
+    ///     The bass plays every phrase the riff plays, but in the opening, a section it sits out, a section the twin leads,
+    ///     whose lead line the bass plays its own under, and a phrase its texture leaves it out of, as the riff opening a
+    ///     section alone.
+    /// </summary>
     [Test]
     public async Task UnderADrivenRiff_TheBass_PlaysEveryPhraseItPlays_ButInTheOpening_AndInASectionItSitsOut()
     {
@@ -29,15 +34,18 @@ public sealed class DrivenRiffBassTest
             if (!events.ContainsKey(song.Track(TrackRole.Bass)))
                 continue;
             bool Plays(int track, double start, double end) => events[track].EventTimeline.Any(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9);
-            foreach (var span in song.Map.Sections.Skip(1).Where(x => Plays(song.Track(TrackRole.Bass), x.Start, x.End)))
-                for (var start = span.Start; start < span.End - 1e-9; start += span.Meter.PatternDuration)
+            var twinLed = song.Trace.Where(x => x.Point == TracePoints.TwinLead && (bool)x.Value!).Select(x => x.Section).ToHashSet();
+            foreach (var span in song.Map.Sections.Skip(1).Where(x => Plays(song.Track(TrackRole.Bass), x.Start, x.End) && !twinLed.Contains(x.SectionId)))
+            {
+                var silent = song.Texture(span).PhraseSilent;
+                foreach (var ((_, start, end), phrase) in span.Phrases.Select((x, p) => (x, p)))
                 {
-                    var end = Math.Min(start + span.Meter.PatternDuration, span.End);
-                    if (!Plays(song.Track(TrackRole.Riff), start, end))
+                    if (!Plays(song.Track(TrackRole.Riff), start, end) || phrase < silent.Length && silent[phrase].Contains(TrackRole.Bass))
                         continue;
                     phrases++;
                     await Assert.That(Plays(song.Track(TrackRole.Bass), start, end)).IsTrue().Because($"seed {song.Seed}, phrase at {start}");
                 }
+            }
         }
 
         await Assert.That(phrases).IsGreaterThan(100);

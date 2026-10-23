@@ -19,6 +19,34 @@ public sealed class TextureTest
         await Assert.That(silent).IsEmpty().Because(string.Join("; ", silent.Take(5)));
     }
 
+    /// <summary>
+    ///     A part a texture leaves out of a phrase, a build's or a thinning's or the others while one part plays alone, strikes
+    ///     no note in it: but a landing on its first beat out of the phrase before, the drums' fill into the next in its last
+    ///     bar, and a line's walk or pickup in its last beat.
+    /// </summary>
+    [Test]
+    public async Task APartATextureLeavesOutOfAPhrase_StrikesNoNoteInIt()
+    {
+        var (checkedPhrases, wrong) = (0, new List<string>());
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
+        foreach (var (span, index) in song.Map.Sections.Select((x, i) => (x, i)).Where(x => !(song.Solos.TryGetValue(x.i, out var solo) && solo.IsDrumSolo)))
+        {
+            var silent = song.Texture(span).PhraseSilent;
+            foreach (var ((_, start, end), phrase) in span.Phrases.Select((x, p) => (x, p)).Where(x => x.p < silent.Length))
+            foreach (var role in silent[phrase])
+            {
+                checkedPhrases++;
+                var allowance = role == TrackRole.Drum ? span.Meter.BarDuration : 1;
+                foreach (var (track, _) in song.Song.TrackDefinitions.Where(x => x.Value.Role == role))
+                foreach (var note in song.Song.Notes!.GetValueOrDefault(track)?.Where(n => n.Position > start + 1e-6 && n.Position < end - allowance - 1e-9) ?? [])
+                    wrong.Add($"seed {song.Seed}, section {index}, phrase {phrase}: {role} at {note.Position}");
+            }
+        }
+
+        await Assert.That(wrong).IsEmpty().Because(string.Join("; ", wrong.Take(5)));
+        await Assert.That(checkedPhrases).IsGreaterThan(20);
+    }
+
     [Test]
     public async Task DrumsMarkingTheForm_NeverPlayASectionAlone_APitchedPartPlayingWithThem()
     {

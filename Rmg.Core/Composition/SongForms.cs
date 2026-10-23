@@ -124,7 +124,8 @@ internal static class SongForms
     /// <param name="ends">The sequence the intro and the outro are drawn from.</param>
     /// <param name="length">The song's length given, which the forms lean to by how near theirs come; none for none.</param>
     /// <param name="genre">The genre, whose chance of one of the forms and whose pool of them are the song's where it names them.</param>
-    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality, SongLength? length, Genre genre)
+    /// <param name="hasRiff">Whether the song has a riff, which a riff section plays.</param>
+    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality, SongLength? length, Genre genre, bool hasRiff)
     {
         var formChance = FormsChance.At(unconventionality, genre.Chance(GenreChoices.FormChances, "forms"));
         // the forms as the genre weighs them where it names them, its plainest at the plain end and its wildest at the wild;
@@ -151,8 +152,9 @@ internal static class SongForms
         var (intro, outro) = (ends.TestProbability(IntroChance.At(unconventionality)), ends.TestProbability(OutroChance.At(unconventionality)));
         var next = structure.SectionIds.Max() + 1;
         var (introId, outroId) = (next, next + 1);
-        // or a riff section, a genre's, the intro coming back after a chorus a verse follows and as the outro
-        if (ends.TestProbability(RiffSectionChance.At(unconventionality, genre.Chance(GenreChoices.RiffSection, "songs"))) && isConventional)
+        // or a riff section, a genre's, the intro coming back after a chorus a verse follows and as the outro, in a song with a
+        // riff to come back
+        if (ends.TestProbability(RiffSectionChance.At(unconventionality, genre.Chance(GenreChoices.RiffSection, "songs"))) && isConventional && hasRiff)
         {
             var ids = structure.SectionIds;
             ImmutableArray<int> returning =

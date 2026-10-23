@@ -188,8 +188,8 @@ internal static class SongStages
             form.Map,
             [..ids],
             structure.Roles,
-            // the last section's lift, at its repeat where it plays twice, before the outro or a riff section closing it
-            ids.Count - 1 + (song.Repeats ? 1 : 0) - (structure.Roles[ids[^1]] is SectionRole.Outro or SectionRole.Intro ? 1 : 0),
+            id => song.SectionOf(id).LinesFrom,
+            LastFull(song),
             song.Genre
         );
         var sectionTempos = SectionTempo.Generate(place => song.AppearanceStream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre, song.Departs);
@@ -221,8 +221,15 @@ internal static class SongStages
         draft with
         {
             Timeline = draft.Timeline.MergeStateTimelineMap(Reharmonisation.Apply(song.Stream(SongStream.Reharmonisation), song.Facets[Facet.Progression], song.Genre, song.Form.Map,
-                draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change)), song.SectionIds.Count - 1 + (song.Repeats ? 1 : 0)))
+                draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change)), LastFull(song)))
         };
+
+    /// <summary>
+    ///     The last section's place, which a key lifts at and a reharmonisation takes: its repeat where it plays twice, before
+    ///     an outro or a riff section closing the song.
+    /// </summary>
+    private static int LastFull(SongDecisions song) =>
+        song.SectionIds.Count - 1 + (song.Repeats ? 1 : 0) - (song.Structure.Roles[song.SectionIds[^1]] is SectionRole.Outro or SectionRole.Intro ? 1 : 0);
 
     /// <summary>
     ///     A section's figure of its own length run across the bar lines now and then, from a stream of its own for each
@@ -231,7 +238,7 @@ internal static class SongStages
     internal static SongDraft Polymeter(SongDecisions song, SongDraft draft)
     {
         var stopped = song.Form.Map.Sections.Where(s => song.StopTime.Any(p => p.Start < s.End - 1e-9 && p.End > s.Start + 1e-9)).Select(s => s.SectionId).ToHashSet();
-        var polymeters = Composition.Polymeter.Generate(
+        var drawn = Composition.Polymeter.Generate(
             id => song.Stream(SongStream.Polymeter, id),
             id => song.SectionOf(id).Facets[Facet.Feel],
             song.SectionMeters,
@@ -239,7 +246,11 @@ internal static class SongStages
             song.Absent,
             song.Genre,
             song.Pinned
-        ).Where(x => !song.SectionOf(x.Key).Breakdown && !stopped.Contains(x.Key)).ToImmutableDictionary();
+        );
+        // a section that loops another's lines runs its source's cycle, or none where its source runs none, its own drawn all
+        // the same
+        var polymeters = song.SectionIds.Distinct().Select(id => (Id: id, Plan: drawn.GetValueOrDefault(song.SectionOf(id).LinesFrom ?? id))).Where(x => x.Plan is not null)
+            .Where(x => !song.SectionOf(x.Id).Breakdown && !stopped.Contains(x.Id)).ToImmutableDictionary(x => x.Id, x => x.Plan!);
         // but a breakdown, its kick locked to the riff, and a section in stop time, whose band hits the bar's first beat,
         // drawn all the same
         StateTrace.RecordSong(TracePoints.Polymeter, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
@@ -354,6 +365,7 @@ internal static class SongStages
                                                           && (song.Sections[index].Form.Guitars.Contains(x.Key)
                                                               ? song.Sections[index].Form.Kind == SectionFormKind.Heavy
                                                               : InstrumentTraits.Has(riff.InstrumentCode, InstrumentTrait.Driven))),
+                (index, phrase) => song.Sections[index].PhraseSilent is var silent && phrase < silent.Length && silent[phrase].Contains(TrackRole.Bass),
                 Math.Max(0, -Registers.OctavesOf(song.Genre, TrackRole.Riff)),
                 song.Genre,
                 song.Tracks.Definitions

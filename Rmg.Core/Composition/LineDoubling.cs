@@ -134,6 +134,7 @@ internal static class LineDoubling
     /// <param name="twinRests">Whether an appearance, by its place, leaves the riff's twin out, which then plays none of the riff.</param>
     /// <param name="playsAFigure">Whether a part plays a figure in an appearance, by its place, which no doubling into it replaces (<see cref="Figures" />).</param>
     /// <param name="drivenRiff">Whether the riff plays on a driven guitar in a section, by its place among the song's sections, whose phrases the bass plays wherever it would rest in them.</param>
+    /// <param name="bassSilent">Whether an appearance's texture leaves the bass out of a phrase, by the appearance's place and the phrase's, as one part alone does, which no doubling fills.</param>
     /// <param name="blocks">A section's sequence of whether its harmonised melody plays in a block, by the section's place.</param>
     /// <param name="twinRaise">How many octaves the riff and its twin play up where the twin plays, as many as the genre tunes its riff down.</param>
     /// <param name="genre">The genre whose chances of the doublings a section draws (<see cref="GenreChoices.Doubling" />).</param>
@@ -151,6 +152,7 @@ internal static class LineDoubling
         Func<int, bool> twinRests,
         Func<int, TrackRole, bool> playsAFigure,
         Func<int, bool> drivenRiff,
+        Func<int, int, bool> bassSilent,
         int twinRaise,
         Genre genre,
         IReadOnlyDictionary<int, IInstrumentTrack> definitions
@@ -278,9 +280,10 @@ internal static class LineDoubling
 
         // and the bass under a driven riff, as a band's plays under its guitars: in a section it plays in, every phrase the
         // riff plays without it it plays with it, in unison, as the pair does; but in the song's opening, which a riff may
-        // start alone, and in a section it sits out whole, left to the guitars
+        // start alone, in a section it sits out whole, left to the guitars, a phrase its texture leaves it out of, as the
+        // riff opening a section alone, and a section the twin leads, a lead line the bass plays its own under
         if (trackOf.TryGetValue(TrackRole.Riff, out var riffTrack) && trackOf.TryGetValue(TrackRole.Bass, out var bassTrack))
-            foreach (var (span, index) in plays.Where(x => x.Index > 0 && drivenRiff(x.Index)))
+            foreach (var (span, index) in plays.Where(x => x.Index > 0 && drivenRiff(x.Index) && !twinLeads(x.Index)))
             {
                 var events = song.TrackTimelineMap;
                 TimelineItem<StateMap>[] In(int track, double start, double end) => [..events[track].EventTimeline.Where(x => x.IsWithin(start, end))];
@@ -294,7 +297,7 @@ internal static class LineDoubling
                         continue;
 
                     StateTrace.RecordSection(TracePoints.RiffBass, bassTrack, span.SectionId, $"{start}", (index, start));
-                    filled.AddRange(riff.Select(x => x.Value.With(CompositionStateKinds.SoundsAs, 0).With(CompositionStateKinds.Doubled, 1)
+                    filled.AddRange(riff.Where(x => !bassSilent(index, span.PhraseOf(x.Position))).Select(x => x.Value.With(CompositionStateKinds.SoundsAs, 0).With(CompositionStateKinds.Doubled, 1)
                         // in its own register, never the twin's raise the riff took
                         .With(CompositionStateKinds.LineRaise, 0).ToTimelineItem(x.Position)));
                 }

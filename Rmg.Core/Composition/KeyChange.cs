@@ -105,6 +105,7 @@ public sealed record KeyChange(double Position, int Semitones)
         SongMap map,
         IReadOnlyList<int> sectionIds,
         IReadOnlyDictionary<int, SectionRole> roles,
+        Func<int, int?> linesFrom,
         int liftAt,
         Genre genre
     )
@@ -121,6 +122,8 @@ public sealed record KeyChange(double Position, int Semitones)
             // the first section sets the song's key
             return hasOwn && id != sectionIds[0] ? step : 0;
         });
+        // a section that loops another's lines in its source's key, its own drawn all the same
+        ownKeys = ownKeys.ToDictionary(x => x.Key, x => linesFrom(x.Key) is { } source ? ownKeys[source] : x.Value);
         var changes = ImmutableArray.CreateBuilder<KeyChange>();
         // how far the key has moved for good, and the key playing, both from the song's own
         var lift = 0;
