@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
@@ -24,7 +25,7 @@ public sealed class OrnamentsTest
     }
 
     [Test]
-    public async Task AnOrnamentsNotes_AreTheNotesNeighbours_WithinItsLength_OnTheLinesAlone_InOctavesToo()
+    public async Task AnOrnamentsNotes_AreTheNotesNeighbours_ATrillsAStepOfTheKey_WithinItsLength_OnTheLinesAlone_InOctavesToo()
     {
         var (ornaments, octaves) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ornamenting))))
@@ -41,6 +42,16 @@ public sealed class OrnamentsTest
                 await Assert.That(ornament.Length * note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep)).IsLessThan(note.Value.Duration).Because(because);
                 // a note of one pitch, or a line's in octaves, never a block of voices
                 await Assert.That(note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.LineVoices) <= 1).IsTrue().Because(because);
+                // a trill's or a turn's neighbours the next steps of the section's scale, never a pentatonic's third
+                if (ornament.Length > 1)
+                {
+                    var (_, _, chord) = Realizer.GetChord(note.Value.State);
+                    var scale = Enumerable.Range(0, 7).Select(x => chord.GetPitch(x).Mod(12)).ToHashSet();
+                    var pitch = note.Value.Pitches[0];
+                    foreach (var x in ornament.Where(x => x != 0))
+                        await Assert.That(scale.Contains((pitch + x).Mod(12)) && Enumerable.Range(1, Math.Abs(x) - 1).All(d => !scale.Contains((pitch + Math.Sign(x) * d).Mod(12))))
+                            .IsTrue().Because($"{because}, its neighbour {x}");
+                }
                 ornaments++;
                 octaves += note.Value.Pitches.Length > 1 ? 1 : 0;
             }

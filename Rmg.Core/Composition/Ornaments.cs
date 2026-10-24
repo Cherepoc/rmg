@@ -108,11 +108,12 @@ internal static class Ornaments
             _ => Enumerable.Range(0, Math.Max(2, (int)Math.Min(length * TrillShare / step, TrillSeconds * Rate) / 2 * 2)).Select(x => x % 2).ToArray()
         };
         var pitch = note.Value.Pitches[0];
-        // the neighbours in the line's scale, or the section's where the line keeps to it, or where the line's leaves a gap
-        // wider than a major third, as a kept pentatonic may
+        // a grace note's neighbour in the line's scale, or the section's where the line keeps to it, or where the line's
+        // leaves a gap wider than a major third, as a kept pentatonic may; a trill's and a turn's a step of the section's, as
+        // a player trills by a step of the key, never a pentatonic's third
         var (_, _, chord) = Realizer.GetChord(note.Value.State);
         var section = Enumerable.Range(0, Scales.StepCount).Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).ToHashSet();
-        var classes = LineScales.Classes((LineScale)note.Value.State.GetStateValue(CompositionStateKinds.LineScale), chord) ?? section;
+        var classes = ornament == Ornament.Grace ? LineScales.Classes((LineScale)note.Value.State.GetStateValue(CompositionStateKinds.LineScale), chord) ?? section : section;
         int Neighbour(int direction)
         {
             var near = Enumerable.Range(1, MajorThird).Select(x => direction * x).ToArray();
