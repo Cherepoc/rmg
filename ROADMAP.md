@@ -308,10 +308,6 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
 - **Intensity moving the energy** (#76, the foundations reviewer), an experiment: the mood's intensity a value of
   Trance's dynamics, the sections' energy drawn around it, asked against the current model; in 28 of 49 presets the
   notes a beat at intensity -1 and 1 differ by 2% or less, the tempo all that moves.
-- **A part's own arpeggio, and the roll** (#102, #357): the arpeggio pool nested by role as the figures' and the
-  instruments' are, the shared one where a role is not named (Bluegrass's chop under the banjo, #356); then a roll,
-  another `ArpeggioPattern`, three of the chord's notes cycling 3+3+2 8ths from the bar's start, the forward roll at the
-  plain end (Bluegrass, Country, Folk, Celtic).
 - **Tempo at a phrase's edges** (#302, #360, then #365): one tempo edit as the ritardando's: the part alone at the
   opening pushing and broadening each phrase into the band's entrance in tempo (`openingAlone`, a slow tempo leaning
   it), and a section's closing bar broadening into the next (the breath, before a return at the plain end, any section

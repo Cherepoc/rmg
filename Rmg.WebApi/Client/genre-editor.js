@@ -355,7 +355,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         melody: ["melodyRange", "sung", "hook", "sequence", "voice", "ornaments", "tension", "appoggiatura"],
         bass: ["bass", "octaveBass", "alternatingBass", "glide", "glideRate", "bassLanding", "figure.bass"],
         riff: ["riff", "riffScale", "figure.riff"],
-        chords: ["figure.chords"],
+        chords: ["figure.chords", "arpeggio.chords"],
+        rhythm: ["arpeggio.rhythm"],
         solo: ["soloAnswers"],
         drums: ["fills", "kickOut", "fillFeet", "hatRolls", "hatRollRate", "ghosts", "ghostNotes", "rudiments", "drumJob", "marks", "drumSounds", "drumStrokes", "figure.ground", "figure.backbeat", "figure.time", "figure.claves", "figure.comp"],
     };
@@ -368,7 +369,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     ];
     const pitched = panel(...pitchedTiles());
     // a part with choices of its own a panel of its own, the others sharing one
-    const panels = Object.fromEntries(["melody", "bass", "riff", "chords"].map((part) => [part, panel(...pitchedTiles(), ...PART_CHOICES[part].map(own))]));
+    const panels = Object.fromEntries(["melody", "bass", "riff", "chords", "rhythm"].map((part) => [part, panel(...pitchedTiles(), ...PART_CHOICES[part].map(own))]));
     const solo = panel(bound(tile(undefined, "Instruments"), () => "instrument.solo"), ...PART_CHOICES.solo.map(own));
     const role = panel(
         bound(tile(isPieceAllowed, "Drums"), (x) => `drumRole.${x}`),

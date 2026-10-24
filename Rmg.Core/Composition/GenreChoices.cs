@@ -341,6 +341,14 @@ public static class GenreChoices
     /// <summary>How the chords and the rhythm part break their chords, or play them whole (<see cref="Arpeggios" />): an arpeggiator's up and down a synth genre's.</summary>
     public static GenreChoice Arpeggio { get; } = Pool("arpeggio", "Arpeggios", Arpeggios.Patterns.Select(x => (Name(x.Pattern.ToString()), Arpeggios.LabelOf(x.Pattern), x.Weight)));
 
+    /// <summary>
+    ///     A part's own pool of the patterns, the chords' or the rhythm part's, over the shared one where a genre names it,
+    ///     so that one part strikes its chords while the other breaks them, a bluegrass guitar's chop under the banjo's roll.
+    /// </summary>
+    public static ImmutableDictionary<TrackRole, GenreChoice> PartArpeggios { get; } = new[] { TrackRole.Chords, TrackRole.Rhythm }.ToImmutableDictionary(
+        x => x,
+        x => Pool($"arpeggio.{Name(x.ToString())}", TrackRoles.LabelOf(x), Composition.Arpeggios.Patterns.Select(p => (Name(p.Pattern.ToString()), Composition.Arpeggios.LabelOf(p.Pattern), p.Weight))));
+
     /// <summary>The tone a part breaking its chord lays on it, its own, the band's chord as it was (<see cref="Arpeggios.Colours" />).</summary>
     public static GenreChoice Colour { get; } = Pool("colour", "A broken chord's colour", Arpeggios.Colours.Select(x => (Name(x.Colour.ToString()), Arpeggios.LabelOf(x.Colour), x.Weight)));
 
@@ -847,6 +855,7 @@ public static class GenreChoices
         Parts, DrumSetup, DrumPieces,
         ..Enum.GetValues<RhythmPart>().Select(x => Rhythms[x]),
         ..Enum.GetValues<FigurePlayer>().Select(x => Figures[x]),
+        PartArpeggios[TrackRole.Chords], PartArpeggios[TrackRole.Rhythm],
         ..Enum.GetValues<RhythmPart>().Select(x => PartFeels[x]),
         ..RolesInOrder.Select(x => DrumRoles[x])
     ];

@@ -270,6 +270,11 @@ internal static class Articulations
                         position => Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)), fast, stroke);
             }
 
+        // and a part's rolled chords rolled in 8ths, as a banjo's fingers roll through a held chord
+        foreach (var (track, timeline) in result.ToArray())
+            if (song.Tracks.Definitions[track].Role.PlaysChords() && timeline.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == (int)ArpeggioPattern.Roll))
+                result[track] = ThreeFingerRoll(timeline, position => song.Form.Map.PlaceOf(position).Beat);
+
         // and a part's whole chords cycled at the frame rate where it plays them so, a genre's, as a sound chip plays a chord
         // on one voice, its own sequence drawn for every part that holds chords
         foreach (var (track, timeline) in result.ToArray())
@@ -354,6 +359,34 @@ internal static class Articulations
                 Duration = k + 1 < count ? step : note.Value.Duration - k * step
             }).ToTimelineItem(note.Position + k * step));
         }));
+
+    /// <summary>
+    ///     A part's rolled chords, each struck again in 8ths from its start until the part's next note, each stroke the note
+    ///     of the roll its 8th in its bar plays (<see cref="ArpeggioPattern.Roll" />), as a banjo's fingers roll through a
+    ///     chord whatever the part's own rhythm; another note as it is.
+    /// </summary>
+    /// <param name="inBar">Where a position falls in its bar, in beats.</param>
+    internal static EventTimeline<RealizedNote> ThreeFingerRoll(EventTimeline<RealizedNote> timeline, Func<double, double> inBar) =>
+        EventTimeline.Create(timeline.Duration, timeline.SelectMany((struck, i) =>
+        {
+            if (struck.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != (int)ArpeggioPattern.Roll || struck.Value.Pitches.Length < 2)
+                return [struck];
+            var next = timeline.Skip(i + 1).Select(x => (TimelineItem<RealizedNote>?)x).FirstOrDefault(x => x!.Value.Position > struck.Position + 1e-9);
+            var end = Math.Min(struck.Position + struck.Value.Duration, next?.Position ?? double.MaxValue);
+            var voiced = struck.Value.Pitches;
+            // on the 8ths from the chord's own 8th, its strokes each to the next
+            var first = Math.Ceiling(struck.Position / RollStep - 1e-9) * RollStep;
+            var strokes = Enumerable.Range(0, Math.Max(1, (int)Math.Ceiling((end - first) / RollStep - 1e-9))).Select(k => k == 0 ? struck.Position : first + k * RollStep).Where(x => x < end - 1e-9).ToArray();
+            return strokes.Select((at, k) => (struck.Value with
+            {
+                Pitches = [Arpeggios.Pick(ArpeggioPattern.Roll, voiced, k, at, false, 0, voiced[0], 0, inBar(at))],
+                Duration = (k + 1 < strokes.Length ? strokes[k + 1] : end) - at,
+                State = struck.Value.State.With(CompositionStateKinds.Strum, 0.0)
+            }).ToTimelineItem(at));
+        }));
+
+    /// <summary>A roll's step, in beats: an 8th.</summary>
+    public const double RollStep = 0.5;
 
     internal static EventTimeline<RealizedNote> Frames(EventTimeline<RealizedNote> timeline, Func<double, double> beatsPerSecond) =>
         EventTimeline.Create(timeline.Duration, timeline.SelectMany((struck, i) =>

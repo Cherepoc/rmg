@@ -827,7 +827,7 @@ internal sealed class SectionGenerator
         if (_tracks.Definitions[trackNumber].Role.PlaysChords())
         {
             var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Chords ? SectionStream.Arpeggio : SectionStream.RhythmArpeggio;
-            var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre);
+            var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre, _tracks.Definitions[trackNumber].Role.Source());
             // a heavy section's guitars striking their chords, and a calm one's breaking them, 8ths or slower, in a pattern of
             // its own where the section's drew none, as its genre allows
             if (form.Kind == SectionFormKind.Heavy && form.Guitars.Contains(trackNumber))
@@ -835,7 +835,7 @@ internal sealed class SectionGenerator
             if (form.Breaker == trackNumber)
             {
                 if (arpeggio == ArpeggioPattern.None)
-                    arpeggio = Arpeggios.DrawBroken(Stream(sectionId, SectionStream.CalmArpeggio, trackNumber), sectionRhythm.Facets[Facet.Chords], _genre);
+                    arpeggio = Arpeggios.DrawBroken(Stream(sectionId, SectionStream.CalmArpeggio, trackNumber), sectionRhythm.Facets[Facet.Chords], _genre, _tracks.Definitions[trackNumber].Role.Source());
                 sectionTrackLayer.Add(CompositionStateKinds.ShortestNote, SectionForm.CalmShortest);
             }
             StateTrace.RecordSection(TracePoints.Arpeggio, trackNumber, sectionId, $"{arpeggio}", arpeggio);

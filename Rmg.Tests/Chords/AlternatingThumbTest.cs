@@ -14,7 +14,7 @@ public sealed class AlternatingThumbTest
     {
         // a C major chord voiced C3 G3 C4 E4
         int[] voiced = [48, 55, 60, 64];
-        int At(int place, double position, bool onBeat) => Arpeggios.Pick(ArpeggioPattern.AlternatingThumb, [..voiced], place, position, onBeat, (int)position, 0, 0);
+        int At(int place, double position, bool onBeat) => Arpeggios.Pick(ArpeggioPattern.AlternatingThumb, [..voiced], place, position, onBeat, (int)position, 0, 0, position % 4);
 
         await Assert.That(At(0, 0, true)).IsEqualTo(48);
         await Assert.That(At(2, 1, true)).IsEqualTo(55);

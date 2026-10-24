@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Events;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -47,7 +48,13 @@ public enum ArpeggioPattern
     ///     The thumb on the beats, the root and the fifth by turns, and the fingers off them on the chord's notes above,
     ///     a folk or a country guitarist's alternating thumb.
     /// </summary>
-    AlternatingThumb
+    AlternatingThumb,
+
+    /// <summary>
+    ///     A three-finger roll: the chord's lowest note under its two highest, cycling in 8ths grouped 3+3+2 from the bar's
+    ///     start, so that its accents cross the beat, a banjo's forward roll.
+    /// </summary>
+    Roll
 }
 
 /// <summary>A tone laid on a broken chord's notes for the part breaking it alone, which the band's chord leaves out.</summary>
@@ -73,7 +80,7 @@ public enum ChordColour
 ///     Arpeggios: a section's chords broken now and then, each note of the chords part one note of its chord, chosen by
 ///     the pattern from its place since the chord came in, in the part's own rhythm. By the chords facet: at the plain
 ///     end the whole chord most often and the common patterns, up, up and down and Alberti, now and then; at the wild end
-///     every pattern and the whole chord alike.
+///     every pattern and the whole chord alike, but a banjo's roll, a genre's alone.
 /// </summary>
 internal static class Arpeggios
 {
@@ -91,7 +98,8 @@ internal static class Arpeggios
         (ArpeggioPattern.UpTwoOctaves, new ByConvention(0, 0.005, 1)),
         (ArpeggioPattern.Pedal, new ByConvention(0, 0.01, 1)),
         (ArpeggioPattern.Montuno, new ByConvention(0, 0.005, 1)),
-        (ArpeggioPattern.AlternatingThumb, new ByConvention(0, 0.005, 1))
+        (ArpeggioPattern.AlternatingThumb, new ByConvention(0, 0.005, 1)),
+        (ArpeggioPattern.Roll, new ByConvention(0, 0, 0))
     ];
 
     /// <summary>The colours a part breaking its chord lays on it, a genre's, which the songs never lay.</summary>
@@ -184,21 +192,26 @@ internal static class Arpeggios
         ArpeggioPattern.UpTwoOctaves => "Up two octaves",
         ArpeggioPattern.Pedal => "Pedal point",
         ArpeggioPattern.AlternatingThumb => "Alternating thumb",
+        ArpeggioPattern.Roll => "A three-finger roll",
         _ => pattern.ToString()
     };
 
+    /// <summary>A part's pool of the patterns, its own where the genre names one (<see cref="GenreChoices.PartArpeggios" />), the shared one's otherwise.</summary>
+    private static Func<ArpeggioPattern, ByConvention?>? PoolOf(Genre genre, TrackRole role) =>
+        genre.Pool<ArpeggioPattern>(GenreChoices.PartArpeggios[role]) ?? genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio);
+
     /// <summary>A pattern that breaks the chord, any but the whole chord, among a genre's pool where it names one; the whole chord where it names none of them, as the genre keeps its chords whole.</summary>
-    public static ArpeggioPattern DrawBroken(IGenerationContext context, double unconventionality, Genre genre)
+    public static ArpeggioPattern DrawBroken(IGenerationContext context, double unconventionality, Genre genre, TrackRole role)
     {
-        var pool = genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio);
+        var pool = PoolOf(genre, role);
         var broken = Patterns.Where(x => x.Pattern != ArpeggioPattern.None && (pool is null || pool(x.Pattern) is not null)).ToArray();
         return broken.Length == 0 ? ArpeggioPattern.None : context.Pick(ByConvention.Weigh(broken, unconventionality, pool));
     }
 
-    /// <summary>A section's pattern, by the chords facet of its unconventionality, among a genre's pool where it names one.</summary>
-    public static ArpeggioPattern Draw(IGenerationContext context, double unconventionality, Genre genre)
+    /// <summary>A section's pattern of a part, by the chords facet of its unconventionality, among a genre's pool of the part's where it names one.</summary>
+    public static ArpeggioPattern Draw(IGenerationContext context, double unconventionality, Genre genre, TrackRole role)
     {
-        return context.Pick(ByConvention.Weigh(Patterns, unconventionality, genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio)));
+        return context.Pick(ByConvention.Weigh(Patterns, unconventionality, PoolOf(genre, role)));
     }
 
     /// <summary>The note of a voiced chord, low to high, that its note of the given place since the chord came in plays.</summary>
@@ -206,7 +219,8 @@ internal static class Arpeggios
     /// <param name="onBeat">Whether the note falls on a beat of its bar, its meter's pulses counted from the bar's start, where a montuno plays the root.</param>
     /// <param name="root">The chord's root, any octave of it, which the root and fifth and the pedal play on, as the voicing may put another note lowest.</param>
     /// <param name="order">The seed a chord broken in no pattern's order draws its notes by (<see cref="CompositionStateKinds.ArpeggioOrder" />).</param>
-    public static int Pick(ArpeggioPattern pattern, ImmutableArray<int> voiced, int place, double position, bool onBeat, int pulse, int root, long order)
+    /// <param name="inBar">Where the note falls in its bar, in beats, which a roll counts its 8ths from.</param>
+    public static int Pick(ArpeggioPattern pattern, ImmutableArray<int> voiced, int place, double position, bool onBeat, int pulse, int root, long order, double inBar)
     {
         var notes = voiced.Order().ToArray();
         var count = notes.Length;
@@ -244,6 +258,11 @@ internal static class Arpeggios
             ArpeggioPattern.AlternatingThumb => onBeat
                 ? notes[pulse % 2 == 0 ? low : fifth]
                 : notes[Fingers(count, low, fifth) is var fingers ? fingers[place / 2 % fingers.Length] : 0],
+            // the bar's 8ths in cells of three, three and two, each the thumb on the lowest note and then the fingers on the
+            // two highest in turn
+            ArpeggioPattern.Roll => (int)Math.Floor(inBar * 2 + 1e-6) % 8 is var eighth && (eighth < 6 ? eighth % 3 : eighth - 6) is var finger && finger == 0
+                ? notes[0]
+                : notes[Math.Max(count - 3 + finger, 1)],
             _ => throw new ArgumentOutOfRangeException(nameof(pattern), pattern, null)
         };
     }
