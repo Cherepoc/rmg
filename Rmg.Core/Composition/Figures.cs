@@ -82,7 +82,8 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
 ///     double kick; a black metal band's blast beat, its cymbal riding it, and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
 ///     band's galloping riff and its reverse gallop, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a jazz drummer's ride,
-///     on the beats and the skip after 2 and 4; a clave's three and two, and the 6/8 bell over two bars,
+///     on the beats and the skip after 2 and 4; a clave's three and two, and the 6/8 bell over two bars, and the chords comping
+///     in clave,
 ///     and the bossa nova's on the snare's stroke, its cross-stick; a trance's chords in 16ths, its arpeggio's steady run, and its bass
 ///     rolling in the 16ths after the kick or on the offbeats, a salsa's tumbao, the bossa nova's bass and the tresillo; four on the floor,
 ///     drum and bass's two-step, the surdo's kick, the snare on every beat, the train beat, the skank, the Charleston, a
@@ -100,7 +101,7 @@ internal static class Figures
     internal const Hold KeepsOutOf = Hold.Build | Hold.Cut;
 
     /// <summary>The players in the turns they play their figures in, each turn after what it follows.</summary>
-    private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves, FigurePlayer.Chords], [FigurePlayer.Ground], [FigurePlayer.Bass]];
+    private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves], [FigurePlayer.Ground, FigurePlayer.Chords], [FigurePlayer.Bass]];
 
     /// <summary>The part a player is, the drums' for the drums' players.</summary>
     public static TrackRole RoleOf(FigurePlayer player) => player switch
@@ -151,6 +152,8 @@ internal static class Figures
         // a ska's or a reggae's chop on the 8ths' offbeats, and a swing band's Charleston comp, on 1 and the 2-and
         new("skank", "The skank, on the 8ths' offbeats", FigurePlayer.Chords, [2, 6, 10, 14], 16, null, 0, false),
         new("charleston", "The Charleston, on 1 and the 2-and", FigurePlayer.Chords, [0, 6], 16, null, 0, false),
+        // the comp in clave, a Latin pianist's or guitarist's on the son clave and the bossa nova guitar's batida on its clave
+        new("withClave", "With the clave, wherever it strikes", FigurePlayer.Chords, [], 0, FigurePlayer.Claves, 0, false),
         // the boom-chicka's chick, the chords on 2 and 4 over the bass's boom on 1 and 3
         new("backbeat", "The chick, on 2 and 4", FigurePlayer.Chords, [4, 12], 16, null, 0, false),
         // the waltz, the bass's oom on 1 and the chords' pah-pah on 2 and 3, drawn by the chords and played by both
@@ -272,8 +275,16 @@ internal static class Figures
             [FigurePlayer.Bass] = TrackOf(TrackRole.Bass) is { } bass ? [bass] : []
         };
 
-        // what a figure that follows a player strikes with: its tracks, the riff's the bass's where the song has no riff
-        int[] Followed(FigurePlayer player) => player == FigurePlayer.Riff && tracks[player].Length == 0 && TrackOf(TrackRole.Bass) is { } bass ? [bass] : tracks[player];
+        // what a figure that follows a player strikes with in a section: its tracks, the riff's the bass's where the song has no
+        // riff, the claves' the snare's where the claves play no figure there and the snare plays the bossa nova's clave
+        int[] Followed(FigurePlayer player, SectionSpan span) => player switch
+        {
+            FigurePlayer.Riff when tracks[player].Length == 0 && TrackOf(TrackRole.Bass) is { } bass => [bass],
+            FigurePlayer.Claves when (tracks[player].Length == 0 || drawn[span.SectionId][player] is null) && drawn[span.SectionId][FigurePlayer.Backbeat]?.Name == "bossaClave"
+                => tracks[FigurePlayer.Backbeat],
+            FigurePlayer.Claves when drawn[span.SectionId][player] is null => [],
+            _ => tracks[player]
+        };
 
         // the parts the form stops, a stop ending's silence, which no figure strikes into
         var holds = draft.Holds(song);
@@ -294,7 +305,7 @@ internal static class Figures
                         if (drawn[span.SectionId][player] is not { } figure)
                             continue;
                         // one that follows where the song plays what it follows, the riff's where it has a riff or a bass
-                        if (figure.Follows is { } followed && Followed(followed).Length == 0)
+                        if (figure.Follows is { } followed && Followed(followed, span).Length == 0)
                             continue;
                         // every bar, a short last one's figure cut at the section's end
                         for (var index = 0; index < span.BarCount; index++)
@@ -303,7 +314,7 @@ internal static class Figures
                             bool In(double position) => position >= bar - 1e-9 && position < end - 1e-9;
                             var own = played.Where(x => In(x.Position)).ToArray();
                             double[] onsets = figure.Follows is { } follows
-                                ? [..Followed(follows).SelectMany(t => timelines[t].EventTimeline).Where(x => In(x.Position)).Select(x => x.Position).Distinct().Order()]
+                                ? [..Followed(follows, span).SelectMany(t => timelines[t].EventTimeline).Where(x => In(x.Position)).Select(x => x.Position).Distinct().Order()]
                                 : figure.Step > 0
                                     ? [..figure.StepsIn(span.Meter).Select(x => bar + x)]
                                     : [..figure.Onsets.Select(x => x - (barsBefore[span] + index) % (figure.Sixteenths / span.Meter.Sixteenths) * span.Meter.Sixteenths)

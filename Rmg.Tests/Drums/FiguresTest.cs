@@ -197,6 +197,33 @@ public sealed class FiguresTest
         await Assert.That(on / (double)hits).IsGreaterThan(0.8);
     }
 
+    /// <summary>
+    ///     A calibration: the chords comping in clave strike with the clave's strokes, Latin's on the claves and Bossa nova's on
+    ///     the snare's cross-stick, but a chord held over a change of chord, struck again at the change, an 8th or a beat after
+    ///     a stroke, and a push (measured over 64 songs: Latin 79%, Bossa nova 69%).
+    /// </summary>
+    [Test]
+    [Arguments("latin")]
+    [Arguments("bossa")]
+    public async Task TheChordsInClave_StrikeWithTheClave(string genre)
+    {
+        var claves = genre == "latin" ? new HashSet<int> { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) } : DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var (hits, on) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        {
+            var strokes = song.Song.TrackEventStateTimelineMap.TrackTimelineMap.Where(x => claves.Contains(x.Key)).SelectMany(x => x.Value.EventTimeline).Select(x => x.Position).ToArray();
+            foreach (var (_, _, position) in Hits(song, new HashSet<int> { song.Song.Track(TrackRole.Chords) }, Playing(song, FigurePlayer.Chords, "withClave")))
+            {
+                hits++;
+                on += strokes.Any(x => Math.Abs(x - position) < 0.13) ? 1 : 0;
+            }
+        }
+
+        Console.WriteLine($"{genre}: of {hits} chords in clave, {on / (double)Math.Max(1, hits):P1} on the clave's strokes");
+        await Assert.That(hits).IsGreaterThan(50);
+        await Assert.That(on / (double)hits).IsGreaterThan(0.5);
+    }
+
     [Test]
     public async Task ADoubleKick_StrikesOnlyOnTheSixteenths()
     {

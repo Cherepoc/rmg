@@ -321,8 +321,6 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   by energy (#344, Nu metal, Doom, Symphonic, Surf rock); a fill's feet, the drum solo's `SoloFeet` under a fill's run
   (#338, the metal presets); a jazz drummer's comping, a colour figure of soft off-beat snare and kick strokes played
   loose (#305, Jazz, Dark jazz, Fusion; *Ghost notes beyond the backbeat*).
-- **The comp in clave** (#316): a chords figure following the claves, or the snare where it plays the bossa clave, the
-  chords player's turn after the claves' (Latin, Bossa nova).
 - **A club intro of entries** (#307): the entries' window a genre pool, its options the present ones and the first
   section whole with a part entering each pattern (House, Techno, Trance, Psytrance, Drum and bass); first measured,
   how many bars the club intros' entries take now with texture's build.
