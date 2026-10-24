@@ -76,6 +76,35 @@ public sealed class SongIntroTest
         await Assert.That(Entries.Length).IsGreaterThan(20);
     }
 
+    /// <summary>
+    ///     A club intro over the first section whole brings its parts in a pattern at a time, every entry on a pattern's
+    ///     start and the parts left at the section's end, some after its first pattern, as a club track opens on its beat.
+    /// </summary>
+    [Test]
+    public async Task AClubIntroOverItsFirstSection_BringsItsPartsInAPatternAtATime()
+    {
+        var (whole, late) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("techno")))))
+        {
+            var intro = song.Map.Intro;
+            if (intro is not { Kind: IntroKind.Entries, Window.Whole: true })
+                continue;
+            whole++;
+            var first = song.Map.Sections[0];
+            await Assert.That(intro.Window.Bars * first.Meter.BarDuration).IsEqualTo(first.Duration).Within(1e-6).Because($"seed {song.Seed}");
+            foreach (var entry in intro.Entries)
+            {
+                var off = entry.Entry % first.Meter.PatternDuration;
+                await Assert.That(Math.Min(off, first.Meter.PatternDuration - off)).IsLessThan(1e-6).Because($"seed {song.Seed}, {entry.Part} at {entry.Entry}");
+            }
+            late += intro.Entries.Any(x => x.Entry > first.Meter.PatternDuration - 1e-6 && x.Entry < first.Duration - 1e-6) ? 1 : 0;
+        }
+
+        Console.WriteLine($"{whole} of 64 Techno songs over the first section whole, {late} bringing a part in after its first pattern");
+        await Assert.That(whole).IsGreaterThan(20);
+        await Assert.That(late).IsGreaterThan(5);
+    }
+
     [Test]
     public async Task EveryPart_IsLeftOutUntilItComesIn_ButForTheDrumsFillIntoTheLanding()
     {

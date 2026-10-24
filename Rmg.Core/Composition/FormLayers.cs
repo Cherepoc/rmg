@@ -71,13 +71,18 @@ public readonly record struct IntroPart(TrackRole Role, DrumRole? DrumRole = nul
     public override string ToString() => DrumRole?.ToString() ?? Role.ToString();
 }
 
-/// <summary>Where an intro's parts come in: over bars of their own before the first section, or over its first phrase.</summary>
+/// <summary>Where an intro's parts come in: over bars of their own before the first section, over its first phrase, or over the whole of it.</summary>
 /// <param name="Bars">How many bars the parts come in over.</param>
 /// <param name="IsBefore">Whether they are bars of their own before the first section, rather than its first phrase.</param>
-public readonly record struct IntroWindow(int Bars, bool IsBefore)
+/// <param name="Whole">Whether they come in over the first section whole, a part at a time of its patterns, as a club track's do.</param>
+public readonly record struct IntroWindow(int Bars, bool IsBefore, bool Whole = false)
 {
-    /// <summary>The window over the first section's phrase at most, as the bars of four it is drawn in may be more than a phrase of three.</summary>
-    public IntroWindow FittedTo(Meter first) => this with { Bars = Math.Min(Bars, first.PhraseBars) };
+    /// <summary>
+    ///     The window over the first section's phrase at most, as the bars of four it is drawn in may be more than a phrase
+    ///     of three, or over the section whole where it takes the whole.
+    /// </summary>
+    /// <param name="plays">How many times the first section plays its pattern.</param>
+    public IntroWindow FittedTo(Meter first, int plays) => this with { Bars = Whole ? plays * first.PatternBarCount : Math.Min(Bars, first.PhraseBars) };
 }
 
 /// <summary>
@@ -143,14 +148,43 @@ internal static class FormLayers
         new(0.6, IntroKind.Entries)
     ];
 
-    /// <summary>Where an intro's parts come in: bars of their own before the first section, or its first phrase, as many bars as the section's phrase has (<see cref="SongDecisions" />).</summary>
-    public static ImmutableArray<Weighted<IntroWindow>> IntroWindows { get; } =
+    /// <summary>
+    ///     Where an intro's parts come in: bars of their own before the first section, its first phrase, as many bars as the
+    ///     section's phrase has, or the section whole, a part a pattern, a genre's, as a club track brings its parts in
+    ///     over its first 16 or 32 bars (<see cref="SongDecisions" />).
+    /// </summary>
+    public static ImmutableArray<(IntroWindow Window, ByConvention Weight)> IntroWindows { get; } =
     [
-        new(0.12, new IntroWindow(1, true)),
-        new(0.2, new IntroWindow(2, true)),
-        new(0.1, new IntroWindow(4, true)),
-        new(0.58, new IntroWindow(Meter.DefaultPhraseBars, false))
+        (new IntroWindow(1, true), new ByConvention(0.12, 0.12, 0.12)),
+        (new IntroWindow(2, true), new ByConvention(0.2, 0.2, 0.2)),
+        (new IntroWindow(4, true), new ByConvention(0.1, 0.1, 0.1)),
+        (new IntroWindow(Meter.DefaultPhraseBars, false), new ByConvention(0.58, 0.58, 0.58)),
+        (new IntroWindow(0, false, Whole: true), new ByConvention(0, 0, 0))
     ];
+
+    /// <summary>The intro's windows weighed by the song's rhythm and the genre's pool of them.</summary>
+    public static ImmutableArray<Weighted<IntroWindow>> WeighWindows(double rhythm, Genre genre) =>
+        ByConvention.Weigh(IntroWindows, rhythm, genre.Pool<IntroWindow>(GenreChoices.IntroWindow, WindowName));
+
+    /// <summary>A window as a genre's pool names it.</summary>
+    public static string WindowName(IntroWindow window) => window switch
+    {
+        { Whole: true } => "section",
+        { IsBefore: false } => "phrase",
+        { Bars: 1 } => "oneBar",
+        { Bars: 2 } => "twoBars",
+        _ => "fourBars"
+    };
+
+    /// <summary>How the page names a window.</summary>
+    public static string WindowLabel(IntroWindow window) => window switch
+    {
+        { Whole: true } => "The first section whole, a part each pattern",
+        { IsBefore: false } => "The first section's phrase",
+        { Bars: 1 } => "A bar of its own",
+        { Bars: 2 } => "Two bars of their own",
+        _ => "Four bars of their own"
+    };
 
     /// <summary>
     ///     How likely each part is to come in next, of those left: most often one that keeps the time or the chords, and

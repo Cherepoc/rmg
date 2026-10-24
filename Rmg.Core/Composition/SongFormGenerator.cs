@@ -103,7 +103,7 @@ internal sealed class SongFormGenerator
         var intro = _context.Pick(FormLayers.WeighIntros(_songRhythm.Value, _genre));
         var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Value, _genre));
         // the entries' window and a count-in's half drawn whatever the intro, so that the draws after them are as many
-        var window = _introContext.Pick(FormLayers.IntroWindows);
+        var window = _introContext.Pick(FormLayers.WeighWindows(_songRhythm.Value, _genre));
         var halfCountIn = _context.TestProbability(FormLayers.HalfCountInChance) && intro == IntroKind.CountIn;
         // a song without drums that keep time has nobody to count it in, so it starts cold, drawn as it would be all the same
         if (intro == IntroKind.CountIn && !_drumsKeepTime)
@@ -119,7 +119,7 @@ internal sealed class SongFormGenerator
         }
 
         if (first is not null)
-            (intro, window, halfCountIn) = (IntroKind.Entries, intro == IntroKind.Entries ? window : _openingContext.Pick(FormLayers.IntroWindows), false);
+            (intro, window, halfCountIn) = (IntroKind.Entries, intro == IntroKind.Entries ? window : _openingContext.Pick(FormLayers.WeighWindows(_songRhythm.Value, _genre)), false);
 
         double held = 0, stop = 0;
         double ringOutBars = 0;
@@ -159,7 +159,7 @@ internal sealed class SongFormGenerator
     /// <param name="hook">The meter of the chorus a hook intro quotes; none for another intro.</param>
     internal static double IntroDuration(FormPlan plan, Meter first, Meter? hook) => plan.Intro switch
     {
-        IntroKind.Entries when plan.Window.IsBefore => plan.Window.FittedTo(first).Bars * first.BarDuration,
+        IntroKind.Entries when plan.Window.IsBefore => plan.Window.FittedTo(first, 1).Bars * first.BarDuration,
         IntroKind.CountIn => first.BarDuration,
         IntroKind.Hook => (hook ?? throw new ArgumentNullException(nameof(hook))).PhraseDuration,
         _ => 0
@@ -205,7 +205,7 @@ internal sealed class SongFormGenerator
         var meter = sections[0].Meter;
         var last = sections[^1].Meter;
         var first = sections[0];
-        plan = plan with { Window = plan.Window.FittedTo(first.Meter) };
+        plan = plan with { Window = plan.Window.FittedTo(first.Meter, first.Plays) };
         // the chorus a hook intro quotes, its first appearance (HookOf)
         var hook = sections.Select((x, i) => (Section: x, Index: i)).FirstOrDefault(x => x.Section.Role == SectionRole.Chorus);
         if (plan.Intro == IntroKind.Hook && hook.Section is null)
@@ -473,8 +473,9 @@ internal sealed class SongFormGenerator
     ///     When the parts of the band come in, over an intro's window: those that play in it, in an order drawn part by
     ///     part, each likelier as <see cref="FormLayers.IntroParts" /> weighs it, leaned by the song's rhythm, a part its
     ///     rhythm gives no weight, as the plainest rhythm gives the unconventional ones, after the rest; a drawn
-    ///     number of them, at least one and one fewer than all, come in over the window, spread evenly from its start,
-    ///     and the rest together at its end, so that the window never plays the whole band.
+    ///     number of them, at least one and one fewer than all, come in over the window, spread evenly from its start by its
+    ///     bars, or by its patterns in a window of the section whole, and the rest together at its end, so that the window
+    ///     never plays the whole band.
     /// </summary>
     /// <param name="riffFirst">Whether the riff comes in first after the part the song opens on alone, an intro's a verse plays over.</param>
     internal ImmutableArray<IntroEntry> DrawEntries(GeneratedSection first, IntroWindow window, TrackRole? opening, bool riffFirst)
@@ -512,13 +513,14 @@ internal sealed class SongFormGenerator
         order = [..alone, ..riff, ..order.Except(alone).Except(riff)];
 
         var inWindow = order.Count <= 1 ? order.Count : Generators.Int(1, order.Count)(new GenerationContext(countSeed));
+        var (unit, units) = window.Whole ? (first.Meter.PatternDuration, first.Plays) : (first.Meter.BarDuration, window.Bars);
         return
         [
             ..order.Select((part, i) => new IntroEntry(
                     part,
                     parts[part],
                     // a part opening the song alone for a bar at least
-                    Math.Max(i < inWindow ? Math.Floor(i * window.Bars / (double)inWindow) * first.Meter.BarDuration : windowDuration,
+                    Math.Max(i < inWindow ? Math.Floor(i * units / (double)inWindow) * unit : windowDuration,
                         alone.Length > 0 && part.Role != opening ? first.Meter.BarDuration : 0)
                 )
             )

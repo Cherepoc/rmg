@@ -321,9 +321,6 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   by energy (#344, Nu metal, Doom, Symphonic, Surf rock); a fill's feet, the drum solo's `SoloFeet` under a fill's run
   (#338, the metal presets); a jazz drummer's comping, a colour figure of soft off-beat snare and kick strokes played
   loose (#305, Jazz, Dark jazz, Fusion; *Ghost notes beyond the backbeat*).
-- **A club intro of entries** (#307): the entries' window a genre pool, its options the present ones and the first
-  section whole with a part entering each pattern (House, Techno, Trance, Psytrance, Drum and bass); first measured,
-  how many bars the club intros' entries take now with texture's build.
 - **Put off:** the game loop (#369), the body replayed from its loop point into the fade as `PlayAt` plays a source:
   two presets, whose fade already replays their last section; taken up should listening ask for the loop.
 
