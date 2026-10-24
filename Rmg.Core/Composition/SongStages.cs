@@ -280,7 +280,11 @@ internal static class SongStages
     /// <summary>The drums marking the lines, now that the song is put together, and the runs they play, which the lines walk with.</summary>
     internal static SongDraft Fills(SongDecisions song, SongDraft draft)
     {
-        var fills = new FillGenerator(song.Stream(SongStream.Fills), song.Tracks, song.Of(Facet.Fills), song.Meter, track => song.Stream(SongStream.UnheardLandings, track), song.Genre);
+        // what each section's fills keep on the kick, from a sequence of its own, by its fills facet and the genre's pool
+        var feet = song.SectionIds.Distinct().ToDictionary(id => id, id => song.Stream(SongStream.FillFeet, id)
+            .Pick(ByConvention.Weigh(FillLayers.Feet, song.SectionOf(id).Facets[Facet.Fills], song.Genre.Pool<FillFeet>(GenreChoices.FillFeet))));
+        var fills = new FillGenerator(song.Stream(SongStream.Fills), song.Tracks, song.Of(Facet.Fills), song.Meter, track => song.Stream(SongStream.UnheardLandings, track), song.Genre,
+            id => feet[id]);
         // a stop-time phrase's end as heavy as a section's, the drums filling the band back in as often
         var stops = song.StopTime;
         var hits = song.EnsembleHits;

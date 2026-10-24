@@ -4,6 +4,19 @@ using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
+/// <summary>What a fill's feet keep under its run (<see cref="FillLayers.Feet" />).</summary>
+public enum FillFeet
+{
+    /// <summary>None, the kick given up to the fill as the rest of the groove is.</summary>
+    None,
+
+    /// <summary>A double kick in 16ths, as a metal drummer's feet run on under the fill.</summary>
+    DoubleKick,
+
+    /// <summary>The groove's own kick, kept under the fill.</summary>
+    Groove
+}
+
 /// <summary>
 ///     A drum's role in a fill, by the sounds a run or a landing plays, finer than its role in the groove
 ///     (<see cref="DrumRole" />): the toms and the cymbal both colour a groove, but a run plays them apart.
@@ -168,6 +181,13 @@ internal static class FillLayers
     ///     dance track's, a genre's that the songs never play (<see cref="GenreChoices.KickOut" />).
     /// </summary>
     public static Probabilities.ByConvention KickOutChance { get; } = new(0, 0, 0);
+
+    /// <summary>
+    ///     What a section's fills keep on the kick under their runs, a genre's that the songs never play: none, a double
+    ///     kick, as a metal drummer's feet keep the drive through a fill, or the groove's own kick (<see cref="GenreChoices.FillFeet" />).
+    /// </summary>
+    public static ImmutableArray<(FillFeet Feet, Probabilities.ByConvention Weight)> Feet { get; } =
+        [(FillFeet.None, new(1, 1, 1)), (FillFeet.DoubleKick, new(0, 0, 0)), (FillFeet.Groove, new(0, 0, 0))];
 
     /// <summary>The shortest a kick-out lasts, in beats: a beat, a bar or two at the longest as a fill's span.</summary>
     public const double ShortestKickOut = 1;

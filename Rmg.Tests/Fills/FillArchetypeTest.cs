@@ -47,7 +47,7 @@ public sealed class FillArchetypeTest
             ],
             StateTimelineMap.Create(12)
         );
-        return new Setup(new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5), Meter.FourFour, _ => context, Genre.None), song, snare);
+        return new Setup(new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5), Meter.FourFour, _ => context, Genre.None, _ => FillFeet.None), song, snare);
     }
 
     private static TimelineItem<StateMap>[] Events(TrackEventStateTimelineMap<StateMap> song, int track, double from, double to) =>

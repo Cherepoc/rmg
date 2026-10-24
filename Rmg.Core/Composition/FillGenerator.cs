@@ -52,6 +52,11 @@ internal sealed class FillGenerator
     // the sequence a drum of the fills and landings that never sounded lands from, by its track (LandTheUnheard)
     private readonly Func<int, IGenerationContext> _unheard;
 
+    // what a section's fills keep on the kick under their runs, by the section
+    private readonly Func<int, FillFeet> _feet;
+
+    private const double Sixteenth = 0.25;
+
     // the drums the fills played, and the landings, as they are marked
     private readonly HashSet<int> _filled = [];
     private readonly List<(double Position, int SectionId, bool IsPercussionOnly, ImmutableArray<RunSound> Sounds)> _landings = [];
@@ -63,8 +68,11 @@ internal sealed class FillGenerator
     /// <param name="meter">The meter the song's bars are in.</param>
     /// <param name="unheard">The sequence a drum of the fills and landings that never sounded lands from, by its track, so that another drum heard or not leaves it (<see cref="LandTheUnheard" />).</param>
     /// <param name="genre">The genre whose pool of the feels a fill's change keeps to.</param>
-    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter, Func<int, IGenerationContext> unheard, Genre genre)
+    /// <param name="feet">What a section's fills keep on the kick under their runs, by the section.</param>
+    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter, Func<int, IGenerationContext> unheard, Genre genre,
+        Func<int, FillFeet> feet)
     {
+        _feet = feet;
         _meter = meter;
         _genre = genre;
         _unheard = unheard;
@@ -449,8 +457,19 @@ internal sealed class FillGenerator
             GrooveTreatment.KickOut => _drumTracks.Where(x => x == DrumGroups.GetTrackNumber(DrumDefinitions.Kick)),
             _ => []
         };
-        foreach (var track in cleared)
+        // the kick kept under a run or a stop where the section's fills keep their feet, its groove's or a double kick's
+        // 16ths, where the groove plays the kick
+        var feet = play.Treatment is GrooveTreatment.Played or GrooveTreatment.Stop && Strikes(kick) ? _feet(sectionId) : FillFeet.None;
+        foreach (var track in cleared.Where(x => x != kick || feet != FillFeet.Groove))
             edits.Clear(track, from, line);
+        if (feet != FillFeet.None)
+            StateTrace.RecordSection(TracePoints.FillFeet, DrumsTrace, sectionId, $"{feet} {from}-{line}", (from, line, feet));
+        if (feet == FillFeet.DoubleKick)
+        {
+            edits.Clear(kick, from, line);
+            for (var at = Math.Ceiling(from / Sixteenth - 1e-9) * Sixteenth; at < line - 1e-9; at += Sixteenth)
+                edits.Hit(kick, at, 0, 0, sectionId, HitKind.Fill);
+        }
         if (play.Treatment == GrooveTreatment.KickOut)
             KickOuts.Add((from, line));
 

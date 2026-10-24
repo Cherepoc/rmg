@@ -452,6 +452,10 @@ public static class GenreChoices
     /// <summary>The chance a fill's line takes the kick out instead, the groove playing on without it into the downbeat (<see cref="FillLayers.KickOutChance" />).</summary>
     public static GenreChoice KickOut { get; } = Chances("kickOut", "Kick-out", [("lines", "Lines the kick drops out for", FillLayers.KickOutChance)]);
 
+    /// <summary>What a section's fills keep on the kick under their runs, none, a double kick or the groove's kick (<see cref="FillLayers.Feet" />).</summary>
+    public static GenreChoice FillFeet { get; } = Pool("fillFeet", "A fill's feet",
+        FillLayers.Feet.Select(x => (Name(x.Feet.ToString()), x.Feet switch { Composition.FillFeet.DoubleKick => "A double kick in 16ths", Composition.FillFeet.Groove => "The groove's kick", _ => "None" }, x.Weight)));
+
     /// <summary>How far the parts play off the beat, from 0, tight, through 50, as the songs have it, to 100, laid back (<see cref="Pocket.GenreReach" />).</summary>
     public static GenreChoice Pocket { get; } = Values("pocket", "Pocket", [("laidBack", "Laid back")], Facet.Feel);
 
@@ -836,7 +840,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, TremoloSpeed, ArticulationModes, LineChords, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, SurfDrop, DrumSoloFeet, Stickings, Intro, IntroWindow, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, TremoloSpeed, ArticulationModes, LineChords, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, FillFeet, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, SurfDrop, DrumSoloFeet, Stickings, Intro, IntroWindow, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, RiffSection, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

@@ -64,6 +64,7 @@ public static class GenreChoiceDescriptions
         ["tremoloSpeed"] = "How fast a tremolo picks a long note: in measured 16ths, as rock and metal pick, or as fast as the hand plays evenly, a surf or a black metal guitarist's 16ths at a fast tempo and 32nds at a slow one.",
         ["articulationModes"] = "How a section's part plays its instrument's other sound: never, in a bar now and then, as a guitar's bar of muted strings, or on its accents, as a bass slapped on them.",
         ["lineChords"] = "How often a line stacks its note on the band's chord, where its instrument plays chords: a riff landing on a chord where a section starts, as a guitar hits a power chord with the crash, and a melody's double stops on every bar's downbeat, as a pianist voices a tune.",
+        ["fillFeet"] = "What a fill keeps on the kick under its run: nothing, the kick given up to the fill, a double kick in 16ths, as a metal drummer's feet keep the drive through a fill, or the groove's own kick.",
         ["levels"] = "How loud each part plays against the others: above the middle louder, below quieter, as a beat's drums lead it or a dub's bass does.",
         ["rests"] = "How often each part sits out a section: above the middle the oftener, as a dub's drums and bass drop out.",
         ["sung"] = "How often a section's melody is sung in lines, resting halfway through its phrase as well as at its end, and in 8ths, no note of it shorter, as a voice phrases; below the middle its phrases run on and run in 16ths, as a played tune's or a rapper's do.",

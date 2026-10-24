@@ -1406,6 +1406,7 @@
     "name": "Heavy metal",
     "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4 or on 3 in its half-time sections, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
+      "fillFeet": { "none": [100, 60, 40], "doubleKick": [0, 40, 50], "groove": [0, 20, 20] },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 10, 20] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
@@ -1500,6 +1501,7 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "fillFeet": { "none": [100, 50, 40], "doubleKick": [0, 50, 60], "groove": [0, 20, 20] },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 15, 25] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
@@ -1597,6 +1599,7 @@
     "name": "Symphonic metal",
     "description": "Distorted guitars and a double kick under a choir, strings and a church organ, a soaring melody on a violin or a voice-like lead, harmonic minor's raised cadence, keyboard and guitar solos, a lifted last chorus.",
     "choices": {
+      "fillFeet": { "none": [100, 60, 40], "doubleKick": [0, 40, 50], "groove": [0, 20, 20] },
       "drumRole": { "time": { "hiHat": 100, "ride": [40, 40, 40], "tom": [10, 30, 40] } },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
@@ -1689,6 +1692,7 @@
     "name": "Doom metal",
     "description": "Slow and crushing: low power chords held and left to ring over a heavy, sparse beat, long stretches on one chord creeping by half steps, the tritone and Phrygian, an organ, a mournful lead, few solos, long songs.",
     "choices": {
+      "fillFeet": { "none": [100, 80, 60], "doubleKick": [0, 5, 10], "groove": [0, 20, 30] },
       "drumRole": { "time": { "hiHat": 100, "ride": [50, 50, 50], "tom": [10, 30, 40] } },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 10, 20] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
@@ -1915,6 +1919,7 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, now and then a clean lead floating over.",
     "choices": {
+      "fillFeet": { "none": [100, 60, 40], "doubleKick": [0, 20, 30], "groove": [0, 30, 40] },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": [10, 20, 30], "soloGhosts": [0, 15, 30], "tremolo": 0 },
       "articulationModes": { "none": [100, 80, 50], "bars": [0, 4, 100], "accents": [0, 25, 60] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
@@ -2016,6 +2021,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, the kick and the bass with it, a picked or clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "fillFeet": { "none": [100, 80, 60], "doubleKick": [0, 5, 10], "groove": [0, 20, 30] },
       "drumRole": { "time": { "hiHat": 100, "ride": [30, 30, 30], "tom": [10, 40, 50] } },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "octaveBass": { "sections": 0 },
@@ -3170,6 +3176,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "fillFeet": { "none": [100, 50, 40], "doubleKick": [0, 50, 60], "groove": [0, 10, 10] },
       "tremoloSpeed": { "measured": 0, "fast": 100 },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [20, 40, 50] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },

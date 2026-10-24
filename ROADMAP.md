@@ -317,8 +317,7 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   it), and a section's closing bar broadening into the next (the breath, before a return at the plain end, any section
   at the wild); later the cadenza, an `EndingKind` holding the last dominant as a stop while the lead runs alone over
   it, should the breath be heard to work.
-- **The drums:** a fill's feet, the drum solo's `SoloFeet` under a fill's run
-  (#338, the metal presets); a jazz drummer's comping, a colour figure of soft off-beat snare and kick strokes played
+- **The drums:** a jazz drummer's comping, a colour figure of soft off-beat snare and kick strokes played
   loose (#305, Jazz, Dark jazz, Fusion; *Ghost notes beyond the backbeat*).
 - **Put off:** the game loop (#369), the body replayed from its loop point into the fade as `PlayAt` plays a source:
   two presets, whose fade already replays their last section; taken up should listening ask for the loop.
