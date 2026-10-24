@@ -9,8 +9,8 @@ namespace Rmg.Core.Composition;
 ///     A later appearance reharmonised: the song's last appearance of a section heard before, a last chorus most often, now
 ///     and then playing some of its pattern's chords as substitutes a third away, the same at every pass, which share two of their three notes with the
 ///     chords they replace, in the section's own scale, but a section on one chord, a vamp; planned before the lines are
-///     placed, and decided under the melody once it is, which sings its tune as heard before, a substitute kept only where
-///     the tune fits it, as an arranger keeps the tune and changes the chords around it.
+///     placed, and decided under the melody once it is, as it would be over the chords it replaces, a substitute kept only
+///     where the tune fits it, as an arranger keeps the tune and changes the chords around it.
 /// </summary>
 /// <param name="Appearance">The appearance reharmonised, by its place.</param>
 /// <param name="Substitutes">Each chord that may take a substitute: where it starts, where the next change is, and the substitute's root from the chord's, in scale steps.</param>
@@ -30,8 +30,8 @@ internal static class Reharmonisation
 
     /// <summary>
     ///     The substitutes the appearance may take, never a chord moved by semitones; none where the song does not
-    ///     reharmonise or has no section heard again, the appearance's melody then singing its tune as heard before
-    ///     (<see cref="LinePattern.Place" />) and the substitutes decided under it (<see cref="Apply" />).
+    ///     reharmonise or has no section heard again, the substitutes decided under the melody once it is placed
+    ///     (<see cref="Apply" />).
     /// </summary>
     /// <param name="moved">Where a key change moves a chord or leads into one, which keeps it.</param>
     /// <param name="last">The last appearance played in full, by its place: the last section, or its drawn repeat, not the passes a fade or a strip adds after it.</param>

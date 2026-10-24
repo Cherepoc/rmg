@@ -20,31 +20,31 @@
     "seeds": [
       {
         "seed": "I",
-        "at": 109.3,
-        "from": 106.1,
+        "at": 105.3,
+        "from": 102,
         "listen": [
-          "Melody (Trumpet)",
           "Chords (Drawbar Organ)",
-          "Bass (Drawbar Organ)"
+          "Bass (Drawbar Organ)",
+          "Pad (Choir Aahs)"
         ]
       },
       {
         "seed": "1D",
-        "at": 236.8,
-        "from": 233.6,
+        "at": 220.8,
+        "from": 217.6,
         "listen": [
           "Bass (Electric Bass (finger))",
-          "Melody (Acoustic Grand Piano)",
-          "Chords (Electric Piano 1)"
+          "Chords (Electric Piano 1)",
+          "Riff (Baritone Sax)"
         ]
       },
       {
-        "seed": "1G",
-        "at": 180.7,
-        "from": 178,
+        "seed": "1g",
+        "at": 177.7,
+        "from": 173.2,
         "listen": [
-          "Counter-melody (Electric Guitar (clean))",
-          "Melody (Electric Guitar (clean))",
+          "Rhythm part (Electric Guitar (muted))",
+          "Chords (Drawbar Organ)",
           "Riff (Brass Section)"
         ]
       },

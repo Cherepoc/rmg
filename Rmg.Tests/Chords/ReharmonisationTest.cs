@@ -17,39 +17,29 @@ public sealed class ReharmonisationTest
     }
 
     /// <summary>
-    ///     A reharmonised appearance's melody sings the tune its section's appearance before sang, as an arranger keeps the
-    ///     tune and changes the chords around it: its notes over the substitutes the same as heard before, raised with the
-    ///     key where it lifts, but where the tune had no note there (measured over 64 songs: 94-98% at offsets 0 and a
-    ///     million, from 59-68% where its notes were kept only where they fitted the substitutes).
+    ///     A reharmonised appearance's chords changed around its melody, as an arranger keeps the tune: the melody's every
+    ///     note the same as the song's without the reharmonisation, its substitutes kept only where the tune fits them, but
+    ///     a double stop's note under it, the band's chord's.
     /// </summary>
     [Test]
-    public async Task AReharmonisedAppearance_SingsItsTuneAsHeardBefore()
+    public async Task AReharmonisedAppearance_KeepsItsMelody_EveryNote()
     {
-        var (notes, kept) = (0, 0);
-        foreach (var (song, substitutes) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Generate(seed)))
+        var reharmonised = 0;
+        foreach (var (seed, with, substitutes, without) in TestCorpus.InParallel(Enumerable.Range(0, 32), seed =>
+                 {
+                     var (with, substitutes) = Generate(seed);
+                     return (Seed: seed, With: with, Substitutes: substitutes, Without: substitutes is null ? null : Generate(seed, "Reharmonisation").Song);
+                 }))
         {
-            if (substitutes is not { } found)
+            if (substitutes is null || without is null)
                 continue;
-            var span = song.Map!.Sections[found.Appearance];
-            var source = song.Map.Sections.Take(found.Appearance).Last(x => x.SectionId == span.SectionId);
-            var melody = song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.ToArray() ?? [];
-            var sung = melody.GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.First().Value.Pitches[0]);
-            // the notes over a substitute, from its change to the next
-            var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-            var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).Append(span.End).ToArray();
-            int Key(double at) => common.GetEffectiveStateMapAt(at).GetStateValue(StateKinds.KeyOffset);
-            bool OverSubstitute(double at) => found.At.Any(x => at >= x - 1e-9 && at < changes.First(c => c > x + 1e-9) - 1e-9);
-            foreach (var note in melody.Where(x => span.IsWithin(x.Position) && OverSubstitute(x.Position)))
-                if (sung.TryGetValue(Math.Round(note.Position - span.Start + source.Start, 6), out var before))
-                {
-                    notes++;
-                    kept += note.Value.Pitches[0] == before + Key(note.Position) - Key(note.Position - span.Start + source.Start) ? 1 : 0;
-                }
+            reharmonised++;
+            // each note as its place and its own pitch, a double stop's under it the band's chord's, which changes with it
+            string[] Melody(Song song) => [..song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Select(x => $"{x.Position:F3} {x.Value.Pitches[0]}") ?? []];
+            await Assert.That(Melody(with)).IsEquivalentTo(Melody(without), CollectionOrdering.Matching).Because($"seed {seed}");
         }
 
-        Console.WriteLine($"  {kept} of {notes} melody notes over a substitute as sung before ({kept / (double)Math.Max(1, notes):P0})");
-        await Assert.That(notes).IsGreaterThan(20);
-        await Assert.That(kept / (double)notes).IsGreaterThan(0.9);
+        await Assert.That(reharmonised).IsGreaterThan(3);
     }
 
     [Test]
