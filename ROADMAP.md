@@ -311,11 +311,6 @@ Disco's and Djent's dead notes) and the tremolo-picked note (#352), each to be a
 
 The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its proposals, reviewed as plans:
 
-- **Plays as the only walk** (#161, the architecture reviewer): `SongMap.Plays` the one walk and `PlayingAt` the one
-  lookup, both one `Play` record, `SectionAt` and `PlayedSections` gone (16 uses left in Core), the render's rule that an
-  intro of its own sounds as its source named, and a rule test that every stage edits the entries' window as it edits
-  the first section's first bars; it closes the class package 06 fixed stage by stage (fills, stop time, pushes and the
-  pedal still miss the window, `WindowStagesReportTest`).
 - **A form as a cycle** (#122, the foundations reviewer), built as an experiment on 25 October 2026 and asked
   (`jazz-form`): a form that names its repeating part (`vvbv+`, `WrittenForm.Repeats`), played as many passes as the
   length comes nearest, each pass the same sections, at the songs' weight 0 and in no preset. Over 64 Jazz songs with it

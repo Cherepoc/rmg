@@ -176,7 +176,7 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
 
     /// <summary>A span's place among the song's sections, a played one's, a hook intro's, as the section it plays as.</summary>
     private int IndexOf(SectionSpan span) => Array.IndexOf(Spans, span) is >= 0 and var index ? index
-        : Map.PlayAt(span.Start)?.Index ?? throw new ArgumentException($"No section of the song plays at {span.Start}.", nameof(span));
+        : Map.PlayingAt(span.Start)?.Index ?? throw new ArgumentException($"No section of the song plays at {span.Start}.", nameof(span));
 
     // the song's sections, and what the trace says of each, read once
     private SectionSpan[] Spans => field ??= [..Map.Sections];

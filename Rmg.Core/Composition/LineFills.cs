@@ -116,7 +116,7 @@ internal static class LineFills
             var walk = !sweeps ? Walk(scale, Pitch(events[before]), target, positions.Length) : Swept(1) ?? Swept(-1) ?? Walk(scale, target - 12, target, positions.Length);
             var walked = positions.Zip(walk, (position, pitch) => (position, pitch)).Select((x, i) => Place(events[before], x.position, x.pitch, i)).ToArray();
             walkedInto.Add(run.Line);
-            StateTrace.RecordSection(TracePoints.LineFill, lineTrack, map.SectionAt(run.Line)?.SectionId ?? 0, $"{positions.Length} notes into {run.Line}{(sweeps ? ", a run" : "")}", (run.Line, positions));
+            StateTrace.RecordSection(TracePoints.LineFill, lineTrack, map.PlayingAt(run.Line)?.Span.SectionId ?? 0, $"{positions.Length} notes into {run.Line}{(sweeps ? ", a run" : "")}", (run.Line, positions));
             // a note held into the rest let go where the walk starts, a line singing one note at a time
             var held = events[before].Value.GetStateValue(StateKinds.HeldDuration);
             if (held > from - events[before].Position)

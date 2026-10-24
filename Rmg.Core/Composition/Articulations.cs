@@ -123,7 +123,7 @@ internal static class Articulations
                 if (timeline[k].Value.State.GetStateValue(CompositionStateKinds.BeatRank) > 0)
                     continue;
                 var sameChord = last >= 0 && timeline[last].Value.State.GetStateValue(StateKinds.ChordChange) == timeline[k].Value.State.GetStateValue(StateKinds.ChordChange)
-                                && song.Form.Map.SectionAt(timeline[last].Position) == song.Form.Map.SectionAt(timeline[k].Position);
+                                && song.Form.Map.PlayingAt(timeline[last].Position) == song.Form.Map.PlayingAt(timeline[k].Position);
                 strongPlaces[k] = sameChord ? strongPlaces[last] + 1 : 0;
                 last = k;
             }
@@ -142,7 +142,7 @@ internal static class Articulations
             {
                 var state = note.Value.State;
                 // the appearance it plays as, an intro's and the ending's too
-                var section = song.Form.Map.PlayAt(note.Position)?.Index ?? -1;
+                var section = song.Form.Map.PlayingAt(note.Position)?.Index ?? -1;
                 // a repeat of the note before as it is played, a bass cycle's step or an octave taken
                 var repeats = i > 0 && played[i - 1].SequenceEqual(note.Value.Pitches);
                 var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
@@ -176,7 +176,7 @@ internal static class Articulations
                 var doubled = state.GetStateValue(CompositionStateKinds.Doubled) > 0;
                 var walks = state.GetStateValue(CompositionStateKinds.Walk) > 0;
                 var sameChordBefore = i > 0 && timeline[i - 1].Value.State.GetStateValue(StateKinds.ChordChange) == state.GetStateValue(StateKinds.ChordChange)
-                                      && song.Form.Map.PlayAt(timeline[i - 1].Position)?.Index == section;
+                                      && song.Form.Map.PlayingAt(timeline[i - 1].Position)?.Index == section;
                 if (part.Role == TrackRole.Bass && ownLine && !doubled && !walks && sameChordBefore && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && weak && !leads
                     && played[i - 1] is var before && (octaved[i - 1] || before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
                 {

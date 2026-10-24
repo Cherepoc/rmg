@@ -188,13 +188,15 @@ internal static class InstrumentsOverTime
 
                 // the notes it plays, an intro made of it and the ending after the last among them, so that the final chord is
                 // played on the instrument the song ended in
-                var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => map.PlayAt(x.Note.Position)?.Index == index).ToArray();
+                var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => map.PlayingAt(x.Note.Position)?.Index == index).ToArray();
                 var accent = inSpan.Length == 0 ? double.MaxValue : inSpan.Select(x => x.Note.Value.Velocity).OrderDescending().ElementAt((int)(inSpan.Length * AccentShare));
                 if (switches || mode != ArticulationMode.None && !variants.IsEmpty)
                     StateTrace.RecordSection(TracePoints.InstrumentOverTime, track, span.SectionId, $"{program} {mode} {variant}", (index, pitched.Role, program, variants.IsEmpty ? ArticulationMode.None : mode, variant));
                 foreach (var (note, i) in inSpan)
                 {
-                    var bar = Math.Clamp(map.PlayAt(note.Position)!.Value.Span.BarOf(note.Position), 0, bars.Length - 1);
+                    // the ending on its last bar's, the final chord as the song ended
+                    var play = map.PlayingAt(note.Position)!.Value;
+                    var bar = play.IsEnding ? bars.Length - 1 : Math.Clamp(play.Span.BarOf(note.Position), 0, bars.Length - 1);
                     var articulated = !variants.IsEmpty && mode switch
                     {
                         ArticulationMode.Bars => bars[bar],

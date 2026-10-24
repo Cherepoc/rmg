@@ -108,7 +108,7 @@ public sealed class FiguresTest
         // the lines the drums mark, an intro's window's end among them, where a fill may take the bar before
         var lines = song.FillLines();
         bool OnLine(double position) => lines.Any(l => Math.Abs(l - position) < 1e-6);
-        return (window ? song.Map.PlayedSections : song.Map.Sections).Where(x => sections.Contains(x.SectionId)).SelectMany(span => song.Song.Notes!.Where(x => tracks.Contains(x.Key)).SelectMany(x => x.Value)
+        return (window ? song.PlayedSpans : [..song.Map.Sections]).Where(x => sections.Contains(x.SectionId)).SelectMany(span => song.Song.Notes!.Where(x => tracks.Contains(x.Key)).SelectMany(x => x.Value)
             .Where(x => x.Position > span.Start + 1e-9 && x.Position < span.End - 1e-9
                         && Math.Abs(Math.IEEERemainder(x.Position - span.Start, span.Meter.PhraseDuration)) > 1e-6 && !OnLine(x.Position))
             .Select(x => (span, Bar: span.Start + Math.Floor((x.Position - span.Start) / span.Meter.BarDuration + 1e-9) * span.Meter.BarDuration, x.Position))
@@ -285,7 +285,7 @@ public sealed class FiguresTest
         {
             var figure = Figures.All.Single(x => x.Player == player && x.Name == name);
             // the bars before each section, an intro's window's among them, as a clave's side runs on across them
-            var played = song.Map.PlayedSections.ToArray();
+            var played = song.PlayedSpans;
             var barsBefore = played.Select((x, i) => (x, Bars: played.Take(i).Sum(y => y.BarCount))).ToDictionary(x => x.x, x => x.Bars);
             foreach (var (span, bar, position) in Hits(song, tracks, Playing(song, player, name)))
             {

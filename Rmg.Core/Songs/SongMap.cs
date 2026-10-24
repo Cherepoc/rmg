@@ -17,7 +17,10 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
 
     public double Duration => Ending.Start + Ending.Duration;
 
-    /// <summary>The section a position is in, a hair early counting as at its start (<see cref="Span.Within" />); none before the first or after the last.</summary>
+    /// <summary>
+    ///     The section a position is in, a hair early counting as at its start (<see cref="Span.Within" />); none before the first
+    ///     or after the last: a section's own span, which a stage asks as the stretch it plays in (<see cref="PlayingAt" />).
+    /// </summary>
     public SectionSpan? SectionAt(double position)
     {
         var index = IndexAt(position + 1e-9);
@@ -48,23 +51,6 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     public SectionSpan? Window => Intro is { Kind: IntroKind.Entries, Window.IsBefore: true } && Origin > 1e-9 && !Sections.IsEmpty
         ? Sections[0] with { Start = 0, Duration = Origin, Cut = 0 }
         : null;
-
-    /// <summary>The sections where the song plays them, an intro's window before the first among them, which plays as it (<see cref="Window" />).</summary>
-    public IEnumerable<SectionSpan> PlayedSections => Window is { } window ? Sections.Prepend(window) : Sections;
-
-    /// <summary>
-    ///     The appearance a position plays as: its section's, an intro's the section it is made of, its first bars or a hook's
-    ///     chorus, and the ending's the last section's, its bars counted on; none for a song of no sections.
-    /// </summary>
-    public Play? PlayAt(double position)
-    {
-        if (Sections.IsEmpty)
-            return null;
-        if (position < Origin - 1e-9)
-            return new Play(Intro.Source, Sections[Intro.Source] with { Start = 0 }, false);
-        var index = IndexAt(position + 1e-9);
-        return new Play(Math.Max(0, index), Sections[Math.Max(0, index)], false);
-    }
 
     /// <summary>
     ///     Every stretch the song plays as a section, each with the place of the section it plays as and that section's

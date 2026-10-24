@@ -7,7 +7,11 @@ namespace Rmg.Tests.Forms;
 ///     How every stage treats an intro of entries' window, the first section's first bars played before it: the stages that
 ///     change a part's notes in the first section's first bars but leave them as they were in the window, where the part
 ///     plays, which a stage walking the song's plays (<see cref="Rmg.Core.Songs.SongMap.Plays" />) does only at what marks
-///     the section's own start, its fill's landing, a lift into it.
+///     the section's own start, its fill's landing, a lift into it. Traced on 25 October 2026 (33 of 128 songs with a
+///     window), each stage's on purpose: the fills and pushes into the section's start; the window's own lines, its parts
+///     coming in through it and the drums at its end with a fill; stop time, left out where parts are still coming in, as
+///     a first section an intro builds is; the pedal where the window holds no change of chord; the doubling where a part
+///     is not in yet; and the timing, which follows the fills and the stops.
 /// </summary>
 public sealed class WindowStagesReportTest
 {

@@ -28,18 +28,20 @@ public sealed class SongMapTest
         await Assert.That(Map.BeatInBar(21.5)).IsEqualTo(1.5);
     }
 
-    /// <summary>A position plays as its section, an intro as the section it is made of, a hook's its chorus, and the ending as the last section.</summary>
+    /// <summary>A position plays as its section, an intro's window as the first section's first bars, a hook as its chorus, and the ending as the last section from its start.</summary>
     [Test]
     public async Task APosition_PlaysAsItsSection_AnIntroAsItsSource_TheEndingAsTheLast()
     {
-        // an entries intro the first section's first bars, its place in it the position moved by the section's start
-        await Assert.That(Map.PlayAt(4)).IsEqualTo(new Play(0, Map.Sections[0] with { Start = 0 }, false));
-        await Assert.That(Map.PlayAt(40)).IsEqualTo(new Play(1, Map.Sections[1], false));
-        await Assert.That(Map.PlayAt(73)).IsEqualTo(new Play(1, Map.Sections[1], false));
+        // an entries intro the first section's first bars, its span moved to the song's start
+        await Assert.That(Map.PlayingAt(4)).IsEqualTo(new Play(0, Map.Sections[0] with { Start = 0, Duration = 8, Cut = 0 }, false));
+        await Assert.That(Map.PlayingAt(40)).IsEqualTo(new Play(1, Map.Sections[1], false));
+        await Assert.That(Map.PlayingAt(73)).IsEqualTo(new Play(1, Map.Sections[1] with { Start = 72, Duration = 4, Cut = 0 }, true));
 
         // a hook intro its chorus's, the second section here
         var hooked = Map with { Intro = new IntroSpan(IntroKind.Hook, 8, Source: 1) };
-        await Assert.That(hooked.PlayAt(4)).IsEqualTo(new Play(1, Map.Sections[1] with { Start = 0 }, false));
+        await Assert.That(hooked.PlayingAt(4)).IsEqualTo(new Play(1, Map.Sections[1] with { Start = 0, Duration = 8, Cut = 0 }, false));
+        // and an intro of its own none
+        await Assert.That((Map with { Intro = new IntroSpan(IntroKind.CountIn, 8) }).PlayingAt(4)).IsNull();
     }
 
     [Test]

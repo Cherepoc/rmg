@@ -37,7 +37,7 @@ public sealed class PinchTest
                 shaken += holds ? 1 : 0;
                 await Assert.That(song.Song.TrackDefinitions[track].Role).IsNotEqualTo(TrackRole.Chords).Because(because);
                 // its phrase where it plays, a hook intro's quote its own
-                var span = song.Map.PlayAt(note.Position)!.Value.Span;
+                var span = song.Map.PlayingAt(note.Position)!.Value.Span;
                 await Assert.That(phrases.Add((span.Start, span.PhraseOf(note.Position))))
                     .IsTrue().Because($"{because}: one a phrase");
             }
