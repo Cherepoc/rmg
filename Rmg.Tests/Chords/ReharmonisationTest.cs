@@ -43,7 +43,7 @@ public sealed class ReharmonisationTest
     }
 
     [Test]
-    public async Task ASubstitute_IsAThirdFromTheChordItReplaces_InTheLaterAppearanceAlone()
+    public async Task ASubstitute_IsAThirdFromTheChordItReplaces_InTheLaterAppearanceAndItsPassesAlone()
     {
         var reharmonised = 0;
         // each song, side by side, and where it reharmonises, again without
@@ -68,19 +68,21 @@ public sealed class ReharmonisationTest
                 await Assert.That(found.At.Contains(change) ? Math.Abs(moved) == 2 : moved == 0).IsTrue().Because($"seed {seed} at {change}");
             }
 
+            // in the appearance, or a pass of its section straight after it, a fade's
             var span = with.Map!.Sections[found.Appearance];
-            await Assert.That(found.At.All(x => x >= span.Start && x < span.End)).IsTrue();
+            var end = with.Map.Sections.Skip(found.Appearance).TakeWhile(x => x.SectionId == span.SectionId).Last().End;
+            await Assert.That(found.At.All(x => x >= span.Start && x < end)).IsTrue();
             await Assert.That(with.Map.Sections.Take(found.Appearance).Any(x => x.SectionId == span.SectionId)).IsTrue();
         }
 
         await Assert.That(reharmonised).IsGreaterThan(3);
     }
 
-    /// <summary>A pattern's chord substituted is substituted alike at every pass of the pattern, as a band keeps the changes it learned.</summary>
+    /// <summary>A pattern's chord substituted is substituted alike at every pass of the pattern, a fade's passes after it too, as a band keeps the changes it learned.</summary>
     [Test]
     public async Task ASubstitute_IsTheSame_AtEveryPassOfThePattern()
     {
-        var (passes, places) = (0, 0);
+        var (passes, places, faded) = (0, 0, 0);
         foreach (var (seed, with, substitutes, without) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed =>
                  {
                      var (with, substitutes) = Generate(seed);
@@ -91,6 +93,8 @@ public sealed class ReharmonisationTest
                 continue;
             int Root(Song song, double position) => song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
             var span = with.Map!.Sections[found.Appearance];
+            // a fade's passes after the appearance playing its changes on
+            faded += found.At.Count(x => x >= span.End - 1e-9);
             foreach (var place in found.At.GroupBy(x => Math.Round((x - span.Start) % span.Meter.PatternDuration, 6)))
             {
                 places++;
@@ -99,7 +103,8 @@ public sealed class ReharmonisationTest
             }
         }
 
-        Console.WriteLine($"{passes} of {places} substituted places played at more than one pass");
+        Console.WriteLine($"{passes} of {places} substituted places played at more than one pass, {faded} substitutes in a fade's passes");
         await Assert.That(passes).IsGreaterThan(0);
+        await Assert.That(faded).IsGreaterThan(0);
     }
 }

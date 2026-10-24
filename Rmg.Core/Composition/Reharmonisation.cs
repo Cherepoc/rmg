@@ -7,7 +7,8 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     A later appearance reharmonised: the song's last appearance of a section heard before, a last chorus most often, now
-///     and then playing some of its pattern's chords as substitutes a third away, the same at every pass, which share two of their three notes with the
+///     and then playing some of its pattern's chords as substitutes a third away, the same at every pass, a fade's passes of
+///     it straight after it among them, which share two of their three notes with the
 ///     chords they replace, in the section's own scale, but a section on one chord, a vamp; planned before the lines are
 ///     placed, and decided under the melody once it is, as it would be over the chords it replaces, a substitute kept only
 ///     where the tune fits it, as an arranger keeps the tune and changes the chords around it.
@@ -54,25 +55,29 @@ internal static class Reharmonisation
             kept.UnionWith(changes);
         if (later >= 0)
         {
-            var span = sections[later];
-            var inSpan = changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9).ToArray();
+            // the appearance and the passes of its section straight after it, a fade's, which play its changes on
+            var passes = sections.Skip(later).TakeWhile(x => x.SectionId == sections[later].SectionId).ToArray();
             // a substitute drawn once for each chord of the section's pattern, by its place in it, and played at every pass,
             // as a band keeps the changes it learned each time round
             var drawn = new Dictionary<double, int?>();
-            for (var i = 0; i < inSpan.Length; i++)
+            foreach (var span in passes)
             {
-                var place = Math.Round((inSpan[i] - span.Start) % span.Meter.PatternDuration, 6);
-                if (!drawn.TryGetValue(place, out var step))
+                var inSpan = changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9).ToArray();
+                for (var i = 0; i < inSpan.Length; i++)
                 {
-                    // drawn whether the song reharmonises or not, so that its draws are as many
-                    var substitutes = context.TestProbability(Share);
-                    var drawnStep = context.Pick(Substitutes);
-                    drawn[place] = step = substitutes ? drawnStep : null;
-                }
+                    var place = Math.Round((inSpan[i] - span.Start) % span.Meter.PatternDuration, 6);
+                    if (!drawn.TryGetValue(place, out var step))
+                    {
+                        // drawn whether the song reharmonises or not, so that its draws are as many
+                        var substitutes = context.TestProbability(Share);
+                        var drawnStep = context.Pick(Substitutes);
+                        drawn[place] = step = substitutes ? drawnStep : null;
+                    }
 
-                if (!reharmonises || step is null || kept.Contains(inSpan[i]))
-                    continue;
-                substituted.Add((inSpan[i], i + 1 < inSpan.Length ? inSpan[i + 1] : span.End, step.Value));
+                    if (!reharmonises || step is null || kept.Contains(inSpan[i]))
+                        continue;
+                    substituted.Add((inSpan[i], i + 1 < inSpan.Length ? inSpan[i + 1] : span.End, step.Value));
+                }
             }
         }
 
