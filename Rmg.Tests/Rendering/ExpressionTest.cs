@@ -100,14 +100,17 @@ public sealed class ExpressionTest
         await Task.CompletedTask;
     }
 
+    /// <summary>The part that echoes sings no vibrato and bends no note, and is never the bass, whose low notes an echo blurs.</summary>
     [Test]
-    public async Task ThePartThatEchoes_NeitherSingsAVibrato_NorBends()
+    public async Task ThePartThatEchoes_NeitherSingsAVibrato_NorBends_NorIsTheBass()
     {
-        var parts = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => PartEffects(TestCorpus.Get(seed, Sound(1)))).SelectMany(x => x).ToArray();
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Sound(1)));
+        var parts = songs.SelectMany(PartEffects).ToArray();
         var (vibrato, bends, echo) = (Array.FindIndex(Effects, x => x.Name == "vibrato"), Array.FindIndex(Effects, x => x.Name == "bends"), Array.FindIndex(Effects, x => x.Name == "echo"));
 
         await Assert.That(parts.Count(p => p[echo])).IsGreaterThan(0);
         await Assert.That(parts.Count(p => p[echo] && (p[vibrato] || p[bends]))).IsEqualTo(0);
+        await Assert.That(songs.Count(song => song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Bass))?.Any(n => Effects[echo].Has(n.Value.State)) ?? false)).IsEqualTo(0);
     }
 
     /// <summary>

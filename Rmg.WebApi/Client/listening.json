@@ -426,10 +426,10 @@
     "seeds": [
       {
         "seed": "8",
-        "at": 96.6,
-        "from": 95.1,
+        "at": 84.5,
+        "from": 83,
         "listen": [
-          "Bass (Acoustic Bass)"
+          "Melody (Electric Guitar (clean))"
         ]
       },
       {
@@ -441,14 +441,6 @@
         ]
       },
       {
-        "seed": "b",
-        "at": 15.6,
-        "from": 14,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
         "seed": "u",
         "at": 143.7,
         "from": 142,
@@ -457,19 +449,30 @@
         ]
       },
       {
-        "seed": "1B",
-        "at": 25.9,
-        "from": 24.3,
+        "seed": "1J",
+        "at": 131.6,
+        "from": 130.1,
         "listen": [
-          "Melody (Tenor Sax)"
+          "Rhythm part (Electric Guitar (clean))",
+          "Drums"
+        ]
+      },
+      {
+        "seed": "1O",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))",
+          "Drums"
         ]
       },
       {
         "seed": "1S",
-        "at": 54.9,
-        "from": 53.1,
+        "at": 82.3,
+        "from": 80.6,
         "listen": [
-          "Bass (Electric Bass (finger))"
+          "Rhythm part (Rock Organ)",
+          "Drums"
         ]
       }
     ]

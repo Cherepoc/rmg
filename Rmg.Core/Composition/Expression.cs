@@ -142,8 +142,8 @@ internal static class Expression
     /// <summary>Whether a strong effect is played only by a part it suits: a filter's, a synth's, and a gate's and a tremolo's, held chords'.</summary>
     private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect is StrongEffect.Gate or StrongEffect.Tremolo;
 
-    /// <summary>Whether a part may echo: one that plays lines, or the rhythm part, whose stabs a dub echoes.</summary>
-    private static bool EchoesFrom(TrackRole role) => role.PlaysLine() || role == TrackRole.Rhythm;
+    /// <summary>Whether a part may echo: one that plays lines, or the rhythm part, whose stabs a dub echoes; never the bass, whose low notes an echo blurs into each other.</summary>
+    private static bool EchoesFrom(TrackRole role) => role != TrackRole.Bass && (role.PlaysLine() || role == TrackRole.Rhythm);
 
     /// <summary>The chances a song plays each gentle effect at all, on whichever of its parts take it.</summary>
     public static ByConvention SongVibratoChance { get; } = new(0, 0.7, 1);
