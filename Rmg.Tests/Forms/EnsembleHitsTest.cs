@@ -27,7 +27,8 @@ public sealed class EnsembleHitsTest
 
     /// <summary>
     ///     A struck bar's band, its chords, pad, riff and rhythm guitar, strikes only where the kick does, before the bar's last
-    ///     half, which the drums fill; of a genre's songs that stop, as a song strikes hits only where it stops at all.
+    ///     half, which the drums fill, and its bass on every hit of the bar but where it walks; of a genre's songs that stop,
+    ///     as a song strikes hits only where it stops at all.
     /// </summary>
     [Test]
     [Arguments("funk")]
@@ -52,6 +53,10 @@ public sealed class EnsembleHitsTest
             foreach (var role in new[] { TrackRole.Chords, TrackRole.Pad, TrackRole.Riff, TrackRole.RiffTwin, TrackRole.Rhythm }.Where(x => !song.Absent.Contains(x)))
             foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Track(role))?.Where(n => n.Position >= start - 1e-9 && n.Position < (start + end) / 2 - 1e-9) ?? [])
                 await Assert.That(kick.Any(k => Math.Abs(k - note.Position) < 1e-6)).IsTrue().Because($"seed {song.Seed}, its {role} at {note.Position} in the bar struck at {start}");
+            // and the bass on every hit with the band, the whole bar, as a horn band's bass is, but where it walks into the next chord
+            foreach (var note in song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Bass))?.Where(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9
+                                                                                                         && n.Value.State.GetStateValue(CompositionStateKinds.Walk) == 0) ?? [])
+                await Assert.That(kick.Any(k => Math.Abs(k - note.Position) < 1e-6)).IsTrue().Because($"seed {song.Seed}, its bass at {note.Position} in the bar struck at {start}");
         }
 
         await Assert.That(bars).IsGreaterThan(3);

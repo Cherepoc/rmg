@@ -243,7 +243,14 @@ internal static class StopTime
             var role = song.Tracks.Definitions[track].Role;
             if (role.Sings())
                 continue;
-            bool Fills(double position) => role is TrackRole.Drum or TrackRole.Bass && InAFill(position);
+            // the drums filling, and the bass walking with them, but in a bar of ensemble hits, where it strikes every hit with
+            // the band, as a horn band's bass does, the drums alone filling, but where its own walk runs into the next chord
+            var walks = role == TrackRole.Bass
+                ? timeline.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Walk) > 0).Select(x => (From: x.Position, To: x.Position + x.Value.Duration)).ToArray()
+                : [];
+            bool InAHitBar(double position) => hitBars.Any(b => position >= b.Start - 1e-9 && position < b.End - 1e-9);
+            bool Fills(double position) => role == TrackRole.Drum && InAFill(position)
+                                           || role == TrackRole.Bass && (InAFill(position) && !InAHitBar(position) || walks.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9));
             // a pitched part's every hit in a bar of ensemble hits, the note it sounds there, or its last before, struck, of the
             // chord there, never one the chord changed since, as loud as the song is there
             var struck = role == TrackRole.Drum ? [] : hitBars.SelectMany(b => HitsOf(b.Start, b.End).Where(at => Place(at, track).In && !Fills(at))
