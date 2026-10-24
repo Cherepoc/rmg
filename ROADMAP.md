@@ -264,37 +264,51 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
 Measured over 32 songs of each preset before planning: Funk's rhythm guitar plays 59% of its notes on General MIDI's
 muted guitar, every one of them a chord of three notes or more, Disco's 76%, Funk rock's 49%, and Funk's guitar riff
 100% of its notes muted; the metal family's rhythm guitar has its lowest note at a median of MIDI 71-73, over a riff's
-47-49, its single notes high. In the order to build:
+47-49, its single notes high; the driven guitars' range starts at E2 (40), where a Djent band tunes to B1 or F#1.
+Reviewed against how the idioms are played, in the order to build:
 
-1. **Funk's mute a touch, not a sound.** A funk guitarist strikes a big chord open, mutes the ghost scratches between
-   them, and plays a single-note line alternating muted and open. The rhythm and riff pools of Funk, Funk rock, Disco
-   and Soul lose the muted guitar as a part's instrument, the clean guitar in its place; a clean or jazz guitar's
-   palm-muted note (`PalmMute`, a dead note) sounds on the muted guitar, its program set on the note as a variant's is,
-   its chords and accents open; a part playing dead notes mutes its weak-beat repeats too, as a chugging part's are,
-   so that its single-note line interchanges. The articulation variants' guitar rows (a clean guitar's bar muted, a
-   muted one's bar clean) go, the same mistake by the bar; the bass's slap and the strings' stay. Measured after: the
-   chords on the muted program (none but the scratches), the muted share of the riff's notes; asked by ear against the
-   part on the muted guitar as now. No choice of its own: one rule and the presets' data.
+1. **Funk's mute: the line's sound, or a touch, never a big chord's.** A funk guitarist plays three ways on one clean
+   guitar: chords strummed in 16ths, the fretting hand lifting between the accents to scratch them muted, the accents
+   ringing open; clean chord riffs, staccato and open throughout, bright voicings high on the neck, as a disco
+   guitarist plays; and single-note riffs, muted throughout as the riff's own sound (a funk rock riff's) or interleaving
+   muted ghosts with open notes. General MIDI's muted guitar is a palm-muted sound, right for a muted line and for the
+   scratches, wrong for a big chord. So: the rhythm part of Funk, Funk rock, Disco and Soul loses the muted guitar as its
+   instrument, its chords open on the clean guitar; the riff keeps it, a muted line its sound; a clean or jazz guitar's
+   dead note (`PalmMute`, its 16th scratches between the 8ths) sounds on the muted guitar, its program set on the note as a
+   variant's is, so that a clean line interleaves its muted ghosts. The variants' rows muting a clean guitar for a bar go,
+   the per-note mute their place; the muted line's opening clean on its accents or for a bar stays, as a muted riff rings
+   an accent open. The bass, the same way: a finger bass slapping its accents (the variants' accents, `articulationModes`)
+   with dead notes between, as a funk player and a Djent one interchange thumb, pops and fingers, rather than the slap
+   patch's every note slapped, which General MIDI cannot mix: Funk's, Funk rock's and Djent's `articulationModes` leaning to
+   the accents, Djent's bass its dead notes. Measured after: the chords on the muted program (none but the scratches), the
+   bass's notes slapped (its accents); asked by ear, each against the presets as they are.
 2. **A tremolo-picked note** (#352, the tremolo-picked line). A tremolo picker alternates as fast as the hand plays
-   evenly, about 11 to 13 strokes a second, 16ths at a black metal or surf tempo and 32nds or sextuplets at a slower
-   one, on the long notes of a riff or a lead, the pitch changing with the line and the picks not; other rock and metal
-   pick their long notes in measured 16ths, slower. An `articulation` option, a section's chance: a riff's or a lead's
-   note a beat or longer re-struck at the finest of the 16th, the sextuplet and the 32nd no faster than a genre's
-   speed (one value: Surf rock and Black metal fast, the other rock and metal presets that take it measured), a
-   power chord re-struck whole, never in a calm section, the up-stroke a touch softer as the strum's. Asked in Black
-   metal against the riff's tremolo figure (every 16th a placed note), which goes if the articulation is preferred, and
-   in Surf rock against none.
-3. **A rhythm guitar on the low string.** A metal band's second guitar doubles the riff low or holds a low note under
-   a lead, slow or chugged, or interchanges a power chord on the accent with single notes. First the doubling: the
-   rhythm part playing the riff in unison now and then, a pair of `doubling`'s, on its onsets (the doubler keeping to
-   its lead's beats); then, if listening asks for more, a section's rhythm part on the low string, each chord its root
-   in the riff's register, its own rhythm kept, the chugs' rule muting its weak repeats and an accent a power chord
-   (Metal, Thrash, Djent, Nu metal, Doom). The register is the risk: two guitars and the bass in one octave.
-4. **Djent's leaping riff.** A riff on its open string and a note over an octave above it, the 13th fret over the open
-   string where it is chromatic, the two interchanging in lengths the polymeter's cycle shifts. First measured: how many
-   pitches Djent's riff plays a pattern, and how far from its pedal. Then, if they keep near the pedal, an option of
-   `riff`'s, the notes of a pedal riff off its pedal an octave up, the scale choosing the note (the octave, the minor
-   ninth in a chromatic riff, the tenth); the rhythm as drawn and the polymeter as it is.
+   evenly, about 11 to 13 strokes a second, 16ths at a black metal or surf tempo and 32nds or sextuplets at a slower one,
+   on the long notes of a riff or a lead, the pitch changing with the line and the picks not; Black metal picks whole
+   power chords and double stops so, a surf lead its melody, while thrash, melodic metal and post-rock pick their long
+   notes in measured 16ths, slower. An `articulation` option, a section's chance: a riff's or a lead's note a beat or
+   longer re-struck at the finest of the 16th, the sextuplet and the 32nd no faster than a genre's speed (one value:
+   Surf rock and Black metal fast, the other rock and metal presets that take it measured), a power chord re-struck
+   whole, never in a calm section, the up-stroke a touch softer as the strum's. Asked in Black metal against the riff's
+   tremolo figure (every 16th a placed note), which goes if the articulation is preferred, and in Surf rock against none.
+3. **A rhythm guitar on the low string.** A metal band's two guitars mostly play the same riff, double-tracked, low;
+   between, the second chugs single palm-muted notes on the open low string under the first's power chords, or holds a
+   low note ringing under a clean verse or a lead. First the doubling: the rhythm part playing the riff in unison now
+   and then, a pair of `doubling`'s, on its onsets (the doubler keeping to its lead's beats); then, if listening asks for
+   more, a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
+   chugs' rule muting its weak repeats and an accent a power chord (Metal, Thrash, Djent, Nu metal, Doom). The register is
+   the risk: two guitars and the bass in one octave.
+4. **A genre's tuning.** The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or
+   C2 for Doom's and Nu metal's, B1 for a seven-string's, F#1 for Djent's eight, General MIDI's guitars sounding below
+   their written range as a sampler does. A value of the genre's (`register`'s or its own), the riff's and the rhythm
+   part's range moved by it, the bass an octave under it as now. Measured first: where the riff of each metal preset
+   sits against its range's floor.
+5. **Djent's riff intervals, no device of its own.** A one-note riff on the open low string moving by chromatic small
+   intervals (a semitone, a tone) or leaping by dissonant large ones (a tritone, a major seventh, a minor ninth over the
+   octave), as Djent's riffs do across their songs; not one song's riff built as a device. The riff's scale already
+   leans chromatic in Djent (`riffScale` chromatic 40-60-70); first measured: Djent's riffs' intervals off their pedal, how
+   many are a semitone, how many leap past an octave, how many are dissonant. Then, only where they keep near the pedal,
+   the riff's leaps a value of the line's (its spread), the presets' data, and no new mechanism.
 
 ### From the review of 22 October 2026
 
