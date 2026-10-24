@@ -230,6 +230,8 @@ internal sealed record SongDecisions(
         // how loud and busy each section is meant to be, from the song's and where and how often the section plays
         var dynamicsContext = Stream(SongStream.Dynamics);
         songStateMap = songStateMap.MergeWith(SectionEnergy.GenerateSong(dynamicsContext, genre));
+        // and moved by its intensity where its energy follows it, from a sequence of its own
+        songStateMap = songStateMap.MergeWith(SectionEnergy.GenerateMood(Stream(SongStream.MoodEnergy), genre, songUnconventionality[Facet.Form], mood.Intensity));
         var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds, SectionEnergy.ContrastOf(genre));
 
         // how the song swings, which its tempo sets the notes of

@@ -361,6 +361,9 @@ internal static class TracePoints
     /// <summary>Whether a song bends its tempo at its phrases' edges (a <c>bool</c>; <see cref="Composition.Rubato" />).</summary>
     public const string Rubato = "Rubato";
 
+    /// <summary>How far a song's intensity moves its sections' energy, 0 where its energy does not follow it (a <c>double</c>; <see cref="Composition.SectionEnergy.MoodStep" />).</summary>
+    public const string MoodEnergy = "Mood energy";
+
     /// <summary>Where a fill keeps its feet under its run, from its start to its line, and what they keep (a <c>(double, double, FillFeet)</c>; <see cref="FillLayers.Feet" />).</summary>
     public const string FillFeet = "Fill feet";
 

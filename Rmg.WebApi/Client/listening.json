@@ -284,6 +284,167 @@
     ]
   },
   {
+    "id": "trance-fierce",
+    "question": "A Trance track at its fiercest intensity, its sections louder and fuller as well as faster: the more driving track, or only busier?",
+    "decides": "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity 1 (#76).",
+    "genre": "trance",
+    "with": {
+      "genre": {},
+      "settings": {
+        "intensity": 61
+      }
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "moodEnergy": {
+          "energy": 0
+        }
+      },
+      "settings": {
+        "intensity": 61
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 6.9,
+        "from": 5.2,
+        "listen": [
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "3",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 247.1,
+        "from": 245.3,
+        "listen": [
+          "Riff (Lead 2 (sawtooth))",
+          "Kick",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 27.6,
+        "from": 25.9,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Pad (Synth Strings 1)",
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Chords (Pad 3 (polysynth))",
+          "Pad (Synth Strings 1)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 193.4,
+        "from": 191.7,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Chords (Synth Strings 1)",
+          "Pad (Pad 8 (sweep))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "trance-calm",
+    "question": "A Trance track at its calmest intensity, its sections softer and sparser as well as slower: the calmer track, or an emptied one?",
+    "decides": "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity -1 (#76).",
+    "genre": "trance",
+    "with": {
+      "genre": {},
+      "settings": {
+        "intensity": 0
+      }
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "moodEnergy": {
+          "energy": 0
+        }
+      },
+      "settings": {
+        "intensity": 0
+      }
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 241.8,
+        "from": 240,
+        "listen": [
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Pad (Choir Aahs)",
+          "Electric Snare"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Riff (Lead 1 (square))",
+          "Chords (Synth Strings 1)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Chords (Synth Strings 1)",
+          "Pad (Pad 7 (halo))"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 78.2,
+        "from": 76.4,
+        "listen": [
+          "Bass (Synth Bass 2)",
+          "Chords (Pad 3 (polysynth))",
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      }
+    ]
+  },
+  {
     "id": "bluegrass-roll",
     "question": "A Bluegrass banjo rolling through its chords in 8ths, its thumb on the lowest note: the banjo's drive, or a pattern on a loop?",
     "decides": "Bluegrass's rhythm part's roll (arpeggio.rhythm, roll 100-100-80), against its chords whole.",

@@ -2274,6 +2274,7 @@
       "introWindow": { "section": [100, 70, 50], "phrase": [0, 30, 40], "fourBars": [0, 10, 20], "twoBars": [0, 5, 10] },
       "soloAnswers": { "sections": [0, 0, 15] },
       "intensity": { "from": -20, "to": 100 },
+      "moodEnergy": { "energy": 100 },
       "darkness": { "from": -80, "to": 40 },
       "glide": { "lead": [0, 10, 20] },
       "length": { "from": [180, 210, 240], "to": [300, 360, 480] },

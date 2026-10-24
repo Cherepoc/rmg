@@ -16,4 +16,5 @@ public static class Layers
     public const string Progression = "Progression";
     public const string SectionRecurrence = "Section recurrence";
     public const string SectionArc = "Section arc";
+    public const string SongMood = "Song mood";
 }

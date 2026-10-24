@@ -53,6 +53,25 @@ internal static class SectionEnergy
             .ToStateMap(context);
     }
 
+    /// <summary>How far the fiercest song's intensity moves every section's energy, and the calmest's the other way: a section's own step.</summary>
+    public const double MoodStep = Section;
+
+    /// <summary>The chance a song's energy follows its intensity, a genre's alone: an experiment asked against the energy its dynamics alone draw.</summary>
+    public static ByConvention MoodChance { get; } = new(0, 0, 0);
+
+    /// <summary>
+    ///     The song's intensity as a layer of its energy, every section's moved by it (<see cref="MoodStep" />), where the song
+    ///     draws its energy to follow it, by its form's conventionality as a genre's dynamics follow it; none where it does not.
+    /// </summary>
+    public static StateMap GenerateMood(IGenerationContext context, Genre genre, double unconventionality, double intensity)
+    {
+        var step = context.TestProbability(MoodChance.At(unconventionality, genre.Chance(GenreChoices.MoodEnergy, "energy"))) ? intensity * MoodStep : 0;
+        StateTrace.RecordSong(TracePoints.MoodEnergy, $"{step:F2}", step);
+        return new StateMapBuilder(Layers.SongMood, perTrack: false)
+            .Add(CompositionStateKinds.Energy, step)
+            .ToStateMap(context);
+    }
+
     /// <summary>How much a section's energy differs from the song's, by a genre's dynamics: half as much at its least, twice at its most.</summary>
     public static double ContrastOf(Genre genre) => Math.Pow(2, genre.Shift(GenreChoices.Dynamics, "contrast"));
 
