@@ -25,9 +25,11 @@ public sealed class TremoloTest
             sections++;
             var definition = (PitchInstrumentTrack)song.Song.TrackDefinitions[entry.Track];
             var notes = song.Song.Notes!.GetValueOrDefault(entry.Track)?.Where(x => song.Map.PlayingAt(x.Position)?.Span.SectionId == entry.Section).ToArray() ?? [];
+            // (but its last stroke where it holds on past its appearance's end, and a solo's)
             foreach (var note in notes.Where(x => InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(x.Value.State, definition.InstrumentCode), InstrumentTrait.Strums)
                                                   && x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Bend) == 0
-                                                  && x.Value.State.GetStateValue(CompositionStateKinds.Ornament).IsDefaultOrEmpty))
+                                                  && x.Value.State.GetStateValue(CompositionStateKinds.Ornament).IsDefaultOrEmpty && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0
+                                                  && !(x.Value.State.GetStateValue(CompositionStateKinds.Picked) > 0 && x.Position + x.Value.Duration > song.Map.PlayingAt(x.Position)!.Value.Span.End - 1e-9)))
                 await Assert.That(note.Value.Duration).IsLessThan(Articulations.TremoloFrom).Because($"seed {song.Seed}, track {entry.Track} at {note.Position}");
             // the strokes, each a step after the one before, no quicker than the hand but at a 16th, a fast
             // picker's never slower than it could, a measured one's 16ths
