@@ -1294,6 +1294,7 @@
     "name": "Power ballad",
     "description": "Slow, 60 to 95, mostly in 4/4, now and then 12/8: a clean or acoustic guitar's broken chords let ring with sweet held tones, an overdriven lead singing the melody, a fingered bass and strings, sus2 and add9 chords, the band building section by section in a big room, a heavy chorus, a guitar solo, now and then the last chorus up a step, fading or ringing out.",
     "choices": {
+      "rubato": { "openings": [20, 30, 40], "returns": [20, 30, 40], "changes": 0 },
       "vibratoWidth": { "narrow": [40, 30, 20], "medium": [30, 30, 30], "broad": [20, 30, 30], "slowStep": [10, 25, 40], "twoSteps": [0, 0, 10] },
       "ornaments": { "graces": [0, 25, 100], "turns": [0, 8, 100], "trills": [0, 0, 15] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
@@ -1362,6 +1363,7 @@
     "name": "Lyrical guitar",
     "description": "Mellow, melancholic instrumental guitar: a dry jazz or nylon guitar's repeating melody over acoustic guitars' broken chords let ring, a simple bass, a heavy delay, a steady downtempo beat or none, a cello now and then, natural minor and Dorian with a Spanish colour, a distorted solo building at the end now and then, 76 to 95.",
     "choices": {
+      "rubato": { "openings": [30, 40, 50], "returns": [20, 30, 40], "changes": [0, 10, 20] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "drumSetup": { "kit": 100 },
       "echo": { "dottedEighth": 100, "quarter": 100, "eighth": 100, "cascade": [0, 25, 60] },
@@ -3006,6 +3008,7 @@
     "name": "Orchestral",
     "description": "Strings, horns and woodwinds over a contrabass, a harp's arpeggios, timpani and a cymbal marking the form, minor, major and harmonic minor, long crescendos into louder sections, parts entering one by one.",
     "choices": {
+      "rubato": { "openings": [20, 30, 40], "returns": [30, 40, 50], "changes": [0, 10, 30] },
       "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "soloists": { "solo": 100, "counterMelody": [30, 40, 50] },
       "sectionHome": { "tonic": 100, "contrast": [20, 30, 30], "relative": 20, "fourth": 10, "fifth": 10 },
@@ -3075,6 +3078,7 @@
     "name": "Cinematic piano",
     "description": "A film's piano: a piano melody over a piano's arpeggios two octaves wide, strings swelling under it, a bass stepping down through the chords, add9, sus and seventh chords, major, minor and Lydian, AABA with a big return and the last section lifted a key, no drums, 60 to 100.",
     "choices": {
+      "rubato": { "openings": [40, 50, 60], "returns": [30, 40, 50], "changes": [0, 10, 20] },
       "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
       "feelChances": {},
@@ -3117,6 +3121,7 @@
     "name": "Chamber",
     "description": "Chamber music: a melody on violin, flute or clarinet over a piano's Alberti figure and a cello's bass, no drums, raised cadences and ornaments, phrases of four bars, AABA, ABA and a rondo, terraced dynamics, 60 to 170 in 4/4, 3/4 and 6/8.",
     "choices": {
+      "rubato": { "openings": [20, 30, 40], "returns": [30, 40, 50], "changes": [0, 10, 30] },
       "vibratoWidth": { "narrow": [100, 60, 40], "medium": [0, 35, 40], "broad": [0, 5, 20] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100], "shortBar": 0, "eased": 50 },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 0, "twin": 0, "imitation": [15, 25, 35] },

@@ -214,6 +214,8 @@ internal static class SongStages
             .MergeStateTimelineMap(preparedRoots)
             .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration, place => song.AppearanceStream(SongStream.TempoRamps, place),
                 SectionTempo.RampChance.At(song.Facets[Facet.Form], song.Genre.Chance(GenreChoices.SectionChanges, "eased"))))
+            // and the tempo bent at the phrases' edges, a genre's, over the sections' own
+            .MergeStateTimelineMap(Rubato.Apply(form.Map, song.Stream(SongStream.Rubato), place => song.AppearanceStream(SongStream.Rubato, place), place => song.Sections[place].Facets[Facet.Form], song.Genre))
             .MergeStateMap(song.CommonStateMap)
             .MergeStateMap(Groove.ToStateMap(song.Swing));
         return draft with { Timeline = timeline, Chains = chains };

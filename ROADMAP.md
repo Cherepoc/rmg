@@ -308,11 +308,9 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
 - **Intensity moving the energy** (#76, the foundations reviewer), an experiment: the mood's intensity a value of
   Trance's dynamics, the sections' energy drawn around it, asked against the current model; in 28 of 49 presets the
   notes a beat at intensity -1 and 1 differ by 2% or less, the tempo all that moves.
-- **Tempo at a phrase's edges** (#302, #360, then #365): one tempo edit as the ritardando's: the part alone at the
-  opening pushing and broadening each phrase into the band's entrance in tempo (`openingAlone`, a slow tempo leaning
-  it), and a section's closing bar broadening into the next (the breath, before a return at the plain end, any section
-  at the wild); later the cadenza, an `EndingKind` holding the last dominant as a stop while the lead runs alone over
-  it, should the breath be heard to work.
+- **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, to be asked): an
+  `EndingKind` holding the last dominant as a stop while the lead runs alone over it, should the breath be heard to
+  work.
 - **Put off:** the game loop (#369), the body replayed from its loop point into the fade as `PlayAt` plays a source:
   two presets, whose fade already replays their last section; taken up should listening ask for the loop.
 

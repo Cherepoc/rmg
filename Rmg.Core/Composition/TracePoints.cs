@@ -358,6 +358,9 @@ internal static class TracePoints
     /// <summary>What a line's fill and landing are (<see cref="FillDecision" />).</summary>
     public const string FillDecision = "Fill decision";
 
+    /// <summary>Whether a song bends its tempo at its phrases' edges (a <c>bool</c>; <see cref="Composition.Rubato" />).</summary>
+    public const string Rubato = "Rubato";
+
     /// <summary>Where a fill keeps its feet under its run, from its start to its line, and what they keep (a <c>(double, double, FillFeet)</c>; <see cref="FillLayers.Feet" />).</summary>
     public const string FillFeet = "Fill feet";
 
