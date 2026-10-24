@@ -74,7 +74,7 @@ public sealed class FiguresTest
     {
         var loose = Figures.All.Where(x => x.Loose).Select(x => $"{x.Player} {x.Name}").Order().ToArray();
         await Assert.That(loose).IsEquivalentTo(
-            ["Backbeat breakbeat", "Bass bossaBass", "Bass halves", "Bass tresillo", "Bass tumbao", "Chords backbeat", "Chords charleston", "Ground breakbeat", "Ground surdo", "Ground twoStep"],
+            ["Backbeat breakbeat", "Bass bossaBass", "Bass halves", "Bass tresillo", "Bass tumbao", "Chords backbeat", "Chords charleston", "Chords sixEight", "Ground breakbeat", "Ground surdo", "Ground twoStep"],
             CollectionOrdering.Matching);
     }
 
@@ -124,6 +124,9 @@ public sealed class FiguresTest
     ///     of them, but where a fill takes the drums or a line walks (measured over 32 at first, every figure 61% to 100%, the
     ///     waltz's bass, the chick on 2 and 4 and the bossa nova's clave the fewest, walking or filling between).
     /// </summary>
+    /// <summary>A figure's meter as a genre names it, four's where it has none.</summary>
+    private static string MeterName(Meter? meter) => meter == Meter.ThreeFour ? "3/4" : meter == Meter.SixEight ? "6/8" : "4/4";
+
     [Test]
     [MethodDataSource(nameof(Fixed))]
     public async Task AFigure_IsPlayedOnItsSixteenths(FigurePlayer player, string name)
@@ -133,7 +136,7 @@ public sealed class FiguresTest
         var genre = GenrePresets.With(preset, GenreChoices.Figures[player], (name, 1));
         genre = genre with
         {
-            Choices = genre.Choices.SetItem(GenreChoices.Meter.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(figure.In == Meter.ThreeFour ? "3/4" : "4/4", new(1, 1, 1)))
+            Choices = genre.Choices.SetItem(GenreChoices.Meter.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(MeterName(figure.In), new(1, 1, 1)))
         };
         var onsets = figure.Onsets.Select(x => x % 16).ToHashSet();
         var (hits, on) = (0, 0);
@@ -230,21 +233,26 @@ public sealed class FiguresTest
 
     /// <summary>A clave strikes only on its onsets: Latin's on the claves, Bossa nova's on the snare's stroke, its cross-stick.</summary>
     [Test]
-    [Arguments("latin", FigurePlayer.Claves, new[] { "clave32", "clave23" })]
-    [Arguments("bossa", FigurePlayer.Backbeat, new[] { "bossaClave" })]
-    public async Task AClave_StrikesOnlyOnItsThreeAndTwo(string genre, FigurePlayer player, string[] names)
+    [Arguments("latin", FigurePlayer.Claves, new[] { "clave32", "clave23" }, null)]
+    [Arguments("latin", FigurePlayer.Claves, new[] { "bell68" }, "6/8")]
+    [Arguments("bossa", FigurePlayer.Backbeat, new[] { "bossaClave" }, null)]
+    public async Task AClave_StrikesOnlyOnItsThreeAndTwo(string genre, FigurePlayer player, string[] names, string? meter)
     {
+        // a figure of another meter's songs given it
+        var given = GenrePresets.Genre(genre);
+        if (meter is not null)
+            given = given with { Choices = given.Choices.SetItem(GenreChoices.Meter.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(meter, new(1, 1, 1))) };
         IReadOnlySet<int> tracks = player == FigurePlayer.Claves
             ? new HashSet<int> { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }
             : DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var (hits, sections, playing) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: given))))
         {
             sections += song.Trace.Count(t => t.Point == TracePoints.Figures);
             playing += names.Sum(name => Playing(song, player, name).Count);
         }
 
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: given))))
         foreach (var name in names)
         {
             var figure = Figures.All.Single(x => x.Player == player && x.Name == name);
@@ -256,7 +264,7 @@ public sealed class FiguresTest
                 hits++;
                 // its 16th in the figure's bars, one or two, counted from the song's first bar
                 var index = barsBefore[span] + span.BarOf(bar);
-                var sixteenth = (position - bar) / 0.25 + index % (figure.Sixteenths / 16) * 16;
+                var sixteenth = (position - bar) / 0.25 + index % (figure.Sixteenths / span.Meter.Sixteenths) * span.Meter.Sixteenths;
                 await Assert.That(figure.Onsets.Any(x => Math.Abs(x - sixteenth) < 0.1)).IsTrue().Because($"seed {song.Seed} at {position}, {name}");
             }
         }

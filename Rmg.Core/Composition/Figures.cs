@@ -82,11 +82,12 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
 ///     double kick; a black metal band's blast beat, its cymbal riding it, and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
 ///     band's galloping riff and its reverse gallop, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a jazz drummer's ride,
-///     on the beats and the skip after 2 and 4; a clave's three and two,
+///     on the beats and the skip after 2 and 4; a clave's three and two, and the 6/8 bell over two bars,
 ///     and the bossa nova's on the snare's stroke, its cross-stick; a trance's chords in 16ths, its arpeggio's steady run, and its bass
 ///     rolling in the 16ths after the kick or on the offbeats, a salsa's tumbao, the bossa nova's bass and the tresillo; four on the floor,
 ///     drum and bass's two-step, the surdo's kick, the snare on every beat, the train beat, the skank, the Charleston, a
-///     bass's pulse in 8ths or 16ths, and the boom-chicka, the bass on 1 and 3 and the chords on 2 and 4. A section draws each player's, its own rhythm or one of its
+///     bass's pulse in 8ths or 16ths, the boom-chicka, the bass on 1 and 3 and the chords on 2 and 4, and 6/8's chick, the
+///     chords on the 8ths between its 1 and 4. A section draws each player's, its own rhythm or one of its
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
 ///     players play, a blast's or a breakbeat's, drawn by the first and played by both; the songs play their own rhythms
 ///     always. The player plays the figure in every bar it plays in, its own notes
@@ -154,6 +155,8 @@ internal static class Figures
         new("backbeat", "The chick, on 2 and 4", FigurePlayer.Chords, [4, 12], 16, null, 0, false),
         // the waltz, the bass's oom on 1 and the chords' pah-pah on 2 and 3, drawn by the chords and played by both
         new("waltz", "The waltz, the pah-pah on 2 and 3", FigurePlayer.Chords, [4, 8], 12, null, 0, false, Meter.ThreeFour, Exact: true),
+        // a jig's or a slip's chords, the 8ths between the bass's 1 and 4, a folk accompanist's, loose as the chick is
+        new("sixEight", "6/8's chick, the 8ths between 1 and 4", FigurePlayer.Chords, [2, 4, 8, 10], 12, null, 0, false, Meter.SixEight),
         new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, null, 1, true),
         new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, null, 0, true),
         // a pulse, the root hammered in even 8ths or 16ths, a disco's, a synthwave's, a darksynth's
@@ -170,6 +173,8 @@ internal static class Figures
         // a son clave counted in half notes, a salsa's beat, its two sides in a bar
         new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 3, 6, 10, 12], 16, null, 0, false, Exact: true),
         new("clave23", "The clave's 2-3", FigurePlayer.Claves, [2, 4, 8, 11, 14], 16, null, 0, false, Exact: true),
+        // the 6/8 bell, a 12/8 bell over two bars of 6/8, an Afro-Cuban 6/8's, its 8ths 1, 3, 5, 6, 8, 10 and 12
+        new("bell68", "The 6/8 bell, over two bars", FigurePlayer.Claves, [0, 4, 8, 10, 14, 18, 22], 24, null, 0, false, Meter.SixEight, Exact: true),
         new("bossaClave", "The bossa nova's clave, the 3-2 with its last stroke an 8th later", FigurePlayer.Backbeat, [0, 6, 12, 20, 26], 32, null, 0, false, Exact: true)
     ];
 
