@@ -187,6 +187,9 @@ internal static class TracePoints
     /// <summary>A surf drop, a guitar's slide down the neck into a louder section: the bar it plays, its start and its end (a tuple of two <c>double</c>s).</summary>
     public const string SurfDrop = "Surf drop";
 
+    /// <summary>Whether a section's part tremolo-picks its long notes, by the part's track (a <c>bool</c>; <see cref="Articulations.Tremolo" />).</summary>
+    public const string Tremolo = "Tremolo";
+
     /// <summary>A solo's run landing on a change of chord: the note's place and how many scale steps its cell moved (a tuple of a <c>double</c> and an <c>int</c>).</summary>
     public const string SoloLanding = "Solo landing";
 

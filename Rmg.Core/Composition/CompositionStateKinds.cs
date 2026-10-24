@@ -227,6 +227,9 @@ internal static class CompositionStateKinds
     // 1 for a note of a chord cycled at a sound chip's frame rate, which no echo repeats, as its cycle would blur
     public static StateKind<int> Cycled { get; } = StateKinds.CreateAdditive<int>(Prefix + "Cycled", StateScope.Render);
 
+    // a tremolo-picked note's stroke, its place among the note's strokes from 1 (Articulations.Tremolo)
+    public static StateKind<int> Picked { get; } = StateKinds.CreateAdditive<int>(Prefix + "Picked", StateScope.Render);
+
     // how many octaves a line's note and its range sit above where its track places them: a harmonised riff's, up the neck
     public static StateKind<int> LineRaise { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineRaise", StateScope.Render);
 

@@ -1376,7 +1376,7 @@
       "parts": { "melody": 100, "chords": [60, 50, 40], "bass": [100, 80, 50], "pad": [10, 20, 40], "counterMelody": [40, 50, 60], "drum": [95, 75, 40], "riff": 0, "riffTwin": 0, "rhythm": 100, "solo": [0, 10, 30] },
       "instrument": { "melody": { "electricGuitarJazz": 100, "acousticGuitarNylon": 90, "acousticGuitarSteel": 70, "electricGuitarClean": 40 }, "rhythm": { "acousticGuitarSteel": 100, "acousticGuitarNylon": 80, "electricGuitarClean": 40 }, "chords": { "acousticGuitarNylon": 100, "electricGuitarClean": 60, "electricPiano1": [0, 10, 20] }, "bass": { "electricBassFinger": 100, "acousticBass": 50 }, "counterMelody": { "acousticGuitarNylon": 100, "cello": [40, 50, 60], "viola": [20, 30, 40] }, "pad": { "pad2Warm": 100, "pad4Choir": [0, 20, 40] }, "solo": { "overdrivenGuitar": 100, "distortionGuitar": [30, 40, 50] } },
       "arpeggio": { "up": 100, "upDown": 80, "alternatingThumb": [30, 40, 40], "upTwoOctaves": [20, 30, 40], "none": [10, 10, 20] },
-      "articulation": { "letRing": [60, 70, 70], "legato": [20, 30, 40], "stabs": 0, "roll": 0, "soloGhosts": 0 },
+      "articulation": { "letRing": [60, 70, 70], "legato": [20, 30, 40], "stabs": 0, "roll": 0, "soloGhosts": 0, "tremolo": [5, 10, 20] },
       "rhythm": { "melody": { "busyness": 25, "repetition": 90 }, "bass": { "repetition": 100, "fullness": 38 }, "ground": { "syncopation": 100, "fullness": 31, "repetition": 92 }, "time": { "speed": 76, "repetition": 82 } },
       "kit": { "standard": 100, "room": 70, "electronic": [0, 10, 25] },
       "pins": { "ground": [90, 90, 70], "backbeat": [100, 100, 80] },
@@ -1402,6 +1402,7 @@
     "name": "Heavy metal",
     "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4 or on 3 in its half-time sections, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 10, 20] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
@@ -1495,6 +1496,7 @@
     "name": "Thrash metal",
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 15, 25] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
@@ -1682,6 +1684,7 @@
     "name": "Doom metal",
     "description": "Slow and crushing: low power chords held and left to ring over a heavy, sparse beat, long stretches on one chord creeping by half steps, the tritone and Phrygian, an organ, a mournful lead, few solos, long songs.",
     "choices": {
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 10, 20] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
@@ -2608,6 +2611,8 @@
     "name": "Surf rock",
     "description": "Instrumental surf: clean, bright guitars drenched in reverb, a tremolo-picked melody, minor and exotic Phrygian lines, a driving picked bass and pounding toms, fast and straight.",
     "choices": {
+      "tremoloSpeed": { "measured": 0, "fast": 100 },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [10, 25, 40] },
       "tempo": { "from": [140, 140, 130], "to": [175, 180, 200] },
       "length": { "from": [110, 110, 100], "to": [180, 180, 210] },
       "meter": { "4/4": 100 },
@@ -3152,6 +3157,8 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "tremoloSpeed": { "measured": 0, "fast": 100 },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [20, 40, 50] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "keyChanges": { "lastSection": 0, "sections": [0, 2, 30], "patterns": [0, 0, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },

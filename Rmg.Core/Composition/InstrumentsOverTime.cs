@@ -5,6 +5,16 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
+/// <summary>How fast a tremolo picks (<see cref="Articulations.Speeds" />).</summary>
+public enum TremoloSpeed
+{
+    /// <summary>In measured 16ths.</summary>
+    Measured,
+
+    /// <summary>As fast as the hand plays evenly.</summary>
+    Fast
+}
+
 /// <summary>How a part's instrument plays its articulation in a section.</summary>
 public enum ArticulationMode
 {

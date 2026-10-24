@@ -31,6 +31,27 @@ internal static class Articulations
     /// </summary>
     public static ByConvention SoloGhostChance { get; } = new(0, 0.15, 0.3);
 
+    /// <summary>
+    ///     The chance a section's riff or lead on a plucked instrument tremolo-picks its long notes, a genre's that the songs
+    ///     never play: each note a beat or longer re-struck, down and up, at a picker's speed (<see cref="Tremolo" />).
+    /// </summary>
+    public static ByConvention TremoloChance { get; } = new(0, 0, 0);
+
+    /// <summary>The shortest note a tremolo picks, in beats: a beat, as a shorter one is a line's own rhythm.</summary>
+    public const double TremoloFrom = 1;
+
+    /// <summary>How many strokes a second a tremolo picker strikes at the most, as fast as the hand plays evenly.</summary>
+    public const double FastStrokes = 16;
+
+    /// <summary>
+    ///     The steps a tremolo picks at, in beats, from the slowest: the 8th, at a tempo too fast for 16ths, the 16th, a
+    ///     measured picker's finest, and, a fast one's, the sextuplet and the 32nd.
+    /// </summary>
+    public static ImmutableArray<double> TremoloSteps { get; } = [0.5, 0.25, 1 / 6.0, 0.125];
+
+    /// <summary>How many of the steps a measured picker plays, the 8th and the 16th.</summary>
+    private const int MeasuredSteps = 2;
+
     /// <summary>The chance a part plays its whole chords cycled at a sound chip's frame rate, a genre's that the songs never play.</summary>
     public static ByConvention FrameChance { get; } = new(0, 0, 0);
 
@@ -219,6 +240,25 @@ internal static class Articulations
                     position => holds.NextAfter(RingsOutOf, position, track));
             }
 
+        // and a riff's or a lead's long notes tremolo-picked in a section that picks them, a genre's, at its speed, each
+        // section and part from a sequence of its own, a twin's as its riff's, never in a calm section
+        var fast = song.Stream(SongStream.Tremolo).Pick(ByConvention.Weigh(Speeds, song.Facets[Facet.Sound], song.Genre.Pool<TremoloSpeed>(GenreChoices.TremoloSpeed))) == TremoloSpeed.Fast;
+        foreach (var (track, timeline) in result.ToArray())
+            if (song.Tracks.Definitions[track] is PitchInstrumentTrack line && line.Role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Melody or TrackRole.Solo)
+            {
+                var picks = song.SectionIds.Distinct().ToDictionary(id => id, id =>
+                {
+                    var tremolo = song.Stream(SongStream.Tremolo, id, song.DrawsAs(track)).TestProbability(TremoloChance.At(song.SectionOf(id).Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "tremolo")))
+                                  && song.SectionOf(id).Form.Kind != SectionFormKind.Calm;
+                    if (tremolo)
+                        StateTrace.RecordSection(TracePoints.Tremolo, track, id, "tremolo", true);
+                    return tremolo;
+                });
+                if (picks.ContainsValue(true))
+                    result[track] = Tremolo(timeline, line.InstrumentCode, position => song.Form.Map.PlayingAt(position) is { Span: var span } && picks[span.SectionId],
+                        position => Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)), fast, stroke);
+            }
+
         // and a part's whole chords cycled at the frame rate where it plays them so, a genre's, as a sound chip plays a chord
         // on one voice, its own sequence drawn for every part that holds chords
         foreach (var (track, timeline) in result.ToArray())
@@ -264,6 +304,41 @@ internal static class Articulations
     ///     as the chord sounds, unstrummed.
     /// </summary>
     /// <param name="beatsPerSecond">The beats a second at a position, by the tempo there.</param>
+    /// <summary>How a genre's tremolo picks: in measured 16ths, as rock and metal pick their long notes, or as fast as the hand plays evenly, a surf or a black metal guitarist's.</summary>
+    public static ImmutableArray<(TremoloSpeed Speed, ByConvention Weight)> Speeds { get; } = [(TremoloSpeed.Measured, new(1, 1, 1)), (TremoloSpeed.Fast, new(0, 0, 0))];
+
+    /// <summary>
+    ///     A part's long notes tremolo-picked where it picks them: each of a beat or longer on a plucked instrument re-struck,
+    ///     its pitches and all, a power chord whole, down and up in turn as the hand alternates, the up-stroke the strum's,
+    ///     a touch softer; at the finest step no quicker than <see cref="FastStrokes" />, a measured picker's 16ths, or 8ths
+    ///     at a tempo too fast for them, a fast one's down to the sextuplet and the 32nd, a tempo's 16ths at a black metal
+    ///     band's and its 32nds at a slow one's, picked until the
+    ///     part's next note at the latest. A note it mutes, bends or ornaments is left as it is.
+    /// </summary>
+    internal static EventTimeline<RealizedNote> Tremolo(EventTimeline<RealizedNote> timeline, int own, Func<double, bool> picks, Func<double, double> beatsPerSecond, bool fast, double stroke) =>
+        EventTimeline.Create(timeline.Duration, timeline.SelectMany((struck, i) =>
+        {
+            // picked until the part's next note at the latest, which the hand moves to
+            var next = timeline.Skip(i + 1).Select(x => (TimelineItem<RealizedNote>?)x).FirstOrDefault(x => x!.Value.Position > struck.Position + 1e-9);
+            var note = next is { } after && after.Position - struck.Position < struck.Value.Duration - 1e-9
+                ? (struck.Value with { Duration = after.Position - struck.Position }).ToTimelineItem(struck.Position)
+                : struck;
+            var state = note.Value.State;
+            var ornament = state.GetStateValue(CompositionStateKinds.Ornament);
+            if (note.Value.Duration < TremoloFrom - 1e-9 || !picks(note.Position) || !InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(state, own), InstrumentTrait.Strums)
+                || state.GetStateValue(CompositionStateKinds.PalmMute) > 0 || state.GetStateValue(CompositionStateKinds.Bend) != 0 || !ornament.IsDefaultOrEmpty)
+                return [struck];
+            // at the quickest tempo it is held at, its start's or its end's, a note held into a faster section's
+            var perSecond = Math.Max(beatsPerSecond(note.Position), beatsPerSecond(note.Position + note.Value.Duration - 1e-6));
+            var step = TremoloSteps.Take(fast ? TremoloSteps.Length : MeasuredSteps).LastOrDefault(x => perSecond / x <= FastStrokes + 1e-9, TremoloSteps[0]);
+            var count = Math.Max(1, (int)Math.Round(note.Value.Duration / step));
+            return Enumerable.Range(0, count).Select(k => (note.Value with
+            {
+                State = state.With(CompositionStateKinds.Strum, (k % 2 == 0 ? 1 : -1) * stroke * perSecond).With(CompositionStateKinds.Picked, k + 1),
+                Duration = k + 1 < count ? step : note.Value.Duration - k * step
+            }).ToTimelineItem(note.Position + k * step));
+        }));
+
     internal static EventTimeline<RealizedNote> Frames(EventTimeline<RealizedNote> timeline, Func<double, double> beatsPerSecond) =>
         EventTimeline.Create(timeline.Duration, timeline.SelectMany((struck, i) =>
         {

@@ -69,7 +69,9 @@ would be without them since, a chord keeping its own where a strong note of the 
 tune note for note the song's without, asked again. The
 third round (24 October 2026) asks those two beside two cuts, each against none: a Cinematic piano melody's double
 stops on its downbeats (`piano-double-stops`, #64) and a Funk part's articulation variants (`funk-articulation`, #59),
-each a genre's choice since (`lineChords`, `articulationModes`), the songs as they were.
+each a genre's choice since (`lineChords`, `articulationModes`), the songs as they were. To ask once built: a riff's
+or a lead's long notes tremolo-picked (`articulation.tremolo`, #352), in Black metal against its riff's tremolo figure,
+which goes if the articulation is preferred, and in Surf rock against none.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
@@ -282,28 +284,19 @@ Reviewed against how the idioms are played, in the order to build:
    patch's every note slapped, which General MIDI cannot mix: Funk's, Funk rock's and Djent's `articulationModes` leaning to
    the accents, Djent's bass its dead notes. Measured after: the chords on the muted program (none but the scratches), the
    bass's notes slapped (its accents); asked by ear, each against the presets as they are.
-2. **A tremolo-picked note** (#352, the tremolo-picked line). A tremolo picker alternates as fast as the hand plays
-   evenly, about 11 to 13 strokes a second, 16ths at a black metal or surf tempo and 32nds or sextuplets at a slower one,
-   on the long notes of a riff or a lead, the pitch changing with the line and the picks not; Black metal picks whole
-   power chords and double stops so, a surf lead its melody, while thrash, melodic metal and post-rock pick their long
-   notes in measured 16ths, slower. An `articulation` option, a section's chance: a riff's or a lead's note a beat or
-   longer re-struck at the finest of the 16th, the sextuplet and the 32nd no faster than a genre's speed (one value:
-   Surf rock and Black metal fast, the other rock and metal presets that take it measured), a power chord re-struck
-   whole, never in a calm section, the up-stroke a touch softer as the strum's. Asked in Black metal against the riff's
-   tremolo figure (every 16th a placed note), which goes if the articulation is preferred, and in Surf rock against none.
-3. **A rhythm guitar on the low string.** A metal band's two guitars mostly play the same riff, double-tracked, low;
+2. **A rhythm guitar on the low string.** A metal band's two guitars mostly play the same riff, double-tracked, low;
    between, the second chugs single palm-muted notes on the open low string under the first's power chords, or holds a
    low note ringing under a clean verse or a lead. First the doubling: the rhythm part playing the riff in unison now
    and then, a pair of `doubling`'s, on its onsets (the doubler keeping to its lead's beats); then, if listening asks for
    more, a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
    chugs' rule muting its weak repeats and an accent a power chord (Metal, Thrash, Djent, Nu metal, Doom). The register is
    the risk: two guitars and the bass in one octave.
-4. **A genre's tuning.** The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or
+3. **A genre's tuning.** The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or
    C2 for Doom's and Nu metal's, B1 for a seven-string's, F#1 for Djent's eight, General MIDI's guitars sounding below
    their written range as a sampler does. A value of the genre's (`register`'s or its own), the riff's and the rhythm
    part's range moved by it, the bass an octave under it as now. Measured first: where the riff of each metal preset
    sits against its range's floor.
-5. **Djent's riff intervals, no device of its own.** A one-note riff on the open low string moving by chromatic small
+4. **Djent's riff intervals, no device of its own.** A one-note riff on the open low string moving by chromatic small
    intervals (a semitone, a tone) or leaping by dissonant large ones (a tritone, a major seventh, a minor ninth over the
    octave), as Djent's riffs do across their songs; not one song's riff built as a device. The riff's scale already
    leans chromatic in Djent (`riffScale` chromatic 40-60-70); first measured: Djent's riffs' intervals off their pedal, how
@@ -325,9 +318,6 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
 - **Intensity moving the energy** (#76, the foundations reviewer), an experiment: the mood's intensity a value of
   Trance's dynamics, the sections' energy drawn around it, asked against the current model; in 28 of 49 presets the
   notes a beat at intensity -1 and 1 differ by 2% or less, the tempo all that moves.
-- **The 6/8 frame** (#329, #320): two rows of `Figures.All`, no stage: a chords figure in 6/8, the chord on the 8ths
-  between the bass's 1 and 4 (onsets 2, 4, 8, 10 of 12), loose as the chick is (Celtic, Folk, Medieval); and the 6/8
-  bell on the claves over two bars (Latin), kept by `Fits` where a 6/8 section draws its claves.
 - **A part's own arpeggio, and the roll** (#102, #357): the arpeggio pool nested by role as the figures' and the
   instruments' are, the shared one where a role is not named (Bluegrass's chop under the banjo, #356); then a roll,
   another `ArpeggioPattern`, three of the chord's notes cycling 3+3+2 8ths from the bar's start, the forward roll at the
@@ -346,9 +336,6 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
 - **A club intro of entries** (#307): the entries' window a genre pool, its options the present ones and the first
   section whole with a part entering each pattern (House, Techno, Trance, Psytrance, Drum and bass); first measured,
   how many bars the club intros' entries take now with texture's build.
-- **A tremolo-picked line** (#352): an `articulation` option, a line's note of a beat or longer re-struck every 16th
-  (Surf rock's lead, Black metal's melody, Lyrical guitar, Medieval, Dungeon synth), the riff's tremolo figure heard and
-  kept (`surf-tremolo`).
 - **Put off:** the game loop (#369), the body replayed from its loop point into the fade as `PlayAt` plays a source:
   two presets, whose fade already replays their last section; taken up should listening ask for the loop.
 

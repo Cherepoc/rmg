@@ -290,7 +290,8 @@ internal enum SongStream
     SoloSpace = 135,
     SoloRhythm = 136,
     SurfDrops = 137,
-    SoloRolls = 138
+    SoloRolls = 138,
+    Tremolo = 139
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>
