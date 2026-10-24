@@ -147,4 +147,39 @@ public sealed class ReharmonisationTest
         await Assert.That(passes).IsGreaterThan(0);
         await Assert.That(faded).IsGreaterThan(0);
     }
+
+    /// <summary>The shapes a Soul song's substitutes play, its own kinds, and secondary dominants alone, by the chords' notes there.</summary>
+    [Test]
+    [Explicit]
+    public async Task ShapesReport()
+    {
+        foreach (var (name, kinds) in new[] { ("soul", new[] { ("third", 1.0), ("applied", 0.4), ("borrowed", 0.2) }), ("dominants", [("third", 0.0), ("applied", 1.0), ("borrowed", 0.0)]) })
+        {
+            var genre = Rmg.Tests.Genres.GenrePresets.With("soul", GenreChoices.ReharmonisedChords, kinds);
+            genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.HarmonyDevices.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("reharmonised", new(1, 1, 1))) };
+            var shapes = new List<string>();
+            var others = new List<string>();
+            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+            {
+                if (song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is not (int index, ImmutableArray<double> at))
+                    continue;
+                var chords = song.Song.TrackEventStateTimelineMap.TrackTimelineMap.GetValueOrDefault(song.Track(TrackRole.Chords))?.EventTimeline.ToArray() ?? [];
+                string? ShapeAt(double position) => chords.Where(n => n.Position <= position + 1e-6).Select(n => n.Value).LastOrDefault() is { } state
+                    ? Classes(state.GetStateValue(StateKinds.ChordNotePitchOffsets).Select(h => h * 12)) is var classes && classes.Count == 0 ? "none"
+                    : ChordShapes.All.FirstOrDefault(x => Classes(x.Targets).SetEquals(classes))?.Name ?? "other" : null;
+                shapes.AddRange(at.Select(ShapeAt).OfType<string>());
+                var span = song.Map.Sections[index];
+                others.AddRange(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)
+                    .Where(x => span.IsWithin(x) && !at.Contains(x)).Select(ShapeAt).OfType<string>());
+            }
+
+            // a shape's notes by their place in the octave, as voicing leaves them
+            static HashSet<double> Classes(IEnumerable<double> semitones) => [..semitones.Select(x => Math.Round((x % 12 + 12) % 12, 2))];
+            string Of(List<string> all) => string.Join(", ", all.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)all.Count:P0}"));
+            Console.WriteLine($"{name}: {shapes.Count} substitutes: {Of(shapes)}");
+            Console.WriteLine($"  {others.Count} other chords of the appearance: {Of(others)}");
+        }
+
+        await Task.CompletedTask;
+    }
 }

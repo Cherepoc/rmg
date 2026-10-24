@@ -265,9 +265,16 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
 ### Soul's reharmonisation (the owner's ask of 24 October 2026)
 
 Built: the substitutes at a phrase's ends and a genre's kinds of them, Soul's secondary dominants and borrowed minors
-beside its chords a third away (`reharmonisation`). Left: a chord's 7th or 9th added where it is reharmonised, as a soul
-arranger thickens the chorus's chords, which needs a chord's shape set as state over its role's pool, as the scale is;
-taken up should `soul-reharmonised` be heard to earn its place.
+beside its chords a third away (`reharmonisation`). A chord's 7th or 9th added where it is reharmonised was planned and
+put off on 24 October 2026, measured first (`ReharmonisationTest.ShapesReport`, 64 Soul songs each reharmonising): a
+substitute keeps the shape its chord drew from Soul's pool, and 64% of them play a seventh, a ninth, a seven-sus4 or a
+thirteenth, against 60% of the appearance's other chords, the secondary dominants 80% (a triad 5%, a six-nine 9%), so the
+chorus is already as thick as an arranger makes it. A chord's shape set as state, a layer over the pool as the scale is,
+was reviewed with it and put off: the shape is the bar's state already (the pool and its index, a role's chord), stamped
+on each note, and the notes' copies carry timing of their own (a pickup's next chord, a held note's shape on the change,
+a polymetric part's), so a common layer would move those into positions for no device that needs it; taken up when a
+second edit after assembly must set a shape, as the ending's home chord does, or a dominant's six-nine is heard to lose
+its pull.
 
 ### Guitars as players play them (the owner's notes of 24 October 2026)
 
