@@ -69,6 +69,12 @@ internal static class Articulations
 
     private const double Sixteenth = 0.25;
 
+    /// <summary>The guitars whose dead notes sound on General MIDI's muted guitar, a jazz guitar and a clean one.</summary>
+    private static readonly int[] MutedProgram = [26, 27];
+
+    /// <summary>General MIDI's muted guitar.</summary>
+    private const int MutedGuitar = 28;
+
     /// <summary>What a ringing note keeps out of: stop time and a part stopped by the form, whose silence it would fill.</summary>
     private const Hold RingsOutOf = Hold.Stop | Hold.Cut;
 
@@ -153,8 +159,12 @@ internal static class Articulations
                 var between = Math.Abs((song.Form.Map.PlaceOf(note.Position).Beat + Sixteenth) % (2 * Sixteenth)) < 1e-6;
                 var chained = i > 0 && Math.Abs(note.Position - timeline[i - 1].Position - Sixteenth) < 1e-6
                               || i + 1 < timeline.Count && Math.Abs(timeline[i + 1].Position - note.Position - Sixteenth) < 1e-6;
+                // on a clean or a jazz guitar its muted sound, General MIDI's muted guitar, as a funk player scratches a
+                // ghost between open chords on the one guitar
                 if (deadNotes && ownLine && between && chained)
-                    state = state.With(CompositionStateKinds.PalmMute, 1);
+                    state = MutedProgram.Contains(program)
+                        ? state.With(CompositionStateKinds.PalmMute, 1).With(CompositionStateKinds.Program, MutedGuitar + 1)
+                        : state.With(CompositionStateKinds.PalmMute, 1);
                 // a bass in octaves, a note off the beat the note before it an octave away, up where its range has it and down
                 // where not, as a disco or a funk bass alternates them; but one leading into the next chord, and a section that
                 // chugs, which mutes its repeats instead

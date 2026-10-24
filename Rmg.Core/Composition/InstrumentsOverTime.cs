@@ -94,16 +94,14 @@ internal static class InstrumentsOverTime
 
     /// <summary>
     ///     The variants of an instrument, as General MIDI has them, each one the same player's on the same rig: a finger or
-    ///     picked bass slapped or picked, a clean guitar muted and a muted one clean, strings in tremolo or pizzicato, a muted
-    ///     trumpet; a driven guitar none, its pinch harmonics a held note's highlight (<see cref="Expression.Pinches" />)
-    ///     and General MIDI's muted guitar a clean one's.
+    ///     picked bass slapped or picked, a muted guitar's line ringing clean, strings in tremolo or pizzicato, a muted
+    ///     trumpet; a driven guitar none, its pinch harmonics a held note's highlight (<see cref="Expression.Pinches" />),
+    ///     and a clean guitar none, whose mute is its dead notes' (<see cref="Articulations" />), never a bar of its chords.
     /// </summary>
     public static ImmutableDictionary<int, ImmutableArray<int>> Variants { get; } = new Dictionary<int, ImmutableArray<int>>
     {
         [33] = [36, 37, 34],
         [34] = [33, 36],
-        [26] = [28],
-        [27] = [28],
         [28] = [27],
         [40] = [44, 45],
         [41] = [44, 45],

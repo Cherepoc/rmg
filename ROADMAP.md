@@ -71,7 +71,8 @@ third round (24 October 2026) asks those two beside two cuts, each against none:
 stops on its downbeats (`piano-double-stops`, #64) and a Funk part's articulation variants (`funk-articulation`, #59),
 each a genre's choice since (`lineChords`, `articulationModes`), the songs as they were. To ask once built: a riff's
 or a lead's long notes tremolo-picked (`articulation.tremolo`, #352), in Black metal against its riff's tremolo figure,
-which goes if the articulation is preferred, and in Surf rock against none.
+which goes if the articulation is preferred, and in Surf rock against none; Funk's guitar, its chords open and its dead
+notes muted, against the part on the muted guitar as it was, and a Funk bass slapping its accents against its own.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
@@ -269,34 +270,23 @@ muted guitar, every one of them a chord of three notes or more, Disco's 76%, Fun
 47-49, its single notes high; the driven guitars' range starts at E2 (40), where a Djent band tunes to B1 or F#1.
 Reviewed against how the idioms are played, in the order to build:
 
-1. **Funk's mute: the line's sound, or a touch, never a big chord's.** A funk guitarist plays three ways on one clean
-   guitar: chords strummed in 16ths, the fretting hand lifting between the accents to scratch them muted, the accents
-   ringing open; clean chord riffs, staccato and open throughout, bright voicings high on the neck, as a disco
-   guitarist plays; and single-note riffs, muted throughout as the riff's own sound (a funk rock riff's) or interleaving
-   muted ghosts with open notes. General MIDI's muted guitar is a palm-muted sound, right for a muted line and for the
-   scratches, wrong for a big chord. So: the rhythm part of Funk, Funk rock, Disco and Soul loses the muted guitar as its
-   instrument, its chords open on the clean guitar; the riff keeps it, a muted line its sound; a clean or jazz guitar's
-   dead note (`PalmMute`, its 16th scratches between the 8ths) sounds on the muted guitar, its program set on the note as a
-   variant's is, so that a clean line interleaves its muted ghosts. The variants' rows muting a clean guitar for a bar go,
-   the per-note mute their place; the muted line's opening clean on its accents or for a bar stays, as a muted riff rings
-   an accent open. The bass, the same way: a finger bass slapping its accents (the variants' accents, `articulationModes`)
-   with dead notes between, as a funk player and a Djent one interchange thumb, pops and fingers, rather than the slap
-   patch's every note slapped, which General MIDI cannot mix: Funk's, Funk rock's and Djent's `articulationModes` leaning to
-   the accents, Djent's bass its dead notes. Measured after: the chords on the muted program (none but the scratches), the
-   bass's notes slapped (its accents); asked by ear, each against the presets as they are.
-2. **A rhythm guitar on the low string.** A metal band's two guitars mostly play the same riff, double-tracked, low;
+Built on 24 October 2026: Funk's mute (the rhythm part's muted guitar out of the funk family's pools, a clean guitar's
+dead notes on the muted guitar, the bar-muting variants gone, a bass slapping its accents in Funk, Funk rock and Djent,
+Disco's and Djent's dead notes) and the tremolo-picked note (#352), each to be asked. Left, in the order to build:
+
+1. **A rhythm guitar on the low string.** A metal band's two guitars mostly play the same riff, double-tracked, low;
    between, the second chugs single palm-muted notes on the open low string under the first's power chords, or holds a
    low note ringing under a clean verse or a lead. First the doubling: the rhythm part playing the riff in unison now
    and then, a pair of `doubling`'s, on its onsets (the doubler keeping to its lead's beats); then, if listening asks for
    more, a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
    chugs' rule muting its weak repeats and an accent a power chord (Metal, Thrash, Djent, Nu metal, Doom). The register is
    the risk: two guitars and the bass in one octave.
-3. **A genre's tuning.** The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or
+2. **A genre's tuning.** The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or
    C2 for Doom's and Nu metal's, B1 for a seven-string's, F#1 for Djent's eight, General MIDI's guitars sounding below
    their written range as a sampler does. A value of the genre's (`register`'s or its own), the riff's and the rhythm
    part's range moved by it, the bass an octave under it as now. Measured first: where the riff of each metal preset
    sits against its range's floor.
-4. **Djent's riff intervals, no device of its own.** A one-note riff on the open low string moving by chromatic small
+3. **Djent's riff intervals, no device of its own.** A one-note riff on the open low string moving by chromatic small
    intervals (a semitone, a tone) or leaping by dissonant large ones (a tritone, a major seventh, a minor ninth over the
    octave), as Djent's riffs do across their songs; not one song's riff built as a device. The riff's scale already
    leans chromatic in Djent (`riffScale` chromatic 40-60-70); first measured: Djent's riffs' intervals off their pedal, how

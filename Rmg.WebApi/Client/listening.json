@@ -43,7 +43,7 @@
         "at": 177.7,
         "from": 173.2,
         "listen": [
-          "Rhythm part (Electric Guitar (muted))",
+          "Rhythm part (Electric Guitar (clean))",
           "Chords (Drawbar Organ)",
           "Riff (Brass Section)"
         ]
@@ -243,51 +243,51 @@
     },
     "seeds": [
       {
-        "seed": "6",
-        "at": 84,
-        "from": 81.7,
+        "seed": "B",
+        "at": 6.6,
+        "from": 4.4,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))"
+          "Bass (Slap Bass 2)"
         ]
       },
       {
-        "seed": "F",
-        "at": 233.1,
-        "from": 230.9,
+        "seed": "V",
+        "at": 2,
+        "from": 0,
         "listen": [
-          "Rhythm part (Electric Guitar (muted))"
+          "Bass (Slap Bass 1)"
         ]
       },
       {
-        "seed": "J",
-        "at": 99.2,
-        "from": 96.9,
+        "seed": "c",
+        "at": 212.3,
+        "from": 210,
         "listen": [
-          "Rhythm part (Electric Guitar (muted))"
+          "Bass (Slap Bass 2)"
         ]
       },
       {
-        "seed": "1F",
-        "at": 12.5,
-        "from": 10,
+        "seed": "12",
+        "at": 159,
+        "from": 156.7,
         "listen": [
-          "Rhythm part (Electric Guitar (muted))"
+          "Bass (Slap Bass 2)"
         ]
       },
       {
-        "seed": "1Q",
-        "at": 186.2,
-        "from": 184.1,
+        "seed": "19",
+        "at": 184.8,
+        "from": 182.4,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))"
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "1f",
-        "at": 90,
-        "from": 87.5,
+        "seed": "20",
+        "at": 128.6,
+        "from": 126.4,
         "listen": [
-          "Chords (Electric Guitar (muted))"
+          "Bass (Slap Bass 1)"
         ]
       }
     ]

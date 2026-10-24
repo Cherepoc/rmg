@@ -35,6 +35,42 @@ public sealed class DeadNoteTest
         await Assert.That(dead).IsGreaterThan(50);
     }
 
+    /// <summary>
+    ///     A funk guitar's chords ring open and its dead notes scratch muted, on the one guitar: no dead note on a clean or jazz
+    ///     guitar, which plays it on General MIDI's muted guitar, its other notes on its own, and the funk presets' rhythm part never on the
+    ///     muted guitar but for its dead notes, a muted line the riff's sound alone.
+    /// </summary>
+    [Test]
+    [Arguments("funk")]
+    [Arguments("funkRock")]
+    [Arguments("disco")]
+    public async Task AFunkGuitarsChords_RingOpen_ItsDeadNotesMuted(string genre)
+    {
+        var (dead, open) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var (track, definition) in song.Song.TrackDefinitions.Where(x => x.Value is PitchInstrumentTrack { Role: TrackRole.Rhythm or TrackRole.Riff }))
+        foreach (var note in song.Song.Notes!.GetValueOrDefault(track)?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0) ?? [])
+        {
+            var own = ((PitchInstrumentTrack)definition).InstrumentCode;
+            var program = InstrumentsOverTime.ProgramOf(note.Value.State, own);
+            var isDead = note.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0;
+            // a dead note never on a clean or a jazz guitar, its muted sound General MIDI's muted guitar, a driven one's played short
+            if (isDead)
+            {
+                dead += program == 28 && own != 28 ? 1 : 0;
+                await Assert.That(program is not (26 or 27)).IsTrue().Because($"seed {song.Seed}, track {track} at {note.Position}");
+            }
+            if (definition.Role == TrackRole.Rhythm && !isDead)
+            {
+                open++;
+                await Assert.That(program).IsNotEqualTo(28).Because($"seed {song.Seed}, track {track} at {note.Position}");
+            }
+        }
+
+        Console.WriteLine($"{genre}: {dead} dead notes muted on a clean guitar, {open} of the rhythm part's notes open");
+        await Assert.That(open).IsGreaterThan(100);
+    }
+
     /// <summary>The songs' own dead notes, none, leave a band that chugs muting no note but a chug's, in a section that chugs, a soloist's ghosts aside: Metal's without its articulations.</summary>
     [Test]
     public async Task TheSongsOwn_MuteOnlyAChugsNotes()

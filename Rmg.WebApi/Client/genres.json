@@ -760,6 +760,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "articulationModes": { "none": [100, 80, 50], "bars": [0, 4, 100], "accents": [0, 25, 60] },
       "length": { "from": [150, 170, 180], "to": [300, 330, 480] },
       "alone": { "drum": 100, "bass": 50, "rhythm": 30 },
       "texture": { "steady": [100, 82, 100], "build": [0, 10, 100], "thin": [0, 4, 100], "alone": [5, 10, 15] },
@@ -800,7 +801,7 @@
         "chords": { "electricPiano1": 100, "electricPiano2": [30, 30, 53], "drawbarOrgan": [40, 40, 52], "electricGuitarClean": 65 },
         "bass": { "electricBassFinger": [80, 80, 100], "slapBass1": [100, 100, 39], "slapBass2": [65, 65, 26], "synthBass1": [0, 10, 25] },
         "riff": { "electricGuitarMuted": [45, 45, 100], "clavinet": [65, 65, 70], "brassSection": [100, 100, 86], "synthBrass1": [10, 15, 25] },
-        "rhythm": { "electricGuitarClean": [65, 65, 100], "electricGuitarMuted": [100, 100, 66], "clavinet": [80, 80, 53] },
+        "rhythm": { "electricGuitarClean": 100, "clavinet": [80, 80, 53] },
         "pad": { "stringEnsemble1": 100, "synthStrings1": 60, "drawbarOrgan": 40 },
         "counterMelody": { "trombone": 100, "electricGuitarClean": 50, "flute": 30, "synthBrass1": [30, 30, 50] },
         "solo": { "altoSax": 100, "tenorSax": 100, "trumpet": 80, "electricGuitarClean": 50, "lead1Square": [30, 30, 60] }
@@ -841,6 +842,7 @@
     "name": "Funk rock",
     "description": "Funk's slap bass, 16th hats, ghost notes and a muted 16th guitar, with an overdriven guitar riff and choruses opening into big distorted chords, sevenths, 7♯9 and power chords, Dorian and Mixolydian, no horns nor keys, the power kit, 88 to 110.",
     "choices": {
+      "articulationModes": { "none": [100, 80, 50], "bars": [0, 4, 100], "accents": [0, 25, 60] },
       "keyChanges": { "lastSection": [0, 5, 20], "sections": [0, 5, 30], "patterns": 0 },
       "length": { "from": [180, 200, 210], "to": [300, 330, 400] },
       "alone": { "drum": 100, "bass": 50, "rhythm": 30 },
@@ -875,7 +877,7 @@
       "harmonicRhythm": { "twoBars": 100, "oneBar": [30, 40, 50] },
       "lineScale": { "pentatonic": [100, 100, 60], "blues": [50, 50, 50], "section": [30, 30, 40], "octatonic": [0, 0, 15] },
       "bass": { "leading": 55 },
-      "instrument": { "melody": { "electricGuitarClean": 100, "overdrivenGuitar": [30, 40, 50] }, "chords": { "electricGuitarClean": 100, "overdrivenGuitar": [30, 40, 50] }, "bass": { "slapBass1": 100, "electricBassFinger": [80, 80, 70], "slapBass2": [40, 40, 30] }, "riff": { "overdrivenGuitar": 100, "electricGuitarClean": 60, "electricGuitarMuted": 40, "distortionGuitar": [20, 30, 40] }, "rhythm": { "electricGuitarMuted": 100, "electricGuitarClean": 70, "overdrivenGuitar": [20, 30, 40] }, "counterMelody": { "electricGuitarClean": 100, "overdrivenGuitar": 40 }, "solo": { "overdrivenGuitar": 100, "distortionGuitar": [50, 60, 70] } },
+      "instrument": { "melody": { "electricGuitarClean": 100, "overdrivenGuitar": [30, 40, 50] }, "chords": { "electricGuitarClean": 100, "overdrivenGuitar": [30, 40, 50] }, "bass": { "slapBass1": 100, "electricBassFinger": [80, 80, 70], "slapBass2": [40, 40, 30] }, "riff": { "overdrivenGuitar": 100, "electricGuitarClean": 60, "electricGuitarMuted": 40, "distortionGuitar": [20, 30, 40] }, "rhythm": { "electricGuitarClean": 100, "overdrivenGuitar": [20, 30, 40] }, "counterMelody": { "electricGuitarClean": 100, "overdrivenGuitar": 40 }, "solo": { "overdrivenGuitar": 100, "distortionGuitar": [50, 60, 70] } },
       "kit": { "power": 100, "standard": [60, 60, 70], "room": [20, 20, 20] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 0, "counterMelody": [20, 30, 40], "drum": 100, "riff": [90, 90, 70], "riffTwin": 0, "rhythm": [60, 70, 70], "solo": [0, 20, 60] },
       "levels": { "bass": 65, "drum": 70 },
@@ -1909,6 +1911,8 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, now and then a clean lead floating over.",
     "choices": {
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": [10, 20, 30], "soloGhosts": [0, 15, 30], "tremolo": 0 },
+      "articulationModes": { "none": [100, 80, 50], "bars": [0, 4, 100], "accents": [0, 25, 60] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "octaveBass": { "sections": 0 },
       "insertion": { "none": 100, "phaser": [0, 0, 30] },
@@ -1971,7 +1975,7 @@
       "instrument": {
         "melody": { "electricGuitarClean": 100, "lead2Sawtooth": 60, "lead5Charang": 40 },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 40, "electricGuitarClean": [40, 50, 60], "pad7Halo": [10, 20, 40] },
-        "bass": { "electricBassPick": 100, "electricBassFinger": 40 },
+        "bass": { "electricBassPick": 100, "electricBassFinger": 40, "slapBass1": [0, 5, 10] },
         "pad": { "pad7Halo": 100, "pad2Warm": 80, "synthStrings1": 60, "choirAahs": 40, "pad8Sweep": 40 },
         "counterMelody": { "lead2Sawtooth": 100, "synthStrings1": 60, "electricGuitarClean": 40 },
         "riff": { "distortionGuitar": 100, "overdrivenGuitar": 30 },
@@ -2117,7 +2121,7 @@
       "louderForms": { "guitars": 0, "quieter": 0 },
       "ghosts": { "sections": [10, 20, 30] },
       "vamp": { "sections": [20, 30, 40] },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": [20, 30, 40], "soloGhosts": [10, 20, 30] },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": [20, 30, 40], "soloGhosts": [10, 20, 30], "deadNotes": [20, 30, 40] },
       "strongEffect": { "none": [100, 70, 30], "pump": 0, "echo": [0, 5, 20], "sweep": [0, 5, 20] },
       "insertion": { "none": 100, "phaser": [30, 40, 50], "wah": [10, 20, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
@@ -2138,7 +2142,7 @@
         "pad": { "stringEnsemble1": 100, "synthStrings1": 60, "stringEnsemble2": 40 },
         "counterMelody": { "violin": 100, "stringEnsemble1": 100, "flute": 30 },
         "riff": { "brassSection": 100, "synthBrass1": [20, 30, 40] },
-        "rhythm": { "electricGuitarMuted": 100, "electricGuitarClean": 70 },
+        "rhythm": { "electricGuitarClean": 100 },
         "solo": { "altoSax": 100, "trumpet": 80 }
       },
       "kit": { "standard": 100, "room": 40, "electronic": [0, 15, 30] },
@@ -2767,7 +2771,7 @@
         "pad": { "drawbarOrgan": 100, "stringEnsemble1": 80, "choirAahs": 70, "voiceOohs": 50 },
         "counterMelody": { "trombone": 70, "stringEnsemble1": 100, "violin": 60 },
         "riff": { "brassSection": 100, "baritoneSax": 40 },
-        "rhythm": { "electricGuitarClean": 100, "electricGuitarMuted": 40 },
+        "rhythm": { "electricGuitarClean": 100 },
         "solo": { "tenorSax": 100, "altoSax": 80, "electricGuitarClean": 60, "trumpet": 50 }
       },
       "kit": { "standard": 100, "room": 70 },
