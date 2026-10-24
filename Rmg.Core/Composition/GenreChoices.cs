@@ -292,6 +292,14 @@ public static class GenreChoices
         [..LinePattern.Tensions.Select(x => (Name(x.Role.ToString()), $"The {TrackRoles.LabelOf(x.Role).ToLowerInvariant()}'s", x.Chance))]);
 
     /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, the chords are struck short, broken chords ring, chords cycle at a chip's frame rate, a 16th chain's notes are muted, and a soloist ghosts its licks (<see cref="Articulations.Apply" />, <see cref="Soloist.Ghosts" />).</summary>
+    /// <summary>How a section's part plays its instrument's other articulation: never, in a bar now and then, or on its accents (<see cref="InstrumentsOverTime.Modes" />).</summary>
+    public static GenreChoice ArticulationModes { get; } = Pool("articulationModes", "Articulation variants",
+        InstrumentsOverTime.Modes.Select(x => (Name(x.Mode.ToString()), InstrumentsOverTime.LabelOf(x.Mode), x.Weight)));
+
+    /// <summary>The chance a section stacks a line's notes, the band's chord under them, where its instrument plays chords (<see cref="Composition.LineChords" />).</summary>
+    public static GenreChoice LineChords { get; } = Chances("lineChords", "Lines stacked",
+        [("riff", "A riff landing on a chord where a section starts", Composition.LineChords.Riff.Chance), ("melody", "A melody's double stops on every bar's downbeat", Composition.LineChords.Melody.Chance)]);
+
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
         [("legato", "Slurred steps", Articulations.LegatoChance), ("roll", "Rolled piano chords", Articulations.RollChance), ("stabs", "Chords as stabs", Articulations.StabChance),
             ("letRing", "Broken chords let ring", Articulations.LetRingChance), ("frames", "Chords cycled at a chip's frame rate", Articulations.FrameChance),
@@ -819,7 +827,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, SurfDrop, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, ArticulationModes, LineChords, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, SurfDrop, DrumSoloFeet, Stickings, Intro, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, RiffSection, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

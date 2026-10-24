@@ -56,12 +56,22 @@ internal static class InstrumentsOverTime
     /// <summary>The instruments of a program's family, itself alone where it has none.</summary>
     public static ImmutableHashSet<int> FamilyOf(int program) => Families.FirstOrDefault(x => x.Contains(program)) ?? [program];
 
+    /// <summary>How a section's part plays its instrument's other articulation, and how likely, a genre's pool of them (<see cref="GenreChoices.ArticulationModes" />).</summary>
     public static ImmutableArray<(ArticulationMode Mode, ByConvention Weight)> Modes { get; } =
     [
         (ArticulationMode.None, new ByConvention(1, 0.93, 1)),
         (ArticulationMode.Bars, new ByConvention(0, 0.04, 1)),
         (ArticulationMode.Accents, new ByConvention(0, 0.03, 1))
     ];
+
+    /// <summary>How the page names a way of articulating.</summary>
+    public static string LabelOf(ArticulationMode mode) => mode switch
+    {
+        ArticulationMode.None => "Its own sound throughout",
+        ArticulationMode.Bars => "A variant in a bar now and then",
+        ArticulationMode.Accents => "A variant on its accents",
+        _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null)
+    };
 
     /// <summary>The chance a bar plays the variant, where a section articulates by bars.</summary>
     public const double BarChance = 0.5;
@@ -159,7 +169,7 @@ internal static class InstrumentsOverTime
                     : keeps && kin.Length > 0 ? context.Pick([..kin.Select(x => new Weighted<RoleInstrument>(Weight(x), x))]).Program
                     : role.Pick(context, sound[index], pool, pitched.InstrumentCode).Program;
                 var program = switches ? switched : pitched.InstrumentCode;
-                var mode = context.Pick(ByConvention.Weigh(Modes, sound[index]));
+                var mode = context.Pick(ByConvention.Weigh(Modes, sound[index], genre.Pool<ArticulationMode>(GenreChoices.ArticulationModes)));
                 // a variant the genre's pool of the part leaves out, a slapped bass in a metal band's, never plays, drawn all the
                 // same; one the role never lists, a guitar's muted strings or a violin's pizzicato, is the player's own
                 var drawnVariants = Variants.GetValueOrDefault(program, []);

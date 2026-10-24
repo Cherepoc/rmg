@@ -32,7 +32,7 @@ FAMILIES = {
     },
     'lines': {
         'choices': 'bass octaveBass alternatingBass bassLanding glide melodyRange lineScale riffScale riff register doubling ornaments tension '
-                   'hook appoggiatura callAndResponse sung glideRate lineRun sequence',
+                   'hook appoggiatura callAndResponse sung glideRate lineRun sequence lineChords',
         'stages': 'Lines|Doubling|Chugs|Ornaments|Notes|Call and response|Kick-out bass',
     },
     'drums': {
@@ -45,7 +45,7 @@ FAMILIES = {
         'stages': 'Solos|Drum solos|Solo answers',
     },
     'sound': {
-        'choices': 'effects strongEffect echo louderForms instrumentSwitches room insertion pan mixFilter levels articulation bendTiming vibratoWidth',
+        'choices': 'effects strongEffect echo louderForms instrumentSwitches room insertion pan mixFilter levels articulation articulationModes bendTiming vibratoWidth',
         'stages': 'Instruments|Articulation|Mix filter|Expression',
     },
 }

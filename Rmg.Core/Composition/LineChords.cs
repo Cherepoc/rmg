@@ -13,24 +13,31 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal static class LineChords
 {
-    /// <summary>How a line stacks: the chance a section does, whether on every bar's downbeat or its first note alone, and how many notes, its own and the chord's under it.</summary>
-    public sealed record Way(double Chance, bool EveryBar, ImmutableArray<Weighted<int>> Voices);
+    /// <summary>
+    ///     How a line stacks: the chance a section does, alike at every end, a genre's option of its own
+    ///     (<see cref="GenreChoices.LineChords" />), whether on every bar's downbeat or its first note alone, and how many
+    ///     notes, its own and the chord's under it.
+    /// </summary>
+    public sealed record Way(string Option, ByConvention Chance, bool EveryBar, ImmutableArray<Weighted<int>> Voices);
 
     /// <summary>The riff, landing on a chord half the time where a section starts, two or three notes.</summary>
-    public static Way Riff { get; } = new(0.5, false, [new(0.6, 2), new(0.4, 3)]);
+    public static Way Riff { get; } = new("riff", new(0.5, 0.5, 0.5), false, [new(0.6, 2), new(0.4, 3)]);
 
     /// <summary>The melody, in a quarter of its sections, a double stop on every bar's downbeat.</summary>
-    public static Way Melody { get; } = new(0.25, true, [new(1, 2)]);
+    public static Way Melody { get; } = new("melody", new(0.25, 0.25, 0.25), true, [new(1, 2)]);
 
     /// <summary>The song with a line's notes stacked as it stacks them, each section drawing from a sequence of its own.</summary>
     /// <param name="streams">A section's sequence, by its place among the song's sections.</param>
+    /// <param name="melody">The song's melody facet, which the chance is read at.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         int lineTrack,
         PitchInstrumentTrack line,
         SongMap map,
         Func<int, IGenerationContext> streams,
-        Way way
+        Way way,
+        Genre genre,
+        double melody
     )
     {
         if (!InstrumentRoles.PlaysChords(line.InstrumentCode) || !song.TrackTimelineMap.ContainsKey(lineTrack))
@@ -42,7 +49,7 @@ internal static class LineChords
         foreach (var (index, span, _) in map.Plays.Where(x => !x.IsEnding))
         {
             var context = streams(index);
-            var stacks = context.TestProbability(way.Chance);
+            var stacks = context.TestProbability(way.Chance.At(melody, genre.Chance(GenreChoices.LineChords, way.Option)));
             var voices = context.Pick(way.Voices);
             if (!stacks)
                 continue;

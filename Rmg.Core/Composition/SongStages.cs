@@ -389,8 +389,8 @@ internal static class SongStages
     internal static SongDraft LineChordsStage(SongDecisions song, SongDraft draft)
     {
         var (riff, melody) = (song.Track(TrackRole.Riff), song.Track(TrackRole.Melody));
-        var timeline = LineChords.Apply(draft.Timeline, riff.Key, (PitchInstrumentTrack)riff.Value, song.Form.Map, index => song.AppearanceStream(SongStream.LineChords, index), LineChords.Riff);
-        timeline = LineChords.Apply(timeline, melody.Key, (PitchInstrumentTrack)melody.Value, song.Form.Map, index => song.AppearanceStream(SongStream.MelodyChords, index), LineChords.Melody);
+        var timeline = LineChords.Apply(draft.Timeline, riff.Key, (PitchInstrumentTrack)riff.Value, song.Form.Map, index => song.AppearanceStream(SongStream.LineChords, index), LineChords.Riff, song.Genre, song.Facets[Facet.Melody]);
+        timeline = LineChords.Apply(timeline, melody.Key, (PitchInstrumentTrack)melody.Value, song.Form.Map, index => song.AppearanceStream(SongStream.MelodyChords, index), LineChords.Melody, song.Genre, song.Facets[Facet.Melody]);
         return draft with { Timeline = timeline };
     }
 
