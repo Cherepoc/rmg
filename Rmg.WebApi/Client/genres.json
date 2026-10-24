@@ -2748,6 +2748,7 @@
     "name": "Soul",
     "description": "An organ, a piano and horns, sevenths and ninths passing through applied dominants, a laid-back backbeat, 4/4 or a swaying 6/8, a last chorus lifted, sax solos answering the tune.",
     "choices": {
+      "reharmonisation": { "third": [100, 50, 40], "applied": [0, 40, 50], "borrowed": [0, 20, 30] },
       "length": { "from": [130, 140, 150], "to": [190, 240, 330] },
       "openingAlone": { "songs": [30, 40, 40] },
       "openingPart": { "riff": 50, "drum": 25, "bass": 25 },

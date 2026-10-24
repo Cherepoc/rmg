@@ -83,25 +83,35 @@ internal static class Reharmonisation
             // a substitute drawn once for each chord of the section's pattern, by its place in it, and played at every pass,
             // as a band keeps the changes it learned each time round
             var drawn = new Dictionary<double, (int Step, ReharmonisationKind Kind)?>();
+            double PlaceOf(SectionSpan span, double at) => Math.Round((at - span.Start) % span.Meter.PatternDuration, 6);
             foreach (var span in passes)
+            foreach (var at in changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9))
             {
+                var place = PlaceOf(span, at);
+                if (drawn.ContainsKey(place))
+                    continue;
+                // drawn whether the song reharmonises or not, so that its draws are as many, a chord in a phrase's last bar the
+                // likelier
+                var atPhraseEnd = place % span.Meter.PhraseDuration >= span.Meter.PhraseDuration - span.Meter.BarDuration - 1e-9;
+                var substitutes = context.TestProbability(atPhraseEnd ? PhraseEndShare : Share);
+                var drawnStep = context.Pick(Substitutes);
+                var kind = kinds.Pick(weights);
+                drawn[place] = substitutes ? (drawnStep, kind) : null;
+            }
+
+            // a chord substituted where it is drawn to be, a dominant only into a chord left as it is, which it then leads
+            // into, the next pass's first where a pass ends
+            for (var p = 0; p < passes.Length; p++)
+            {
+                var span = passes[p];
                 var inSpan = changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9).ToArray();
                 for (var i = 0; i < inSpan.Length; i++)
                 {
-                    var place = Math.Round((inSpan[i] - span.Start) % span.Meter.PatternDuration, 6);
-                    if (!drawn.TryGetValue(place, out var draw))
-                    {
-                        // drawn whether the song reharmonises or not, so that its draws are as many, a chord in a phrase's last
-                        // bar the likelier
-                        var atPhraseEnd = place % span.Meter.PhraseDuration >= span.Meter.PhraseDuration - span.Meter.BarDuration - 1e-9;
-                        var substitutes = context.TestProbability(atPhraseEnd ? PhraseEndShare : Share);
-                        var drawnStep = context.Pick(Substitutes);
-                        var kind = kinds.Pick(weights);
-                        drawn[place] = draw = substitutes ? (drawnStep, kind) : null;
-                    }
-
                     var next = i + 1 < inSpan.Length ? inSpan[i + 1] : span.End;
-                    if (!reharmonises || draw is not var (step, kindOf) || kept.Contains(inSpan[i]) || Substitute(inSpan[i], next, step, kindOf) is not var (moves, scale))
+                    var nextSubstituted = i + 1 < inSpan.Length ? drawn[PlaceOf(span, next)] is not null
+                        : p + 1 < passes.Length && drawn[PlaceOf(passes[p + 1], passes[p + 1].Start)] is not null;
+                    if (!reharmonises || drawn[PlaceOf(span, inSpan[i])] is not var (step, kind) || kept.Contains(inSpan[i])
+                        || kind == ReharmonisationKind.Applied && nextSubstituted || Substitute(inSpan[i], next, step, kind) is not var (moves, scale))
                         continue;
                     substituted.Add((inSpan[i], next, moves, scale));
                 }

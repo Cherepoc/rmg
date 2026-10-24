@@ -262,6 +262,13 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   is song-wide state, and a clamp per section a swing of the section's own, put off until a fast swung section is
   heard rushed.
 
+### Soul's reharmonisation (the owner's ask of 24 October 2026)
+
+Built: the substitutes at a phrase's ends and a genre's kinds of them, Soul's secondary dominants and borrowed minors
+beside its chords a third away (`reharmonisation`). Left: a chord's 7th or 9th added where it is reharmonised, as a soul
+arranger thickens the chorus's chords, which needs a chord's shape set as state over its role's pool, as the scale is;
+taken up should `soul-reharmonised` be heard to earn its place.
+
 ### Guitars as players play them (the owner's notes of 24 October 2026)
 
 Measured over 32 songs of each preset before planning: Funk's rhythm guitar plays 59% of its notes on General MIDI's

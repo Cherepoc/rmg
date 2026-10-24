@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Songs;
@@ -76,6 +77,42 @@ public sealed class ReharmonisationTest
         }
 
         await Assert.That(reharmonised).IsGreaterThan(3);
+    }
+
+    /// <summary>
+    ///     A secondary dominant substituted leads into the next chord: its root a fifth above the next chord's, its triad
+    ///     major and its seventh flat, Mixolydian on its root, as a soul arranger leads into a chorus's chords.
+    /// </summary>
+    [Test]
+    public async Task ASecondaryDominant_IsTheNextChordsDominant()
+    {
+        var genre = Rmg.Tests.Genres.GenrePresets.With("soul", GenreChoices.ReharmonisedChords, ("third", 0), ("applied", 1), ("borrowed", 0));
+        // every song reharmonising
+        genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.HarmonyDevices.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("reharmonised", new(1, 1, 1))) };
+        var dominants = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        {
+            if (song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is not (int, ImmutableArray<double> at))
+                continue;
+            var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+            foreach (var position in at)
+            {
+                var next = changes.FirstOrDefault(x => x > position + 1e-9, double.NaN);
+                if (double.IsNaN(next))
+                    continue;
+                dominants++;
+                var (_, _, chord) = Realizer.GetChord(common.GetEffectiveStateMapAt(position));
+                var (_, _, target) = Realizer.GetChord(common.GetEffectiveStateMapAt(next));
+                var because = $"seed {song.Seed} at {position}";
+                await Assert.That((target.GetPitch(0) - chord.GetPitch(0)).Mod(12)).IsEqualTo(5).Because(because);
+                await Assert.That((chord.GetPitch(2) - chord.GetPitch(0)).Mod(12)).IsEqualTo(4).Because(because);
+                await Assert.That((chord.GetPitch(6) - chord.GetPitch(0)).Mod(12)).IsEqualTo(10).Because(because);
+            }
+        }
+
+        Console.WriteLine($"{dominants} secondary dominants in 64 Soul songs asked for them");
+        await Assert.That(dominants).IsGreaterThan(10);
     }
 
     /// <summary>A pattern's chord substituted is substituted alike at every pass of the pattern, a fade's passes after it too, as a band keeps the changes it learned.</summary>

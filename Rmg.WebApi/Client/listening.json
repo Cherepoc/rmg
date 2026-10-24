@@ -19,23 +19,12 @@
     },
     "seeds": [
       {
-        "seed": "I",
-        "at": 105.3,
-        "from": 102,
+        "seed": "d",
+        "at": 97.4,
+        "from": 94.9,
         "listen": [
-          "Chords (Drawbar Organ)",
-          "Pad (Choir Aahs)",
-          "Bass (Drawbar Organ)"
-        ]
-      },
-      {
-        "seed": "K",
-        "at": 140.8,
-        "from": 139.7,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Riff (Baritone Sax)",
-          "Chords (Acoustic Grand Piano)"
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
@@ -45,16 +34,25 @@
         "listen": [
           "Bass (Electric Bass (finger))",
           "Chords (Electric Piano 1)",
-          "Riff (Baritone Sax)"
+          "Counter-melody (String Ensemble 1)"
         ]
       },
       {
         "seed": "1g",
-        "at": 177.7,
-        "from": 173.2,
+        "at": 182.3,
+        "from": 177.7,
         "listen": [
           "Rhythm part (Electric Guitar (clean))",
-          "Chords (Drawbar Organ)",
+          "Chords (Drawbar Organ)"
+        ]
+      },
+      {
+        "seed": "1j",
+        "at": 162.9,
+        "from": 160.7,
+        "listen": [
+          "Bass (Drawbar Organ)",
+          "Pad (Voice Oohs)",
           "Riff (Brass Section)"
         ]
       },
