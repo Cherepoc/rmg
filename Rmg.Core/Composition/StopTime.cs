@@ -250,7 +250,7 @@ internal static class StopTime
                 : [];
             bool InAHitBar(double position) => hitBars.Any(b => position >= b.Start - 1e-9 && position < b.End - 1e-9);
             bool Fills(double position) => role == TrackRole.Drum && InAFill(position)
-                                           || role == TrackRole.Bass && (InAFill(position) && !InAHitBar(position) || walks.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9));
+                                           || role == TrackRole.Bass && (InAHitBar(position) ? walks.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9) : InAFill(position));
             // a pitched part's every hit in a bar of ensemble hits, the note it sounds there, or its last before, struck, of the
             // chord there, never one the chord changed since, as loud as the song is there
             var struck = role == TrackRole.Drum ? [] : hitBars.SelectMany(b => HitsOf(b.Start, b.End).Where(at => Place(at, track).In && !Fills(at))
