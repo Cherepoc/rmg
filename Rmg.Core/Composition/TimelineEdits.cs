@@ -34,6 +34,13 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         spans.Add((from, to));
     }
 
+    /// <summary>A track left empty from one position up to another: the song's notes there cleared, and the edits' own hits there given up.</summary>
+    public void Leave(int track, double from, double to)
+    {
+        Clear(track, from, to);
+        _hits.GetValueOrDefault(track)?.RemoveAll(x => x.Position >= from - Epsilon && x.Position < to - Epsilon);
+    }
+
     /// <summary>Whether a track strikes at a position once the edits are made: a hit of its own there, or the song's not cleared.</summary>
     public bool Strikes(TrackEventStateTimelineMap<StateMap> song, int track, double position) =>
         _hits.GetValueOrDefault(track)?.Any(x => Math.Abs(x.Position - position) < Epsilon) == true

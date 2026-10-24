@@ -158,6 +158,35 @@ public sealed class DrumSoloTest
     }
 
     /// <summary>
+    ///     A kit's solo over the band's hits catches every one of them with the kick and a crash, as a drummer does, its hands
+    ///     clear of a 16th either side, soloing between them, up to its build.
+    /// </summary>
+    [Test]
+    public async Task AKitsSoloOverHits_CatchesEveryHit_WithTheKickAndACrash()
+    {
+        var genre = Rmg.Tests.Genres.GenrePresets.With("rock", GenreChoices.Solos, ("sections", 1), ("hits", 1));
+        var (kick, cymbal) = (DrumGroups.GetTrackNumber(DrumDefinitions.Kick), DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal));
+        var hands = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Tom }.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var caught = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
+        foreach (var (span, plan, _, solo) in DrumSolos(song).Where(x => x.Solo.Soloists.Contains(0) && song.Solos[x.Solo.Index].HitEvery > 0))
+        {
+            var every = span.Meter.BarDuration * song.Solos[solo.Index].HitEvery;
+            bool StrikesAt(int track, double at) => song.Song.Notes!.GetValueOrDefault(track)?.Any(x => Math.Abs(x.Position - at) < 1e-6) ?? false;
+            for (var at = span.Start; at < plan.Max(x => x.End) - 1e-9; at += every)
+            {
+                caught++;
+                var because = $"seed {song.Seed}, the hit at {at}";
+                await Assert.That(StrikesAt(kick, at) && StrikesAt(cymbal, at)).IsTrue().Because(because);
+                await Assert.That(song.Song.Notes!.Where(x => hands.Contains(x.Key)).SelectMany(x => x.Value).Any(x => Math.Abs(x.Position - at) < 0.25 - 1e-6)).IsFalse().Because(because);
+            }
+        }
+
+        Console.WriteLine($"{caught} hits caught");
+        await Assert.That(caught).IsGreaterThan(10);
+    }
+
+    /// <summary>
     ///     A kit's held gesture but a release a roll on one drum, its strokes growing or fading steadily through it, as a
     ///     drummer swells into the next gesture or eases off, but for the beats' own accents on it, a 0.06 at most.
     /// </summary>
@@ -196,15 +225,18 @@ public sealed class DrumSoloTest
 
             var drummer = song.Soloists[TrackRole.Drum];
             var drums = song.Song.Notes!.Where(x => song.IsDrum(x.Key)).ToArray();
-            foreach (var (span, plan, feet, _) in KitSolos(song))
+            foreach (var (span, plan, feet, solo) in KitSolos(song))
             {
                 solos++;
                 var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
+                // the band's hits under it, which it catches with the kick and a crash (AKitsSoloOverHits_CatchesEveryHit_WithTheKickAndACrash)
+                var every = song.Solos[solo.Index].HitEvery * span.Meter.BarDuration;
+                bool OnABandHit(double position) => every > 0 && ((position - span.Start) % every + every) % every is var off && Math.Min(off, every - off) < 1e-6;
                 // all but the last bar, which the fill into the next section plays, or its build does
                 await Assert.That(plan[^1].End).IsLessThanOrEqualTo(span.LastBar + 1e-9);
                 foreach (var segment in plan)
                 {
-                    var hits = drums.SelectMany(x => x.Value.Where(n => n.Position >= segment.Start - 1e-9 && n.Position < segment.End - 1e-9).Select(n => (Track: x.Key, Note: n))).ToArray();
+                    var hits = drums.SelectMany(x => x.Value.Where(n => n.Position >= segment.Start - 1e-9 && n.Position < segment.End - 1e-9 && !OnABandHit(n.Position)).Select(n => (Track: x.Key, Note: n))).ToArray();
                     // a pause the hands silent, and the feet too unless they keep time
                     if (segment.Gesture == SoloGesture.Pause)
                         await Assert.That(hits.Where(x => !(feet && x.Track == kick))).IsEmpty().Because($"seed {song.Seed} at {segment.Start}");

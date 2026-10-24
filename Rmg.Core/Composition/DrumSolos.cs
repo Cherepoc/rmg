@@ -84,6 +84,9 @@ internal static class DrumSolos
 
     public const double RollSwell = 0.15;
 
+    /// <summary>How far either side of a band's hit under a drum solo the hands leave it to the kick and the crash, in beats, a 16th.</summary>
+    public const double HitClearance = 0.25;
+
     /// <summary>How intense a release is at least to ring a crash with the kick, a quieter one the floor tom's.</summary>
     public const double CrashRelease = 0.6;
 
@@ -467,6 +470,11 @@ internal static class DrumSolos
                 return under.GetStateValue(StateKinds.Velocity);
             }
 
+            // how loud the solo plays at a place, as heard: its arc there, moved by the intensity of the gesture playing
+            double HeardAt(double at, double level) =>
+                StartLoudness + (ClimaxLoudness - StartLoudness) * (SoloLines.Arc((at - whole.Start) / whole.Duration) - SoloLines.ArcStart) / (1 - SoloLines.ArcStart)
+                + IntensityReach * (2 * level - 1);
+
             void Strike(RunSound sound, double at, double share) =>
                 edits.Hit(sound.Track, at, Heard(share) - Under(sound.Track, at), sound.Articulation, whole.SectionId, HitKind.DrumSolo);
 
@@ -505,10 +513,8 @@ internal static class DrumSolos
                         edits.Hit(footTrack, onset, Heard(TimeLoudness) - Under(footTrack, onset), footSound, whole.SectionId, HitKind.DrumSolo);
                 }
 
-                // how loud it plays, as heard: the solo's arc at its place, moved by its intensity, its accents over it and its
-                // taps under it
-                var heard = StartLoudness + (ClimaxLoudness - StartLoudness) * (SoloLines.Arc((start - whole.Start) / whole.Duration) - SoloLines.ArcStart) / (1 - SoloLines.ArcStart)
-                            + IntensityReach * (2 * level - 1);
+                // how loud it plays, as heard, its accents over it and its taps under it
+                var heard = HeardAt(start, level);
                 var (accented, tapped) = (heard + AccentGap, heard - TapDrop);
                 // the soloists in turn by phrase, or together
                 foreach (var player in mode == SoloMode.Trading ? [soloists[phrase % soloists.Count]] : soloists)
@@ -701,6 +707,22 @@ internal static class DrumSolos
                     }
                 }
             }
+
+            // the band's hits under a kit's solo caught with them, as a drummer catches each with the kick and a crash and
+            // solos between: the hands' strokes within a 16th of a hit given up, and the hit struck as loud as the solo's
+            // accent there, up to its build, which rolls over them
+            if (solo.HitEvery > 0 && kitSolos)
+                for (var at = whole.Start; at < span.End - 1e-9; at += whole.Meter.BarDuration * solo.HitEvery)
+                {
+                    var level = playing.FirstOrDefault(x => at >= x.Start - 1e-9 && at < x.End - 1e-9)?.Intensity ?? 0;
+                    foreach (var track in tracks.Where(x => !feetTracks.Contains(x)))
+                        edits.Leave(track, at - HitClearance, at + HitClearance);
+                    foreach (var sound in new[] { kick, crash }.OfType<RunSound>())
+                    {
+                        edits.Leave(sound.Track, at, at + 1e-6);
+                        Strike(sound, at, HeardAt(at, level) + AccentGap);
+                    }
+                }
 
             song = edits.ApplyTo(song);
         }
