@@ -467,7 +467,8 @@ internal sealed class FillGenerator
         if (feet == FillFeet.DoubleKick)
         {
             edits.Clear(kick, from, line);
-            for (var at = Math.Ceiling(from / Sixteenth - 1e-9) * Sixteenth; at < line - 1e-9; at += Sixteenth)
+            // from the song's start at the earliest, a fill into its first section reaching before it
+            for (var at = Math.Max(0, Math.Ceiling(from / Sixteenth - 1e-9) * Sixteenth); at < line - 1e-9; at += Sixteenth)
                 edits.Hit(kick, at, 0, 0, sectionId, HitKind.Fill);
         }
         if (play.Treatment == GrooveTreatment.KickOut)
