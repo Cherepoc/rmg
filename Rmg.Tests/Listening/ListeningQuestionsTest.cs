@@ -53,37 +53,23 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("soul-reharmonised", "A Soul song's later chorus over new chords, its melody sung as before over them: a lift, or the chorus lost?",
+        new("soul-reharmonised", "A Soul song's later chorus over new chords around its melody, the tune the same as sung before: a lift, or the chorus lost?",
             "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.", "soul", [],
             new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
             x => Reharmonised(x) is { } r ? r.Substitutes.Min() : null, Places: x => Reharmonised(x) is { } r ? [..r.Substitutes] : []),
-        new("hiphop-verses", "A Hip-hop verse with its lead out, the beat alone where a rapper's verse would be: a beat tape's room for a voice, or an empty verse?",
-            "How often a verse leaves its melody out (voice.verses, Hip-hop's 60-70-70), against never.", "hipHop", [],
-            new() { ["voice"] = new() { ["verses"] = 0 } },
-            x => Unsung(x).Select(v => (double?)v).Min(), Places: Unsung),
         new("folk-tune", "A Folk tune a little faster and fuller, about four notes a bar rather than three: a tune to follow, or busier than the style?",
             "Folk's melody rhythm (rhythm.melody, speed 60 and fullness 65), against the songs' own.", "folk", [],
             null,
             x => Sung(x).Select(v => (double?)v.Start).Min(), (x, span) => Sung(x).Contains(span),
             WithPatch: new() { ["rhythm.melody"] = new() { ["speed"] = 60, ["fullness"] = 65 } }),
-        new("pop-hook-intro", "A Pop song opening on its chorus's hook, the band playing it before the first verse: a pop record's opening, or the chorus given away?",
-            "Whether Pop's intro may open on the chorus's hook (intro.hook 40-40-10), against its entries and cold openings alone.", "pop", [],
-            null,
-            x => x.Map.Intro.Kind == IntroKind.Hook ? 0 : null, Places: x => x.Map.Intro.Kind == IntroKind.Hook ? [0] : [],
-            WithPatch: new() { ["intro"] = new() { ["hook"] = new[] { 40, 40, 10 } } }),
-        new("pop-drop", "A Pop chorus landing after a bar of the band gone silent: a pop chorus's lift, or a hole?",
-            "Whether Pop's lifts drop, the band silent for the bar before (drop.lifts 0-10-20, dropKind.silent), against the songs' own never.", "pop", [],
-            null,
-            x => Drops(x).Select(d => (double?)d).Min(), Places: Drops,
-            WithPatch: new() { ["drop"] = new() { ["lifts"] = new[] { 0, 10, 20 } }, ["dropKind"] = new() { ["silent"] = 100, ["filtered"] = 0 } }),
-        new("ska-effect", "A Ska song with an echo, a tremolo or a sweep on a part: dub's echo in ska, or an effect a live ska band doesn't play?",
-            "Whether Ska's songs play a strong effect (strongEffect, the songs' own pool), against none.", "ska", [],
-            new() { ["strongEffect"] = GenreChoices.StrongEffect.Options.ToDictionary(x => x.Name, x => (object)(x.Name == "none" ? 100 : 0)) },
-            x => ((SongEffects)x.Trace.Single(e => e.Point == TracePoints.SongEffects).Value!).Strong != StrongEffect.None ? x.Map.Sections[0].Start : null),
-        new("blues-power-chords", "A Blues riff in power chords, a fifth over each note, over the band's seventh chords: a blues-rock riff, or a fifth against the chord?",
-            "How often a Blues section's riff plays in power chords (riff.powerChords, 15-25-30), against single notes; heard worse, a power chord kept to its chord's root and fifth (#92).", "blues", [],
-            new() { ["riff"] = new() { ["powerChords"] = 0 } },
-            x => PowerChords(x).Select(v => (double?)v).Min(), Places: PowerChords)
+        new("piano-double-stops", "A Cinematic piano melody struck with a second note under it on every bar's downbeat, as a pianist voices a tune: fuller, or cluttered?",
+            "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never; not told apart, cut (#64).", "filmPiano", [],
+            new() { ["lineChords"] = new() { ["melody"] = 0 } },
+            x => DoubleStops(x).Select(v => (double?)v).Min(), Places: DoubleStops),
+        new("funk-articulation", "A Funk part switching to its instrument's other sound for a while, a bass slapped on its accents or a guitar muted for a bar: a player's touch, or a sound jumping?",
+            "Whether a section's part plays its instrument's variant (articulationModes, the songs' own: in bars 0-4-100, on accents 0-3-100), against never; not told apart, cut (#59).", "funk", [],
+            new() { ["articulationModes"] = new() { ["none"] = 100, ["bars"] = 0, ["accents"] = 0 } },
+            x => Variants(x).Select(v => (double?)v).Min(), Places: Variants)
     ];
 
     /// <summary>The appearance a song reharmonises, by its place, and where its substitutes start; none where it reharmonises none.</summary>
@@ -93,26 +79,23 @@ public sealed class ListeningQuestionsTest
     /// <summary>Whether a melody note sounds in a span.</summary>
     private static bool IsSung(CorpusSong song, SectionSpan span) => song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Any(n => n.IsWithin(span.Start, span.End)) ?? false;
 
-    /// <summary>Where a song's verses start that leave their melody out, in beats.</summary>
-    private static double[] Unsung(CorpusSong song)
-    {
-        var roles = ((SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!).Roles;
-        return [..song.Map.Sections.Where(x => roles.GetValueOrDefault(x.SectionId) == SectionRole.Verse && !IsSung(song, x)).Select(x => x.Start)];
-    }
-
     /// <summary>A song's appearances its melody sounds in.</summary>
     private static SectionSpan[] Sung(CorpusSong song) => [..song.Map.Sections.Where(x => IsSung(song, x))];
 
-    /// <summary>Where a song's lifts drop, the start of the silent bar before each, in beats.</summary>
-    private static double[] Drops(CorpusSong song) =>
-        [..song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!).Select(x => x - song.Map.BarBefore(x))];
+    /// <summary>Where a song's melody stacks its notes on the band's chord, a double stop, in beats.</summary>
+    private static double[] DoubleStops(CorpusSong song) =>
+        [..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1).Select(x => x.Position) ?? []];
 
-    /// <summary>Where a song's appearances start whose riff plays in power chords, in beats.</summary>
-    private static double[] PowerChords(CorpusSong song)
-    {
-        var sections = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords && (bool)x.Value!).Select(x => x.Section).ToHashSet();
-        return [..song.Map.Sections.Where(x => sections.Contains(x.SectionId)).Select(x => x.Start)];
-    }
+    /// <summary>Where a song's parts play their instrument's variant, as each section that articulates traces it, in beats.</summary>
+    private static double[] Variants(CorpusSong song) =>
+    [
+        ..song.Trace.Where(x => x.Point == TracePoints.InstrumentOverTime)
+            .Select(x => (x.Track, Value: ((int Index, TrackRole, int, ArticulationMode Mode, int Variant))x.Value!))
+            .Where(x => x.Value.Mode != ArticulationMode.None)
+            .SelectMany(x => song.Song.Notes!.GetValueOrDefault(x.Track)?.Where(n => song.Map.PlayAt(n.Position)?.Index == x.Value.Index
+                                                                                  && n.Value.State.GetStateValue(CompositionStateKinds.Program) == x.Value.Variant + 1) ?? [])
+            .Select(x => x.Position)
+    ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

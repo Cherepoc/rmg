@@ -61,7 +61,15 @@ asked. The second round (24 October 2026) asks Soul's reharmonised chorus again 
 verses resting the melody (`hiphop-verses`, 0.39), a Folk tune faster and fuller (`folk-tune`, 0.32), Pop's hook intro
 (`pop-hook-intro`, 1.36) and its silent drop before a chorus (`pop-drop`, 0.44), Ska's strong effect against none
 (`ska-effect`, 0.47) and the Blues riff's power chords against single notes (`blues-power-chords`, 0.21); the song with
-the device given a patch of its own where the preset lacks it.
+the device given a patch of its own where the preset lacks it. Answered the same day: the resting verses, the hook
+intro, the silent drop and the power chords 6-0 and the strong effect 5-0 (one can't tell), Pop taking its hook intro
+(40-40-10) and its silent drop (0-10-20) since, the echo never on a bass's low notes since; the fuller Folk tune 2-2,
+asked again; Soul's reharmonised chorus heard singing another tune, its substitutes decided around the melody as it
+would be without them since, a chord keeping its own where a strong note of the tune does not fit the substitute, the
+tune note for note the song's without, asked again. The
+third round (24 October 2026) asks those two beside two cuts, each against none: a Cinematic piano melody's double
+stops on its downbeats (`piano-double-stops`, #64) and a Funk part's articulation variants (`funk-articulation`, #59),
+each a genre's choice since (`lineChords`, `articulationModes`), the songs as they were.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 

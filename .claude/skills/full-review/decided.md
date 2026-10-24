@@ -141,3 +141,9 @@ rejected while fixing: the place, what was decided, why.
 - The glide's share (`glideRate`, #29 of 22 October 2026, #35 of 16 October) kept beside the glide's chance: the chance
   decides whether a part slides, the share how many of its changes, an 808's few (Trap's 20, Hip-hop's 30) against a
   lead's half; without it a gliding Trap bass would slide into half its notes. Not a cut candidate again.
+- Hip-hop's verses resting the melody (`voice.verses`, #314 of 22 October 2026) kept, heard 6-0 with them on 24 October:
+  a beat tape's room for a voice, not an empty verse. Not a question again.
+- The Blues riff's power chords (`riff.powerChords`, #92 of 22 October 2026) kept, heard 6-0 against single notes on 24
+  October; the fifth over a strong note on the chord's third not changed, as nothing was heard wrong with it.
+- Ska's strong effect at the songs' own pool (#350 of 22 October 2026) kept, heard 5-0 against none on 24 October, the
+  echo off the bass since (an echo never on the bass, whose low notes it blurs).

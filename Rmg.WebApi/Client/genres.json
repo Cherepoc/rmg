@@ -1227,8 +1227,10 @@
   {
     "id": "pop",
     "name": "Pop",
-    "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus now and then lifted a key or played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, mostly major, 90 to 138.",
+    "description": "A verse, a pre-chorus and a chorus on a hook, now and then opening on the hook or landing it after a bar of silence, the last chorus now and then lifted a key or played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, mostly major, 90 to 138.",
     "choices": {
+      "dropKind": { "silent": 100, "filtered": 0 },
+      "drop": { "lifts": [0, 10, 20], "rolls": 0 },
       "ornaments": { "graces": [0, 25, 100], "turns": [0, 8, 100], "trills": [0, 0, 15] },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "soloists": { "solo": 100, "chords": [10, 13, 20], "riff": [10, 10, 20] },
@@ -1260,7 +1262,7 @@
       "lastRepeat": { "songs": [60, 55, 40], "breakdown": [20, 25, 25] },
       "hook": { "choruses": [80, 80, 60], "sections": [10, 20, 20] },
       "pins": { "ground": [50, 50, 30], "backbeat": [90, 90, 60] },
-      "intro": { "entries": 100, "cold": [40, 40, 40] },
+      "intro": { "entries": 100, "cold": [40, 40, 40], "hook": [40, 40, 10] },
       "ending": { "button": 100, "fade": [35, 40, 25], "ringOut": [40, 40, 40] },
       "solos": { "sections": [0, 3, 10], "trades": 0, "hits": [0, 20, 30], "own": [0, 50, 100] },
       "instrument": {

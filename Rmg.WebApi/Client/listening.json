@@ -1,7 +1,7 @@
 [
   {
     "id": "soul-reharmonised",
-    "question": "A Soul song's later chorus over new chords, its melody sung as before over them: a lift, or the chorus lost?",
+    "question": "A Soul song's later chorus over new chords around its melody, the tune the same as sung before: a lift, or the chorus lost?",
     "decides": "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.",
     "genre": "soul",
     "with": {
@@ -70,75 +70,6 @@
         "from": 88.3,
         "listen": [
           "Chords (Electric Piano 1)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "hiphop-verses",
-    "question": "A Hip-hop verse with its lead out, the beat alone where a rapper's verse would be: a beat tape's room for a voice, or an empty verse?",
-    "decides": "How often a verse leaves its melody out (voice.verses, Hip-hop's 60-70-70), against never.",
-    "genre": "hipHop",
-    "with": {
-      "genre": {},
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "voice": {
-          "verses": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "A",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Melody (Alto Sax)"
-        ]
-      },
-      {
-        "seed": "E",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "O",
-        "at": 82.6,
-        "from": 80,
-        "listen": [
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "k",
-        "at": 10.7,
-        "from": 8,
-        "listen": [
-          "Melody (Muted Trumpet)"
-        ]
-      },
-      {
-        "seed": "u",
-        "at": 2.7,
-        "from": 0,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "x",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Melody (Lead 1 (square))"
         ]
       }
     ]
@@ -221,185 +152,10 @@
     ]
   },
   {
-    "id": "pop-hook-intro",
-    "question": "A Pop song opening on its chorus's hook, the band playing it before the first verse: a pop record's opening, or the chorus given away?",
-    "decides": "Whether Pop's intro may open on the chorus's hook (intro.hook 40-40-10), against its entries and cold openings alone.",
-    "genre": "pop",
-    "with": {
-      "genre": {
-        "intro": {
-          "hook": [
-            40,
-            40,
-            10
-          ]
-        }
-      },
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {},
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "M",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Rhythm part (Acoustic Guitar (steel))",
-          "Chords (Acoustic Grand Piano)",
-          "Melody (Lead 1 (square))"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Rhythm part (Acoustic Guitar (steel))",
-          "Chords (Electric Guitar (clean))",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "14",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Chords (Acoustic Grand Piano)",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "1C",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Bass (Synth Bass 1)",
-          "Maracas",
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "1b",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Bass (Synth Bass 1)",
-          "Melody (Lead 6 (voice))",
-          "Pad (String Ensemble 1)"
-        ]
-      },
-      {
-        "seed": "20",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Chords (Acoustic Grand Piano)",
-          "Melody (Lead 1 (square))",
-          "Bass (Electric Bass (finger))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "pop-drop",
-    "question": "A Pop chorus landing after a bar of the band gone silent: a pop chorus's lift, or a hole?",
-    "decides": "Whether Pop's lifts drop, the band silent for the bar before (drop.lifts 0-10-20, dropKind.silent), against the songs' own never.",
-    "genre": "pop",
-    "with": {
-      "genre": {
-        "drop": {
-          "lifts": [
-            0,
-            10,
-            20
-          ],
-          "rolls": 0
-        },
-        "dropKind": {
-          "silent": 100,
-          "filtered": 0
-        }
-      },
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {},
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "9",
-        "at": 48.1,
-        "from": 45.7,
-        "listen": [
-          "Melody (Electric Guitar (clean))",
-          "Hi-Hat",
-          "Chords (Pad 3 (polysynth))"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 139.4,
-        "from": 137.1,
-        "listen": [
-          "Kick",
-          "Rhythm part (Electric Guitar (clean))",
-          "Chords (Synth Brass 1)"
-        ]
-      },
-      {
-        "seed": "j",
-        "at": 131.1,
-        "from": 129.1,
-        "listen": [
-          "Melody (Acoustic Grand Piano)",
-          "Electric Snare",
-          "Bass (Synth Bass 1)"
-        ]
-      },
-      {
-        "seed": "p",
-        "at": 117.8,
-        "from": 115.6,
-        "listen": [
-          "Hi-Hat",
-          "Chords (Synth Brass 1)",
-          "Maracas"
-        ]
-      },
-      {
-        "seed": "y",
-        "at": 134.4,
-        "from": 131.1,
-        "listen": [
-          "Ride",
-          "Kick",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "z",
-        "at": 121.2,
-        "from": 118.9,
-        "listen": [
-          "Hi-Hat",
-          "Chords (Acoustic Guitar (steel))",
-          "Melody (Lead 6 (voice))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "ska-effect",
-    "question": "A Ska song with an echo, a tremolo or a sweep on a part: dub's echo in ska, or an effect a live ska band doesn't play?",
-    "decides": "Whether Ska's songs play a strong effect (strongEffect, the songs' own pool), against none.",
-    "genre": "ska",
+    "id": "piano-double-stops",
+    "question": "A Cinematic piano melody struck with a second note under it on every bar's downbeat, as a pianist voices a tune: fuller, or cluttered?",
+    "decides": "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never; not told apart, cut (#64).",
+    "genre": "filmPiano",
     "with": {
       "genre": {},
       "settings": {}
@@ -407,139 +163,131 @@
     "without": {
       "skip": [],
       "genre": {
-        "strongEffect": {
-          "none": 100,
-          "echo": 0,
-          "tremolo": 0,
-          "sweep": 0,
-          "pump": 0,
-          "wobble": 0,
-          "squelch": 0,
-          "opening": 0,
-          "gate": 0
+        "lineChords": {
+          "melody": 0,
+          "riff": 50
         }
       },
       "settings": {}
     },
     "seeds": [
       {
-        "seed": "8",
-        "at": 84.5,
-        "from": 83,
+        "seed": "7",
+        "at": 97.2,
+        "from": 94.2,
         "listen": [
-          "Melody (Electric Guitar (clean))"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "A",
-        "at": 0,
-        "from": 0,
+        "seed": "B",
+        "at": 122.8,
+        "from": 120,
         "listen": [
-          "Melody (Alto Sax)"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "u",
-        "at": 143.7,
-        "from": 142,
+        "seed": "I",
+        "at": 66.2,
+        "from": 64.1,
         "listen": [
-          "Riff (Brass Section)"
-        ]
-      },
-      {
-        "seed": "1J",
-        "at": 131.6,
-        "from": 130.1,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Drums"
-        ]
-      },
-      {
-        "seed": "1O",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))",
-          "Drums"
-        ]
-      },
-      {
-        "seed": "1S",
-        "at": 82.3,
-        "from": 80.6,
-        "listen": [
-          "Rhythm part (Rock Organ)",
-          "Drums"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "blues-power-chords",
-    "question": "A Blues riff in power chords, a fifth over each note, over the band's seventh chords: a blues-rock riff, or a fifth against the chord?",
-    "decides": "How often a Blues section's riff plays in power chords (riff.powerChords, 15-25-30), against single notes; heard worse, a power chord kept to its chord's root and fifth (#92).",
-    "genre": "blues",
-    "with": {
-      "genre": {},
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "riff": {
-          "powerChords": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "2",
-        "at": 28.5,
-        "from": 26.7,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 34.9,
-        "from": 32.1,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 173.7,
-        "from": 171.4,
-        "listen": [
-          "Riff (Overdriven Guitar)"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
         "seed": "W",
-        "at": 51.4,
-        "from": 49.3,
+        "at": 118.7,
+        "from": 116.8,
         "listen": [
-          "Riff (Brass Section)"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "X",
-        "at": 24.8,
-        "from": 22.8,
+        "seed": "b",
+        "at": 88.3,
+        "from": 85.5,
         "listen": [
-          "Riff (Brass Section)"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "l",
-        "at": 67,
-        "from": 64.2,
+        "seed": "h",
+        "at": 30.8,
+        "from": 27.7,
         "listen": [
-          "Riff (Electric Guitar (clean))"
+          "Melody (Acoustic Grand Piano)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "funk-articulation",
+    "question": "A Funk part switching to its instrument's other sound for a while, a bass slapped on its accents or a guitar muted for a bar: a player's touch, or a sound jumping?",
+    "decides": "Whether a section's part plays its instrument's variant (articulationModes, the songs' own: in bars 0-4-100, on accents 0-3-100), against never; not told apart, cut (#59).",
+    "genre": "funk",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "articulationModes": {
+          "none": 100,
+          "bars": 0,
+          "accents": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 84,
+        "from": 81.7,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 233.1,
+        "from": 230.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 99.2,
+        "from": 96.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "1F",
+        "at": 12.5,
+        "from": 10,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "1Q",
+        "at": 186.2,
+        "from": 184.1,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1f",
+        "at": 90,
+        "from": 87.5,
+        "listen": [
+          "Chords (Electric Guitar (muted))"
         ]
       }
     ]
