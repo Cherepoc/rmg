@@ -30,12 +30,12 @@
       },
       {
         "seed": "1D",
-        "at": 220.8,
-        "from": 217.6,
+        "at": 236.8,
+        "from": 233.6,
         "listen": [
           "Bass (Electric Bass (finger))",
-          "Chords (Electric Piano 1)",
-          "Melody (Acoustic Grand Piano)"
+          "Melody (Acoustic Grand Piano)",
+          "Chords (Electric Piano 1)"
         ]
       },
       {
@@ -43,19 +43,9 @@
         "at": 180.7,
         "from": 178,
         "listen": [
-          "Melody (Electric Guitar (clean))",
           "Counter-melody (Electric Guitar (clean))",
+          "Melody (Electric Guitar (clean))",
           "Riff (Brass Section)"
-        ]
-      },
-      {
-        "seed": "1j",
-        "at": 158,
-        "from": 155.8,
-        "listen": [
-          "Chords (Drawbar Organ)",
-          "Melody (Electric Piano 1)",
-          "Bass (Drawbar Organ)"
         ]
       },
       {
@@ -64,6 +54,14 @@
         "from": 136.1,
         "listen": [
           "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "1s",
+        "at": 121.7,
+        "from": 118.3,
+        "listen": [
+          "Chords (Electric Piano 1)"
         ]
       },
       {

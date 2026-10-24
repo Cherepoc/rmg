@@ -18,9 +18,9 @@ public sealed class ReharmonisationTest
 
     /// <summary>
     ///     A reharmonised appearance's melody sings the tune its section's appearance before sang, as an arranger keeps the
-    ///     tune and changes the chords under it: its notes over the substitutes the same as heard before, where they fit the
-    ///     new chord, but where it lands on a chord or leads into the next (measured over 64 songs: 59-68% at offsets 0 and a
-    ///     million, from 15-25% placed anew over them).
+    ///     tune and changes the chords around it: its notes over the substitutes the same as heard before, raised with the
+    ///     key where it lifts, but where the tune had no note there (measured over 64 songs: 94-98% at offsets 0 and a
+    ///     million, from 59-68% where its notes were kept only where they fitted the substitutes).
     /// </summary>
     [Test]
     public async Task AReharmonisedAppearance_SingsItsTuneAsHeardBefore()
@@ -37,18 +37,19 @@ public sealed class ReharmonisationTest
             // the notes over a substitute, from its change to the next
             var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).Append(span.End).ToArray();
+            int Key(double at) => common.GetEffectiveStateMapAt(at).GetStateValue(StateKinds.KeyOffset);
             bool OverSubstitute(double at) => found.At.Any(x => at >= x - 1e-9 && at < changes.First(c => c > x + 1e-9) - 1e-9);
             foreach (var note in melody.Where(x => span.IsWithin(x.Position) && OverSubstitute(x.Position)))
                 if (sung.TryGetValue(Math.Round(note.Position - span.Start + source.Start, 6), out var before))
                 {
                     notes++;
-                    kept += note.Value.Pitches[0] == before ? 1 : 0;
+                    kept += note.Value.Pitches[0] == before + Key(note.Position) - Key(note.Position - span.Start + source.Start) ? 1 : 0;
                 }
         }
 
         Console.WriteLine($"  {kept} of {notes} melody notes over a substitute as sung before ({kept / (double)Math.Max(1, notes):P0})");
         await Assert.That(notes).IsGreaterThan(20);
-        await Assert.That(kept / (double)notes).IsGreaterThan(0.4);
+        await Assert.That(kept / (double)notes).IsGreaterThan(0.9);
     }
 
     [Test]

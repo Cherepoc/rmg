@@ -243,9 +243,10 @@ internal sealed class LinePattern
     }
 
     /// <summary>
-    ///     A reharmonised appearance's notes singing its source's, each where the source sang it, where it fits the new chord
-    ///     there as a hook's repeat does (<see cref="FitsHook" />), and the line's own where it does not, so that the tune is
-    ///     the one heard and the chords under it new; but a note that lands on its chord, which keeps its landing.
+    ///     A reharmonised appearance's notes singing its source's, each where the source sang it, before its substitutes are
+    ///     decided under them (<see cref="Reharmonisation" />): every note as sung over a chord alike, the same steps from its
+    ///     root, a key's lift raising them with it, and, over another chord, where it fits it as a hook's repeat does
+    ///     (<see cref="FitsHook" />), but a note that lands on it, which keeps its landing.
     /// </summary>
     /// <param name="span">The appearance reharmonised.</param>
     /// <param name="source">Its section's appearance before it, whose tune it sings.</param>
@@ -253,10 +254,21 @@ internal sealed class LinePattern
     {
         var at = notes.Select((x, i) => (Position: Math.Round(x.Note.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
         for (var i = 0; i < notes.Length; i++)
-            if (span.IsWithin(notes[i].Note.Position) && !lands(i) && at.TryGetValue(Math.Round(notes[i].Note.Position - span.Start + source.Start, 6), out var sung)
-                && FitsHook(notes[i], notes[sung].Pitch))
-                notes[i] = notes[i] with { Pitch = notes[sung].Pitch };
+        {
+            if (!span.IsWithin(notes[i].Note.Position) || !at.TryGetValue(Math.Round(notes[i].Note.Position - span.Start + source.Start, 6), out var sung))
+                continue;
+            var (from, to) = (notes[sung].Note.Chord, notes[i].Note.Chord);
+            var step = LinePlacement.GetScaleStep(from, notes[sung].Pitch);
+            var pitch = to.GetPitch(step) + notes[sung].Pitch - from.GetPitch(step);
+            if (Alike(notes[sung].Note, notes[i].Note) || !lands(i) && FitsHook(notes[i], pitch))
+                notes[i] = notes[i] with { Pitch = pitch };
+        }
     }
+
+    /// <summary>Whether two notes' chords are alike, their scales and their notes the same from their roots, wherever their roots are.</summary>
+    private static bool Alike(LineNote a, LineNote b) =>
+        Enumerable.Range(0, Scales.StepCount).All(x => a.Chord.GetPitch(x) - a.Chord.Root == b.Chord.GetPitch(x) - b.Chord.Root)
+        && a.Classes.Select(x => (x - a.Chord.Root).Mod(12)).ToHashSet().SetEquals(b.Classes.Select(x => (x - b.Chord.Root).Mod(12)));
 
     /// <summary>
     ///     A hooked section's repeated bars singing their letter's first bar's notes, each where the first played it in
