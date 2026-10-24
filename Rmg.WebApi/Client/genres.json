@@ -1597,6 +1597,7 @@
     "name": "Symphonic metal",
     "description": "Distorted guitars and a double kick under a choir, strings and a church organ, a soaring melody on a violin or a voice-like lead, harmonic minor's raised cadence, keyboard and guitar solos, a lifted last chorus.",
     "choices": {
+      "drumRole": { "time": { "hiHat": 100, "ride": [40, 40, 40], "tom": [10, 30, 40] } },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "ensembleHits": { "sections": [15, 20, 25] },
@@ -1688,6 +1689,7 @@
     "name": "Doom metal",
     "description": "Slow and crushing: low power chords held and left to ring over a heavy, sparse beat, long stretches on one chord creeping by half steps, the tritone and Phrygian, an organ, a mournful lead, few solos, long songs.",
     "choices": {
+      "drumRole": { "time": { "hiHat": 100, "ride": [50, 50, 50], "tom": [10, 30, 40] } },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 10, 20] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
@@ -2014,6 +2016,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, the kick and the bass with it, a picked or clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "drumRole": { "time": { "hiHat": 100, "ride": [30, 30, 30], "tom": [10, 40, 50] } },
       "rudiments": { "flams": [0, 5, 20], "drags": [0, 0, 10] },
       "octaveBass": { "sections": 0 },
       "intensity": { "from": -20, "to": 100 },
@@ -2620,6 +2623,7 @@
     "name": "Surf rock",
     "description": "Instrumental surf: clean, bright guitars drenched in reverb, a tremolo-picked melody, minor and exotic Phrygian lines, a driving picked bass and pounding toms, fast and straight.",
     "choices": {
+      "drumRole": { "time": { "hiHat": 100, "ride": [30, 30, 30], "tom": [30, 50, 60] } },
       "tremoloSpeed": { "measured": 0, "fast": 100 },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [10, 25, 40] },
       "tempo": { "from": [140, 140, 130], "to": [175, 180, 200] },

@@ -10,6 +10,12 @@ internal static class DrumGroups
     /// <summary>The chance that a section may groove on the toms, which play mostly in fills.</summary>
     private const double TomsGrooveChance = 0.25;
 
+    /// <summary>
+    ///     How often a group grooves at least to lead a role a section draws one of its drums into, as the toms keep a tom
+    ///     groove's time; a group that all but never grooves, the cymbals' accents or the calls, never leads.
+    /// </summary>
+    public const double LeadsFrom = TomsGrooveChance;
+
     /// <summary>The chance that a section may groove on the cymbal, which marks mostly where a section lands.</summary>
     private const double AccentsGrooveChance = 0.12;
 

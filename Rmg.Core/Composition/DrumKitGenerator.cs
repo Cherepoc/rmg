@@ -42,13 +42,17 @@ internal static class DrumKitGenerator
         var leads = ImmutableDictionary.CreateBuilder<DrumRole, PercussionInstrumentDefinition>();
         foreach (var lead in LeadRoles)
         {
-            // a lead of a group that grooves, not of one that all but never does, such as the calls
-            var grooving = family.Where(x => !leads.ContainsValue(x) && DrumGroups.GroupOf(x).GrooveChance >= 1).ToArray();
+            // a lead of a group that grooves, or of one that grooves now and then where the section draws its drum into the
+            // role, the toms keeping a tom groove's time, not of one that all but never does, such as the calls
+            var grooving = family.Where(x => !leads.ContainsValue(x)
+                                             && (DrumGroups.GroupOf(x).GrooveChance >= 1 || roles[x] == lead && DrumGroups.GroupOf(x).GrooveChance >= DrumGroups.LeadsFrom - 1e-9)).ToArray();
             // among the drums playing it, one whose own role it is where any is, so that a drum drawn into it from
-            // another is left to lead its own
+            // another lead is left to lead its own, beside a colour's drawn into it, which leads none of its own, as the toms
+            // keeping a tom groove's time beside the hi-hat
             var playing = grooving.Where(x => roles[x] == lead).ToArray();
             var own = grooving.Where(x => x.MainRole == lead).ToArray();
-            var candidates = playing.Intersect(own).ToArray() is { Length: > 0 } both ? both : playing.Length > 0 ? playing : own;
+            var candidates = playing.Intersect(own).ToArray() is { Length: > 0 } both ? [..both, ..playing.Where(x => !LeadRoles.Contains(x.MainRole))]
+                : playing.Length > 0 ? playing : own;
             if (candidates.Length == 0)
                 continue;
 
