@@ -33,15 +33,13 @@ public sealed class SongMapTest
     public async Task APosition_PlaysAsItsSection_AnIntroAsItsSource_TheEndingAsTheLast()
     {
         // an entries intro the first section's first bars, its place in it the position moved by the section's start
-        await Assert.That(Map.PlayAt(4)).IsEqualTo(new Play(0, Map.Sections[0], 8));
-        await Assert.That(Map.PlayAt(4)!.Value.Played.Start).IsEqualTo(0);
-        await Assert.That(Map.PlayAt(40)).IsEqualTo(new Play(1, Map.Sections[1], 0));
-        await Assert.That(Map.PlayAt(73)).IsEqualTo(new Play(1, Map.Sections[1], 0));
+        await Assert.That(Map.PlayAt(4)).IsEqualTo(new Play(0, Map.Sections[0] with { Start = 0 }, false));
+        await Assert.That(Map.PlayAt(40)).IsEqualTo(new Play(1, Map.Sections[1], false));
+        await Assert.That(Map.PlayAt(73)).IsEqualTo(new Play(1, Map.Sections[1], false));
 
         // a hook intro its chorus's, the second section here
         var hooked = Map with { Intro = new IntroSpan(IntroKind.Hook, 8, Source: 1) };
-        await Assert.That(hooked.PlayAt(4)).IsEqualTo(new Play(1, Map.Sections[1], 40));
-        await Assert.That(hooked.PlayAt(4)!.Value.Played.SectionId).IsEqualTo(1);
+        await Assert.That(hooked.PlayAt(4)).IsEqualTo(new Play(1, Map.Sections[1] with { Start = 0 }, false));
     }
 
     [Test]

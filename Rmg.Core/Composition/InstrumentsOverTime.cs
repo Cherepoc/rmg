@@ -194,7 +194,7 @@ internal static class InstrumentsOverTime
                     StateTrace.RecordSection(TracePoints.InstrumentOverTime, track, span.SectionId, $"{program} {mode} {variant}", (index, pitched.Role, program, variants.IsEmpty ? ArticulationMode.None : mode, variant));
                 foreach (var (note, i) in inSpan)
                 {
-                    var bar = Math.Clamp(span.BarOf(note.Position + map.PlayAt(note.Position)!.Value.Offset), 0, bars.Length - 1);
+                    var bar = Math.Clamp(map.PlayAt(note.Position)!.Value.Span.BarOf(note.Position), 0, bars.Length - 1);
                     var articulated = !variants.IsEmpty && mode switch
                     {
                         ArticulationMode.Bars => bars[bar],

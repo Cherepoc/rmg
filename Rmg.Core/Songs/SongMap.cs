@@ -61,9 +61,9 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
         if (Sections.IsEmpty)
             return null;
         if (position < Origin - 1e-9)
-            return new Play(Intro.Source, Sections[Intro.Source], Sections[Intro.Source].Start);
+            return new Play(Intro.Source, Sections[Intro.Source] with { Start = 0 }, false);
         var index = IndexAt(position + 1e-9);
-        return new Play(Math.Max(0, index), Sections[Math.Max(0, index)], 0);
+        return new Play(Math.Max(0, index), Sections[Math.Max(0, index)], false);
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     ///     on, marked as such so that a stage that leaves a final chord alone may keep out of it. A stage of the sections
     ///     walks these, so that what is made from a section is treated as its source is.
     /// </summary>
-    public IEnumerable<(int Index, SectionSpan Span, bool IsEnding)> Plays
+    public IEnumerable<Play> Plays
     {
         get
         {
@@ -82,9 +82,9 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
             if (IntroPlay is { } intro)
                 yield return intro;
             for (var i = 0; i < Sections.Length; i++)
-                yield return (i, Sections[i], false);
+                yield return new Play(i, Sections[i], false);
             if (Ending.Duration > 1e-9)
-                yield return (Sections.Length - 1, Sections[^1] with { Start = Ending.Start, Duration = Ending.Duration, Cut = 0 }, true);
+                yield return new Play(Sections.Length - 1, Sections[^1] with { Start = Ending.Start, Duration = Ending.Duration, Cut = 0 }, true);
         }
     }
 
@@ -92,20 +92,20 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     ///     An intro played as a section, a hook's as its chorus and an intro of entries' window as the first section, its
     ///     source's span moved there (<see cref="Window" />); none for an intro of its own.
     /// </summary>
-    private (int Index, SectionSpan Span, bool IsEnding)? IntroPlay =>
-        Intro.Kind == IntroKind.Hook && Origin > 1e-9 ? (Intro.Source, Sections[Intro.Source] with { Start = 0, Duration = Origin, Cut = 0 }, false)
-        : Window is { } window ? (0, window, false)
+    private Play? IntroPlay =>
+        Intro.Kind == IntroKind.Hook && Origin > 1e-9 ? new Play(Intro.Source, Sections[Intro.Source] with { Start = 0, Duration = Origin, Cut = 0 }, false)
+        : Window is { } window ? new Play(0, window, false)
         : null;
 
     /// <summary>The stretch a position plays in as a section (<see cref="Plays" />); none in an intro of its own, a count-in's or a cold one's.</summary>
-    public (int Index, SectionSpan Span, bool IsEnding)? PlayingAt(double position)
+    public Play? PlayingAt(double position)
     {
         if (Sections.IsEmpty)
             return null;
         if (position < Origin - 1e-9)
             return IntroPlay is { } intro && intro.Span.IsWithin(position) ? intro : null;
         if (SectionAt(position) is { } span)
-            return (IndexAt(position + 1e-9), span, false);
+            return new Play(IndexAt(position + 1e-9), span, false);
         return Ending.Duration > 1e-9 && position < Ending.Start + Ending.Duration - 1e-9 ? Plays.Last() : null;
     }
 
@@ -222,11 +222,11 @@ public sealed record IntroSpan(IntroKind Kind, double Duration, IntroWindow Wind
 ///     The appearance a stretch of the song plays as (<see cref="SongMap.PlayAt" />): its place among the sections, its
 ///     section's span, and how far the stretch is from it, which a position adds to reach the same place in it.
 /// </summary>
-public readonly record struct Play(int Index, SectionSpan Span, double Offset)
-{
-    /// <summary>The section's span moved to where the stretch plays it, whose bars count from there.</summary>
-    public SectionSpan Played => Span with { Start = Span.Start - Offset };
-}
+/// <summary>
+///     A stretch the song plays as a section: the place of the section it plays as, that section's span moved to where the
+///     stretch plays it, whose bars count from there, and whether it is the ending, the last section's bars counted on.
+/// </summary>
+public readonly record struct Play(int Index, SectionSpan Span, bool IsEnding);
 
 /// <summary>A part of the band coming in, in an intro of entries.</summary>
 /// <param name="Tracks">The part's tracks.</param>

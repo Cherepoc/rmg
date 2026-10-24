@@ -70,7 +70,7 @@ internal static class ExpressionRender
     ///     its source's, a hook's its chorus's, in the chorus's meter (<see cref="SongMap.PlayAt" />); a song of no sections is a mistake.
     /// </summary>
     private static SectionSpan SectionAt(SongMap? map, double position) =>
-        map?.PlayAt(position)?.Played ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
+        map?.PlayAt(position)?.Span ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
 
     /// <summary>How far a time is from its bar's pulse before to the next, from 0 to 1: the beats of 4/4, the dotted quarters of 6/8, the groups of 7/8.</summary>
     private static double SincePulse(SongMap? map, double at)
@@ -110,7 +110,7 @@ internal static class ExpressionRender
     internal static double CyclesPerBeat(double rate, double beatSeconds) => VibratoGrid.MinBy(x => Math.Abs(Math.Log(x / (rate * beatSeconds))));
 
     /// <summary>Where a vibrato's cycles count from: the start of the section playing at a place, the song's for none.</summary>
-    internal static double GridOrigin(SongMap? map, double position) => map?.PlayAt(position)?.Played.Start ?? 0;
+    internal static double GridOrigin(SongMap? map, double position) => map?.PlayAt(position)?.Span.Start ?? 0;
 
     /// <summary>The track's expression, from its notes, as they are swung, at the song's tempo, a gate's and a filter's by the sections of the map, under the whole mix's closing.</summary>
     public static (ImmutableArray<(double Position, int Value)> Bends, ImmutableArray<(double Position, int Controller, int Value)> Controllers,
