@@ -1,402 +1,94 @@
 [
   {
-    "id": "funk-rhythm",
-    "question": "A Funk soloist riffing on the band's rhythm, a note or two struck short on its onsets: in the groove, or a soloist gone quiet?",
-    "decides": "How often a soloist riffs on the band's rhythm (soloStyle.rhythm, Funk's 30-40-50), against never.",
-    "genre": "funk",
+    "id": "soul-reharmonised",
+    "question": "A Soul song's later chorus over new chords, its melody sung as before over them: a lift, or the chorus lost?",
+    "decides": "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.",
+    "genre": "soul",
     "with": {
+      "genre": {},
       "settings": {}
     },
     "without": {
       "skip": [],
       "genre": {
-        "soloStyle": {
-          "rhythm": 0
+        "harmonyDevices": {
+          "reharmonised": 0
         }
       },
       "settings": {}
     },
     "seeds": [
-      {
-        "seed": "8",
-        "at": 183.4,
-        "listen": [
-          "Melody (Trumpet)"
-        ]
-      },
-      {
-        "seed": "R",
-        "at": 244.7,
-        "listen": [
-          "Bass (Slap Bass 1)"
-        ]
-      },
-      {
-        "seed": "a",
-        "at": 191.9,
-        "listen": [
-          "Solo (Tenor Sax)"
-        ]
-      },
-      {
-        "seed": "g",
-        "at": 129.3,
-        "listen": [
-          "Solo (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "1l",
-        "at": 191.9,
-        "listen": [
-          "Rhythm part (Electric Guitar (muted))"
-        ]
-      },
-      {
-        "seed": "1x",
-        "at": 78.6,
-        "listen": [
-          "Chords (Drawbar Organ)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "surf-drop",
-    "question": "A Surf guitar's last bar before a louder section slid down the neck in palm-muted 16ths onto it: the surf drop, or a gimmick?",
-    "decides": "Whether a lift into a louder section takes a surf drop (surfDrop.lifts, Surf's 30-40-50), against none.",
-    "genre": "surf",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "surfDrop": {
-          "lifts": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 15.4,
-        "listen": [
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 10.5,
-        "listen": [
-          "Riff (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 10.6,
-        "listen": [
-          "Riff (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "U",
-        "at": 14.3,
-        "listen": [
-          "Riff (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "a",
-        "at": 101.9,
-        "listen": [
-          "Melody (Electric Guitar (clean))"
-        ]
-      },
-      {
-        "seed": "d",
-        "at": 23,
-        "listen": [
-          "Riff (Electric Guitar (clean))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "jazz-chromatic",
-    "question": "A Jazz soloist's run approaching its note on the beat from a half step away: a jazz line, or a wrong note?",
-    "decides": "How often a soloist's run approaches its note on the beat chromatically (soloStyle.chromatic, Jazz's 40-50-60), against never.",
-    "genre": "jazz",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "soloStyle": {
-          "chromatic": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 239.3,
-        "listen": [
-          "Solo (Electric Guitar (jazz))"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 136.1,
-        "listen": [
-          "Solo (Tenor Sax)"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 74.8,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "B",
-        "at": 188.4,
-        "listen": [
-          "Chords (Electric Guitar (jazz))"
-        ]
-      },
-      {
-        "seed": "E",
-        "at": 204.4,
-        "listen": [
-          "Solo (Alto Sax)"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 385.6,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "idm-64ths",
-    "question": "An IDM hi-hat rolling in 64ths, a drill splintering the beat: the style's, or a buzz?",
-    "decides": "How often IDM's hat rolls drill in 64ths (hatRollRate.sixtyFourths, 0-20-60), against its 32nds and triplets alone.",
-    "genre": "idm",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "hatRollRate": {
-          "sixtyFourths": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "B",
-        "at": 130.9,
-        "listen": [
-          "Hi-Hat"
-        ]
-      },
       {
         "seed": "I",
-        "at": 218.2,
+        "at": 109.3,
+        "from": 106.1,
         "listen": [
-          "Hi-Hat"
+          "Melody (Trumpet)",
+          "Chords (Drawbar Organ)",
+          "Bass (Drawbar Organ)"
         ]
       },
       {
-        "seed": "L",
-        "at": 6.2,
+        "seed": "1D",
+        "at": 220.8,
+        "from": 217.6,
         "listen": [
-          "Hi-Hat"
+          "Bass (Electric Bass (finger))",
+          "Chords (Electric Piano 1)",
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "N",
-        "at": 200.8,
+        "seed": "1G",
+        "at": 180.7,
+        "from": 178,
         "listen": [
-          "Hi-Hat"
+          "Melody (Electric Guitar (clean))",
+          "Counter-melody (Electric Guitar (clean))",
+          "Riff (Brass Section)"
         ]
       },
       {
-        "seed": "S",
-        "at": 49.3,
+        "seed": "1j",
+        "at": 158,
+        "from": 155.8,
         "listen": [
-          "Hi-Hat"
+          "Chords (Drawbar Organ)",
+          "Melody (Electric Piano 1)",
+          "Bass (Drawbar Organ)"
         ]
       },
       {
-        "seed": "a",
-        "at": 258.9,
+        "seed": "1r",
+        "at": 138.5,
+        "from": 136.1,
         "listen": [
-          "Hi-Hat"
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "21",
+        "at": 91.6,
+        "from": 88.3,
+        "listen": [
+          "Chords (Electric Piano 1)"
         ]
       }
     ]
   },
   {
-    "id": "rock-turnaround",
-    "question": "A Rock riff turning round into its next cycle, a walk up or down on its last beat: a riff band's, or a stumble?",
-    "decides": "How often a riff turns round where its pattern starts again (riff.turnaround, Rock's 30-40-40), against never.",
-    "genre": "rock",
+    "id": "hiphop-verses",
+    "question": "A Hip-hop verse with its lead out, the beat alone where a rapper's verse would be: a beat tape's room for a voice, or an empty verse?",
+    "decides": "How often a verse leaves its melody out (voice.verses, Hip-hop's 60-70-70), against never.",
+    "genre": "hipHop",
     "with": {
+      "genre": {},
       "settings": {}
     },
     "without": {
       "skip": [],
       "genre": {
-        "riff": {
-          "turnaround": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "3",
-        "at": 2.1,
-        "listen": [
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 121.2,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "7",
-        "at": 118.2,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 106.9,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "H",
-        "at": 53,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "T",
-        "at": 14.4,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Bass (Electric Bass (pick))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "techno-kickout",
-    "question": "A Techno kick dropping out for a line before the next section, the band going on without it: a DJ's tension, or a hole?",
-    "decides": "How often the kick drops out for a phrase's last line (kickOut.lines, Techno's 20-30-40), against never.",
-    "genre": "techno",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "kickOut": {
-          "lines": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 288.6,
-        "listen": [
-          "Bass (Synth Bass 2)",
-          "Electric Snare"
-        ]
-      },
-      {
-        "seed": "4",
-        "at": 13.7,
-        "listen": [
-          "Bass (Synth Bass 2)",
-          "Tom"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 303.5,
-        "listen": [
-          "Bass (Synth Bass 1)",
-          "Kick",
-          "Electric Snare"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 413.8,
-        "listen": [
-          "Kick",
-          "Bass (Synth Bass 2)",
-          "Cymbal"
-        ]
-      },
-      {
-        "seed": "U",
-        "at": 266.3,
-        "listen": [
-          "Bass (Synth Bass 2)",
-          "Kick",
-          "Electric Snare"
-        ]
-      },
-      {
-        "seed": "Y",
-        "at": 364.5,
-        "listen": [
-          "Bass (Synth Bass 2)",
-          "Tom"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "metal-verse-riff",
-    "question": "A Metal verse sung over the intro's riff: the band's main riff carrying the song, or a verse with nothing of its own?",
-    "decides": "How often a verse plays over the intro's riff (riffSection.verses, Metal's 30-40-40), against a verse of its own.",
-    "genre": "metal",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "riffSection": {
+        "voice": {
           "verses": 0
         }
       },
@@ -404,196 +96,449 @@
     },
     "seeds": [
       {
-        "seed": "5",
-        "at": 12.3,
+        "seed": "A",
+        "at": 0,
+        "from": 0,
         "listen": [
-          "Bass (Electric Bass (pick))",
-          "Riff (Overdriven Guitar)",
-          "Rhythm part (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "U",
-        "at": 78,
-        "listen": [
-          "Melody (Lead 2 (sawtooth))",
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "c",
-        "at": 3.3,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Rhythm part (Electric Guitar (clean))",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "x",
-        "at": 15.6,
-        "listen": [
-          "Melody (Lead 5 (charang))",
-          "Chords (Acoustic Guitar (steel))"
-        ]
-      },
-      {
-        "seed": "16",
-        "at": 9.8,
-        "listen": [
-          "Solo (Overdriven Guitar)",
-          "Bass (Electric Bass (finger))",
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "1U",
-        "at": 15.6,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "metal-riff-section",
-    "question": "A Metal song opening on its main riff and bringing it back between a chorus and a verse, and at its end: a riff band's song, or the same bars again?",
-    "decides": "How often a song is built on a riff section returning (riffSection.songs, Metal's 50-60-40), against the songs' own form.",
-    "genre": "metal",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "riffSection": {
-          "songs": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 200.5,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Hi-Hat",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "4",
-        "at": 323.3,
-        "listen": [
-          "Melody (Lead 5 (charang))",
-          "Chords (Distortion Guitar)",
-          "Tom"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 98.6,
-        "listen": [
-          "Rhythm part (Overdriven Guitar)",
-          "Riff (Distortion Guitar)",
-          "Chords (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 65.2,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Riff (Overdriven Guitar)",
-          "Melody (Lead 5 (charang))"
-        ]
-      },
-      {
-        "seed": "M",
-        "at": 75.4,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Hi-Hat",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "Z",
-        "at": 61.8,
-        "listen": [
-          "Riff (Overdriven Guitar)",
-          "Rhythm part (Electric Guitar (clean))",
-          "Bass (Electric Bass (pick))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "darkjazz-half-time",
-    "question": "Dark jazz's drums in half time, the backbeat on 3, at an already slow tempo: the style's slow menace, or a pulse too slow to follow?",
-    "decides": "How often a Dark jazz section's drums play in half time (feelChances.halfTime, 0-70-80), against in time.",
-    "genre": "darkJazz",
-    "with": {
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "feelChances": {
-          "halfTime": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "6",
-        "at": 148.4,
-        "listen": [
-          "Ride",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 76,
-        "listen": [
-          "Ride",
-          "Acoustic Snare"
+          "Melody (Alto Sax)"
         ]
       },
       {
         "seed": "E",
-        "at": 301.5,
-        "listen": [
-          "Acoustic Snare",
-          "Hi-Hat",
-          "Kick"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 23.3,
-        "listen": [
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "J",
         "at": 0,
+        "from": 0,
         "listen": [
-          "Kick",
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 82.6,
+        "from": 80,
+        "listen": [
           "Hi-Hat"
         ]
       },
       {
-        "seed": "M",
-        "at": 81.2,
+        "seed": "k",
+        "at": 10.7,
+        "from": 8,
         "listen": [
-          "Acoustic Snare",
+          "Melody (Muted Trumpet)"
+        ]
+      },
+      {
+        "seed": "u",
+        "at": 2.7,
+        "from": 0,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "x",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Melody (Lead 1 (square))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "folk-tune",
+    "question": "A Folk tune a little faster and fuller, about four notes a bar rather than three: a tune to follow, or busier than the style?",
+    "decides": "Folk's melody rhythm (rhythm.melody, speed 60 and fullness 65), against the songs' own.",
+    "genre": "folk",
+    "with": {
+      "genre": {
+        "rhythm.melody": {
+          "speed": 60,
+          "fullness": 65,
+          "offbeat": 50,
+          "fineness": 50,
+          "syncopation": 50,
+          "repetition": 50,
+          "busyness": 50
+        }
+      },
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {},
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 30.9,
+        "from": 29.1,
+        "listen": [
+          "Melody (Whistle)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 35.6,
+        "from": 33.9,
+        "listen": [
+          "Melody (Acoustic Guitar (nylon))",
+          "Counter-melody (Clarinet)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 84.7,
+        "from": 83.2,
+        "listen": [
+          "Rhythm part (Banjo)",
+          "Melody (Acoustic Guitar (nylon))"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 51.6,
+        "from": 49,
+        "listen": [
+          "Melody (Banjo)"
+        ]
+      },
+      {
+        "seed": "B",
+        "at": 51.4,
+        "from": 49.3,
+        "listen": [
+          "Melody (Acoustic Guitar (nylon))"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 90.9,
+        "from": 89.1,
+        "listen": [
+          "Melody (Flute)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pop-hook-intro",
+    "question": "A Pop song opening on its chorus's hook, the band playing it before the first verse: a pop record's opening, or the chorus given away?",
+    "decides": "Whether Pop's intro may open on the chorus's hook (intro.hook 40-40-10), against its entries and cold openings alone.",
+    "genre": "pop",
+    "with": {
+      "genre": {
+        "intro": {
+          "hook": [
+            40,
+            40,
+            10
+          ]
+        }
+      },
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {},
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "M",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Chords (Acoustic Grand Piano)",
+          "Melody (Lead 1 (square))"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Rhythm part (Acoustic Guitar (steel))",
+          "Chords (Electric Guitar (clean))",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "14",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Acoustic Grand Piano)",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "1C",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Maracas",
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "1b",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Melody (Lead 6 (voice))",
+          "Pad (String Ensemble 1)"
+        ]
+      },
+      {
+        "seed": "20",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Melody (Lead 1 (square))",
+          "Bass (Electric Bass (finger))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pop-drop",
+    "question": "A Pop chorus landing after a bar of the band gone silent: a pop chorus's lift, or a hole?",
+    "decides": "Whether Pop's lifts drop, the band silent for the bar before (drop.lifts 0-10-20, dropKind.silent), against the songs' own never.",
+    "genre": "pop",
+    "with": {
+      "genre": {
+        "drop": {
+          "lifts": [
+            0,
+            10,
+            20
+          ],
+          "rolls": 0
+        },
+        "dropKind": {
+          "silent": 100,
+          "filtered": 0
+        }
+      },
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {},
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "9",
+        "at": 48.1,
+        "from": 45.7,
+        "listen": [
+          "Melody (Electric Guitar (clean))",
+          "Hi-Hat",
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 139.4,
+        "from": 137.1,
+        "listen": [
+          "Kick",
+          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Synth Brass 1)"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 131.1,
+        "from": 129.1,
+        "listen": [
+          "Melody (Acoustic Grand Piano)",
+          "Electric Snare",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "p",
+        "at": 117.8,
+        "from": 115.6,
+        "listen": [
+          "Hi-Hat",
+          "Chords (Synth Brass 1)",
+          "Maracas"
+        ]
+      },
+      {
+        "seed": "y",
+        "at": 134.4,
+        "from": 131.1,
+        "listen": [
           "Ride",
+          "Kick",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "z",
+        "at": 121.2,
+        "from": 118.9,
+        "listen": [
+          "Hi-Hat",
+          "Chords (Acoustic Guitar (steel))",
+          "Melody (Lead 6 (voice))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ska-effect",
+    "question": "A Ska song with an echo, a tremolo or a sweep on a part: dub's echo in ska, or an effect a live ska band doesn't play?",
+    "decides": "Whether Ska's songs play a strong effect (strongEffect, the songs' own pool), against none.",
+    "genre": "ska",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "strongEffect": {
+          "none": 100,
+          "echo": 0,
+          "tremolo": 0,
+          "sweep": 0,
+          "pump": 0,
+          "wobble": 0,
+          "squelch": 0,
+          "opening": 0,
+          "gate": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "8",
+        "at": 96.6,
+        "from": 95.1,
+        "listen": [
           "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "A",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Melody (Alto Sax)"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 15.6,
+        "from": 14,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "u",
+        "at": 143.7,
+        "from": 142,
+        "listen": [
+          "Riff (Brass Section)"
+        ]
+      },
+      {
+        "seed": "1B",
+        "at": 25.9,
+        "from": 24.3,
+        "listen": [
+          "Melody (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "1S",
+        "at": 54.9,
+        "from": 53.1,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "blues-power-chords",
+    "question": "A Blues riff in power chords, a fifth over each note, over the band's seventh chords: a blues-rock riff, or a fifth against the chord?",
+    "decides": "How often a Blues section's riff plays in power chords (riff.powerChords, 15-25-30), against single notes; heard worse, a power chord kept to its chord's root and fifth (#92).",
+    "genre": "blues",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "riff": {
+          "powerChords": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 28.5,
+        "from": 26.7,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 34.9,
+        "from": 32.1,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 173.7,
+        "from": 171.4,
+        "listen": [
+          "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "W",
+        "at": 51.4,
+        "from": 49.3,
+        "listen": [
+          "Riff (Brass Section)"
+        ]
+      },
+      {
+        "seed": "X",
+        "at": 24.8,
+        "from": 22.8,
+        "listen": [
+          "Riff (Brass Section)"
+        ]
+      },
+      {
+        "seed": "l",
+        "at": 67,
+        "from": 64.2,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
         ]
       }
     ]

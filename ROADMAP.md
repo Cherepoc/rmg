@@ -52,8 +52,16 @@ intro's riff (`metal-verse-riff`, 0.92) and its riff section (`metal-riff-sectio
 and kept: the surf drop 6-0, the chromatic approach 5-0, IDM's 64ths 5-1, the riff turnaround 4-0 (two the same, its
 strum turning the riff's every later stroke fixed since), the kick-out 6-0, the riff section 6-0 and the half time 6-0;
 Soul's reharmonised chorus skipped, its melody sung as before over the new chords since, to ask again; the verse over
-the intro's riff asked again, the intro playing the riff it repeats since; the devices of a few places heard from 8 s
-before one of their places since.
+the intro's riff asked again, the intro playing the riff it repeats since. Retired the same day, every device kept: the
+verse over the intro's riff 6-0, the surf drop 12-0 and the riff turnaround 9-0 (three the same) over both its songs,
+Funk's soloist riffing 7-1 (one can't tell). A question's songs are listened at where the two songs' difference holding
+its device's place starts, after a stretch alike, a build or a pickup into it among the device's, from the bar before,
+rather than seconds before a place or a pattern; a place where nothing differs within a bar of it is reported and never
+asked. The second round (24 October 2026) asks Soul's reharmonised chorus again (`soul-reharmonised`, 0.35), Hip-hop's
+verses resting the melody (`hiphop-verses`, 0.39), a Folk tune faster and fuller (`folk-tune`, 0.32), Pop's hook intro
+(`pop-hook-intro`, 1.36) and its silent drop before a chorus (`pop-drop`, 0.44), Ska's strong effect against none
+(`ska-effect`, 0.47) and the Blues riff's power chords against single notes (`blues-power-chords`, 0.21); the song with
+the device given a patch of its own where the preset lacks it.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 

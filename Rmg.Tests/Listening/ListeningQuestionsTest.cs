@@ -25,18 +25,17 @@ public sealed class ListeningQuestionsTest
     /// <param name="Skip">The stages the song without the device leaves out.</param>
     /// <param name="GenrePatch">
     ///     The options the song without the device lays over its genre's, by choice and option, the genre's others as they
-    ///     are: an amount or its three ends; a device a preset may take, the song
-    ///     without it the song with it added.
+    ///     are: an amount or its three ends; none for none.
     /// </param>
-    /// <param name="At">Where the song first plays the device, in beats, as its trace and notes have it, a little before it where it grows; none where it does not.</param>
+    /// <param name="At">Where the song first plays the device, in beats, as its trace and notes have it; none where it does not.</param>
     /// <param name="In">The sections the device plays in, where alone it is listened to; every section for none.</param>
     /// <param name="With">The settings the songs with the device are given, by the page's name, as its steps; none for none.</param>
     /// <param name="Without">The settings the songs without it are given, as <paramref name="With" />.</param>
     /// <param name="Places">
-    ///     Where a device of a few places plays, in beats, each heard from a little before it rather than from a pattern's
-    ///     start, as the bar it plays in may not be the pattern's that differs the most; none for a device that plays
-    ///     throughout what it is heard in.
+    ///     Where the device plays, in beats, each heard from the bar before it, alike in the two songs; none
+    ///     for a device that plays throughout what it is heard in, heard from a pattern's start.
     /// </param>
+    /// <param name="WithPatch">The options the song with the device lays over its genre's, as <paramref name="GenrePatch" />: a device the preset lacks added; none for none.</param>
     private sealed record Question(
         string Id,
         string Text,
@@ -48,98 +47,72 @@ public sealed class ListeningQuestionsTest
         Func<CorpusSong, SectionSpan, bool>? In = null,
         Dictionary<string, int>? With = null,
         Dictionary<string, int>? Without = null,
-        Func<CorpusSong, double[]>? Places = null
+        Func<CorpusSong, double[]>? Places = null,
+        Dictionary<string, Dictionary<string, object>>? WithPatch = null
     );
-
-    /// <summary>A song's pitched solos' segments, by their sections' places, as the trace records them.</summary>
-    private static (int Index, SoloLines.Segment[] Plan)[] SoloPlans(CorpusSong song) =>
-        [..song.Trace.Where(x => x.Point == TracePoints.SoloGestures).Select(x => ((int Index, bool, SoloLines.Segment[] Plan))x.Value!).Select(x => (x.Index, x.Plan))];
-
-    /// <summary>The appearances a song plays its pitched solos in, by their places among its sections, not every appearance of their sections.</summary>
-    private static HashSet<int> Soloed(CorpusSong song) => [..SoloPlans(song).Select(x => x.Index)];
-
-    /// <summary>Where a song first plays a solo segment that takes a test, in beats; none where it plays none.</summary>
-    private static double? FirstSegment(CorpusSong song, Func<SoloLines.Segment, bool> takes) =>
-        SoloPlans(song).SelectMany(x => x.Plan).Where(takes).Select(x => (double?)x.Start).Min();
 
     private static readonly Question[] Questions =
     [
-        new("funk-rhythm", "A Funk soloist riffing on the band's rhythm, a note or two struck short on its onsets: in the groove, or a soloist gone quiet?",
-            "How often a soloist riffs on the band's rhythm (soloStyle.rhythm, Funk's 30-40-50), against never.", "funk", [],
-            new() { ["soloStyle"] = new() { ["rhythm"] = 0 } },
-            x => FirstSegment(x, s => s.Gesture == SoloGesture.Rhythm), (x, span) => Soloed(x).Contains(x.Map.Sections.IndexOf(span))),
-        new("surf-drop", "A Surf guitar's last bar before a louder section slid down the neck in palm-muted 16ths onto it: the surf drop, or a gimmick?",
-            "Whether a lift into a louder section takes a surf drop (surfDrop.lifts, Surf's 30-40-50), against none.", "surf", [],
-            new() { ["surfDrop"] = new() { ["lifts"] = 0 } },
-            x => Drops(x).Select(d => (double?)d.From - 2).Min(), (x, span) => Drops(x).Any(d => Math.Abs(d.To - span.End) < 1e-6), Places: x => [..Drops(x).Select(d => d.From)]),
-        new("jazz-chromatic", "A Jazz soloist's run approaching its note on the beat from a half step away: a jazz line, or a wrong note?",
-            "How often a soloist's run approaches its note on the beat chromatically (soloStyle.chromatic, Jazz's 40-50-60), against never.", "jazz", [],
-            new() { ["soloStyle"] = new() { ["chromatic"] = 0 } },
-            x => FirstSegment(x, s => s.Gesture == SoloGesture.Run), (x, span) => Soloed(x).Contains(x.Map.Sections.IndexOf(span)), Places: Chromatic),
-        new("idm-64ths", "An IDM hi-hat rolling in 64ths, a drill splintering the beat: the style's, or a buzz?",
-            "How often IDM's hat rolls drill in 64ths (hatRollRate.sixtyFourths, 0-20-60), against its 32nds and triplets alone.", "idm", [],
-            new() { ["hatRollRate"] = new() { ["sixtyFourths"] = 0 } },
-            x => x.Trace.Where(e => e.Point == TracePoints.HatRolls).SelectMany(e => (ImmutableArray<(double From, double To, int Rate)>)e.Value!).Where(r => r.Rate == 16).Select(r => (double?)r.From - 2).Min(),
-            Places: x => [..x.Trace.Where(e => e.Point == TracePoints.HatRolls).SelectMany(e => (ImmutableArray<(double From, double To, int Rate)>)e.Value!).Where(r => r.Rate == 16).Select(r => r.From)]),
-        new("rock-turnaround", "A Rock riff turning round into its next cycle, a walk up or down on its last beat: a riff band's, or a stumble?",
-            "How often a riff turns round where its pattern starts again (riff.turnaround, Rock's 30-40-40), against never.", "rock", [],
-            new() { ["riff"] = new() { ["turnaround"] = 0 } },
-            x => x.Trace.Where(e => e.Point == TracePoints.LineFill && e.Track == x.Track(TrackRole.Riff)).Select(e => (double?)(((double, double[]))e.Value!).Item1 - 2).Min(),
-            Places: x => [..x.Trace.Where(e => e.Point == TracePoints.LineFill && e.Track == x.Track(TrackRole.Riff)).Select(e => (((double, double[]))e.Value!).Item2[0])]),
-        new("techno-kickout", "A Techno kick dropping out for a line before the next section, the band going on without it: a DJ's tension, or a hole?",
-            "How often the kick drops out for a phrase's last line (kickOut.lines, Techno's 20-30-40), against never.", "techno", [],
-            new() { ["kickOut"] = new() { ["lines"] = 0 } },
-            x => KickOuts(x).Select(k => (double?)k.From - 2).Min(), (x, span) => KickOuts(x).Any(k => k.From >= span.Start - 1e-9 && k.From < span.End - 1e-9),
-            Places: x => [..KickOuts(x).Select(k => k.From)]),
-        new("metal-verse-riff", "A Metal verse sung over the intro's riff: the band's main riff carrying the song, or a verse with nothing of its own?",
-            "How often a verse plays over the intro's riff (riffSection.verses, Metal's 30-40-40), against a verse of its own.", "metal", [],
-            new() { ["riffSection"] = new() { ["verses"] = 0 } },
-            x => FirstOf(x, OverRiff(x)), (x, span) => OverRiff(x).Contains(span.SectionId)),
-        new("metal-riff-section", "A Metal song opening on its main riff and bringing it back between a chorus and a verse, and at its end: a riff band's song, or the same bars again?",
-            "How often a song is built on a riff section returning (riffSection.songs, Metal's 50-60-40), against the songs' own form.", "metal", [],
-            new() { ["riffSection"] = new() { ["songs"] = 0 } },
-            x => RiffReturns(x).Select(r => (double?)r.Start).Min(), (x, span) => RiffReturns(x).Any(r => Math.Abs(r.Start - span.Start) < 1e-6)),
-        new("darkjazz-half-time", "Dark jazz's drums in half time, the backbeat on 3, at an already slow tempo: the style's slow menace, or a pulse too slow to follow?",
-            "How often a Dark jazz section's drums play in half time (feelChances.halfTime, 0-70-80), against in time.", "darkJazz", [],
-            new() { ["feelChances"] = new() { ["halfTime"] = 0 } },
-            x => FirstOf(x, HalfTime(x)), (x, span) => HalfTime(x).Contains(span.SectionId))
+        new("soul-reharmonised", "A Soul song's later chorus over new chords, its melody sung as before over them: a lift, or the chorus lost?",
+            "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.", "soul", [],
+            new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
+            x => Reharmonised(x) is { } r ? r.Substitutes.Min() : null, Places: x => Reharmonised(x) is { } r ? [..r.Substitutes] : []),
+        new("hiphop-verses", "A Hip-hop verse with its lead out, the beat alone where a rapper's verse would be: a beat tape's room for a voice, or an empty verse?",
+            "How often a verse leaves its melody out (voice.verses, Hip-hop's 60-70-70), against never.", "hipHop", [],
+            new() { ["voice"] = new() { ["verses"] = 0 } },
+            x => Unsung(x).Select(v => (double?)v).Min(), Places: Unsung),
+        new("folk-tune", "A Folk tune a little faster and fuller, about four notes a bar rather than three: a tune to follow, or busier than the style?",
+            "Folk's melody rhythm (rhythm.melody, speed 60 and fullness 65), against the songs' own.", "folk", [],
+            null,
+            x => Sung(x).Select(v => (double?)v.Start).Min(), (x, span) => Sung(x).Contains(span),
+            WithPatch: new() { ["rhythm.melody"] = new() { ["speed"] = 60, ["fullness"] = 65 } }),
+        new("pop-hook-intro", "A Pop song opening on its chorus's hook, the band playing it before the first verse: a pop record's opening, or the chorus given away?",
+            "Whether Pop's intro may open on the chorus's hook (intro.hook 40-40-10), against its entries and cold openings alone.", "pop", [],
+            null,
+            x => x.Map.Intro.Kind == IntroKind.Hook ? 0 : null, Places: x => x.Map.Intro.Kind == IntroKind.Hook ? [0] : [],
+            WithPatch: new() { ["intro"] = new() { ["hook"] = new[] { 40, 40, 10 } } }),
+        new("pop-drop", "A Pop chorus landing after a bar of the band gone silent: a pop chorus's lift, or a hole?",
+            "Whether Pop's lifts drop, the band silent for the bar before (drop.lifts 0-10-20, dropKind.silent), against the songs' own never.", "pop", [],
+            null,
+            x => Drops(x).Select(d => (double?)d).Min(), Places: Drops,
+            WithPatch: new() { ["drop"] = new() { ["lifts"] = new[] { 0, 10, 20 } }, ["dropKind"] = new() { ["silent"] = 100, ["filtered"] = 0 } }),
+        new("ska-effect", "A Ska song with an echo, a tremolo or a sweep on a part: dub's echo in ska, or an effect a live ska band doesn't play?",
+            "Whether Ska's songs play a strong effect (strongEffect, the songs' own pool), against none.", "ska", [],
+            new() { ["strongEffect"] = GenreChoices.StrongEffect.Options.ToDictionary(x => x.Name, x => (object)(x.Name == "none" ? 100 : 0)) },
+            x => ((SongEffects)x.Trace.Single(e => e.Point == TracePoints.SongEffects).Value!).Strong != StrongEffect.None ? x.Map.Sections[0].Start : null),
+        new("blues-power-chords", "A Blues riff in power chords, a fifth over each note, over the band's seventh chords: a blues-rock riff, or a fifth against the chord?",
+            "How often a Blues section's riff plays in power chords (riff.powerChords, 15-25-30), against single notes; heard worse, a power chord kept to its chord's root and fifth (#92).", "blues", [],
+            new() { ["riff"] = new() { ["powerChords"] = 0 } },
+            x => PowerChords(x).Select(v => (double?)v).Min(), Places: PowerChords)
     ];
 
-    /// <summary>Where a song first plays a section of those, in beats; none where it plays none.</summary>
-    private static double? FirstOf(CorpusSong song, HashSet<int> sections) => song.Map.Sections.FirstOrDefault(x => sections.Contains(x.SectionId))?.Start;
+    /// <summary>The appearance a song reharmonises, by its place, and where its substitutes start; none where it reharmonises none.</summary>
+    private static (int Index, ImmutableArray<double> Substitutes)? Reharmonised(CorpusSong song) =>
+        song.Trace.Where(x => x.Point == TracePoints.Reharmonisation).Select(x => x.Value).OfType<(int, ImmutableArray<double>)>().Select(x => ((int, ImmutableArray<double>)?)x).FirstOrDefault();
 
-    /// <summary>A song's surf drops, each its bar's start and end.</summary>
-    private static (double From, double To)[] Drops(CorpusSong song) =>
-        [..song.Trace.Where(x => x.Point == TracePoints.SurfDrop).Select(x => ((double From, double To))x.Value!)];
+    /// <summary>Whether a melody note sounds in a span.</summary>
+    private static bool IsSung(CorpusSong song, SectionSpan span) => song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Any(n => n.IsWithin(span.Start, span.End)) ?? false;
 
-    /// <summary>Where a song's soloists play a note off the scale, a run's chromatic approach.</summary>
-    private static double[] Chromatic(CorpusSong song) =>
-    [
-        ..song.Solos.Where(x => !x.Value.IsDrumSolo).SelectMany(x => x.Value.Soloists.Where(r => r != TrackRole.Drum).SelectMany(r => song.Song.Notes!.GetValueOrDefault(song.Track(r))?.Where(n =>
-            n.IsWithin(song.Map.Sections[x.Key].Start, song.Map.Sections[x.Key].End) && n.Value.State.GetStateValue(StateKinds.Alteration) != 0
-            && n.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) > 0) ?? [])).Select(n => n.Position).Order()
-    ];
+    /// <summary>Where a song's verses start that leave their melody out, in beats.</summary>
+    private static double[] Unsung(CorpusSong song)
+    {
+        var roles = ((SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!).Roles;
+        return [..song.Map.Sections.Where(x => roles.GetValueOrDefault(x.SectionId) == SectionRole.Verse && !IsSung(song, x)).Select(x => x.Start)];
+    }
 
-    /// <summary>A song's kick-outs, each from where the kick drops out to where it plays again.</summary>
-    private static (double From, double To)[] KickOuts(CorpusSong song) =>
-        [..song.Trace.Where(x => x.Point == TracePoints.KickOuts).SelectMany(x => (ImmutableArray<(double From, double To)>)x.Value!)];
+    /// <summary>A song's appearances its melody sounds in.</summary>
+    private static SectionSpan[] Sung(CorpusSong song) => [..song.Map.Sections.Where(x => IsSung(song, x))];
 
-    /// <summary>A song's form, as it drew it.</summary>
-    private static SongStructure FormOf(CorpusSong song) => (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+    /// <summary>Where a song's lifts drop, the start of the silent bar before each, in beats.</summary>
+    private static double[] Drops(CorpusSong song) =>
+        [..song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!).Select(x => x - song.Map.BarBefore(x))];
 
-    /// <summary>The intro's section, where the song opens on one.</summary>
-    private static int? Intro(CorpusSong song) => FormOf(song).Roles.Where(x => x.Value == SectionRole.Intro).Select(x => (int?)x.Key).SingleOrDefault();
-
-    /// <summary>The verses a song plays over its intro's riff, by their sections.</summary>
-    private static HashSet<int> OverRiff(CorpusSong song) =>
-        [..song.Trace.Where(x => x.Point == TracePoints.LinesFrom && (int)x.Value! == Intro(song) && FormOf(song).Roles.GetValueOrDefault(x.Section) == SectionRole.Verse).Select(x => x.Section)];
-
-    /// <summary>A riff section's returns, the intro's section played again after the song opens on it.</summary>
-    private static SectionSpan[] RiffReturns(CorpusSong song) => Intro(song) is { } intro ? [..song.Map.Sections.Where(x => x.SectionId == intro).Skip(1)] : [];
-
-    /// <summary>The sections whose drums play in half time.</summary>
-    private static HashSet<int> HalfTime(CorpusSong song) => [..song.Trace.Where(x => x.Point == TracePoints.TimeFeel && (int)x.Value! == 1).Select(x => x.Section)];
-
+    /// <summary>Where a song's appearances start whose riff plays in power chords, in beats.</summary>
+    private static double[] PowerChords(CorpusSong song)
+    {
+        var sections = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords && (bool)x.Value!).Select(x => x.Section).ToHashSet();
+        return [..song.Map.Sections.Where(x => sections.Contains(x.SectionId)).Select(x => x.Start)];
+    }
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()
@@ -160,17 +133,17 @@ public sealed class ListeningQuestionsTest
     private const double NearBest = 0.9;
 
     /// <summary>
-    ///     A question's patch as the page lays it: its options, and of a choice its genre does not name, every other option
-    ///     at the songs' own amounts, as a choice named switches off the options it leaves out, so that the song without
-    ///     differs by the device alone; none for no patch.
+    ///     A question's patch of one side as the page lays it: its options, and of a choice its genre does not name, every
+    ///     other option at the songs' own amounts, as a choice named switches off the options it leaves out, so that the two
+    ///     songs differ by the device alone; none for no patch.
     /// </summary>
-    private static Dictionary<string, Dictionary<string, object>>? PatchOf(Question question)
+    private static Dictionary<string, Dictionary<string, object>>? PatchOf(Question question, bool without)
     {
-        if (question.GenrePatch is null)
+        if ((without ? question.GenrePatch : question.WithPatch) is not { } sidePatch)
             return null;
         var named = question.Genre is null ? [] : GenrePresets.All.Single(x => x.Id == question.Genre).Choices;
         var patch = new Dictionary<string, Dictionary<string, object>>();
-        foreach (var (choice, options) in question.GenrePatch)
+        foreach (var (choice, options) in sidePatch)
         {
             var completed = options.ToDictionary(x => x.Key, x => x.Value);
             if (!named.ContainsKey(choice))
@@ -185,13 +158,13 @@ public sealed class ListeningQuestionsTest
         return patch;
     }
 
-    /// <summary>A question's genre as its song without the device has it, its choices patched as the page patches them; none for no genre.</summary>
+    /// <summary>A question's genre as its song of one side has it, its choices patched as the page patches them; none for no genre.</summary>
     private static Genre? GenreOf(Question question, bool without)
     {
         if (question.Genre is null)
             return null;
         var preset = GenrePresets.All.Single(x => x.Id == question.Genre);
-        if (!without || PatchOf(question) is not { } patch)
+        if (PatchOf(question, without) is not { } patch)
             return GenrePresets.Genre(preset);
         var choices = new Dictionary<string, Dictionary<string, JsonElement>>(preset.Choices);
         // every option the patch names its amount, the genre's others as they are, as the page lays it (listening.js)
@@ -215,11 +188,8 @@ public sealed class ListeningQuestionsTest
         return new SongOverrides(Genre: GenreOf(question, without), Darkness: Mood("darkness"), Intensity: Mood("intensity"));
     }
 
-    /// <summary>How long before a pattern's start a song is listened from, in seconds, the page starting it a moment earlier still.</summary>
-    private const double LeadIn = 4;
-
-    /// <summary>How long before a place of a device of a few places a song is listened from, in seconds, so that the bars leading into it are heard first.</summary>
-    private const double PlaceLead = 8;
+    /// <summary>How many bars before a place of a device's the two songs' difference is looked for from, as a build or a pickup leads into it.</summary>
+    private const int LookBack = 4;
 
     /// <summary>How many parts a song names to listen to at most, and how much of the most different's difference one makes at least to be named.</summary>
     private const int Listened = 3;
@@ -227,33 +197,58 @@ public sealed class ListeningQuestionsTest
     private const double ListenedShare = 0.25;
 
     /// <summary>
-    ///     A song of a question heard with its device and without, from where the device first plays, at a pattern's start, as
-    ///     a figure is stated in its first bar and played again in the rest, which alone may differ, in the sections the
-    ///     device plays in: how much the two differ where they differ the most, at the earliest pattern nearly as different,
-    ///     where to listen from, in seconds, and the parts that differ the most there, to listen to; none where no pattern
-    ///     is the device's.
+    ///     A song of a question heard with its device and without, at a place of its device's, or, of a device playing
+    ///     throughout, at a pattern's start, as a figure is stated in its first bar and played again in the rest, which
+    ///     alone may differ, in the sections the device plays in: how much the two differ where they differ the most, at
+    ///     the earliest place nearly as different, where to listen and where to start, the bar before, in seconds, and the
+    ///     parts that differ the most there, to listen to; and how many of its places nothing differs within a bar of;
+    ///     none where no place is the device's.
     /// </summary>
-    private static (double Difference, double At, string[] Listen)? Measure(Question question, int seed, CorpusSong with, double first)
+    private static ((double Difference, double At, double From, string[] Listen)? Heard, int Missed) Measure(Question question, int seed, CorpusSong with, double first)
     {
         var without = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), OverridesOf(question, true), question.Skip.ToImmutableHashSet(), CancellationToken.None);
         var difference = new HeardDifference(with.Rendered, Rmg.Core.Rendering.Render.RenderSong(without));
-        // from a pattern's start, or a little before a place of a device of a few places, which the window then holds
-        var starts = question.Places is { } placesOf
-            ? placesOf(with).Where(x => x >= first - 1e-9).Select(x => Math.Max(0, with.Rendered.SecondsAt(x) - PlaceLead + LeadIn))
-            : with.Map.Sections
-                .Where(x => x.End > first + 1e-9 && (question.In?.Invoke(with, x) ?? true))
-                .SelectMany(x => x.Patterns.Where(p => p.End > first + 1e-9))
-                .Select(p => with.Rendered.SecondsAt(p.Start));
-        var places = starts.Select(at => (Difference: difference.Between(at, at + Heard), At: at)).ToArray();
-        if (places.Length == 0)
-            return null;
-        var best = places.Max(x => x.Difference);
-        var (most, at) = places.First(x => x.Difference >= best * NearBest - 1e-9);
+        double Seconds(double position) => with.Rendered.SecondsAt(Math.Max(0, position));
+        double BarBefore(double position) => position - with.Map.BarBefore(position);
+        // a place listened at where the two songs' difference holding it starts, after a stretch alike in both, a build,
+        // a pickup or an approach into it among the device's, from the bar before, so that what leads in is the same in both
+        // and the device what is heard next; a place differing all the bars before it is inside another's difference, and
+        // one where nothing differs within a bar of it one its trace has wrong, or where it is not heard
+        (double At, double From)? HeardAt(double position)
+        {
+            var bar = with.Map.BarBefore(position);
+            var look = position - LookBack * bar;
+            if (difference.FirstDifference(Seconds(look), Seconds(position + with.Map.MeterAt(position).BarDuration)) is not { } at
+                || at <= Seconds(look) + 1e-6 && look > 1e-9)
+                return null;
+            return (at, Math.Max(0, at - (Seconds(position) - Seconds(position - bar))));
+        }
+        bool IsMissed(double position) =>
+            difference.FirstDifference(Seconds(BarBefore(position)), Seconds(position + with.Map.MeterAt(position).BarDuration)) is null;
+        (double At, double From)[] places;
+        var missed = 0;
+        if (question.Places is { } placesOf)
+        {
+            var all = placesOf(with).Where(x => x >= first - 1e-9).Distinct().Order().ToArray();
+            places = [..all.Select(HeardAt).OfType<(double, double)>().Distinct()];
+            missed = all.Count(IsMissed);
+        }
+        else
+            places =
+            [
+                ..with.Map.Sections
+                    .Where(x => x.End > first + 1e-9 && (question.In?.Invoke(with, x) ?? true))
+                    .SelectMany(x => x.Patterns.Where(p => p.End > first + 1e-9))
+                    .Select(p => (Seconds(p.Start), Seconds(BarBefore(p.Start))))
+            ];
+        var measured = places.Select(x => (Difference: difference.Between(x.At, x.At + Heard), x.At, x.From)).ToArray();
+        if (measured.Length == 0)
+            return (null, missed);
+        var best = measured.Max(x => x.Difference);
+        var (most, at, from) = measured.First(x => x.Difference >= best * NearBest - 1e-9);
         var parts = difference.Parts(at, at + Heard).OrderByDescending(x => x.Value).ToArray();
-        // heard from a few seconds before the pattern, so that the device comes after what leads into it
-        at = Math.Max(0, at - LeadIn);
         // a part once, at its largest share, which its second take or its other instrument would name again
-        return (most, at, [..parts.Where(x => x.Value >= parts.FirstOrDefault().Value * ListenedShare).DistinctBy(x => x.Key.Split(" (")[0]).Take(Listened).Select(x => x.Key)]);
+        return ((most, at, from, [..parts.Where(x => x.Value >= parts.FirstOrDefault().Value * ListenedShare).DistinctBy(x => x.Key.Split(" (")[0]).Take(Listened).Select(x => x.Key)]), missed);
     }
 
     /// <summary>
@@ -270,12 +265,17 @@ public sealed class ListeningQuestionsTest
         {
             var overrides = OverridesOf(question, false);
             // the first songs that play the device, each measured where it plays
-            var measured = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
+            var playing = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
                 {
                     var song = TestCorpus.Get(seed, overrides);
-                    return question.At(song) is { } at ? (Seed: seed, Measure: Measure(question, seed, song, at)) : (seed, null);
+                    return question.At(song) is { } at ? (Seed: seed, Measure: Measure(question, seed, song, at)) : (seed, (null, 0));
                 })
-                .Where(x => x.Measure is not null).Take(Candidates).Select(x => (x.Seed, Difference: x.Measure!.Value.Item1, At: x.Measure.Value.Item2, Listen: x.Measure.Value.Item3)).ToArray();
+                .Where(x => x.Measure.Heard is not null || x.Measure.Missed > 0).Take(Candidates).ToArray();
+            // a song with no place heard after a stretch alike is never asked
+            var missed = playing.Sum(x => x.Measure.Missed);
+            if (missed > 0 || playing.Any(x => x.Measure.Heard is null))
+                Console.WriteLine($"{question.Id}: {missed} places with nothing differing a bar either side, {playing.Count(x => x.Measure.Heard is null)} songs of {playing.Length} with no place heard after a stretch alike");
+            var measured = playing.Where(x => x.Measure.Heard is not null).Select(x => (x.Seed, x.Measure.Heard!.Value.Difference, x.Measure.Heard.Value.At, x.Measure.Heard.Value.From, x.Measure.Heard.Value.Listen)).ToArray();
             // a song the device plays in but that sounds the same without it, as another device plays it there too, never asked
             var asked = measured.Where(x => x.Difference > 0).OrderByDescending(x => x.Difference).Take(Seeds).OrderBy(x => x.Seed).ToArray();
             Console.WriteLine($"{question.Id}: {measured.Length} songs measured, {measured.Count(x => x.Difference <= 0)} the same without, the first {Seeds} differing {measured.Take(Seeds).Select(x => x.Difference).DefaultIfEmpty().Average():F2} on the average, " +
@@ -289,9 +289,9 @@ public sealed class ListeningQuestionsTest
                 decides = question.Decides,
                 genre = question.Genre,
                 // an object of choices always, as the page reads it, empty where the song without the device patches none
-                with = new { settings = question.With ?? [] },
-                without = new { skip = question.Skip, genre = PatchOf(question) ?? new Dictionary<string, Dictionary<string, object>>(), settings = question.Without ?? [] },
-                seeds = asked.Select(x => new { seed = Base62.FromSeed(TestCorpus.SongSeed(x.Seed)), at = Math.Round(x.At, 1), listen = x.Listen }).ToArray()
+                with = new { genre = PatchOf(question, false) ?? new Dictionary<string, Dictionary<string, object>>(), settings = question.With ?? [] },
+                without = new { skip = question.Skip, genre = PatchOf(question, true) ?? new Dictionary<string, Dictionary<string, object>>(), settings = question.Without ?? [] },
+                seeds = asked.Select(x => new { seed = Base62.FromSeed(TestCorpus.SongSeed(x.Seed)), at = Math.Round(x.At, 1), from = Math.Round(x.From, 1), listen = x.Listen }).ToArray()
             });
         }
 
@@ -314,7 +314,7 @@ public sealed class ListeningQuestionsTest
             await Assert.That(Rmg.WebApi.Analytics.AnalyticsEndpoints.IsVerdict($"{question.Id}:with")).IsTrue().Because(question.Id);
             // and its patch switching off no option it does not name: a choice its genre leaves to the songs named whole
             var named = question.Genre is null ? [] : GenrePresets.All.Single(x => x.Id == question.Genre).Choices;
-            foreach (var (choice, options) in PatchOf(question) ?? [])
+            foreach (var (choice, options) in (PatchOf(question, false) ?? []).Concat(PatchOf(question, true) ?? []))
                 if (!named.ContainsKey(choice))
                     await Assert.That(options.Keys.ToHashSet().SetEquals(GenreChoices.All.Single(x => x.Name == choice).Options.Select(x => x.Name))).IsTrue().Because($"{question.Id}: {choice}");
         }
@@ -333,7 +333,8 @@ public sealed class ListeningQuestionsTest
             string Json(object? value) => JsonSerializer.Serialize(value);
             await Assert.That(entry.GetProperty("genre").ValueKind == JsonValueKind.Null ? null : entry.GetProperty("genre").GetString()).IsEqualTo(asked.Genre).Because(asked.Id);
             await Assert.That(Json(entry.GetProperty("without").GetProperty("skip"))).IsEqualTo(Json(asked.Skip)).Because(asked.Id);
-            await Assert.That(Json(entry.GetProperty("without").GetProperty("genre"))).IsEqualTo(Json(PatchOf(asked) ?? new Dictionary<string, Dictionary<string, object>>())).Because(asked.Id);
+            await Assert.That(Json(entry.GetProperty("with").GetProperty("genre"))).IsEqualTo(Json(PatchOf(asked, false) ?? new Dictionary<string, Dictionary<string, object>>())).Because(asked.Id);
+            await Assert.That(Json(entry.GetProperty("without").GetProperty("genre"))).IsEqualTo(Json(PatchOf(asked, true) ?? new Dictionary<string, Dictionary<string, object>>())).Because(asked.Id);
             await Assert.That(Json(entry.GetProperty("with").GetProperty("settings"))).IsEqualTo(Json(asked.With ?? [])).Because(asked.Id);
             await Assert.That(Json(entry.GetProperty("without").GetProperty("settings"))).IsEqualTo(Json(asked.Without ?? [])).Because(asked.Id);
         }

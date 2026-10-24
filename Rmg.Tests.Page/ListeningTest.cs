@@ -39,6 +39,29 @@ public sealed class ListeningTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A question's song with its device lays the patch its side gives over the genre, a device the genre lacks added, and its song without none.</summary>
+    [Test]
+    public async Task AQuestionsSongWith_AddsWhatItsPatchGives()
+    {
+        await using var page = await SongPage.Open(site, "?listen=rock-louder");
+        var strip = page.Page.Locator("section.listening");
+        await page.Until(() => strip.IsVisibleAsync(), "the question asked");
+        var count = page.Requests.Count;
+        await strip.GetByRole(AriaRole.Button, new() { Name = "Play A" }).ClickAsync();
+        await page.Until(() => page.Requests.Count > count, "A asked for");
+        await Assert.That(page.Requests[^1].Body.GetProperty("genre").GetProperty("louderForms").GetProperty("quieter").GetInt32()).IsEqualTo(100);
+        await page.Settled();
+
+        count = page.Requests.Count;
+        await strip.GetByRole(AriaRole.Button, new() { Name = "Play B" }).ClickAsync();
+        await page.Until(() => page.Requests.Count > count, "B asked for");
+        var without = page.Requests[^1].Body.GetProperty("genre");
+        // the genre's own, Rock's quieter form at its three ends
+        await Assert.That(without.GetProperty("louderForms").GetProperty("quieter").ValueKind).IsEqualTo(JsonValueKind.Array);
+        await page.Settled();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task AQuestion_PlaysASongWithAndWithout_AndKeepsTheVerdict()
     {

@@ -1,9 +1,10 @@
 /**
  *     The page's listening mode, `?listen=` a question's id, on a server that listens (a test instance): a device heard
  *     with and without over a few songs, A and B swapped from song to song so that neither is always the one with, and a
- *     verdict on each. The questions are written by the tests (`ListeningQuestionsTest`), each its songs and where in each
- *     the device first plays, the genre they are made in, what the song without leaves out, stages of it and choices of
- *     its genre, and the settings each side gives its songs, a mood given. They are served beside the page, `listening.json`, and fetched only where the page listens.
+ *     verdict on each. The questions are written by the tests (`ListeningQuestionsTest`), each its songs, where in each
+ *     the device plays and where to start, the bar before, the genre they are made in, the choices of it the song with
+ *     adds, what the song without leaves out, stages of it and choices of its genre, and the settings each side gives its
+ *     songs, a mood given. They are served beside the page, `listening.json`, and fetched only where the page listens.
  */
 
 import { minutesAndSeconds } from "./text.js";
@@ -16,11 +17,11 @@ export async function loadQuestions() {
 }
 
 /**
- *     A genre's choices with a question's patch laid over them for its song without the device: every option the patch
- *     names its amount, and the genre's other options of the choice as they are, so that the song without differs by the
- *     device alone.
+ *     A genre's choices with a question's patch of one side laid over them, the device taken out for the song without it
+ *     or added for the song with it: every option the patch names its amount, and the genre's other options of the
+ *     choice as they are, so that the two songs differ by the device alone.
  */
-export function withoutDevice(choices, patch) {
+export function patchedChoices(choices, patch) {
     const patched = { ...choices };
     for (const [choice, options] of Object.entries(patch)) patched[choice] = { ...(choices[choice] ?? {}), ...options };
     return patched;
@@ -73,9 +74,6 @@ export function createListeningIndex(questions, verdicts, genreName) {
     return index;
 }
 
-/** How long before where a device plays a song starts, so that what leads into it is heard, in seconds. */
-const LEAD_SECONDS = 2;
-
 /** Seconds as minutes and seconds, 1:05. */
 const clock = minutesAndSeconds;
 
@@ -127,7 +125,7 @@ export function createListeningStrip(question, { play, verdict }) {
     const isWithout = (letter) => (letter === "B") === (at % 2 === 0);
     const plays = ["A", "B"].map((letter) => button(`Play ${letter}`, () => {
         heard.textContent = `Playing ${letter}`;
-        play(question.seeds[at].seed, isWithout(letter), Math.max(0, question.seeds[at].at - LEAD_SECONDS));
+        play(question.seeds[at].seed, isWithout(letter), question.seeds[at].from);
     }, "primary"));
     const answers = CHOICES.map(([choice, text]) => {
         const element = button(text, () => {
@@ -167,7 +165,7 @@ export function createListeningStrip(question, { play, verdict }) {
         const done = at >= question.seeds.length;
         where.textContent = done
             ? `Done: ${question.seeds.length} songs heard. Thank you.`
-            : `Song ${at + 1} of ${question.seeds.length} · listen at ${clock(question.seeds[at].at)}, A and B starting just before`;
+            : `Song ${at + 1} of ${question.seeds.length} · listen at ${clock(question.seeds[at].at)}, A and B starting a bar before`;
         focus.textContent = done || !question.seeds[at].listen?.length ? "" : `Listen to: ${question.seeds[at].listen.join(", ")}`;
         heard.textContent = "";
         for (const element of [...plays, ...answers]) element.disabled = done;

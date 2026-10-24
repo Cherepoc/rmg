@@ -221,7 +221,10 @@ package's commit with `status.py $R package <package> <commit> "<songs changed>"
   but a device of a few places (a bar's slide into a section, a note in a run, a roll at a bar's end) is asked whatever
   its measure, its songs heard from its places: the measure takes 16 s around a moment of it, and a small place is
   heard clearly (the owner kept the surf drop at 0.04, the chromatic approach at 0.03 and IDM's 64ths at 0.05 on
-  23 October 2026, to be asked). A measure is no reason to cut.
+  23 October 2026, to be asked). A measure is no reason to cut. Every song is heard where its device is: at the start
+  of the difference holding the device's place, after a stretch alike, from the bar before, never seconds earlier to
+  cover a place unsure (leads stacked to 10 s once, of the same music in both); a place where nothing differs is the
+  trace's mistake or a device not heard there, reported and not asked.
   That measure counts the notes that differ, not the quality asked of them: a question of a colour, a mood or a
   brightness, measures the colour first (a song's major chords at each end), as songs a mood moved by its draws alone
   were measured apart and heard the same. A question of a device that refers to other music (a break on the tune, a
