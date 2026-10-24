@@ -1017,6 +1017,7 @@
       "feelValues": { "sixteenths": 0 },
       "ending": { "ringOut": 100, "button": [60, 60, 50], "fade": [20, 20, 30] },
       "rhythm": {
+        "melody": { "speed": 60, "fullness": 65 },
         "rhythm": { "speed": 69, "fullness": 82 }
       },
       "arpeggio": { "none": 100, "alberti": [40, 50, 50], "upDown": [30, 40, 40], "up": [20, 20, 30], "rootFifth": [0, 0, 20], "alternatingThumb": [60, 60, 50], "rhythm": { "none": 100, "alberti": [40, 50, 50], "upDown": [30, 40, 40], "up": [20, 20, 30], "rootFifth": [0, 0, 20], "alternatingThumb": [60, 60, 50], "roll": [30, 40, 40] } },

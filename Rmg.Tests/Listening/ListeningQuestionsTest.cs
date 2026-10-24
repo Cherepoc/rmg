@@ -57,45 +57,39 @@ public sealed class ListeningQuestionsTest
             "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.", "soul", [],
             new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
             x => Reharmonised(x) is { } r ? r.Substitutes.Min() : null, Places: x => Reharmonised(x) is { } r ? [..r.Substitutes] : []),
-        new("folk-tune", "A Folk tune a little faster and fuller, about four notes a bar rather than three: a tune to follow, or busier than the style?",
-            "Folk's melody rhythm (rhythm.melody, speed 60 and fullness 65), against the songs' own.", "folk", [],
-            null,
-            x => Sung(x).Select(v => (double?)v.Start).Min(), (x, span) => Sung(x).Contains(span),
-            WithPatch: new() { ["rhythm.melody"] = new() { ["speed"] = 60, ["fullness"] = 65 } }),
         new("piano-double-stops", "A Cinematic piano melody struck with a second note under it on every bar's downbeat, as a pianist voices a tune: fuller, or cluttered?",
             "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never; not told apart, cut (#64).", "filmPiano", [],
             new() { ["lineChords"] = new() { ["melody"] = 0 } },
             x => DoubleStops(x).Select(v => (double?)v).Min(), Places: DoubleStops),
-        new("funk-articulation", "A Funk part switching to its instrument's other sound for a while, a bass slapped on its accents or a guitar muted for a bar: a player's touch, or a sound jumping?",
-            "Whether a section's part plays its instrument's variant (articulationModes, the songs' own: in bars 0-4-100, on accents 0-3-100), against never; not told apart, cut (#59).", "funk", [],
-            new() { ["articulationModes"] = new() { ["none"] = 100, ["bars"] = 0, ["accents"] = 0 } },
-            x => Variants(x).Select(v => (double?)v).Min(), Places: Variants)
+        new("blackmetal-tremolo", "A Black metal riff's long notes tremolo-picked as fast as the hand plays, over its riff's own tremolo figure: the style's wall of picking, or a blur?",
+            "How often a section tremolo-picks a riff's long notes (articulation.tremolo, Black metal's 20-40-50), against never.", "blackMetal", [],
+            new() { ["articulation"] = new() { ["tremolo"] = 0 } },
+            x => Picked(x).Select(v => (double?)v).Min(), Places: Picked),
+        new("surf-tremolo", "A Surf melody's long notes tremolo-picked as fast as the hand plays: the style's picked lead, or a blur?",
+            "How often a section tremolo-picks a lead's long notes (articulation.tremolo, Surf's 10-25-40), against never.", "surf", [],
+            new() { ["articulation"] = new() { ["tremolo"] = 0 } },
+            x => Picked(x).Select(v => (double?)v).Min(), Places: Picked),
+        new("bluegrass-roll", "A Bluegrass banjo rolling through its chords in 8ths, its thumb on the lowest note: the banjo's drive, or a pattern on a loop?",
+            "Bluegrass's rhythm part's roll (arpeggio.rhythm, roll 100-100-80), against its chords whole.", "bluegrass", [],
+            new() { ["arpeggio.rhythm"] = new() { ["roll"] = 0, ["none"] = 100 } },
+            x => Rolled(x).Select(v => (double?)v).Min(), Places: Rolled)
     ];
 
     /// <summary>The appearance a song reharmonises, by its place, and where its substitutes start; none where it reharmonises none.</summary>
     private static (int Index, ImmutableArray<double> Substitutes)? Reharmonised(CorpusSong song) =>
         song.Trace.Where(x => x.Point == TracePoints.Reharmonisation).Select(x => x.Value).OfType<(int, ImmutableArray<double>)>().Select(x => ((int, ImmutableArray<double>)?)x).FirstOrDefault();
 
-    /// <summary>Whether a melody note sounds in a span.</summary>
-    private static bool IsSung(CorpusSong song, SectionSpan span) => song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Any(n => n.IsWithin(span.Start, span.End)) ?? false;
-
-    /// <summary>A song's appearances its melody sounds in.</summary>
-    private static SectionSpan[] Sung(CorpusSong song) => [..song.Map.Sections.Where(x => IsSung(song, x))];
-
     /// <summary>Where a song's melody stacks its notes on the band's chord, a double stop, in beats.</summary>
     private static double[] DoubleStops(CorpusSong song) =>
         [..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1).Select(x => x.Position) ?? []];
 
-    /// <summary>Where a song's parts play their instrument's variant, as each section that articulates traces it, in beats.</summary>
-    private static double[] Variants(CorpusSong song) =>
-    [
-        ..song.Trace.Where(x => x.Point == TracePoints.InstrumentOverTime)
-            .Select(x => (x.Track, Value: ((int Index, TrackRole, int, ArticulationMode Mode, int Variant))x.Value!))
-            .Where(x => x.Value.Mode != ArticulationMode.None)
-            .SelectMany(x => song.Song.Notes!.GetValueOrDefault(x.Track)?.Where(n => song.Map.PlayAt(n.Position)?.Index == x.Value.Index
-                                                                                  && n.Value.State.GetStateValue(CompositionStateKinds.Program) == x.Value.Variant + 1) ?? [])
-            .Select(x => x.Position)
-    ];
+    /// <summary>Where a song's notes are tremolo-picked, their strokes', in beats.</summary>
+    private static double[] Picked(CorpusSong song) =>
+        [..song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) > 0).Select(x => x.Position).Order()];
+
+    /// <summary>Where a song's rhythm part rolls its chords, in beats.</summary>
+    private static double[] Rolled(CorpusSong song) =>
+        [..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == (int)ArpeggioPattern.Roll).Select(x => x.Position) ?? []];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

@@ -147,3 +147,7 @@ rejected while fixing: the place, what was decided, why.
   October; the fifth over a strong note on the chord's third not changed, as nothing was heard wrong with it.
 - Ska's strong effect at the songs' own pool (#350 of 22 October 2026) kept, heard 5-0 against none on 24 October, the
   echo off the bass since (an echo never on the bass, whose low notes it blurs).
+- Folk's fuller tune (`rhythm.melody` speed 60, fullness 65, #326 of 22 October 2026) taken, heard 6-0 against the songs'
+  own on 24 October, after 2-2 the round before.
+- The articulation variants (`articulationModes`, #59 of 22 October 2026) kept, heard 6-0 in Funk against none on 24
+  October: a bass slapped on its accents, a guitar muted for a bar, a player's touch. Not a cut again.
