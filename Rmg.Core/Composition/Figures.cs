@@ -5,7 +5,7 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
-/// <summary>Who plays a figure: the kick, the snare, the riff, the chords, the claves, the bass or the drum keeping time, in the order a section draws them.</summary>
+/// <summary>Who plays a figure: the kick, the snare, the riff, the chords, the claves, the bass, the drum keeping time or the snare comping, in the order a section draws them.</summary>
 public enum FigurePlayer
 {
     Ground,
@@ -14,7 +14,10 @@ public enum FigurePlayer
     Claves,
     Chords,
     Bass,
-    Time
+    Time,
+
+    /// <summary>The snare comping where it colours the groove, a jazz drummer's, the backbeat its hi-hat's foot.</summary>
+    Comp
 }
 
 /// <summary>
@@ -82,7 +85,7 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
 ///     double kick; a black metal band's blast beat, its cymbal riding it, and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
 ///     band's galloping riff and its reverse gallop, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a jazz drummer's ride,
-///     on the beats and the skip after 2 and 4; a clave's three and two, and the 6/8 bell over two bars, and the chords comping
+///     on the beats and the skip after 2 and 4, and a jazz drummer's comping on the snare; a clave's three and two, and the 6/8 bell over two bars, and the chords comping
 ///     in clave,
 ///     and the bossa nova's on the snare's stroke, its cross-stick; a trance's chords in 16ths, its arpeggio's steady run, and its bass
 ///     rolling in the 16ths after the kick or on the offbeats, a salsa's tumbao, the bossa nova's bass and the tresillo; four on the floor,
@@ -101,7 +104,8 @@ internal static class Figures
     internal const Hold KeepsOutOf = Hold.Build | Hold.Cut;
 
     /// <summary>The players in the turns they play their figures in, each turn after what it follows.</summary>
-    private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves], [FigurePlayer.Ground, FigurePlayer.Chords], [FigurePlayer.Bass]];
+    // the snare's comping a turn after its backbeat's, the two its tracks, so that neither's edit takes the other's place
+    private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves], [FigurePlayer.Ground, FigurePlayer.Chords, FigurePlayer.Comp], [FigurePlayer.Bass]];
 
     /// <summary>The part a player is, the drums' for the drums' players.</summary>
     public static TrackRole RoleOf(FigurePlayer player) => player switch
@@ -109,7 +113,7 @@ internal static class Figures
         FigurePlayer.Riff => TrackRole.Riff,
         FigurePlayer.Chords => TrackRole.Chords,
         FigurePlayer.Bass => TrackRole.Bass,
-        FigurePlayer.Ground or FigurePlayer.Backbeat or FigurePlayer.Time or FigurePlayer.Claves => TrackRole.Drum,
+        FigurePlayer.Ground or FigurePlayer.Backbeat or FigurePlayer.Time or FigurePlayer.Claves or FigurePlayer.Comp => TrackRole.Drum,
         _ => throw new ArgumentOutOfRangeException(nameof(player), player, null)
     };
 
@@ -174,6 +178,9 @@ internal static class Figures
         // the tresillo, 3+3+2 in each half of the bar, a jazz-funk vamp's bass arpeggio
         new("tresillo", "The tresillo, 3+3+2 in each half bar", FigurePlayer.Bass, [0, 3, 6, 8, 11, 14], 16, null, 0, false),
         // a son clave counted in half notes, a salsa's beat, its two sides in a bar
+        // a jazz drummer's comping on the snare, soft strokes on the 2-and, the 3-and and the 4-and, as loose as the drummer
+        // talks with the soloist
+        new("jazzComp", "Comping on the 2-and, the 3-and and the 4-and", FigurePlayer.Comp, [6, 10, 14], 16, null, 0, false),
         new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 3, 6, 10, 12], 16, null, 0, false, Exact: true),
         new("clave23", "The clave's 2-3", FigurePlayer.Claves, [2, 4, 8, 11, 14], 16, null, 0, false, Exact: true),
         // the 6/8 bell, a 12/8 bell over two bars of 6/8, an Afro-Cuban 6/8's, its 8ths 1, 3, 5, 6, 8, 10 and 12
@@ -197,6 +204,7 @@ internal static class Figures
         FigurePlayer.Chords => "Chords' figure",
         FigurePlayer.Bass => "Bass's figure",
         FigurePlayer.Time => "Hi-hat's figure",
+        FigurePlayer.Comp => "Snare's comping",
         _ => "Claves' figure"
     };
 
@@ -268,6 +276,7 @@ internal static class Figures
         {
             [FigurePlayer.Ground] = [..DrumGroups.Kick.Tracks.Where(all.ContainsKey)],
             [FigurePlayer.Backbeat] = [..DrumGroups.Snare.Tracks.Where(all.ContainsKey)],
+            [FigurePlayer.Comp] = [..DrumGroups.Snare.Tracks.Where(all.ContainsKey)],
             [FigurePlayer.Time] = [..DrumGroups.Timekeepers.Tracks.Where(all.ContainsKey)],
             [FigurePlayer.Riff] = TrackOf(TrackRole.Riff) is { } own ? [own] : [],
             [FigurePlayer.Claves] = [..new[] { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }.Where(all.ContainsKey)],
@@ -303,6 +312,9 @@ internal static class Figures
                     foreach (var span in song.Form.Map.PlayedSections)
                     {
                         if (drawn[span.SectionId][player] is not { } figure)
+                            continue;
+                        // the snare comping only where it colours the groove, never where it leads the backbeat
+                        if (player == FigurePlayer.Comp && song.SectionOf(span.SectionId).DrumRoles.GetValueOrDefault(track) != DrumRole.Colour)
                             continue;
                         // one that follows where the song plays what it follows, the riff's where it has a riff or a bass
                         if (figure.Follows is { } followed && Followed(followed, span).Length == 0)
@@ -366,7 +378,7 @@ internal static class Figures
     }
 
     /// <summary>The drums' players, whose rhythm a half or double time stretches or presses.</summary>
-    private static readonly ImmutableHashSet<FigurePlayer> Drums = [FigurePlayer.Ground, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves];
+    private static readonly ImmutableHashSet<FigurePlayer> Drums = [FigurePlayer.Ground, FigurePlayer.Backbeat, FigurePlayer.Time, FigurePlayer.Claves, FigurePlayer.Comp];
 
     /// <summary>The song with the figures laid traced and handed on, and a heavy figure's backbeat under them.</summary>
     private static SongDraft Laid(SongDecisions song, SongDraft draft, Dictionary<int, Dictionary<FigurePlayer, Figure?>> drawn, HashSet<(int Section, FigurePlayer Player)> laid)

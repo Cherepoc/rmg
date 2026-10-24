@@ -84,7 +84,7 @@
       "tempoBand": { "slow": 31, "middle": 44, "fast": 31 },
       "soloShare": { "trading": 100, "together": [5, 10, 20] },
       "soloCount": { "one": 100, "two": [10, 20, 30], "three": [0, 5, 10] },
-      "figure": { "time": { "own": [20, 30, 40], "swingRide": 100 }, "chords": { "own": 100, "charleston": [10, 20, 30] }, "bass": { "own": 100, "halves": [25, 20, 10] } },
+      "figure": { "time": { "own": [20, 30, 40], "swingRide": 100 }, "chords": { "own": 100, "charleston": [10, 20, 30] }, "bass": { "own": 100, "halves": [25, 20, 10] }, "comp": { "own": [20, 40, 60], "jazzComp": 100 } },
       "length": { "from": [270, 300, 240], "to": [540, 600, 720] },
       "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": [100, 50, 0], "block": [0, 10, 25], "twin": 50 },
       "vamp": { "sections": [0, 10, 25] },

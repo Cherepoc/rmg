@@ -74,7 +74,7 @@ public sealed class FiguresTest
     {
         var loose = Figures.All.Where(x => x.Loose).Select(x => $"{x.Player} {x.Name}").Order().ToArray();
         await Assert.That(loose).IsEquivalentTo(
-            ["Backbeat breakbeat", "Bass bossaBass", "Bass halves", "Bass tresillo", "Bass tumbao", "Chords backbeat", "Chords charleston", "Chords sixEight", "Ground breakbeat", "Ground surdo", "Ground twoStep"],
+            ["Backbeat breakbeat", "Bass bossaBass", "Bass halves", "Bass tresillo", "Bass tumbao", "Chords backbeat", "Chords charleston", "Chords sixEight", "Comp jazzComp", "Ground breakbeat", "Ground surdo", "Ground twoStep"],
             CollectionOrdering.Matching);
     }
 
@@ -132,7 +132,7 @@ public sealed class FiguresTest
     public async Task AFigure_IsPlayedOnItsSixteenths(FigurePlayer player, string name)
     {
         var figure = Figures.All.Single(x => x.Player == player && x.Name == name);
-        var preset = player switch { FigurePlayer.Riff => "metal", _ => "rock" };
+        var preset = player switch { FigurePlayer.Riff => "metal", FigurePlayer.Comp => "jazz", _ => "rock" };
         var genre = GenrePresets.With(preset, GenreChoices.Figures[player], (name, 1));
         genre = genre with
         {
@@ -147,6 +147,7 @@ public sealed class FiguresTest
                 FigurePlayer.Ground => DrumGroups.Kick.Tracks.ToHashSet(),
                 FigurePlayer.Backbeat => DrumGroups.Snare.Tracks.ToHashSet(),
                 FigurePlayer.Time => DrumGroups.Timekeepers.Tracks.ToHashSet(),
+                FigurePlayer.Comp => DrumGroups.Snare.Tracks.ToHashSet(),
                 FigurePlayer.Riff => [song.Song.Track(TrackRole.Riff)],
                 FigurePlayer.Chords => [song.Song.Track(TrackRole.Chords)],
                 _ => [song.Song.Track(TrackRole.Bass)]
