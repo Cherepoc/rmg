@@ -259,6 +259,43 @@ proposed beyond fixes, reviewed as plans, each one mechanism over a case each:
   is song-wide state, and a clamp per section a swing of the section's own, put off until a fast swung section is
   heard rushed.
 
+### Guitars as players play them (the owner's notes of 24 October 2026)
+
+Measured over 32 songs of each preset before planning: Funk's rhythm guitar plays 59% of its notes on General MIDI's
+muted guitar, every one of them a chord of three notes or more, Disco's 76%, Funk rock's 49%, and Funk's guitar riff
+100% of its notes muted; the metal family's rhythm guitar has its lowest note at a median of MIDI 71-73, over a riff's
+47-49, its single notes high. In the order to build:
+
+1. **Funk's mute a touch, not a sound.** A funk guitarist strikes a big chord open, mutes the ghost scratches between
+   them, and plays a single-note line alternating muted and open. The rhythm and riff pools of Funk, Funk rock, Disco
+   and Soul lose the muted guitar as a part's instrument, the clean guitar in its place; a clean or jazz guitar's
+   palm-muted note (`PalmMute`, a dead note) sounds on the muted guitar, its program set on the note as a variant's is,
+   its chords and accents open; a part playing dead notes mutes its weak-beat repeats too, as a chugging part's are,
+   so that its single-note line interchanges. The articulation variants' guitar rows (a clean guitar's bar muted, a
+   muted one's bar clean) go, the same mistake by the bar; the bass's slap and the strings' stay. Measured after: the
+   chords on the muted program (none but the scratches), the muted share of the riff's notes; asked by ear against the
+   part on the muted guitar as now. No choice of its own: one rule and the presets' data.
+2. **A tremolo-picked note** (#352, the tremolo-picked line). A tremolo picker alternates as fast as the hand plays
+   evenly, about 11 to 13 strokes a second, 16ths at a black metal or surf tempo and 32nds or sextuplets at a slower
+   one, on the long notes of a riff or a lead, the pitch changing with the line and the picks not; other rock and metal
+   pick their long notes in measured 16ths, slower. An `articulation` option, a section's chance: a riff's or a lead's
+   note a beat or longer re-struck at the finest of the 16th, the sextuplet and the 32nd no faster than a genre's
+   speed (one value: Surf rock and Black metal fast, the other rock and metal presets that take it measured), a
+   power chord re-struck whole, never in a calm section, the up-stroke a touch softer as the strum's. Asked in Black
+   metal against the riff's tremolo figure (every 16th a placed note), which goes if the articulation is preferred, and
+   in Surf rock against none.
+3. **A rhythm guitar on the low string.** A metal band's second guitar doubles the riff low or holds a low note under
+   a lead, slow or chugged, or interchanges a power chord on the accent with single notes. First the doubling: the
+   rhythm part playing the riff in unison now and then, a pair of `doubling`'s, on its onsets (the doubler keeping to
+   its lead's beats); then, if listening asks for more, a section's rhythm part on the low string, each chord its root
+   in the riff's register, its own rhythm kept, the chugs' rule muting its weak repeats and an accent a power chord
+   (Metal, Thrash, Djent, Nu metal, Doom). The register is the risk: two guitars and the bass in one octave.
+4. **Djent's leaping riff.** A riff on its open string and a note over an octave above it, the 13th fret over the open
+   string where it is chromatic, the two interchanging in lengths the polymeter's cycle shifts. First measured: how many
+   pitches Djent's riff plays a pattern, and how far from its pedal. Then, if they keep near the pedal, an option of
+   `riff`'s, the notes of a pedal riff off its pedal an octave up, the scale choosing the note (the octave, the minor
+   ninth in a chromatic riff, the tenth); the rhythm as drawn and the polymeter as it is.
+
 ### From the review of 22 October 2026
 
 The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its proposals, reviewed as plans:
