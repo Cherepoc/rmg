@@ -74,7 +74,7 @@ public sealed class FiguresTest
     {
         var loose = Figures.All.Where(x => x.Loose).Select(x => $"{x.Player} {x.Name}").Order().ToArray();
         await Assert.That(loose).IsEquivalentTo(
-            ["Backbeat breakbeat", "Bass bossaBass", "Bass halves", "Bass tresillo", "Bass tumbao", "Chords backbeat", "Chords charleston", "Chords sixEight", "Comp jazzComp", "Ground breakbeat", "Ground surdo", "Ground twoStep"],
+            ["Backbeat breakbeat", "Backbeat surf", "Bass bossaBass", "Bass halves", "Bass tresillo", "Bass tumbao", "Chords backbeat", "Chords charleston", "Chords sixEight", "Comp jazzComp", "Ground breakbeat", "Ground oneAndThree", "Ground surdo", "Ground twoStep"],
             CollectionOrdering.Matching);
     }
 

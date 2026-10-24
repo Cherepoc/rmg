@@ -139,12 +139,16 @@ internal static class Figures
         new("swingRide", "The swing ride, on the beats and the skip after 2 and 4", FigurePlayer.Time, [0, 4, 6, 8, 12, 14], 16, null, 0, false, Exact: true),
         // the kick on every beat, a dance track's, a reggae's steppers, a pop chorus's, the likelier the louder the section
         new("fourOnTheFloor", "Four on the floor, the kick on every beat", FigurePlayer.Ground, [0, 4, 8, 12], 16, null, 1, false),
+        // the kick on 1 and 3 alone, the half notes under a surf band's snare, a country two-beat's
+        new("oneAndThree", "The kick on 1 and 3", FigurePlayer.Ground, [0, 8], 16, null, 0, false),
         // drum and bass's, the kick on 1 and the 3-and around the snare's 2 and 4
         new("twoStep", "The two-step, the kick on 1 and the 3-and", FigurePlayer.Ground, [0, 10], 16, null, 0, false),
         // the bossa nova's surdo, on 1, the 2-and, 3 and the 4-and
         new("surdo", "The surdo, on 1, the 2-and, 3 and the 4-and", FigurePlayer.Ground, [0, 6, 8, 14], 16, null, 0, false),
         // the snare on every beat, Motown's, and a power metal band's over its double kick
         new("everyBeat", "The snare on every beat", FigurePlayer.Backbeat, [0, 4, 8, 12], 16, null, 1, false),
+        // the surf beat, the snare on 2 and 4 and the 2-and between, over the kick's 1 and 3
+        new("surf", "The surf beat, the snare on 2, the 2-and and 4", FigurePlayer.Backbeat, [4, 6, 12], 16, null, 0, false),
         // the country train beat, the snare in even 8ths
         new("trainBeat", "The train beat, the snare in even 8ths", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 0, false),
         new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, null, 0, false),

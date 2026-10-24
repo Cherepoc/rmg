@@ -151,3 +151,5 @@ rejected while fixing: the place, what was decided, why.
   own on 24 October, after 2-2 the round before.
 - The articulation variants (`articulationModes`, #59 of 22 October 2026) kept, heard 6-0 in Funk against none on 24
   October: a bass slapped on its accents, a guitar muted for a bar, a player's touch. Not a cut again.
+- Surf's tremolo-picked lead (`articulation.tremolo`, #352 of 22 October 2026) kept, heard 6-0 against none on 25
+  October. Not a question again.
