@@ -445,6 +445,89 @@
     ]
   },
   {
+    "id": "jazz-form",
+    "question": "A Jazz tune's AABA played through again and again, its choruses over the same form, against the forms it plays now, mostly its own: a jazz tune played through, or a loop?",
+    "decides": "Whether Jazz's AABA is a cycle its length repeats (form vvbv+, in place of vvbv and vvbvvvbv), against Jazz as now (#122).",
+    "genre": "jazz",
+    "with": {
+      "genre": {
+        "form": {
+          "vvbv+": 100,
+          "vvbv": 0,
+          "vvbvvvbv": 0
+        }
+      },
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {},
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 69.3,
+        "from": 68,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Solo (Alto Sax)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 112.1,
+        "from": 110.5,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Melody (Trumpet)",
+          "Solo (Tenor Sax)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 91,
+        "from": 89,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Pad (String Ensemble 1)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "9",
+        "at": 333.9,
+        "from": 330.4,
+        "listen": [
+          "Tom",
+          "Melody (Alto Sax)",
+          "Acoustic Snare"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 89.7,
+        "from": 88.1,
+        "listen": [
+          "Chords (Electric Guitar (jazz))",
+          "Bass (Acoustic Bass)",
+          "Hi-Hat"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 99.2,
+        "from": 96.7,
+        "listen": [
+          "Hi-Hat",
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Contrabass)"
+        ]
+      }
+    ]
+  },
+  {
     "id": "bluegrass-roll",
     "question": "A Bluegrass banjo rolling through its chords in 8ths, its thumb on the lowest note: the banjo's drive, or a pattern on a loop?",
     "decides": "Bluegrass's rhythm part's roll (arpeggio.rhythm, roll 100-100-80), against its chords whole.",

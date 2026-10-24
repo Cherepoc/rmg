@@ -88,7 +88,7 @@ public sealed class SongFormReportTest
 
             formed++;
             await Assert.That(structure.Roles.Values.Distinct().Count()).IsEqualTo(structure.Roles.Count);
-            await Assert.That(SongForms.Forms.Any(x => x.Value.SequenceEqual(roles))).IsTrue();
+            await Assert.That(SongForms.Forms.Any(x => x.Value.Played(null).SequenceEqual(roles))).IsTrue();
         }
 
         await Assert.That(formed).IsGreaterThan(0);

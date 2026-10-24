@@ -316,9 +316,16 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   intro of its own sounds as its source named, and a rule test that every stage edits the entries' window as it edits
   the first section's first bars; it closes the class package 06 fixed stage by stage (fills, stop time, pushes and the
   pedal still miss the window, `WindowStagesReportTest`).
-- **A form as a cycle** (#122, the foundations reviewer), an experiment: Jazz's AABA as a form the song's length
-  repeats, a form option beside `vvbv` asked against it by ear, before any migration; Jazz plays a bridge in 38% of its
-  songs, its lengths beyond any fixed AABA's.
+- **A form as a cycle** (#122, the foundations reviewer), built as an experiment on 25 October 2026 and asked
+  (`jazz-form`): a form that names its repeating part (`vvbv+`, `WrittenForm.Repeats`), played as many passes as the
+  length comes nearest, each pass the same sections, at the songs' weight 0 and in no preset. Over 64 Jazz songs with it
+  in place of AABA once and twice (`FormCycleTest.Report`): a bridge in 89% of the songs drawn, against 31%, a free form
+  in 11%, against 69%, and at the plain end 97% within Jazz's lengths, against 36%, two to nine passes. Heard to work,
+  the migration follows: Jazz's pool naming it, the forms that are only longer copies (`vvbvvvbv`, `vvvvvv`,
+  `vcvcbcvc`, `vpcvpcbcvpc`) folded into cycles, and the length's chance of a free form left to the form facet. Found
+  with it, either way: a jazz tune's head is rarely played out, 3% to 6% of the songs leaving their last four sections
+  unsoloed, now and with the cycle, as solos fall on any later appearance; a cycle's last pass sung, as its first is,
+  should the question be heard as a loop for want of it.
 - **Intensity moving the energy** (#76, the foundations reviewer), built as an experiment on 24 October 2026 and asked
   (`trance-fierce`, `trance-calm`): a song's energy following its intensity (`moodEnergy`, Trance's alone), every
   section's moved by the intensity times a section's step, the proposal's wider spread at a given end left out as a case

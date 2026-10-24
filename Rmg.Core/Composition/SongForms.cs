@@ -23,6 +23,26 @@ public enum SectionRole
     PostChorus
 }
 
+/// <summary>
+///     A form songs are written in, its roles in order, and whether it is a cycle the song's length repeats, as a jazz
+///     tune's AABA is played through again and again, each pass its sections once more.
+/// </summary>
+public sealed record WrittenForm(ImmutableArray<SectionRole> Roles, bool Repeats = false)
+{
+    /// <summary>
+    ///     The form's roles as a song of a length plays them: a cycle as many times as comes nearest the length, at least
+    ///     once, by how long an appearance of each role plays; once where no length is given, as any other form.
+    /// </summary>
+    internal ImmutableArray<SectionRole> Played(SongLength? length)
+    {
+        if (!Repeats || length is null)
+            return Roles;
+        var pass = Roles.Sum(length.AppearanceSeconds);
+        var passes = Math.Max(1, (int)Math.Round(length.Target / pass));
+        return [..Enumerable.Repeat(Roles, passes).SelectMany(x => x)];
+    }
+}
+
 /// <summary>A song's sections in its order, and the role each plays.</summary>
 public sealed record SongStructure(ImmutableArray<int> SectionIds, ImmutableDictionary<int, SectionRole> Roles);
 
@@ -86,33 +106,36 @@ internal static class SongForms
     public const double FormChance = 0.7;
 
     /// <summary>The forms, as their roles in order, and how often each is drawn.</summary>
-    public static ImmutableArray<Weighted<ImmutableArray<SectionRole>>> Forms { get; } =
+    public static ImmutableArray<Weighted<WrittenForm>> Forms { get; } =
     [
-        new(0.35, Parse("VCVCBC")),
-        new(0.25, Parse("VPCVPCBC")),
-        new(0.15, Parse("VCVCBVC")),
-        new(0.1, Parse("VCVC")),
-        new(0.1, Parse("CVCVBC")),
-        new(0.05, Parse("VPCVPC")),
+        new(0.35, new WrittenForm(Parse("VCVCBC"))),
+        new(0.25, new WrittenForm(Parse("VPCVPCBC"))),
+        new(0.15, new WrittenForm(Parse("VCVCBVC"))),
+        new(0.1, new WrittenForm(Parse("VCVC"))),
+        new(0.1, new WrittenForm(Parse("CVCVBC"))),
+        new(0.05, new WrittenForm(Parse("VPCVPC"))),
         // and two longer, seldom drawn but where a song is to play long
-        new(0.02, Parse("VCVCBCVC")),
-        new(0.02, Parse("VPCVPCBCVPC")),
+        new(0.02, new WrittenForm(Parse("VCVCBCVC"))),
+        new(0.02, new WrittenForm(Parse("VPCVPCBCVPC"))),
         // and AABA, once and twice, the A a verse and the B a bridge, which songs never take but a genre may, as a jazz
         // standard of eight-bar sections is
-        new(0, Parse("VVBV")),
-        new(0, Parse("VVBVVVBV")),
+        new(0, new WrittenForm(Parse("VVBV"))),
+        new(0, new WrittenForm(Parse("VVBVVVBV"))),
         // and ABA and a rondo, ABACA, a classical piece's, the A a verse, the B a bridge and the C a chorus, an episode of
         // its own, which songs never take but a genre may
-        new(0, Parse("VBV")),
-        new(0, Parse("VBVCV")),
+        new(0, new WrittenForm(Parse("VBV"))),
+        new(0, new WrittenForm(Parse("VBVCV"))),
         // and strophic, verse after verse, a ballad's or a blues', four or six, which songs never take but a genre may
-        new(0, Parse("VVVV")),
-        new(0, Parse("VVVVVV")),
+        new(0, new WrittenForm(Parse("VVVV"))),
+        new(0, new WrittenForm(Parse("VVVVVV"))),
         // and with a post-chorus after every chorus, a pop song's bonus hook, which songs never take but a genre may
-        new(0, Parse("VCQVCQBCQ")),
+        new(0, new WrittenForm(Parse("VCQVCQBCQ"))),
         // and three verses with their hooks, a rap song's, which songs never take but a genre may
-        new(0, Parse("VCVCVC")),
-        new(0, Parse("VPCQVPCQBCQ"))
+        new(0, new WrittenForm(Parse("VCVCVC"))),
+        new(0, new WrittenForm(Parse("VPCQVPCQBCQ"))),
+        // and AABA as a cycle, played through as many times as the song's length comes nearest, a jazz tune's head and its
+        // choruses over the same form, which songs never take but a genre may
+        new(0, new WrittenForm(Parse("VVBV"), Repeats: true))
     ];
 
     /// <param name="context">The sequence the form is drawn from.</param>
@@ -130,9 +153,11 @@ internal static class SongForms
         var formChance = FormsChance.At(unconventionality, genre.Chance(GenreChoices.FormChances, "forms"));
         // the forms as the genre weighs them where it names them, its plainest at the plain end and its wildest at the wild;
         // a length given weighs those that may be drawn
-        var forms = genre.Pool<ImmutableArray<SectionRole>>(GenreChoices.Form, NameOf) is { } pool
+        var written = genre.Pool<WrittenForm>(GenreChoices.Form, NameOf) is { } pool
             ? ByConvention.Weigh(Forms.Select(x => (x.Value, new ByConvention(x.Weight, x.Weight, x.Weight))), unconventionality, pool)
             : Forms;
+        // each as the length plays it, a cycle as many times as comes nearest it
+        ImmutableArray<Weighted<ImmutableArray<SectionRole>>> forms = [..written.Select(x => new Weighted<ImmutableArray<SectionRole>>(x.Weight, x.Value.Played(length)))];
         var isConventional = context.TestProbability(length is null ? formChance : length.FormChance(formChance, forms.Where(x => x.Weight > 0).Select(x => (IEnumerable<SectionRole>)x.Value)));
         var form = context.Pick(length is null ? forms : [..forms.Select(x => x with { Weight = x.Weight * length.Closeness(x.Value.Sum(length.AppearanceSeconds)) })]);
         SongStructure structure;
@@ -174,8 +199,10 @@ internal static class SongForms
     /// <summary>The chance a song takes one of the forms, by its form facet: the plainest always, the wildest never.</summary>
     public static ByConvention FormsChance { get; } = RhythmicUnconventionality.Ends(FormChance, -1);
 
-    /// <summary>A form's name, as a genre gives it: its roles' letters, "vcvcbc".</summary>
-    public static string NameOf(ImmutableArray<SectionRole> form) => string.Concat(form.Select(x => x switch
+    /// <summary>A form's name, as a genre gives it: its roles' letters, "vcvcbc", and a cycle's a "+" after them, "vvbv+".</summary>
+    public static string NameOf(WrittenForm form) => LettersOf(form.Roles) + (form.Repeats ? "+" : "");
+
+    private static string LettersOf(ImmutableArray<SectionRole> form) => string.Concat(form.Select(x => x switch
     {
         SectionRole.Verse => 'v',
         SectionRole.PreChorus => 'p',
@@ -186,13 +213,13 @@ internal static class SongForms
     }));
 
     /// <summary>A form as a page shows it where room is short: its roles' letters, "VCVCBC".</summary>
-    public static string ShortOf(ImmutableArray<SectionRole> form) => NameOf(form).ToUpperInvariant();
+    public static string ShortOf(WrittenForm form) => NameOf(form).ToUpperInvariant();
 
-    /// <summary>A form as a page shows it: its roles in words, "Verse, chorus, verse, chorus, bridge, chorus".</summary>
-    public static string LabelOf(ImmutableArray<SectionRole> form)
+    /// <summary>A form as a page shows it: its roles in words, "Verse, chorus, verse, chorus, bridge, chorus", a cycle's "played through again".</summary>
+    public static string LabelOf(WrittenForm form)
     {
-        var words = string.Join(", ", form.Select(x => x switch { SectionRole.PreChorus => "pre-chorus", SectionRole.PostChorus => "post-chorus", _ => x.ToString().ToLowerInvariant() }));
-        return char.ToUpperInvariant(words[0]) + words[1..];
+        var words = string.Join(", ", form.Roles.Select(x => x switch { SectionRole.PreChorus => "pre-chorus", SectionRole.PostChorus => "post-chorus", _ => x.ToString().ToLowerInvariant() }));
+        return char.ToUpperInvariant(words[0]) + words[1..] + (form.Repeats ? ", played through again" : "");
     }
 
     private static ImmutableArray<SectionRole> Parse(string roles)
