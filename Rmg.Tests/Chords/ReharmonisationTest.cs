@@ -82,7 +82,7 @@ public sealed class ReharmonisationTest
     [Test]
     public async Task ASubstitute_IsTheSame_AtEveryPassOfThePattern()
     {
-        var (passes, places, faded) = (0, 0, 0);
+        var (passes, places, faded, ends, all) = (0, 0, 0, 0, 0);
         foreach (var (seed, with, substitutes, without) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed =>
                  {
                      var (with, substitutes) = Generate(seed);
@@ -93,8 +93,11 @@ public sealed class ReharmonisationTest
                 continue;
             int Root(Song song, double position) => song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
             var span = with.Map!.Sections[found.Appearance];
-            // a fade's passes after the appearance playing its changes on
+            // a fade's passes after the appearance playing its changes on, and those in a phrase's last bar, where an arranger
+            // reharmonises
             faded += found.At.Count(x => x >= span.End - 1e-9);
+            ends += found.At.Count(x => (x - span.Start) % span.Meter.PhraseDuration >= span.Meter.PhraseDuration - span.Meter.BarDuration - 1e-9);
+            all += found.At.Length;
             foreach (var place in found.At.GroupBy(x => Math.Round((x - span.Start) % span.Meter.PatternDuration, 6)))
             {
                 places++;
@@ -103,7 +106,7 @@ public sealed class ReharmonisationTest
             }
         }
 
-        Console.WriteLine($"{passes} of {places} substituted places played at more than one pass, {faded} substitutes in a fade's passes");
+        Console.WriteLine($"{passes} of {places} substituted places played at more than one pass, {faded} substitutes in a fade's passes, {ends} of {all} substitutes in a phrase's last bar");
         await Assert.That(passes).IsGreaterThan(0);
         await Assert.That(faded).IsGreaterThan(0);
     }

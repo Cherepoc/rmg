@@ -24,8 +24,18 @@
         "from": 102,
         "listen": [
           "Chords (Drawbar Organ)",
-          "Bass (Drawbar Organ)",
-          "Pad (Choir Aahs)"
+          "Pad (Choir Aahs)",
+          "Bass (Drawbar Organ)"
+        ]
+      },
+      {
+        "seed": "K",
+        "at": 140.8,
+        "from": 139.7,
+        "listen": [
+          "Bass (Electric Bass (finger))",
+          "Riff (Baritone Sax)",
+          "Chords (Acoustic Grand Piano)"
         ]
       },
       {
@@ -60,14 +70,6 @@
         "seed": "1s",
         "at": 121.7,
         "from": 118.3,
-        "listen": [
-          "Chords (Electric Piano 1)"
-        ]
-      },
-      {
-        "seed": "21",
-        "at": 91.6,
-        "from": 88.3,
         "listen": [
           "Chords (Electric Piano 1)"
         ]

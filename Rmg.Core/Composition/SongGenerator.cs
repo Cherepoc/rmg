@@ -293,7 +293,8 @@ internal enum SongStream
     SoloRolls = 138,
     Tremolo = 139,
     FillFeet = 140,
-    Rubato = 141
+    Rubato = 141,
+    ReharmonisationKinds = 142
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

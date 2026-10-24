@@ -225,7 +225,7 @@ internal static class SongStages
     internal static SongDraft Reharmonise(SongDecisions song, SongDraft draft) =>
         draft with
         {
-            Reharmonisation = Composition.Reharmonisation.Plan(song.Stream(SongStream.Reharmonisation), song.Facets[Facet.Progression], song.Genre, song.Form.Map,
+            Reharmonisation = Composition.Reharmonisation.Plan(song.Stream(SongStream.Reharmonisation), song.Stream(SongStream.ReharmonisationKinds), song.Facets[Facet.Progression], song.Genre, song.Form.Map,
                 draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change)), LastFull(song))
         };
 

@@ -26,7 +26,7 @@ FAMILIES = {
     },
     'harmony': {
         'choices': 'rootMotion rootDegree cadenceDegree cadenceRaise sectionHome chordScales ownMode passingChords passingKind planing harmonyDevices '
-                   'turnaround vamp keyChanges keyLift sectionKey sectionPedal harmonicRhythm scale chordShape colour arpeggio arpeggio.chords arpeggio.rhythm gateParts '
+                   'turnaround vamp reharmonisation keyChanges keyLift sectionKey sectionPedal harmonicRhythm scale chordShape colour arpeggio arpeggio.chords arpeggio.rhythm gateParts '
                    'harmonyInterval strictness darkness',
         'stages': 'Reharmonisation|Inner lines|Pedal|Line chords',
     },

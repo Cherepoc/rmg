@@ -460,6 +460,15 @@ public static class GenreChoices
     /// <summary>The chance a fill's line takes the kick out instead, the groove playing on without it into the downbeat (<see cref="FillLayers.KickOutChance" />).</summary>
     public static GenreChoice KickOut { get; } = Chances("kickOut", "Kick-out", [("lines", "Lines the kick drops out for", FillLayers.KickOutChance)]);
 
+    /// <summary>How a reharmonised chord is substituted: a third away, a secondary dominant into the next chord, or a major chord borrowed minor (<see cref="Composition.Reharmonisation.Kinds" />).</summary>
+    public static GenreChoice ReharmonisedChords { get; } = Pool("reharmonisation", "Reharmonised chords",
+        Composition.Reharmonisation.Kinds.Select(x => (Name(x.Kind.ToString()), x.Kind switch
+        {
+            ReharmonisationKind.Applied => "A secondary dominant into the next chord",
+            ReharmonisationKind.Borrowed => "A major chord borrowed minor",
+            _ => "A chord a third away"
+        }, x.Weight)));
+
     /// <summary>The tempo at a phrase's edges: the opening part alone's phrases pushed and broadened, and a section's last bar broadening into a return or any section (<see cref="Composition.Rubato" />).</summary>
     public static GenreChoice Rubato { get; } = Chances("rubato", "Rubato",
         [("openings", "The opening part alone's phrases pushed and broadened", Composition.Rubato.OpeningChance), ("returns", "A section's last bar broadening into a return", Composition.Rubato.ReturnChance),
@@ -853,7 +862,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, TremoloSpeed, ArticulationModes, LineChords, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, FillFeet, Rubato, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, SurfDrop, DrumSoloFeet, Stickings, Intro, IntroWindow, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
+        Tempo, TempoBand, Length, Darkness, Intensity, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, TremoloSpeed, ArticulationModes, LineChords, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, FillFeet, Rubato, ReharmonisedChords, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, SurfDrop, DrumSoloFeet, Stickings, Intro, IntroWindow, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
         SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, RiffSection, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
