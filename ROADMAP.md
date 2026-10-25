@@ -925,9 +925,9 @@ the nine stages after the notes that drew (25 October 2026), the mix filter now 
 drops, hat rolls, ghosts, the snare's rudiments and the lines' ornaments draw their choices as the song's decisions
 (`SongDecisions`), the stages playing them; stop time was already so, its carriers and hits read from the notes. The
 audit counted the draws a stage makes in its own file, and missed two given theirs by `SongStages` (26 October): the
-instruments a part switches to by section (`InstrumentsOverTime`), drawn after the register is placed for the part's
-own instrument, to move before the notes as its track's state so that the register follows the instrument playing;
-and the expression (`Expression`, 39 draws), its bends', vibrato's, tone's and sound's choices of the form alone to be
+instruments a part switches to by section (`InstrumentsOverTime`), now planned before the notes, an instrument switched
+to its track's state with the part's octaves on it, which the notes are realized within (a switched instrument's notes
+outside its range 1.7%, from 3.4%); and the expression (`Expression`, 39 draws), its bends', vibrato's, tone's and sound's choices of the form alone to be
 told from those reading the notes and moved, as the articulations were, the twin then following its riff by the
 doubling's copy and `DrawsAs` gone. Left besides: Drum marks, which chooses its marking drums among those that play by
 their notes and marks at their typical loudness, to move once which drums play is a decision of its own. A soloist's

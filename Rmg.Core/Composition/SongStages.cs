@@ -31,6 +31,12 @@ internal sealed record SongDraft(
     public ImmutableArray<(double Start, double End, double BarDuration)> Stopped { get; init; } = [];
 
     /// <summary>
+    ///     Every pitched part's instrument in each appearance, planned before the notes, which are realized within its range
+    ///     and played on it (<see cref="InstrumentsOverTime.Plan" />); none before it is planned.
+    /// </summary>
+    public ImmutableDictionary<int, ImmutableArray<SectionInstrument>>? Instruments { get; init; }
+
+    /// <summary>
     ///     The stretches the stages have made that the others keep out of, each written by the stage that made it: a fill, a
     ///     kick-out, which the bass leaves with the kick (<see cref="SongStages.KickOutBass" />), a polymeter's sections, a
     ///     drum solo's turns, a calling verse's call and its answer (<see cref="Composition.CallAndResponse" />).
@@ -156,6 +162,7 @@ internal static class SongStages
         new("Solos", Solos, CanSkip: true),
         new("Solo answers", SoloAnswers, CanSkip: true),
         new("Articulation choices", Articulations.Choose, CanSkip: true),
+        new("Instrument choices", InstrumentChoices, CanSkip: false),
         new("Mix filter", Composition.MixFilter.Apply, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
         new("Drum marks", DrumMarks.Apply, CanSkip: true),
@@ -443,6 +450,34 @@ internal static class SongStages
     internal static SongDraft RealizeNotes(SongDecisions song, SongDraft draft) =>
         draft with { Notes = song.Form.Edits.CutNotes(Realizer.Realize(song.Tracks.Definitions, draft.Timeline, song.Form.Map.PlaceOf), song.Roles) };
 
+    /// <summary>The parts' instruments as planned before the notes.</summary>
+    private static ImmutableDictionary<int, ImmutableArray<SectionInstrument>> InstrumentsOf(SongDraft draft) =>
+        draft.Instruments ?? throw new InvalidOperationException("The notes are realized before the instruments are planned.");
+
+    /// <summary>
+    ///     The parts' instruments over the song, planned before the notes by every section's sound facet, a twin's as its
+    ///     riff's, and an instrument a part switches to its track's state there with the part's octaves on it, which its
+    ///     notes are realized within, as its own's are within its own (<see cref="Registers.WithinInstrument(PitchInstrumentTrack, int, Genre)" />).
+    /// </summary>
+    internal static SongDraft InstrumentChoices(SongDecisions song, SongDraft draft)
+    {
+        var plan = InstrumentsOverTime.Plan(
+            song.Tracks.Definitions,
+            song.Form.Map,
+            [..song.Sections.Select(x => x.Facets[Facet.Sound])],
+            // a twin as its riff, drawing from the riff's sequences
+            (section, track) => song.Stream(SongStream.InstrumentsOverTime, section, song.DrawsAs(track)),
+            (section, track) => song.Stream(SongStream.InstrumentFamilies, section, song.DrawsAs(track)),
+            song.Genre
+        );
+        var tracks = draft.Timeline.TrackTimelineMap.ToBuilder();
+        foreach (var (track, sections) in plan)
+            if (tracks.TryGetValue(track, out var map) && sections.Any(x => x.Program != ((PitchInstrumentTrack)song.Tracks.Definitions[track]).InstrumentCode))
+                tracks[track] = map.MergeStateTimelineMap(StateTimelineMap.Create(draft.Timeline.Duration,
+                    [InstrumentsOverTime.StateOf(sections, (PitchInstrumentTrack)song.Tracks.Definitions[track], song.Form.Map, draft.Timeline.Duration, song.Genre)]));
+        return draft with { Instruments = plan, Timeline = TrackEventStateTimelineMap.Create(draft.Timeline.Duration, tracks.ToImmutable(), draft.Timeline.CommonStateTimelineMap) };
+    }
+
     /// <summary>
     ///     The bass out with the kick where the drums take it out, the low end leaving together into the downbeat: its notes
     ///     there taken out, and one sounding into the span ending where it starts.
@@ -461,21 +496,9 @@ internal static class SongStages
         return draft with { Notes = notes };
     }
 
-    /// <summary>The parts' instruments over the song, switched and articulated by every section's sound facet.</summary>
+    /// <summary>The parts' instruments over the song on their notes, as planned, their articulations' variants played.</summary>
     internal static SongDraft Instruments(SongDecisions song, SongDraft draft) =>
-        draft with
-        {
-            Notes = InstrumentsOverTime.Apply(
-                NotesOf(draft),
-                song.Tracks.Definitions,
-                song.Form.Map,
-                [..song.Sections.Select(x => x.Facets[Facet.Sound])],
-                // a twin as its riff, drawing from the riff's sequences
-                (section, track) => song.Stream(SongStream.InstrumentsOverTime, section, song.DrawsAs(track)),
-                (section, track) => song.Stream(SongStream.InstrumentFamilies, section, song.DrawsAs(track)),
-                song.Genre
-            )
-        };
+        draft with { Notes = InstrumentsOverTime.Apply(NotesOf(draft), song.Tracks.Definitions, song.Form.Map, InstrumentsOf(draft)) };
 
     /// <summary>
     ///     A hook intro as its chorus plays: every part's notes of the chorus's first phrase as every stage before made them,

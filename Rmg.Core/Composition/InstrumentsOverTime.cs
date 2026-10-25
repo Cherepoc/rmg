@@ -135,8 +135,11 @@ internal static class InstrumentsOverTime
             : null;
 
     /// <summary>
-    ///     The song's notes with every pitched part's instrument over the song on them (<see cref="CompositionStateKinds.Program" />),
-    ///     each section and part drawing from a sequence of its own.
+    ///     Every pitched part's instrument in each of the song's appearances, by its track and the appearance's place, before
+    ///     its notes are realized, which they are within its range (<see cref="Realizer" />): switched now and then, by the
+    ///     section's sound facet, within its family or to another of the role's, and its articulation's variant, each section
+    ///     and part drawing from a sequence of its own, an appearance as its section's every time, so that a chorus comes back
+    ///     in the instrument it switched to.
     /// </summary>
     /// <param name="sound">Every section's sound facet, by its place among the song's sections.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track, a riff's twin's its riff's.</param>
@@ -145,24 +148,19 @@ internal static class InstrumentsOverTime
     ///     The genre whose pools of the roles' instruments a switch keeps to, and an articulation too, a variant, where the
     ///     pool leaves it out; one the role never lists is the instrument's own.
     /// </param>
-    public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
-        ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
+    public static ImmutableDictionary<int, ImmutableArray<SectionInstrument>> Plan(
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
         SongMap map,
         IReadOnlyList<double> sound,
         Func<int, int, IGenerationContext> streams,
         Func<int, int, IGenerationContext> families,
         Genre genre
-    )
-    {
-        var result = notes.ToBuilder();
-        foreach (var (track, definition) in definitions.Where(x => x.Value is PitchInstrumentTrack && notes.ContainsKey(x.Key)))
+    ) =>
+        definitions.Where(x => x.Value is PitchInstrumentTrack).ToImmutableDictionary(x => x.Key, x =>
         {
-            var pitched = (PitchInstrumentTrack)definition;
-            var programs = new Dictionary<int, int>();
-            foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
+            var (track, pitched) = (x.Key, (PitchInstrumentTrack)x.Value);
+            return map.Sections.Select((span, index) =>
             {
-                // a section plays as it did the time before, so that a chorus comes back in the instrument it switched to
                 var context = streams(span.SectionId, track);
                 var switches = context.TestProbability(SwitchChance.At(sound[index], genre.Chance(GenreChoices.InstrumentSwitches, "sections")));
                 var role = RoleOf(pitched.Role);
@@ -184,8 +182,52 @@ internal static class InstrumentsOverTime
                 var drawnVariant = drawnVariants.IsEmpty ? program : drawnVariants[context.GenerateInt(0, drawnVariants.Length)];
                 var leftOut = pool is not null && role?.Instruments.FirstOrDefault(x => x.Program == drawnVariant) is { } listed && !(Weight(listed) > 0);
                 var (variants, variant) = leftOut ? (ImmutableArray<int>.Empty, program) : (drawnVariants, drawnVariant);
-                var bars = Enumerable.Range(0, span.BarCount).Select(_ => context.TestProbability(BarChance)).ToArray();
+                ImmutableArray<bool> bars = [..Enumerable.Range(0, span.BarCount).Select(_ => context.TestProbability(BarChance))];
+                return new SectionInstrument(switches, program, mode, variants, variant, bars);
+            }).ToImmutableArray();
+        });
 
+    /// <summary>
+    ///     A part's instrument along the song as its track's state, where it switches: in each stretch it plays as a section the
+    ///     instrument it plays there and its octaves on it, unset where it plays its own and outside the sections.
+    /// </summary>
+    public static StateTimeline<LayerValue<PartInstrument>> StateOf(ImmutableArray<SectionInstrument> sections, PitchInstrumentTrack part, SongMap map, double duration, Genre genre)
+    {
+        LayerValue<PartInstrument> On(int program) => program == part.InstrumentCode
+            ? LayerValue<PartInstrument>.Unset
+            : Registers.WithinInstrument(part, program, genre) is var fitted ? new LayerValue<PartInstrument>(StateDepths.Track, new PartInstrument(program, fitted.MinOctaveOffset, fitted.MaxOctaveOffset)) : default;
+        Play[] plays = [..map.Plays];
+        var at = new SortedDictionary<double, LayerValue<PartInstrument>> { [0] = LayerValue<PartInstrument>.Unset };
+        foreach (var play in plays.Where(x => plays.All(y => Math.Abs(y.Span.Start - x.Span.End) > 1e-9)))
+            at[play.Span.End] = LayerValue<PartInstrument>.Unset;
+        foreach (var play in plays)
+            at[play.Span.Start] = On(sections[play.Index].Program);
+        var items = new List<TimelineItem<LayerValue<PartInstrument>>>();
+        foreach (var (position, state) in at.Where(x => x.Key < duration - 1e-9))
+            if (items.Count == 0 || items[^1].Value != state)
+                items.Add(state.ToTimelineItem(position));
+        return StateTimeline.Create(duration, CompositionStateKinds.Instrument, items);
+    }
+
+    /// <summary>
+    ///     The song's notes with every pitched part's instrument over the song on them (<see cref="CompositionStateKinds.Program" />),
+    ///     as planned (<see cref="Plan" />), its articulation's variant on the bars or the accents it plays them on.
+    /// </summary>
+    public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
+        ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
+        ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
+        SongMap map,
+        ImmutableDictionary<int, ImmutableArray<SectionInstrument>> plan
+    )
+    {
+        var result = notes.ToBuilder();
+        foreach (var (track, definition) in definitions.Where(x => x.Value is PitchInstrumentTrack && notes.ContainsKey(x.Key)))
+        {
+            var pitched = (PitchInstrumentTrack)definition;
+            var programs = new Dictionary<int, int>();
+            foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
+            {
+                var (switches, program, mode, variants, variant, bars) = plan[track][index];
                 // the notes it plays, an intro made of it and the ending after the last among them, so that the final chord is
                 // played on the instrument the song ended in
                 var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => map.PlayingAt(x.Note.Position)?.Index == index).ToArray();
@@ -244,3 +286,12 @@ internal static class InstrumentsOverTime
         return result.ToImmutable();
     }
 }
+
+/// <summary>
+///     A part's instrument in an appearance (<see cref="InstrumentsOverTime.Plan" />): whether it switched, the instrument it
+///     plays, how it plays its articulation's variant, the variants it has, the one it plays, and the bars it plays it in.
+/// </summary>
+public sealed record SectionInstrument(bool Switches, int Program, ArticulationMode Mode, ImmutableArray<int> Variants, int Variant, ImmutableArray<bool> Bars);
+
+/// <summary>An instrument a part switches to, and the part's octaves on it (<see cref="CompositionStateKinds.Instrument" />).</summary>
+public readonly record struct PartInstrument(int Program, int MinOctave, int MaxOctave);

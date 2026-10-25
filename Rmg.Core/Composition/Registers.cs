@@ -35,10 +35,13 @@ public static class Registers
     ///     genre's register for the part is at its lowest quarter or its highest (<see cref="GenreChoices.Register" />), as
     ///     a guitar tuned down plays, or a bass up high.
     /// </summary>
-    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, Genre genre)
+    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, Genre genre) => WithinInstrument(part, part.InstrumentCode, genre);
+
+    /// <summary>A part's octaves, as it has them, moved within another instrument's, one it switches to (<see cref="InstrumentsOverTime" />).</summary>
+    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, int program, Genre genre)
     {
         var moved = OctavesOf(genre, part.Role);
-        var (low, high) = OctavesOf(part.InstrumentCode) is var (l, h) ? (l + moved, h + moved) : default;
+        var (low, high) = OctavesOf(program) is var (l, h) ? (l + moved, h + moved) : default;
         var width = part.MaxOctaveOffset - part.MinOctaveOffset;
         var min = Math.Clamp(part.MinOctaveOffset + moved, low, high);
         var max = Math.Clamp(min + width, min, high);

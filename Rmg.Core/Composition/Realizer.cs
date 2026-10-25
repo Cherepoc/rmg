@@ -26,7 +26,10 @@ internal static class Realizer
 
     private static readonly ImmutableArray<int> ChromaticScaleOffsets = [..Enumerable.Range(0, OctaveNoteCount)];
 
-    /// <summary>The notes of every track that plays, by its number, from the song's state.</summary>
+    /// <summary>
+    ///     The notes of every track that plays, by its number, from the song's state, each note within the range of the
+    ///     instrument its part plays where it is (<see cref="CompositionStateKinds.Instrument" />).
+    /// </summary>
     /// <param name="placeOf">Where a position is in the song's bars, its bar's meter and its beat in it.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Realize(
         ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions,
@@ -164,7 +167,10 @@ internal static class Realizer
         }
     }
 
-    /// <summary>A pitched track's notes: its chords each placed from the one before, and a line's as it was placed.</summary>
+    /// <summary>
+    ///     A pitched track's notes: its chords each placed from the one before on the same instrument, and a line's as it was
+    ///     placed, each within its instrument's range.
+    /// </summary>
     /// <param name="changes">Where the song's chords change, in order.</param>
     /// <param name="crossings">
     ///     The notes, by their index, that would sound across a change of chord with no note on it, and the change, which
@@ -178,12 +184,22 @@ internal static class Realizer
         out List<(int Index, double Change)> crossings
     )
     {
-        var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
-        var octaveCount = track.MaxOctaveOffset - track.MinOctaveOffset + 1;
-        var range = GetRange(track);
-
-        // the chords are placed in order, each following from the one before
-        var voiceLeader = new VoiceLeader(range.Low, range.High, notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes));
+        // the chords are placed in order, each following from the one before on the same instrument, in its octaves: the
+        // instrument the part plays there, but a note a section's form gives an instrument of its own and a solo's, which
+        // play on the part's
+        var leaders = new Dictionary<(int, int), ((int Low, int High) Range, VoiceLeader Leader)>();
+        ((int Low, int High) Range, VoiceLeader Leader) On(StateMap state)
+        {
+            var playing = state.GetStateValue(CompositionStateKinds.Instrument);
+            var (min, max) = playing.IsSet && state.GetStateValue(CompositionStateKinds.Program) == 0 && state.GetStateValue(CompositionStateKinds.LineSolo) == 0
+                ? (playing.Value.MinOctave, playing.Value.MaxOctave)
+                : (track.MinOctaveOffset, track.MaxOctaveOffset);
+            if (leaders.TryGetValue((min, max), out var known))
+                return known;
+            var (absoluteMinOctave, octaveCount) = (min + ZeroOctaveOffset, max - min + 1);
+            var range = (absoluteMinOctave * OctaveNoteCount, (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1);
+            return leaders[(min, max)] = (range, new VoiceLeader(range.Item1, range.Item2, notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes)));
+        }
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
         crossings = [];
@@ -192,6 +208,7 @@ internal static class Realizer
         for (var i = 0; i < items.Length; i++)
         {
             place = i > 0 && UntilChange(changes, items[i - 1].Position) > items[i].Position - items[i - 1].Position + 1e-9 ? place + 1 : 0;
+            var (range, voiceLeader) = On(items[i].Value.Value);
             notes[i] = RealizeNote(items[i], voiceLeader, track.Role, range, placeOf(items[i].Position), changes, place, out var unclipped);
             var change = items[i].Position + UntilChange(changes, items[i].Position);
             var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;

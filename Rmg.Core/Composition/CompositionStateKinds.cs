@@ -232,6 +232,10 @@ internal static class CompositionStateKinds
     // choice over its part's, and played by them (Articulations.Choose)
     public static StateKind<LayerValue<ArticulationChoice>> Articulation { get; } = StateKinds.CreateLowestLayerWins<ArticulationChoice>(Prefix + "Articulation", StateScope.Render);
 
+    // the instrument a part switches to where it is and its octaves on it, chosen as its track's state before the notes are
+    // realized within them (InstrumentsOverTime.Plan); unset where it plays its own
+    public static StateKind<LayerValue<PartInstrument>> Instrument { get; } = StateKinds.CreateLowestLayerWins<PartInstrument>(Prefix + "Instrument", StateScope.Render);
+
     // how long a guitar's stroke takes across its strings, in seconds, the song's (Articulations.Choose)
     public static StateKind<double> Stroke { get; } = StateKinds.CreateAdditive<double>(Prefix + "Stroke", StateScope.Render);
 
