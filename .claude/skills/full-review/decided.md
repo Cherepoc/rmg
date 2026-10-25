@@ -153,3 +153,8 @@ rejected while fixing: the place, what was decided, why.
   October: a bass slapped on its accents, a guitar muted for a bar, a player's touch. Not a cut again.
 - Surf's tremolo-picked lead (`articulation.tremolo`, #352 of 22 October 2026) kept, heard 6-0 against none on 25
   October. Not a question again.
+- Surf's beat, the kick on 1 and 3 and the snare on 2, the 2-and and 4 (`oneAndThree`, `surf`), the owner's
+  convention for the genre, given on 25 October 2026, beside the train beat and, wilder, the drums' own. Not a finding.
+- `blackmetal-tremolo` asked a section's long notes picked against none, which the owner did not mean: the device is a
+  line heard plain and again picked in one song, planned in `ROADMAP.md` (*A tremolo as a reprise*). Its answers say
+  nothing of that device.

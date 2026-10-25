@@ -229,7 +229,11 @@ package's commit with `status.py $R package <package> <commit> "<songs changed>"
   brightness, measures the colour first (a song's major chords at each end), as songs a mood moved by its draws alone
   were measured apart and heard the same. A question of a device that refers to other music (a break on the tune, a
   quote) checks that what it refers to is there to hear in its songs: the tune sung before, dense enough to follow, on
-  an instrument the device is not. A question answered "can't tell" twice is not asked again, nor its device changed,
+  an instrument the device is not. A question of a device that is a contrast within a song (a line heard plain and
+  again tremolo-picked, a reprise) hears both sides in its one song, from before the first: a device drawn alike for
+  every time a section plays cannot be asked so, its songs differing by a note or two (`blackmetal-tremolo` was asked
+  so, its first song differing in its last note alone, on 25 October 2026). Before a question is asked its song is
+  looked at where it starts: what differs there against what the question says. A question answered "can't tell" twice is not asked again, nor its device changed,
   until its songs are looked at: what the device plays there against what the question says it does (two such
   questions failed for causes found only by looking at the songs, neither the device's amount). Ask the first-ranked first, a round of ten at most, the answers
   collected from the test instance's dashboard (`/admin/api/summary`, its `verdicts`) before the next; a question
