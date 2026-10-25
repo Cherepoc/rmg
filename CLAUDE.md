@@ -30,8 +30,13 @@
   note); `Realizer` only chooses their register from what came before (a chord's voicing) and leads into what follows. A
   decision that needs the song put together, such as a fill, the form or a stop, is an edit after assembly, not a render
   flag. The stages after assembly run in one order (`SongStages`): those before `Realizer` edit the state, those after
-  it edit the notes, and can no longer change a chord's voicing or a line's placement. A stage that hands another its
-  work does so through `SongDraft`, and comes before it.
+  it edit the notes, and can no longer change a chord's voicing or a line's placement. A decision is made as state
+  before the notes unless it needs what only the realized notes have, their pitches, a voicing or a line's placement,
+  as an ornament's grace notes do: a stage after the notes plays the state, and draws only what reads the notes, so
+  that a part slurring or a section stopping is chosen before them (`Articulations.Choose`). A choice is its deepest
+  layer's (`CreateLowestLayerWins`), a note's own over its part's and its section's; only an amount that adds, a
+  velocity or an offset, is additive. A stage that hands another its work does so through `SongDraft`, and comes
+  before it.
 - **Lean, don't decide.** Bias a choice by conventionality through its ends (`ByConvention`), and by energy, a line's
   weight or anything else with `Tilt`: an option's weight times the odds to the power of its lean, a chance through its
   odds, a value around its middle by its skew. A lean is data on the option; never multiply or cap a chance by hand.
@@ -40,7 +45,9 @@
   decisions by the way: the band's lift into a louder section follows the sections, not the drums' fill lines. An edit
   to the whole band, such as a stop, reaches every track of the song, not those one section's timeline happens to hold,
   as later stages add parts such as a soloist or a riser. A part of the song made from another, such as a hook intro
-  from its chorus, is treated by every stage as its source is, so that it stays what it quotes.
+  from its chorus, is treated by every stage as its source is, so that it stays what it quotes; and a part made from
+  another's notes, a doubling, a soloist's track or a hook intro, takes what it plays as and its source's choices only
+  where it plays the source's line, never the source's whole state.
 - **Streams.** Every stage, section and part draws from its own stream (`SongStream`, `Seeds.Derive`), a part's keyed by
   its role or track and never shared with another part's, so that a change to one leaves the others as they were. A
   new decision draws from a stream of its own, or keeps the number of draws, so that with its effect off the corpus is
@@ -48,7 +55,8 @@
 - **Songs change on purpose.** A refactor keeps the fingerprint where the right code keeps it, but code is never bent
   to keep it (draw orders kept by hand, helpers shaped round a draw, lookups left mixed); the change is made
   deliberately instead, and its commit says how many of 256 drawn songs it changed, their MIDI compared with the
-  build's label, which names its commit, left out.
+  build's label, which names its commit, left out. A refactor may change songs by moving draws alone, every draw
+  from the same stream and nothing else played otherwise, the songs it changed counted and traced to the move.
 - **Measure.** Measure a change in behaviour on the corpus before and after it (`TestCorpus`, explicit report
   tests), and tune it against the numbers. Tests read the trace's typed values (`StateTraceEntry.Value`,
   `TracePoints`), never its descriptions. A change that redraws the songs meets songs the tests never met, and some

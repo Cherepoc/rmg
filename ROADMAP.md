@@ -913,6 +913,19 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   quadratically (#297); a silent start recognised by its trace, its holder exempt alone (#304); the harmony's N.C.
   wherever no pitched part sounds mid-song, and a named chord's root the chords part's (#318).
 
+### Decisions after the notes
+
+`CLAUDE.md` now asks a decision be made as state before the notes unless it needs what only the realized notes have.
+Nine stages after the notes still draw (25 October 2026), each to be read against it and moved where it fails, a
+refactor that moves draws alone, its songs counted: Stop time (whether the song stops, which sections, their returns,
+the ensemble hits), Pushes (which sections push), Surf drops (which lifts drop, the slide itself the notes'), the Mix
+filter (the song's filter, an appearance's dip), Hat rolls (an appearance's rolls), Ghosts and Drum ornaments (a
+section's, the song's, a hit's share), Drum marks (the song's, an appearance's swells, strikes and rolls), and
+Ornaments (the song's, and each note's, which reads its realized pitch and stays). The likely movers are the sections'
+and the appearances' choices, made of the form alone; a draw per note that reads its pitch or its neighbours stays.
+A part made from another's notes taking the source's whole state is the other rule's first case: a soloist's track
+made from the melody's (`Solos`), which keeps `Articulations.Choose` just before the notes.
+
 ### A tremolo as a reprise
 
 `blackmetal-tremolo` asked the wrong thing: its songs differed by a held note or two, as a section draws its tremolo
