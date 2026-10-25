@@ -1,80 +1,5 @@
 [
   {
-    "id": "soul-reharmonised",
-    "question": "A Soul song's later chorus over new chords around its melody, the tune the same as sung before: a lift, or the chorus lost?",
-    "decides": "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.",
-    "genre": "soul",
-    "with": {
-      "genre": {},
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "harmonyDevices": {
-          "reharmonised": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "d",
-        "at": 97.4,
-        "from": 94.9,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "1D",
-        "at": 220.8,
-        "from": 217.6,
-        "listen": [
-          "Bass (Electric Bass (finger))",
-          "Chords (Electric Piano 1)",
-          "Counter-melody (String Ensemble 1)"
-        ]
-      },
-      {
-        "seed": "1g",
-        "at": 182.3,
-        "from": 177.7,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Chords (Drawbar Organ)"
-        ]
-      },
-      {
-        "seed": "1j",
-        "at": 162.9,
-        "from": 160.7,
-        "listen": [
-          "Bass (Drawbar Organ)",
-          "Pad (Voice Oohs)",
-          "Riff (Brass Section)"
-        ]
-      },
-      {
-        "seed": "1r",
-        "at": 138.5,
-        "from": 136.1,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "1s",
-        "at": 121.7,
-        "from": 118.3,
-        "listen": [
-          "Chords (Electric Piano 1)"
-        ]
-      }
-    ]
-  },
-  {
     "id": "piano-double-stops",
     "question": "A Cinematic piano melody struck with a second note under it on every bar's downbeat, as a pianist voices a tune: fuller, or cluttered?",
     "decides": "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never; not told apart, cut (#64).",
@@ -119,25 +44,25 @@
         ]
       },
       {
-        "seed": "W",
-        "at": 119.2,
-        "from": 117.2,
+        "seed": "1K",
+        "at": 234.1,
+        "from": 231.4,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "b",
-        "at": 88.3,
-        "from": 85.5,
+        "seed": "1P",
+        "at": 133.7,
+        "from": 130.4,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "h",
-        "at": 30.8,
-        "from": 27.7,
+        "seed": "1U",
+        "at": 66.5,
+        "from": 62.8,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
@@ -216,7 +141,7 @@
   },
   {
     "id": "trance-fierce",
-    "question": "A Trance track at its fiercest intensity, its sections louder and fuller as well as faster: the more driving track, or only busier?",
+    "question": "Two Trance tracks both at the fiercest intensity, one of them also with its sections louder and fuller for it: the more driving track, or only busier?",
     "decides": "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity 1 (#76).",
     "genre": "trance",
     "with": {
@@ -298,7 +223,7 @@
   },
   {
     "id": "trance-calm",
-    "question": "A Trance track at its calmest intensity, its sections softer and sparser as well as slower: the calmer track, or an emptied one?",
+    "question": "Two Trance tracks both at the calmest intensity, one of them also with its sections softer and sparser for it: the calmer track, or an emptied one?",
     "decides": "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity -1 (#76).",
     "genre": "trance",
     "with": {
@@ -376,89 +301,6 @@
     ]
   },
   {
-    "id": "jazz-form",
-    "question": "A Jazz tune's AABA played through again and again, its choruses over the same form, against the forms it plays now, mostly its own: a jazz tune played through, or a loop?",
-    "decides": "Whether Jazz's AABA is a cycle its length repeats (form vvbv+, in place of vvbv and vvbvvvbv), against Jazz as now (#122).",
-    "genre": "jazz",
-    "with": {
-      "genre": {
-        "form": {
-          "vvbv+": 100,
-          "vvbv": 0,
-          "vvbvvvbv": 0
-        }
-      },
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {},
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "5",
-        "at": 69.3,
-        "from": 68,
-        "listen": [
-          "Chords (Electric Piano 1)",
-          "Solo (Alto Sax)",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 112.1,
-        "from": 110.5,
-        "listen": [
-          "Chords (Electric Piano 1)",
-          "Melody (Trumpet)",
-          "Solo (Tenor Sax)"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 91,
-        "from": 89,
-        "listen": [
-          "Chords (Electric Piano 1)",
-          "Pad (String Ensemble 1)",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 333.9,
-        "from": 330.4,
-        "listen": [
-          "Tom",
-          "Melody (Alto Sax)",
-          "Acoustic Snare"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 89.7,
-        "from": 88.1,
-        "listen": [
-          "Chords (Electric Guitar (jazz))",
-          "Bass (Acoustic Bass)",
-          "Hi-Hat"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 99.2,
-        "from": 96.7,
-        "listen": [
-          "Hi-Hat",
-          "Chords (Acoustic Grand Piano)",
-          "Bass (Contrabass)"
-        ]
-      }
-    ]
-  },
-  {
     "id": "bluegrass-roll",
     "question": "A Bluegrass banjo rolling through its chords in 8ths, its thumb on the lowest note: the banjo's drive, or a pattern on a loop?",
     "decides": "Bluegrass's rhythm part's roll (arpeggio.rhythm, roll 100-100-80), against its chords whole.",
@@ -487,17 +329,9 @@
         ]
       },
       {
-        "seed": "7",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Rhythm part (Banjo)"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 61,
-        "from": 59.8,
+        "seed": "D",
+        "at": 121.1,
+        "from": 118.9,
         "listen": [
           "Rhythm part (Banjo)"
         ]
@@ -520,8 +354,16 @@
       },
       {
         "seed": "K",
-        "at": 18,
-        "from": 17,
+        "at": 57.2,
+        "from": 56.1,
+        "listen": [
+          "Rhythm part (Banjo)"
+        ]
+      },
+      {
+        "seed": "N",
+        "at": 164.5,
+        "from": 162.8,
         "listen": [
           "Rhythm part (Banjo)"
         ]

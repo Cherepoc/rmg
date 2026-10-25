@@ -118,7 +118,7 @@
       "effects": { "vibrato": [30, 60, 90], "bends": [0, 15, 50], "soloBends": [10, 40, 60], "chorus": [0, 20, 60], "swell": [0, 35, 100], "tone": [40, 70, 80], "tape": 0, "pinch": 0, "dive": 0 },
       "pan": { "bass": 65, "chords": 65 },
       "formChances": { "forms": [100, 90, 60] },
-      "form": { "vvbv": 100, "vvbvvvbv": 100, "vcvcbc": 10, "vvvv": [0, 20, 20] },
+      "form": { "vvbv+": 100, "vcvcbc": 10, "vvvv": [0, 20, 20] },
       "phrases": { "eightBars": [100, 100, 60], "fourBars": [30, 30, 40], "twelveBars": [30, 30, 25] },
       "instrument": {
         "melody": { "vibraphone": [45, 45, 63], "electricGuitarJazz": [40, 40, 49], "trumpet": [80, 80, 77], "mutedTrumpet": [55, 55, 53], "altoSax": [85, 85, 81], "tenorSax": [100, 100, 96], "clarinet": [30, 30, 68], "flute": [25, 25, 100] },

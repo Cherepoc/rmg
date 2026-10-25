@@ -59,10 +59,6 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("soul-reharmonised", "A Soul song's later chorus over new chords around its melody, the tune the same as sung before: a lift, or the chorus lost?",
-            "How often a later appearance is reharmonised (harmonyDevices.reharmonised, Soul's 10-20-30), against never.", "soul", [],
-            new() { ["harmonyDevices"] = new() { ["reharmonised"] = 0 } },
-            x => Reharmonised(x) is { } r ? r.Substitutes.Min() : null, Places: x => Reharmonised(x) is { } r ? [..r.Substitutes] : []),
         new("piano-double-stops", "A Cinematic piano melody struck with a second note under it on every bar's downbeat, as a pianist voices a tune: fuller, or cluttered?",
             "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never; not told apart, cut (#64).", "filmPiano", [],
             new() { ["lineChords"] = new() { ["melody"] = 0 } },
@@ -71,32 +67,33 @@ public sealed class ListeningQuestionsTest
             "How often an appearance tremolo-picks its riff's, rhythm part's or melody's notes, the likelier and the faster the more energy it has (articulation.tremolo, Black metal's 20-40-50), against never.", "blackMetal", [],
             new() { ["articulation"] = new() { ["tremolo"] = 0 } },
             x => Reprised(x)?.Picked, Places: x => Reprised(x) is { } r ? [r.Picked] : [], Contrast: x => Reprised(x)?.Plain),
-        new("trance-fierce", "A Trance track at its fiercest intensity, its sections louder and fuller as well as faster: the more driving track, or only busier?",
+        new("trance-fierce", "Two Trance tracks both at the fiercest intensity, one of them also with its sections louder and fuller for it: the more driving track, or only busier?",
             "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity 1 (#76).", "trance", [],
             new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
             x => x.Origin, With: new() { ["intensity"] = 61 }, Without: new() { ["intensity"] = 61 }),
-        new("trance-calm", "A Trance track at its calmest intensity, its sections softer and sparser as well as slower: the calmer track, or an emptied one?",
+        new("trance-calm", "Two Trance tracks both at the calmest intensity, one of them also with its sections softer and sparser for it: the calmer track, or an emptied one?",
             "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity -1 (#76).", "trance", [],
             new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
             x => x.Origin, With: new() { ["intensity"] = 0 }, Without: new() { ["intensity"] = 0 }),
-        new("jazz-form", "A Jazz tune's AABA played through again and again, its choruses over the same form, against the forms it plays now, mostly its own: a jazz tune played through, or a loop?",
-            "Whether Jazz's AABA is a cycle its length repeats (form vvbv+, in place of vvbv and vvbvvvbv), against Jazz as now (#122).", "jazz", [],
-            null,
-            x => x.Map.Sections.Length > 4 ? x.Map.Sections[4].Start : null,
-            WithPatch: new() { ["form"] = new() { ["vvbv+"] = 100, ["vvbv"] = 0, ["vvbvvvbv"] = 0 } }),
         new("bluegrass-roll", "A Bluegrass banjo rolling through its chords in 8ths, its thumb on the lowest note: the banjo's drive, or a pattern on a loop?",
             "Bluegrass's rhythm part's roll (arpeggio.rhythm, roll 100-100-80), against its chords whole.", "bluegrass", [],
             new() { ["arpeggio.rhythm"] = new() { ["roll"] = 0, ["none"] = 100 } },
             x => Rolled(x).Select(v => (double?)v).Min(), Places: Rolled)
     ];
 
-    /// <summary>The appearance a song reharmonises, by its place, and where its substitutes start; none where it reharmonises none.</summary>
-    private static (int Index, ImmutableArray<double> Substitutes)? Reharmonised(CorpusSong song) =>
-        song.Trace.Where(x => x.Point == TracePoints.Reharmonisation).Select(x => x.Value).OfType<(int, ImmutableArray<double>)>().Select(x => ((int, ImmutableArray<double>)?)x).FirstOrDefault();
-
     /// <summary>Where a song's melody stacks its notes on the band's chord, a double stop, in beats.</summary>
-    private static double[] DoubleStops(CorpusSong song) =>
-        [..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1).Select(x => x.Position) ?? []];
+    /// <remarks>
+    ///     But where the tune plays in octaves, its octave below sounding under it without the double stop too, and where another
+    ///     part sounds within an octave under the tune, as the left hand's chords do, so that what is heard apart is the stop.
+    /// </remarks>
+    private static double[] DoubleStops(CorpusSong song)
+    {
+        var melody = song.Track(TrackRole.Melody);
+        bool Under(TimelineItem<RealizedNote> note) => song.Song.Notes!.Where(x => x.Key != melody).SelectMany(x => x.Value)
+            .Any(x => x.Position <= note.Position + 1e-6 && x.Position + x.Value.Duration > note.Position + 1e-6 && x.Value.Pitches.Any(p => p < note.Value.Pitches.Max() && p >= note.Value.Pitches.Max() - 12));
+        return [..song.Song.Notes!.GetValueOrDefault(melody)?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1
+                                                                     && x.Value.State.GetStateValue(CompositionStateKinds.Octave) == 0 && !Under(x)).Select(x => x.Position) ?? []];
+    }
 
     /// <summary>How many bars at most a contrast's later side follows its first, so that a listener hears them as one.</summary>
     private const int ContrastBars = 16;

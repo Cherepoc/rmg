@@ -155,6 +155,10 @@ rejected while fixing: the place, what was decided, why.
   October. Not a question again.
 - Surf's beat, the kick on 1 and 3 and the snare on 2, the 2-and and 4 (`oneAndThree`, `surf`), the owner's
   convention for the genre, given on 25 October 2026, beside the train beat and, wilder, the drums' own. Not a finding.
+- Jazz's AABA as a cycle (`vvbv+`, #122 of 22 October 2026), heard 6-0 against AABA once and twice on 26 October
+  and taken into its pool. Not a question again.
+- A Soul song's later chorus reharmonised (`harmonyDevices.reharmonised`, #94 of 22 October 2026) kept, heard 5-0, two
+  unsure, on 26 October. Not a cut again.
 - Black metal's tremolo carried through its line's rests (`articulation.tremoloThrough` 100), the owner's convention
   given on 25 October 2026: a picked line runs on as one wave, its rests within a phrase filled. Not a question.
 - `blackmetal-tremolo` asked a section's long notes picked against none, which the owner did not mean: the device is a

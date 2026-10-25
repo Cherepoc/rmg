@@ -82,7 +82,7 @@ public sealed class TremoloTest
         var held = Rmg.Core.Events.StateMap.FromStates([CompositionStateKinds.Articulation.CreateState(new Rmg.Core.Events.LayerValue<ArticulationChoice>(Rmg.Core.Events.StateDepths.Note, new(PartArticulation.Holds, 0.25)))]);
         Rmg.Core.Events.TimelineItem<RealizedNote> Note(double at) => new(at, new RealizedNote([40], 0.8, 0.5, held));
         // phrases of four beats, a change of chord at 3, the part held silent from 13
-        var played = Articulations.Held(Rmg.Core.Events.EventTimeline.Create(16, [Note(0), Note(1), Note(2), Note(3.5), Note(5), Note(8), Note(12.5), Note(14)]), [3],
+        var played = Articulations.Held(Rmg.Core.Events.EventTimeline.Create(16, [Note(0), Note(1), Note(2), Note(3.5), Note(5), Note(8), Note(12.5), Note(14)]), x => x.State.GetStateValue(CompositionStateKinds.Articulation).Value.Articulates.HasFlag(PartArticulation.Holds), [3],
             position => Math.Floor(position / 4) * 4 + 4, position => position < 13 ? 13 : 16).Select(x => (x.Position, x.Value.Duration)).ToArray();
         await Assert.That(played).IsEquivalentTo(new[] { (0.0, 1.0), (1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (5.0, 3.0), (8.0, 4.0), (12.5, 0.5), (14.0, 2.0) });
     }

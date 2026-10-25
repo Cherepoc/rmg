@@ -7,8 +7,11 @@ namespace Rmg.Tests.Forms;
 /// <summary>A form as a cycle the song's length repeats (<see cref="WrittenForm.Repeats" />), Jazz's AABA played through as its experiment.</summary>
 public sealed class FormCycleTest
 {
-    /// <summary>Jazz with its AABA as a cycle in place of AABA once and twice, its other forms as they are.</summary>
-    private static readonly Genre Cycling = GenrePresets.With("jazz", GenreChoices.Form, ("vvbv+", 1), ("vcvcbc", 0.1));
+    /// <summary>Jazz, its AABA a cycle, as heard 6-0 against its AABA once and twice on 26 October 2026.</summary>
+    private static readonly Genre Cycling = GenrePresets.Genre("jazz");
+
+    /// <summary>Jazz as it was before, its AABA played once or twice, its other forms as they are.</summary>
+    private static readonly Genre Before = GenrePresets.With("jazz", GenreChoices.Form, ("vvbv", 1), ("vvbvvvbv", 1), ("vcvcbc", 0.1));
 
     private static CorpusSong[] Songs(Genre genre, double? @base) =>
         [..TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre, Base: @base)))];
@@ -50,7 +53,7 @@ public sealed class FormCycleTest
     public async Task Report()
     {
         static double Share(IEnumerable<bool> values) => values.DefaultIfEmpty().Average(x => x ? 1.0 : 0);
-        foreach (var (name, genre) in new[] { ("now", GenrePresets.Genre("jazz")), ("cycle", Cycling) })
+        foreach (var (name, genre) in new[] { ("before", Before), ("cycle", Cycling) })
             foreach (var @base in new double?[] { 0, null })
             {
                 var songs = Songs(genre, @base);
