@@ -131,7 +131,8 @@ internal sealed record SongStage(string Name, Func<SongDecisions, SongDraft, Son
 ///     The song's stages after it is put together, in their order, which is their correctness: a stage that reads
 ///     another's work comes after it, such as the lines after the fills they walk with, and a stage that keeps another's
 ///     intent before it would undo it, such as a hook's quote before the lines lead into the first section. A stage after
-///     the notes edits them, but for state only the render reads, as the mix filter's, which no note keeps.
+///     the notes edits them, and draws only what reads them, a choice made of the form alone made before them, as the
+///     mix filter's and the parts' articulations are.
 /// </summary>
 internal static class SongStages
 {
@@ -155,6 +156,7 @@ internal static class SongStages
         new("Solos", Solos, CanSkip: true),
         new("Solo answers", SoloAnswers, CanSkip: true),
         new("Articulation choices", Articulations.Choose, CanSkip: true),
+        new("Mix filter", Composition.MixFilter.Apply, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
         new("Drum marks", DrumMarks.Apply, CanSkip: true),
         new("Stop time", Composition.StopTime.Apply, CanSkip: true),
@@ -166,7 +168,6 @@ internal static class SongStages
         new("Ornaments", Composition.Ornaments.Apply, CanSkip: true),
         new("Articulation", Articulations.Apply, CanSkip: true),
         new("Surf drops", SurfDrops.Apply, CanSkip: true),
-        new("Mix filter", Composition.MixFilter.Apply, CanSkip: true),
         new("Timing", Pocket.Apply, CanSkip: true),
         new("Kick-out bass", KickOutBass, CanSkip: true),
         new("Expression", ExpressionStage, CanSkip: true),
