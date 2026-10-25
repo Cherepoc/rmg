@@ -3186,7 +3186,7 @@
     "choices": {
       "fillFeet": { "none": [100, 50, 40], "doubleKick": [0, 50, 60], "groove": [0, 10, 10] },
       "tremoloSpeed": { "measured": 0, "fast": 100 },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [20, 40, 50] },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [20, 40, 50], "tremoloThrough": 100 },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "keyChanges": { "lastSection": 0, "sections": [0, 2, 30], "patterns": [0, 0, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },

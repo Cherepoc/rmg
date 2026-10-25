@@ -189,14 +189,6 @@
         ]
       },
       {
-        "seed": "d",
-        "at": 265.6,
-        "from": 256.6,
-        "listen": [
-          "Rhythm part (Overdriven Guitar)"
-        ]
-      },
-      {
         "seed": "1U",
         "at": 256,
         "from": 218.8,
@@ -210,6 +202,14 @@
         "from": 179.7,
         "listen": [
           "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1i",
+        "at": 213.2,
+        "from": 189.9,
+        "listen": [
+          "Riff (Overdriven Guitar)"
         ]
       }
     ]

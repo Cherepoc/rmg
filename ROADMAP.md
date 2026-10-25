@@ -932,7 +932,10 @@ genre's, and at a step of its speed, both leaning by the appearance's energy as 
 faster (Black metal's lines plain and later picked in 48 of 64 songs, from 4). Asked as `blackmetal-tremolo`, a song
 heard from its plain hearing's last phrase, the return within 16 bars (`Contrast`). A doubled note plays as its source
 chose there (`Doubled` naming the part it doubles), the twin as its riff, a harmony as the melody, the bass with the riff,
-which holds where the riff picks, as an instrument that cannot pick does. Left, in the order to build:
+which holds where the riff picks, as an instrument that cannot pick does. A genre's tremolo may carry a picked line
+through its rests (`articulation.tremoloThrough`, Black metal's 100): its notes held each to the next within the phrase
+(`PartArticulation.Holds`), stopping at a change of chord, the next note struck there, so that the wall runs on (Black
+metal's riff silent 1% of a picking appearance's phrases, from 6%, its rhythm part 2% from 13%). Left, in the order to build:
 
 1. **An accelerating tremolo into a lift**, a separate device of a few places: the line's last bar or two before a
    louder section picked faster stroke by stroke, 8ths to 16ths to the hand's fastest, as a snare roll builds; a hold

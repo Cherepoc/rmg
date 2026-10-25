@@ -33,7 +33,10 @@ public enum PartArticulation
     LetsRing = 16,
 
     /// <summary>Whole chords cycled at a sound chip's frame rate.</summary>
-    Frames = 32
+    Frames = 32,
+
+    /// <summary>A line's notes held to its next, no rest between them in a phrase (<see cref="Articulations.Held" />).</summary>
+    Holds = 64
 }
 
 /// <summary>The notes' articulations, two stages of the song after it is put together (<see cref="SongStages" />): chosen as state, and played.</summary>
@@ -74,6 +77,12 @@ internal static class Articulations
     ///     quietly is picked again, and faster, as it comes back louder.
     /// </summary>
     public const double TremoloLean = 1;
+
+    /// <summary>
+    ///     The chance a song's tremolo carries a picked line through its rests, a genre's that the songs never play: its notes
+    ///     held each to the next where it picks, as a black metal guitarist's picking runs on as one wave (<see cref="PartArticulation.Holds" />).
+    /// </summary>
+    public static ByConvention TremoloThroughChance { get; } = new(0, 0, 0);
 
     /// <summary>How many strokes a note is picked in at the fewest: two, as a note struck once is the line's own.</summary>
     public const int TremoloStrokes = 2;
@@ -150,6 +159,8 @@ internal static class Articulations
         // the steps the song's tremolo picks at, a measured picker's 8th and 16th or a fast one's 16th, sextuplet and 32nd
         var fast = song.Stream(SongStream.Tremolo).Pick(ByConvention.Weigh(Speeds, song.Facets[Facet.Sound], song.Genre.Pool<TremoloSpeed>(GenreChoices.TremoloSpeed))) == TremoloSpeed.Fast;
         ImmutableArray<double> steps = fast ? [..TremoloSteps.Skip(MeasuredSteps - 1)] : [..TremoloSteps.Take(MeasuredSteps)];
+        // and whether a picked line is carried through its rests, from a sequence of its own
+        var through = song.Stream(SongStream.TremoloThrough).TestProbability(TremoloThroughChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "tremoloThrough")));
         // an appearance's step, none where it picks none: the likelier and the finer the more energy it has, as far as its
         // section's rhythm follows it, from a sequence of its own and the part's, never in a calm section, whose guitars ring
         // their broken chords
@@ -194,8 +205,13 @@ internal static class Articulations
             // the chords' broken chords let ring in a calm section whatever the part draws, as the part's own, which a note's
             // own choice is over
             var ringing = articulates | PartArticulation.LetsRing;
-            ArticulationChoice In(Play? play) => new(rings || play is { Span: var played } && role.PlaysChords() && Calm(played) ? ringing : articulates,
-                play is { Index: var index } ? picking.GetValueOrDefault(index) : 0);
+            // and a line it picks held through its rests, where the song carries its tremolo through them
+            ArticulationChoice In(Play? play)
+            {
+                var step = play is { Index: var index } ? picking.GetValueOrDefault(index) : 0;
+                var own = rings || play is { Span: var played } && role.PlaysChords() && Calm(played) ? ringing : articulates;
+                return new ArticulationChoice(through && step > 0 ? own | PartArticulation.Holds : own, step);
+            }
             choices.TryAdd(role, In);
             var state = StateTimelineMap.Create(duration, [Along(duration, plays, In)]);
             // on the part's track, which every stage before the notes has made where the part plays, a soloist's from the
@@ -395,6 +411,12 @@ internal static class Articulations
                 result[track] = LetRing(timeline, chords.InstrumentCode, changes, song.Form.Map, (note, position) => Has(note, PartArticulation.LetsRing) && !holds.At(RingsOutOf, position, track),
                     position => holds.NextAfter(RingsOutOf, position, track));
 
+        // and a line held through its rests where it holds them, never into stop time or a stop the form makes
+        foreach (var (track, timeline) in result.ToArray())
+            if (timeline.Any(x => Has(x.Value, PartArticulation.Holds)))
+                result[track] = Held(timeline, changes, position => song.Form.Map.PlayingAt(position)?.Span.Phrases.Where(p => position < p.End - 1e-9).Select(p => (double?)p.End).FirstOrDefault(),
+                    position => holds.NextAfter(RingsOutOf, position, track));
+
         // and a part's notes tremolo-picked where it picks them, until the end of the appearance a note starts in, but a
         // hit of stop time's
         foreach (var (track, timeline) in result.ToArray())
@@ -450,6 +472,45 @@ internal static class Articulations
     ///     as the chord sounds, unstrummed.
     /// </summary>
     /// <param name="beatsPerSecond">The beats a second at a position, by the tempo there.</param>
+    /// <summary>
+    ///     A line's notes held each to its next where it holds them (<see cref="PartArticulation.Holds" />), so that no rest
+    ///     falls between them: to the next note's start, but no further than its phrase's end, which the next phrase starts
+    ///     after a breath, the next change of chord, over which it would sound against the next chord, and the next stretch
+    ///     held silent; and where it stops at a change, the next note, of the chord there, struck at the change, so that the
+    ///     line moves with the chords and runs on; a note in no phrase, an intro of its own's, as it is.
+    /// </summary>
+    /// <param name="phraseEnd">Where the phrase a position plays in ends; none outside the sections.</param>
+    /// <param name="heldFrom">Where the part is next held silent after a position.</param>
+    internal static EventTimeline<RealizedNote> Held(EventTimeline<RealizedNote> timeline, double[] changes, Func<double, double?> phraseEnd, Func<double, double> heldFrom)
+    {
+        var notes = timeline.ToList();
+        for (var i = 0; i < notes.Count; i++)
+        {
+            var note = notes[i];
+            if (!Has(note.Value, PartArticulation.Holds) || phraseEnd(note.Position) is not { } phrase)
+                continue;
+            var nextAt = notes.FindIndex(i + 1, x => x.Position > note.Position + 1e-9);
+            var next = nextAt < 0 ? timeline.Duration : notes[nextAt].Position;
+            var change = changes.FirstOrDefault(x => x > note.Position + 1e-9, timeline.Duration);
+            var silent = heldFrom(note.Position);
+            var end = Math.Min(Math.Min(next, phrase), Math.Min(change, silent));
+            if (end - note.Position > note.Value.Duration + 1e-9)
+                notes[i] = (note.Value with { Duration = end - note.Position }).ToTimelineItem(note.Position);
+            // the next note struck at the change it waits after, where it is held too and no other change or silence comes first
+            if (nextAt >= 0 && change < next - 1e-9 && change < phrase - 1e-9 && change < silent - 1e-9 && Has(notes[nextAt].Value, PartArticulation.Holds)
+                && !changes.Any(x => x > change + 1e-9 && x <= next + 1e-9) && heldFrom(change) > next - 1e-9)
+            {
+                var moved = notes[nextAt];
+                notes[nextAt] = (moved.Value with { Duration = moved.Value.Duration + moved.Position - change }).ToTimelineItem(change);
+                // a note struck with it, a chord's, moved with it
+                for (var k = nextAt + 1; k < notes.Count && Math.Abs(notes[k].Position - moved.Position) < 1e-9; k++)
+                    notes[k] = (notes[k].Value with { Duration = notes[k].Value.Duration + notes[k].Position - change }).ToTimelineItem(change);
+            }
+        }
+
+        return EventTimeline.Create(timeline.Duration, notes);
+    }
+
     /// <summary>How a genre's tremolo picks: in measured 16ths, as rock and metal pick their long notes, or as fast as the hand plays evenly, a surf or a black metal guitarist's.</summary>
     public static ImmutableArray<(TremoloSpeed Speed, ByConvention Weight)> Speeds { get; } = [(TremoloSpeed.Measured, new(1, 1, 1)), (TremoloSpeed.Fast, new(0, 0, 0))];
 

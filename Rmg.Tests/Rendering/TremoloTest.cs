@@ -70,4 +70,20 @@ public sealed class TremoloTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
             await Assert.That(song.Trace.Any(x => x.Point == TracePoints.Tremolo)).IsFalse().Because($"seed {song.Seed}");
     }
+
+    /// <summary>
+    ///     A held line's note runs on to its next within its phrase; one stopping at a change of chord leaves the next note,
+    ///     of the chord there, struck at the change; a phrase's end and a stretch held silent stop it, the next phrase after a
+    ///     breath.
+    /// </summary>
+    [Test]
+    public async Task AHeldLine_RunsOnToItsNextNote_StrikingItAtAChangeItWaitsAfter()
+    {
+        var held = Rmg.Core.Events.StateMap.FromStates([CompositionStateKinds.Articulation.CreateState(new Rmg.Core.Events.LayerValue<ArticulationChoice>(Rmg.Core.Events.StateDepths.Note, new(PartArticulation.Holds, 0.25)))]);
+        Rmg.Core.Events.TimelineItem<RealizedNote> Note(double at) => new(at, new RealizedNote([40], 0.8, 0.5, held));
+        // phrases of four beats, a change of chord at 3, the part held silent from 13
+        var played = Articulations.Held(Rmg.Core.Events.EventTimeline.Create(16, [Note(0), Note(1), Note(2), Note(3.5), Note(5), Note(8), Note(12.5), Note(14)]), [3],
+            position => Math.Floor(position / 4) * 4 + 4, position => position < 13 ? 13 : 16).Select(x => (x.Position, x.Value.Duration)).ToArray();
+        await Assert.That(played).IsEquivalentTo(new[] { (0.0, 1.0), (1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (5.0, 3.0), (8.0, 4.0), (12.5, 0.5), (14.0, 2.0) });
+    }
 }
