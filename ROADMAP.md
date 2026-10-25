@@ -930,22 +930,19 @@ Built on 25 October 2026: an appearance tremolo-picks its riff's, its rhythm par
 genre's, and at a step of its speed, both leaning by the appearance's energy as far as its section's rhythm follows it
 (`Articulations.TremoloLean`), any note two strokes long or more, so that a line heard quietly comes back picked, and
 faster (Black metal's lines plain and later picked in 48 of 64 songs, from 4). Asked as `blackmetal-tremolo`, a song
-heard from its plain hearing's last phrase, the return within 16 bars (`Contrast`). Left, in the order to build:
+heard from its plain hearing's last phrase, the return within 16 bars (`Contrast`). A doubled note plays as its source
+chose there (`Doubled` naming the part it doubles), the twin as its riff, a harmony as the melody, the bass with the riff,
+which holds where the riff picks, as an instrument that cannot pick does. Left, in the order to build:
 
-1. **A doubled line picking as its source does.** `Doubled` naming the part it doubles, and `Articulations.Choose`
-   giving a doubled note its source's choice at a note's depth, so that the twin follows by the rule rather than by
-   drawing as its riff, a counter-melody harmonising a picked melody picks, and the bass doubling a picked riff holds
-   its notes, as an instrument that cannot pick does (the play-out's limit, not a draw). It moves the counter-melody's
-   slurs to the melody's where it harmonises it, a change of its own to count.
-2. **An accelerating tremolo into a lift**, a separate device of a few places: the line's last bar or two before a
+1. **An accelerating tremolo into a lift**, a separate device of a few places: the line's last bar or two before a
    louder section picked faster stroke by stroke, 8ths to 16ths to the hand's fastest, as a snare roll builds; a hold
    the timing and the drums keep out of, its strokes off the grid. Surf's and a post-rock band's.
-3. **A bowed tremolo**: a strings part's theme coming back louder on General MIDI's tremolo strings (44) rather than
+2. **A bowed tremolo**: a strings part's theme coming back louder on General MIDI's tremolo strings (44) rather than
    re-struck, the orchestral and the film presets' climax; an instrument switch for the appearance
    (`InstrumentsOverTime`), not a stroke.
-4. **A swell under a picked chord**, the strokes of a held power chord growing louder, Black metal's; a velocity curve
+3. **A swell under a picked chord**, the strokes of a held power chord growing louder, Black metal's; a velocity curve
    at the play-out, minor.
-5. **A genre's own following**, should listening find Surf's lead picking too seldom in its quieter verses: how far a
+4. **A genre's own following**, should listening find Surf's lead picking too seldom in its quieter verses: how far a
    genre's tremolo follows the energy as a genre's shift rather than one lean for all; and the appearances ranked by
    their energy within the song should a song of sections alike in energy pick none apart.
 

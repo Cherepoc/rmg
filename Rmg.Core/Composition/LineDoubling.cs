@@ -255,7 +255,7 @@ internal static class LineDoubling
                     .Where(x => Doubles(x.Position + delay))
                     .Select(x => x.Value.With(StateKinds.ScaleStep, step == 0 || isTwin ? x.Value.GetStateValue(StateKinds.ScaleStep) + step : Harmonised(x.Value.GetStateValue(StateKinds.ScaleStep) + step, x.Position + delay))
                         .With(StateKinds.Alteration, step == 0 ? x.Value.GetStateValue(StateKinds.Alteration) : 0)
-                        .With(CompositionStateKinds.Doubled, 1)
+                        .With(CompositionStateKinds.Doubled, (int)source + 1)
                         .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0)
                         .With(CompositionStateKinds.LineRaise, isTwin ? twinRaise : 0).ToTimelineItem(x.Position + delay))
                     .Select(x => block ? x.Value.With(CompositionStateKinds.LineVoices, Math.Max(x.Value.GetStateValue(CompositionStateKinds.LineVoices), BlockVoices)).ToTimelineItem(x.Position) : x);
@@ -294,7 +294,7 @@ internal static class LineDoubling
                     if (In(bassTrack, start, end).Length > 0 || In(riffTrack, start, end) is not { Length: > 0 } riff)
                         continue;
 
-                    filled.AddRange(riff.Where(x => !bassSilent(index, span.PhraseOf(x.Position))).Select(x => x.Value.With(CompositionStateKinds.SoundsAs, 0).With(CompositionStateKinds.Doubled, 1)
+                    filled.AddRange(riff.Where(x => !bassSilent(index, span.PhraseOf(x.Position))).Select(x => x.Value.With(CompositionStateKinds.SoundsAs, 0).With(CompositionStateKinds.Doubled, (int)TrackRole.Riff + 1)
                         // in its own register, never the twin's raise the riff took
                         .With(CompositionStateKinds.LineRaise, 0).ToTimelineItem(x.Position)));
                 }

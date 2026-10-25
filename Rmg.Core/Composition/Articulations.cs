@@ -134,8 +134,8 @@ internal static class Articulations
     ///     strings (<see cref="CompositionStateKinds.Stroke" />): a piano's held chords rolled, a bass's, a
     ///     riff's or a rhythm part's 16th chains muted between the 8ths, the chords struck short, a line's steps slurred, but
     ///     the bass's, broken chords let ring, and in a calm section always (SectionForm), and whole chords cycled at the
-    ///     frame rate, each a genre's or the songs' own by the sound facet, every part from a sequence of its own, a twin's
-    ///     as its riff's, whose notes it plays; and a riff's, a rhythm part's or a lead's notes tremolo-picked in an appearance
+    ///     frame rate, each a genre's or the songs' own by the sound facet, every part from a sequence of its own, and a note
+    ///     doubling another's line as its source plays it, a twin's as its riff's; and a riff's, a rhythm part's or a lead's notes tremolo-picked in an appearance
     ///     that picks them, a genre's, at a step of its speed, both leaning by the appearance's energy, each appearance and
     ///     part from a sequence of its own, never in a calm section.
     /// </summary>
@@ -151,12 +151,12 @@ internal static class Articulations
         var fast = song.Stream(SongStream.Tremolo).Pick(ByConvention.Weigh(Speeds, song.Facets[Facet.Sound], song.Genre.Pool<TremoloSpeed>(GenreChoices.TremoloSpeed))) == TremoloSpeed.Fast;
         ImmutableArray<double> steps = fast ? [..TremoloSteps.Skip(MeasuredSteps - 1)] : [..TremoloSteps.Take(MeasuredSteps)];
         // an appearance's step, none where it picks none: the likelier and the finer the more energy it has, as far as its
-        // section's rhythm follows it, from a sequence of its own and the part's, a twin's as its riff's, whose notes it plays,
-        // never in a calm section, whose guitars ring their broken chords
+        // section's rhythm follows it, from a sequence of its own and the part's, never in a calm section, whose guitars ring
+        // their broken chords
         double Step(int index, int track)
         {
             var section = song.SectionOf(song.Form.Map.Sections[index].SectionId);
-            var context = song.AppearanceStream(SongStream.Tremolo, index, song.DrawsAs(track));
+            var context = song.AppearanceStream(SongStream.Tremolo, index, track);
             var tilt = SectionEnergy.Tilt(song.Energies[index], section.Rhythm.Coupling);
             var picks = context.TestProbability(tilt.Chance(TremoloChance.At(section.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "tremolo")), TremoloLean));
             var step = context.Pick(tilt.Weigh(steps.Select(x => new Weighted<double>(1, x)), x => TremoloLean * (steps.Length == 1 ? 0 : 2.0 * steps.IndexOf(x) / (steps.Length - 1) - 1)));
@@ -164,6 +164,8 @@ internal static class Articulations
         }
 
         var tracks = draft.Timeline.TrackTimelineMap.ToBuilder();
+        // every part's choice in each stretch it plays as a section, which a doubled note of its line plays too
+        var choices = new Dictionary<TrackRole, Func<Play?, ArticulationChoice>>();
         foreach (var (track, definition) in song.Tracks.Definitions)
         {
             if (definition is not PitchInstrumentTrack { Role: var role })
@@ -171,20 +173,19 @@ internal static class Articulations
             var articulates = PartArticulation.None;
             if (Draws(SongStream.Roll, track, RollChance, "roll"))
                 articulates |= PartArticulation.Rolls;
-            // its 16th chains' notes between the 8ths muted, a twin's as its riff's, whose notes it plays; a solo's its
-            // soloist's own (Soloist.Ghosts)
-            if (role.Source() is TrackRole.Bass or TrackRole.Riff or TrackRole.Rhythm && Draws(SongStream.DeadNotes, song.DrawsAs(track), DeadNoteChance, "deadNotes"))
+            // its 16th chains' notes between the 8ths muted; a solo's its soloist's own (Soloist.Ghosts)
+            if (role is TrackRole.Bass or TrackRole.Riff or TrackRole.Rhythm && Draws(SongStream.DeadNotes, track, DeadNoteChance, "deadNotes"))
                 articulates |= PartArticulation.DeadNotes;
             // the chords struck short, the chords' and the rhythm part's, a skank's chop
             if (role.PlaysChords() && Draws(SongStream.Stabs, track, StabChance, "stabs"))
                 articulates |= PartArticulation.Stabs;
-            if (role.PlaysLine() && role != TrackRole.Bass && Draws(SongStream.Legato, song.DrawsAs(track), LegatoChance, "legato"))
+            if (role.PlaysLine() && role != TrackRole.Bass && Draws(SongStream.Legato, track, LegatoChance, "legato"))
                 articulates |= PartArticulation.Slurs;
             var rings = role.PlaysChords() && Draws(SongStream.LetRing, track, LetRingChance, "letRing");
             // the chords cycled, its own sequence drawn for every part that holds chords
             if (role.PlaysChords() && Draws(SongStream.FrameArpeggio, track, FrameChance, "frames"))
                 articulates |= PartArticulation.Frames;
-            var picking = role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Rhythm or TrackRole.Melody
+            var picking = role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Melody
                 ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Step(index, track))
                 : [];
             if (tracks.ContainsKey(track))
@@ -195,12 +196,22 @@ internal static class Articulations
             var ringing = articulates | PartArticulation.LetsRing;
             ArticulationChoice In(Play? play) => new(rings || play is { Span: var played } && role.PlaysChords() && Calm(played) ? ringing : articulates,
                 play is { Index: var index } ? picking.GetValueOrDefault(index) : 0);
+            choices.TryAdd(role, In);
             var state = StateTimelineMap.Create(duration, [Along(duration, plays, In)]);
             // on the part's track, which every stage before the notes has made where the part plays, a soloist's from the
             // melody's state among them (Solos), so that its notes take the part's own; a part with no notes plays none
             if (!state.IsDefault && tracks.TryGetValue(track, out var existing))
                 tracks[track] = existing.MergeStateTimelineMap(state);
         }
+
+        // and a note doubling another part's line as its source plays it there, a note's own choice over its part's: a twin as
+        // its riff, a harmony as the melody, the bass with the riff, each as its instrument can (Apply)
+        foreach (var (track, map) in tracks.ToArray())
+            if (map.EventTimeline.Any(x => x.Value.GetStateValue(CompositionStateKinds.Doubled) > 0))
+                tracks[track] = map.WithEvents(map.EventTimeline.MapValues((position, note) =>
+                    note.GetStateValue(CompositionStateKinds.Doubled) is var source and > 0 && choices.TryGetValue((TrackRole)(source - 1), out var of)
+                        ? note.With(CompositionStateKinds.Articulation, new LayerValue<ArticulationChoice>(StateDepths.Note, of(song.Form.Map.PlayingAt(position))))
+                        : note));
 
         return draft with
         {
@@ -370,9 +381,9 @@ internal static class Articulations
             }));
         }
 
-        // and a line's steps slurred where its part slurs
+        // and a line's steps slurred where its part slurs, but the bass's, which plays a line it doubles struck
         foreach (var (track, timeline) in result.ToArray())
-            if (timeline.Any(x => Has(x.Value, PartArticulation.Slurs)))
+            if (song.Tracks.Definitions[track].Role != TrackRole.Bass && timeline.Any(x => Has(x.Value, PartArticulation.Slurs)))
                 result[track] = Slur(timeline);
 
         // and a part's broken chords let ring where it lets them
