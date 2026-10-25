@@ -156,5 +156,6 @@ rejected while fixing: the place, what was decided, why.
 - Surf's beat, the kick on 1 and 3 and the snare on 2, the 2-and and 4 (`oneAndThree`, `surf`), the owner's
   convention for the genre, given on 25 October 2026, beside the train beat and, wilder, the drums' own. Not a finding.
 - `blackmetal-tremolo` asked a section's long notes picked against none, which the owner did not mean: the device is a
-  line heard plain and again picked in one song, planned in `ROADMAP.md` (*A tremolo as a reprise*). Its answers say
+  line heard plain and again picked in one song, built on 25 October 2026 as the tremolo following the energy and asked
+  again under the same id from the plain hearing (`ROADMAP.md`, *A tremolo through the song*). Its round 4 answers say
   nothing of that device.

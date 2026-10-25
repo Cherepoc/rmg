@@ -924,20 +924,32 @@ loudness, to move once which drums play is a decision of its own; and a part mad
 source's whole state, a soloist's track made from the melody's (`Solos`), which keeps `Articulations.Choose` just
 before the notes.
 
-### A tremolo as a reprise
+### A tremolo through the song
 
-`blackmetal-tremolo` asked the wrong thing: its songs differed by a held note or two, as a section draws its tremolo
-for every time it plays. Meant is a line heard plain and again tremolo-picked, both in one song, the contrast the device.
-Measured before (64 songs each, `TremoloRepriseTest`): 4 Black metal songs and 12 Surf ones play a line both ways, though
-61 and 63 have a riff's, a rhythm part's or a melody's line of long notes that recurs; the rhythm guitar never picks,
-nor the parts doubling a picked line. The articulations are now chosen as the parts' state before the notes
-(`Articulations.Choose`), so the plan is that stage's: a part picking an appearance only where its line, the section's
-or the one whose lines it plays, was heard before; any note two strokes long or more picked, not only a beat's; the
-finest step drawn for each picking appearance, the 8th, the 8th triplet, the 16th, the sextuplet or the 32nd within
-`tremoloSpeed`'s range, the louder appearance leaning finer, the hand's cap kept; the rhythm part picking beside the
-riff and the melody; and a doubled note playing as its source does, `Doubled` naming its source, its articulations
-copied, the bass's step no finer than a 16th and a part that cannot pick holding the note (the play-out's limits, not a
-draw). Surf's first verses then lose their tremolo to its returns, heard 6-0 kept as it is (#352): to hear again.
+Built on 25 October 2026: an appearance tremolo-picks its riff's, its rhythm part's or its melody's notes by a chance, a
+genre's, and at a step of its speed, both leaning by the appearance's energy as far as its section's rhythm follows it
+(`Articulations.TremoloLean`), any note two strokes long or more, so that a line heard quietly comes back picked, and
+faster (Black metal's lines plain and later picked in 48 of 64 songs, from 4). Asked as `blackmetal-tremolo`, a song
+heard from its plain hearing's last phrase, the return within 16 bars (`Contrast`). Left, in the order to build:
+
+1. **A doubled line picking as its source does.** `Doubled` naming the part it doubles, and `Articulations.Choose`
+   giving a doubled note its source's choice at a note's depth, so that the twin follows by the rule rather than by
+   drawing as its riff, a counter-melody harmonising a picked melody picks, and the bass doubling a picked riff holds
+   its notes, as an instrument that cannot pick does (the play-out's limit, not a draw). It moves the counter-melody's
+   slurs to the melody's where it harmonises it, a change of its own to count.
+2. **An accelerating tremolo into a lift**, a separate device of a few places: the line's last bar or two before a
+   louder section picked faster stroke by stroke, 8ths to 16ths to the hand's fastest, as a snare roll builds; a hold
+   the timing and the drums keep out of, its strokes off the grid. Surf's and a post-rock band's.
+3. **A bowed tremolo**: a strings part's theme coming back louder on General MIDI's tremolo strings (44) rather than
+   re-struck, the orchestral and the film presets' climax; an instrument switch for the appearance
+   (`InstrumentsOverTime`), not a stroke.
+4. **A swell under a picked chord**, the strokes of a held power chord growing louder, Black metal's; a velocity curve
+   at the play-out, minor.
+5. **A genre's own following**, should listening find Surf's lead picking too seldom in its quieter verses: how far a
+   genre's tremolo follows the energy as a genre's shift rather than one lean for all; and the appearances ranked by
+   their energy within the song should a song of sections alike in energy pick none apart.
+
+A post-rock or blackgaze preset, the device's home, has none yet.
 
 ## Genres
 

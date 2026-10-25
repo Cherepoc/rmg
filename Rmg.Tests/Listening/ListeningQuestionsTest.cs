@@ -35,6 +35,11 @@ public sealed class ListeningQuestionsTest
     ///     Where the device plays, in beats, each heard from the bar before it, alike in the two songs; none
     ///     for a device that plays throughout what it is heard in, heard from a pattern's start.
     /// </param>
+    /// <param name="Contrast">
+    ///     Where a device that is a contrast within the song first plays its other side, in beats, which the song is heard
+    ///     from, the bar before, so that both are heard in it, its place still where the songs differ: a line plain before
+    ///     it is picked; none for a device heard at its place alone.
+    /// </param>
     /// <param name="WithPatch">The options the song with the device lays over its genre's, as <paramref name="GenrePatch" />: a device the preset lacks added; none for none.</param>
     private sealed record Question(
         string Id,
@@ -48,7 +53,8 @@ public sealed class ListeningQuestionsTest
         Dictionary<string, int>? With = null,
         Dictionary<string, int>? Without = null,
         Func<CorpusSong, double[]>? Places = null,
-        Dictionary<string, Dictionary<string, object>>? WithPatch = null
+        Dictionary<string, Dictionary<string, object>>? WithPatch = null,
+        Func<CorpusSong, double?>? Contrast = null
     );
 
     private static readonly Question[] Questions =
@@ -61,10 +67,10 @@ public sealed class ListeningQuestionsTest
             "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never; not told apart, cut (#64).", "filmPiano", [],
             new() { ["lineChords"] = new() { ["melody"] = 0 } },
             x => DoubleStops(x).Select(v => (double?)v).Min(), Places: DoubleStops),
-        new("blackmetal-tremolo", "A Black metal riff's long notes tremolo-picked as fast as the hand plays, over its riff's own tremolo figure: the style's wall of picking, or a blur?",
-            "How often a section tremolo-picks a riff's long notes (articulation.tremolo, Black metal's 20-40-50), against never.", "blackMetal", [],
+        new("blackmetal-tremolo", "A Black metal line heard plain, then tremolo-picked as its section comes back with more energy, the guitars' wall: a build, or a blur?",
+            "How often an appearance tremolo-picks its riff's, rhythm part's or melody's notes, the likelier and the faster the more energy it has (articulation.tremolo, Black metal's 20-40-50), against never.", "blackMetal", [],
             new() { ["articulation"] = new() { ["tremolo"] = 0 } },
-            x => Picked(x).Select(v => (double?)v).Min(), Places: Picked),
+            x => Reprised(x)?.Picked, Places: x => Reprised(x) is { } r ? [r.Picked] : [], Contrast: x => Reprised(x)?.Plain),
         new("trance-fierce", "A Trance track at its fiercest intensity, its sections louder and fuller as well as faster: the more driving track, or only busier?",
             "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity 1 (#76).", "trance", [],
             new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
@@ -92,9 +98,37 @@ public sealed class ListeningQuestionsTest
     private static double[] DoubleStops(CorpusSong song) =>
         [..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Melody))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1).Select(x => x.Position) ?? []];
 
-    /// <summary>Where a song's notes are tremolo-picked, their strokes', in beats.</summary>
-    private static double[] Picked(CorpusSong song) =>
-        [..song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) > 0).Select(x => x.Position).Order()];
+    /// <summary>How many bars at most a contrast's later side follows its first, so that a listener hears them as one.</summary>
+    private const int ContrastBars = 16;
+
+    /// <summary>
+    ///     Where a song plays a line plain and then picked nearest together: the start of the plain hearing's last phrase, of
+    ///     the section's own line or the one whose lines it plays, and the first picked note of a later appearance of it, in
+    ///     beats, the picked note within <see cref="ContrastBars" /> of the plain hearing's end, so that the two are heard
+    ///     together; none where it plays none so near.
+    /// </summary>
+    private static (double Plain, double Picked)? Reprised(CorpusSong song)
+    {
+        var sources = song.Trace.Where(x => x.Point == TracePoints.LinesFrom).ToDictionary(x => x.Section, x => (int)x.Value!);
+        int LineOf(int index) => sources.GetValueOrDefault(song.Map.Sections[index].SectionId, song.Map.Sections[index].SectionId);
+        var pairs = new List<(double Plain, double Picked, double Gap)>();
+        foreach (var role in new[] { TrackRole.Riff, TrackRole.Rhythm, TrackRole.Melody }.Where(x => song.Song.TrackDefinitions.Values.Any(t => t.Role == x)))
+        {
+            var heard = (song.Song.Notes!.GetValueOrDefault(song.Track(role))?.ToArray() ?? []).Select(x => (Play: song.Map.PlayingAt(x.Position), Note: x))
+                .Where(x => x.Play is { IsEnding: false }).GroupBy(x => x.Play!.Value.Index).OrderBy(x => x.Key)
+                .Select(x => (Index: x.Key, Picked: x.Where(n => n.Note.Value.State.GetStateValue(CompositionStateKinds.Picked) > 0).Select(n => (double?)n.Note.Position).Min()))
+                .ToArray();
+            foreach (var (index, picked) in heard.Where(x => x.Picked is not null))
+                if (heard.Where(x => x.Index < index && x.Picked is null && LineOf(x.Index) == LineOf(index)).Select(x => (int?)x.Index).LastOrDefault() is { } plain)
+                {
+                    var span = song.Map.Sections[plain];
+                    if (picked!.Value - span.End <= ContrastBars * span.Meter.BarDuration + 1e-9)
+                        pairs.Add((span.Phrases.Last().Start, picked.Value, picked.Value - span.End));
+                }
+        }
+
+        return pairs.Count == 0 ? null : pairs.MinBy(x => x.Gap) is var (plainAt, pickedAt, _) ? (plainAt, pickedAt) : null;
+    }
 
     /// <summary>Where a song's rhythm part rolls its chords, in beats.</summary>
     private static double[] Rolled(CorpusSong song) =>
@@ -232,6 +266,9 @@ public sealed class ListeningQuestionsTest
             return (null, missed);
         var best = measured.Max(x => x.Difference);
         var (most, at, from) = measured.First(x => x.Difference >= best * NearBest - 1e-9);
+        // a contrast heard from its other side, the bar before it
+        if (question.Contrast?.Invoke(with) is { } other && Seconds(BarBefore(other)) < from)
+            from = Seconds(BarBefore(other));
         var parts = difference.Parts(at, at + Heard).OrderByDescending(x => x.Value).ToArray();
         // a part once, at its largest share, which its second take or its other instrument would name again
         return ((most, at, from, [..parts.Where(x => x.Value >= parts.FirstOrDefault().Value * ListenedShare).DistinctBy(x => x.Key.Split(" (")[0]).Take(Listened).Select(x => x.Key)]), missed);

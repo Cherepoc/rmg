@@ -146,8 +146,8 @@
   },
   {
     "id": "blackmetal-tremolo",
-    "question": "A Black metal riff's long notes tremolo-picked as fast as the hand plays, over its riff's own tremolo figure: the style's wall of picking, or a blur?",
-    "decides": "How often a section tremolo-picks a riff's long notes (articulation.tremolo, Black metal's 20-40-50), against never.",
+    "question": "A Black metal line heard plain, then tremolo-picked as its section comes back with more energy, the guitars' wall: a build, or a blur?",
+    "decides": "How often an appearance tremolo-picks its riff's, rhythm part's or melody's notes, the likelier and the faster the more energy it has (articulation.tremolo, Black metal's 20-40-50), against never.",
     "genre": "blackMetal",
     "with": {
       "genre": {},
@@ -164,51 +164,52 @@
     },
     "seeds": [
       {
-        "seed": "5",
-        "at": 320.1,
-        "from": 318.5,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 408.7,
-        "from": 407.1,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
         "seed": "D",
-        "at": 281.1,
-        "from": 279.1,
+        "at": 156.2,
+        "from": 115.1,
         "listen": [
           "Riff (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "H",
-        "at": 340.1,
-        "from": 339,
+        "seed": "N",
+        "at": 242.9,
+        "from": 223,
         "listen": [
-          "Riff (Distortion Guitar)"
+          "Riff (Overdriven Guitar)",
+          "Rhythm part (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "O",
-        "at": 331.6,
-        "from": 330.6,
-        "listen": [
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "T",
-        "at": 316.3,
-        "from": 314.9,
+        "seed": "S",
+        "at": 269.2,
+        "from": 238.2,
         "listen": [
           "Riff (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 265.6,
+        "from": 256.6,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1U",
+        "at": 256,
+        "from": 218.8,
+        "listen": [
+          "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "1d",
+        "at": 204.1,
+        "from": 179.7,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
         ]
       }
     ]

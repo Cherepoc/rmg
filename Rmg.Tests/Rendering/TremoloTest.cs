@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 using Rmg.Tests.Genres;
@@ -8,14 +9,14 @@ namespace Rmg.Tests.Rendering;
 public sealed class TremoloTest
 {
     /// <summary>
-    ///     In a section a part tremolo-picks in, every note of its plucked instrument a beat or longer is picked, but one it
+    ///     In an appearance a part tremolo-picks in, every note of its plucked instrument a beat or longer is picked, but one it
     ///     mutes, bends or ornaments, its strokes no quicker than a picker's hand but at an 8th, a fast genre's at the finest
     ///     step the tempo allows, a measured one's at an 8th or a 16th.
     /// </summary>
     [Test]
     [Arguments("blackMetal", true)]
     [Arguments("thrash", false)]
-    public async Task APickingSectionsLongNotes_AreTremoloPicked_NoQuickerThanTheHand(string genre, bool fast)
+    public async Task APickingAppearancesNotes_AreTremoloPicked_NoQuickerThanTheHand(string genre, bool fast)
     {
         var picking = GenrePresets.With(genre, GenreChoices.Articulation, ("tremolo", 1));
         var (sections, strokes, rates) = (0, 0, new List<double>());
@@ -24,13 +25,21 @@ public sealed class TremoloTest
         {
             sections++;
             var definition = (PitchInstrumentTrack)song.Song.TrackDefinitions[entry.Track];
-            var notes = song.Song.Notes!.GetValueOrDefault(entry.Track)?.Where(x => song.Map.PlayingAt(x.Position)?.Span.SectionId == entry.Section).ToArray() ?? [];
+            var (index, _) = ((int, double))entry.Value!;
+            // but in stop time, its phrases, and in a bar of ensemble hits, whose hits a tremolo leaves struck (Articulations.PicksOutOf)
+            var stopped = song.Trace.Where(x => x.Point == TracePoints.StopTime).SelectMany(x => (ImmutableArray<double>)x.Value!).ToArray();
+            var hits = song.Trace.Where(x => x.Point == TracePoints.EnsembleHits).SelectMany(x => (ImmutableArray<double>)x.Value!).ToArray();
+            bool InStopTime(double at) => song.Map.Sections.Any(s => stopped.Any(x => Math.Abs(x - s.Start) < 1e-6) && at >= s.Start - 1e-9 && at < s.Start + s.Meter.PhraseDuration - 1e-9)
+                                          || song.Map.Sections.Any(s => hits.Any(x => at >= x - 1e-9 && at < x + s.Meter.BarDuration - 1e-9 && s.IsWithin(x)));
+            var notes = song.Song.Notes!.GetValueOrDefault(entry.Track)?.Where(x => song.Map.PlayingAt(x.Position)?.Index == index).ToArray() ?? [];
             // (but its last stroke where it holds on past its appearance's end, and a solo's)
-            foreach (var note in notes.Where(x => InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(x.Value.State, definition.InstrumentCode), InstrumentTrait.Strums)
+            foreach (var note in notes.Where(x => !InStopTime(x.Position) && InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(x.Value.State, definition.InstrumentCode), InstrumentTrait.Strums)
                                                   && x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Bend) == 0
                                                   && x.Value.State.GetStateValue(CompositionStateKinds.Ornament).IsDefaultOrEmpty && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0
                                                   && !(x.Value.State.GetStateValue(CompositionStateKinds.Picked) > 0 && x.Position + x.Value.Duration > song.Map.PlayingAt(x.Position)!.Value.Span.End - 1e-9)))
-                await Assert.That(note.Value.Duration).IsLessThan(Articulations.TremoloFrom).Because($"seed {song.Seed}, track {entry.Track} at {note.Position}");
+                // as long as it sounds before the part's next note, which the hand moves to
+                await Assert.That(Math.Min(note.Value.Duration, notes.Where(x => x.Position > note.Position + 1e-9).Select(x => x.Position - note.Position).DefaultIfEmpty(double.MaxValue).Min()))
+                    .IsLessThan(Articulations.TremoloStrokes * Articulations.TremoloSteps[0]).Because($"seed {song.Seed}, track {entry.Track} at {note.Position}");
             // the strokes, each a step after the one before, no quicker than the hand but at a 16th, a fast
             // picker's never slower than it could, a measured one's 16ths
             // (a note's strokes among those of another struck with it apart, by their pitches)

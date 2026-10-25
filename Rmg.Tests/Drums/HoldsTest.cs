@@ -20,6 +20,7 @@ public sealed class HoldsTest
         ("Ghosts", Ghosts.KeepsOutOf, true),
         ("Hat rolls", HatRolls.KeepsOutOf, true),
         ("Drum ornaments", DrumOrnaments.KeepsOutOf, true),
+        ("Articulation", Articulations.PicksOutOf, false),
         ("Surf drops", SurfDrops.KeepsOutOf, false)
     ];
 
@@ -36,6 +37,7 @@ public sealed class HoldsTest
     [Arguments("reggae")]
     [Arguments("surf")]
     [Arguments("trap")]
+    [Arguments("metal")]
     public async Task ANoteAStageAdds_IsNeverInAStretchItKeepsOutOf(string genre)
     {
         var added = 0;
