@@ -5,7 +5,13 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
-/// <summary>The articulations a part plays its notes with where it is, its track's state (<see cref="CompositionStateKinds.Articulates" />).</summary>
+/// <summary>
+///     How a part plays its notes where it is (<see cref="CompositionStateKinds.Articulation" />): its articulations, and the
+///     finest step it tremolo-picks its long notes at, in beats, the tempo's hand coarsening it, 0 where it picks none.
+/// </summary>
+public readonly record struct ArticulationChoice(PartArticulation Articulates, double TremoloStep);
+
+/// <summary>The articulations a part plays its notes with where it is (<see cref="ArticulationChoice" />).</summary>
 [Flags]
 public enum PartArticulation
 {
@@ -114,17 +120,18 @@ internal static class Articulations
 
     /// <summary>
     ///     Every part's articulations chosen as its track's state along the song, which <see cref="Apply" /> plays once the
-    ///     notes are realized (<see cref="CompositionStateKinds.Articulates" />): a piano's held chords rolled, a bass's, a
+    ///     notes are realized (<see cref="CompositionStateKinds.Articulation" />), and the song's stroke across a guitar's
+    ///     strings (<see cref="CompositionStateKinds.Stroke" />): a piano's held chords rolled, a bass's, a
     ///     riff's or a rhythm part's 16th chains muted between the 8ths, the chords struck short, a line's steps slurred, but
     ///     the bass's, broken chords let ring, and in a calm section always (SectionForm), and whole chords cycled at the
     ///     frame rate, each a genre's or the songs' own by the sound facet, every part from a sequence of its own, a twin's
     ///     as its riff's, whose notes it plays; and a riff's or a lead's long notes tremolo-picked in a section that picks
-    ///     them, a genre's, at its speed, each section and part from a sequence of its own, never in a calm section
-    ///     (<see cref="CompositionStateKinds.TremoloStep" />).
+    ///     them, a genre's, at its speed, each section and part from a sequence of its own, never in a calm section.
     /// </summary>
     internal static SongDraft Choose(SongDecisions song, SongDraft draft)
     {
         var duration = draft.Timeline.Duration;
+        var stroke = StrokeFrom + (StrokeTo - StrokeFrom) * song.Stream(SongStream.Strum).GenerateDouble();
         Play[] plays = [..song.Form.Map.Plays];
         bool Calm(SectionSpan span) => song.SectionOf(span.SectionId).Form.Kind == SectionFormKind.Calm;
         bool Draws(SongStream stream, long key, ByConvention chance, string option) =>
@@ -163,40 +170,50 @@ internal static class Articulations
                     return tremolo;
                 })
                 : [];
-            // the chords' broken chords let ring in a calm section whatever the part draws
+            // the chords' broken chords let ring in a calm section whatever the part draws, as the part's own, which a note's
+            // own choice is over
             var ringing = articulates | PartArticulation.LetsRing;
-            var state = StateTimelineMap.Create(duration, [
-                Along(CompositionStateKinds.Articulates, duration, plays, (int)(rings ? ringing : articulates), span => (int)(rings || role.PlaysChords() && Calm(span) ? ringing : articulates)),
-                Along(CompositionStateKinds.TremoloStep, duration, plays, 0.0, span => picks.GetValueOrDefault(span.SectionId) ? finest : 0)
-            ]);
+            ArticulationChoice In(SectionSpan? span) => new(rings || span is { } played && role.PlaysChords() && Calm(played) ? ringing : articulates,
+                span is { } at && picks.GetValueOrDefault(at.SectionId) ? finest : 0);
+            var state = StateTimelineMap.Create(duration, [Along(duration, plays, In)]);
+            // on the part's track, which every stage before the notes has made where the part plays, a soloist's from the
+            // melody's state among them (Solos), so that its notes take the part's own; a part with no notes plays none
             if (!state.IsDefault && tracks.TryGetValue(track, out var existing))
                 tracks[track] = existing.MergeStateTimelineMap(state);
         }
 
-        return draft with { Timeline = TrackEventStateTimelineMap.Create(duration, tracks.ToImmutable(), draft.Timeline.CommonStateTimelineMap) };
+        return draft with
+        {
+            Timeline = TrackEventStateTimelineMap.Create(duration, tracks.ToImmutable(), draft.Timeline.CommonStateTimelineMap)
+                .MergeStateMap(StateMap.FromStates([CompositionStateKinds.Stroke.CreateState(stroke)]))
+        };
     }
 
     /// <summary>
-    ///     A part's state along the song: in each stretch it plays as a section (<see cref="SongMap.Plays" />) the section's,
-    ///     and elsewhere, in an intro of its own, the part's own; a change only where it changes.
+    ///     A part's choice along the song, its track's: in each stretch it plays as a section (<see cref="SongMap.Plays" />)
+    ///     the section's, and elsewhere, in an intro of its own, the part's own; a change only where it changes.
     /// </summary>
-    private static StateTimeline<T> Along<T>(StateKind<T> kind, double duration, IReadOnlyList<Play> plays, T own, Func<SectionSpan, T> value)
-        where T : notnull
+    /// <param name="choice">The part's choice in a stretch it plays as a section, or none, elsewhere.</param>
+    private static StateTimeline<LayerValue<ArticulationChoice>> Along(double duration, IReadOnlyList<Play> plays, Func<SectionSpan?, ArticulationChoice> choice)
     {
-        var at = new SortedDictionary<double, T> { [0] = own };
+        // the part's own from the start, and again after a stretch no other follows, past the ending
+        var at = new SortedDictionary<double, ArticulationChoice> { [0] = choice(null) };
         foreach (var play in plays.Where(x => plays.All(y => Math.Abs(y.Span.Start - x.Span.End) > 1e-9)))
-            at[play.Span.End] = own;
+            at[play.Span.End] = choice(null);
         foreach (var play in plays)
-            at[play.Span.Start] = value(play.Span);
-        var items = new List<TimelineItem<T>>();
+            at[play.Span.Start] = choice(play.Span);
+        var items = new List<TimelineItem<LayerValue<ArticulationChoice>>>();
         foreach (var (position, state) in at.Where(x => x.Key < duration - 1e-9))
-            if (items.Count == 0 || !EqualityComparer<T>.Default.Equals(items[^1].Value, state))
-                items.Add(state.ToTimelineItem(position));
-        return StateTimeline.Create(duration, kind, items);
+            if (items.Count == 0 || items[^1].Value.Value != state)
+                items.Add(new LayerValue<ArticulationChoice>(StateDepths.Track, state).ToTimelineItem(position));
+        return StateTimeline.Create(duration, CompositionStateKinds.Articulation, items);
     }
 
+    /// <summary>How a note's part plays it, by its state.</summary>
+    private static ArticulationChoice ChoiceOf(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Articulation).Value;
+
     /// <summary>Whether a note's part plays it with an articulation, by its state.</summary>
-    private static bool Has(RealizedNote note, PartArticulation articulation) => ((PartArticulation)note.State.GetStateValue(CompositionStateKinds.Articulates)).HasFlag(articulation);
+    private static bool Has(RealizedNote note, PartArticulation articulation) => ChoiceOf(note).Articulates.HasFlag(articulation);
 
     /// <summary>
     ///     The notes' articulations: in a section that chugs, a guitar's or a picked bass's note that repeats the one before
@@ -210,7 +227,7 @@ internal static class Articulations
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
         var notes = SongStages.NotesOf(draft);
-        var stroke = StrokeFrom + (StrokeTo - StrokeFrom) * song.Stream(SongStream.Strum).GenerateDouble();
+        var stroke = draft.Timeline.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(CompositionStateKinds.Stroke);
         var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
@@ -349,7 +366,7 @@ internal static class Articulations
 
         // and a part's long notes tremolo-picked where it picks them, until the end of the appearance a note starts in
         foreach (var (track, timeline) in result.ToArray())
-            if (song.Tracks.Definitions[track] is PitchInstrumentTrack line && timeline.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.TremoloStep) > 0))
+            if (song.Tracks.Definitions[track] is PitchInstrumentTrack line && timeline.Any(x => ChoiceOf(x.Value).TremoloStep > 0))
                 result[track] = Tremolo(timeline, line.InstrumentCode, position => song.Form.Map.PlayingAt(position)?.Span.End,
                     position => Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)), stroke);
 
@@ -405,7 +422,7 @@ internal static class Articulations
     public static ImmutableArray<(TremoloSpeed Speed, ByConvention Weight)> Speeds { get; } = [(TremoloSpeed.Measured, new(1, 1, 1)), (TremoloSpeed.Fast, new(0, 0, 0))];
 
     /// <summary>
-    ///     A part's long notes tremolo-picked where it picks them (<see cref="CompositionStateKinds.TremoloStep" />): each of a
+    ///     A part's long notes tremolo-picked where it picks them (<see cref="ArticulationChoice.TremoloStep" />): each of a
     ///     beat or longer on a plucked instrument re-struck, its pitches and all, a power chord whole, down and up in turn as
     ///     the hand alternates, the up-stroke the strum's, a touch softer; at the finest step its state allows no quicker
     ///     than <see cref="FastStrokes" />, a measured picker's 16ths, or 8ths
@@ -426,7 +443,7 @@ internal static class Articulations
             var state = note.Value.State;
             var ornament = state.GetStateValue(CompositionStateKinds.Ornament);
             // a lead line the part solos played as it is
-            var finest = state.GetStateValue(CompositionStateKinds.TremoloStep);
+            var finest = ChoiceOf(note.Value).TremoloStep;
             if (note.Value.Duration < TremoloFrom - 1e-9 || finest <= 0 || until(note.Position) is not { } end || !InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(state, own), InstrumentTrait.Strums)
                 || state.GetStateValue(CompositionStateKinds.PalmMute) > 0 || state.GetStateValue(CompositionStateKinds.Bend) != 0 || !ornament.IsDefaultOrEmpty
                 || state.GetStateValue(CompositionStateKinds.LineSolo) != 0)
@@ -471,10 +488,15 @@ internal static class Articulations
     /// <summary>A roll's step, in beats: an 8th.</summary>
     public const double RollStep = 0.5;
 
+    /// <summary>
+    ///     A part's whole chords cycled at the frame rate where it cycles them (<see cref="PartArticulation.Frames" />), each
+    ///     until the part's next note at the latest; another note as it is.
+    /// </summary>
+    /// <param name="beatsPerSecond">The beats a second at a position, by the tempo there.</param>
     internal static EventTimeline<RealizedNote> Frames(EventTimeline<RealizedNote> timeline, Func<double, double> beatsPerSecond) =>
         EventTimeline.Create(timeline.Duration, timeline.SelectMany((struck, i) =>
         {
-            if (struck.Value.Pitches.Length < 2)
+            if (struck.Value.Pitches.Length < 2 || !Has(struck.Value, PartArticulation.Frames))
                 return [struck];
             // cycled until the part's next note at the latest, so that two chords' cycles never run together
             var note = i + 1 < timeline.Count && timeline[i + 1].Position - struck.Position < struck.Value.Duration - 1e-9
