@@ -46,7 +46,7 @@ FAMILIES = {
     },
     'sound': {
         'choices': 'effects strongEffect echo louderForms instrumentSwitches room insertion pan mixFilter levels articulation tremoloSpeed articulationModes bendTiming vibratoWidth',
-        'stages': 'Instruments|Articulation choices|Articulation|Mix filter|Expression',
+        'stages': 'Instrument choices|Instruments|Articulation choices|Articulation|Mix filter|Expression',
     },
 }
 
@@ -68,7 +68,7 @@ stale += [f'stage {x}' for d in FAMILIES.values() for x in d['stages'].split('|'
 
 # the genre presets by cluster of styles, a genre-fit reviewer each: the neighbours a preset is told apart from
 CLUSTERS = {
-    'rock-pop': 'rock pop ballad punk surf',
+    'rock-pop': 'rock pop ballad punk surf postRock',
     'heavy': 'metal nuMetal djent blackMetal thrash doom symphonic',
     'blues-jazz': 'blues jazz fusion soul darkJazz jazzFunk',
     'groove': 'funk funkRock disco latin bossa reggae dub ska',

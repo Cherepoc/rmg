@@ -78,7 +78,27 @@ public sealed class ListeningQuestionsTest
         new("bluegrass-roll", "A Bluegrass banjo rolling through its chords in 8ths, its thumb on the lowest note: the banjo's drive, or a pattern on a loop?",
             "Bluegrass's rhythm part's roll (arpeggio.rhythm, roll 100-100-80), against its chords whole.", "bluegrass", [],
             new() { ["arpeggio.rhythm"] = new() { ["roll"] = 0, ["none"] = 100 } },
-            x => Rolled(x).Select(v => (double?)v).Min(), Places: Rolled)
+            x => Rolled(x).Select(v => (double?)v).Min(), Places: Rolled),
+        new("postrock-tremolo", "A Post-rock build's guitars tremolo-picking their lines, the faster the louder the section, against them picked once a note: the wall at the peak, or a blur?",
+            "How often an appearance tremolo-picks its lines in Post-rock (articulation.tremolo, 15-30-40, carried through its rests in half the songs), against never.", "postRock", [],
+            new() { ["articulation"] = new() { ["tremolo"] = 0 } },
+            x => PickedAt(x).Select(v => (double?)v).Min(), Places: PickedAt),
+        new("postrock-heavy", "A Post-rock song's clean guitars turning driven in its louder sections, against them staying clean: the release, or a different band?",
+            "How often a louder section's clean guitars turn driven in Post-rock (louderForms.guitars, 80-90-90), against never.", "postRock", [],
+            new() { ["louderForms"] = new() { ["guitars"] = 0, ["quieter"] = 0 } },
+            x => Driven(x).Select(v => (double?)v).Min(), Places: Driven)
+    ];
+
+    /// <summary>Where a song's notes are first tremolo-picked, each picked note's first stroke, in beats.</summary>
+    private static double[] PickedAt(CorpusSong song) =>
+        [..song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) == 1).Select(x => x.Position).Order()];
+
+    /// <summary>Where a song's heavy sections start, their guitars driven, in beats.</summary>
+    private static double[] Driven(CorpusSong song) =>
+    [
+        ..song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { Role: TrackRole.Chords or TrackRole.Rhythm or TrackRole.Riff })
+            .SelectMany(x => x.Value.Where(n => InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(n.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode), InstrumentTrait.Driven)))
+            .Select(x => song.Map.PlayingAt(x.Position)?.Span.Start).OfType<double>().Distinct().Order()
     ];
 
     /// <summary>Where a song's melody stacks its notes on the band's chord, a double stop, in beats.</summary>

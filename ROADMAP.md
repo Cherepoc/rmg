@@ -959,7 +959,14 @@ metal's riff silent 1% of a picking appearance's phrases, from 6%, its rhythm pa
    genre's tremolo follows the energy as a genre's shift rather than one lean for all; and the appearances ranked by
    their energy within the song should a song of sections alike in energy pick none apart.
 
-A post-rock or blackgaze preset, the device's home, has none yet.
+Post-rock, asked for by the owner, built on 26 October 2026 as data of the devices there are (`postRock`): long, its
+songs building from near silence (their thirds' loudness 0.04, 0.30, 0.46, 62 of 64 loudest after their start), clean
+guitars ringing and arpeggiated, driven where a louder section turns heavy, the tremolo following the energy and
+carried through its rests in half the songs, a delay and a hall, ringing out or fading; asked as `postrock-tremolo` and
+`postrock-heavy`. Its gaps, measured (`PostRockReportTest`): a section's form is its every appearance's, so that a
+section heavy at its loud return is heavy in its quiet first one too, the guitars driven in 44% of the quieter half's
+notes against 45% of the louder's; a form drawn by the appearance, its energy's step with it, as the appearance's
+parts are, would let a section come back heavy; and the accelerating tremolo into a lift (1, above).
 
 ## Genres
 
