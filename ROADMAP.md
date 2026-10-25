@@ -913,6 +913,21 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   quadratically (#297); a silent start recognised by its trace, its holder exempt alone (#304); the harmony's N.C.
   wherever no pitched part sounds mid-song, and a named chord's root the chords part's (#318).
 
+### A tremolo as a reprise
+
+`blackmetal-tremolo` asked the wrong thing: its songs differed by a held note or two, as a section draws its tremolo
+for every time it plays. Meant is a line heard plain and again tremolo-picked, both in one song, the contrast the device.
+Measured before (64 songs each, `TremoloRepriseTest`): 4 Black metal songs and 12 Surf ones play a line both ways, though
+61 and 63 have a riff's, a rhythm part's or a melody's line of long notes that recurs; the rhythm guitar never picks,
+nor the parts doubling a picked line. The articulations are now chosen as the parts' state before the notes
+(`Articulations.Choose`), so the plan is that stage's: a part picking an appearance only where its line, the section's
+or the one whose lines it plays, was heard before; any note two strokes long or more picked, not only a beat's; the
+finest step drawn for each picking appearance, the 8th, the 8th triplet, the 16th, the sextuplet or the 32nd within
+`tremoloSpeed`'s range, the louder appearance leaning finer, the hand's cap kept; the rhythm part picking beside the
+riff and the melody; and a doubled note playing as its source does, `Doubled` naming its source, its articulations
+copied, the bass's step no finer than a 16th and a part that cannot pick holding the note (the play-out's limits, not a
+draw). Surf's first verses then lose their tremolo to its returns, heard 6-0 kept as it is (#352): to hear again.
+
 ## Genres
 
 A genre is the page's data (`Genre`, `GenreChoices`, `Client/genres.json`), every option three amounts, at the plain

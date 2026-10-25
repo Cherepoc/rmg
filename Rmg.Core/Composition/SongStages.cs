@@ -154,6 +154,7 @@ internal static class SongStages
         new("Pedal", SectionPedals.Apply, CanSkip: true),
         new("Solos", Solos, CanSkip: true),
         new("Solo answers", SoloAnswers, CanSkip: true),
+        new("Articulation choices", Articulations.Choose, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
         new("Drum marks", DrumMarks.Apply, CanSkip: true),
         new("Stop time", Composition.StopTime.Apply, CanSkip: true),

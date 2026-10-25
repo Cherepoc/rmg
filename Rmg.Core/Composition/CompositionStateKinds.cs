@@ -227,6 +227,14 @@ internal static class CompositionStateKinds
     // 1 for a note of a chord cycled at a sound chip's frame rate, which no echo repeats, as its cycle would blur
     public static StateKind<int> Cycled { get; } = StateKinds.CreateAdditive<int>(Prefix + "Cycled", StateScope.Render);
 
+    // the articulations a part plays its notes with where it is, a PartArticulation's bits, decided as its track's state
+    // before the notes are realized and played by them (Articulations.Choose)
+    public static StateKind<int> Articulates { get; } = StateKinds.CreateAdditive<int>(Prefix + "Articulates", StateScope.Render);
+
+    // the finest step a part tremolo-picks its long notes at where it picks them, in beats, the tempo's hand coarsening it,
+    // 0 where it does not (Articulations.Choose)
+    public static StateKind<double> TremoloStep { get; } = StateKinds.CreateAdditive<double>(Prefix + "TremoloStep", StateScope.Render);
+
     // a tremolo-picked note's stroke, its place among the note's strokes from 1 (Articulations.Tremolo)
     public static StateKind<int> Picked { get; } = StateKinds.CreateAdditive<int>(Prefix + "Picked", StateScope.Render);
 
