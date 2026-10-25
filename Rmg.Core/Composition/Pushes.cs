@@ -14,6 +14,11 @@ internal static class Pushes
     /// <summary>How early a push plays its change, in beats: an eighth.</summary>
     public const double Early = 0.5;
 
+    /// <summary>Which sections push their changes, each a section's decision from a sequence of its own, by its groove facet, a genre's (<see cref="SongDecisions.Pushing" />).</summary>
+    internal static ImmutableDictionary<int, bool> Pushing(SongDecisions song) =>
+        song.SectionIds.Distinct().ToImmutableDictionary(id => id,
+            id => song.Stream(SongStream.Pushes, id).TestProbability(Chance.At(song.SectionOf(id).Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Push, "sections"))));
+
     /// <summary>
     ///     Pushes: in a pushing section, every chord change on a bar's first beat but the section's first played an eighth
     ///     early by the band's harmony, as an anticipation: a part's notes there moved ahead and held to where they ended, a
@@ -23,13 +28,9 @@ internal static class Pushes
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
-        var pushing = song.SectionIds.Distinct().ToDictionary(id => id, id =>
-        {
-            var section = song.SectionOf(id);
-            var pushes = song.Stream(SongStream.Pushes, id).TestProbability(Chance.At(section.Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Push, "sections")));
-            StateTrace.RecordSection(TracePoints.Push, SectionGenerator.SectionTrace, id, $"{pushes}", pushes);
-            return pushes;
-        });
+        var pushing = song.Pushing;
+        foreach (var id in song.SectionIds.Distinct())
+            StateTrace.RecordSection(TracePoints.Push, SectionGenerator.SectionTrace, id, $"{pushing[id]}", pushing[id]);
         // but in a solo, in a polymeter, whose cycle runs across the changes, and in stop time and out of it, whose hits stay
         // on the bar
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();

@@ -73,6 +73,26 @@ internal sealed record SongDecisions(
     /// </summary>
     public ImmutableArray<(double Start, double End, double BarDuration)> EnsembleHits => field.IsDefault ? field = StopTimeSkipped ? [] : [..Composition.StopTime.HitBars(this)] : field;
 
+    /// <summary>Which sections push their chord changes, by their ids (<see cref="Composition.Pushes.Pushing" />).</summary>
+    public ImmutableDictionary<int, bool> Pushing => field ??= Composition.Pushes.Pushing(this);
+
+    /// <summary>Whether each appearance is slid down into with a surf drop, should the lift into it be louder (<see cref="Composition.SurfDrops.Drops" />).</summary>
+    public ImmutableArray<bool> SurfDrops => field.IsDefault ? field = Composition.SurfDrops.Drops(this) : field;
+
+    /// <summary>Every section's ghost notes' draws, by its id, none where it ghosts none (<see cref="Composition.Ghosts.Draws" />).</summary>
+    public ImmutableDictionary<int, ImmutableArray<double>?> Ghosts => field ??= Composition.Ghosts.Draws(this);
+
+    /// <summary>The hi-hat rolls the song plays, before a fill or stop time keeps one out (<see cref="Composition.HatRolls.Planned" />).</summary>
+    public ImmutableArray<(double From, double To, int Rate)> HatRolls => field.IsDefault ? field = Composition.HatRolls.Planned(this) : field;
+
+    /// <summary>Whether the song's snare flams in its fills and drags into its backbeats (<see cref="Composition.DrumOrnaments.Rudiments" />).</summary>
+    public (bool Flams, bool Drags) Rudiments => _rudiments ??= Composition.DrumOrnaments.Rudiments(this);
+
+    private (bool Flams, bool Drags)? _rudiments;
+
+    /// <summary>The ornaments the song's lines play (<see cref="Composition.Ornaments.Played" />).</summary>
+    public ImmutableArray<(Ornament Ornament, ByConvention Chance, double Share, double Seconds, double Beats)> Ornaments => field.IsDefault ? field = Composition.Ornaments.Played(this) : field;
+
     /// <summary>
     ///     The song's first chorus where it plays and its place among the sections, which a hook intro quotes (<see
     ///     cref="IntroKind.Hook" />); none for a song without a chorus.

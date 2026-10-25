@@ -40,20 +40,11 @@ internal static class HatRolls
     public const double From = 0.6;
 
     /// <summary>
-    ///     Hi-hat rolls, the trap's: now and then a beat of a bar, or its half, on the drums keeping time played as a roll of
-    ///     32nds or 16th triplets growing louder, into one of the bar's beats, its end the likeliest, into the snare or the
-    ///     next bar, each note the drum's own note there, where it plays and no fill does. A
-    ///     bar's decision, a genre's, from a sequence of its own for each appearance. The drum keeping time is the song's
-    ///     hi-hat where it keeps time, as the roles are drawn for the song, a wild section's redrawn roles aside; a ride's
-    ///     or a shaker's time never rolls.
+    ///     The rolls the song plays, each bar's decision, a genre's, from a sequence of its own for each appearance, drawn for
+    ///     every bar so that the draws are as many, before a fill or stop time keeps one out (<see cref="SongDecisions.HatRolls" />).
     /// </summary>
-    internal static SongDraft Apply(SongDecisions song, SongDraft draft)
+    internal static ImmutableArray<(double From, double To, int Rate)> Planned(SongDecisions song)
     {
-        var notes = SongStages.NotesOf(draft);
-        var times = song.Tracks.DrumsOf(DrumRole.Time).Where(x => notes.ContainsKey(x) && x == DrumGroups.GetTrackNumber(DrumDefinitions.HiHat)).ToArray();
-        if (times.Length == 0)
-            return draft;
-
         var rolls = new List<(double From, double To, int Rate)>();
         // the sections and an intro of entries' window, which plays as the first, its own sequence the first's
         foreach (var (index, span, _) in song.Form.Map.Plays.Where(x => !x.IsEnding))
@@ -75,9 +66,27 @@ internal static class HatRolls
             }
         }
 
-        // but where a fill plays, from its first note to its line, and in stop time, after the draws so that they are as many
+        return [..rolls];
+    }
+
+    /// <summary>
+    ///     Hi-hat rolls, the trap's: now and then a beat of a bar, or its half, on the drums keeping time played as a roll of
+    ///     32nds or 16th triplets growing louder, into one of the bar's beats, its end the likeliest, into the snare or the
+    ///     next bar, each note the drum's own note there, where it plays and no fill does. A
+    ///     bar's decision, a genre's, from a sequence of its own for each appearance. The drum keeping time is the song's
+    ///     hi-hat where it keeps time, as the roles are drawn for the song, a wild section's redrawn roles aside; a ride's
+    ///     or a shaker's time never rolls.
+    /// </summary>
+    internal static SongDraft Apply(SongDecisions song, SongDraft draft)
+    {
+        var notes = SongStages.NotesOf(draft);
+        var times = song.Tracks.DrumsOf(DrumRole.Time).Where(x => notes.ContainsKey(x) && x == DrumGroups.GetTrackNumber(DrumDefinitions.HiHat)).ToArray();
+        if (times.Length == 0)
+            return draft;
+
+        // but where a fill plays, from its first note to its line, and in stop time
         var holds = draft.Holds(song);
-        rolls.RemoveAll(r => times.Any(track => holds.Meets(KeepsOutOf, r.From, r.To, track)));
+        var rolls = song.HatRolls.Where(r => !times.Any(track => holds.Meets(KeepsOutOf, r.From, r.To, track))).ToArray();
         StateTrace.RecordSong(TracePoints.HatRolls, string.Join(", ", rolls.Select(x => $"{x.From}-{x.To}")), rolls.ToImmutableArray());
 
         var result = notes.ToBuilder();

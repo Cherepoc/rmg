@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Rendering;
@@ -27,6 +28,19 @@ internal static class Ghosts
     public const double Length = 0.25;
 
     /// <summary>
+    ///     Every section's draw of each 16th of its bar, none where it does not ghost, its decision from a sequence of its own
+    ///     by its groove facet, a genre's, drawn for every section so that the draws are as many (<see cref="SongDecisions.Ghosts" />).
+    /// </summary>
+    internal static ImmutableDictionary<int, ImmutableArray<double>?> Draws(SongDecisions song) =>
+        song.SectionIds.Distinct().ToImmutableDictionary(id => id, id =>
+        {
+            var context = song.Stream(SongStream.Ghosts, id);
+            var ghosts = context.TestProbability(Chance.At(song.SectionOf(id).Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Ghosts, "sections")));
+            ImmutableArray<double> draws = [..Enumerable.Range(0, (int)Math.Round(song.SectionMeters[id].BarDuration / Length)).Select(_ => context.GenerateDouble())];
+            return ghosts ? draws : (ImmutableArray<double>?)null;
+        });
+
+    /// <summary>
     ///     A snare's ghost notes, a funk or soul drummer's: in a ghosting section, its snares keeping the backbeat play soft
     ///     16ths off the beat between their backbeats, the likelier next to one, each on the snare's head, as soft as heard
     ///     against its bar's loudest note. A section's decision, the 16ths it ghosts the same in each of its bars, as a
@@ -38,17 +52,9 @@ internal static class Ghosts
     {
         var notes = SongStages.NotesOf(draft);
         var snares = song.Tracks.DrumsOf(DrumRole.Backbeat).Where(x => notes.ContainsKey(x) && DrumGroups.SnareHeads.Contains(x)).ToArray();
-        // every section's draw of each 16th of its bar, none where it does not ghost, drawn for every section so that the
-        // draws are as many
-        var ghosting = song.SectionIds.Distinct().ToDictionary(id => id, id =>
-        {
-            var section = song.SectionOf(id);
-            var context = song.Stream(SongStream.Ghosts, id);
-            var ghosts = context.TestProbability(Chance.At(section.Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Ghosts, "sections")));
-            var draws = Enumerable.Range(0, (int)Math.Round(song.SectionMeters[id].BarDuration / Length)).Select(_ => context.GenerateDouble()).ToArray();
-            StateTrace.RecordSection(TracePoints.Ghosts, SectionGenerator.SectionTrace, id, $"{ghosts}", ghosts);
-            return ghosts ? draws : null;
-        });
+        var ghosting = song.Ghosts;
+        foreach (var id in song.SectionIds.Distinct())
+            StateTrace.RecordSection(TracePoints.Ghosts, SectionGenerator.SectionTrace, id, $"{ghosting[id] is not null}", ghosting[id] is not null);
         if (snares.Length == 0 || ghosting.Values.All(x => x is null))
             return draft;
 

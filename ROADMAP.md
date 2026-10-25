@@ -915,16 +915,14 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
 
 ### Decisions after the notes
 
-`CLAUDE.md` now asks a decision be made as state before the notes unless it needs what only the realized notes have.
-Nine stages after the notes still draw (25 October 2026), each to be read against it and moved where it fails, a
-refactor that moves draws alone, its songs counted: Stop time (whether the song stops, which sections, their returns,
-the ensemble hits), Pushes (which sections push), Surf drops (which lifts drop, the slide itself the notes'), the Mix
-filter (the song's filter, an appearance's dip), Hat rolls (an appearance's rolls), Ghosts and Drum ornaments (a
-section's, the song's, a hit's share), Drum marks (the song's, an appearance's swells, strikes and rolls), and
-Ornaments (the song's, and each note's, which reads its realized pitch and stays). The likely movers are the sections'
-and the appearances' choices, made of the form alone; a draw per note that reads its pitch or its neighbours stays.
-A part made from another's notes taking the source's whole state is the other rule's first case: a soloist's track
-made from the melody's (`Solos`), which keeps `Articulations.Choose` just before the notes.
+`CLAUDE.md` asks a decision be made as state before the notes unless it needs what only the realized notes have. Of
+the nine stages after the notes that drew (25 October 2026), the mix filter now runs before them, and pushes, surf
+drops, hat rolls, ghosts, the snare's rudiments and the lines' ornaments draw their choices as the song's decisions
+(`SongDecisions`), the stages playing them; stop time was already so, its carriers and hits read from the notes. Left:
+Drum marks, which chooses its marking drums among those that play by their notes and marks at their typical
+loudness, to move once which drums play is a decision of its own; and a part made from another's notes taking the
+source's whole state, a soloist's track made from the melody's (`Solos`), which keeps `Articulations.Choose` just
+before the notes.
 
 ### A tremolo as a reprise
 

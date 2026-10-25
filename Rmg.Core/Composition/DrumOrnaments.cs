@@ -26,6 +26,14 @@ internal static class DrumOrnaments
     /// <summary>How many grace strokes a drum plays a second: a flam's grace about 35 ms before its note.</summary>
     public const double Rate = 28;
 
+    /// <summary>Whether the song flams and drags, each by a chance of its own from one sequence, a genre's (<see cref="SongDecisions.Rudiments" />).</summary>
+    internal static (bool Flams, bool Drags) Rudiments(SongDecisions song)
+    {
+        var context = song.Stream(SongStream.DrumOrnaments);
+        var flams = context.TestProbability(FlamChance.At(song.Facets[Facet.Fills], song.Genre.Chance(GenreChoices.Rudiments, "flams")));
+        return (flams, context.TestProbability(DragChance.At(song.Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Rudiments, "drags"))));
+    }
+
     /// <summary>
     ///     The snare's ornaments, a rudiment's: a flam, a soft stroke just before a note, in a fill, a rock or a
     ///     marching drummer's accent, on its 8ths; and a drag, two, before its backbeat elsewhere, a jazz or a funk drummer's. Each the
@@ -36,9 +44,7 @@ internal static class DrumOrnaments
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
-        var context = song.Stream(SongStream.DrumOrnaments);
-        var flams = context.TestProbability(FlamChance.At(song.Facets[Facet.Fills], song.Genre.Chance(GenreChoices.Rudiments, "flams")));
-        var drags = context.TestProbability(DragChance.At(song.Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Rudiments, "drags")));
+        var (flams, drags) = song.Rudiments;
         StateTrace.RecordSong(TracePoints.DrumOrnaments, $"flams {flams}, drags {drags}", (flams, drags));
         if (!flams && !drags)
             return draft;

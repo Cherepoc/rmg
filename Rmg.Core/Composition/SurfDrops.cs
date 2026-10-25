@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
@@ -23,6 +24,16 @@ internal static class SurfDrops
     internal const Hold KeepsOutOf = Hold.Stop | Hold.DrumSolo | Hold.Solo | Hold.Build | Hold.Cut;
 
     /// <summary>
+    ///     Whether each appearance after the first is dropped into, should a lift into it be louder, from a sequence of its own
+    ///     by its appearance, drawn for every one, by its section's form facet, a genre's (<see cref="SongDecisions.SurfDrops" />).
+    /// </summary>
+    internal static ImmutableArray<bool> Drops(SongDecisions song) =>
+    [
+        ..song.Form.Map.Sections.Select((x, i) => i > 0 && song.AppearanceStream(SongStream.SurfDrops, i)
+            .TestProbability(Chance.At(song.SectionOf(x.SectionId).Facets[Facet.Form], song.Genre.Chance(GenreChoices.SurfDrop, "lifts"))))
+    ];
+
+    /// <summary>
     ///     The song with a surf drop into every louder section that draws one, from a sequence of its own by the section's
     ///     appearance, drawn for every one: the riff's guitar, or the melody's where no riff plays a guitar, its notes in the
     ///     bar before taken out and its 16ths there sliding down by semitones from an octave above the next section's first
@@ -40,9 +51,7 @@ internal static class SurfDrops
         var result = notes.ToBuilder();
         for (var i = 1; i < sections.Length; i++)
         {
-            var drops = song.AppearanceStream(SongStream.SurfDrops, i).TestProbability(Chance.At(song.SectionOf(sections[i].SectionId).Facets[Facet.Form], song.Genre.Chance(GenreChoices.SurfDrop, "lifts")));
-            var louder = song.LiftsInto(i - 1);
-            if (!drops || !louder || guitar is not { } track)
+            if (!song.SurfDrops[i] || !song.LiftsInto(i - 1) || guitar is not { } track)
                 continue;
             var (from, to) = sections[i - 1].Bar(sections[i - 1].BarCount - 1);
             var timeline = result[track];

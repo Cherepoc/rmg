@@ -48,13 +48,17 @@ internal static class Ornaments
 
     public static string LabelOf(Ornament ornament) => ornament == Ornament.Grace ? "Grace notes" : ornament + "s";
 
+    /// <summary>The ornaments the song plays, each by its chance from one sequence, drawn for every one so that the draws are as many (<see cref="SongDecisions.Ornaments" />).</summary>
+    internal static ImmutableArray<(Ornament Ornament, ByConvention Chance, double Share, double Seconds, double Beats)> Played(SongDecisions song)
+    {
+        var context = song.Stream(SongStream.Ornaments);
+        return [..All.Where(x => context.TestProbability(x.Chance.At(song.Facets[Facet.Melody], song.Genre.Chance(GenreChoices.Ornaments, NameOf(x.Ornament)))))];
+    }
+
     /// <summary>The song's melody and counter-melody with their ornaments, where it plays any.</summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
-        var context = song.Stream(SongStream.Ornaments);
-        var melody = song.Facets[Facet.Melody];
-        // drawn for every ornament, so that the draws are as many
-        var plays = All.Where(x => context.TestProbability(x.Chance.At(melody, song.Genre.Chance(GenreChoices.Ornaments, NameOf(x.Ornament))))).ToArray();
+        var plays = song.Ornaments;
         StateTrace.RecordSong(TracePoints.Ornaments, string.Join(", ", plays.Select(x => x.Ornament)),
             plays.Select(x => x.Ornament).ToImmutableArray());
         if (plays.Length == 0)
