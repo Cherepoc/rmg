@@ -19,9 +19,14 @@ is removed once it is built, its leftovers kept under *Open work*.
   backlog judged against the conventions on 19 October, its changes built (*Bends and vibrato*).
 3. **The ratings report** (P2, *Listening data*) once the dashboard shows songs rated enough; the default genre by
    the ratings with it.
-4. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
-   with its reason; no new presets until the owner asks (15 October 2026).
-5. **Parked** (P4): kept for their reasons, not planned.
+4. **The plan of 26 October 2026**, in its order: the choices after the notes, the instruments' and the expression's,
+   moved before them (*Decisions after the notes*), the instruments first as they change what is heard; a Post-rock
+   preset, asked for by the owner, its devices the existing ones and its gaps measured (*A tremolo through the song*, the
+   accelerating tremolo into a lift first among them); then the guitars' plan (*Guitars as players play them*), the
+   rest of Jazz's cycle (*From the review of 22 October*) and the review's record.
+5. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
+   with its reason; no new presets but those the owner asks for.
+6. **Parked** (P4): kept for their reasons, not planned.
 
 ## Listening
 
@@ -918,11 +923,16 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
 `CLAUDE.md` asks a decision be made as state before the notes unless it needs what only the realized notes have. Of
 the nine stages after the notes that drew (25 October 2026), the mix filter now runs before them, and pushes, surf
 drops, hat rolls, ghosts, the snare's rudiments and the lines' ornaments draw their choices as the song's decisions
-(`SongDecisions`), the stages playing them; stop time was already so, its carriers and hits read from the notes. Left:
-Drum marks, which chooses its marking drums among those that play by their notes and marks at their typical
-loudness, to move once which drums play is a decision of its own; and a part made from another's notes taking the
-source's whole state, a soloist's track made from the melody's (`Solos`), which keeps `Articulations.Choose` just
-before the notes.
+(`SongDecisions`), the stages playing them; stop time was already so, its carriers and hits read from the notes. The
+audit counted the draws a stage makes in its own file, and missed two given theirs by `SongStages` (26 October): the
+instruments a part switches to by section (`InstrumentsOverTime`), drawn after the register is placed for the part's
+own instrument, to move before the notes as its track's state so that the register follows the instrument playing;
+and the expression (`Expression`, 39 draws), its bends', vibrato's, tone's and sound's choices of the form alone to be
+told from those reading the notes and moved, as the articulations were, the twin then following its riff by the
+doubling's copy and `DrawsAs` gone. Left besides: Drum marks, which chooses its marking drums among those that play by
+their notes and marks at their typical loudness, to move once which drums play is a decision of its own. A soloist's
+track made from the melody's state (`Solos`) is what it plays as, the melody's line it takes over; the parts' choices
+are made after it (`Articulations.Choose`), so that none of the melody's reaches it.
 
 ### A tremolo through the song
 

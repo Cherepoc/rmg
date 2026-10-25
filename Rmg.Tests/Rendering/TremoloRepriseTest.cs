@@ -10,8 +10,8 @@ public sealed class TremoloRepriseTest
     private static readonly TrackRole[] Parts = [TrackRole.Riff, TrackRole.RiffTwin, TrackRole.Rhythm, TrackRole.Melody, TrackRole.CounterMelody, TrackRole.Bass];
 
     /// <summary>
-    ///     A genre's songs by their parts: the songs where a part plays a line of long notes, a beat or longer, in two of its
-    ///     appearances or more, a line the section's or the one whose lines it plays, and those where it plays one plain in
+    ///     A genre's songs by their parts: the songs where a part plays a line with notes a beat or longer, which any tremolo
+    ///     picks, in two of its appearances or more, a line the section's or the one whose lines it plays, and those where it plays one plain in
     ///     one appearance and picked in another, and plain and later picked; how often a line's first hearing is picked, the
     ///     strokes by their step, and each part's appearances with long notes, and those picked (measured over 64 songs on 25
     ///     October 2026, a section's tremolo drawn for every time it played: Black metal's lines plain and later picked in 4
@@ -65,7 +65,7 @@ public sealed class TremoloRepriseTest
             building += builds ? 1 : 0;
         }
 
-        Console.WriteLine($"{genre}: {songs.Length} songs, {picking} picking, {recurring} with a riff's, a rhythm's or a melody's line of long notes recurring, {contrasted} with a line plain and picked, {building} plain and later picked");
+        Console.WriteLine($"{genre}: {songs.Length} songs, {picking} picking, {recurring} with a riff's, a rhythm's or a melody's line of a beat's notes recurring, {contrasted} with a line plain and picked, {building} plain and later picked");
         Console.WriteLine($"  lines' first hearings picked {firstsPicked} of {firsts}");
         Console.WriteLine($"  strokes by step: {string.Join(", ", steps.OrderByDescending(x => x.Key).Select(x => $"{x.Key} {x.Value}"))}");
         foreach (var (role, (longs, picked, again)) in counts)
