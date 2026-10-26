@@ -515,6 +515,10 @@ code before it is recorded here. Left:
   playing three of the kit's notes (`PercussionSectionsTest`, its assertion naming no song yet); a calm section's drums
   not sparser (seed 14 at 712, `DroneAndQuieterFormTest`). Their songs change with the review of 22 October's packages: each to be
   read at the first offset it fails at after them.
+- **Two at 1000000** (26 October 2026, each failing at fafdf766 too, older than the build's lean against energy): Nu
+  metal's tom groove leading no time on the tom in a section that draws it (seed 6, section 6,
+  `AGenresTomGroove_LeadsSomeSectionsTime_OnTheTom`); and a plain melody's phrases ending off the chord's root or third
+  (549 against 552 phrases, `APlainMelodysPhrases_EndOnTheChordsRootOrThird`), a rule or a calibration to read.
 - **The suite's memory at 924000000:** about 240 tests ran out of the 8 GB cap there (23 October 2026), every one
   passing alone; the corpus's songs cached by the tests, larger there, are the likely cause, with the suite's slowing
   (the review of 22 October's #246).
