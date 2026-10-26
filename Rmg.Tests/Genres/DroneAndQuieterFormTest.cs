@@ -41,20 +41,20 @@ public sealed class DroneAndQuieterFormTest
         return (onPedal, weak, above, strong);
     }
 
-    /// <summary>A droning section's riff plays its weak notes on its open string and its melody over it, leaping about an octave between them.</summary>
+    /// <summary>A droning section's riff plays its weak notes on its open string and its melody over it, leaping between them.</summary>
     [Test]
     public async Task ADroningRiff_PlaysItsWeakNotesOnItsOpenString_ItsMelodyLeapingOverIt()
     {
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("djent", GenreChoices.Riff, "drone"))));
         var drones = songs.Select(x => Pedal(x, x.Trace.Where(t => t.Point == TracePoints.Drone && (bool)t.Value!).Select(t => t.Section).ToHashSet())).ToArray();
         var (onPedal, weak, above, strong) = (drones.Sum(x => x.OnPedal), drones.Sum(x => x.Weak), drones.Sum(x => x.Above), drones.Sum(x => x.Strong));
-        // the melody an octave or more over the string as far as the guitar reaches, the restated and led notes among the
-        // rest, against the mechanism breaking (measured: 99% on the string, 9.5 to 10 semitones over it, at offsets 0 and a
-        // million)
+        // the melody over the string as far as the guitar reaches, the restated and led notes among the rest, against the
+        // mechanism breaking (measured: 99% on the string, 6.7 and 5.7 semitones over it at offsets 0 and a million, 9.5 to 10
+        // before the guitar's range stopped at its low E, a key of C to D# then droning an octave up)
         Console.WriteLine($"droning: {onPedal} of {weak} weak notes on the open string, the strong ones {above / (double)strong:F1} semitones over it on the average");
         await Assert.That(weak).IsGreaterThan(100);
         await Assert.That(onPedal / (double)weak).IsGreaterThan(0.9);
-        await Assert.That(above / (double)strong).IsGreaterThan(7);
+        await Assert.That(above / (double)strong).IsGreaterThan(4);
     }
 
     /// <summary>

@@ -321,7 +321,10 @@ notes in unison, `RhythmRiffReportTest`), asked as `metal-rhythm-unison`. Left:
    C2 for Doom's and Nu metal's, B1 for a seven-string's, F#1 for Djent's eight, General MIDI's guitars sounding below
    their written range as a sampler does. A value of the genre's (`register`'s or its own), the riff's and the rhythm
    part's range moved by it, the bass an octave under it as now. Measured first: where the riff of each metal preset
-   sits against its range's floor.
+   sits against its range's floor. The floor is now a semitone's (`Realizer.RangeOf`, 27 October 2026): a line's range
+   its octaves cut to its instrument's, which took the guitars' notes from the half octave below E2 (Djent's riff's
+   lowest tenth 42 to 44), and a Djent drone in a key of C to D# onto its open string an octave up, its melody's leaps
+   over it 9.5 to 6.7 semitones; a tuning takes them back down.
 3. **Djent's riff intervals, no device of its own**, measured on 26 October 2026 (`RiffIntervalsReportTest`): Djent's riffs
    move as Metal's do, repeating 44% of their moves against 46%, a semitone 8% against 7%, a tritone 4% against 2%, a
    seventh, a ninth or past an octave 2% against none, but go back to their pedal from off it 35% of the time against
@@ -525,8 +528,8 @@ code before it is recorded here. Left:
 Each taken up when its reason no longer holds or listening asks:
 
 - **The heavy genres' low tuning** (19 October 2026): Metal, Djent and Nu metal tuned to B0 or a drop A, a five-string
-  bass's floor, as a genre's choice; every bass's floor is E1 (`InstrumentRanges`), and a range by genre is a mechanism
-  of its own.
+  bass's floor, as a genre's choice; every bass's floor is E1 (`InstrumentRanges`, kept by `Realizer.RangeOf` since 27
+  October 2026, 8% of its notes below it before), and a range by genre is a mechanism of its own.
 
 - **The false ending** (#372): the band hitting the home chord, a beat or two of silence, the drums counting back in;
   its hit a harmony edit before `Realizer`, for a gimmick that wears thin, rare even where it plays.
@@ -840,6 +843,9 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
 - **The playing following the articulation** (P3; palm-muted chugs done): octaves popped in slap, short notes muted,
   without which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`Pocket`).
+- **A chord's notes within its instrument's range** (P3): a line's range is cut to its instrument's (`Realizer.RangeOf`,
+  27 October 2026), a chord's still voiced in whole octaves (`FitChordIntoRange`), 1% of the chords' notes outside
+  their instrument's range (`RegisterReportTest`), a guitar's below its low E; the voicing's octaves cut the same way.
 - **A motif stretched,** its rhythm doubled, beside moved and inverted (`Soloist.MotifInversion`), should listening ask.
 - **A solo's runs in fives and sevens,** a fusion player's grouping, which the feels give a whole part but perhaps not
   a run; if not, a case of segments in any pattern (see *Parked*), not a mechanism of its own.

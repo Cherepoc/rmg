@@ -77,12 +77,25 @@ internal static class Realizer
     private static EventTimeline<StateMap> NoteStates(EventStateTimelineMap<StateMap> merged) =>
         merged.ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
 
-    /// <summary>The lowest and the highest note of a pitched track's range.</summary>
-    internal static (int Low, int High) GetRange(PitchInstrumentTrack track)
+    /// <summary>The lowest and the highest note of a pitched track's range (<see cref="RangeOf" />).</summary>
+    internal static (int Low, int High) GetRange(PitchInstrumentTrack track) => RangeOf(track.MinOctaveOffset, track.MaxOctaveOffset, track.InstrumentCode);
+
+    /// <summary>
+    ///     A line's range: its octaves' notes within its instrument's (<see cref="InstrumentRanges" />), moved by as many
+    ///     octaves as a genre's register moved the part past the instrument's own, as a guitar tuned down plays lower
+    ///     (<see cref="Registers.WithinInstrument(PitchInstrumentTrack, int, Genre)" />), as far as an octave's width is left,
+    ///     which a line needs to sound every note: a bass in an octave half below its strings plays those below them an octave
+    ///     up, as a bassist does below the low E.
+    /// </summary>
+    internal static (int Low, int High) RangeOf(int minOctave, int maxOctave, int program)
     {
-        var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
-        var octaveCount = track.MaxOctaveOffset - track.MinOctaveOffset + 1;
-        return (absoluteMinOctave * OctaveNoteCount, (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1);
+        var (low, high) = ((minOctave + ZeroOctaveOffset) * OctaveNoteCount, (maxOctave + ZeroOctaveOffset + 1) * OctaveNoteCount - 1);
+        var (lowestOctave, highestOctave) = Registers.OctavesOf(program);
+        var (lowest, highest) = InstrumentRanges.Of(program) is var (l, h)
+            ? (l - OctaveNoteCount * Math.Max(0, lowestOctave - minOctave), h + OctaveNoteCount * Math.Max(0, maxOctave - highestOctave))
+            : default;
+        var from = Math.Min(Math.Max(low, lowest), high - OctaveNoteCount + 1);
+        return (from, Math.Max(Math.Min(high, highest), from + OctaveNoteCount - 1));
     }
 
     /// <summary>
@@ -187,19 +200,24 @@ internal static class Realizer
         // the chords are placed in order, each following from the one before on the same instrument, in its octaves: the
         // instrument the part plays there, but a note a section's form gives an instrument of its own and a solo's, which
         // play on the part's
-        var leaders = new Dictionary<(int, int), ((int Low, int High) Range, VoiceLeader Leader)>();
-        ((int Low, int High) Range, VoiceLeader Leader) On(StateMap state)
+        var leaders = new Dictionary<(int, int), VoiceLeader>();
+        ((int Low, int High) Line, VoiceLeader Leader) On(StateMap state)
         {
             var playing = state.GetStateValue(CompositionStateKinds.Instrument);
             // a note's own, a guitar doubling another's line in its register, whatever instrument its section's form gives it
-            var (min, max) = playing.IsSet && (playing.Depth == StateDepths.Note || state.GetStateValue(CompositionStateKinds.Program) == 0) && state.GetStateValue(CompositionStateKinds.LineSolo) == 0
-                ? (playing.Value.MinOctave, playing.Value.MaxOctave)
-                : (track.MinOctaveOffset, track.MaxOctaveOffset);
-            if (leaders.TryGetValue((min, max), out var known))
-                return known;
-            var (absoluteMinOctave, octaveCount) = (min + ZeroOctaveOffset, max - min + 1);
-            var range = (absoluteMinOctave * OctaveNoteCount, (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1);
-            return leaders[(min, max)] = (range, new VoiceLeader(range.Item1, range.Item2, notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes)));
+            var (min, max, program) = playing.IsSet && (playing.Depth == StateDepths.Note || state.GetStateValue(CompositionStateKinds.Program) == 0) && state.GetStateValue(CompositionStateKinds.LineSolo) == 0
+                ? (playing.Value.MinOctave, playing.Value.MaxOctave, playing.Value.Program)
+                : (track.MinOctaveOffset, track.MaxOctaveOffset, track.InstrumentCode);
+            // a chord voiced in its octaves, led on through a change of instrument in them, a line placed in its range within
+            // the instrument's
+            if (!leaders.TryGetValue((min, max), out var leader))
+            {
+                var (absoluteMinOctave, octaveCount) = (min + ZeroOctaveOffset, max - min + 1);
+                var range = (absoluteMinOctave * OctaveNoteCount, (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1);
+                leaders[(min, max)] = leader = new VoiceLeader(range.Item1, range.Item2, notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes));
+            }
+
+            return (RangeOf(min, max, program), leader);
         }
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
