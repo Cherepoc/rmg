@@ -104,7 +104,10 @@ notes muted, against the part on the muted guitar as it was, and a Funk bass sla
   struck once); and of its sixth round (26 October 2026), Cinematic piano's double stop under the tune
   (`piano-double-stops`, 9 to none, four the same, heard with the melody alone, the left hand's chords under it in the
   band), Trance's energy following its intensity (`trance-fierce` 11 to 1, `trance-calm` 8 to none) and Post-rock's
-  build into a louder appearance (`postrock-build`, 8 to 2, drawn only where it picks two steps faster).
+  build into a louder appearance (`postrock-build`, 8 to 2, drawn only where it picks two steps faster); and of its
+  seventh round (27 October 2026), a song's energy following its intensity as the songs have it, in Pop and Metal at
+  the fiercest and the calmest (`pop-fierce`, `pop-calm`, `metal-fierce`, `metal-calm`, 6 to none each), and Jazz's
+  darker tone (`jazz-tone`, 4 to none, two the same).
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure

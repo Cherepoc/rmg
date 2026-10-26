@@ -165,3 +165,4 @@ rejected while fixing: the place, what was decided, why.
   line heard plain and again picked in one song, built on 25 October 2026 as the tremolo following the energy and asked
   again under the same id from the plain hearing (`ROADMAP.md`, *A tremolo through the song*). Its round 4 answers say
   nothing of that device.
+- A part's darker tone (`effects.tone`, #28) kept on listening, 4 to none, two the same (`jazz-tone`, 27 October 2026): not a cut candidate again.

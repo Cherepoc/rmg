@@ -57,29 +57,7 @@ public sealed class ListeningQuestionsTest
         Func<CorpusSong, double?>? Contrast = null
     );
 
-    private static readonly Question[] Questions =
-    [
-        new("pop-fierce", "Two Pop songs both at the fiercest intensity, one of them also with its sections louder and fuller for it: the more driving song, or only busier?",
-            "Whether a song's energy follows its intensity as the songs have it (moodEnergy.energy, the songs' 100-100-50, heard in Trance), in a genre that does not name it, against its tempo and leans alone, both given intensity 1 (#76).", "pop", [],
-            new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
-            x => x.Origin, With: new() { ["intensity"] = 61 }, Without: new() { ["intensity"] = 61 }),
-        new("pop-calm", "Two Pop songs both at the calmest intensity, one of them also with its sections softer and sparser for it: the calmer song, or an emptied one?",
-            "Whether a song's energy follows its intensity as the songs have it (moodEnergy.energy, the songs' 100-100-50), in a genre that does not name it, against its tempo and leans alone, both given intensity -1 (#76).", "pop", [],
-            new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
-            x => x.Origin, With: new() { ["intensity"] = 0 }, Without: new() { ["intensity"] = 0 }),
-        new("metal-fierce", "Two Metal songs both at the fiercest intensity, one of them also with its sections louder and fuller for it: the heavier song, or only busier?",
-            "Whether a song's energy follows its intensity as the songs have it (moodEnergy.energy, the songs' 100-100-50), in a loud genre, against its tempo and leans alone, both given intensity 1 (#76).", "metal", [],
-            new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
-            x => x.Origin, With: new() { ["intensity"] = 61 }, Without: new() { ["intensity"] = 61 }),
-        new("metal-calm", "Two Metal songs both at the calmest intensity, one of them also with its sections softer and sparser for it: a brooding song, or a band holding back for nothing?",
-            "Whether a song's energy follows its intensity as the songs have it (moodEnergy.energy, the songs' 100-100-50), in a loud genre, against its tempo and leans alone, both given intensity -1 (#76).", "metal", [],
-            new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
-            x => x.Origin, With: new() { ["intensity"] = 0 }, Without: new() { ["intensity"] = 0 }),
-        new("jazz-tone", "A Jazz band with some of its parts in a darker tone of their own, a mellow guitar, a dull bass, darker still in the quiet choruses, against their sounds as they are: warmer, or muffled?",
-            "Whether a part plays a darker tone of its own (effects.tone, Jazz's 40-70-80, a part's chance 0-35-50 where the song's does), against never; heard not to earn its place, cut (#28).", "jazz", [],
-            new() { ["effects"] = new() { ["tone"] = 0 } },
-            x => x.Origin)
-    ];
+    private static readonly Question[] Questions = [];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()
