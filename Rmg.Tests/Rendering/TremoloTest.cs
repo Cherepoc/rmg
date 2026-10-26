@@ -90,6 +90,18 @@ public sealed class TremoloTest
     }
 
     /// <summary>
+    ///     The steps a build can pick faster: from an 8th to a 32nd three at a beat a second, from a sextuplet one, and from a
+    ///     16th at two and a half beats a second one, the 32nd too quick for the hand there.
+    /// </summary>
+    [Test]
+    [Arguments(0.5, 0.125, 1.0, 3)]
+    [Arguments(1 / 6.0, 0.125, 1.0, 1)]
+    [Arguments(0.25, 0.125, 2.5, 1)]
+    [Arguments(0.5, 0.25, 1.0, 1)]
+    public async Task ABuildsSteps_AreThoseFasterThanItsStart_ThatTheHandPlays(double from, double finest, double beatsPerSecond, int steps) =>
+        await Assert.That(Articulations.StepsUp(from, finest, beatsPerSecond)).IsEqualTo(steps);
+
+    /// <summary>
     ///     A build's held note picked faster each quarter of its bar, from an 8th an 8th, a 16th, a sextuplet and a 32nd at a beat
     ///     a second, from a 16th the part picked before never slower than it, and at a tempo too fast for its finest, no quicker
     ///     than the hand.

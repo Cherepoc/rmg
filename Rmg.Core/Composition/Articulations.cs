@@ -71,6 +71,21 @@ internal static partial class Articulations
     /// <summary>How many of the steps a measured picker plays, the 8th and the 16th; a fast one plays the rest from the 16th.</summary>
     private const int MeasuredSteps = 2;
 
+    /// <summary>How many steps faster a build picks at the fewest, three speeds heard, as one step is a jump rather than a build.</summary>
+    public const int BuildSteps = 2;
+
+    /// <summary>
+    ///     How many steps faster than the step it starts at a build can pick, to the finest given, each no quicker than the hand
+    ///     at the tempo, the step it starts at too.
+    /// </summary>
+    /// <param name="beatsPerSecond">The beats a second at the build, by the tempo there.</param>
+    internal static int StepsUp(double from, double finest, double beatsPerSecond)
+    {
+        double[] played = [..TremoloSteps.Where(x => beatsPerSecond / x <= FastStrokes + 1e-9)];
+        var start = played.Where(x => x >= from - 1e-9).DefaultIfEmpty(TremoloSteps[0]).Min();
+        return played.Count(x => x < start - 1e-9 && x >= finest - 1e-9);
+    }
+
     /// <summary>The chance a part plays its whole chords cycled at a sound chip's frame rate, a genre's that the songs never play.</summary>
     public static ByConvention FrameChance { get; } = new(0, 0, 0);
 

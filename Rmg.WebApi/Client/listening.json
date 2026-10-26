@@ -283,27 +283,27 @@
         ]
       },
       {
-        "seed": "9",
-        "at": 127.1,
-        "from": 124.4,
+        "seed": "a",
+        "at": 214.6,
+        "from": 212.6,
         "listen": [
-          "Melody (Electric Guitar (clean))"
+          "Riff (Electric Guitar (clean))"
         ]
       },
       {
-        "seed": "Q",
-        "at": 251.4,
-        "from": 248.7,
-        "listen": [
-          "Rhythm part (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "X",
-        "at": 119.3,
-        "from": 117.4,
+        "seed": "g",
+        "at": 38.8,
+        "from": 35.6,
         "listen": [
           "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "n",
+        "at": 266.9,
+        "from": 264.5,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
         ]
       }
     ]

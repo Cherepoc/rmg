@@ -57,6 +57,7 @@ internal static partial class Articulations
     internal static SongDraft Choose(SongDecisions song, SongDraft draft)
     {
         var duration = draft.Timeline.Duration;
+        var tempo = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
         var stroke = StrokeFrom + (StrokeTo - StrokeFrom) * song.Stream(SongStream.Strum).GenerateDouble();
         Play[] plays = [..song.Form.Map.Plays];
         bool Calm(SectionSpan span) => song.SectionOf(span.SectionId).Form.Kind == SectionFormKind.Calm;
@@ -114,9 +115,10 @@ internal static partial class Articulations
             var picking = role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Melody
                 ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Step(index, track))
                 : [];
-            // a build only where the part picks slower than the song's finest, which it can quicken from
+            // a build only where the part can pick two steps faster than it picks, or than an 8th, at the tempo of its last bar
             var building = role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Melody
-                ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Builds(index, track) && (picking[index] <= 0 || picking[index] > steps[^1] + 1e-9))
+                ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Builds(index, track)
+                    && StepsUp(picking[index] > 0 ? picking[index] : TremoloSteps[0], steps[^1], Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(song.Form.Map.Sections[index].LastBar))) >= BuildSteps)
                 : [];
             if (tracks.ContainsKey(track))
                 foreach (var (index, step) in picking.Where(x => x.Value > 0))
