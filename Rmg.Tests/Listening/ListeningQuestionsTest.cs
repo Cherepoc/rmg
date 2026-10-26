@@ -109,7 +109,7 @@ public sealed class ListeningQuestionsTest
     private static double[] BuiltAt(CorpusSong song) =>
     [
         ..song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) == 1
-                                                               && x.Value.State.GetStateValue(CompositionStateKinds.Articulation).Value.Articulates.HasFlag(PartArticulation.Builds))
+                                                               && x.Value.State.GetStateValue(CompositionStateKinds.Articulation).Value.BuildFrom > 0)
             .Select(x => song.Map.PlaceOf(x.Position) is var place ? x.Position - place.Beat : x.Position).Distinct().Order()
     ];
 

@@ -7,9 +7,11 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     How a part plays its notes where it is (<see cref="CompositionStateKinds.Articulation" />): its articulations, and the
-///     finest step it tremolo-picks its notes at, in beats, the tempo's hand coarsening it, 0 where it picks none.
+///     finest step it tremolo-picks its notes at, in beats, the tempo's hand coarsening it, 0 where it picks none; and where it
+///     builds into a louder appearance, picking faster each quarter of its bar, the step it starts at, the one it picked at
+///     before or an 8th, 0 where it builds none (<see cref="Articulations.Tremolo" />).
 /// </summary>
-public readonly record struct ArticulationChoice(PartArticulation Articulates, double TremoloStep);
+public readonly record struct ArticulationChoice(PartArticulation Articulates, double TremoloStep, double BuildFrom);
 
 /// <summary>The articulations a part plays its notes with where it is (<see cref="ArticulationChoice" />).</summary>
 [Flags]
@@ -36,10 +38,7 @@ public enum PartArticulation
     Frames = 32,
 
     /// <summary>A line's notes held to its next, no rest between them in a phrase (<see cref="Articulations.Held" />).</summary>
-    Holds = 64,
-
-    /// <summary>A line's last bar before a louder section picked faster and faster into it (<see cref="Articulations.Tremolo" />).</summary>
-    Builds = 128
+    Holds = 64
 }
 
 internal static partial class Articulations
@@ -115,8 +114,9 @@ internal static partial class Articulations
             var picking = role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Melody
                 ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Step(index, track))
                 : [];
+            // a build only where the part picks slower than the song's finest, which it can quicken from
             var building = role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Melody
-                ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Builds(index, track))
+                ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Builds(index, track) && (picking[index] <= 0 || picking[index] > steps[^1] + 1e-9))
                 : [];
             if (tracks.ContainsKey(track))
                 foreach (var (index, step) in picking.Where(x => x.Value > 0))
@@ -130,13 +130,13 @@ internal static partial class Articulations
             {
                 var step = play is { Index: var index, IsEnding: var ending } && !(ending && FormLayers.HasFinalChord(song.Form.Map.Ending.Kind)) ? picking.GetValueOrDefault(index) : 0;
                 var own = rings || play is { Span: var played } && role.PlaysChords() && Calm(played) ? ringing : articulates;
-                return new ArticulationChoice(through && step > 0 ? own | PartArticulation.Holds : own, step);
+                return new ArticulationChoice(through && step > 0 ? own | PartArticulation.Holds : own, step, 0);
             }
-            // a section's own stretch's last bar where the part builds out of it, held through and picked from an 8th to the
-            // finest of the song's steps
+            // a section's own stretch's last bar where the part builds out of it, held through and picked from the step it
+            // picked at, or an 8th, to the finest of the song's steps
             (double From, ArticulationChoice Choice)? Built(Play play) =>
-                !play.IsEnding && building.GetValueOrDefault(play.Index) && Math.Abs(play.Span.Start - song.Form.Map.Sections[play.Index].Start) < 1e-9
-                    ? (play.Span.LastBar, new ArticulationChoice(In(play).Articulates | PartArticulation.Holds | PartArticulation.Builds, steps[^1]))
+                !play.IsEnding && building.GetValueOrDefault(play.Index) && Math.Abs(play.Span.Start - song.Form.Map.Sections[play.Index].Start) < 1e-9 && In(play) is var own
+                    ? (play.Span.LastBar, new ArticulationChoice(own.Articulates | PartArticulation.Holds, steps[^1], own.TremoloStep > 0 ? own.TremoloStep : TremoloSteps[0]))
                     : null;
             ArticulationChoice At(double position) => song.Form.Map.PlayingAt(position) is { } play
                 ? Built(play) is var (from, built) && position >= from - 1e-9 ? built : In(play)

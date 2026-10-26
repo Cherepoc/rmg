@@ -555,13 +555,11 @@
         ]
       },
       {
-        "seed": "H",
-        "at": 387.9,
-        "from": 386.1,
+        "seed": "G",
+        "at": 140.3,
+        "from": 138.1,
         "listen": [
-          "Rhythm part (Overdriven Guitar)",
-          "Riff (Overdriven Guitar)",
-          "Melody (Electric Guitar (clean))"
+          "Rhythm part (Distortion Guitar)"
         ]
       },
       {
@@ -574,10 +572,9 @@
       },
       {
         "seed": "Q",
-        "at": 419.5,
-        "from": 416.8,
+        "at": 251.4,
+        "from": 248.7,
         "listen": [
-          "Melody (Electric Guitar (clean))",
           "Rhythm part (Distortion Guitar)"
         ]
       }

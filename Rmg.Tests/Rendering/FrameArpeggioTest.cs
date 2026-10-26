@@ -39,7 +39,7 @@ public sealed class FrameArpeggioTest
     [Arguments(2.0, 13)]
     public async Task AChordCycled_TakesTwoFramesANote_OrFewerCyclesHeld(double beats, int frames)
     {
-        var chord = new RealizedNote([60, 64, 67], 0.8, beats, Rmg.Core.Events.StateMap.FromStates([CompositionStateKinds.Articulation.CreateState(new Rmg.Core.Events.LayerValue<ArticulationChoice>(Rmg.Core.Events.StateDepths.Note, new(PartArticulation.Frames, 0)))]));
+        var chord = new RealizedNote([60, 64, 67], 0.8, beats, Rmg.Core.Events.StateMap.FromStates([CompositionStateKinds.Articulation.CreateState(new Rmg.Core.Events.LayerValue<ArticulationChoice>(Rmg.Core.Events.StateDepths.Note, new(PartArticulation.Frames, 0, 0)))]));
         var cycled = Articulations.Frames(Rmg.Core.Events.EventTimeline.Create(4, [new Rmg.Core.Events.TimelineItem<RealizedNote>(0, chord)]), _ => 1).ToArray();
         await Assert.That(cycled[1].Position - cycled[0].Position).IsEqualTo(frames * Articulations.Frame).Within(1e-9);
         // its notes cycled as many times at the most, and once more begun

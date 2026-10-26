@@ -52,7 +52,7 @@ internal static partial class Articulations
 
     /// <summary>
     ///     The chance a part builds into a louder appearance, its last bar before it picked faster and faster, a genre's that the
-    ///     songs never play (<see cref="PartArticulation.Builds" />).
+    ///     songs never play (<see cref="ArticulationChoice.BuildFrom" />).
     /// </summary>
     public static ByConvention TremoloBuildChance { get; } = new(0, 0, 0);
 
@@ -413,10 +413,12 @@ internal static partial class Articulations
             // at the quickest tempo it is held at, its start's or its end's, a note held into a faster section's
             var perSecond = Math.Max(beatsPerSecond(note.Position), beatsPerSecond(note.Position + note.Value.Duration - 1e-6));
             var step = TremoloSteps.Where(x => x >= finest - 1e-9).LastOrDefault(x => perSecond / x <= FastStrokes + 1e-9, TremoloSteps[0]);
-            // a build's strokes the faster each quarter of its bar, from an 8th to its finest, each no quicker than the hand
-            if (Has(note.Value, PartArticulation.Builds))
+            // a build's strokes the faster each quarter of its bar, a step at a time from the step it starts at to its finest,
+            // never slower than the part picked before it, each no quicker than the hand
+            if (ChoiceOf(note.Value).BuildFrom is var from and > 0)
             {
-                double StepAt(double at) => TremoloSteps.Where(x => x >= Math.Max(finest, TremoloSteps[Math.Min(quarterOf(at), TremoloSteps.Length - 1)]) - 1e-9)
+                var first = TremoloSteps.IndexOf(TremoloSteps.First(x => x <= from + 1e-9));
+                double StepAt(double at) => TremoloSteps.Where(x => x >= Math.Max(finest, TremoloSteps[Math.Min(first + quarterOf(at), TremoloSteps.Length - 1)]) - 1e-9)
                     .LastOrDefault(x => beatsPerSecond(at) / x <= FastStrokes + 1e-9, TremoloSteps[0]);
                 var stop = Math.Min(note.Position + note.Value.Duration, end);
                 var strokes = new List<double>();

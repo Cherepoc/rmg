@@ -81,7 +81,7 @@ public sealed class TremoloTest
     [Test]
     public async Task AHeldLine_RunsOnToItsNextNote_StrikingItAtAChangeItWaitsAfter()
     {
-        var held = Rmg.Core.Events.StateMap.FromStates([CompositionStateKinds.Articulation.CreateState(new Rmg.Core.Events.LayerValue<ArticulationChoice>(Rmg.Core.Events.StateDepths.Note, new(PartArticulation.Holds, 0.25)))]);
+        var held = Rmg.Core.Events.StateMap.FromStates([CompositionStateKinds.Articulation.CreateState(new Rmg.Core.Events.LayerValue<ArticulationChoice>(Rmg.Core.Events.StateDepths.Note, new(PartArticulation.Holds, 0.25, 0)))]);
         Rmg.Core.Events.TimelineItem<RealizedNote> Note(double at) => new(at, new RealizedNote([40], 0.8, 0.5, held));
         // phrases of four beats, a change of chord at 3, the part held silent from 13
         var played = Articulations.Held(Rmg.Core.Events.EventTimeline.Create(16, [Note(0), Note(1), Note(2), Note(3.5), Note(5), Note(8), Note(12.5), Note(14)]), x => x.State.GetStateValue(CompositionStateKinds.Articulation).Value.Articulates.HasFlag(PartArticulation.Holds), [3],
@@ -90,16 +90,18 @@ public sealed class TremoloTest
     }
 
     /// <summary>
-    ///     A build's held note picked faster each quarter of its bar, an 8th, a 16th, a sextuplet and a 32nd at a beat a second,
-    ///     and at a tempo too fast for its finest, no quicker than the hand.
+    ///     A build's held note picked faster each quarter of its bar, from an 8th an 8th, a 16th, a sextuplet and a 32nd at a beat
+    ///     a second, from a 16th the part picked before never slower than it, and at a tempo too fast for its finest, no quicker
+    ///     than the hand.
     /// </summary>
     [Test]
-    [Arguments(1.0, new[] { 0.5, 0.25, 1 / 6.0, 0.125 })]
-    [Arguments(3.0, new[] { 0.5, 0.25, 0.25, 0.25 })]
-    public async Task ABuild_PicksFasterEachQuarterOfItsBar_NoQuickerThanTheHand(double beatsPerSecond, double[] steps)
+    [Arguments(1.0, 0.5, new[] { 0.5, 0.25, 1 / 6.0, 0.125 })]
+    [Arguments(1.0, 0.25, new[] { 0.25, 1 / 6.0, 0.125, 0.125 })]
+    [Arguments(3.0, 0.5, new[] { 0.5, 0.25, 0.25, 0.25 })]
+    public async Task ABuild_PicksFasterEachQuarterOfItsBar_FromItsStep_NoQuickerThanTheHand(double beatsPerSecond, double from, double[] steps)
     {
         var state = Rmg.Core.Events.StateMap.FromStates([CompositionStateKinds.Articulation.CreateState(new Rmg.Core.Events.LayerValue<ArticulationChoice>(Rmg.Core.Events.StateDepths.Note,
-            new(PartArticulation.Holds | PartArticulation.Builds, Articulations.TremoloSteps[^1])))]);
+            new(PartArticulation.Holds, Articulations.TremoloSteps[^1], from)))]);
         var picked = Articulations.Tremolo(Rmg.Core.Events.EventTimeline.Create(4, [new Rmg.Core.Events.TimelineItem<RealizedNote>(0, new RealizedNote([40], 0.8, 4, state))]), 29,
             _ => 4, _ => beatsPerSecond, 0.01, position => (int)Math.Floor(position + 1e-9)).ToArray();
         foreach (var (a, b) in picked.Zip(picked.Skip(1)))

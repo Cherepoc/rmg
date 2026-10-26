@@ -4,7 +4,7 @@ using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Rendering;
 
-/// <summary>A line's last bar before a louder section picked faster and faster into it (<see cref="PartArticulation.Builds" />).</summary>
+/// <summary>A line's last bar before a louder section picked faster and faster into it (<see cref="ArticulationChoice.BuildFrom" />).</summary>
 public sealed class TremoloBuildReportTest
 {
     /// <summary>A genre's songs' appearances followed by another, the parts building into the next, and a build's strokes a second in each quarter of its bar.</summary>
@@ -23,7 +23,7 @@ public sealed class TremoloBuildReportTest
             builds += song.Trace.Count(x => x.Point == TracePoints.TremoloBuild);
             foreach (var (_, timeline) in song.Song.Notes!)
             {
-                var strokes = timeline.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Articulation).Value.Articulates.HasFlag(PartArticulation.Builds)
+                var strokes = timeline.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Articulation).Value.BuildFrom > 0
                                                   && x.Value.State.GetStateValue(CompositionStateKinds.Picked) > 0).ToArray();
                 foreach (var (a, b) in strokes.Zip(strokes.Skip(1)).Where(x => x.Second.Value.State.GetStateValue(CompositionStateKinds.Picked) == x.First.Value.State.GetStateValue(CompositionStateKinds.Picked) + 1))
                 {
