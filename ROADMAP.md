@@ -927,9 +927,11 @@ drops, hat rolls, ghosts, the snare's rudiments and the lines' ornaments draw th
 audit counted the draws a stage makes in its own file, and missed two given theirs by `SongStages` (26 October): the
 instruments a part switches to by section (`InstrumentsOverTime`), now planned before the notes, an instrument switched
 to its track's state with the part's octaves on it, which the notes are realized within (a switched instrument's notes
-outside its range 1.7%, from 3.4%); and the expression (`Expression`, 39 draws), its bends', vibrato's, tone's and sound's choices of the form alone to be
-told from those reading the notes and moved, as the articulations were, the twin then following its riff by the
-doubling's copy and `DrawsAs` gone. Left besides: Drum marks, which chooses its marking drums among those that play by
+outside its range 1.7%, from 3.4%); and the expression (`Expression`), its song's, its parts' and their sections'
+choices now chosen before the notes (`Expression.Plan`, `ExpressionPlan`), the play-out drawing only each note's own
+by its place. Left: the twin drawing its instruments and its expression as its riff (`DrawsAs`), which the doubling's
+copy could take over only by giving a doubled bass or harmony its source's bends and vibrato, a change to hear rather
+than a refactor. Left besides: Drum marks, which chooses its marking drums among those that play by
 their notes and marks at their typical loudness, to move once which drums play is a decision of its own. A soloist's
 track made from the melody's state (`Solos`) is what it plays as, the melody's line it takes over; the parts' choices
 are made after it (`Articulations.Choose`), so that none of the melody's reaches it.

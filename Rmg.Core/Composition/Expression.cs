@@ -673,6 +673,134 @@ internal static class Expression
     }
 
     /// <summary>
+    ///     The song's, its parts' and their sections' expression, chosen before the notes from the decisions alone, each part
+    ///     and section from a sequence of its own, a twin's as its riff's, which its notes then play (<see cref="Apply" />):
+    ///     whether the song plays its parts' tones, a tape, dives and pinches, and every part's sound for the whole song and
+    ///     its vibrato in each section, with the seed its notes' own draws are made from.
+    /// </summary>
+    /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
+    /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
+    /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them, and each part's derived from it by its track.</param>
+    /// <param name="tapeStream">The song's sequence of its tape's wow, whether it plays one, how deep, and each part's detune derived from it by its track.</param>
+    /// <param name="pinchStream">The song's sequence of whether its guitars pinch and dive.</param>
+    /// <param name="pinchStreams">A part's sequence of its pinches, by its track.</param>
+    /// <param name="drawsAs">The track a part draws as, the riff's for its twin.</param>
+    public static ExpressionPlan Plan(
+        ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
+        SongMap map,
+        double songSound,
+        SongSound songEffects,
+        IReadOnlyList<double> sound,
+        IReadOnlyList<double> energies,
+        Func<int, IGenerationContext> partStreams,
+        Func<int, int, IGenerationContext> streams,
+        IGenerationContext toneStream,
+        IGenerationContext tapeStream,
+        IGenerationContext pinchStream,
+        Func<int, IGenerationContext> pinchStreams,
+        Genre genre,
+        Func<int, int> drawsAs
+    )
+    {
+        var ((songVibrato, songChorus, songSwell, songBends, _, _), carriers) = songEffects;
+        // whether the song gives its parts tones at all, the genre's where it names it
+        var songTone = toneStream.TestProbability(SongToneChance.At(songSound, genre.Chance(GenreChoices.Effects, "tone")));
+        // and whether it plays off a tape, and how far its pitch drifts
+        var tape = tapeStream.TestProbability(TapeChance.At(songSound, genre.Chance(GenreChoices.Effects, "tape")));
+        var wow = (int)Math.Round(Wow.At(songSound) * (0.5 + tapeStream.GenerateDouble()));
+        // each part's tone and detune derived from these by its track, so that whether another part plays leaves them
+        var (toneSeed, tapeSeed) = (toneStream.GenerateSeed(), tapeStream.GenerateSeed());
+        // and whether its riff dives into a louder section
+        var songDives = pinchStream.TestProbability(SongDiveChance.At(songSound, genre.Chance(GenreChoices.Effects, "dive")));
+        // and whether its guitars pinch, on General MIDI's guitar harmonics, which listening preferred to the driven guitar's squeal
+        var songPinches = pinchStream.TestProbability(SongPinchChance.At(songSound, genre.Chance(GenreChoices.Effects, "pinch")));
+
+        // the widths the genre's vibratos take
+        var widths = genre.Pool<Vibrato>(GenreChoices.VibratoWidth, NameOf);
+        var parts = definitions.ToImmutableDictionary(x => x.Key, x =>
+        {
+            var (track, definition) = (x.Key, x.Value);
+            var role = definition.Role;
+            var program = definition is PitchInstrumentTrack pitched ? pitched.InstrumentCode : -1;
+            // the part's sound for the whole song, of the effects the song plays: a part makes every draw whatever the song
+            // plays, so that what one effect decides leaves the others' draws as they are
+            var part = partStreams(track);
+            var vibrates = part.TestProbability(VibratoChance.At(songSound)) & songVibrato;
+            var isSung = role is TrackRole.Melody or TrackRole.CounterMelody;
+            var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : isSung ? LineSwellChance : SwellChance).At(songSound)) & songSwell;
+            var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
+            // a riff's twin as its riff
+            bool Carries(StrongEffect effect) => carriers.TryGetValue(effect, out var carrier) && carrier == drawsAs(track);
+            var tremoloDepth = 30 + part.GenerateInt(0, 40);
+            var sweepDepth = 40 + part.GenerateInt(0, 60);
+            var tremolo = Carries(StrongEffect.Tremolo) ? tremoloDepth : 0;
+            var sweeps = Carries(StrongEffect.Sweep) ? sweepDepth : 0;
+            var echoes = Carries(StrongEffect.Echo);
+            // a pump every part's it suits, not one's, as a kick ducks the whole of a mix under it
+            var pumps = carriers.ContainsKey(StrongEffect.Pump) && Suits(StrongEffect.Pump, role, program);
+            // an echo repeats the notes as they are played, so a bent or wavering one would smear: the part that echoes plays
+            // them straight
+            vibrates &= !echoes;
+            bendsHere &= !echoes;
+            var echoKinds = ByConvention.Weigh(EchoKinds.Select(x => (x, x.Weight)), songSound, genre.Pool<EchoKind>(GenreChoices.Echo) is { } pool ? x => pool(x.Kind) : null);
+            var (_, delay, once, _) = echoKinds[Generators.WeightedIndex(echoKinds)(part)].Value;
+            var room = Reverb(role, genre);
+            var reverb = (int)Math.Round(room + ReverbSpread.At(songSound) * (part.GenerateDouble() * 127 - room));
+            var choruses = part.TestProbability((ChorusesClassically(program) ? ClassicChorusChance : ChorusChance).At(songSound)) & songChorus;
+            var chorus = 40 + part.GenerateInt(0, 60);
+            // how much the part leans to the bigger sizes, around 0
+            var strength = StrengthSpread.At(songSound) * Generators.SplineValue()(part);
+            // and whether it slides from note to note, and how often, but where it echoes, playing straight
+            var slides = part.TestProbability(SlideChance.At(songSound)) & !echoes;
+            var slideRate = SlideRate.At(songSound) * 2 * part.GenerateDouble();
+            // a bass that glides, a genre's, into half the notes it may from the note before, as an 808's or an acid line's
+            // does, on an instrument that bends; drawn whatever the genre, so that the part's other draws stay
+            // and a lead that glides, a G-funk's or a trance's whining line, its own chance of the same draw, the share of
+            // notes either slides into a genre's (GenreChoices.GlideRate)
+            var glideOption = role switch { TrackRole.Bass => "bass", TrackRole.Melody => "lead", _ => null };
+            var glides = part.TestProbability(glideOption is null ? 0 : GlideChance.At(songSound, genre.Chance(GenreChoices.Glide, glideOption))) && glideOption is not null && !echoes && Bends(program);
+            if (glides)
+                (slides, slideRate) = (true, GlideRate * (1 + genre.Shift(GenreChoices.GlideRate, "share")));
+            // and how far its filter closes, and a wobble's cycle, drawn last, so that the part's other draws stay
+            var filterDepth = 40 + part.GenerateInt(0, 60);
+            var wobbleCycle = WobbleCycles[part.GenerateInt(0, WobbleCycles.Length)];
+            // the filter this part plays, one at most
+            var filter = carriers.Where(x => IsFilter(x.Key) && x.Value == drawsAs(track)).Select(x => x.Key).FirstOrDefault();
+            // and a gate's 16ths, every one or a pattern's, its first always sounding, drawn whatever the song plays
+            var patterned = part.TestProbability(GatePatternChance.At(songSound));
+            var steps = Enumerable.Range(0, 16).Select(_ => part.TestProbability(GateStepChance)).ToArray();
+            var gate = Carries(StrongEffect.Gate) ? steps.Select((x, i) => i == 0 || !patterned || x ? 1 << i : 0).Sum() : 0;
+            // and its tone, from a sequence of its own
+            var partTone = new GenerationContext(Seeds.Derive(toneSeed, drawsAs(track)));
+            var toned = partTone.TestProbability(ToneChance.At(songSound)) & songTone && role != TrackRole.Drum;
+            var toneDepth = 0.3 + 0.7 * partTone.GenerateDouble();
+            // and its detune, either way, from a sequence of its own; a drum's kit and a part holding chords left in tune
+            var partTape = new GenerationContext(Seeds.Derive(tapeSeed, drawsAs(track)));
+            var detuned = partTape.TestProbability(DetuneChance) && tape && role is not (TrackRole.Drum or TrackRole.Pad) && !role.PlaysChords();
+            var detune = (partTape.TestProbability(0.5) ? 1 : -1) * partTape.GenerateInt(2, DetuneMost + 1);
+            // and its pinches and its dive, from a sequence of its own, each note's by its place, so that a note let pass
+            // leaves the others' draws as they were, one a phrase at most
+            var pinchSeed = pinchStreams(track).GenerateSeed();
+            // and its vibrato in each section, the part's strength and the section's energy as one lean to the wider, the wide only
+            // where its instrument suits it, and the seed of every note's draws there, by its place, so that a note a stage
+            // before took out leaves the others' as they were
+            ImmutableArray<SectionExpression> sections =
+            [
+                ..map.Sections.Select((span, index) =>
+                {
+                    var context = streams(span.SectionId, track);
+                    var lean = new Tilt(Tilt.Of(StrengthOdds, strength).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds);
+                    var vibrato = context.Pick(lean.Weigh(ByConvention.Weigh(Vibratos.Where(v => Suits(v.Width, program)), sound[index], widths), Lean));
+                    return new SectionExpression(vibrato, context.GenerateSeed());
+                })
+            ];
+            return new PartExpression(vibrates, swells, bendsHere, tremolo, sweeps, echoes, pumps, delay, once, reverb, choruses, chorus, strength, slides, slideRate, glides,
+                filterDepth, wobbleCycle, filter, gate, toned, toneDepth, detuned, detune, pinchSeed, sections);
+        });
+        return new ExpressionPlan(new SongExpression(songTone, tape, wow, toneSeed, tapeSeed, songDives, songPinches), parts);
+    }
+
+    /// <summary>
     ///     The song's notes with every part's expression on them (<see cref="CompositionStateKinds.Vibrato" /> and the
     ///     rest), each part in a section drawing from a sequence of its own, by the section, so that a section plays as it
     ///     did before.
@@ -682,13 +810,8 @@ internal static class Expression
     /// <param name="sound">Every section's sound facet, by its place among the song's sections.</param>
     /// <param name="energies">Every section's energy, by its place, which leans its bends' sizes.</param>
     /// <param name="soloists">Every part's soloist, whose leans its solos' notes play by, as intense as the solo is there.</param>
-    /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
-    /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
-    /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them, and each part's derived from it by its track.</param>
-    /// <param name="pinchStream">The song's sequence of whether its guitars pinch and dive.</param>
-    /// <param name="pinchStreams">A part's sequence of its pinches, by its track.</param>
+    /// <param name="plan">The song's, its parts' and their sections' expression, chosen before the notes (<see cref="Plan" />).</param>
     /// <param name="beatSeconds">How long a beat lasts at a position, in seconds, which a pinched note's length is held to, and a bend's and a vibrato's are timed in.</param>
-    /// <param name="tapeStream">The song's sequence of its tape's wow, whether it plays one, how deep, and each part's detune derived from it by its track.</param>
     /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
     /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
     /// <param name="cuts">Where a part's notes end as the band stops, by its track, which a gated part's held chords end by.</param>
@@ -703,12 +826,7 @@ internal static class Expression
         IReadOnlyList<double> sound,
         IReadOnlyList<double> energies,
         IReadOnlyDictionary<TrackRole, Soloist> soloists,
-        Func<int, IGenerationContext> partStreams,
-        Func<int, int, IGenerationContext> streams,
-        IGenerationContext toneStream,
-        IGenerationContext tapeStream,
-        IGenerationContext pinchStream,
-        Func<int, IGenerationContext> pinchStreams,
+        ExpressionPlan plan,
         Func<double, double> beatSeconds,
         Genre genre,
         IReadOnlyList<double> changes,
@@ -728,17 +846,7 @@ internal static class Expression
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
         var backbeat = DrumGroups.Snare.Tracks.ToHashSet();
         (double Delay, bool Once)? carrierEcho = null;
-        // whether the song gives its parts tones at all, the genre's where it names it
-        var songTone = toneStream.TestProbability(SongToneChance.At(songSound, genre.Chance(GenreChoices.Effects, "tone")));
-        // and whether it plays off a tape, and how far its pitch drifts
-        var tape = tapeStream.TestProbability(TapeChance.At(songSound, genre.Chance(GenreChoices.Effects, "tape")));
-        var wow = (int)Math.Round(Wow.At(songSound) * (0.5 + tapeStream.GenerateDouble()));
-        // each part's tone and detune derived from these by its track, so that whether another part plays leaves them
-        var (toneSeed, tapeSeed) = (toneStream.GenerateSeed(), tapeStream.GenerateSeed());
-        // and whether its riff dives into a louder section
-        var songDives = pinchStream.TestProbability(SongDiveChance.At(songSound, genre.Chance(GenreChoices.Effects, "dive")));
-        // and whether its guitars pinch, on General MIDI's guitar harmonics, which listening preferred to the driven guitar's squeal
-        var songPinches = pinchStream.TestProbability(SongPinchChance.At(songSound, genre.Chance(GenreChoices.Effects, "pinch")));
+        var (songTone, tape, wow, toneSeed, tapeSeed, songDives, songPinches) = plan.Song;
 
         // the bars a kick strikes in, which a pump ducks the band in, by where each starts, so that a pad alone or the
         // band where the drums rest or the kick is out swells free
@@ -774,69 +882,14 @@ internal static class Expression
                 return low;
             }
 
-            // the part's sound for the whole song, of the effects the song plays: a part makes every draw whatever the song
-            // plays, so that what one effect decides leaves the others' draws as they are
-            var part = partStreams(track);
-            var vibrates = part.TestProbability(VibratoChance.At(songSound)) & songVibrato;
+            // the part's sound for the whole song, as planned
+            var (vibrates, swells, bendsHere, tremolo, sweeps, echoes, pumps, delay, once, reverb, choruses, chorus, strength, slides, slideRate, glides, filterDepth, wobbleCycle,
+                filter, gate, toned, toneDepth, detuned, detune, pinchSeed, sections) = plan.Parts[track];
             var isSung = role is TrackRole.Melody or TrackRole.CounterMelody;
-            var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : isSung ? LineSwellChance : SwellChance).At(songSound)) & songSwell;
-            var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
-            // a riff's twin as its riff
-            bool Carries(StrongEffect effect) => carriers.TryGetValue(effect, out var carrier) && carrier == drawsAs(track);
-            var tremoloDepth = 30 + part.GenerateInt(0, 40);
-            var sweepDepth = 40 + part.GenerateInt(0, 60);
-            var tremolo = Carries(StrongEffect.Tremolo) ? tremoloDepth : 0;
-            var sweeps = Carries(StrongEffect.Sweep) ? sweepDepth : 0;
-            var echoes = Carries(StrongEffect.Echo);
-            // a pump every part's it suits, not one's, as a kick ducks the whole of a mix under it
-            var pumps = carriers.ContainsKey(StrongEffect.Pump) && Suits(StrongEffect.Pump, role, program);
-            // an echo repeats the notes as they are played, so a bent or wavering one would smear: the part that echoes plays
-            // them straight
-            vibrates &= !echoes;
-            bendsHere &= !echoes;
-            var echoKinds = ByConvention.Weigh(EchoKinds.Select(x => (x, x.Weight)), songSound, genre.Pool<EchoKind>(GenreChoices.Echo) is { } pool ? x => pool(x.Kind) : null);
-            var (_, delay, once, _) = echoKinds[Generators.WeightedIndex(echoKinds)(part)].Value;
             if (echoes)
                 carrierEcho = (delay, once);
-            var room = Reverb(role, genre);
-            var reverb = (int)Math.Round(room + ReverbSpread.At(songSound) * (part.GenerateDouble() * 127 - room));
-            var choruses = part.TestProbability((ChorusesClassically(program) ? ClassicChorusChance : ChorusChance).At(songSound)) & songChorus;
-            var chorus = 40 + part.GenerateInt(0, 60);
-            // how much the part leans to the bigger sizes, around 0
-            var strength = StrengthSpread.At(songSound) * Generators.SplineValue()(part);
-            // and whether it slides from note to note, and how often, but where it echoes, playing straight
-            var slides = part.TestProbability(SlideChance.At(songSound)) & !echoes;
-            var slideRate = SlideRate.At(songSound) * 2 * part.GenerateDouble();
-            // a bass that glides, a genre's, into half the notes it may from the note before, as an 808's or an acid line's
-            // does, on an instrument that bends; drawn whatever the genre, so that the part's other draws stay
-            // and a lead that glides, a G-funk's or a trance's whining line, its own chance of the same draw, the share of
-            // notes either slides into a genre's (GenreChoices.GlideRate)
-            var glideOption = role switch { TrackRole.Bass => "bass", TrackRole.Melody => "lead", _ => null };
-            var glides = part.TestProbability(glideOption is null ? 0 : GlideChance.At(songSound, genre.Chance(GenreChoices.Glide, glideOption))) && glideOption is not null && !echoes && Bends(program);
-            if (glides)
-                (slides, slideRate) = (true, GlideRate * (1 + genre.Shift(GenreChoices.GlideRate, "share")));
             // and from across a gap, into a short note too
             var (slideGap, shortestSlide) = glides ? (GlideGap, GlideShortest) : (SlideGap, 0.0);
-            // and how far its filter closes, and a wobble's cycle, drawn last, so that the part's other draws stay
-            var filterDepth = 40 + part.GenerateInt(0, 60);
-            var wobbleCycle = WobbleCycles[part.GenerateInt(0, WobbleCycles.Length)];
-            // the filter this part plays, one at most
-            var filter = carriers.Where(x => IsFilter(x.Key) && x.Value == drawsAs(track)).Select(x => x.Key).FirstOrDefault();
-            // and a gate's 16ths, every one or a pattern's, its first always sounding, drawn whatever the song plays
-            var patterned = part.TestProbability(GatePatternChance.At(songSound));
-            var steps = Enumerable.Range(0, 16).Select(_ => part.TestProbability(GateStepChance)).ToArray();
-            var gate = Carries(StrongEffect.Gate) ? steps.Select((x, i) => i == 0 || !patterned || x ? 1 << i : 0).Sum() : 0;
-            // and its tone, from a sequence of its own
-            var partTone = new GenerationContext(Seeds.Derive(toneSeed, drawsAs(track)));
-            var toned = partTone.TestProbability(ToneChance.At(songSound)) & songTone && role != TrackRole.Drum;
-            var toneDepth = 0.3 + 0.7 * partTone.GenerateDouble();
-            // and its detune, either way, from a sequence of its own; a drum's kit and a part holding chords left in tune
-            var partTape = new GenerationContext(Seeds.Derive(tapeSeed, drawsAs(track)));
-            var detuned = partTape.TestProbability(DetuneChance) && tape && role is not (TrackRole.Drum or TrackRole.Pad) && !role.PlaysChords();
-            var detune = (partTape.TestProbability(0.5) ? 1 : -1) * partTape.GenerateInt(2, DetuneMost + 1);
-            // and its pinches and its dive, from a sequence of its own, each note's by its place, so that a note let pass
-            // leaves the others' draws as they were, one a phrase at most
-            var pinchSeed = pinchStreams(track).GenerateSeed();
             IGenerationContext Pinching(double position, int decision) =>
                 new GenerationContext(Seeds.Derive(Seeds.Derive(pinchSeed, map.PlaceKey(position)), decision));
             var pinchedPhrases = new HashSet<(int, int)>();
@@ -844,7 +897,6 @@ internal static class Expression
             var widths = genre.Pool<Vibrato>(GenreChoices.VibratoWidth, NameOf);
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
-                var context = streams(span.SectionId, track);
                 var u = sound[index];
                 var bendChance = BendChance.At(u);
                 var bendKinds = ByConvention.Weigh(BendKinds, u);
@@ -852,12 +904,10 @@ internal static class Expression
                 // only where its instrument suits it
                 var lean = new Tilt(Tilt.Of(StrengthOdds, strength).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds);
                 var sizes = lean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1);
-                var vibrato = context.Pick(lean.Weigh(ByConvention.Weigh(Vibratos.Where(x => Suits(x.Width, program)), u, widths), Lean));
+                var (vibrato, noteSeed) = sections[index];
                 // the part's tone here, darker the quieter the section, as dark as it goes at an energy of -1 and below, half as
                 // dark at 1 and above
                 var tone = toned ? (int)Math.Round(ToneReach * toneDepth * (3 - Math.Clamp(energies[index], -1, 1)) / 4) : 0;
-                // every note's draws by its place, so that a note a stage before took out leaves the others' as they were
-                var noteSeed = context.GenerateSeed();
                 // a tremolo the whole section's where the part holds every note there a beat or longer, as a held chord trembles,
                 // and none where it plays anything faster, a riff's or a run's, so that it never turns on and off within it
                 var trembles = tremolo > 0 && Enumerable.Range(first(span.Start), timeline.Count - first(span.Start)).TakeWhile(i => timeline[i].Position < span.End - 1e-9)
@@ -1098,6 +1148,24 @@ internal static class Expression
         return result.ToImmutable();
     }
 }
+
+/// <summary>The song's expression, chosen before the notes (<see cref="Expression.Plan" />): its parts' tones, its tape and its wow, the seeds its parts' tones and detunes derive from, its dives and its pinches.</summary>
+internal sealed record SongExpression(bool Tone, bool Tape, int Wow, ulong ToneSeed, ulong TapeSeed, bool Dives, bool Pinches);
+
+/// <summary>
+///     A part's expression for the whole song, chosen before its notes (<see cref="Expression.Plan" />): its vibrato, swells and
+///     bends, the strong effects it carries and their depths, its echo's delay, its reverb and chorus, its strength, its slides
+///     and glides, its filter, its gate's steps, its tone, its detune, its pinches' seed, and its sections'.
+/// </summary>
+internal sealed record PartExpression(bool Vibrates, bool Swells, bool Bends, int Tremolo, int Sweeps, bool Echoes, bool Pumps, double Delay, bool Once, int Reverb,
+    bool Choruses, int Chorus, double Strength, bool Slides, double SlideRate, bool Glides, int FilterDepth, double WobbleCycle, StrongEffect Filter, int Gate,
+    bool Toned, double ToneDepth, bool Detuned, int Detune, ulong PinchSeed, ImmutableArray<SectionExpression> Sections);
+
+/// <summary>A part's vibrato in a section, and the seed of its notes' draws there (<see cref="Expression.Plan" />).</summary>
+internal sealed record SectionExpression(Vibrato Vibrato, ulong NoteSeed);
+
+/// <summary>The song's and every part's expression, by its track, chosen before the notes (<see cref="Expression.Plan" />).</summary>
+internal sealed record ExpressionPlan(SongExpression Song, ImmutableDictionary<int, PartExpression> Parts);
 
 /// <summary>The effects a song plays at all: the gentle ones, each its own, the strong one drawn first, or none, and the others beside it.</summary>
 internal sealed record SongEffects(bool Vibrato, bool Chorus, bool Swell, bool Bends, StrongEffect Strong, ImmutableArray<StrongEffect> Others);

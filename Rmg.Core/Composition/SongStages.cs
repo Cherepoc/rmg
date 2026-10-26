@@ -36,6 +36,9 @@ internal sealed record SongDraft(
     /// </summary>
     public ImmutableDictionary<int, ImmutableArray<SectionInstrument>>? Instruments { get; init; }
 
+    /// <summary>The song's and its parts' expression, chosen before the notes, which play it (<see cref="Expression.Plan" />); none before it is chosen.</summary>
+    public ExpressionPlan? Expression { get; init; }
+
     /// <summary>
     ///     The stretches the stages have made that the others keep out of, each written by the stage that made it: a fill, a
     ///     kick-out, which the bass leaves with the kick (<see cref="SongStages.KickOutBass" />), a polymeter's sections, a
@@ -163,6 +166,7 @@ internal static class SongStages
         new("Solo answers", SoloAnswers, CanSkip: true),
         new("Articulation choices", Articulations.Choose, CanSkip: true),
         new("Instrument choices", InstrumentChoices, CanSkip: false),
+        new("Expression choices", ExpressionChoices, CanSkip: false),
         new("Mix filter", Composition.MixFilter.Apply, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
         new("Drum marks", DrumMarks.Apply, CanSkip: true),
@@ -450,6 +454,28 @@ internal static class SongStages
     internal static SongDraft RealizeNotes(SongDecisions song, SongDraft draft) =>
         draft with { Notes = song.Form.Edits.CutNotes(Realizer.Realize(song.Tracks.Definitions, draft.Timeline, song.Form.Map.PlaceOf), song.Roles) };
 
+    /// <summary>The song's and its parts' expression, chosen before the notes, a twin's as its riff's.</summary>
+    internal static SongDraft ExpressionChoices(SongDecisions song, SongDraft draft) =>
+        draft with
+        {
+            Expression = Expression.Plan(
+                song.Tracks.Definitions,
+                song.Form.Map,
+                song.Facets[Facet.Sound],
+                song.Sound,
+                [..song.Sections.Select(x => x.Facets[Facet.Sound])],
+                song.Energies,
+                track => song.Stream(SongStream.PartSound, song.DrawsAs(track)),
+                (section, track) => song.Stream(SongStream.Expression, section, song.DrawsAs(track)),
+                song.Stream(SongStream.Tone),
+                song.Stream(SongStream.Tape),
+                song.Stream(SongStream.Pinch),
+                track => song.Stream(SongStream.Pinch, song.DrawsAs(track)),
+                song.Genre,
+                song.DrawsAs
+            )
+        };
+
     /// <summary>The parts' instruments as planned before the notes.</summary>
     private static ImmutableDictionary<int, ImmutableArray<SectionInstrument>> InstrumentsOf(SongDraft draft) =>
         draft.Instruments ?? throw new InvalidOperationException("The notes are realized before the instruments are planned.");
@@ -558,12 +584,7 @@ internal static class SongStages
                 [..song.Sections.Select(x => x.Facets[Facet.Sound])],
                 song.Energies,
                 song.Soloists,
-                track => song.Stream(SongStream.PartSound, song.DrawsAs(track)),
-                (section, track) => song.Stream(SongStream.Expression, section, song.DrawsAs(track)),
-                song.Stream(SongStream.Tone),
-                song.Stream(SongStream.Tape),
-                song.Stream(SongStream.Pinch),
-                track => song.Stream(SongStream.Pinch, song.DrawsAs(track)),
+                draft.Expression ?? throw new InvalidOperationException("The expression is played before it is chosen."),
                 position => Meter.SecondsPerBeat(draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(position)),
                 song.Genre,
                 [..draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)],
