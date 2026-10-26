@@ -86,4 +86,21 @@ public sealed class TremoloTest
             position => Math.Floor(position / 4) * 4 + 4, position => position < 13 ? 13 : 16).Select(x => (x.Position, x.Value.Duration)).ToArray();
         await Assert.That(played).IsEquivalentTo(new[] { (0.0, 1.0), (1.0, 1.0), (2.0, 1.0), (3.0, 1.0), (5.0, 3.0), (8.0, 4.0), (12.5, 0.5), (14.0, 2.0) });
     }
+
+    /// <summary>
+    ///     A build's held note picked faster each quarter of its bar, an 8th, a 16th, a sextuplet and a 32nd at a beat a second,
+    ///     and at a tempo too fast for its finest, no quicker than the hand.
+    /// </summary>
+    [Test]
+    [Arguments(1.0, new[] { 0.5, 0.25, 1 / 6.0, 0.125 })]
+    [Arguments(3.0, new[] { 0.5, 0.25, 0.25, 0.25 })]
+    public async Task ABuild_PicksFasterEachQuarterOfItsBar_NoQuickerThanTheHand(double beatsPerSecond, double[] steps)
+    {
+        var state = Rmg.Core.Events.StateMap.FromStates([CompositionStateKinds.Articulation.CreateState(new Rmg.Core.Events.LayerValue<ArticulationChoice>(Rmg.Core.Events.StateDepths.Note,
+            new(PartArticulation.Holds | PartArticulation.Builds, Articulations.TremoloSteps[^1])))]);
+        var picked = Articulations.Tremolo(Rmg.Core.Events.EventTimeline.Create(4, [new Rmg.Core.Events.TimelineItem<RealizedNote>(0, new RealizedNote([40], 0.8, 4, state))]), 29,
+            _ => 4, _ => beatsPerSecond, 0.01, position => (int)Math.Floor(position + 1e-9)).ToArray();
+        foreach (var (a, b) in picked.Zip(picked.Skip(1)))
+            await Assert.That(b.Position - a.Position).IsEqualTo(steps[(int)Math.Floor(a.Position + 1e-9)]).Within(1e-9).Because($"at {a.Position}");
+    }
 }

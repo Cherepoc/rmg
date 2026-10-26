@@ -190,6 +190,9 @@ internal static class TracePoints
     /// <summary>An appearance a part tremolo-picks its notes in, by the part's track and the appearance's section: its place among the song's appearances and the step it picks at, in beats (a tuple of an <c>int</c> and a <c>double</c>; <see cref="Articulations.Choose" />, played by <see cref="Articulations.Tremolo" />).</summary>
     public const string Tremolo = "Tremolo";
 
+    /// <summary>An appearance a part builds out of, its last bar picked faster and faster into the louder one, by the part's track and the appearance's section: its place among the song's appearances (an <c>int</c>; <see cref="Articulations.Choose" />).</summary>
+    public const string TremoloBuild = "Tremolo build";
+
     /// <summary>A solo's run landing on a change of chord: the note's place and how many scale steps its cell moved (a tuple of a <c>double</c> and an <c>int</c>).</summary>
     public const string SoloLanding = "Solo landing";
 

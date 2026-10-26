@@ -86,7 +86,19 @@ public sealed class ListeningQuestionsTest
         new("postrock-heavy", "A Post-rock song's clean guitars turning driven in its louder sections, against them staying clean: the release, or a different band?",
             "How often a louder section's clean guitars turn driven in Post-rock (louderForms.guitars, 80-90-90), against never.", "postRock", [],
             new() { ["louderForms"] = new() { ["guitars"] = 0, ["quieter"] = 0 } },
-            x => Driven(x).Select(v => (double?)v).Min(), Places: Driven)
+            x => Driven(x).Select(v => (double?)v).Min(), Places: Driven),
+        new("postrock-build", "A Post-rock guitar picking faster and faster through its last bar into a louder section, 8ths to as fast as the hand goes, against it played as it was: the build, or a rush?",
+            "How often a part builds into a louder appearance in Post-rock (articulation.tremoloBuild, 30-50-60), against never.", "postRock", [],
+            new() { ["articulation"] = new() { ["tremoloBuild"] = 0 } },
+            x => BuiltAt(x).Select(v => (double?)v).Min(), Places: BuiltAt)
+    ];
+
+    /// <summary>Where a song's parts build into a louder section, each build's first stroke, in beats.</summary>
+    private static double[] BuiltAt(CorpusSong song) =>
+    [
+        ..song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) == 1
+                                                               && x.Value.State.GetStateValue(CompositionStateKinds.Articulation).Value.Articulates.HasFlag(PartArticulation.Builds))
+            .Select(x => song.Map.PlaceOf(x.Position) is var place ? x.Position - place.Beat : x.Position).Distinct().Order()
     ];
 
     /// <summary>Where a song's notes are first tremolo-picked, each picked note's first stroke, in beats.</summary>

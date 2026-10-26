@@ -50,6 +50,12 @@ internal static partial class Articulations
     /// </summary>
     public static ByConvention TremoloThroughChance { get; } = new(0, 0, 0);
 
+    /// <summary>
+    ///     The chance a part builds into a louder appearance, its last bar before it picked faster and faster, a genre's that the
+    ///     songs never play (<see cref="PartArticulation.Builds" />).
+    /// </summary>
+    public static ByConvention TremoloBuildChance { get; } = new(0, 0, 0);
+
     /// <summary>How many strokes a note is picked in at the fewest: two, as a note struck once is the line's own.</summary>
     public const int TremoloStrokes = 2;
 
@@ -277,7 +283,8 @@ internal static partial class Articulations
         foreach (var (track, timeline) in result.ToArray())
             if (song.Tracks.Definitions[track] is PitchInstrumentTrack line && timeline.Any(x => ChoiceOf(x.Value).TremoloStep > 0))
                 result[track] = Tremolo(timeline, line.InstrumentCode, position => holds.At(PicksOutOf, position, track) ? null : song.Form.Map.PlayingAt(position)?.Span.End,
-                    position => Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)), stroke);
+                    position => Meter.BeatsPerSecond(tempo.GetEffectiveValueAt(position)), stroke,
+                    position => song.Form.Map.PlaceOf(position) is var place ? (int)Math.Floor(place.Beat / (place.Meter.BarDuration / 4) + 1e-9) : 0);
 
         // and a part's rolled chords rolled in 8ths, as a banjo's fingers roll through a held chord, each held to the next through
         // the part's rests, so that the roll runs on, the next chord taking it over at its first 8th
@@ -385,7 +392,9 @@ internal static partial class Articulations
     ///     bends or ornaments is left as it is, and a solo's.
     /// </summary>
     /// <param name="until">Where the appearance a note starts in ends; none in an intro of its own, or where it keeps out.</param>
-    internal static EventTimeline<RealizedNote> Tremolo(EventTimeline<RealizedNote> timeline, int own, Func<double, double?> until, Func<double, double> beatsPerSecond, double stroke) =>
+    /// <param name="quarterOf">Which quarter of its bar a position falls in, from 0, by which a build picks the faster.</param>
+    internal static EventTimeline<RealizedNote> Tremolo(EventTimeline<RealizedNote> timeline, int own, Func<double, double?> until, Func<double, double> beatsPerSecond, double stroke,
+        Func<double, int> quarterOf) =>
         EventTimeline.Create(timeline.Duration, timeline.SelectMany((struck, i) =>
         {
             // picked until the part's next note at the latest, which the hand moves to
@@ -404,6 +413,23 @@ internal static partial class Articulations
             // at the quickest tempo it is held at, its start's or its end's, a note held into a faster section's
             var perSecond = Math.Max(beatsPerSecond(note.Position), beatsPerSecond(note.Position + note.Value.Duration - 1e-6));
             var step = TremoloSteps.Where(x => x >= finest - 1e-9).LastOrDefault(x => perSecond / x <= FastStrokes + 1e-9, TremoloSteps[0]);
+            // a build's strokes the faster each quarter of its bar, from an 8th to its finest, each no quicker than the hand
+            if (Has(note.Value, PartArticulation.Builds))
+            {
+                double StepAt(double at) => TremoloSteps.Where(x => x >= Math.Max(finest, TremoloSteps[Math.Min(quarterOf(at), TremoloSteps.Length - 1)]) - 1e-9)
+                    .LastOrDefault(x => beatsPerSecond(at) / x <= FastStrokes + 1e-9, TremoloSteps[0]);
+                var stop = Math.Min(note.Position + note.Value.Duration, end);
+                var strokes = new List<double>();
+                for (var at = note.Position; at < stop - 1e-9; at += StepAt(at))
+                    strokes.Add(at);
+                if (strokes.Count < TremoloStrokes)
+                    return [struck];
+                return strokes.Select((at, k) => (note.Value with
+                {
+                    State = state.With(CompositionStateKinds.Strum, (k % 2 == 0 ? 1 : -1) * stroke * beatsPerSecond(at)).With(CompositionStateKinds.Picked, k + 1),
+                    Duration = (k + 1 < strokes.Count ? strokes[k + 1] : note.Position + note.Value.Duration) - at
+                }).ToTimelineItem(at));
+            }
             if (note.Value.Duration < TremoloStrokes * step - 1e-9)
                 return [struck];
             // its strokes in the section that picks, the rest of it held into the next as it was

@@ -2635,7 +2635,7 @@
     "choices": {
       "drumRole": { "time": { "hiHat": 100, "ride": [30, 30, 30], "tom": [30, 50, 60] } },
       "tremoloSpeed": { "measured": 0, "fast": 100 },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [10, 25, 40] },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [10, 25, 40], "tremoloBuild": [10, 20, 30] },
       "tempo": { "from": [140, 140, 130], "to": [175, 180, 200] },
       "length": { "from": [110, 110, 100], "to": [180, 180, 210] },
       "meter": { "4/4": 100 },
@@ -2715,7 +2715,7 @@
       "strongEffect": { "none": [60, 40, 20], "echo": [60, 80, 90], "tremolo": [0, 10, 20] },
       "echo": { "dottedEighth": 100, "quarter": 60, "eighth": 40, "cascade": [0, 10, 20] },
       "room": { "hall": 100, "plate": [20, 30, 40] },
-      "articulation": { "letRing": [50, 60, 70], "legato": [10, 20, 30], "stabs": 0, "roll": 0, "frames": 0, "deadNotes": 0, "soloGhosts": 0, "tremolo": [15, 30, 40], "tremoloThrough": 50 },
+      "articulation": { "letRing": [50, 60, 70], "legato": [10, 20, 30], "stabs": 0, "roll": 0, "frames": 0, "deadNotes": 0, "soloGhosts": 0, "tremolo": [15, 30, 40], "tremoloThrough": 50, "tremoloBuild": [30, 50, 60] },
       "tremoloSpeed": { "measured": 30, "fast": 100 },
       "arpeggio": { "none": [60, 50, 40], "up": [60, 60, 60], "upDown": [40, 40, 50], "pairs": [10, 15, 20] },
       "feelChances": { "swing": 0, "halfTime": [10, 15, 20], "doubleTime": [10, 20, 25] },
@@ -3236,7 +3236,7 @@
     "choices": {
       "fillFeet": { "none": [100, 50, 40], "doubleKick": [0, 50, 60], "groove": [0, 10, 10] },
       "tremoloSpeed": { "measured": 0, "fast": 100 },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [20, 40, 50], "tremoloThrough": 100 },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [20, 40, 50], "tremoloThrough": 100, "tremoloBuild": [10, 20, 30] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "keyChanges": { "lastSection": 0, "sections": [0, 2, 30], "patterns": [0, 0, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },

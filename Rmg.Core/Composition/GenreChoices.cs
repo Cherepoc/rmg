@@ -309,7 +309,8 @@ public static class GenreChoices
             ("letRing", "Broken chords let ring", Articulations.LetRingChance), ("frames", "Chords cycled at a chip's frame rate", Articulations.FrameChance),
             ("deadNotes", "Dead notes in a 16th chain", Articulations.DeadNoteChance), ("soloGhosts", "A soloist's ghosts in its licks", Articulations.SoloGhostChance),
             ("tremolo", "A riff's, a rhythm part's or a lead's notes tremolo-picked, the more the more energy", Articulations.TremoloChance),
-            ("tremoloThrough", "A tremolo carried through its line's rests", Articulations.TremoloThroughChance)]);
+            ("tremoloThrough", "A tremolo carried through its line's rests", Articulations.TremoloThroughChance),
+            ("tremoloBuild", "A line picked faster and faster into a louder section", Articulations.TremoloBuildChance)]);
 
     /// <summary>How fast a tremolo picks, in measured 16ths or as fast as the hand plays (<see cref="Articulations.Speeds" />).</summary>
     public static GenreChoice TremoloSpeed { get; } = Pool("tremoloSpeed", "Tremolo picking",

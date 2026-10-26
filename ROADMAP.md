@@ -947,17 +947,17 @@ chose there (`Doubled` naming the part it doubles), the twin as its riff, a harm
 which holds where the riff picks, as an instrument that cannot pick does. A genre's tremolo may carry a picked line
 through its rests (`articulation.tremoloThrough`, Black metal's 100): its notes held each to the next within the phrase
 (`PartArticulation.Holds`), stopping at a change of chord, the next note struck there, so that the wall runs on (Black
-metal's riff silent 1% of a picking appearance's phrases, from 6%, its rhythm part 2% from 13%). Left, in the order to build:
+metal's riff silent 1% of a picking appearance's phrases, from 6%, its rhythm part 2% from 13%). A part builds into a
+louder appearance now and then (`articulation.tremoloBuild`, Post-rock's 30-50-60, Surf's and Black metal's 10-20-30): its
+last bar held through and picked faster each quarter of it, an 8th to the song's finest under the hand's cap (Post-rock's
+strokes 3.5, 6.9, 9.7 and 12.8 a second by quarter), asked as `postrock-build`. Left, in the order to build:
 
-1. **An accelerating tremolo into a lift**, a separate device of a few places: the line's last bar or two before a
-   louder section picked faster stroke by stroke, 8ths to 16ths to the hand's fastest, as a snare roll builds; a hold
-   the timing and the drums keep out of, its strokes off the grid. Surf's and a post-rock band's.
-2. **A bowed tremolo**: a strings part's theme coming back louder on General MIDI's tremolo strings (44) rather than
+1. **A bowed tremolo**: a strings part's theme coming back louder on General MIDI's tremolo strings (44) rather than
    re-struck, the orchestral and the film presets' climax; an instrument switch for the appearance
    (`InstrumentsOverTime`), not a stroke.
-3. **A swell under a picked chord**, the strokes of a held power chord growing louder, Black metal's; a velocity curve
+2. **A swell under a picked chord**, the strokes of a held power chord growing louder, Black metal's; a velocity curve
    at the play-out, minor.
-4. **A genre's own following**, should listening find Surf's lead picking too seldom in its quieter verses: how far a
+3. **A genre's own following**, should listening find Surf's lead picking too seldom in its quieter verses: how far a
    genre's tremolo follows the energy as a genre's shift rather than one lean for all; and the appearances ranked by
    their energy within the song should a song of sections alike in energy pick none apart.
 
@@ -968,7 +968,7 @@ carried through its rests in half the songs, a delay and a hall, ringing out or 
 `postrock-heavy`. Its gaps, measured (`PostRockReportTest`): a section's form is its every appearance's, so that a
 section heavy at its loud return is heavy in its quiet first one too, the guitars driven in 44% of the quieter half's
 notes against 45% of the louder's; a form drawn by the appearance, its energy's step with it, as the appearance's
-parts are, would let a section come back heavy; and the accelerating tremolo into a lift (1, above).
+parts are, would let a section come back heavy.
 
 ## Genres
 

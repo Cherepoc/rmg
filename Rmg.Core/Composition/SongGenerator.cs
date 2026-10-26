@@ -296,7 +296,8 @@ internal enum SongStream
     Rubato = 141,
     ReharmonisationKinds = 142,
     MoodEnergy = 143,
-    TremoloThrough = 144
+    TremoloThrough = 144,
+    TremoloBuild = 145
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

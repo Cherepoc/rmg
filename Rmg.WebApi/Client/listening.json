@@ -502,12 +502,83 @@
         ]
       },
       {
+        "seed": "M",
+        "at": 565,
+        "from": 562.5,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "postrock-build",
+    "question": "A Post-rock guitar picking faster and faster through its last bar into a louder section, 8ths to as fast as the hand goes, against it played as it was: the build, or a rush?",
+    "decides": "How often a part builds into a louder appearance in Post-rock (articulation.tremoloBuild, 30-50-60), against never.",
+    "genre": "postRock",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "articulation": {
+          "tremoloBuild": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "4",
+        "at": 160.6,
+        "from": 157.2,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
         "seed": "8",
-        "at": 418.2,
+        "at": 376.2,
+        "from": 374.8,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "E",
+        "at": 33.7,
+        "from": 31.4,
+        "listen": [
+          "Rhythm part (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 387.9,
+        "from": 386.1,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)",
+          "Riff (Overdriven Guitar)",
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 183.8,
+        "from": 180.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 419.5,
         "from": 416.8,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))",
-          "Chords (Overdriven Guitar)"
+          "Melody (Electric Guitar (clean))",
+          "Rhythm part (Distortion Guitar)"
         ]
       }
     ]

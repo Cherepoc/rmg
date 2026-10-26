@@ -36,7 +36,10 @@ public enum PartArticulation
     Frames = 32,
 
     /// <summary>A line's notes held to its next, no rest between them in a phrase (<see cref="Articulations.Held" />).</summary>
-    Holds = 64
+    Holds = 64,
+
+    /// <summary>A line's last bar before a louder section picked faster and faster into it (<see cref="Articulations.Tremolo" />).</summary>
+    Builds = 128
 }
 
 internal static partial class Articulations
@@ -65,6 +68,15 @@ internal static partial class Articulations
         ImmutableArray<double> steps = fast ? [..TremoloSteps.Skip(MeasuredSteps - 1)] : [..TremoloSteps.Take(MeasuredSteps)];
         // and whether a picked line is carried through its rests, from a sequence of its own
         var through = song.Stream(SongStream.TremoloThrough).TestProbability(TremoloThroughChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "tremoloThrough")));
+        // and whether a part builds into a louder appearance, its last bar before it picked faster and faster, from a sequence of
+        // its own and the part's, by the section's sound facet, a genre's; never out of a calm section or into the ending
+        bool Builds(int index, int track)
+        {
+            var span = song.Form.Map.Sections[index];
+            var builds = song.AppearanceStream(SongStream.TremoloBuild, index, track)
+                .TestProbability(TremoloBuildChance.At(song.SectionOf(span.SectionId).Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "tremoloBuild")));
+            return builds && index + 1 < song.Form.Map.Sections.Length && song.LiftsInto(index) && !Calm(span);
+        }
         // an appearance's step, none where it picks none: the likelier and the finer the more energy it has, as far as its
         // section's rhythm follows it, from a sequence of its own and the part's, never in a calm section, whose guitars ring
         // their broken chords
@@ -80,7 +92,7 @@ internal static partial class Articulations
 
         var tracks = draft.Timeline.TrackTimelineMap.ToBuilder();
         // every part's choice in each stretch it plays as a section, which a doubled note of its line plays too
-        var choices = new Dictionary<TrackRole, Func<Play?, ArticulationChoice>>();
+        var choices = new Dictionary<TrackRole, Func<double, ArticulationChoice>>();
         foreach (var (track, definition) in song.Tracks.Definitions)
         {
             if (definition is not PitchInstrumentTrack { Role: var role })
@@ -103,6 +115,9 @@ internal static partial class Articulations
             var picking = role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Melody
                 ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Step(index, track))
                 : [];
+            var building = role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Melody
+                ? Enumerable.Range(0, song.Form.Map.Sections.Length).ToDictionary(index => index, index => Builds(index, track))
+                : [];
             if (tracks.ContainsKey(track))
                 foreach (var (index, step) in picking.Where(x => x.Value > 0))
                     StateTrace.RecordSection(TracePoints.Tremolo, track, song.Form.Map.Sections[index].SectionId, $"{step:F3}", (index, step));
@@ -116,8 +131,20 @@ internal static partial class Articulations
                 var own = rings || play is { Span: var played } && role.PlaysChords() && Calm(played) ? ringing : articulates;
                 return new ArticulationChoice(through && step > 0 ? own | PartArticulation.Holds : own, step);
             }
-            choices.TryAdd(role, In);
-            var state = StateTimelineMap.Create(duration, [Along(duration, plays, In)]);
+            // a section's own stretch's last bar where the part builds out of it, held through and picked from an 8th to the
+            // finest of the song's steps
+            (double From, ArticulationChoice Choice)? Built(Play play) =>
+                !play.IsEnding && building.GetValueOrDefault(play.Index) && Math.Abs(play.Span.Start - song.Form.Map.Sections[play.Index].Start) < 1e-9
+                    ? (play.Span.LastBar, new ArticulationChoice(In(play).Articulates | PartArticulation.Holds | PartArticulation.Builds, steps[^1]))
+                    : null;
+            ArticulationChoice At(double position) => song.Form.Map.PlayingAt(position) is { } play
+                ? Built(play) is var (from, built) && position >= from - 1e-9 ? built : In(play)
+                : In(null);
+            if (tracks.ContainsKey(track))
+                foreach (var (index, _) in building.Where(x => x.Value))
+                    StateTrace.RecordSection(TracePoints.TremoloBuild, track, song.Form.Map.Sections[index].SectionId, $"{index}", index);
+            choices.TryAdd(role, At);
+            var state = StateTimelineMap.Create(duration, [Along(duration, plays, In, Built)]);
             // on the part's track, which every stage before the notes has made where the part plays, a soloist's from the
             // melody's state among them (Solos), so that its notes take the part's own; a part with no notes plays none
             if (!state.IsDefault && tracks.TryGetValue(track, out var existing))
@@ -130,7 +157,7 @@ internal static partial class Articulations
             if (map.EventTimeline.Any(x => x.Value.GetStateValue(CompositionStateKinds.Doubled) > 0))
                 tracks[track] = map.WithEvents(map.EventTimeline.MapValues((position, note) =>
                     note.GetStateValue(CompositionStateKinds.Doubled) is var source and > 0 && choices.TryGetValue((TrackRole)(source - 1), out var of)
-                        ? note.With(CompositionStateKinds.Articulation, new LayerValue<ArticulationChoice>(StateDepths.Note, of(song.Form.Map.PlayingAt(position))))
+                        ? note.With(CompositionStateKinds.Articulation, new LayerValue<ArticulationChoice>(StateDepths.Note, of(position)))
                         : note));
 
         return draft with
@@ -145,7 +172,9 @@ internal static partial class Articulations
     ///     the section's, and elsewhere, in an intro of its own, the part's own; a change only where it changes.
     /// </summary>
     /// <param name="choice">The part's choice in a stretch it plays as a section, by the stretch, or none, elsewhere.</param>
-    private static StateTimeline<LayerValue<ArticulationChoice>> Along(double duration, IReadOnlyList<Play> plays, Func<Play?, ArticulationChoice> choice)
+    /// <param name="last">Where a stretch's last stretch plays a choice of its own, and the choice, a build's; none where it plays its own.</param>
+    private static StateTimeline<LayerValue<ArticulationChoice>> Along(double duration, IReadOnlyList<Play> plays, Func<Play?, ArticulationChoice> choice,
+        Func<Play, (double From, ArticulationChoice Choice)?> last)
     {
         // the part's own from the start, and again after a stretch no other follows, past the ending
         var at = new SortedDictionary<double, ArticulationChoice> { [0] = choice(null) };
@@ -153,6 +182,9 @@ internal static partial class Articulations
             at[play.Span.End] = choice(null);
         foreach (var play in plays)
             at[play.Span.Start] = choice(play);
+        foreach (var play in plays)
+            if (last(play) is var (from, built))
+                at[from] = built;
         var items = new List<TimelineItem<LayerValue<ArticulationChoice>>>();
         foreach (var (position, state) in at.Where(x => x.Key < duration - 1e-9))
             if (items.Count == 0 || items[^1].Value.Value != state)
