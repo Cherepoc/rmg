@@ -329,12 +329,13 @@ internal static class SoloLines
             return [..steps.Select(chord.GetPitch).Where(x => x >= bottom && x <= TopAt(position)).Distinct().Order()];
         }
 
-        int[] ScaleNotes(double position) => Notes(position, Enumerable.Range(-4 * Scales.StepCount, 12 * Scales.StepCount));
+        // every octave a register may reach, a piccolo's lead high in its range as a bass's low in its own
+        int[] ScaleNotes(double position) => Notes(position, Enumerable.Range(-4 * Scales.StepCount, 16 * Scales.StepCount));
         // the chord's own notes, as the band's shape has them, a sus or a power chord's without the third it leaves out; the
         // triad's where no part carries a shape there
         int[] ShapeSteps(double position) => chordAt(position) is { } state ? [..Realizer.GetChordNotes(state).Steps] : ChordSteps;
         var chordChanges = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
-        int[] ChordNotes(double position) => Notes(position, Enumerable.Range(-4, 12).SelectMany(octave => ShapeSteps(position).Select(x => x + octave * Scales.StepCount)));
+        int[] ChordNotes(double position) => Notes(position, Enumerable.Range(-4, 16).SelectMany(octave => ShapeSteps(position).Select(x => x + octave * Scales.StepCount)));
         int Nearest(int[] notes, int pitch) => notes.Length == 0 ? Math.Clamp(pitch, bottom, top) : notes.MinBy(x => Math.Abs(x - pitch));
 
         // the louder the more intense, around none, as the caller sets how loud the line plays as heard (Solos.Lift)
