@@ -21,7 +21,8 @@ public sealed class SurfReportTest
         {
             drops++;
             var guitar = song.Song.Notes!.Single(x => x.Value.Count(n => n.Position >= from - 1e-9 && n.Position < to - 1e-9 && n.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0) >= (to - from) * 4 - 1e-9).Value;
-            var slide = guitar.Where(x => x.Position >= from - 0.1 && x.Position < to - 0.1).OrderBy(x => x.Position).ToArray();
+            // its palm-muted 16ths, a tremolo picked up to the bar's start before it apart
+            var slide = guitar.Where(x => x.Position >= from - 0.1 && x.Position < to - 0.1 && x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0).OrderBy(x => x.Position).ToArray();
             var landing = guitar.First(x => x.Position >= to - 0.1);
             await Assert.That(slide.Zip(slide.Skip(1)).All(x => x.Second.Value.Pitches[0] <= x.First.Value.Pitches[0] && x.First.Value.Pitches[0] - x.Second.Value.Pitches[0] <= 1)).IsTrue().Because($"seed {song.Seed} at {from}");
             await Assert.That(slide[^1].Value.Pitches[0] - landing.Value.Pitches.Max()).IsEqualTo(1).Because($"seed {song.Seed} at {from}");
