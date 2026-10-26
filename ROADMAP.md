@@ -95,7 +95,13 @@ notes muted, against the part on the muted guitar as it was, and a Funk bass sla
   the owner's to give), so that the mood's sound by darkness is not built, and the soloist's ghosts (`solo-ghosts`); and of the eighth round (19 October), Metal's fast vibrato a step wide
   (5 to 1, its one song answered without a clean guitar's melody, so that a broad, a fast or a two steps' vibrato is
   now shaken only on a sound that sustains, never a clean or an acoustic guitar's, the acoustic's never a step wide),
-  the strings' vibrato sung soon (4 to none, one the same, one unsure) and a drummer's stickings (#341, 5 to 1).
+  the strings' vibrato sung soon (4 to none, one the same, one unsure) and a drummer's stickings (#341, 5 to 1); and
+  of the fifth round of 22 October's review (26 October 2026), Post-rock's tremolo (`postrock-tremolo`, 6 to none) and
+  its louder sections' guitars driven (`postrock-heavy`, 6 to none), Metal's rhythm guitar doubling the riff in unison
+  (`metal-rhythm-unison`, 6 to none), Black metal's lines plain and later tremolo-picked (`blackmetal-tremolo`, 10 to
+  none, its two "same" on songs before the riff's tremolo figure was folded into the picking, every current song's
+  with) and Bluegrass's banjo roll (`bluegrass-roll`, 6 to 2, both without on songs before the ending's final chord was
+  struck once).
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure

@@ -63,10 +63,6 @@ public sealed class ListeningQuestionsTest
             "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never, both with the tune's octaves off, which sound a note under it too; not told apart, cut (#64).", "filmPiano", [],
             new() { ["lineChords"] = new() { ["melody"] = 0 }, ["doubling"] = new() { ["octaves"] = 0 } },
             x => DoubleStops(x).Select(v => (double?)v).Min(), Places: DoubleStops, WithPatch: new() { ["doubling"] = new() { ["octaves"] = 0 } }),
-        new("blackmetal-tremolo", "A Black metal line heard plain, then tremolo-picked as its section comes back with more energy, the guitars' wall: a build, or a blur?",
-            "How often an appearance tremolo-picks its riff's, rhythm part's or melody's notes, the likelier and the faster the more energy it has (articulation.tremolo, Black metal's 20-40-50), against never.", "blackMetal", [],
-            new() { ["articulation"] = new() { ["tremolo"] = 0 } },
-            x => Reprised(x)?.Picked, Places: x => Reprised(x) is { } r ? [r.Picked] : [], Contrast: x => Reprised(x)?.Plain),
         new("trance-fierce", "Two Trance tracks both at the fiercest intensity, one of them also with its sections louder and fuller for it: the more driving track, or only busier?",
             "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity 1 (#76).", "trance", [],
             new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
@@ -75,35 +71,11 @@ public sealed class ListeningQuestionsTest
             "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity -1 (#76).", "trance", [],
             new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
             x => x.Origin, With: new() { ["intensity"] = 0 }, Without: new() { ["intensity"] = 0 }),
-        new("bluegrass-roll", "A Bluegrass banjo rolling through its chords in 8ths, its thumb on the lowest note: the banjo's drive, or a pattern on a loop?",
-            "Bluegrass's rhythm part's roll (arpeggio.rhythm, roll 100-100-80), against its chords whole.", "bluegrass", [],
-            new() { ["arpeggio.rhythm"] = new() { ["roll"] = 0, ["none"] = 100 } },
-            x => Rolled(x).Select(v => (double?)v).Min(), Places: Rolled),
-        new("postrock-tremolo", "A Post-rock build's guitars tremolo-picking their lines, the faster the louder the section, against them picked once a note: the wall at the peak, or a blur?",
-            "How often an appearance tremolo-picks its lines in Post-rock (articulation.tremolo, 15-30-40, carried through its rests in half the songs), against never.", "postRock", [],
-            new() { ["articulation"] = new() { ["tremolo"] = 0 } },
-            x => PickedAt(x).Select(v => (double?)v).Min(), Places: PickedAt),
-        new("postrock-heavy", "A Post-rock song's clean guitars turning driven in its louder sections, against them staying clean: the release, or a different band?",
-            "How often a louder section's clean guitars turn driven in Post-rock (louderForms.guitars, 80-90-90), against never.", "postRock", [],
-            new() { ["louderForms"] = new() { ["guitars"] = 0, ["quieter"] = 0 } },
-            x => Driven(x).Select(v => (double?)v).Min(), Places: Driven),
         new("postrock-build", "A Post-rock guitar picking faster and faster through its last bar into a louder section, 8ths to as fast as the hand goes, against it played as it was: the build, or a rush?",
             "How often a part builds into a louder appearance in Post-rock (articulation.tremoloBuild, 30-50-60), against never.", "postRock", [],
             new() { ["articulation"] = new() { ["tremoloBuild"] = 0 } },
-            x => BuiltAt(x).Select(v => (double?)v).Min(), Places: BuiltAt),
-        new("metal-rhythm-unison", "A Metal band's rhythm guitar playing the riff with the riff guitar in unison now and then, rather than its own chords: the riff's weight, or a part lost?",
-            "How often a section's rhythm part doubles the riff in unison (doubling.rhythm, Metal's 30-40-50), against never.", "metal", [],
-            new() { ["doubling"] = new() { ["rhythm"] = 0 } },
-            x => RhythmDoubles(x).Select(v => (double?)v).Min(), Places: RhythmDoubles)
+            x => BuiltAt(x).Select(v => (double?)v).Min(), Places: BuiltAt)
     ];
-
-    /// <summary>Where a song's rhythm part starts doubling the riff, each section's first such note, in beats.</summary>
-    private static double[] RhythmDoubles(CorpusSong song) =>
-        !song.Song.TrackDefinitions.Values.Any(x => x.Role == TrackRole.Rhythm) ? [] :
-        [
-            ..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Doubled) == (int)TrackRole.Riff + 1)
-                .GroupBy(x => song.Map.PlayingAt(x.Position)?.Index).Select(x => x.Min(n => n.Position)).Order().ToArray() ?? []
-        ];
 
     /// <summary>Where a song's parts build into a louder section, each build's first stroke, in beats.</summary>
     private static double[] BuiltAt(CorpusSong song) =>
@@ -111,18 +83,6 @@ public sealed class ListeningQuestionsTest
         ..song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) == 1
                                                                && x.Value.State.GetStateValue(CompositionStateKinds.Articulation).Value.BuildFrom > 0)
             .Select(x => song.Map.PlaceOf(x.Position) is var place ? x.Position - place.Beat : x.Position).Distinct().Order()
-    ];
-
-    /// <summary>Where a song's notes are first tremolo-picked, each picked note's first stroke, in beats.</summary>
-    private static double[] PickedAt(CorpusSong song) =>
-        [..song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) == 1).Select(x => x.Position).Order()];
-
-    /// <summary>Where a song's heavy sections start, their guitars driven, in beats.</summary>
-    private static double[] Driven(CorpusSong song) =>
-    [
-        ..song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { Role: TrackRole.Chords or TrackRole.Rhythm or TrackRole.Riff })
-            .SelectMany(x => x.Value.Where(n => InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(n.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode), InstrumentTrait.Driven)))
-            .Select(x => song.Map.PlayingAt(x.Position)?.Span.Start).OfType<double>().Distinct().Order()
     ];
 
     /// <summary>Where a song's melody stacks its notes on the band's chord, a double stop, in beats.</summary>
@@ -138,42 +98,6 @@ public sealed class ListeningQuestionsTest
         return [..song.Song.Notes!.GetValueOrDefault(melody)?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1
                                                                      && x.Value.State.GetStateValue(CompositionStateKinds.Octave) == 0 && !Under(x)).Select(x => x.Position) ?? []];
     }
-
-    /// <summary>How many bars at most a contrast's later side follows its first, so that a listener hears them as one.</summary>
-    private const int ContrastBars = 16;
-
-    /// <summary>
-    ///     Where a song plays a line plain and then picked nearest together: the start of the plain hearing's last phrase, of
-    ///     the section's own line or the one whose lines it plays, and the first picked note of a later appearance of it, in
-    ///     beats, the picked note within <see cref="ContrastBars" /> of the plain hearing's end, so that the two are heard
-    ///     together; none where it plays none so near.
-    /// </summary>
-    private static (double Plain, double Picked)? Reprised(CorpusSong song)
-    {
-        var sources = song.Trace.Where(x => x.Point == TracePoints.LinesFrom).ToDictionary(x => x.Section, x => (int)x.Value!);
-        int LineOf(int index) => sources.GetValueOrDefault(song.Map.Sections[index].SectionId, song.Map.Sections[index].SectionId);
-        var pairs = new List<(double Plain, double Picked, double Gap)>();
-        foreach (var role in new[] { TrackRole.Riff, TrackRole.Rhythm, TrackRole.Melody }.Where(x => song.Song.TrackDefinitions.Values.Any(t => t.Role == x)))
-        {
-            var heard = (song.Song.Notes!.GetValueOrDefault(song.Track(role))?.ToArray() ?? []).Select(x => (Play: song.Map.PlayingAt(x.Position), Note: x))
-                .Where(x => x.Play is { IsEnding: false }).GroupBy(x => x.Play!.Value.Index).OrderBy(x => x.Key)
-                .Select(x => (Index: x.Key, Picked: x.Where(n => n.Note.Value.State.GetStateValue(CompositionStateKinds.Picked) > 0).Select(n => (double?)n.Note.Position).Min()))
-                .ToArray();
-            foreach (var (index, picked) in heard.Where(x => x.Picked is not null))
-                if (heard.Where(x => x.Index < index && x.Picked is null && LineOf(x.Index) == LineOf(index)).Select(x => (int?)x.Index).LastOrDefault() is { } plain)
-                {
-                    var span = song.Map.Sections[plain];
-                    if (picked!.Value - span.End <= ContrastBars * span.Meter.BarDuration + 1e-9)
-                        pairs.Add((span.Phrases.Last().Start, picked.Value, picked.Value - span.End));
-                }
-        }
-
-        return pairs.Count == 0 ? null : pairs.MinBy(x => x.Gap) is var (plainAt, pickedAt, _) ? (plainAt, pickedAt) : null;
-    }
-
-    /// <summary>Where a song's rhythm part rolls its chords, in beats.</summary>
-    private static double[] Rolled(CorpusSong song) =>
-        [..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == (int)ArpeggioPattern.Roll).Select(x => x.Position) ?? []];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()
