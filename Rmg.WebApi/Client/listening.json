@@ -96,52 +96,57 @@
     },
     "seeds": [
       {
-        "seed": "D",
-        "at": 156.2,
-        "from": 115.1,
+        "seed": "4",
+        "at": 340.9,
+        "from": 330,
         "listen": [
-          "Riff (Overdriven Guitar)"
+          "Riff (Overdriven Guitar)",
+          "Rhythm part (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "N",
-        "at": 242.9,
-        "from": 223,
+        "seed": "S",
+        "at": 240.1,
+        "from": 211.4,
         "listen": [
           "Rhythm part (Overdriven Guitar)",
           "Riff (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "S",
-        "at": 269.2,
-        "from": 238.2,
+        "seed": "b",
+        "at": 264,
+        "from": 241.9,
         "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "s",
-        "at": 432.2,
-        "from": 405.9,
-        "listen": [
+          "Riff (Overdriven Guitar)",
           "Rhythm part (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "1U",
-        "at": 256,
-        "from": 218.8,
+        "seed": "1P",
+        "at": 330.7,
+        "from": 303.6,
         "listen": [
+          "Rhythm part (Distortion Guitar)",
           "Riff (Distortion Guitar)"
         ]
       },
       {
-        "seed": "1i",
-        "at": 213.2,
-        "from": 189.9,
+        "seed": "1m",
+        "at": 344.6,
+        "from": 342.5,
         "listen": [
-          "Riff (Overdriven Guitar)"
+          "Rhythm part (Overdriven Guitar)",
+          "Riff (Overdriven Guitar)",
+          "Riff's twin (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "1s",
+        "at": 85.4,
+        "from": 55.1,
+        "listen": [
+          "Riff (Distortion Guitar)"
         ]
       }
     ]
@@ -608,6 +613,14 @@
     },
     "seeds": [
       {
+        "seed": "8",
+        "at": 339.7,
+        "from": 338.3,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
         "seed": "A",
         "at": 93.2,
         "from": 90.6,
@@ -641,16 +654,8 @@
       },
       {
         "seed": "O",
-        "at": 127.9,
-        "from": 126.3,
-        "listen": [
-          "Rhythm part (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 147.7,
-        "from": 145.6,
+        "at": 222.6,
+        "from": 221.1,
         "listen": [
           "Rhythm part (Distortion Guitar)"
         ]

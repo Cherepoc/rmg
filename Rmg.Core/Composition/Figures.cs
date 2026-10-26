@@ -83,7 +83,7 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 
 /// <summary>
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
-///     double kick; a black metal band's blast beat, its cymbal riding it, and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
+///     double kick; a black metal band's blast beat and its cymbal riding it; a breakbeat's kick and snare; a heavy
 ///     band's galloping riff and its reverse gallop, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a jazz drummer's ride,
 ///     on the beats and the skip after 2 and 4, and a jazz drummer's comping on the snare; a clave's three and two, and the 6/8 bell over two bars, and the chords comping
 ///     in clave,
@@ -155,7 +155,6 @@ internal static class Figures
         new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, null, 0, false),
         new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, null, 0, false),
         new("reverseGallop", "A reverse gallop, two 16ths and an 8th a beat", FigurePlayer.Riff, [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14], 16, null, 0, false),
-        new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, null, 0, false),
         new("arpeggio16", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, null, 1, false),
         // a ska's or a reggae's chop on the 8ths' offbeats, and a swing band's Charleston comp, on 1 and the 2-and
         new("skank", "The skank, on the 8ths' offbeats", FigurePlayer.Chords, [2, 6, 10, 14], 16, null, 0, false),
@@ -242,7 +241,7 @@ internal static class Figures
                 // a breakdown's kick with its riff, drawn all the same
                 if (player == FigurePlayer.Ground && section.Breakdown)
                     figures[player] = Of(player, "withRiff");
-                // and none in a calm section, neither a riff's tremolo nor the drums' blast, drawn all the same
+                // and none in a calm section, neither a riff's gallop nor the drums' blast, drawn all the same
                 if (section.Form.Kind == SectionFormKind.Calm)
                     figures[player] = null;
             }

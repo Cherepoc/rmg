@@ -28,7 +28,7 @@ public sealed class NewGenresReportTest
             var harmonics = guitarNotes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Pinch) > 0).ToArray();
             Console.WriteLine($"{name}, {end}: of {guitarNotes.Length} driven guitar notes {harmonics.Length} in harmonics, {harmonics.Count(x => x.Value.Duration < 0.5 - 1e-9)} of them shorter than an 8th");
             Console.WriteLine($"{name}, {end}: tempo {tempos.Average():0}, in 4/4 {meters.Count(m => m.Sixteenths == 16) / (double)meters.Length:P0}, swung {songs.Average(x => x.Swing.Delay > 0 ? 1.0 : 0):P0}; " +
-                              $"sections {Figure(FigurePlayer.Riff, "tremolo")}, {Figure(FigurePlayer.Ground, "blast")}, {Figure(FigurePlayer.Ground, "doubleKick")}, {Figure(FigurePlayer.Ground, "breakbeat")}; " +
+                              $"sections riff tremolo-picked {songs.Sum(s => s.Trace.Count(t => t.Point == TracePoints.Tremolo && s.Song.TrackDefinitions[t.Track].Role == TrackRole.Riff)) / (double)songs.Sum(s => s.Map.Sections.Length):P0}, {Figure(FigurePlayer.Ground, "blast")}, {Figure(FigurePlayer.Ground, "doubleKick")}, {Figure(FigurePlayer.Ground, "breakbeat")}; " +
                               $"chords of four notes or more {chords.Count(c => c.Value.Pitches.Select(p => p % 12).Distinct().Count() >= 4) / (double)Math.Max(1, chords.Length):P0}; " +
                               $"strong effects {string.Join(", ", effects.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))}");
         }

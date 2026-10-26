@@ -75,8 +75,9 @@ tune note for note the song's without, asked again. The
 third round (24 October 2026) asks those two beside two cuts, each against none: a Cinematic piano melody's double
 stops on its downbeats (`piano-double-stops`, #64) and a Funk part's articulation variants (`funk-articulation`, #59),
 each a genre's choice since (`lineChords`, `articulationModes`), the songs as they were. To ask once built: a riff's
-or a lead's long notes tremolo-picked (`articulation.tremolo`, #352), in Black metal against its riff's tremolo figure,
-which goes if the articulation is preferred, and in Surf rock against none; Funk's guitar, its chords open and its dead
+or a lead's long notes tremolo-picked (`articulation.tremolo`, #352), the riff's tremolo figure folded into it on 26 October
+2026 (its share of the riff's pool given to the picking in Metal, Thrash, Symphonic, Surf and Black metal), and in Surf
+rock against none; Funk's guitar, its chords open and its dead
 notes muted, against the part on the muted guitar as it was, and a Funk bass slapping its accents against its own.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
@@ -585,7 +586,7 @@ What the plans of 8 to 15 October 2026 left, each by listening unless said:
   outro's and a kept tempo's shaped (110); a preset's copy of the songs' amounts written as "own" (467), should the
   copies drift.
 - **A section's form:** a calm section's bass held on its roots; a fill or a fade into it; Heavy metal's and Rock's
-  calm; Black metal's drone, its tremolo figure repeating a note.
+  calm; Black metal's drone, its picking repeating a note.
 - **The metal family:** a slap bass in Nu metal's quiet sections alone; Doom's slow ♭3–4–♭5 motion heard as a blues
   lick or not, and a held or bent ♭5; a melody spoken rather than sung (repeated notes, a range of a fifth), with *A
   melody sung rather than played*.
@@ -776,7 +777,7 @@ The riff:
   so that Reggae's and Ska's offbeat riffs keep a contrast; Funk's and Techno's an acid line's accents. The muting cut:
   a funk guitar's dead notes are `deadNotes`', a chug's its own, and General MIDI's muted guitar cannot chug.
 - **A riff's rhythm** (P4, a report first): the riff's rhythm is the pattern generator's, a little fuller
-  (`RiffLayers.Fullness`), and the riff a figure's player (`Figures`: the gallop, its reverse, the tremolo). Its rests,
+  (`RiffLayers.Fullness`), and the riff a figure's player (`Figures`: the gallop and its reverse). Its rests,
   off-beat onsets and pushes measured against the bass's, the figures' sections apart; a lean of its own only if the
   rest comes out a bass line's, Funk's and Nu metal's syncopation the measure.
 

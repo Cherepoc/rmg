@@ -1411,7 +1411,7 @@
     "description": "Distorted twin guitars on a galloping riff in power chords, the snare on 2 and 4 or on 3 in its half-time sections, harmonised solos, natural and harmonic minor, the chords climbing ♭VI–♭VII–i, mid to fast.",
     "choices": {
       "fillFeet": { "none": [100, 60, 40], "doubleKick": [0, 40, 50], "groove": [0, 20, 20] },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 10, 20] },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 13, 24] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
@@ -1440,7 +1440,7 @@
       "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": {
         "ground": { "own": 100, "withRiff": 40, "doubleKick": [5, 15, 20] },
-        "riff": { "own": 100, "gallop": [45, 55, 55], "tremolo": [0, 5, 10], "reverseGallop": [5, 10, 15] }
+        "riff": { "own": 100, "gallop": [45, 55, 55], "reverseGallop": [5, 10, 15] }
       },
       "drumSounds": { "china": 70 },
       "drumStrokes": { "china": 70, "openHiHat": 85 },
@@ -1506,7 +1506,7 @@
     "description": "Fast and tight: palm-muted 16ths chugging on the low string, the kick and the bass locked with the riff, a double kick, long stretches on one chord, Phrygian and chromatic riffs, a half-time break, wild whammy solos.",
     "choices": {
       "fillFeet": { "none": [100, 50, 40], "doubleKick": [0, 50, 60], "groove": [0, 20, 20] },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [5, 15, 25] },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [19, 31, 42] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "vibratoWidth": { "narrow": [20, 10, 10], "medium": [30, 20, 20], "broad": [30, 30, 30], "fastStep": [30, 50, 60], "twoSteps": [0, 5, 20] },
       "octaveBass": { "sections": 0 },
@@ -1537,7 +1537,7 @@
       "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": {
         "ground": { "own": 70, "withRiff": 100, "doubleKick": [20, 30, 40] },
-        "riff": { "own": 100, "gallop": [10, 15, 20], "tremolo": [20, 30, 40], "reverseGallop": [10, 15, 20] }
+        "riff": { "own": 100, "gallop": [10, 15, 20], "reverseGallop": [10, 15, 20] }
       },
       "drumSounds": { "china": 70 },
       "drumStrokes": { "china": 70, "openHiHat": 85 },
@@ -1630,7 +1630,7 @@
       "texture": { "steady": 100, "build": [40, 50, 60], "alone": [10, 15, 20] },
       "figure": {
         "ground": { "own": 100, "withRiff": 30, "doubleKick": [40, 55, 70] },
-        "riff": { "own": 100, "gallop": [20, 25, 30], "tremolo": [0, 5, 10] },
+        "riff": { "own": 100, "gallop": [20, 25, 30] },
         "backbeat": { "own": 100, "everyBeat": [10, 20, 30] }
       },
       "drumSounds": { "china": 70 },
@@ -1660,6 +1660,7 @@
       "soloists": { "solo": 100, "chords": [30, 40, 50], "riff": [10, 20, 30] },
       "keyChanges": { "lastSection": [20, 30, 50], "sections": [5, 15, 40], "patterns": [0, 0, 30] },
       "effects": { "bends": [40, 70, 90], "soloBends": [50, 70, 90], "vibrato": [40, 70, 100], "swell": [0, 10, 40], "pinch": [20, 40, 50], "dive": [20, 35, 50], "chorus": 0, "tone": 0, "tape": 0 },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [0, 4, 7] },
       "strongEffect": { "none": 100 },
       "ending": { "ringOut": 100, "button": 60, "stop": 40, "big": 50 },
       "levels": { "riff": 70, "drum": 65 },
@@ -2637,7 +2638,7 @@
     "choices": {
       "drumRole": { "time": { "hiHat": 100, "ride": [30, 30, 30], "tom": [30, 50, 60] } },
       "tremoloSpeed": { "measured": 0, "fast": 100 },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [10, 25, 40], "tremoloBuild": [10, 20, 30] },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [31, 46, 60], "tremoloBuild": [10, 20, 30] },
       "tempo": { "from": [140, 140, 130], "to": [175, 180, 200] },
       "length": { "from": [110, 110, 100], "to": [180, 180, 210] },
       "meter": { "4/4": 100 },
@@ -2662,7 +2663,7 @@
       },
       "riff": { "hook": 80, "powerChords": 40, "chugs": 20, "turnaround": [20, 30, 30] },
       "surfDrop": { "lifts": [30, 40, 50] },
-      "figure": { "riff": { "own": 100, "tremolo": [30, 40, 50] }, "ground": { "oneAndThree": 100, "own": [0, 15, 40] }, "backbeat": { "surf": 100, "trainBeat": [10, 20, 30], "own": [0, 10, 30] }, "bass": { "own": 100, "eighths": 60 } },
+      "figure": { "ground": { "oneAndThree": 100, "own": [0, 15, 40] }, "backbeat": { "surf": 100, "trainBeat": [10, 20, 30], "own": [0, 10, 30] }, "bass": { "own": 100, "eighths": 60 } },
       "room": { "plate": 100 },
       "space": { "melody": 85, "riff": 85, "solo": 85, "chords": 70, "rhythm": 70, "bass": 30, "drum": 35 },
       "strongEffect": { "none": 100, "tremolo": [30, 40, 50] },
@@ -3239,7 +3240,7 @@
     "choices": {
       "fillFeet": { "none": [100, 50, 40], "doubleKick": [0, 50, 60], "groove": [0, 10, 10] },
       "tremoloSpeed": { "measured": 0, "fast": 100 },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [20, 40, 50], "tremoloThrough": 100, "tremoloBuild": [10, 20, 30] },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": 0, "letRing": 0, "frames": 0, "deadNotes": 0, "soloGhosts": [0, 15, 30], "tremolo": [70, 80, 86], "tremoloThrough": 100, "tremoloBuild": [10, 20, 30] },
       "harmonyDevices": { "reharmonised": 0, "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "keyChanges": { "lastSection": 0, "sections": [0, 2, 30], "patterns": [0, 0, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
@@ -3279,7 +3280,7 @@
       "riffScale": { "section": 100, "chromatic": [10, 20, 40] },
       "riff": { "powerChords": [20, 20, 20], "chugs": [5, 5, 10], "hook": [100, 80, 0], "drone": [10, 20, 30], "turnaround": [25, 30, 30] },
       "riffSection": { "songs": [20, 30, 30], "verses": [20, 30, 30] },
-      "figure": { "ground": { "own": 100, "doubleKick": [40, 50, 60], "blast": [100, 80, 60] }, "riff": { "own": [60, 50, 40], "tremolo": 100 } },
+      "figure": { "ground": { "own": 100, "doubleKick": [40, 50, 60], "blast": [100, 80, 60] } },
       "phraseScheme": { "aaaa": 100, "aaab": [40, 40, 50], "abab": [20, 20, 30] },
       "sectionLength": { "bars16": 100, "bars32": [60, 60, 60] },
       "phrases": { "fourBars": 100, "eightBars": [60, 60, 60] },
