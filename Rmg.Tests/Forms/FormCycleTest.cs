@@ -10,8 +10,8 @@ public sealed class FormCycleTest
     /// <summary>Jazz, its AABA a cycle, as heard 6-0 against its AABA once and twice on 26 October 2026.</summary>
     private static readonly Genre Cycling = GenrePresets.Genre("jazz");
 
-    /// <summary>Jazz as it was before, its AABA played once or twice, its other forms as they are.</summary>
-    private static readonly Genre Before = GenrePresets.With("jazz", GenreChoices.Form, ("vvbv", 1), ("vvbvvvbv", 1), ("vcvcbc", 0.1));
+    /// <summary>Jazz with its AABA played once, its other forms as they are, as it played before the cycle but for its twice through, which the cycle folded in.</summary>
+    private static readonly Genre Before = GenrePresets.With("jazz", GenreChoices.Form, ("vvbv", 1), ("vcvcbc", 0.1));
 
     private static CorpusSong[] Songs(Genre genre, double? @base) =>
         [..TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre, Base: @base)))];
@@ -41,6 +41,14 @@ public sealed class FormCycleTest
         }
 
         await Assert.That(cycled).IsGreaterThan(20);
+    }
+
+    /// <summary>A rule: a preset naming a cycle gives a length, which the cycle is played through as many times as comes nearest, as one without plays it once.</summary>
+    [Test]
+    public async Task APresetNamingACycle_GivesALength()
+    {
+        foreach (var preset in GenrePresets.All.Where(x => x.Choices.TryGetValue(GenreChoices.Form.Name, out var forms) && forms.Keys.Any(k => k.EndsWith('+'))))
+            await Assert.That(preset.Choices.ContainsKey(GenreChoices.Length.Name)).IsTrue().Because(preset.Id);
     }
 
     /// <summary>A rule: at the plain end a cycle of three passes or more plays its head out, none of its last pass soloed.</summary>

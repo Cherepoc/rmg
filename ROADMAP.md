@@ -334,11 +334,11 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   69%, and at the plain end 97% within Jazz's lengths, against 36%, two to nine passes. Heard 6-0 on 26 October 2026 and
   taken: Jazz's pool names it in place of AABA once and twice; its head played out since, a cycle of three passes or more
   leaving its last unsoloed (`SongForms.HeadOutChance`, 1-0.9-0.5, the last pass sung at the plain end 88% of the songs from
-  3%). Left of the migration: the forms that are only longer copies (`vvbvvvbv`, `vvvvvv`,
-  `vcvcbcvc`, `vpcvpcbcvpc`) folded into cycles, and the length's chance of a free form left to the form facet. Found
-  with it, either way: a jazz tune's head is rarely played out, 3% to 6% of the songs leaving their last four sections
-  unsoloed, now and with the cycle, as solos fall on any later appearance; a cycle's last pass sung, as its first is,
-  should the question be heard as a loop for want of it.
+  3%); and the forms that are only longer copies folded into cycles (26 October): AABA twice into `vvbv+` (Bossa nova,
+  Cinematic piano, Chamber), four and six verses into a strophic `v+` (Folk, Celtic, Blues, Bluegrass, Dungeon, Medieval,
+  Soul, Country), Folk, Medieval and Country given lengths for them (a cycle played once where none is given, a rule of
+  it), their free forms the fewer where a cycle fits the length (Blues' 23% from 30%, Dungeon's 44% from 59%,
+  `FormFoldReportTest`). Left: the length's chance of a free form left to the form facet.
 - **Intensity moving the energy** (#76, the foundations reviewer), built as an experiment on 24 October 2026 and asked
   (`trance-fierce`, `trance-calm`): a song's energy following its intensity (`moodEnergy`, Trance's alone), every
   section's moved by the intensity times a section's step, the proposal's wider spread at a given end left out as a case

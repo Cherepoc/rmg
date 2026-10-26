@@ -117,17 +117,13 @@ internal static class SongForms
         // and two longer, seldom drawn but where a song is to play long
         new(0.02, new WrittenForm(Parse("VCVCBCVC"))),
         new(0.02, new WrittenForm(Parse("VPCVPCBCVPC"))),
-        // and AABA, once and twice, the A a verse and the B a bridge, which songs never take but a genre may, as a jazz
-        // standard of eight-bar sections is
+        // and AABA, the A a verse and the B a bridge, which songs never take but a genre may, as a jazz standard of eight-bar
+        // sections is
         new(0, new WrittenForm(Parse("VVBV"))),
-        new(0, new WrittenForm(Parse("VVBVVVBV"))),
         // and ABA and a rondo, ABACA, a classical piece's, the A a verse, the B a bridge and the C a chorus, an episode of
         // its own, which songs never take but a genre may
         new(0, new WrittenForm(Parse("VBV"))),
         new(0, new WrittenForm(Parse("VBVCV"))),
-        // and strophic, verse after verse, a ballad's or a blues', four or six, which songs never take but a genre may
-        new(0, new WrittenForm(Parse("VVVV"))),
-        new(0, new WrittenForm(Parse("VVVVVV"))),
         // and with a post-chorus after every chorus, a pop song's bonus hook, which songs never take but a genre may
         new(0, new WrittenForm(Parse("VCQVCQBCQ"))),
         // and three verses with their hooks, a rap song's, which songs never take but a genre may
@@ -135,7 +131,10 @@ internal static class SongForms
         new(0, new WrittenForm(Parse("VPCQVPCQBCQ"))),
         // and AABA as a cycle, played through as many times as the song's length comes nearest, a jazz tune's head and its
         // choruses over the same form, which songs never take but a genre may
-        new(0, new WrittenForm(Parse("VVBV"), Repeats: true))
+        new(0, new WrittenForm(Parse("VVBV"), Repeats: true)),
+        // and strophic, verse after verse as many as the length comes nearest, a ballad's or a blues' choruses, which songs
+        // never take but a genre may
+        new(0, new WrittenForm(Parse("V"), Repeats: true))
     ];
 
     /// <param name="context">The sequence the form is drawn from.</param>

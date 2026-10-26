@@ -44,17 +44,17 @@
         ]
       },
       {
-        "seed": "1K",
-        "at": 234.1,
-        "from": 231.4,
+        "seed": "13",
+        "at": 174.1,
+        "from": 172.1,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "1P",
-        "at": 133.7,
-        "from": 130.4,
+        "seed": "1K",
+        "at": 234.1,
+        "from": 231.4,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
@@ -330,6 +330,14 @@
         ]
       },
       {
+        "seed": "7",
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Rhythm part (Banjo)"
+        ]
+      },
+      {
         "seed": "D",
         "at": 121.1,
         "from": 118.9,
@@ -338,9 +346,9 @@
         ]
       },
       {
-        "seed": "H",
-        "at": 167,
-        "from": 165.2,
+        "seed": "G",
+        "at": 180.4,
+        "from": 178.8,
         "listen": [
           "Rhythm part (Banjo)"
         ]
@@ -355,16 +363,8 @@
       },
       {
         "seed": "K",
-        "at": 57.2,
-        "from": 56.1,
-        "listen": [
-          "Rhythm part (Banjo)"
-        ]
-      },
-      {
-        "seed": "N",
-        "at": 164.5,
-        "from": 162.8,
+        "at": 140.8,
+        "from": 139.4,
         "listen": [
           "Rhythm part (Banjo)"
         ]
