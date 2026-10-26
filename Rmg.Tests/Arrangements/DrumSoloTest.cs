@@ -376,7 +376,8 @@ public sealed class DrumSoloTest
         var tom = DrumGroups.GetTrackNumber(DrumDefinitions.Tom);
         var (gestures, down) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
-        foreach (var (_, plan, _, _) in KitSolos(song).Where(x => !x.Feet && song.Song.Notes!.GetValueOrDefault(tom)?.Count > 0))
+        // but a solo over the band's hits, whose hands a hit clears a 16th either side of, a run's first notes among them
+        foreach (var (_, plan, _, _) in KitSolos(song).Where(x => !x.Feet && song.Song.Notes!.GetValueOrDefault(tom)?.Count > 0 && song.Solos[x.Solo.Index].HitEvery == 0))
         foreach (var segment in plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick))
         {
             gestures++;
