@@ -43,8 +43,8 @@ public sealed record WrittenForm(ImmutableArray<SectionRole> Roles, bool Repeats
     }
 }
 
-/// <summary>A song's sections in its order, and the role each plays.</summary>
-public sealed record SongStructure(ImmutableArray<int> SectionIds, ImmutableDictionary<int, SectionRole> Roles);
+/// <summary>A song's sections in its order, the role each plays, and how many sections a pass of its form plays where the form is a cycle, 0 where not.</summary>
+public sealed record SongStructure(ImmutableArray<int> SectionIds, ImmutableDictionary<int, SectionRole> Roles, int Pass = 0);
 
 internal static class SectionContrast
 {
@@ -156,10 +156,11 @@ internal static class SongForms
         var written = genre.Pool<WrittenForm>(GenreChoices.Form, NameOf) is { } pool
             ? ByConvention.Weigh(Forms.Select(x => (x.Value, new ByConvention(x.Weight, x.Weight, x.Weight))), unconventionality, pool)
             : Forms;
-        // each as the length plays it, a cycle as many times as comes nearest it
-        ImmutableArray<Weighted<ImmutableArray<SectionRole>>> forms = [..written.Select(x => new Weighted<ImmutableArray<SectionRole>>(x.Weight, x.Value.Played(length)))];
-        var isConventional = context.TestProbability(length is null ? formChance : length.FormChance(formChance, forms.Where(x => x.Weight > 0).Select(x => (IEnumerable<SectionRole>)x.Value)));
-        var form = context.Pick(length is null ? forms : [..forms.Select(x => x with { Weight = x.Weight * length.Closeness(x.Value.Sum(length.AppearanceSeconds)) })]);
+        // each as the length plays it, a cycle as many times as comes nearest it, with its pass
+        ImmutableArray<Weighted<(ImmutableArray<SectionRole> Roles, int Pass)>> forms =
+            [..written.Select(x => new Weighted<(ImmutableArray<SectionRole>, int)>(x.Weight, (x.Value.Played(length), x.Value.Repeats ? x.Value.Roles.Length : 0)))];
+        var isConventional = context.TestProbability(length is null ? formChance : length.FormChance(formChance, forms.Where(x => x.Weight > 0).Select(x => (IEnumerable<SectionRole>)x.Value.Roles)));
+        var (form, pass) = context.Pick(length is null ? forms : [..forms.Select(x => x with { Weight = x.Weight * length.Closeness(x.Value.Roles.Sum(length.AppearanceSeconds)) })]);
         SongStructure structure;
         if (!isConventional)
         {
@@ -170,7 +171,7 @@ internal static class SongForms
         {
             // a section for every role, numbered in the order the roles first play
             var ids = form.Distinct().Select((role, id) => (role, id)).ToDictionary(x => x.role, x => x.id);
-            structure = new SongStructure([..form.Select(x => ids[x])], ids.ToImmutableDictionary(x => x.Value, x => x.Key));
+            structure = new SongStructure([..form.Select(x => ids[x])], ids.ToImmutableDictionary(x => x.Value, x => x.Key), pass);
         }
 
         // and an intro and an outro of their own now and then, sections of their own after the others
@@ -192,9 +193,17 @@ internal static class SongForms
         }
         return new SongStructure(
             [..(intro ? [introId] : Array.Empty<int>()), ..structure.SectionIds, ..(outro ? [outroId] : Array.Empty<int>())],
-            structure.Roles.AddRange(new[] { (intro, introId, SectionRole.Intro), (outro, outroId, SectionRole.Outro) }.Where(x => x.Item1).Select(x => new KeyValuePair<int, SectionRole>(x.Item2, x.Item3)))
+            structure.Roles.AddRange(new[] { (intro, introId, SectionRole.Intro), (outro, outroId, SectionRole.Outro) }.Where(x => x.Item1).Select(x => new KeyValuePair<int, SectionRole>(x.Item2, x.Item3))),
+            structure.Pass
         );
     }
+
+    /// <summary>
+    ///     The chance a song of a cycle of three passes or more plays its last pass as its head, the tune sung, none of its
+    ///     sections soloed, as a jazz band plays the head out after the solos, by its form facet: a convention, every time at
+    ///     the plain end, now and then not in the wildest songs.
+    /// </summary>
+    public static ByConvention HeadOutChance { get; } = new(1, 0.9, 0.5);
 
     /// <summary>The chance a song takes one of the forms, by its form facet: the plainest always, the wildest never.</summary>
     public static ByConvention FormsChance { get; } = RhythmicUnconventionality.Ends(FormChance, -1);

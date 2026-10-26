@@ -303,12 +303,20 @@ notes in unison, `RhythmRiffReportTest`), asked as `metal-rhythm-unison`. Left:
    clean verse or a lead: a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
    chugs' rule muting its weak repeats and an accent a power chord (Metal, Thrash, Djent, Nu metal, Doom). The register is
    the risk: two guitars and the bass in one octave.
-2. **A genre's tuning.** The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or
+2. **A genre's tuning**, measured on 26 October 2026 (`TuningReportTest`) and put off for the owner's ear: the metal
+   presets' riffs already reach the guitars' floor, a median of MIDI 47 to 49 and their lowest tenth 42, 9% to 14% of
+   their notes within a tone of E2 (Black metal's higher, a median of 59); lower takes a semitone floor in the realizer,
+   whose ranges are whole octaves, and General MIDI's guitars sounding below E2 are its lowest sample transposed, which
+   is the owner's to hear before it is built. The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or
    C2 for Doom's and Nu metal's, B1 for a seven-string's, F#1 for Djent's eight, General MIDI's guitars sounding below
    their written range as a sampler does. A value of the genre's (`register`'s or its own), the riff's and the rhythm
    part's range moved by it, the bass an octave under it as now. Measured first: where the riff of each metal preset
    sits against its range's floor.
-3. **Djent's riff intervals, no device of its own.** A one-note riff on the open low string moving by chromatic small
+3. **Djent's riff intervals, no device of its own**, measured on 26 October 2026 (`RiffIntervalsReportTest`): Djent's riffs
+   move as Metal's do, repeating 44% of their moves against 46%, a semitone 8% against 7%, a tritone 4% against 2%, a
+   seventh, a ninth or past an octave 2% against none, but go back to their pedal from off it 35% of the time against
+   12%; so they keep near the pedal, and the next step is the riff's stepwiseness (`RiffLayers.Stepwiseness`, 0.55 for
+   every genre) a preset's value, Djent's the more stepwise on its chromatic scale, a knob of the presets' to hear. A one-note riff on the open low string moving by chromatic small
    intervals (a semitone, a tone) or leaping by dissonant large ones (a tritone, a major seventh, a minor ninth over the
    octave), as Djent's riffs do across their songs; not one song's riff built as a device. The riff's scale already
    leans chromatic in Djent (`riffScale` chromatic 40-60-70); first measured: Djent's riffs' intervals off their pedal, how
@@ -324,7 +332,9 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   length comes nearest, each pass the same sections, at the songs' weight 0. Over 64 Jazz songs with it in place of AABA
   once and twice (`FormCycleTest.Report`): a bridge in 89% of the songs drawn, against 31%, a free form in 11%, against
   69%, and at the plain end 97% within Jazz's lengths, against 36%, two to nine passes. Heard 6-0 on 26 October 2026 and
-  taken: Jazz's pool names it in place of AABA once and twice. Left of the migration: the forms that are only longer copies (`vvbvvvbv`, `vvvvvv`,
+  taken: Jazz's pool names it in place of AABA once and twice; its head played out since, a cycle of three passes or more
+  leaving its last unsoloed (`SongForms.HeadOutChance`, 1-0.9-0.5, the last pass sung at the plain end 88% of the songs from
+  3%). Left of the migration: the forms that are only longer copies (`vvbvvvbv`, `vvvvvv`,
   `vcvcbcvc`, `vpcvpcbcvpc`) folded into cycles, and the length's chance of a free form left to the form facet. Found
   with it, either way: a jazz tune's head is rarely played out, 3% to 6% of the songs leaving their last four sections
   unsoloed, now and with the cycle, as solos fall on any later appearance; a cycle's last pass sung, as its first is,

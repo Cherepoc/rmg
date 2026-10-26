@@ -43,6 +43,26 @@ public sealed class FormCycleTest
         await Assert.That(cycled).IsGreaterThan(20);
     }
 
+    /// <summary>A rule: at the plain end a cycle of three passes or more plays its head out, none of its last pass soloed.</summary>
+    [Test]
+    public async Task APlainCycleOfThreePasses_PlaysItsHeadOut()
+    {
+        var heads = 0;
+        foreach (var song in Songs(Cycling, 0))
+        {
+            var roles = Roles(song);
+            if (roles.Contains(SectionRole.Free) || roles.Length < 12)
+                continue;
+            heads++;
+            var body = song.Map.Sections.Select((x, i) => i).Where(i => song.Trace.Single(t => t.Point == TracePoints.SongForm).Value is SongStructure form
+                                                                         && form.Roles[song.Map.Sections[i].SectionId] is not (SectionRole.Intro or SectionRole.Outro)).ToArray();
+            foreach (var index in body[^4..])
+                await Assert.That(song.Solos.ContainsKey(index)).IsFalse().Because($"seed {song.Seed}, section {index}");
+        }
+
+        await Assert.That(heads).IsGreaterThan(20);
+    }
+
     /// <summary>
     ///     Jazz now and with its AABA a cycle, at the plain end and as drawn: the songs with a bridge, in a free form, and
     ///     within Jazz's range of lengths, the passes a cycle plays, the sections after the first soloed, and the songs whose

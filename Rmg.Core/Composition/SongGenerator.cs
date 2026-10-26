@@ -297,7 +297,8 @@ internal enum SongStream
     ReharmonisationKinds = 142,
     MoodEnergy = 143,
     TremoloThrough = 144,
-    TremoloBuild = 145
+    TremoloBuild = 145,
+    HeadOut = 146
 }
 
 /// <summary>A third of a genre's tempo range (<see cref="SongGenerator.TempoBands" />).</summary>

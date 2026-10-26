@@ -413,7 +413,14 @@ internal sealed record SongDecisions(
         IReadOnlyCollection<TrackRole>[] partsAt = [..played.Select((_, index) => SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray())];
         // no solo over a breakdown, whose band rests to its chugs, nor over a calm section, whose guitars rest to its broken
         // chords, nor over a breakdown chorus, built up from the voice
-        bool PlaysNoSolo(int index) => generateSection(played[index]) is { Breakdown: true } or { Form.Kind: SectionFormKind.Calm } || breakdownChorus && index == sectionIds.Length - 1;
+        // nor over the head played out, a cycle's last pass of three or more, the head, the solos and the head again, its body's
+        // last sections, from a sequence of its own
+        int[] body = [..played.Select((id, index) => (id, index)).Where(x => structure.Roles[x.id] is not (SectionRole.Intro or SectionRole.Outro)).Select(x => x.index)];
+        var headsOut = Stream(SongStream.HeadOut).TestProbability(SongForms.HeadOutChance.At(songUnconventionality[Facet.Form])) && structure.Pass > 0 && body.Length >= 3 * structure.Pass;
+        var head = headsOut ? body[^structure.Pass..].ToHashSet() : [];
+        StateTrace.RecordSong(TracePoints.HeadOut, $"{headsOut}", headsOut);
+        bool PlaysNoSolo(int index) => generateSection(played[index]) is { Breakdown: true } or { Form.Kind: SectionFormKind.Calm } || breakdownChorus && index == sectionIds.Length - 1
+                                       || head.Contains(index);
         // a later appearance played as a solo now and then, each from a sequence of its own, by the section's facets, and
         // one the soloist's where the song has it, in an appearance that plays one
         var drawnSolos = Composition.Solos.WithSoloist(
