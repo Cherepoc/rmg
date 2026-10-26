@@ -101,7 +101,10 @@ notes muted, against the part on the muted guitar as it was, and a Funk bass sla
   (`metal-rhythm-unison`, 6 to none), Black metal's lines plain and later tremolo-picked (`blackmetal-tremolo`, 10 to
   none, its two "same" on songs before the riff's tremolo figure was folded into the picking, every current song's
   with) and Bluegrass's banjo roll (`bluegrass-roll`, 6 to 2, both without on songs before the ending's final chord was
-  struck once).
+  struck once); and of its sixth round (26 October 2026), Cinematic piano's double stop under the tune
+  (`piano-double-stops`, 9 to none, four the same, heard with the melody alone, the left hand's chords under it in the
+  band), Trance's energy following its intensity (`trance-fierce` 11 to 1, `trance-calm` 8 to none) and Post-rock's
+  build into a louder appearance (`postrock-build`, 8 to 2, drawn only where it picks two steps faster).
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
@@ -351,9 +354,9 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   section's moved by the intensity times a section's step, the proposal's wider spread at a given end left out as a case
   of its own. Over 64 Trance songs at intensity -1 and 1 (`MoodEnergyTest.Report`): its pitched parts' notes a second
   6.9 to 14.1, against 8.9 to 12.5 without, its drums' notes a bar 11.7 to 14.7, against 13.3 at both, its melody's
-  velocity 0.40 to 0.42, flat without. Heard to work, the migration follows: the songs' own chance raised, a genre's
-  dynamics leaning the result, and `Mood.Leans`'s figures entry taken out, as the energy leans the figures already;
-  heard not to, the choice and its layer taken out.
+  velocity 0.40 to 0.42, flat without. Heard to work on 26 October 2026 (11 to 1 at the fiercest, 8 to none at the
+  calmest), so the migration follows: the songs' own chance raised, a genre's dynamics leaning the result, and
+  `Mood.Leans`'s figures entry taken out, as the energy leans the figures already.
 - **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, to be asked): an
   `EndingKind` holding the last dominant as a stop while the lead runs alone over it, should the breath be heard to
   work.
@@ -974,7 +977,7 @@ through its rests (`articulation.tremoloThrough`, Black metal's 100): its notes 
 metal's riff silent 1% of a picking appearance's phrases, from 6%, its rhythm part 2% from 13%). A part builds into a
 louder appearance now and then (`articulation.tremoloBuild`, Post-rock's 30-50-60, Surf's and Black metal's 10-20-30): its
 last bar held through and picked faster each quarter of it, an 8th to the song's finest under the hand's cap (Post-rock's
-strokes 3.5, 6.9, 9.7 and 12.8 a second by quarter), asked as `postrock-build`. Left, in the order to build:
+strokes 3.5, 6.9, 9.7 and 12.8 a second by quarter), heard 8 to 2 (`postrock-build`). Left, in the order to build:
 
 1. **A bowed tremolo**: a strings part's theme coming back louder on General MIDI's tremolo strings (44) rather than
    re-struck, the orchestral and the film presets' climax; an instrument switch for the appearance

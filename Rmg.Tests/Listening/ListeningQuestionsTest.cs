@@ -57,47 +57,7 @@ public sealed class ListeningQuestionsTest
         Func<CorpusSong, double?>? Contrast = null
     );
 
-    private static readonly Question[] Questions =
-    [
-        new("piano-double-stops", "A Cinematic piano melody struck with a second note under it on every bar's downbeat, as a pianist voices a tune: fuller, or cluttered?",
-            "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never, both with the tune's octaves off, which sound a note under it too; not told apart, cut (#64).", "filmPiano", [],
-            new() { ["lineChords"] = new() { ["melody"] = 0 }, ["doubling"] = new() { ["octaves"] = 0 } },
-            x => DoubleStops(x).Select(v => (double?)v).Min(), Places: DoubleStops, WithPatch: new() { ["doubling"] = new() { ["octaves"] = 0 } }),
-        new("trance-fierce", "Two Trance tracks both at the fiercest intensity, one of them also with its sections louder and fuller for it: the more driving track, or only busier?",
-            "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity 1 (#76).", "trance", [],
-            new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
-            x => x.Origin, With: new() { ["intensity"] = 61 }, Without: new() { ["intensity"] = 61 }),
-        new("trance-calm", "Two Trance tracks both at the calmest intensity, one of them also with its sections softer and sparser for it: the calmer track, or an emptied one?",
-            "Whether a Trance song's energy follows its intensity (moodEnergy.energy, Trance's 100), against its tempo and leans alone, both given intensity -1 (#76).", "trance", [],
-            new() { ["moodEnergy"] = new() { ["energy"] = 0 } },
-            x => x.Origin, With: new() { ["intensity"] = 0 }, Without: new() { ["intensity"] = 0 }),
-        new("postrock-build", "A Post-rock guitar picking faster and faster through its last bar into a louder section, 8ths to as fast as the hand goes, against it played as it was: the build, or a rush?",
-            "How often a part builds into a louder appearance in Post-rock (articulation.tremoloBuild, 30-50-60), against never.", "postRock", [],
-            new() { ["articulation"] = new() { ["tremoloBuild"] = 0 } },
-            x => BuiltAt(x).Select(v => (double?)v).Min(), Places: BuiltAt)
-    ];
-
-    /// <summary>Where a song's parts build into a louder section, each build's first stroke, in beats.</summary>
-    private static double[] BuiltAt(CorpusSong song) =>
-    [
-        ..song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) == 1
-                                                               && x.Value.State.GetStateValue(CompositionStateKinds.Articulation).Value.BuildFrom > 0)
-            .Select(x => song.Map.PlaceOf(x.Position) is var place ? x.Position - place.Beat : x.Position).Distinct().Order()
-    ];
-
-    /// <summary>Where a song's melody stacks its notes on the band's chord, a double stop, in beats.</summary>
-    /// <remarks>
-    ///     But where the tune plays in octaves, its octave below sounding under it without the double stop too, and where another
-    ///     part sounds within an octave under the tune, as the left hand's chords do, so that what is heard apart is the stop.
-    /// </remarks>
-    private static double[] DoubleStops(CorpusSong song)
-    {
-        var melody = song.Track(TrackRole.Melody);
-        bool Under(TimelineItem<RealizedNote> note) => song.Song.Notes!.Where(x => x.Key != melody).SelectMany(x => x.Value)
-            .Any(x => x.Position <= note.Position + 1e-6 && x.Position + x.Value.Duration > note.Position + 1e-6 && x.Value.Pitches.Any(p => p < note.Value.Pitches.Max() && p >= note.Value.Pitches.Max() - 12));
-        return [..song.Song.Notes!.GetValueOrDefault(melody)?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1
-                                                                     && x.Value.State.GetStateValue(CompositionStateKinds.Octave) == 0 && !Under(x)).Select(x => x.Position) ?? []];
-    }
+    private static readonly Question[] Questions = [];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()
