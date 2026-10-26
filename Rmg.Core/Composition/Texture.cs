@@ -33,12 +33,13 @@ internal static class Texture
 {
     /// <summary>
     ///     How likely each texture is, at the plain end, the middle and the wild end, and how it leans by the section's
-    ///     energy: those of fewer parts against it.
+    ///     energy: those of fewer parts against it, a build's first phrases among them, as a louder section arrives whole and
+    ///     an intro or a breakdown builds.
     /// </summary>
     public static ImmutableArray<(TextureKind Kind, ByConvention Weight, double EnergyLean)> Kinds { get; } =
     [
         (TextureKind.Steady, new ByConvention(1, 0.82, 1), 0),
-        (TextureKind.Build, new ByConvention(0, 0.1, 1), 0),
+        (TextureKind.Build, new ByConvention(0, 0.1, 1), -1),
         (TextureKind.Thin, new ByConvention(0, 0.04, 1), -1),
         (TextureKind.Alone, new ByConvention(0, 0.04, 1), -1)
     ];
