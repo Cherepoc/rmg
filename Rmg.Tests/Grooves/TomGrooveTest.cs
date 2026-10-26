@@ -25,11 +25,12 @@ public sealed class TomGrooveTest
             if (kit.Leads.GetValueOrDefault(DrumRole.Time) != DrumDefinitions.Tom)
                 continue;
             led++;
-            // its tom sounding in the section's appearances, where its drums groove, the kick and the snare a bar's worth at least,
-            // not where they rest but for a landing
+            // its tom sounding in the section's appearances, where its drums groove, the kick and the snare a bar's worth at least
+            // of their groove's notes, not a fill's, not where they rest but for a landing, nor a build's snare roll
             int Notes(int track) => song.Song.Notes!.GetValueOrDefault(track)?.Count(x => song.Map.PlayingAt(x.Position)?.Span.SectionId == section) ?? 0;
+            int Hits(int track) => song.Trace.Count(x => x.Point == TracePoints.Fill && x.Track == track && x.Section == section);
             var bars = song.Map.Sections.Where(x => x.SectionId == section).Sum(x => x.BarCount);
-            if (new[] { DrumDefinitions.Kick, DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare }.Sum(x => Notes(DrumGroups.GetTrackNumber(x))) >= bars)
+            if (new[] { DrumDefinitions.Kick, DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare }.Select(DrumGroups.GetTrackNumber).Sum(x => Notes(x) - Hits(x)) >= bars)
                 await Assert.That(Notes(tom)).IsGreaterThan(0).Because($"seed {song.Seed}, section {section}");
         }
 
