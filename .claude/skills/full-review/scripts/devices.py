@@ -46,7 +46,7 @@ FAMILIES = {
     },
     'sound': {
         'choices': 'effects strongEffect echo louderForms instrumentSwitches room insertion pan mixFilter levels articulation tremoloSpeed articulationModes bendTiming vibratoWidth',
-        'stages': 'Instrument choices|Instruments|Articulation choices|Articulation|Mix filter|Expression',
+        'stages': 'Instrument choices|Instruments|Articulation choices|Articulation|Mix filter|Expression choices|Expression',
     },
 }
 
