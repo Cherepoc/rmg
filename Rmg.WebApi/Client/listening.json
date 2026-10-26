@@ -2,10 +2,14 @@
   {
     "id": "piano-double-stops",
     "question": "A Cinematic piano melody struck with a second note under it on every bar's downbeat, as a pianist voices a tune: fuller, or cluttered?",
-    "decides": "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never; not told apart, cut (#64).",
+    "decides": "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never, both with the tune's octaves off, which sound a note under it too; not told apart, cut (#64).",
     "genre": "filmPiano",
     "with": {
-      "genre": {},
+      "genre": {
+        "doubling": {
+          "octaves": 0
+        }
+      },
       "settings": {}
     },
     "without": {
@@ -14,6 +18,9 @@
         "lineChords": {
           "melody": 0,
           "riff": 50
+        },
+        "doubling": {
+          "octaves": 0
         }
       },
       "settings": {}
@@ -44,6 +51,14 @@
         ]
       },
       {
+        "seed": "u",
+        "at": 226.2,
+        "from": 223.4,
+        "listen": [
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
         "seed": "13",
         "at": 174.1,
         "from": 172.1,
@@ -52,17 +67,9 @@
         ]
       },
       {
-        "seed": "1K",
-        "at": 234.1,
-        "from": 231.4,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "1U",
-        "at": 66.5,
-        "from": 62.8,
+        "seed": "18",
+        "at": 114.3,
+        "from": 111.4,
         "listen": [
           "Melody (Acoustic Grand Piano)"
         ]
@@ -502,11 +509,12 @@
         ]
       },
       {
-        "seed": "8",
-        "at": 52.3,
-        "from": 50.8,
+        "seed": "O",
+        "at": 418,
+        "from": 416.4,
         "listen": [
-          "Chords (Electric Guitar (clean))"
+          "Chords (Electric Guitar (clean))",
+          "Rhythm part (Electric Guitar (clean))"
         ]
       }
     ]

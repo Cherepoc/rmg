@@ -30,6 +30,12 @@ internal static class VelocityLayers
     };
 
     /// <summary>
+    ///     How much louder a part plays a phrase it is left alone in: up to a leading part's level, the melody's, from its own
+    ///     under it, as a mix rides up the one part left; none for a part as loud already.
+    /// </summary>
+    public static double LoneLift(TrackRole role) => Math.Max(0, GetLevel(TrackRole.Melody) - GetLevel(role));
+
+    /// <summary>
     ///     How much louder or quieter a genre plays a part at its most or its least (<see cref="GenreChoices.Levels" />), in the
     ///     velocity's units, about 15 to 20 MIDI steps, fewer above the middle, as a beat's drums lead it.
     /// </summary>

@@ -1124,6 +1124,22 @@ internal sealed record GeneratedSection(
             ));
         }
 
+        // and a pitched part left alone in a phrase, every other resting or silent there, the drums too, played at a leading
+        // part's level, as a mix rides up the one part left, a pad's bed heard as the melody would be
+        var phrases = (int)Math.Ceiling(Timeline.Duration / Meter.PhraseDuration - 1e-9);
+        for (var phrase = 0; phrase < phrases; phrase++)
+        {
+            TrackRole[] sounding = [..Roles.Values.Distinct().Except(Resting).Except(phrase < PhraseSilent.Length ? PhraseSilent[phrase] : [])];
+            if (sounding is not [var alone] || alone == TrackRole.Drum || VelocityLayers.LoneLift(alone) <= 0)
+                continue;
+            var (from, to) = (phrase * Meter.PhraseDuration, Math.Min((phrase + 1) * Meter.PhraseDuration, Timeline.Duration));
+            var lift = StateTimelineMap.Create(Timeline.Duration, [StateTimeline.Create(Timeline.Duration, StateKinds.Velocity,
+                [VelocityLayers.LoneLift(alone).ToTimelineItem(from), 0.0.ToTimelineItem(to)])]);
+            timeline = TrackEventStateTimelineMap.Create(timeline.Duration, timeline.TrackTimelineMap.Select(x => Roles[x.Key] == alone
+                ? new KeyValuePair<int, EventStateTimelineMap<StateMap>>(x.Key, x.Value.MergeStateTimelineMap(lift))
+                : x), timeline.CommonStateTimelineMap);
+        }
+
         return this with { Timeline = timeline, Lines = [..Lines.Where(x => !silent.Contains(x.Track))] };
     }
 }

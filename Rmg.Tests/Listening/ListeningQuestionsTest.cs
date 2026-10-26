@@ -60,9 +60,9 @@ public sealed class ListeningQuestionsTest
     private static readonly Question[] Questions =
     [
         new("piano-double-stops", "A Cinematic piano melody struck with a second note under it on every bar's downbeat, as a pianist voices a tune: fuller, or cluttered?",
-            "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never; not told apart, cut (#64).", "filmPiano", [],
-            new() { ["lineChords"] = new() { ["melody"] = 0 } },
-            x => DoubleStops(x).Select(v => (double?)v).Min(), Places: DoubleStops),
+            "Whether a melody on a chord instrument plays double stops on its downbeats (lineChords.melody, 25 at every end), against never, both with the tune's octaves off, which sound a note under it too; not told apart, cut (#64).", "filmPiano", [],
+            new() { ["lineChords"] = new() { ["melody"] = 0 }, ["doubling"] = new() { ["octaves"] = 0 } },
+            x => DoubleStops(x).Select(v => (double?)v).Min(), Places: DoubleStops, WithPatch: new() { ["doubling"] = new() { ["octaves"] = 0 } }),
         new("blackmetal-tremolo", "A Black metal line heard plain, then tremolo-picked as its section comes back with more energy, the guitars' wall: a build, or a blur?",
             "How often an appearance tremolo-picks its riff's, rhythm part's or melody's notes, the likelier and the faster the more energy it has (articulation.tremolo, Black metal's 20-40-50), against never.", "blackMetal", [],
             new() { ["articulation"] = new() { ["tremolo"] = 0 } },
