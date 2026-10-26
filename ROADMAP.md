@@ -349,14 +349,6 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   Soul, Country), Folk, Medieval and Country given lengths for them (a cycle played once where none is given, a rule of
   it), their free forms the fewer where a cycle fits the length (Blues' 23% from 30%, Dungeon's 44% from 59%,
   `FormFoldReportTest`). Left: the length's chance of a free form left to the form facet.
-- **Intensity moving the energy** (#76, the foundations reviewer), built as an experiment on 24 October 2026 and asked
-  (`trance-fierce`, `trance-calm`): a song's energy following its intensity (`moodEnergy`, Trance's alone), every
-  section's moved by the intensity times a section's step, the proposal's wider spread at a given end left out as a case
-  of its own. Over 64 Trance songs at intensity -1 and 1 (`MoodEnergyTest.Report`): its pitched parts' notes a second
-  6.9 to 14.1, against 8.9 to 12.5 without, its drums' notes a bar 11.7 to 14.7, against 13.3 at both, its melody's
-  velocity 0.40 to 0.42, flat without. Heard to work on 26 October 2026 (11 to 1 at the fiercest, 8 to none at the
-  calmest), so the migration follows: the songs' own chance raised, a genre's dynamics leaning the result, and
-  `Mood.Leans`'s figures entry taken out, as the energy leans the figures already.
 - **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, to be asked): an
   `EndingKind` holding the last dominant as a stop while the lead runs alone over it, should the breath be heard to
   work.
@@ -518,10 +510,6 @@ code before it is recorded here. Left:
   playing three of the kit's notes (`PercussionSectionsTest`, its assertion naming no song yet); a calm section's drums
   not sparser (seed 14 at 712, `DroneAndQuieterFormTest`). Their songs change with the review of 22 October's packages: each to be
   read at the first offset it fails at after them.
-- **Two at 1000000** (26 October 2026, each failing at fafdf766 too, older than the build's lean against energy): Nu
-  metal's tom groove leading no time on the tom in a section that draws it (seed 6, section 6,
-  `AGenresTomGroove_LeadsSomeSectionsTime_OnTheTom`); and a plain melody's phrases ending off the chord's root or third
-  (549 against 552 phrases, `APlainMelodysPhrases_EndOnTheChordsRootOrThird`), a rule or a calibration to read.
 - **The suite's memory at 924000000:** about 240 tests ran out of the 8 GB cap there (23 October 2026), every one
   passing alone; the corpus's songs cached by the tests, larger there, are the likely cause, with the suite's slowing
   (the review of 22 October's #246).

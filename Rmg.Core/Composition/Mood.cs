@@ -8,7 +8,8 @@ namespace Rmg.Core.Composition;
 ///     intense, from -1, the calmest, to 1, the fiercest, the two axes of valence and arousal, their quadrants serene,
 ///     euphoric, sombre and menacing. A mood never adds an option nor takes one away: it leans the weights of those a
 ///     genre's pool allows at the song's conventionality, an option's odds times <see cref="Odds" /> to the power of its
-///     lean times the mood, as energy leans; a middling mood leans nothing. Each is drawn within a genre's span
+///     lean times the mood, as energy leans; a middling mood leans nothing. Its intensity moves the song's
+///     energy too (<see cref="SectionEnergy.GenerateMood" />), which leans the sections' draws. Each is drawn within a genre's span
 ///     (<see cref="GenreChoices.Darkness" />, <see cref="GenreChoices.Intensity" />), the songs' own a moderate one, or
 ///     given, from a sequence of its own, so that giving one leaves the rest of the song as its seed made it.
 /// </summary>
@@ -35,10 +36,11 @@ public readonly record struct Mood(double Darkness, double Intensity)
     ///     leans it as the songs have it, where its options' own amounts are the songs' draw, and not where the songs draw
     ///     otherwise, as their kit by their drums' job. The scales by their darkness, a minor third's dark and a major's
     ///     bright, Lydian the brightest and Locrian the darkest (<see cref="Scale.Darkness" />); the fiercer, the likelier
-    ///     the power kit, double time, a riff that chugs or plays power chords, a driven instrument, a loud section's figure,
+    ///     the power kit, double time, a riff that chugs or plays power chords, a driven instrument,
     ///     hat rolls, ghost notes and drops, and the calmer the brushes, the jazz kit and half time; a tempo's range leaning
     ///     to its fast end the fiercer, and its fast third; a chord shape and a chord's own mode by its darkness; fills the
-    ///     more the fiercer, a value as a range's lean.
+    ///     more the fiercer, a value as a range's lean. The figures and the rest a section's energy leans follow the
+    ///     intensity through it (<see cref="SectionEnergy.GenerateMood" />), not here.
     /// </summary>
     // built when first asked, as the choices it names take the songs' span of a mood from here
     public static ImmutableArray<(GenreChoice Choice, Func<string, (double Darkness, double Intensity)> Lean, bool AsSongs)> Leans => field.IsDefault ? field =
@@ -61,9 +63,6 @@ public readonly record struct Mood(double Darkness, double Intensity)
         (GenreChoices.HatRolls, _ => (0, 1), false),
         (GenreChoices.Ghosts, _ => (0, 1), false),
         (GenreChoices.Drop, name => (0, name == "lifts" ? 1 : 0), false),
-        // every player's figures by how a loud section leans them, a double kick or four on the floor the fiercer
-        ..Enum.GetValues<FigurePlayer>().Select(player => (GenreChoices.Figures[player],
-            (Func<string, (double, double)>)(name => (0, Figures.Of(player, name)?.EnergyLean ?? 0)), false)),
         // every part's instruments, a driven one the fiercer
         ..GenreChoices.InstrumentPools.Select(x => (GenreChoices.Instruments[x.Role],
             (Func<string, (double, double)>)(name => (0, InstrumentTraits.Has(x.Pool.Everything.First(i => GenreChoices.Name(i.Name) == name).Program, InstrumentTrait.Driven) ? 1 : 0)),
