@@ -356,7 +356,7 @@ internal static class Realizer
 
         // a broken chord plays one of its notes, by its pattern and its place since the chord came in, the colour its part
         // lays on it among them; a rolled one whole, its colour too, which the articulations roll in 8ths (Articulations.ThreeFingerRoll)
-        var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio);
+        var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio).Value;
         if (role.PlaysChords() && !isLine && arpeggio == ArpeggioPattern.Roll)
             notes = [..Arpeggios.Coloured(notes, stateMap, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour))];
         else if (role.PlaysChords() && !isLine && arpeggio != ArpeggioPattern.None)

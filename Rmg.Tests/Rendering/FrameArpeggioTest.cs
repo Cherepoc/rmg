@@ -87,7 +87,7 @@ public sealed class FrameArpeggioTest
             for (var i = 0; i + 1 < notes.Length; i++)
             {
                 var note = notes[i];
-                if (note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 || note.Value.Pitches.Length != 1
+                if (note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == 0 || note.Value.Pitches.Length != 1
                     || InstrumentTraits.Rings(InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)definition).InstrumentCode)))
                     continue;
                 broken++;

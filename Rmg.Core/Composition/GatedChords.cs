@@ -44,7 +44,7 @@ internal static class GatedChords
 
         // every stretch the song plays as a section's, an intro's window as its section's first bars; an intro of its own's
         // and the ending's notes, which play no gate, as they are, and a broken chord's and a solo's, which hold no chord
-        bool HoldsNoChord(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0 || note.State.GetStateValue(CompositionStateKinds.LineSolo) != 0;
+        bool HoldsNoChord(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Arpeggio).Value != 0 || note.State.GetStateValue(CompositionStateKinds.LineSolo) != 0;
         var played = map.Plays.Where(x => !x.IsEnding).Select(x => x.Span).ToArray();
         var held = timeline.Where(x => InStopTime(x.Position) || HoldsNoChord(x.Value) || x.Position < played[0].Start - Epsilon || x.Position >= map.Sections[^1].End - Epsilon).ToList();
         foreach (var section in played)

@@ -122,7 +122,7 @@ public sealed class DroneAndQuieterFormTest
                 heavy++;
                 // or a pinch's harmonic (Expression)
                 await Assert.That(SectionForm.HeavyPrograms.Append(Expression.GuitarHarmonics)).Contains(InstrumentsOverTime.ProgramOf(note.Value.State, 0)).Because($"seed {song.Seed}, track {track} at {note.Position}");
-                await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio)).IsEqualTo(0).Because($"seed {song.Seed}, track {track} at {note.Position}");
+                await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value).IsEqualTo(0).Because($"seed {song.Seed}, track {track} at {note.Position}");
             }
         }
 

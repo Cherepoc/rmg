@@ -19,7 +19,7 @@ public sealed class LetRingTest
         var (ringing, all) = (0, 0);
         foreach (var song in songs)
         {
-            var notes = song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0).ToArray();
+            var notes = song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value != 0).ToArray();
             all += notes.Length;
             ringing += notes.Zip(notes.Skip(1)).Count(x => x.First.Position + x.First.Value.Duration > x.Second.Position + 1e-6);
         }

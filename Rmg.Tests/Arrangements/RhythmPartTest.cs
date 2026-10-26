@@ -23,7 +23,7 @@ public sealed class RhythmPartTest
 
             // whole chords, but where broken or soloing, of the chord's notes, a power chord's fifth too
             var whole = song.Song.Notes![song.Song.Track(TrackRole.Rhythm)]
-                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
+                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
                 .ToArray();
             await Assert.That(whole.All(x => x.Value.Pitches.Distinct().Count() >= 2)).IsTrue().Because($"seed {song.Seed}");
             foreach (var note in whole)

@@ -20,11 +20,11 @@ public sealed class MetalArpeggiosReportTest
                         Notes: x.Value.Where(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9).ToArray(), span.Duration))))
                 .Where(x => x.Notes.Length > 0)
                 .ToArray();
-            var arpeggios = broken.Where(x => x.Notes.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0)).ToArray();
+            var arpeggios = broken.Where(x => x.Notes.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value != 0)).ToArray();
             int Program(PitchInstrumentTrack part, RealizedNote note) => InstrumentsOverTime.ProgramOf(note.State, part.InstrumentCode);
             var clean = arpeggios.Count(x => x.Notes.Count(n => Program(x.Part, n.Value) is >= 24 and <= 28) > x.Notes.Length / 2);
             var colours = arpeggios.Select(x => (ChordColour)x.Notes[0].Value.State.GetStateValue(CompositionStateKinds.Colour)).ToArray();
-            var patterns = arpeggios.Select(x => (ArpeggioPattern)x.Notes[0].Value.State.GetStateValue(CompositionStateKinds.Arpeggio)).ToArray();
+            var patterns = arpeggios.Select(x => (ArpeggioPattern)x.Notes[0].Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value).ToArray();
             Console.WriteLine($"{name}: of the chord parts' sections {arpeggios.Length / (double)broken.Length:P0} broken, {clean / (double)Math.Max(1, arpeggios.Length):P0} of them clean, " +
                               $"{arpeggios.Select(x => x.Notes.Length / x.Duration).DefaultIfEmpty(double.NaN).Average():F1} notes a beat, the rhythm part's {arpeggios.Where(x => x.Part.Role == TrackRole.Rhythm).DefaultIfEmpty().Average(x => x.Notes is null ? 0 : x.Notes.Length / x.Duration):F1}; " +
                               $"patterns {string.Join(", ", patterns.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)patterns.Length:P0}"))}; " +

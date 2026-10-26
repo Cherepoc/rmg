@@ -14,7 +14,7 @@ public sealed class TwelveEightTest
         {
             await Assert.That(Meter.NameOf(song.Map.Meter)).IsEqualTo("12/8");
             await Assert.That(song.Map.Meter.BarDuration).IsEqualTo(6);
-            var notes = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0
+            var notes = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value != 0
                 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0 && song.Map.MeterAt(x.Position) == song.Map.Meter).ToArray() ?? [];
             broken += notes.Length;
             // off the 8ths of its bar, counted from the bar's start

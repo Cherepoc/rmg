@@ -17,7 +17,7 @@ public sealed class SongGeneratorChordTrackTest
         {
             // as the song realizes them, but a solo's line, which the chords may play, and broken chords, one note at a time
             var sizes = TestCorpus.Get(seed).Song.Notes![TestCorpus.Get(seed).Track(TrackRole.Chords)]
-                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
+                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
                 .Select(x => x.Value.Pitches.Distinct().Count())
                 .ToArray();
             chords += sizes.Length;

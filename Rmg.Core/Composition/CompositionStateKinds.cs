@@ -184,8 +184,8 @@ internal static class CompositionStateKinds
     // as its rhythm has them
     public static StateKind<double> ShortestNote { get; } = StateKinds.CreateAdditive<double>(Prefix + "ShortestNote");
 
-    // how a section's chords are broken, an ArpeggioPattern, 0 for the whole chord at once
-    public static StateKind<int> Arpeggio { get; } = StateKinds.CreateAdditive<int>(Prefix + "Arpeggio", StateScope.Render);
+    // how a section's chords are broken, an ArpeggioPattern, 0 for the whole chord at once, the deepest layer's
+    public static StateKind<LayerValue<int>> Arpeggio { get; } = StateKinds.CreateLowestLayerWins<int>(Prefix + "Arpeggio", StateScope.Render);
 
     // the seed a chord broken in no pattern's order draws its notes by, the section's own for its part
     public static StateKind<long> ArpeggioOrder { get; } = StateKinds.CreateAdditive<long>(Prefix + "ArpeggioOrder", StateScope.Render);

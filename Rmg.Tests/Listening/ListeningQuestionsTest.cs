@@ -173,7 +173,7 @@ public sealed class ListeningQuestionsTest
 
     /// <summary>Where a song's rhythm part rolls its chords, in beats.</summary>
     private static double[] Rolled(CorpusSong song) =>
-        [..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == (int)ArpeggioPattern.Roll).Select(x => x.Position) ?? []];
+        [..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == (int)ArpeggioPattern.Roll).Select(x => x.Position) ?? []];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

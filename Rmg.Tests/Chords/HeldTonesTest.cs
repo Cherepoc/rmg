@@ -20,7 +20,7 @@ public sealed class HeldTonesTest
     private static (RealizedNote Note, IReadOnlySet<int> Chord)[] Broken(IEnumerable<CorpusSong> songs) =>
     [
         ..songs.SelectMany(song => song.Song.Notes![song.Song.Track(TrackRole.Chords)]
-            .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0 && x.Value.Pitches.Length == 1)
+            .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value != 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0 && x.Value.Pitches.Length == 1)
             .Select(x => (x.Value, Realizer.GetChordNotes(x.Value.State).Classes)))
     ];
 
@@ -42,7 +42,7 @@ public sealed class HeldTonesTest
         // every note the chord's, a note of its own scale, or a held step of the key, the key's own as the section has it
         foreach (var song in clean)
         // but a solo's line, which the part may play
-        foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0
+        foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value != 0
                                                                                            && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
         {
             var (own, root, chord) = Realizer.GetChord(note.Value.State);

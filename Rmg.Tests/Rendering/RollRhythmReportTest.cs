@@ -22,7 +22,7 @@ public sealed class RollRhythmReportTest
         var steps = new Dictionary<double, int>();
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("bluegrass")))))
         {
-            var notes = song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == (int)ArpeggioPattern.Roll && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0).ToArray() ?? [];
+            var notes = song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == (int)ArpeggioPattern.Roll && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0).ToArray() ?? [];
             foreach (var note in notes)
                 if (Math.Abs(song.Map.PlaceOf(note.Position).Beat * 2 - Math.Round(song.Map.PlaceOf(note.Position).Beat * 2)) < 1e-6) on++;
                 else off++;

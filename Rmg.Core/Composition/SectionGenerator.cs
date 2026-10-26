@@ -839,7 +839,7 @@ internal sealed class SectionGenerator
                 sectionTrackLayer.Add(CompositionStateKinds.ShortestNote, SectionForm.CalmShortest);
             }
             StateTrace.RecordSection(TracePoints.Arpeggio, trackNumber, sectionId, $"{arpeggio}", arpeggio);
-            sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
+            sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, new LayerValue<int>(StateDepths.Section, (int)arpeggio));
             // and, broken in no pattern's order, the seed of its order, from a sequence of its own
             if (arpeggio == ArpeggioPattern.Random)
                 sectionTrackLayer.Add(CompositionStateKinds.ArpeggioOrder, (long)Stream(sectionId, SectionStream.ArpeggioOrder, trackNumber).GenerateSeed());

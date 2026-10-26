@@ -41,7 +41,7 @@ public sealed class AlternatingThumbTest
         {
             var changes = song.ChordChanges;
             foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role is TrackRole.Chords or TrackRole.Rhythm))
-            foreach (var chord in notes.Where(x => (ArpeggioPattern)x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == ArpeggioPattern.AlternatingThumb
+            foreach (var chord in notes.Where(x => (ArpeggioPattern)x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == ArpeggioPattern.AlternatingThumb
                                                    && x.Value.State.GetStateValue(CompositionStateKinds.Colour) == 0 && x.Value.Pitches.Length == 1
                                                    // but a solo's line the part plays, which keeps its part's state
                                                    && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0

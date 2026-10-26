@@ -289,7 +289,7 @@ internal static partial class Articulations
         // and a part's rolled chords rolled in 8ths, as a banjo's fingers roll through a held chord, each held to the next through
         // the part's rests, so that the roll runs on, the next chord taking it over at its first 8th
         // but a break's, its soloist's own line, whose rests are the break's
-        static bool Rolled(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Arpeggio) == (int)ArpeggioPattern.Roll && note.Pitches.Length > 1
+        static bool Rolled(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == (int)ArpeggioPattern.Roll && note.Pitches.Length > 1
                                                  && note.State.GetStateValue(CompositionStateKinds.LineSolo) == 0;
         foreach (var (track, timeline) in result.ToArray())
             if (song.Tracks.Definitions[track].Role.PlaysChords() && timeline.Any(x => Rolled(x.Value)))
@@ -316,7 +316,7 @@ internal static partial class Articulations
         return EventTimeline.Create(timeline.Duration, notes.Select((note, i) =>
         {
             var program = InstrumentsOverTime.ProgramOf(note.Value.State, own);
-            var broken = note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0 && note.Value.Pitches.Length == 1;
+            var broken = note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value != 0 && note.Value.Pitches.Length == 1;
             // a broken chord's note on an instrument that holds its sound ends where the part's next starts, as an
             // arpeggiator's notes do, which held on would smear into a cluster
             if (broken && !InstrumentTraits.Rings(program) && i + 1 < notes.Length && notes[i + 1].Position - note.Position < note.Value.Duration - 1e-9)
@@ -453,7 +453,7 @@ internal static partial class Articulations
     internal static EventTimeline<RealizedNote> ThreeFingerRoll(EventTimeline<RealizedNote> timeline, Func<double, double> inBar, Func<double, double> eighthFrom) =>
         EventTimeline.Create(timeline.Duration, timeline.SelectMany((struck, i) =>
         {
-            if (struck.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != (int)ArpeggioPattern.Roll || struck.Value.Pitches.Length < 2)
+            if (struck.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value != (int)ArpeggioPattern.Roll || struck.Value.Pitches.Length < 2)
                 return [struck];
             var next = timeline.Skip(i + 1).Select(x => (TimelineItem<RealizedNote>?)x).FirstOrDefault(x => x!.Value.Position > struck.Position + 1e-9);
             var voiced = struck.Value.Pitches;
