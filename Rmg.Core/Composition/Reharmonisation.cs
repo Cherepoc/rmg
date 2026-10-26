@@ -121,7 +121,8 @@ internal static class Reharmonisation
         return substituted.Count == 0 ? null : new ReharmonisationPlan(later, [..substituted]);
 
         // a chord's substitute of a kind, its root's move and its scale's steps; none where the kind fits it not: a dominant
-        // into a chord with no fifth to resolve to, or that is already its dominant, a borrowed minor of a chord not major
+        // into a chord with no fifth to resolve to, that is already its dominant or in another key, a borrowed minor of a
+        // chord not major
         (int Step, StepAlterations? Scale)? Substitute(double at, double next, int third, ReharmonisationKind kind)
         {
             var state = common.GetEffectiveStateMapAt(at);
@@ -134,9 +135,13 @@ internal static class Reharmonisation
             {
                 case ReharmonisationKind.Applied:
                 {
-                    var target = common.GetEffectiveStateMapAt(next).GetStateValue(StateKinds.ChordRoot);
+                    var into = common.GetEffectiveStateMapAt(next);
+                    var target = into.GetStateValue(StateKinds.ChordRoot);
                     var step = (target + 4 - root).Mod(Scales.StepCount) is var up && up > 3 ? up - Scales.StepCount : up;
-                    if (step == 0 || next >= common.Duration - 1e-9 || Above(target, 4) == 6)
+                    // and only into a chord in the same key and scale, whose root its steps count in: not across a key change
+                    // into the next section, whose chord the steps would miss
+                    if (step == 0 || next >= common.Duration - 1e-9 || Above(target, 4) == 6
+                        || into.GetStateValue(StateKinds.KeyOffset) != state.GetStateValue(StateKinds.KeyOffset) || !into.GetStateValue(StateKinds.ScaleOffsets).SequenceEqual(offsets))
                         return null;
                     return (step, ChordScales.Toward(offsets, root + step, Scales.Mixolydian.Offsets, ChordScaleKind.Applied)?.Steps);
                 }
