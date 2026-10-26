@@ -5,6 +5,7 @@ using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
+using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Forms;
 
@@ -86,6 +87,32 @@ public sealed class SongEndingTest
         }
 
         await Assert.That(endings.Length).IsGreaterThan(0);
+    }
+
+    /// <summary>
+    ///     The final chord struck once by every pitched part, together on the ending's downbeat, a big ending's again on its
+    ///     last hit: a broken chord's whole, never rolled nor tremolo-picked, a banjo's roll and a guitar's picking among them,
+    ///     where the genres play them.
+    /// </summary>
+    [Test]
+    [Arguments(null)]
+    [Arguments("bluegrass")]
+    [Arguments("postRock")]
+    [Arguments("blackMetal")]
+    public async Task TheFinalChord_IsStruckOnce_ByEveryPart(string? genre)
+    {
+        var overrides = new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(GenrePresets.All.Single(x => x.Id == genre)));
+        var endings = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, overrides)).Where(x => FormLayers.HasFinalChord(Ending(x).Kind)).ToArray();
+        foreach (var song in endings)
+            foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack))
+            {
+                var final = notes.Where(x => x.Position >= Ending(song).Start - 1e-9).ToArray();
+                double[] struck = Ending(song).Kind == EndingKind.Big ? [Ending(song).Start, Ending(song).Start + Ending(song).Held] : [Ending(song).Start];
+                await Assert.That(final.All(x => struck.Any(at => Math.Abs(x.Position - at) < 1e-6))).IsTrue().Because($"{genre} seed {song.Seed}, track {track}");
+                await Assert.That(final.All(x => x.Value.State.GetStateValue(CompositionStateKinds.Picked) == 0)).IsTrue().Because($"{genre} seed {song.Seed}, track {track}");
+            }
+
+        await Assert.That(endings.Length).IsGreaterThan(8);
     }
 
     [Test]

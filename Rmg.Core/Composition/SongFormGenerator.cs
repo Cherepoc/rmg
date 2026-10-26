@@ -614,7 +614,8 @@ internal sealed class SongFormGenerator
     )
     {
         var homeBar = lastSection.Timeline.Trim(lastSection.Meter.BarDuration);
-        var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length)]);
+        // the final chord struck whole, a broken chord's too, as the band hits it together
+        var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length), CompositionStateKinds.Arpeggio.CreateState(new LayerValue<int>(StateDepths.Note, (int)ArpeggioPattern.None))]);
         // every track plays the home bar's chord as its earliest note has it, the downbeat's, whichever note it takes its
         // own state from; where no part plays in the home bar, the home chord as the song last played it, a section's
         // before, rather than the shapes the parts last played, a cadence's among them

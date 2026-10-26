@@ -124,10 +124,11 @@ internal static partial class Articulations
             // the chords' broken chords let ring in a calm section whatever the part draws, as the part's own, which a note's
             // own choice is over
             var ringing = articulates | PartArticulation.LetsRing;
-            // and a line it picks held through its rests, where the song carries its tremolo through them
+            // and a line it picks held through its rests, where the song carries its tremolo through them; but none in an
+            // ending's final chord, which the band strikes once
             ArticulationChoice In(Play? play)
             {
-                var step = play is { Index: var index } ? picking.GetValueOrDefault(index) : 0;
+                var step = play is { Index: var index, IsEnding: var ending } && !(ending && FormLayers.HasFinalChord(song.Form.Map.Ending.Kind)) ? picking.GetValueOrDefault(index) : 0;
                 var own = rings || play is { Span: var played } && role.PlaysChords() && Calm(played) ? ringing : articulates;
                 return new ArticulationChoice(through && step > 0 ? own | PartArticulation.Holds : own, step);
             }

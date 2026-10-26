@@ -31,7 +31,9 @@ public sealed class TremoloTest
             var hits = song.Trace.Where(x => x.Point == TracePoints.EnsembleHits).SelectMany(x => (ImmutableArray<double>)x.Value!).ToArray();
             bool InStopTime(double at) => song.Map.Sections.Any(s => stopped.Any(x => Math.Abs(x - s.Start) < 1e-6) && at >= s.Start - 1e-9 && at < s.Start + s.Meter.PhraseDuration - 1e-9)
                                           || song.Map.Sections.Any(s => hits.Any(x => at >= x - 1e-9 && at < x + s.Meter.BarDuration - 1e-9 && s.IsWithin(x)));
-            var notes = song.Song.Notes!.GetValueOrDefault(entry.Track)?.Where(x => song.Map.PlayingAt(x.Position)?.Index == index).ToArray() ?? [];
+            // but the ending's final chord, which the band strikes once
+            var notes = song.Song.Notes!.GetValueOrDefault(entry.Track)?.Where(x => song.Map.PlayingAt(x.Position) is { Index: var at, IsEnding: var ending } && at == index
+                                                                                    && !(ending && FormLayers.HasFinalChord(song.Map.Ending.Kind))).ToArray() ?? [];
             // (but its last stroke where it holds on past its appearance's end, and a solo's)
             foreach (var note in notes.Where(x => !InStopTime(x.Position) && InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(x.Value.State, definition.InstrumentCode), InstrumentTrait.Strums)
                                                   && x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.Bend) == 0

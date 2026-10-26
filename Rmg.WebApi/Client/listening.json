@@ -114,15 +114,6 @@
         ]
       },
       {
-        "seed": "Z",
-        "at": 269.1,
-        "from": 249.4,
-        "listen": [
-          "Rhythm part (Overdriven Guitar)",
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
         "seed": "s",
         "at": 432.2,
         "from": 405.9,
@@ -136,6 +127,14 @@
         "from": 218.8,
         "listen": [
           "Riff (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "1i",
+        "at": 213.2,
+        "from": 189.9,
+        "listen": [
+          "Riff (Overdriven Guitar)"
         ]
       }
     ]
@@ -338,17 +337,9 @@
         ]
       },
       {
-        "seed": "D",
-        "at": 121.1,
-        "from": 118.9,
-        "listen": [
-          "Rhythm part (Banjo)"
-        ]
-      },
-      {
-        "seed": "G",
-        "at": 180.4,
-        "from": 178.8,
+        "seed": "F",
+        "at": 2.8,
+        "from": 1.6,
         "listen": [
           "Rhythm part (Banjo)"
         ]
@@ -363,8 +354,16 @@
       },
       {
         "seed": "K",
-        "at": 140.8,
-        "from": 139.4,
+        "at": 0,
+        "from": 0,
+        "listen": [
+          "Rhythm part (Banjo)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 19.2,
+        "from": 18,
         "listen": [
           "Rhythm part (Banjo)"
         ]
@@ -400,10 +399,10 @@
       },
       {
         "seed": "A",
-        "at": 448.7,
-        "from": 445.9,
+        "at": 179.5,
+        "from": 176.7,
         "listen": [
-          "Melody (Electric Guitar (clean))"
+          "Rhythm part (Distortion Guitar)"
         ]
       },
       {
@@ -416,8 +415,8 @@
       },
       {
         "seed": "G",
-        "at": 213.4,
-        "from": 211.2,
+        "at": 151.2,
+        "from": 149,
         "listen": [
           "Rhythm part (Distortion Guitar)"
         ]
@@ -503,11 +502,11 @@
         ]
       },
       {
-        "seed": "M",
-        "at": 565,
-        "from": 562.5,
+        "seed": "8",
+        "at": 52.3,
+        "from": 50.8,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))"
+          "Chords (Electric Guitar (clean))"
         ]
       }
     ]
