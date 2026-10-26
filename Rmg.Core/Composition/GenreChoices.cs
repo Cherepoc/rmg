@@ -649,6 +649,7 @@ public static class GenreChoices
     [
         ("octaves", "Lines in octaves", LineDoubling.OctaveChance), ("harmony", "The melody harmonised", LineDoubling.HarmonyChance),
         ("riff", "The bass with the riff", LineDoubling.RiffChance),
+        ("rhythm", "The rhythm part with the riff, in unison", LineDoubling.RhythmChance),
         ("block", "The melody harmonised in three voices", LineDoubling.BlockChance),
         ("twin", "Sections the riff's twin leads", LineDoubling.TwinLeadChance),
         ("imitation", "The melody imitated a bar later", LineDoubling.ImitationChance)

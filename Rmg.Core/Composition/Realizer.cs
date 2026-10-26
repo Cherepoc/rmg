@@ -191,7 +191,8 @@ internal static class Realizer
         ((int Low, int High) Range, VoiceLeader Leader) On(StateMap state)
         {
             var playing = state.GetStateValue(CompositionStateKinds.Instrument);
-            var (min, max) = playing.IsSet && state.GetStateValue(CompositionStateKinds.Program) == 0 && state.GetStateValue(CompositionStateKinds.LineSolo) == 0
+            // a note's own, a guitar doubling another's line in its register, whatever instrument its section's form gives it
+            var (min, max) = playing.IsSet && (playing.Depth == StateDepths.Note || state.GetStateValue(CompositionStateKinds.Program) == 0) && state.GetStateValue(CompositionStateKinds.LineSolo) == 0
                 ? (playing.Value.MinOctave, playing.Value.MaxOctave)
                 : (track.MinOctaveOffset, track.MaxOctaveOffset);
             if (leaders.TryGetValue((min, max), out var known))
@@ -296,7 +297,9 @@ internal static class Realizer
         // is not cut by
         unclipped = heldDuration > 0 || pedals ? 0 : duration;
         // a solo's note is a line's, whatever part plays it
-        var isLine = role.PlaysLine() || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1;
+        // a line's, a solo's on any part, and a note doubling another part's line, as the rhythm part plays the riff
+        var isLine = role.PlaysLine() || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1
+                     || stateMap.GetStateValue(CompositionStateKinds.Doubled) is var source and > 0 && ((TrackRole)(source - 1)).PlaysLine();
         if (heldDuration > 0)
             duration = heldDuration;
         else if (isLine && (role != TrackRole.Bass || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1))

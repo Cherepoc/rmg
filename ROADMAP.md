@@ -293,11 +293,14 @@ Built on 24 October 2026: Funk's mute (the rhythm part's muted guitar out of the
 dead notes on the muted guitar, the bar-muting variants gone, a bass slapping its accents in Funk, Funk rock and Djent,
 Disco's and Djent's dead notes) and the tremolo-picked note (#352), each to be asked. Left, in the order to build:
 
-1. **A rhythm guitar on the low string.** A metal band's two guitars mostly play the same riff, double-tracked, low;
-   between, the second chugs single palm-muted notes on the open low string under the first's power chords, or holds a
-   low note ringing under a clean verse or a lead. First the doubling: the rhythm part playing the riff in unison now
-   and then, a pair of `doubling`'s, on its onsets (the doubler keeping to its lead's beats); then, if listening asks for
-   more, a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
+Built on 26 October 2026: the rhythm part playing the riff in unison now and then (`doubling.rhythm`, the metal
+family's), a pair of the doubling's on the riff's onsets, its notes played as the riff's line in the riff's register on
+its own instrument (`PartInstrument` at a note's depth), the riff's raise kept (Metal's 220 of 873 sections, 84% of their
+notes in unison, `RhythmRiffReportTest`), asked as `metal-rhythm-unison`. Left:
+
+1. **A rhythm guitar on the low string**, if listening asks for more than the doubling: between, the second guitar chugs
+   single palm-muted notes on the open low string under the first's power chords, or holds a low note ringing under a
+   clean verse or a lead: a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
    chugs' rule muting its weak repeats and an accent a power chord (Metal, Thrash, Djent, Nu metal, Doom). The register is
    the risk: two guitars and the bass in one octave.
 2. **A genre's tuning.** The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or

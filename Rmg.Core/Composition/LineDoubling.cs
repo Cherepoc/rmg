@@ -61,6 +61,12 @@ internal static class LineDoubling
     public static ByConvention RiffChance { get; } = new(1, 0.5, 0);
 
     /// <summary>
+    ///     The chance the rhythm part plays the riff with it in a section, in unison, in the riff's register on its own
+    ///     instrument, as a metal band's two guitars double the riff: a genre's alone.
+    /// </summary>
+    public static ByConvention RhythmChance { get; } = new(0, 0, 0);
+
+    /// <summary>
     ///     The chance the counter-melody imitates the melody in a section, its phrase a bar later, an octave below, each note
     ///     on the same step above the chord it falls on as the melody's above its own, as a canon moves with the harmony: a
     ///     genre's alone.
@@ -77,7 +83,8 @@ internal static class LineDoubling
         (TrackRole.Melody, TrackRole.CounterMelody, [(2, Any), (-2, Any), (5, Any), (-5, Any), (3, Never), (-3, Never), (4, Never), (-4, Never)], HarmonyChance, "harmony", false, 0),
         (TrackRole.Riff, TrackRole.Bass, [(0, Any)], RiffChance, "riff", false, 0),
         (TrackRole.Riff, TrackRole.RiffTwin, TwinSteps, Any, null, true, 0),
-        (TrackRole.Melody, TrackRole.CounterMelody, [(-7, Any)], ImitationChance, "imitation", false, 1)
+        (TrackRole.Melody, TrackRole.CounterMelody, [(-7, Any)], ImitationChance, "imitation", false, 1),
+        (TrackRole.Riff, TrackRole.Rhythm, [(0, Any)], RhythmChance, "rhythm", false, 0)
     ];
 
 
@@ -236,6 +243,11 @@ internal static class LineDoubling
                 var block = source == TrackRole.Melody && !isTwin && bars == 0 && blocks(index).TestProbability(BlockChance.At(melody, genre.Chance(GenreChoices.Doubling, "block")));
                 // an imitation's notes the bars later it plays them
                 var delay = bars * span.Meter.BarDuration;
+                // a guitar doubling another's line in unison in its register, on its own instrument, as the riff and the rhythm
+                // part play the riff together; the bass with the riff in its own, an octave or two under it
+                var unison = steps is [(0, _)] && target != TrackRole.Bass && definitions[sourceTrack] is PitchInstrumentTrack sourcePart && definitions[targetTrack] is PitchInstrumentTrack targetPart
+                    ? new LayerValue<PartInstrument>(StateDepths.Note, new PartInstrument(targetPart.InstrumentCode, sourcePart.MinOctaveOffset, sourcePart.MaxOctaveOffset))
+                    : LayerValue<PartInstrument>.Unset;
                 if (block && Traces(TracePoints.BlockHarmony, targetTrack, index))
                     StateTrace.RecordSection(TracePoints.BlockHarmony, targetTrack, span.SectionId, $"{step}", index);
                 // in every phrase the doubled part plays, its own kept where a texture rests the doubled part, phrase by phrase
@@ -257,7 +269,8 @@ internal static class LineDoubling
                         .With(StateKinds.Alteration, step == 0 ? x.Value.GetStateValue(StateKinds.Alteration) : 0)
                         .With(CompositionStateKinds.Doubled, (int)source + 1)
                         .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0)
-                        .With(CompositionStateKinds.LineRaise, isTwin ? twinRaise : 0).ToTimelineItem(x.Position + delay))
+                        .With(CompositionStateKinds.LineRaise, isTwin ? twinRaise : unison.IsSet ? x.Value.GetStateValue(CompositionStateKinds.LineRaise) : 0)
+                        .With(CompositionStateKinds.Instrument, unison).ToTimelineItem(x.Position + delay))
                     .Select(x => block ? x.Value.With(CompositionStateKinds.LineVoices, Math.Max(x.Value.GetStateValue(CompositionStateKinds.LineVoices), BlockVoices)).ToTimelineItem(x.Position) : x);
                 if (bars > 0)
                     doubled = Answering(doubled, events[sourceTrack], events[targetTrack], song.CommonStateTimelineMap);

@@ -101,8 +101,8 @@
         "at": 242.9,
         "from": 223,
         "listen": [
-          "Riff (Overdriven Guitar)",
-          "Rhythm part (Overdriven Guitar)"
+          "Rhythm part (Overdriven Guitar)",
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
@@ -114,27 +114,28 @@
         ]
       },
       {
-        "seed": "1U",
-        "at": 256,
-        "from": 218.8,
+        "seed": "Z",
+        "at": 269.1,
+        "from": 249.4,
         "listen": [
-          "Riff (Distortion Guitar)"
+          "Rhythm part (Overdriven Guitar)",
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "1d",
-        "at": 204.1,
-        "from": 179.7,
+        "seed": "s",
+        "at": 432.2,
+        "from": 405.9,
         "listen": [
           "Rhythm part (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "1i",
-        "at": 213.2,
-        "from": 189.9,
+        "seed": "1U",
+        "at": 256,
+        "from": 218.8,
         "listen": [
-          "Riff (Overdriven Guitar)"
+          "Riff (Distortion Guitar)"
         ]
       }
     ]
@@ -578,6 +579,75 @@
         "from": 416.8,
         "listen": [
           "Melody (Electric Guitar (clean))",
+          "Rhythm part (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "metal-rhythm-unison",
+    "question": "A Metal band's rhythm guitar playing the riff with the riff guitar in unison now and then, rather than its own chords: the riff's weight, or a part lost?",
+    "decides": "How often a section's rhythm part doubles the riff in unison (doubling.rhythm, Metal's 30-40-50), against never.",
+    "genre": "metal",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "doubling": {
+          "rhythm": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "A",
+        "at": 93.2,
+        "from": 90.6,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "H",
+        "at": 34.6,
+        "from": 32.6,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 61.9,
+        "from": 60.4,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 167.2,
+        "from": 165.8,
+        "listen": [
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 127.9,
+        "from": 126.3,
+        "listen": [
+          "Rhythm part (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 147.7,
+        "from": 145.6,
+        "listen": [
           "Rhythm part (Distortion Guitar)"
         ]
       }

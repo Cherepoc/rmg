@@ -90,8 +90,20 @@ public sealed class ListeningQuestionsTest
         new("postrock-build", "A Post-rock guitar picking faster and faster through its last bar into a louder section, 8ths to as fast as the hand goes, against it played as it was: the build, or a rush?",
             "How often a part builds into a louder appearance in Post-rock (articulation.tremoloBuild, 30-50-60), against never.", "postRock", [],
             new() { ["articulation"] = new() { ["tremoloBuild"] = 0 } },
-            x => BuiltAt(x).Select(v => (double?)v).Min(), Places: BuiltAt)
+            x => BuiltAt(x).Select(v => (double?)v).Min(), Places: BuiltAt),
+        new("metal-rhythm-unison", "A Metal band's rhythm guitar playing the riff with the riff guitar in unison now and then, rather than its own chords: the riff's weight, or a part lost?",
+            "How often a section's rhythm part doubles the riff in unison (doubling.rhythm, Metal's 30-40-50), against never.", "metal", [],
+            new() { ["doubling"] = new() { ["rhythm"] = 0 } },
+            x => RhythmDoubles(x).Select(v => (double?)v).Min(), Places: RhythmDoubles)
     ];
+
+    /// <summary>Where a song's rhythm part starts doubling the riff, each section's first such note, in beats.</summary>
+    private static double[] RhythmDoubles(CorpusSong song) =>
+        !song.Song.TrackDefinitions.Values.Any(x => x.Role == TrackRole.Rhythm) ? [] :
+        [
+            ..song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Doubled) == (int)TrackRole.Riff + 1)
+                .GroupBy(x => song.Map.PlayingAt(x.Position)?.Index).Select(x => x.Min(n => n.Position)).Order().ToArray() ?? []
+        ];
 
     /// <summary>Where a song's parts build into a louder section, each build's first stroke, in beats.</summary>
     private static double[] BuiltAt(CorpusSong song) =>
