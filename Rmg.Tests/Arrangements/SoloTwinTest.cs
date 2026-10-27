@@ -27,6 +27,9 @@ public sealed class SoloTwinTest
         foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always("metal")))))
         foreach (var (index, solo) in song.Solos.Where(x => !x.Value.IsDrumSolo && !x.Value.TradesWithDrums && x.Value.Soloists.Length > 1))
         {
+            // but where the melody sings nothing, which leaves the solo nothing to play on, its parts as they would be
+            if (song.Trace.Any(x => x.Point == TracePoints.SoloLine && ((int Index, int Notes))x.Value! is { } line && line.Index == index && line.Notes == 0))
+                continue;
             var because = $"seed {song.Seed} section {index}";
             twins++;
             await Assert.That(solo.Mode).IsEqualTo(SoloMode.Together).Because(because);

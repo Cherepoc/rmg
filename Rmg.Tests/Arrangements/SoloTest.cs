@@ -1409,14 +1409,15 @@ public sealed class SoloTest
     [Test]
     public async Task AChordSoloistsApproach_IsAPlanedStackedNote_NeverAPlainSoloists()
     {
-        var notes = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0.5)))).SelectMany(x => x).ToArray();
+        var notes = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0.5)))).SelectMany(x => x).ToArray();
         var plain = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0)))).SelectMany(x => x).ToArray();
 
         // a plain soloist neither approaches nor planes; a middling one that does not plane planes its approaches alone (a
         // note's line may be another soloist's, so the notes are counted, not their players)
         await Assert.That(plain.All(x => !x.Soloist.Approaches && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) == 0)).IsTrue();
         var approaches = notes.Where(x => !x.Soloist.Planes && IsStacked(x.Note) && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) > 0).ToArray();
-        // a floor against the mechanism breaking, which a few songs move (10 at offset 942000000)
+        // a floor against the mechanism breaking, which a few songs move (31 to 54 over 128 songs at offsets 0, 924000000 and 942000000)
+        Console.WriteLine($"{approaches.Length} approaches planed by soloists that do not plane");
         await Assert.That(approaches.Length).IsGreaterThan(4);
     }
 

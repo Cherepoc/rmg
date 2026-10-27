@@ -36,14 +36,19 @@ public sealed class LetRingTest
         foreach (var (song, without) in songs.Zip(unrung))
         {
             var changes = song.ChordChanges;
-            var notes = song.Song.Notes![song.Song.Track(TrackRole.Chords)].ToArray();
+            var track = song.Song.Track(TrackRole.Chords);
+            var notes = song.Song.Notes![track].ToArray();
+            // but the song's opening chord where a silent start holds it from the first beat into where it was, every other
+            // part coming in a bar or more in (SilentStart)
+            var opened = notes is [{ Position: < 1e-9 }, ..] && song.Song.Notes.Where(x => x.Key != track)
+                .All(x => x.Value.Count == 0 || x.Value[0].Position >= song.Map.MeterAt(0).BarDuration - 1e-9);
             var before = without.Song.Notes![without.Song.Track(TrackRole.Chords)].ToArray();
             await Assert.That(notes.Select(x => x.Position)).IsEquivalentTo(before.Select(x => x.Position), CollectionOrdering.Matching).Because($"seed {song.Seed}");
             for (var i = 0; i + 1 < notes.Length; i++)
             {
                 // a note let ring, longer than it was
                 var (note, next) = (notes[i], notes[i + 1]);
-                if (note.Value.Duration <= before[i].Value.Duration + 1e-9)
+                if (note.Value.Duration <= before[i].Value.Duration + 1e-9 || i == 0 && opened)
                     continue;
                 var because = $"seed {song.Seed} at {note.Position}";
                 // rung on: its figure an 8th or slower, to its chord's change, a bar at most, its own pitch not struck again

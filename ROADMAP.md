@@ -495,22 +495,24 @@ clap not taken for the kit in a section of percussion alone, a kick-out only whe
 bands measured over 256 songs and Djent's gated pad over songs that gate); a new one checked against the committed
 code before it is recorded here. Left:
 
-- **A run into a note above its line's range:** a counter-melody's run at offset 942000000 (seed 29 into 256) rising to
-  its range's top, 60, and landing on 67, a leap the run means to fill, its landing placed outside the range it runs in.
-- **Four at 924000000** (the review of 16 October's holdout, 23 October 2026, each failing at ea7cd3f too, older than that
-  review's fixes): the polymeter's chords off their cycle (seed 45 at 479.75, a 7-16th cell in a 16/16 bar, the chords'
-  onsets in its second frame not on the first cell's, `PolymeterTest`); a drum doubling a lead off the lead's beats
-  (seed 26, section 9 at 672, a tambourine on the kick at 682 and 698, `DoublingTest`; traced on 23 October 2026 to
-  `Polymeter`, which lays a drum bound to the kick from its own first cell apart from the kick's, so that the tambourine
-  strikes a cell's start the kick no longer plays; to keep a doubling or accenting drum to its lead's notes as laid, the
-  section's bindings would need their kind, a figure of its own on the lead's feel kept apart; the same rule's failure
-  at 958000000, a doubler's own strong beats in a bar its lead left out, fixed in the section's drums, 920e1bb7); a percussion-only section
-  playing three of the kit's notes (`PercussionSectionsTest`, its assertion naming no song yet); a calm section's drums
-  not sparser (seed 14 at 712, `DroneAndQuieterFormTest`). Their songs change with the review of 22 October's packages: each to be
-  read at the first offset it fails at after them.
-- **The suite's memory at 924000000:** about 240 tests ran out of the 8 GB cap there (23 October 2026), every one
-  passing alone; the corpus's songs cached by the tests, larger there, are the likely cause, with the suite's slowing
-  (the review of 22 October's #246).
+Run again at 924000000 and 942000000 on 27 October 2026, after the review of 22 October's fixes (8 and 6 failing, every
+one traced): a line's range widened past its instrument's top where the top cut its octave short, now down from the top
+(an oboe's melody at 92 over its 91; notes outside their instrument 488 to 403 of 157959, 48 to 42 on a switched one); a
+line on an instrument its section switches to placed in the part's range and moved by the octaves between them, a
+counter-melody's run on a violin no longer folded at the range's edge (the run into a note above its range, seed 29 at
+942000000, among them); four rules reading too much (a dominant in the section before a reharmonised one, a drum
+solo's hits, the silent start's held opening, the mix's closing filter over a swell, a solo over no melody); and three
+counts widened. The suite's memory there fixed by its fresh songs read a few at a time (`TestCorpus.Streamed`). Left:
+
+- **Two at 924000000, older than the review of 16 October:** a drum doubling a lead off the lead's beats (seed 26,
+  section 9 at 672, a tambourine on the kick at 682 and 698, `DoublingTest`; traced on 23 October 2026 to `Polymeter`,
+  which lays a drum bound to the kick from its own first cell apart from the kick's, so that the tambourine strikes a
+  cell's start the kick no longer plays; to keep a doubling or accenting drum to its lead's notes as laid, the section's
+  bindings would need their kind, a figure of its own on the lead's feel kept apart, a mechanism for one tambourine);
+  and a percussion-only section struck by the kit (seed 2, section 16-48, `PercussionSectionsTest`): an intro of
+  entries over the first section brings the kit in, and its fill's landing, a kick and a crash, falls on the first beat
+  of the percussion-only section after it, whose line should take the percussion's landings (`FillGenerator`, the
+  landings by `line.Next.IsPercussionOnly`), to read where the intro's line takes its next section from.
 - **Three page tests seen failing once each,** their messages not kept: the seek readout's
   (`TheKeyChordTempoAndMeter_AreShownAsTheSongPlays_AndFollowASeek`), the length's
   (`ALength_ShowsHowLongTheSongPlayed_AndGiven_IsAskedFor`) and the bar dragged by hand's

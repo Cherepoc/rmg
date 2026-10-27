@@ -96,8 +96,10 @@ internal static class Realizer
         var (lowest, highest) = InstrumentRanges.Of(program) is var (l, h)
             ? (l + tuning - OctaveNoteCount * Math.Max(0, lowestOctave - minOctave), h + tuning + OctaveNoteCount * Math.Max(0, maxOctave - highestOctave))
             : default;
-        var from = Math.Min(Math.Max(low, lowest), high - OctaveNoteCount + 1);
-        return (from, Math.Max(Math.Min(high, highest), from + OctaveNoteCount - 1));
+        var (from, top) = (Math.Min(Math.Max(low, lowest), high - OctaveNoteCount + 1), Math.Min(high, highest));
+        // an octave's width down from the instrument's top where it cuts the octaves short, as an oboe's line high in its
+        // range keeps below its top note
+        return (Math.Min(from, top - OctaveNoteCount + 1), top);
     }
 
     /// <summary>
@@ -203,11 +205,13 @@ internal static class Realizer
         // instrument the part plays there, but a note a section's form gives an instrument of its own and a solo's, which
         // play on the part's
         var leaders = new Dictionary<(int, int), VoiceLeader>();
-        ((int Low, int High) Line, VoiceLeader Leader) On(StateMap state)
+        var home = GetRange(track);
+        ((int Low, int High) Line, VoiceLeader Leader, (int Low, int High) Home, int Shift) On(StateMap state)
         {
             var playing = state.GetStateValue(CompositionStateKinds.Instrument);
             // a note's own, a guitar doubling another's line in its register, whatever instrument its section's form gives it
-            var (min, max, program) = playing.IsSet && (playing.Depth == StateDepths.Note || state.GetStateValue(CompositionStateKinds.Program) == 0) && state.GetStateValue(CompositionStateKinds.LineSolo) == 0
+            var switched = playing.IsSet && (playing.Depth == StateDepths.Note || state.GetStateValue(CompositionStateKinds.Program) == 0) && state.GetStateValue(CompositionStateKinds.LineSolo) == 0;
+            var (min, max, program) = switched
                 ? (playing.Value.MinOctave, playing.Value.MaxOctave, playing.Value.Program)
                 : (track.MinOctaveOffset, track.MaxOctaveOffset, track.InstrumentCode);
             // a chord voiced in its octaves, led on through a change of instrument in them, a line placed in its range within
@@ -219,8 +223,13 @@ internal static class Realizer
                 leaders[(min, max)] = leader = new VoiceLeader(range.Item1, range.Item2, notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes));
             }
 
-            // the part's own instrument tuned as it tunes it, another as it is
-            return (RangeOf(min, max, program, program == track.InstrumentCode ? track.StateMap.GetStateValue(CompositionStateKinds.Tuning) : 0), leader);
+            // the part's own instrument tuned as it tunes it, another as it is; a line on an instrument its section switches
+            // to placed in the part's range first and moved by the octaves between their octaves, so that it keeps its shape,
+            // a run whole, a note's own placed in its register already
+            var line = RangeOf(min, max, program, program == track.InstrumentCode ? track.StateMap.GetStateValue(CompositionStateKinds.Tuning) : 0);
+            return switched && playing.Depth != StateDepths.Note
+                ? (line, leader, home, OctaveNoteCount * (min - track.MinOctaveOffset))
+                : (line, leader, line, 0);
         }
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
@@ -230,8 +239,8 @@ internal static class Realizer
         for (var i = 0; i < items.Length; i++)
         {
             place = i > 0 && UntilChange(changes, items[i - 1].Position) > items[i].Position - items[i - 1].Position + 1e-9 ? place + 1 : 0;
-            var (range, voiceLeader) = On(items[i].Value.Value);
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, range, placeOf(items[i].Position), changes, place, out var unclipped);
+            var (range, voiceLeader, from, shift) = On(items[i].Value.Value);
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, range, from, shift, placeOf(items[i].Position), changes, place, out var unclipped);
             var change = items[i].Position + UntilChange(changes, items[i].Position);
             var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;
             if (items[i].Position + unclipped > change + 1e-9 && next > change + 1e-9)
@@ -279,11 +288,16 @@ internal static class Realizer
     }
 
         /// <summary>A pitched note: its chord, its length, and its pitches, as the track's line places them.</summary>
+    /// <param name="range">The range a line's note is placed in, its instrument's there.</param>
+    /// <param name="home">The range a line's note is placed in first, its part's where its section switches it to another instrument, else <paramref name="range" />.</param>
+    /// <param name="shift">The semitones a line's note moves by from <paramref name="home" />, the octaves between the part's and the instrument's.</param>
     private static TimelineItem<RealizedNote> RealizeNote(
         TimelineItem<WithDuration<StateMap>> timelineItemWithDuration,
         VoiceLeader voiceLeader,
         TrackRole role,
         (int Low, int High) range,
+        (int Low, int High) home,
+        int shift,
         Place at,
         ImmutableArray<double> changes,
         int place,
@@ -344,7 +358,7 @@ internal static class Realizer
         // as its scale step above the chord's root and its alteration; the chords the whole chord, led from the one before
         ImmutableArray<int> notes = role switch
         {
-            _ when isLine => [InRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration) + raise)],
+            _ when isLine => [InRange(IntoRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration) + raise, home.Low + raise, home.High + raise) + shift)],
             TrackRole.Chords or TrackRole.Rhythm or TrackRole.Pad => voiceLeader.Place(
                 [..chordSteps.Select(ToNote)],
                 ToNote(0),

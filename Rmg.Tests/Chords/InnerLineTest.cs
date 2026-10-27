@@ -12,7 +12,7 @@ public sealed class InnerLineTest
     public async Task ALinesNotes_FallFromTheChordsRoot_ASemitoneAQuarter()
     {
         var lined = 0;
-        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed,
                      new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Chords, 0.8))))))
         foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0))
         {
@@ -28,6 +28,7 @@ public sealed class InnerLineTest
         }
 
         Console.WriteLine($"{lined} chords with a line inside");
+        // a floor against the mechanism breaking (87 to 333 at offsets 0, 924000000 and 942000000)
         await Assert.That(lined).IsGreaterThan(10);
     }
 

@@ -22,9 +22,9 @@ public sealed class PercussionSectionsTest
                 sections++;
                 var kitNotes = song.Song.Notes!
                     .Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum && !IsPercussion(x.Key))
-                    .SelectMany(x => x.Value)
-                    .Count(x => x.Position >= span.Start && x.Position < span.End - 1);
-                await Assert.That(kitNotes).IsEqualTo(0);
+                    .SelectMany(x => x.Value.Select(n => (Track: x.Key, n.Position)))
+                    .Where(x => x.Position >= span.Start && x.Position < span.End - 1).ToArray();
+                await Assert.That(kitNotes).IsEmpty().Because($"seed {song.Seed}, section {span.Start}-{span.End}: {string.Join(" ", kitNotes.Select(x => $"{x.Track} at {x.Position}"))}");
                 var percussionNotes = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum && IsPercussion(x.Key)).SelectMany(x => x.Value).Count(x => x.Position >= span.Start && x.Position < span.End);
                 await Assert.That(percussionNotes).IsGreaterThan(0);
             }

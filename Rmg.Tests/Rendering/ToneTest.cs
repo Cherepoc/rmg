@@ -50,8 +50,9 @@ public sealed class ToneTest
         {
             var rendered = song.Rendered.Tracks.First(x => !x.IsPercussionInstrument && x.Role == TrackRole.Pad);
             int At(double position) => rendered.Controllers.Where(c => c.Controller == ExpressionRender.BrightnessController && c.Position <= position + 1e-6).Select(c => c.Value).DefaultIfEmpty(64).Last();
+            // but under a filter, the part's own or the whole mix's closing, which holds its brightness down
             foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Swell) == 1 && x.Value.Duration >= 2
-                                                 && x.Value.State.GetStateValue(CompositionStateKinds.Filter) == 0))
+                                                 && x.Value.State.GetStateValue(CompositionStateKinds.Filter) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.MixClosed) == 0))
             {
                 swelled++;
                 var (start, grown) = (song.Swing.Apply(note.Position), song.Swing.Apply(note.Position + 1));

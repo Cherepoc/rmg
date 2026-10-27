@@ -26,11 +26,13 @@ public sealed class TremoloTest
             sections++;
             var definition = (PitchInstrumentTrack)song.Song.TrackDefinitions[entry.Track];
             var (index, _) = ((int, double))entry.Value!;
-            // but in stop time, its phrases, and in a bar of ensemble hits, whose hits a tremolo leaves struck (Articulations.PicksOutOf)
+            // but in stop time, its phrases, in a bar of ensemble hits and under a drum solo's hits, whose hits a tremolo leaves
+            // struck (Articulations.PicksOutOf)
             var stopped = song.Trace.Where(x => x.Point == TracePoints.StopTime).SelectMany(x => (ImmutableArray<double>)x.Value!).ToArray();
             var hits = song.Trace.Where(x => x.Point == TracePoints.EnsembleHits).SelectMany(x => (ImmutableArray<double>)x.Value!).ToArray();
             bool InStopTime(double at) => song.Map.Sections.Any(s => stopped.Any(x => Math.Abs(x - s.Start) < 1e-6) && at >= s.Start - 1e-9 && at < s.Start + s.Meter.PhraseDuration - 1e-9)
-                                          || song.Map.Sections.Any(s => hits.Any(x => at >= x - 1e-9 && at < x + s.Meter.BarDuration - 1e-9 && s.IsWithin(x)));
+                                          || song.Map.Sections.Any(s => hits.Any(x => at >= x - 1e-9 && at < x + s.Meter.BarDuration - 1e-9 && s.IsWithin(x)))
+                                          || song.Solos.Any(x => x.Value is { IsDrumSolo: true, HitEvery: > 0 } && song.Map.Sections[x.Key].IsWithin(at));
             // but the ending's final chord, which the band strikes once
             var notes = song.Song.Notes!.GetValueOrDefault(entry.Track)?.Where(x => song.Map.PlayingAt(x.Position) is { Index: var at, IsEnding: var ending } && at == index
                                                                                     && !(ending && FormLayers.HasFinalChord(song.Map.Ending.Kind))).ToArray() ?? [];

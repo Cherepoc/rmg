@@ -116,8 +116,9 @@ public sealed class HarmonyRulesTest
 
     /// <summary>
     ///     A dominant of a scale of its own, an applied one, a passing one or its tritone substitute, as the band plays it
-    ///     in a reharmonised appearance after the stages that change chords, leads into a diminished chord only where its
-    ///     section first played it so, a borrowed chord's resolution in an exotic scale of its own harmony.
+    ///     in a reharmonised appearance after the stages that change chords, leads into a diminished chord of the appearance
+    ///     only where its section first played it so, a borrowed chord's resolution in an exotic scale of its own harmony;
+    ///     the section before's last chord is its own section's, which the reharmonisation never changed.
     /// </summary>
     [Test]
     public async Task ADominant_AsPlayed_NeverLeadsIntoADiminishedChord()
@@ -157,7 +158,7 @@ public sealed class HarmonyRulesTest
             for (var i = 0; i + 1 < changes.Length; i++)
             {
                 if (ChordAt(changes[i]) is not { Own: true } dominant || !dominant.Classes.IsSupersetOf([4, 7]) || ChordAt(changes[i + 1]) is not { } next
-                    || !sections[later].IsWithin(changes[i + 1]))
+                    || !sections[later].IsWithin(changes[i]) || !sections[later].IsWithin(changes[i + 1]))
                     continue;
                 var span = sections[later];
                 dominants++;

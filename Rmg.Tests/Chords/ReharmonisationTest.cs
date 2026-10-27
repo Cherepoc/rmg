@@ -120,7 +120,7 @@ public sealed class ReharmonisationTest
     public async Task ASubstitute_IsTheSame_AtEveryPassOfThePattern()
     {
         var (passes, places, faded, ends, all) = (0, 0, 0, 0, 0);
-        foreach (var (seed, with, substitutes, without) in TestCorpus.Streamed(Enumerable.Range(0, 64), seed =>
+        foreach (var (seed, with, substitutes, without) in TestCorpus.Streamed(Enumerable.Range(0, 128), seed =>
                  {
                      var (with, substitutes) = Generate(seed);
                      return (Seed: seed, With: with, Substitutes: substitutes, Without: substitutes is null ? null : Generate(seed, "Reharmonisation").Song);
