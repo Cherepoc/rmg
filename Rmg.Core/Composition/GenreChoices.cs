@@ -382,6 +382,13 @@ public static class GenreChoices
         PartsOf(TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo), Facet.Sound);
 
     /// <summary>
+    ///     How a guitar or a bass is tuned, every note its frets play moved with it: from 0, an octave down, through 50, as the
+    ///     songs have it, to 100, an octave up, a semitone every 4 or so, as a band tunes to D or to B, a seven-string's: the
+    ///     range a line is placed in, a chord's voicing kept in the part's octaves (<see cref="Registers.TuningOf" />).
+    /// </summary>
+    public static GenreChoice Tuning { get; } = Values("tuning", "Tuning", PartsOf(TrackRole.Riff, TrackRole.Rhythm, TrackRole.Bass), Facet.Sound);
+
+    /// <summary>
     ///     How often each of a drum's own sounds plays as an accent and in a fill, from 0, an eighth as often, through 50, as
     ///     the songs have it, to 100, eight times as often, one a wild song's alone played at the plain end where a genre leans
     ///     it up: a metal china, a disco's open hi-hat off the beat (<see cref="DrumSounds.OddsOf" />).
@@ -869,7 +876,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, TempoBand, Length, Darkness, Intensity, MoodEnergy, Meter, Feel, FeelChances, TimeChanges, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, Strictness, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, OwnMode, HarmonicRhythm, Turnaround, PassingChords, PassingKinds, Planing, HarmonyDevices, SectionPedal, Loop, LineScale, MelodyRange, Sung, Ornaments, Tension, Appoggiatura, Bass, OctaveBass, AlternatingBass, Glide, GlideRate, BassLanding, Effects, BendTiming, VibratoWidth, GateParts, Articulation, TremoloSpeed, ArticulationModes, LineChords, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, HatRollRate, Ghosts, GhostNotes, Rudiments, Pocket, Fills, KickOut, FillFeet, Rubato, ReharmonisedChords, Drop, DropKind, Mutation, MixFilter, Breakdown, StopTime, Stops, EnsembleHits, Push, KeyChanges, KeyLift, SectionKey, Hook, Sequence, Riff, Solos, SoloCount, SoloShare, Soloists, SoloLanding, SoloStyle, SurfDrop, DrumSoloFeet, Stickings, Intro, IntroWindow, OpeningAlone, OpeningPart, Ending, StrongEffect, Echo, Room, Insertion, Pan, FormChances, Form, SectionLength, RoleLength, PhraseScheme, Texture, Alone, Dynamics, Phrases, PhraseBars,
-        SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, RiffSection, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
+        SectionChanges, Polymeter, PolymeterCell, LineRun, SoloAnswers, CallAndResponse, LastRepeat, RiffSection, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, Tuning, DrumSounds, DrumStrokes, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

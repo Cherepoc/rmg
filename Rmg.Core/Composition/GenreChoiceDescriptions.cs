@@ -136,6 +136,7 @@ public static class GenreChoiceDescriptions
         ["ghostNotes"] = "How many soft 16ths a ghosting snare plays around its backbeat: below the middle fewer, as a fast break wants, above it more.",
         ["marks"] = "How often drums marking the form strike, and how often they swell through a section's start, a roll growing to it and fading after: above the middle oftener.",
         ["register"] = "How high each part sits: at the lowest quarter an octave down, as a guitar tuned down, at the highest an octave up, as a bass singing high.",
+        ["tuning"] = "How a guitar or a bass is tuned, every note on it moved with it: below the middle down, a semitone every 4 or so, as a band tunes to D or a seven-string to B.",
         ["drumSounds"] = "How often each of a drum's own sounds plays as an accent and in fills: a metal china, a disco's open hi-hat off the beat.",
         ["drumStrokes"] = "How often each of a drum's own sounds is its steady stroke: the cross-stick of a ballad, a jazz drummer's hi-hat foot, a loud chorus's open hi-hat.",
         ["louderForms"] = "How often a louder section turns heavy, its clean guitars distorted, as a band kicks in the distortion for the chorus, and how often a quieter one turns calm, its distorted guitars acoustic or clean, one breaking the chords slowly and letting them ring, the others resting, the drums in half time.",

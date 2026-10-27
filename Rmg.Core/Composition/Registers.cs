@@ -1,3 +1,4 @@
+using Rmg.Core.Events;
 using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
@@ -47,6 +48,24 @@ public static class Registers
         var max = Math.Clamp(min + width, min, high);
         return Moved(part, Math.Max(low, max - width), max);
     }
+
+    /// <summary>
+    ///     How many semitones a genre tunes a part's instrument, the riff's twin as the riff: its tuning's shift in twelfths of an
+    ///     octave, below 0 down (<see cref="GenreChoices.Tuning" />).
+    /// </summary>
+    public static int TuningOf(Genre genre, TrackRole role) =>
+        GenreChoices.Name(role.Source().ToString()) is var name && GenreChoices.Tuning.Options.Any(x => x.Name == name)
+            ? (int)Math.Round(12 * genre.Shift(GenreChoices.Tuning, name))
+            : 0;
+
+    /// <summary>A part tuned as its genre tunes it, its own instrument's every note moved by as many semitones (<see cref="Realizer.RangeOf" />).</summary>
+    public static PitchInstrumentTrack Tuned(PitchInstrumentTrack part, Genre genre) => TuningOf(genre, part.Role) is var tuning and not 0
+        ? new PitchInstrumentTrack(part.StateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.Tuning.CreateState(tuning)])), part.InstrumentCode, part.MinOctaveOffset, part.MaxOctaveOffset, part.Role, part.Pan)
+        : part;
+
+    /// <summary>A part's own instrument's range, as the part tunes it.</summary>
+    public static (int Low, int High) RangeOf(PitchInstrumentTrack part) =>
+        (InstrumentRanges.Of(part.InstrumentCode), part.StateMap.GetStateValue(CompositionStateKinds.Tuning)) is var ((low, high), tuning) ? (low + tuning, high + tuning) : default;
 
     /// <summary>How many octaves a genre moves a part, the riff's twin as the riff: -1, 0 or 1, by its register's shift.</summary>
     public static int OctavesOf(Genre genre, TrackRole role) =>

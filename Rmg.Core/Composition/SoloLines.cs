@@ -234,7 +234,7 @@ internal static class SoloLines
     internal static int RaiseOf(PitchInstrumentTrack definition)
     {
         var (ownLow, ownHigh) = Realizer.GetRange(definition);
-        var (instrumentLow, instrumentHigh) = InstrumentRanges.Of(definition.InstrumentCode);
+        var (instrumentLow, instrumentHigh) = Registers.RangeOf(definition);
         var lead = instrumentLow + (int)Math.Round(LeadShare * (instrumentHigh - instrumentLow));
         return Math.Clamp((int)Math.Round((lead - (ownLow + ownHigh) / 2.0) / 12), 0, Math.Max(0, (instrumentHigh - ownHigh) / 12));
     }
@@ -243,7 +243,7 @@ internal static class SoloLines
     internal static int RaiseTo(PitchInstrumentTrack definition, PitchInstrumentTrack other, int otherRaise)
     {
         var ((_, ownHigh), (_, otherHigh)) = (Realizer.GetRange(definition), Realizer.GetRange(other));
-        return Math.Clamp((int)Math.Round((otherHigh + 12 * otherRaise - ownHigh) / 12.0), 0, Math.Max(0, (InstrumentRanges.Of(definition.InstrumentCode).High - ownHigh) / 12));
+        return Math.Clamp((int)Math.Round((otherHigh + 12 * otherRaise - ownHigh) / 12.0), 0, Math.Max(0, (Registers.RangeOf(definition).High - ownHigh) / 12));
     }
 
     /// <summary>How high in its instrument's range a soloist leads, as a share of it from its lowest note: two thirds up, a guitar's solo up the neck, a horn's in its bright upper register.</summary>
@@ -303,7 +303,7 @@ internal static class SoloLines
         var reach = Reach(soloist);
         var raise = RaiseOf(definition);
         var (ownLow, ownHigh) = Realizer.GetRange(definition);
-        var (instrumentLow, instrumentHigh) = InstrumentRanges.Of(definition.InstrumentCode);
+        var (instrumentLow, instrumentHigh) = Registers.RangeOf(definition);
         var lead = instrumentLow + (int)Math.Round(LeadShare * (instrumentHigh - instrumentLow));
         var (low, high) = (ownLow + 12 * raise, ownHigh + 12 * raise);
         var middle = Math.Clamp(lead, Math.Min(low + reach, (low + high) / 2), Math.Max(high - reach, (low + high) / 2));

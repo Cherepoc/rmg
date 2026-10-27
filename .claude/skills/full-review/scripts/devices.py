@@ -31,7 +31,7 @@ FAMILIES = {
         'stages': 'Reharmonisation|Inner lines|Pedal|Line chords',
     },
     'lines': {
-        'choices': 'bass octaveBass alternatingBass bassLanding glide melodyRange lineScale riffScale riff register doubling ornaments tension '
+        'choices': 'bass octaveBass alternatingBass bassLanding glide melodyRange lineScale riffScale riff register tuning doubling ornaments tension '
                    'hook appoggiatura callAndResponse sung glideRate lineRun sequence lineChords',
         'stages': 'Lines|Doubling|Chugs|Ornaments|Notes|Call and response|Kick-out bass',
     },

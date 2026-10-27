@@ -177,6 +177,9 @@ internal static class CompositionStateKinds
     public static StateKind<int> Reverb { get; } = StateKinds.CreateAdditive<int>(Prefix + "Reverb", StateScope.Render);
     public static StateKind<int> Chorus { get; } = StateKinds.CreateAdditive<int>(Prefix + "Chorus", StateScope.Render);
 
+    // the semitones a part's own instrument is tuned from its standard tuning, below 0 down (Registers.TuningOf)
+    public static StateKind<int> Tuning { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tuning");
+
     // the General MIDI program a note plays, 1 more than its number, 0 for its track's own
     public static StateKind<int> Program { get; } = StateKinds.CreateAdditive<int>(Prefix + "Program", StateScope.Render);
 

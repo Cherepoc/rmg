@@ -30,11 +30,16 @@ public sealed class TuningReportTest
                         var low = note.Value.Pitches.Min();
                         lows.Add(low);
                         all++;
-                        floor += low - InstrumentRanges.Of(InstrumentsOverTime.ProgramOf(note.Value.State, part.InstrumentCode)).Low <= 2 ? 1 : 0;
+                        // on the part's own instrument as it tunes it
+                        var program = InstrumentsOverTime.ProgramOf(note.Value.State, part.InstrumentCode);
+                        floor += low - (program == part.InstrumentCode ? Rmg.Core.Composition.Registers.RangeOf(part) : InstrumentRanges.Of(program)).Low <= 2 ? 1 : 0;
                     }
                 }
                 lows.Sort();
-                line.Add(lows.Count == 0 ? $"{role} none" : $"{role} median {lows[lows.Count / 2]} lowest tenth {lows[lows.Count / 10]} at the floor {floor / (double)all:P0}");
+                // the floors of the parts' ranges, the lowest note each may play
+                var floors = songs.Where(x => x.Song.TrackDefinitions.Values.Any(t => t.Role == role))
+                    .Select(x => Realizer.GetRange((PitchInstrumentTrack)x.Song.TrackDefinitions[x.Track(role)]).Low).CountBy(x => x).OrderBy(x => x.Key);
+                line.Add(lows.Count == 0 ? $"{role} none" : $"{role} median {lows[lows.Count / 2]} lowest tenth {lows[lows.Count / 10]} at the floor {floor / (double)all:P0}, floors {string.Join(" ", floors.Select(x => $"{x.Key}:{x.Value}"))}");
             }
             Console.WriteLine($"{genre}: {string.Join("; ", line)}");
         }

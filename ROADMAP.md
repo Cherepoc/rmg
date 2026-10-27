@@ -23,7 +23,7 @@ is removed once it is built, its leftovers kept under *Open work*.
    moved before them (*Decisions after the notes*), the instruments first as they change what is heard; a Post-rock
    preset, asked for by the owner, its devices the existing ones and its gaps measured (*A tremolo through the song*, the
    accelerating tremolo into a lift first among them); then the guitars' plan (*Guitars as players play them*), the
-   rest of Jazz's cycle (*From the review of 22 October*) and the review's record.
+   rest of Jazz's cycle (*From the review of 22 October*). The review's record was closed on 27 October.
 5. **When the need shows** (P3): the leftovers and the put-off items under *Open work*, each by what listening says,
    with its reason; no new presets but those the owner asks for.
 6. **Parked** (P4): kept for their reasons, not planned.
@@ -316,18 +316,14 @@ notes in unison, `RhythmRiffReportTest`), asked as `metal-rhythm-unison`. Left:
    clean verse or a lead: a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
    chugs' rule muting its weak repeats and an accent a power chord (Metal, Thrash, Djent, Nu metal, Doom). The register is
    the risk: two guitars and the bass in one octave.
-2. **A genre's tuning**, measured on 26 October 2026 (`TuningReportTest`) and put off for the owner's ear: the metal
-   presets' riffs already reach the guitars' floor, a median of MIDI 47 to 49 and their lowest tenth 42, 9% to 14% of
-   their notes within a tone of E2 (Black metal's higher, a median of 59); lower takes a semitone floor in the realizer,
-   whose ranges are whole octaves, and General MIDI's guitars sounding below E2 are its lowest sample transposed, which
-   is the owner's to hear before it is built. The driven guitars' range a genre's, its lowest note its tuning's: E2 for a rock band's, D2 or
-   C2 for Doom's and Nu metal's, B1 for a seven-string's, F#1 for Djent's eight, General MIDI's guitars sounding below
-   their written range as a sampler does. A value of the genre's (`register`'s or its own), the riff's and the rhythm
-   part's range moved by it, the bass an octave under it as now. Measured first: where the riff of each metal preset
-   sits against its range's floor. The floor is now a semitone's (`Realizer.RangeOf`, 27 October 2026): a line's range
-   its octaves cut to its instrument's, which took the guitars' notes from the half octave below E2 (Djent's riff's
-   lowest tenth 42 to 44), and a Djent drone in a key of C to D# onto its open string an octave up, its melody's leaps
-   over it 9.5 to 6.7 semitones; a tuning takes them back down.
+2. **A genre's tuning**, built on 27 October 2026 for Djent alone, to be asked (`djent-tuning`) before any other preset
+   takes one: `tuning` by role (riff, rhythm, bass), a semitone every 4 or so below 50, a part's range and its own
+   instrument's moved by it as its frets' notes are (`Registers.Tuned`, `Realizer.RangeOf`), a chord's voicing kept in its
+   octaves. Djent tuned to B, a seven-string's (29): its riff's median 49 to 43 and its floor E2 to B1, its bass's median
+   40 to 35 and its floor E1 to B0, the octave between them kept, a drone in C to D# back on the low string. General
+   MIDI's guitars below E2 are their lowest sample transposed, which the question asks of the owner's ear. Heard to work,
+   the rest by the measure (`TuningReportTest`): Doom and Nu metal to C or D, Metal to D or as it is, Thrash and Black
+   metal as they are.
 3. **Djent's riff intervals, no device of its own**, measured on 26 October 2026 (`RiffIntervalsReportTest`): Djent's riffs
    move as Metal's do, repeating 44% of their moves against 46%, a semitone 8% against 7%, a tritone 4% against 2%, a
    seventh, a ninth or past an octave 2% against none, but go back to their pedal from off it 35% of the time against
