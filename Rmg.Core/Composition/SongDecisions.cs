@@ -419,8 +419,11 @@ internal sealed record SongDecisions(
         var headsOut = Stream(SongStream.HeadOut).TestProbability(SongForms.HeadOutChance.At(songUnconventionality[Facet.Form])) && structure.Pass > 0 && body.Length >= 3 * structure.Pass;
         var head = headsOut ? body[^structure.Pass..].ToHashSet() : [];
         StateTrace.RecordSong(TracePoints.HeadOut, $"{headsOut}", headsOut);
+        // nor over the appearances a stripped song adds for its ending, whose parts leave one by one, which a solo resting
+        // them would leave none of
+        bool Strips(int index) => plan.Ending == EndingKind.Strip && index >= played.Length - fading;
         bool PlaysNoSolo(int index) => generateSection(played[index]) is { Breakdown: true } or { Form.Kind: SectionFormKind.Calm } || breakdownChorus && index == sectionIds.Length - 1
-                                       || head.Contains(index);
+                                       || head.Contains(index) || Strips(index);
         // a later appearance played as a solo now and then, each from a sequence of its own, by the section's facets, and
         // one the soloist's where the song has it, in an appearance that plays one
         var drawnSolos = Composition.Solos.WithSoloist(
@@ -462,8 +465,9 @@ internal sealed record SongDecisions(
                 Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),
                 energyStep,
                 restedBefore.GetValueOrDefault(id, []),
-                // an intro of entries builds the first section's parts up itself, and an intro a verse plays over plays steady
-                index == 0 && (plan.Intro == IntroKind.Entries || riffIntro),
+                // an intro of entries builds the first section's parts up itself, and an intro a verse plays over plays steady;
+                // and a stripped song's appearances added for its ending, whose parts leave one by one as their texture
+                index == 0 && (plan.Intro == IntroKind.Entries || riffIntro) || Strips(index),
                 solo,
                 [..lateEntries.Where(x => index < x.Value).Select(x => x.Key)],
                 // and the part the song opens on alone in the first

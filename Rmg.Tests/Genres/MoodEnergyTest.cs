@@ -57,12 +57,18 @@ public sealed class MoodEnergyTest
     [Arguments("metal")]
     [Arguments("jazz")]
     [Arguments("pop")]
+    [Arguments("trap")]
+    [Arguments("hipHop")]
+    [Arguments("dnb")]
+    [Arguments("techno")]
+    [Arguments("electronic")]
+    [Arguments("psytrance")]
     public async Task Report(string? id)
     {
         var genre = id is null ? Genre.None : GenrePresets.Genre(id);
         const int count = 64;
         static double Mean(IEnumerable<double> values) => values.Where(double.IsFinite).DefaultIfEmpty(double.NaN).Average();
-        Console.WriteLine($"{"",-14}{"intensity",10}{"energy",8}{"tempo",8}{"notes/s",9}{"velocity",10}{"melody",8}{"drums/bar",11}{"calm",7}{"heavy",7}");
+        Console.WriteLine($"{"",-14}{"intensity",10}{"energy",8}{"tempo",8}{"notes/s",9}{"velocity",10}{"melody",8}{"drums/bar",11}{"calm",7}{"heavy",7}{"kick4",7}");
         foreach (var (name, each) in new[] { ($"{id ?? "songs"}", genre), ("not", Not(genre)) })
             foreach (var intensity in new[] { -1.0, 0, 1 })
             {
@@ -75,9 +81,21 @@ public sealed class MoodEnergyTest
                                   $"{Mean(songs.SelectMany(x => x.Rendered.Tracks.SelectMany(t => t.NoteTimeline).Select(n => n.Value.Velocity))),10:0.000}" +
                                   $"{Mean(songs.SelectMany(x => x.Song.Notes!.GetValueOrDefault(x.Track(TrackRole.Melody))?.Select(n => n.Value.Velocity) ?? [])),8:0.000}" +
                                   $"{Mean(songs.Select(x => x.Drums.Length / (x.Rendered.Duration / x.Map.Meter.BarDuration))),11:0.0}" +
-                                  $"{forms.Count(x => x == SectionFormKind.Calm) / (double)forms.Length,7:P0}{forms.Count(x => x == SectionFormKind.Heavy) / (double)forms.Length,7:P0}");
+                                  $"{forms.Count(x => x == SectionFormKind.Calm) / (double)forms.Length,7:P0}{forms.Count(x => x == SectionFormKind.Heavy) / (double)forms.Length,7:P0}" +
+                                  $"{Mean(songs.Where(x => x.PlaysDrums).Select(FourOnTheFloor)),7:P0}");
             }
 
         await Task.CompletedTask;
+    }
+
+    /// <summary>The share of a song's bars the drums play in whose kick strikes every beat.</summary>
+    private static double FourOnTheFloor(CorpusSong song)
+    {
+        var bar = song.Map.Meter.BarDuration;
+        var kicks = (song.Song.TrackEventStateTimelineMap.TrackTimelineMap.GetValueOrDefault(DrumGroups.GetTrackNumber(DrumDefinitions.Kick))?.EventTimeline
+            .Select(x => Math.Round(x.Position, 6)) ?? []).ToHashSet();
+        // a kit without a kick, a hand drum's, strikes none
+        var bars = song.Drums.Select(x => Math.Floor(x.Position / bar + 1e-9)).Distinct().ToArray();
+        return bars.Count(b => Enumerable.Range(0, (int)Math.Round(bar)).All(beat => kicks.Contains(Math.Round(b * bar + beat, 6)))) / (double)bars.Length;
     }
 }

@@ -118,17 +118,20 @@ public sealed class PolymeterTest
                 for (var (cell, at) = (0, start); at < end - 1e-9; at += cells[^1].Length)
                     cells.Add((at, plan.CellAt(cell++) * 0.25));
                 // the motif as the longest cell plays it whole where it first does, and the first cell its start, either
-                // missing what falls in a bar the part sits out
+                // missing what falls in a bar the part sits out, which the frame's other cells play from their starts
                 var longest = cells.FirstOrDefault(x => x.Length.Equals(plan.Longest * 0.25) && x.At + x.Length <= end + 1e-9);
                 if (longest == default)
                     continue;
-                var first = new[] { longest, cells[0] }.SelectMany(c => events.Where(x => x >= c.At - 1e-9 && x < c.At + c.Length - 1e-9).Select(x => Math.Round(x - c.At, 6))).ToHashSet();
+                HashSet<double> Offsets((double At, double Length) c) => events.Where(x => x >= c.At - 1e-9 && x < c.At + c.Length - 1e-9).Select(x => Math.Round(x - c.At, 6)).ToHashSet();
+                var first = Offsets(longest).Union(Offsets(cells[0])).ToHashSet();
                 if (first.Count == 0)
                     first = [0];
                 foreach (var onset in events.Where(x => x >= start - 1e-9 && x < Math.Min(start + frame, span.End) - 1e-9))
                 {
-                    var from = cells.Last(x => x.At <= onset + 1e-9).At;
-                    await Assert.That(first.Contains(Math.Round(onset - from, 6))).IsTrue().Because($"seed {song.Seed} at {onset}");
+                    var cell = cells.FindLastIndex(x => x.At <= onset + 1e-9);
+                    var offset = Math.Round(onset - cells[cell].At, 6);
+                    var motif = first.Union(cells.Where((_, i) => i != cell).SelectMany(Offsets)).ToHashSet();
+                    await Assert.That(motif.Contains(offset)).IsTrue().Because($"seed {song.Seed} at {onset}");
                 }
             }
         }

@@ -1024,7 +1024,7 @@ internal sealed record GeneratedSection(
     /// </summary>
     /// <param name="energyStep">How far the appearance's energy is from the section's, such as more for a later one.</param>
     /// <param name="before">The parts that rested the time before, of which it may leave out no more.</param>
-    /// <param name="keepsTexture">Whether it plays steady, whatever its texture draws, as the song's first section after an intro that brings its parts in.</param>
+    /// <param name="keepsTexture">Whether it plays steady, whatever its texture draws, as the song's first section after an intro that brings its parts in, or the appearances a stripped ending leaves one by one.</param>
     /// <param name="solo">The appearance's solo, whose soloists, and for a pitched solo the melody, play it throughout.</param>
     /// <param name="held">The parts the song holds back yet, which rest whatever the appearance draws, unless it would fall silent.</param>
     /// <param name="entering">The parts the song brings in at the appearance, which play whatever it draws, so that they are heard coming in.</param>
