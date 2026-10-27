@@ -57,7 +57,17 @@ public sealed class ListeningQuestionsTest
         Func<CorpusSong, double?>? Contrast = null
     );
 
-    private static readonly Question[] Questions = [];
+    private static readonly Question[] Questions =
+    [
+        new("djent-tuning", "Two Djent songs, one with its guitars and bass tuned down to B, five semitones under the other's: the heavier, or only muddier?",
+            "Whether a genre tunes its parts down (tuning, Djent's riff, rhythm and bass at 29, B), against the standard tuning; General MIDI's guitars below E2 are their lowest sample transposed. Heard to work, Doom, Nu metal and Metal take theirs by the measure.", "djent", [],
+            new() { ["tuning"] = new() { ["riff"] = 50, ["rhythm"] = 50, ["bass"] = 50 } },
+            x => x.Origin),
+        new("metal-rhythm-low", "Two Metal songs, one with its rhythm guitar's chords an octave lower, just over the riff, against high over it: the heavier wall, or the two guitars blurred into one?",
+            "Whether the metal family's rhythm part sits an octave down (register.rhythm 0 in Metal, Thrash, Doom, Nu metal and Djent, its median 63-70 to 52-56), against its register as the part has it; heard to blur, back to 50.", "metal", [],
+            new() { ["register"] = new() { ["rhythm"] = 50 } },
+            x => x.Origin)
+    ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

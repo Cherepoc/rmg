@@ -311,7 +311,13 @@ family's), a pair of the doubling's on the riff's onsets, its notes played as th
 its own instrument (`PartInstrument` at a note's depth), the riff's raise kept (Metal's 220 of 873 sections, 84% of their
 notes in unison, `RhythmRiffReportTest`), asked as `metal-rhythm-unison`. Left:
 
-1. **A rhythm guitar on the low string**, if listening asks for more than the doubling: between, the second guitar chugs
+Built on 27 October 2026: a power chord never inverted, its root at the bottom as on a guitar's low strings (a fourth 8-15%
+of the metal family's rhythm notes to 2-3%, its distorted power chords 17-25%, `TuningReportTest`'s shapes), and the
+rhythm part an octave down (`register.rhythm` 0 in Metal, Thrash, Doom, Nu metal and Djent, its median 63-70 to 52-56
+over the riff's 47-50, Djent's 47 to 46, its notes within two of the guitar's low E 0-3% to 5-8%), asked as
+`metal-rhythm-low`. Left:
+
+1. **A rhythm guitar on the low string**, if listening asks for more than the doubling and the lower rhythm part: between, the second guitar chugs
    single palm-muted notes on the open low string under the first's power chords, or holds a low note ringing under a
    clean verse or a lead: a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
    chugs' rule muting its weak repeats and an accent a power chord (Metal, Thrash, Djent, Nu metal, Doom). The register is
@@ -324,16 +330,6 @@ notes in unison, `RhythmRiffReportTest`), asked as `metal-rhythm-unison`. Left:
    MIDI's guitars below E2 are their lowest sample transposed, which the question asks of the owner's ear. Heard to work,
    the rest by the measure (`TuningReportTest`): Doom and Nu metal to C or D, Metal to D or as it is, Thrash and Black
    metal as they are.
-3. **Djent's riff intervals, no device of its own**, measured on 26 October 2026 (`RiffIntervalsReportTest`): Djent's riffs
-   move as Metal's do, repeating 44% of their moves against 46%, a semitone 8% against 7%, a tritone 4% against 2%, a
-   seventh, a ninth or past an octave 2% against none, but go back to their pedal from off it 35% of the time against
-   12%; so they keep near the pedal, and the next step is the riff's stepwiseness (`RiffLayers.Stepwiseness`, 0.55 for
-   every genre) a preset's value, Djent's the more stepwise on its chromatic scale, a knob of the presets' to hear. A one-note riff on the open low string moving by chromatic small
-   intervals (a semitone, a tone) or leaping by dissonant large ones (a tritone, a major seventh, a minor ninth over the
-   octave), as Djent's riffs do across their songs; not one song's riff built as a device. The riff's scale already
-   leans chromatic in Djent (`riffScale` chromatic 40-60-70); first measured: Djent's riffs' intervals off their pedal, how
-   many are a semitone, how many leap past an octave, how many are dissonant. Then, only where they keep near the pedal,
-   the riff's leaps a value of the line's (its spread), the presets' data, and no new mechanism.
 
 ### From the review of 22 October 2026
 
@@ -1104,6 +1100,10 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 
 ## Decided, and kept
 
+- **Djent's riffs no stepwiseness of their own** (decided 27 October 2026): Djent's riffs move as Metal's do but go back
+  to their pedal from off it 35% of the time against 12% (`RiffIntervalsReportTest`), and off it both ways, by chromatic
+  semitones and tones and by dissonant leaps past the octave; a stepwiseness leans one way and answers half of it, and
+  the riff's chromatic scale (`riffScale`) already leans the steps, so no preset takes a value of it.
 - **No solo in the plainest songs** (decided by the owner 18 October 2026): Rock's and Metal's plainest songs play no
   guitar solo, as the curve rule has it, a solo an unconventional thing that never happens at 0.
 - **Analytics written off the request** (decided 11 October 2026): an event is written in 0.042 ms
