@@ -145,6 +145,10 @@ internal static class CompositionStateKinds
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 
+    // 1 for a chord part's chords played as their root and its perfect fifth, no third nor colour, as a part a genre moves an
+    // octave down plays them, a third so low a blur (Registers.WithinInstrument)
+    public static StateKind<int> OpenChords { get; } = StateKinds.CreateAdditive<int>(Prefix + "OpenChords", StateScope.Render);
+
     // how deep a pump ducks the note on every beat, in percent of its expression, 0 for none (Expression.PumpDepth)
     public static StateKind<int> Pump { get; } = StateKinds.CreateAdditive<int>(Prefix + "Pump", StateScope.Render);
     public static StateKind<int> AutoPan { get; } = StateKinds.CreateAdditive<int>(Prefix + "AutoPan", StateScope.Render);

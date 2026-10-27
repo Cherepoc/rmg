@@ -1,8 +1,8 @@
 [
   {
     "id": "djent-tuning",
-    "question": "Two Djent songs, one with its guitars and bass tuned down to B, five semitones under the other's: the heavier, or only muddier?",
-    "decides": "Whether a genre tunes its parts down (tuning, Djent's riff, rhythm and bass at 29, B), against the standard tuning; General MIDI's guitars below E2 are their lowest sample transposed. Heard to work, Doom, Nu metal and Metal take theirs by the measure.",
+    "question": "Two Djent songs, one with its guitars tuned down, two to nine semitones under the other's and its bass with them as far as B: the heavier, or only muddier?",
+    "decides": "Whether a genre tunes its parts down (tuning, Djent's riff, rhythm and bass from E at its plain end to E an octave down at its wild, the bass no lower than B0), against the standard tuning; General MIDI's guitars below E2 are their lowest sample transposed. Heard to work, Doom, Nu metal and Metal take theirs by the measure.",
     "genre": "djent",
     "with": {
       "genre": {},
@@ -21,21 +21,22 @@
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 0,
-        "from": 0,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
         "seed": "5",
         "at": 34.9,
         "from": 32.7,
         "listen": [
           "Riff (Overdriven Guitar)",
+          "Rhythm part (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "7",
+        "at": 179,
+        "from": 176.9,
+        "listen": [
           "Bass (Electric Bass (pick))",
-          "Rhythm part (Overdriven Guitar)"
+          "Riff (Distortion Guitar)"
         ]
       },
       {
@@ -78,8 +79,8 @@
   },
   {
     "id": "metal-rhythm-low",
-    "question": "Two Metal songs, one with its rhythm guitar's chords an octave lower, just over the riff, against high over it: the heavier wall, or the two guitars blurred into one?",
-    "decides": "Whether the metal family's rhythm part sits an octave down (register.rhythm 0 in Metal, Thrash, Doom, Nu metal and Djent, its median 63-70 to 52-56), against its register as the part has it; heard to blur, back to 50.",
+    "question": "Two Metal songs, one with its rhythm guitar's chords an octave lower, just over the riff, in power chords, against high over it in full chords: the heavier wall, or the two guitars blurred into one?",
+    "decides": "Whether the metal family's rhythm part sits an octave down (register.rhythm 0 in Metal, Thrash, Doom, Nu metal and Djent, its median 63-70 to 52-56, its chords open, root and fifth), against its register as the part has it; heard to blur, back to 50.",
     "genre": "metal",
     "with": {
       "genre": {},

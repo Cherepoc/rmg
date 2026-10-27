@@ -52,18 +52,30 @@ internal sealed class VoiceLeader
 
         ImmutableArray<int> placed;
         if (_previous.IsDefault || isReset)
-            placed = _placeAsDrawn(drawn);
+            placed = AsDrawn(drawn, isVoicingFixed);
         else if (drawn.SequenceEqual(_previousDrawn) && root == _previousRoot)
             // the same chord again keeps its layout
             placed = _previous;
         else
             placed = Choose(drawn, isVoicingFixed, _previous, root - _previousRoot, Math.Clamp(smoothness, 0, 1), _minNote, _maxNote)
-                ?? _placeAsDrawn(drawn);
+                ?? AsDrawn(drawn, isVoicingFixed);
 
         _previousDrawn = drawn;
         _previous = placed;
         _previousRoot = root;
         return placed;
+    }
+
+    /// <summary>
+    ///     A chord placed as drawn, one whose layout is fixed moved whole by octaves to the nearest of its layouts that fit the
+    ///     range, rather than its top folded under, as a power chord's fifth would be into a fourth; folded where none fits.
+    /// </summary>
+    private ImmutableArray<int> AsDrawn(ImmutableArray<int> drawn, bool isVoicingFixed)
+    {
+        var fitted = _placeAsDrawn(drawn);
+        return isVoicingFixed && !fitted.IsEmpty && GetLayouts(drawn, true, _minNote, _maxNote).OrderBy(x => Math.Abs(x[0] - fitted.Min())).FirstOrDefault() is { IsDefault: false } whole
+            ? whole
+            : fitted;
     }
 
     /// <summary>

@@ -345,6 +345,8 @@ internal static class Realizer
             duration = pedals ? Math.Min(duration, nextNoteDuration) : Math.Min(role == TrackRole.Bass ? Math.Min(duration, nextNoteDuration) : duration, UntilChange(changes, position));
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
+        // a chord part a genre moves an octave down plays no third nor colour (Registers.WithinInstrument)
+        var open = !isLine && stateMap.GetStateValue(CompositionStateKinds.OpenChords) > 0;
 
         // a raised line's note and range an octave or more above the track's (CompositionStateKinds.LineRaise)
         var raise = OctaveNoteCount * stateMap.GetStateValue(CompositionStateKinds.LineRaise);
@@ -359,10 +361,11 @@ internal static class Realizer
         ImmutableArray<int> notes = role switch
         {
             _ when isLine => [InRange(IntoRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration) + raise, home.Low + raise, home.High + raise) + shift)],
+            // a part playing its chords open their root and its perfect fifth, as a power chord is never diminished
             TrackRole.Chords or TrackRole.Rhythm or TrackRole.Pad => voiceLeader.Place(
-                [..chordSteps.Select(ToNote)],
+                open ? [ToNote(0), ToNote(0) + PerfectFifth] : [..chordSteps.Select(ToNote)],
                 ToNote(0),
-                stateMap.GetStateValue(StateKinds.ChordVoicingFixed) > 0,
+                open || stateMap.GetStateValue(StateKinds.ChordVoicingFixed) > 0,
                 stateMap.GetStateValue(StateKinds.VoiceLeading),
                 stateMap.GetStateValue(StateKinds.ChordVoicingReset)
             ),
@@ -392,10 +395,11 @@ internal static class Realizer
         // a broken chord plays one of its notes, by its pattern and its place since the chord came in, the colour its part
         // lays on it among them; a rolled one whole, its colour too, which the articulations roll in 8ths (Articulations.ThreeFingerRoll)
         var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio).Value;
+        var colour = open ? ChordColour.None : (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour);
         if (role.PlaysChords() && !isLine && arpeggio == ArpeggioPattern.Roll)
-            notes = [..Arpeggios.Coloured(notes, stateMap, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour))];
+            notes = [..Arpeggios.Coloured(notes, stateMap, ToNote(0), colour)];
         else if (role.PlaysChords() && !isLine && arpeggio != ArpeggioPattern.None)
-            notes = [Arpeggios.Pick(arpeggio, Arpeggios.Coloured(notes, stateMap, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour)), place, at.PatternBar * at.Meter.BarDuration + at.Beat,
+            notes = [Arpeggios.Pick(arpeggio, Arpeggios.Coloured(notes, stateMap, ToNote(0), colour), place, at.PatternBar * at.Meter.BarDuration + at.Beat,
                 at.OnPulse, at.Pulse, ToNote(0), stateMap.GetStateValue(CompositionStateKinds.ArpeggioOrder), at.Beat)];
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);

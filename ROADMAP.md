@@ -315,7 +315,9 @@ Built on 27 October 2026: a power chord never inverted, its root at the bottom a
 of the metal family's rhythm notes to 2-3%, its distorted power chords 17-25%, `TuningReportTest`'s shapes), and the
 rhythm part an octave down (`register.rhythm` 0 in Metal, Thrash, Doom, Nu metal and Djent, its median 63-70 to 52-56
 over the riff's 47-50, Djent's 47 to 46, its notes within two of the guitar's low E 0-3% to 5-8%), asked as
-`metal-rhythm-low`. Left:
+`metal-rhythm-low`; on 28 October its chords open down there, root and fifth, no third nor colour (`OpenChords`, set
+where a genre moves a chord part down), its full chords 10-25% of its notes to none, and a fixed shape a section starts
+on moved whole rather than its fifth folded under into a fourth (`VoiceLeader`), the fourths 1-11% to none. Left:
 
 1. **A rhythm guitar on the low string**, if listening asks for more than the doubling and the lower rhythm part: between, the second guitar chugs
    single palm-muted notes on the open low string under the first's power chords, or holds a low note ringing under a
@@ -325,8 +327,9 @@ over the riff's 47-50, Djent's 47 to 46, its notes within two of the guitar's lo
 2. **A genre's tuning**, built on 27 October 2026 for Djent alone, to be asked (`djent-tuning`) before any other preset
    takes one: `tuning` by role (riff, rhythm, bass), a semitone every 4 or so below 50, a part's range and its own
    instrument's moved by it as its frets' notes are (`Registers.Tuned`, `Realizer.RangeOf`), a chord's voicing kept in its
-   octaves. Djent tuned to B, a seven-string's (29): its riff's median 49 to 43 and its floor E2 to B1, its bass's median
-   40 to 35 and its floor E1 to B0, the octave between them kept, a drone in C to D# back on the low string. General
+   octaves. Djent tuned by the song's sound from E at its plain end through A# to E an octave down at its wild ([50, 25,
+   0], 28 October 2026; first B, a seven-string's, 29): its riff's floor G1 to D2 over 64 songs, mostly A#1, its bass
+   with it but no lower than B0 (`Registers.LowestTuned`), a drone in C to D# back on the low string. General
    MIDI's guitars below E2 are their lowest sample transposed, which the question asks of the owner's ear. Heard to work,
    the rest by the measure (`TuningReportTest`): Doom and Nu metal to C or D, Metal to D or as it is, Thrash and Black
    metal as they are.

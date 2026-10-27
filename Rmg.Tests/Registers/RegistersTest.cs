@@ -39,22 +39,29 @@ public sealed class RegistersTest
     }
 
     /// <summary>
-    ///     A rule: a genre's tuning moves its parts' ranges by its semitones, Djent's guitars and bass down to B, and every note
-    ///     of their lines on their own instruments within the tuned range, the same seeds' parts in standard tuning otherwise.
+    ///     A rule: a genre's tuning moves its parts' ranges by its semitones, Djent's guitars by the song's sound from E down to
+    ///     E an octave below, its bass with them as far as B0 (<see cref="Rmg.Core.Composition.Registers.LowestTuned" />), and
+    ///     every note of their lines on their own instruments within the tuned range, the same seeds' parts in standard tuning
+    ///     otherwise.
     /// </summary>
     [Test]
     public async Task AGenresTuning_MovesItsPartsRanges_EveryNoteWithin()
     {
         var djent = Rmg.Tests.Genres.GenrePresets.Genre("djent");
         var standard = djent with { Choices = djent.Choices.SetItem(GenreChoices.Tuning.Name, System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty) };
+        var tunings = new HashSet<int>();
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var (song, plain) = (TestCorpus.Get(seed, new SongOverrides(Genre: djent)), TestCorpus.Get(seed, new SongOverrides(Genre: standard)));
+            var riffTuning = ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(TrackRole.Riff)]).StateMap.GetStateValue(CompositionStateKinds.Tuning);
+            tunings.Add(riffTuning);
+            await Assert.That(riffTuning).IsBetween(-12, -1).Because($"seed {seed}");
             foreach (var role in new[] { TrackRole.Riff, TrackRole.Bass })
             {
                 var (tuned, untuned) = ((PitchInstrumentTrack)song.Song.TrackDefinitions[song.Song.Track(role)], (PitchInstrumentTrack)plain.Song.TrackDefinitions[plain.Song.Track(role)]);
-                await Assert.That(Rmg.Core.Composition.Registers.RangeOf(tuned).Low).IsEqualTo(InstrumentRanges.Of(tuned.InstrumentCode).Low - 5).Because($"seed {seed}, {role}");
-                await Assert.That(Realizer.GetRange(tuned).Low).IsEqualTo(Realizer.GetRange(untuned).Low - 5).Because($"seed {seed}, {role}");
+                var tuning = Math.Max(riffTuning, Rmg.Core.Composition.Registers.LowestTuned - InstrumentRanges.Of(tuned.InstrumentCode).Low);
+                await Assert.That(Rmg.Core.Composition.Registers.RangeOf(tuned).Low).IsEqualTo(InstrumentRanges.Of(tuned.InstrumentCode).Low + tuning).Because($"seed {seed}, {role}");
+                await Assert.That(Realizer.GetRange(tuned).Low).IsEqualTo(Realizer.GetRange(untuned).Low + tuning).Because($"seed {seed}, {role}");
             }
 
             foreach (var (track, notes) in song.Song.Notes!)
@@ -69,6 +76,37 @@ public sealed class RegistersTest
                         .Because($"seed {seed}, {part.Role} at {note.Position}: {string.Join(" ", note.Value.Pitches)} in {low}-{high}");
             }
         }
+
+        // drawn by the song, not one for the genre
+        await Assert.That(tunings.Count).IsGreaterThan(2);
+    }
+
+    /// <summary>
+    ///     A rule: a chord part a genre moves an octave down, the metal rhythm part, plays its chords open, every note of a
+    ///     chord its root's unison, fifth or octave, no third nor colour (<see cref="CompositionStateKinds.OpenChords" />); a
+    ///     note doubling the riff's line plays the riff's.
+    /// </summary>
+    [Test]
+    public async Task AChordPartMovedDown_PlaysItsChordsOpen_NoThird()
+    {
+        var metal = Rmg.Tests.Genres.GenrePresets.Genre("metal");
+        var chords = 0;
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: metal))))
+        {
+            if (!song.Song.TrackDefinitions.Values.Any(x => x.Role == TrackRole.Rhythm))
+                continue;
+            var track = song.Song.Track(TrackRole.Rhythm);
+            await Assert.That(((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).StateMap.GetStateValue(CompositionStateKinds.OpenChords)).IsEqualTo(1).Because($"seed {song.Seed}");
+            foreach (var note in (song.Song.Notes!.GetValueOrDefault(track)?.ToArray() ?? []).Where(x => x.Value.Pitches.Length > 1 && x.Value.State.GetStateValue(CompositionStateKinds.Doubled) == 0
+                                                                     && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
+            {
+                chords++;
+                await Assert.That(note.Value.Pitches.All(x => (x - note.Value.Pitches.Min()) is 0 or 7 or 12 or 19 or 24)).IsTrue()
+                    .Because($"seed {song.Seed} at {note.Position}: {string.Join(" ", note.Value.Pitches)}");
+            }
+        }
+
+        await Assert.That(chords).IsGreaterThan(0);
     }
 
     [Test]

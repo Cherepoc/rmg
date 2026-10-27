@@ -34,9 +34,13 @@ public static class Registers
     /// <summary>
     ///     A part's octaves, as drawn, moved within its instrument's, as many as it has room for; both moved an octave where a
     ///     genre's register for the part is at its lowest quarter or its highest (<see cref="GenreChoices.Register" />), as
-    ///     a guitar tuned down plays, or a bass up high.
+    ///     a guitar tuned down plays, or a bass up high; a chord part moved down playing its chords open, root and fifth, as a
+    ///     guitar's low strings do, a third down there a blur (<see cref="CompositionStateKinds.OpenChords" />).
     /// </summary>
-    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, Genre genre) => WithinInstrument(part, part.InstrumentCode, genre);
+    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, Genre genre) => WithinInstrument(
+        part.Role.PlaysChords() && OctavesOf(genre, part.Role) < 0
+            ? new PitchInstrumentTrack(part.StateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.OpenChords.CreateState(1)])), part.InstrumentCode, part.MinOctaveOffset, part.MaxOctaveOffset, part.Role, part.Pan)
+            : part, part.InstrumentCode, genre);
 
     /// <summary>A part's octaves, as it has them, moved within another instrument's, one it switches to (<see cref="InstrumentsOverTime" />).</summary>
     public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, int program, Genre genre)
@@ -58,8 +62,14 @@ public static class Registers
             ? (int)Math.Round(12 * genre.Shift(GenreChoices.Tuning, name))
             : 0;
 
-    /// <summary>A part tuned as its genre tunes it, its own instrument's every note moved by as many semitones (<see cref="Realizer.RangeOf" />).</summary>
-    public static PitchInstrumentTrack Tuned(PitchInstrumentTrack part, Genre genre) => TuningOf(genre, part.Role) is var tuning and not 0
+    /// <summary>The lowest note a part's instrument is tuned down to, B0, a five-string bass's lowest, below which a note is felt more than heard.</summary>
+    public const int LowestTuned = 23;
+
+    /// <summary>
+    ///     A part tuned as its genre tunes it, its own instrument's every note moved by as many semitones, its lowest no lower
+    ///     than <see cref="LowestTuned" />, so that a bass tuned with guitars an octave down stops at B0 (<see cref="Realizer.RangeOf" />).
+    /// </summary>
+    public static PitchInstrumentTrack Tuned(PitchInstrumentTrack part, Genre genre) => Math.Max(TuningOf(genre, part.Role), LowestTuned - InstrumentRanges.Of(part.InstrumentCode).Low) is var tuning and not 0
         ? new PitchInstrumentTrack(part.StateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.Tuning.CreateState(tuning)])), part.InstrumentCode, part.MinOctaveOffset, part.MaxOctaveOffset, part.Role, part.Pan)
         : part;
 

@@ -1986,7 +1986,7 @@
       "riff": { "powerChords": [60, 60, 50], "chugs": [50, 50, 40], "drone": [40, 40, 50], "hook": [100, 80, 0], "turnaround": [25, 30, 30] },
       "riffSection": { "songs": [30, 40, 40], "verses": [30, 40, 40] },
       "register": { "riff": 0, "rhythm": 0 },
-      "tuning": { "riff": 29, "rhythm": 29, "bass": 29 },
+      "tuning": { "riff": [50, 25, 0], "rhythm": [50, 25, 0], "bass": [50, 25, 0] },
       "parts": { "melody": [40, 40, 50], "chords": [60, 60, 60], "bass": 100, "pad": [50, 50, 60], "counterMelody": [40, 45, 55], "drum": 100, "riff": 100, "riffTwin": [0, 10, 20], "rhythm": [50, 50, 50], "solo": [20, 40, 60] },
       "instrument": {
         "melody": { "electricGuitarClean": 100, "lead2Sawtooth": 60, "lead5Charang": 40 },
