@@ -28,7 +28,7 @@ public sealed class LonePartTest
     {
         var lone = new Dictionary<TrackRole, List<double>>();
         var melody = new List<double>();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             var roles = song.Song.TrackDefinitions.Values.Select(x => x.Role).ToHashSet();
             if (roles.Contains(TrackRole.Melody))

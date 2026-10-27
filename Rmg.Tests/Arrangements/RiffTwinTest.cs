@@ -60,7 +60,7 @@ public sealed class RiffTwinTest
         var genre = Rmg.Tests.Genres.GenrePresets.Genre("metal");
         var raise = Math.Max(0, -Rmg.Core.Composition.Registers.OctavesOf(genre, TrackRole.Riff));
         var (leading, raised) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre,
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre,
                      Parts: ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true).Add(TrackRole.RiffTwin, true)))))
         {
             var leads = song.Trace.Where(x => x.Point == TracePoints.TwinLead).ToDictionary(x => x.Section, x => (bool)x.Value!);
@@ -157,7 +157,7 @@ public sealed class RiffTwinTest
         var checkedSections = 0;
         // Metal's songs given the riff and its twin, so that every chugging section has a twin to rest
         var withTwin = new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("metal"), Parts: ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true).Add(TrackRole.RiffTwin, true));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, withTwin)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, withTwin)))
         {
             var chugs = song.Trace.Where(x => x.Point == TracePoints.Chugs && (bool)x.Value!).Select(x => x.Section).ToHashSet();
             var twin = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.RiffTwin).SelectMany(x => x.Value).ToArray();

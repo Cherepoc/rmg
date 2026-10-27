@@ -17,7 +17,7 @@ public sealed class PushTest
     {
         int pushed = 0, early = 0, kicked = 0;
         var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))))
         {
             var pushing = song.Trace.Where(x => x.Point == TracePoints.Push && (bool)x.Value!).Select(x => x.Section).ToHashSet();
             var changes = song.ChordChanges;
@@ -57,7 +57,7 @@ public sealed class PushTest
     public async Task ThePlainestSongs_NeverPush()
     {
         var sections = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Push))
         {
             sections++;

@@ -16,7 +16,7 @@ public sealed class FillFeetTest
     {
         var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
         var (doubles, grooves) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("thrash")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("thrash")))))
         foreach (var (from, line, feet) in song.Trace.Where(x => x.Point == TracePoints.FillFeet).Select(x => ((double, double, FillFeet))x.Value!))
         {
             var kicks = song.Song.TrackEventStateTimelineMap.TrackTimelineMap[kick].EventTimeline.Where(x => x.Position >= from - 1e-9 && x.Position < line - 1e-9).Select(x => Math.Round(x.Position * 4)).ToHashSet();
@@ -32,7 +32,7 @@ public sealed class FillFeetTest
 
         Console.WriteLine($"{doubles} fills over a double kick, {grooves} over the groove's kick, in 64 Thrash songs");
         await Assert.That(doubles).IsGreaterThan(10);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed)))
             await Assert.That(song.Trace.Any(x => x.Point == TracePoints.FillFeet)).IsFalse().Because($"seed {song.Seed}");
     }
 }

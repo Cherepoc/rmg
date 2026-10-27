@@ -11,7 +11,7 @@ public sealed class DubEchoTest
     public async Task AnEchoingRhythmPart_EchoesItsChords_AndTheSnaresBackbeat_AtItsDelay()
     {
         var (songs, dubbed) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("reggae")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("reggae")))))
         {
             var notes = song.Song.Notes!;
             int Echo(int track) => notes.GetValueOrDefault(track)?.Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo)).FirstOrDefault(x => x > 0) ?? 0;

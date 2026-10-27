@@ -46,6 +46,14 @@ internal static class TestCorpus
     public static T[] InParallel<T>(IEnumerable<int> seeds, Func<int, T> work) =>
         seeds.AsParallel().AsOrdered().Select(seed => Isolated(() => work(seed))).ToArray();
 
+    /// <summary>
+    ///     The work of every seed, in the seeds' order, as <see cref="InParallel{T}" /> does it, but handed over a core's
+    ///     worth at a time as it is read, so that a test reading songs made afresh once holds a few of them rather than all:
+    ///     a song with its trace is some 3 MB, and the suite's tests run eight at a time.
+    /// </summary>
+    public static IEnumerable<T> Streamed<T>(IEnumerable<int> seeds, Func<int, T> work) =>
+        seeds.Chunk(Environment.ProcessorCount).SelectMany(chunk => InParallel(chunk, work));
+
     private static readonly ConcurrentDictionary<(int, Meter), Lazy<CorpusSong>> MeterSongs = new();
 
     /// <summary>The song of the seed with its bars in the meter given instead of its own.</summary>

@@ -239,7 +239,7 @@ public sealed class PolymeterTest
     {
         var sections = 0;
         foreach (var genre in DrivenGenres)
-            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(genre)))))
+            foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(genre)))))
             {
                 var plans = song.PolymeterPlans;
                 var spans = song.Map.Sections.Where(x => plans.ContainsKey(x.SectionId)).ToArray();

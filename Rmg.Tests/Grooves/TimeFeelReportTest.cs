@@ -50,7 +50,7 @@ public sealed class TimeFeelReportTest
     {
         var snares = DrumGroups.Snare.Tracks.ToHashSet();
         var (onThree, onTwoAndFour) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0.5, Genre: Genres.GenrePresets.Genre("dnb")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0.5, Genre: Genres.GenrePresets.Genre("dnb")))))
         {
             var feels = song.Trace.Where(x => x.Point == TracePoints.TimeFeel).ToDictionary(x => x.Section, x => (int)x.Value!);
             // the snare pinned there, and outside the build into a drop, silent or filtered, which rolls on the beats

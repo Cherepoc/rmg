@@ -54,7 +54,7 @@ public sealed class KeyPreparationTest
     public async Task APivotChord_IsOneTheOldKeyHasToo()
     {
         var pivots = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Scale(0.4))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Scale(0.4))))
         {
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             foreach (var (_, chords, _) in Preparations(song).Where(x => x.Device == KeyChange.Device.Pivot))
@@ -77,7 +77,7 @@ public sealed class KeyPreparationTest
     public async Task APedal_HoldsTheNewKeysDominant_InTheBassUnderTheBarBefore()
     {
         var (notes, held) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Scale(1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Scale(1))))
         {
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             foreach (var (change, from, _) in Preparations(song).Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Change, x.Chords[0], x.Device)))
@@ -101,7 +101,7 @@ public sealed class KeyPreparationTest
     {
         var sequences = 0;
         // between the middle and the wild end, where a change leaves its section's last phrase to climb in
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, Scale(0.8))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, Scale(0.8))))
         {
             var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
             foreach (var (change, chords, _) in Preparations(song).Where(x => x.Device == KeyChange.Device.Sequence))

@@ -12,7 +12,7 @@ public sealed class KickOutTest
     public async Task AKickOut_TakesTheBassOutWithTheKick_UntilItsLine()
     {
         var spans = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.With("techno", GenreChoices.KickOut, ("lines", 1))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.With("techno", GenreChoices.KickOut, ("lines", 1))))))
         {
             var kickOuts = (ImmutableArray<(double From, double To)>)song.Trace.Single(x => x.Point == TracePoints.KickOuts).Value!;
             // but a riser into a drop, which a song without a pad or chords plays on the bass's track
@@ -39,7 +39,7 @@ public sealed class KickOutTest
     {
         var (kicks, others) = (DrumGroups.Kick.Tracks.ToHashSet(), DrumGroups.Timekeepers.Tracks.Concat(DrumGroups.Snare.Tracks).ToHashSet());
         var (spans, playing) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.With("techno", GenreChoices.KickOut, ("lines", 1))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.With("techno", GenreChoices.KickOut, ("lines", 1))))))
         foreach (var (from, to) in (ImmutableArray<(double From, double To)>)song.Trace.Single(x => x.Point == TracePoints.KickOuts).Value!)
         {
             spans++;

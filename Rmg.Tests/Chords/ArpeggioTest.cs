@@ -49,7 +49,7 @@ public sealed class ArpeggioTest
     public async Task ABluegrassBanjo_Rolls_ItsThumbOnTheCellsFirst8ths()
     {
         var (cells, low, rolled, whole) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("bluegrass")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("bluegrass")))))
         {
             var traced = song.Trace.Where(x => x.Point == TracePoints.Arpeggio).ToArray();
             whole += traced.Count(x => x.Track == song.Track(TrackRole.Chords) && (ArpeggioPattern)x.Value! == ArpeggioPattern.None);
@@ -84,7 +84,7 @@ public sealed class ArpeggioTest
         // and a quieter section always calm, its breaker breaking the chords where the genre lets it
         var genre = new Genre(TestCorpus.Always(GenreChoices.Arpeggio, GenreChoices.Name(nameof(ArpeggioPattern.None))).Choices
             .AddRange(TestCorpus.Always(GenreChoices.LouderForms, "quieter").Choices));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
             await Assert.That(song.Trace.Where(x => x.Point == TracePoints.Arpeggio).All(x => (ArpeggioPattern)x.Value! == ArpeggioPattern.None)).IsTrue().Because($"seed {song.Seed}");
     }
 

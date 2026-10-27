@@ -16,7 +16,7 @@ public sealed class HarmonyRulesTest
     [Test]
     public async Task ThePlainestSongs_NeitherReharmoniseNorHoldAPedal()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
         {
             await Assert.That(song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value).IsNull().Because($"seed {song.Seed}");
             await Assert.That(song.Trace.Where(x => x.Point == TracePoints.SectionPedal).All(x => x.Value is null)).IsTrue().Because($"seed {song.Seed}");
@@ -31,7 +31,7 @@ public sealed class HarmonyRulesTest
     public async Task AVampingSection_PlaysOneChord_WhereverItPlays()
     {
         var vamping = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With(GenreChoices.Vamp, "sections")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With(GenreChoices.Vamp, "sections")))))
         {
             var vamps = song.Trace.Where(x => x.Point == TracePoints.Vamp && (bool)x.Value!).Select(x => x.Section).ToHashSet();
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
@@ -58,7 +58,7 @@ public sealed class HarmonyRulesTest
     public async Task AContrastHome_IsAMajorKeysFifth_AndAMinorKeysRelativeMajor()
     {
         var (major, minor) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With(GenreChoices.SectionHome, "contrast")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With(GenreChoices.SectionHome, "contrast")))))
         foreach (var home in song.Trace.Where(x => x.Point == TracePoints.SectionHome && (int)x.Value! != 0))
         {
             var scale = (Scale)song.Trace.Last(x => x.Point == TracePoints.SectionScale && x.Section == home.Section).Value!;
@@ -77,7 +77,7 @@ public sealed class HarmonyRulesTest
     [Test]
     public async Task AGenresSectionHomes_KeepToItsPool()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With(GenreChoices.SectionHome, "tonic")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With(GenreChoices.SectionHome, "tonic")))))
         foreach (var home in song.Trace.Where(x => x.Point == TracePoints.SectionHome))
             await Assert.That((int)home.Value!).IsEqualTo(0).Because($"seed {song.Seed}, section {home.Section}");
     }
@@ -93,7 +93,7 @@ public sealed class HarmonyRulesTest
     {
         var dominants = 0;
         var genre = TestCorpus.Always(GenreChoices.All.Single(x => x.Name == choice), option);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             T Last<T>(string point, int section) => (T)song.Trace.Last(x => x.Point == point && x.Section == section).Value!;
             foreach (var section in song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => x.Section).Distinct())
@@ -127,7 +127,7 @@ public sealed class HarmonyRulesTest
         var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
             .Add(GenreChoices.ChordScales.Name, all.Add("applied", new(1, 1, 1)))
             .Add(GenreChoices.HarmonyDevices.Name, all.Add("reharmonised", new(1, 1, 1))));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             if (song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is not (int later, ImmutableArray<double>))
                 continue;
@@ -182,7 +182,7 @@ public sealed class HarmonyRulesTest
     {
         var looping = 0;
         var genre = With(GenreChoices.Loop, "sections");
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             T Last<T>(string point, int section) => (T)song.Trace.Last(x => x.Point == point && x.Section == section).Value!;
             var first = song.Map.Sections[0].SectionId;
@@ -201,7 +201,7 @@ public sealed class HarmonyRulesTest
         // a genre looping but at its plain end
         var unlessPlain = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
             .Add(GenreChoices.Loop.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("sections", new ByConvention(0, 1, 1))));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: unlessPlain))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: unlessPlain))))
             await Assert.That(song.Trace.Where(x => x.Point == TracePoints.Loop).All(x => !(bool)x.Value!)).IsTrue().Because($"seed {song.Seed}");
     }
 }

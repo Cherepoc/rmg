@@ -137,7 +137,7 @@ public sealed class DrumSoloTest
     {
         var genre = Rmg.Tests.Genres.GenrePresets.With("rock", GenreChoices.Solos, ("sections", 1), ("hits", 1));
         var (solos, struck) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
         foreach (var (index, solo) in song.Solos.Where(x => x.Value is { IsDrumSolo: true, HitEvery: > 0 }))
         {
             solos++;
@@ -168,7 +168,7 @@ public sealed class DrumSoloTest
         var (kick, cymbal) = (DrumGroups.GetTrackNumber(DrumDefinitions.Kick), DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal));
         var hands = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Tom }.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var caught = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
         foreach (var (span, plan, _, solo) in DrumSolos(song).Where(x => x.Solo.Soloists.Contains(0) && song.Solos[x.Solo.Index].HitEvery > 0))
         {
             var every = span.Meter.BarDuration * song.Solos[solo.Index].HitEvery;
@@ -344,7 +344,7 @@ public sealed class DrumSoloTest
     {
         var (hat, tom) = (DrumGroups.GetTrackNumber(DrumDefinitions.HiHat), DrumGroups.GetTrackNumber(DrumDefinitions.Tom));
         var (solos, pedals, roundTheKit) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild with { Genre = Rmg.Tests.Genres.GenrePresets.Genre("jazz") })))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild with { Genre = Rmg.Tests.Genres.GenrePresets.Genre("jazz") })))
         foreach (var (span, plan, feet, _) in KitSolos(song).Where(x => x.Feet && x.Span.Meter.Sixteenths == 16))
         {
             solos++;
@@ -375,7 +375,7 @@ public sealed class DrumSoloTest
             ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(GenreChoices.Name(nameof(Sticking.Cascade)), new(1, 1, 1))));
         var tom = DrumGroups.GetTrackNumber(DrumDefinitions.Tom);
         var (gestures, down) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild with { Genre = genre })))
         // but a solo over the band's hits, whose hands a hit clears a 16th either side of, a run's first notes among them
         foreach (var (_, plan, _, _) in KitSolos(song).Where(x => !x.Feet && song.Song.Notes!.GetValueOrDefault(tom)?.Count > 0 && song.Solos[x.Solo.Index].HitEvery == 0))
         foreach (var segment in plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick))
@@ -400,7 +400,7 @@ public sealed class DrumSoloTest
     public async Task ASoloTradingWithTheDrums_LeavesTheirTurnsToThem_TheBandLaidOut()
     {
         var (trades, drumTurns, pitchedTurns) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("jazz")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("jazz")))))
         foreach (var (index, solo) in song.Solos.Where(x => x.Value.TradesWithDrums))
         {
             trades++;

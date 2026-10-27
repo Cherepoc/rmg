@@ -12,7 +12,7 @@ public sealed class OrchestraKitTest
     public async Task TheOrchestraKitsTimpani_PlayTheChordsRootOrFifth()
     {
         var tuned = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("orchestral"))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("orchestral"))))
                      .Where(x => x.Song.Draws?.Kit == 48))
         {
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;

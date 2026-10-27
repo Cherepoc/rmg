@@ -43,7 +43,7 @@ public sealed class TurnaroundTest
 
         await Assert.That(Rmg.Core.Composition.Progressions.Turnaround.At(0)).IsEqualTo(0);
         // the plainest songs of a genre that turns around at its plain end turning every section around
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre))))
         foreach (var turn in song.Trace.Where(x => x.Point == TracePoints.Turnaround))
             await Assert.That((((bool Turns, bool))turn.Value!).Turns).IsTrue().Because($"seed {song.Seed}, section {turn.Section}");
     }

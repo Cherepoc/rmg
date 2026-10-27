@@ -20,7 +20,7 @@ public sealed class TremoloTest
     {
         var picking = GenrePresets.With(genre, GenreChoices.Articulation, ("tremolo", 1));
         var (sections, strokes, rates) = (0, 0, new List<double>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: picking))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: picking))))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Tremolo))
         {
             sections++;
@@ -69,7 +69,7 @@ public sealed class TremoloTest
     [Test]
     public async Task ThePlainestSongs_PickNoTremolo()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
             await Assert.That(song.Trace.Any(x => x.Point == TracePoints.Tremolo)).IsFalse().Because($"seed {song.Seed}");
     }
 

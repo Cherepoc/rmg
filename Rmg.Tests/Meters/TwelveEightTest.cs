@@ -10,7 +10,7 @@ public sealed class TwelveEightTest
     public async Task ASongIn12_8_PlaysBarsOfFourGroupsOfThree_ItsBrokenChordsOnItsEighths()
     {
         var (broken, offGrid) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Meter.TwelveEight)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Meter.TwelveEight)))
         {
             await Assert.That(Meter.NameOf(song.Map.Meter)).IsEqualTo("12/8");
             await Assert.That(song.Map.Meter.BarDuration).IsEqualTo(6);

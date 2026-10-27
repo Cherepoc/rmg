@@ -34,7 +34,7 @@ public sealed class SongIntroTest
     public async Task ASong_SoundsFromItsFirstBar_AndInEverySection_AndOpensAsItsGenreNames_InEveryGenre()
     {
         foreach (var preset in GenrePresets.All.Prepend(null))
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, preset is null ? 32 : 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: preset is null ? null : GenrePresets.Genre(preset)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, preset is null ? 32 : 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: preset is null ? null : GenrePresets.Genre(preset)))))
         {
             var genre = preset?.Id;
             if (preset is not null && preset.Choices.TryGetValue(GenreChoices.Intro.Name, out var intros))
@@ -84,7 +84,7 @@ public sealed class SongIntroTest
     public async Task AClubIntroOverItsFirstSection_BringsItsPartsInAPatternAtATime()
     {
         var (whole, late) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("techno")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("techno")))))
         {
             var intro = song.Map.Intro;
             if (intro is not { Kind: IntroKind.Entries, Window.Whole: true })

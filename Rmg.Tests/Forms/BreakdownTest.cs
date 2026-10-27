@@ -23,7 +23,7 @@ public sealed class BreakdownTest
     public async Task ABreakdown_IsABridgeInHalfTime_TheKickWithTheRiff_TheLinesAndThePadOut()
     {
         var (found, kicked, withRiff) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always("djent")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always("djent")))))
         {
             var structure = (SongStructure)song.Trace.Single(t => t.Point == TracePoints.SongForm).Value!;
             var breakdowns = Breakdowns(song);

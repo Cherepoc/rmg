@@ -10,7 +10,7 @@ public sealed class PhraseLengthTest
     [Test]
     public async Task ThePlainestSongs_PhraseInFours()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
             await Assert.That(song.Map.Sections.All(x => x.Meter.PhraseBars == Meter.DefaultPhraseBars)).IsTrue().Because($"seed {song.Seed}");
     }
 

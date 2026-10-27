@@ -140,7 +140,7 @@ public sealed class FiguresTest
         };
         var onsets = figure.Onsets.Select(x => x % 16).ToHashSet();
         var (hits, on) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var tracks = player switch
             {
@@ -173,7 +173,7 @@ public sealed class FiguresTest
     {
         var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var (hits, on) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("nuMetal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("nuMetal")))))
         {
             // the riff where it plays, else the bass
             var leader = song.Song.TrackDefinitions.Where(x => x.Value.Role == TrackRole.Riff && song.Song.Notes!.GetValueOrDefault(x.Key)?.Count > 0).Select(x => (int?)x.Key).FirstOrDefault()
@@ -210,7 +210,7 @@ public sealed class FiguresTest
     {
         var claves = genre == "latin" ? new HashSet<int> { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) } : DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var (hits, on) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             var strokes = song.Song.TrackEventStateTimelineMap.TrackTimelineMap.Where(x => claves.Contains(x.Key)).SelectMany(x => x.Value.EventTimeline).Select(x => x.Position).ToArray();
             foreach (var (_, _, position) in Hits(song, new HashSet<int> { song.Song.Track(TrackRole.Chords) }, Playing(song, FigurePlayer.Chords, "withClave")))
@@ -230,7 +230,7 @@ public sealed class FiguresTest
     {
         var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var hits = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))))
         foreach (var (_, bar, position) in Hits(song, kicks, Playing(song, FigurePlayer.Ground, "doubleKick")))
         {
             hits++;
@@ -246,7 +246,7 @@ public sealed class FiguresTest
     {
         var keepers = DrumGroups.Timekeepers.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var (hits, on) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
         foreach (var (_, bar, position) in Hits(song, keepers, Playing(song, FigurePlayer.Time, "blast")))
         {
             hits++;
@@ -274,13 +274,13 @@ public sealed class FiguresTest
             ? new HashSet<int> { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }
             : DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var (hits, sections, playing) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: given))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: given))))
         {
             sections += song.Trace.Count(t => t.Point == TracePoints.Figures);
             playing += names.Sum(name => Playing(song, player, name).Count);
         }
 
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: given))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: given))))
         foreach (var name in names)
         {
             var figure = Figures.All.Single(x => x.Player == player && x.Name == name);
@@ -309,7 +309,7 @@ public sealed class FiguresTest
     public async Task ARollingBass_PlaysOffTheBeat()
     {
         var (notes, off) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trance")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trance")))))
         {
             var bass = song.Track(TrackRole.Bass);
             var rolling = Playing(song, FigurePlayer.Bass, "rolling");
@@ -338,7 +338,7 @@ public sealed class FiguresTest
     {
         var figure = Figures.All.Single(x => x.Player == FigurePlayer.Bass && x.Name == name);
         var (notes, on) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             var bass = song.Track(TrackRole.Bass);
             var playing = Playing(song, FigurePlayer.Bass, name);
@@ -366,7 +366,7 @@ public sealed class FiguresTest
     public async Task AWaltz_StrikesItsChordsOn2And3_AndItsBassOn1()
     {
         var (notes, on, waltzes) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("country"), Meter: Meter.ThreeFour))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("country"), Meter: Meter.ThreeFour))))
         {
             var playing = Playing(song, FigurePlayer.Chords, "waltz");
             foreach (var span in song.Map.Sections.Where(x => playing.Contains(x.SectionId)))
@@ -393,7 +393,7 @@ public sealed class FiguresTest
     public async Task AFigureSeveralPlayersPlay_IsPlayedByAll_ABlastsKickWithItsSnareAndItsCymbal_ButInHalfOrDoubleTime()
     {
         var (blasts, alone) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
         foreach (var entry in song.Trace.Where(t => t.Point == TracePoints.Figures))
         {
             var figures = (ImmutableDictionary<FigurePlayer, string>)entry.Value!;
@@ -415,7 +415,7 @@ public sealed class FiguresTest
     public async Task APolymeterSection_PlaysNoFigureOfFixedOnsets_ButAKickWithItsRiff()
     {
         var polymeters = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("idm")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("idm")))))
         {
             var plans = (ImmutableDictionary<int, Polymeter.Plan>)song.Trace.Single(x => x.Point == TracePoints.Polymeter).Value!;
             foreach (var id in plans.Keys)
@@ -434,7 +434,7 @@ public sealed class FiguresTest
     public async Task ABassPlayingAFigure_IsNotDoubledWithTheRiff()
     {
         var (figured, doubled) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno")))))
         {
             var withRiff = song.Trace.Where(t => t.Point == TracePoints.LineDoubling && ((int, TrackRole, TrackRole, int))t.Value! is (_, TrackRole.Riff, TrackRole.Bass, _))
                 .Select(t => t.Section).ToHashSet();

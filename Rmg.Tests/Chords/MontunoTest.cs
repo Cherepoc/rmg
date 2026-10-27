@@ -17,7 +17,7 @@ public sealed class MontunoTest
     public async Task AMontuno_PlaysTheRootOnTheBeats_TheOtherNotesOffThem()
     {
         var (beats, beatRoots, offs, offRoots) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Montuno))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Montuno))))
         foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)]
                      .Where(x => (ArpeggioPattern)x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == ArpeggioPattern.Montuno
                                  && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0 && x.Value.Pitches.Length == 1))

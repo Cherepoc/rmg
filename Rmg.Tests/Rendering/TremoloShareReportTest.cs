@@ -25,7 +25,7 @@ public sealed class TremoloShareReportTest
     {
         var (picked, notes) = (new Dictionary<TrackRole, int>(), new Dictionary<TrackRole, int>());
         var (appearances, picking, tremolo, silent, played) = (0, 0, 0, 0.0, 0.0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         foreach (var role in new[] { TrackRole.Riff, TrackRole.Rhythm, TrackRole.Melody }.Where(x => song.Song.TrackDefinitions.Values.Any(t => t.Role == x)))
         {
             var line = song.Song.Notes!.GetValueOrDefault(song.Track(role))?.ToArray() ?? [];

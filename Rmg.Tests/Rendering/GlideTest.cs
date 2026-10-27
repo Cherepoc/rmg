@@ -68,7 +68,7 @@ public sealed class GlideTest
     {
         var genre = GenrePresets.With("hipHop", GenreChoices.Glide, ("bass", 1));
         var (leaps, steps, ends, inner) = (new List<bool>(), new List<bool>(), new List<bool>(), new List<bool>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             if (song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass))?.ToArray() is not { } bass)
                 continue;

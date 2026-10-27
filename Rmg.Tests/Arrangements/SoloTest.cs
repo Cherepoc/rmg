@@ -70,7 +70,7 @@ public sealed class SoloTest
     public async Task ASolo_IsPlayedByItsSoloists_TheMelodyResting_AndADrumSolo_ByTheDrumsAlone()
     {
         var (checkedSolos, drumSolos) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
         foreach (var (index, solo) in song.Solos)
         {
             // a melody with no notes there leaves nothing to solo on
@@ -118,7 +118,7 @@ public sealed class SoloTest
     public async Task ASoloistsGhosts_AreInItsLicksAlone()
     {
         var ghosts = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("funk")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("funk")))))
         foreach (var (index, _, plan) in Plans(song))
         {
             var solo = song.Solos[index];
@@ -170,7 +170,7 @@ public sealed class SoloTest
             return openings.Count(x => x.Picks) / (double)Math.Max(1, openings.Length);
         }
 
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))))
         foreach (var (first, before, _) in Openings(song).Where(x => x.Picks))
             await Assert.That(before is { } last && Math.Abs(last.End - first.Start) < 1e-9
                               && (last.Gesture == SoloGesture.Pause && last.End - last.Start >= 0.5 - 1e-9 || last.IsRelease && last.End - last.Start >= 1 - 1e-9)).IsTrue()
@@ -201,7 +201,7 @@ public sealed class SoloTest
     public async Task ASpaciousSoloist_RestsEachLinesLastBar_AndRunsABeatAtMost()
     {
         var lines = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Spaced(1)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Spaced(1)))))
         foreach (var (span, notes, plan) in SolosNotes(song).Where(x => x.Span.Meter.PhraseBars % 4 == 0 && x.Span.Cut == 0))
         {
             var bar = span.Meter.BarDuration;
@@ -261,7 +261,7 @@ public sealed class SoloTest
     public async Task ARestatedMotif_IsDisplacedNowAndThen_SilentBeforeIt()
     {
         var (restated, displaced) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
         {
             foreach (var (start, shift) in song.Trace.Where(x => x.Point == TracePoints.SoloMotif).Select(x => ((double Start, double Shift))x.Value!))
             {
@@ -345,7 +345,7 @@ public sealed class SoloTest
         double Share(Genre genre, bool rule)
         {
             var (notes, on) = (0, 0);
-            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+            foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
             {
                 // the band's onsets, the rhythm part's where it plays, the chords' where it does not
                 var rhythm = song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Rhythm))?.Select(x => x.Position).ToArray() ?? [];
@@ -383,7 +383,7 @@ public sealed class SoloTest
         {
             var (solos, released, bent, shaken) = (0, 0, 0, 0);
             var gestures = new Dictionary<SoloGesture, double>();
-            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+            foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
             foreach (var (_, notes, plan) in SolosNotes(song).Where(x => x.Notes.Length > 0))
             {
                 var top = notes.MaxBy(x => x.Value.Pitches.Max());
@@ -417,7 +417,7 @@ public sealed class SoloTest
         double Share(string genre, bool rule)
         {
             var (notes, chromatic) = (0, 0);
-            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+            foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
             foreach (var (span, solo, _) in SolosNotes(song))
             for (var i = 0; i < solo.Length; i++)
             {
@@ -450,7 +450,7 @@ public sealed class SoloTest
     public async Task AGuitarSolo_LeadsHighInItsRange_WhicheverPartPlaysIt(string preset)
     {
         var pitches = new List<int>();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
         foreach (var (index, solo) in song.Solos.Where(x => !x.Value.IsDrumSolo))
         foreach (var role in solo.Soloists.Where(x => x != TrackRole.Drum))
         {
@@ -481,7 +481,7 @@ public sealed class SoloTest
     public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()
     {
         var trading = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
         foreach (var (index, _, plan) in Plans(song))
         {
             if (song.Solos[index] is not { Mode: SoloMode.Trading, Soloists.Length: > 1 })
@@ -528,7 +528,7 @@ public sealed class SoloTest
     {
         var (tuneVelocities, fillVelocities) = (new List<double>(), new List<double>());
         var (sungNotes, inTune) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("bluegrass")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("bluegrass")))))
         {
             var tunes = song.Trace.Where(x => x.Point == TracePoints.SoloTune).Select(x => ((double Position, int Pitch, double Held)[])x.Value!).ToArray();
             foreach (var (index, _, _) in Plans(song).Where(x => !x.IsOwn && song.Solos[x.Index].Soloists.Length == 1))
@@ -572,7 +572,7 @@ public sealed class SoloTest
         int Solos(string genre, bool rolls)
         {
             var solos = 0;
-            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+            foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
             {
                 var tunes = song.Trace.Where(x => x.Point == TracePoints.SoloTune).Select(x => ((double Position, int Pitch, double Held)[])x.Value!).ToArray();
                 foreach (var (index, _, _) in Plans(song).Where(x => !x.IsOwn && song.Solos[x.Index].Soloists.Length == 1))
@@ -627,7 +627,7 @@ public sealed class SoloTest
     public async Task TradingSoloists_PlayTheirOwnLines_NoRunBrokenByAnOctave(string preset)
     {
         var turns = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
         foreach (var (index, solo) in song.Solos.Where(x => x.Value is { Mode: SoloMode.Trading, Soloists.Length: > 1, IsDrumSolo: false }))
         {
             var span = song.Map.Sections[index];
@@ -658,7 +658,7 @@ public sealed class SoloTest
     public async Task ASolosScaleRun_StepsByTheScale_AndItsHeldNotes_AreTheChords()
     {
         int held = 0, onChord = 0, scaleRuns = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Facets(1, 1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Facets(1, 1))))
         foreach (var (index, _, segments) in Gestures(song))
         {
             // a solo of one soloist, all of whose line is its
@@ -1010,7 +1010,7 @@ public sealed class SoloTest
     public async Task TheCounterMelodyAndThePad_MakeRoomForASolo()
     {
         var checkedSolos = new Dictionary<TrackRole, int> { [TrackRole.CounterMelody] = 0, [TrackRole.Pad] = 0 };
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 0.5))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 0.5))))
         foreach (var (index, solo) in song.Solos.Where(x => !x.Value.IsDrumSolo))
         {
             var span = song.Map.Sections[index];
@@ -1076,7 +1076,7 @@ public sealed class SoloTest
     public async Task ARun_KeepsToItsSoloistsStamina_AtEverySpeed_AndToItsCap()
     {
         var checkedRuns = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
         {
             var soloists = song.Soloists;
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
@@ -1112,7 +1112,7 @@ public sealed class SoloTest
     public async Task EveryPhraseOfASolo_EndsOnARelease_AChordsNoteHeldFromAStrongBeat()
     {
         var (releases, onChord) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Facets(1, 0.5))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Facets(1, 0.5))))
         foreach (var (index, _, plan) in Plans(song))
         {
             var span = song.Map.Sections[index];
@@ -1145,7 +1145,7 @@ public sealed class SoloTest
     public async Task ARelease_SingsItsSoloistsVibrato_BendsOnlyIntoIt_TheMoreIntenseTheOftener_AndNeverSlides()
     {
         var releases = new List<(double Intensity, BendKind Bend, bool Vibrato)>();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild)))
         {
             var soloists = song.Soloists;
             foreach (var (track, notes) in song.Song.Notes!)
@@ -1496,7 +1496,7 @@ public sealed class SoloTest
         var metal = GenrePresets.With("metal", GenreChoices.SoloShare, ("together", 1));
         var genre = metal with { Choices = metal.Choices.SetItem(GenreChoices.SoloCount.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("two", new ByConvention(1, 1, 1))) };
         var (unison, doubled, harmony, harmonised) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         foreach (var (index, plan) in song.Solos.Where(x => x.Value is { Mode: SoloMode.Together, Soloists.Length: 2 } && !x.Value.Soloists.Contains(TrackRole.Drum)))
         {
             var span = song.Map.Sections[index];

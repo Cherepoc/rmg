@@ -9,7 +9,7 @@ public sealed class ShortBarTest
     [Test]
     public async Task ThePlainestSongs_CutNoBar()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
             await Assert.That(song.Map.Sections.All(x => x.Cut == 0)).IsTrue().Because($"seed {song.Seed}");
     }
 

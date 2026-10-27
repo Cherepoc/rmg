@@ -23,7 +23,7 @@ public sealed class PassingChordTest
     public async Task APassingChord_IsTheNextsDominant_OrTheNextASemitoneAway_HalfwayThroughAChordABarLong()
     {
         var passing = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz")))))
         foreach (var (rhythm, progression) in Sections(song))
         {
             await Assert.That(progression.Length).IsEqualTo(rhythm.Count);
@@ -47,7 +47,7 @@ public sealed class PassingChordTest
     {
         var wild = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0.9)), Genre: GenrePresets.Genre("jazz"));
         var (above, below) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, wild)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, wild)))
         {
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             // a chord as a pitched note struck where it starts has it, its section's home among its state; none where none is
@@ -87,7 +87,7 @@ public sealed class PassingChordTest
     public async Task ThePlainestSongs_PassNoChord()
     {
         var plain = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0)), Genre: GenrePresets.Genre("jazz"));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, plain)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, plain)))
             await Assert.That(Sections(song).All(x => x.Rhythm.Passing.IsEmpty)).IsTrue();
     }
 }

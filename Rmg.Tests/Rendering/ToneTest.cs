@@ -45,7 +45,7 @@ public sealed class ToneTest
     public async Task ASwell_BrightensAsItGrows()
     {
         var swelled = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("ambient")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("ambient")))))
         foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { Role: TrackRole.Pad }))
         {
             var rendered = song.Rendered.Tracks.First(x => !x.IsPercussionInstrument && x.Role == TrackRole.Pad);

@@ -67,7 +67,7 @@ public sealed class BoogieTest
         var (steps, unlike) = (0, 0);
         // the bass's own line, not one doubling another's, nor a pedal, which the boogie leaves as they are
         var genre = GenrePresets.With(preset, GenreChoices.AlternatingBass, ("sections", 0), ("boogie", 1));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var sections = song.Trace.Where(t => t.Point == TracePoints.Boogie && (bool)t.Value!).Select(t => t.Section).ToHashSet();
             var bass = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Bass).SelectMany(x => x.Value).ToArray();

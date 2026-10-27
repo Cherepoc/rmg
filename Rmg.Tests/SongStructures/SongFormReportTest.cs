@@ -19,7 +19,7 @@ public sealed class SongFormReportTest
         var genre = Rmg.Tests.Genres.GenrePresets.With("pop", GenreChoices.Form, ("vcqvcqbcq", 1), ("vpcvpcbc", 0), ("vcvcbc", 0), ("vpcvpcbcvpc", 0), ("cvcvbc", 0), ("vpcqvpcqbcq", 0));
         var (posts, hooks) = (0, 0);
         var (chorusBars, postBars) = (new List<double>(), new List<double>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var ids = structure.SectionIds;
@@ -98,7 +98,7 @@ public sealed class SongFormReportTest
     public async Task AnIntroAndAnOutroOfTheirOwn_PlayOnce_FirstAndLast_NeverInAPlainSong()
     {
         var (intros, outros) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 0.5))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 0.5))))))
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var roles = structure.SectionIds.Select(x => structure.Roles[x]).ToArray();

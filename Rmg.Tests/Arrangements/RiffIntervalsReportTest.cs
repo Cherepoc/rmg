@@ -20,7 +20,7 @@ public sealed class RiffIntervalsReportTest
     {
         var moves = new Dictionary<string, int>();
         var (off, back) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             if (!song.Song.TrackDefinitions.Values.Any(x => x.Role == TrackRole.Riff))
                 continue;

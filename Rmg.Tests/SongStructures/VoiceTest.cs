@@ -11,7 +11,7 @@ public sealed class VoiceTest
     private static (int Verses, int VersesOut, int Choruses, int ChorusesOut) Rests(Genre genre)
     {
         var (verses, versesOut, choruses, chorusesOut) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var structure = song.Trace.Where(x => x.Point == TracePoints.SongForm).Select(x => (SongStructure)x.Value!).Single();
             foreach (var span in song.Song.Map!.Sections)

@@ -81,7 +81,7 @@ public sealed class StrumTest
     public async Task APianosRoll_IsOnAChordHeldABeat_NeverOnAStab()
     {
         var rolled = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("disco")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("disco")))))
         foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack))
         foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Strum) != 0
                                               && !InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(x.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode), InstrumentTrait.Strums)))

@@ -17,7 +17,7 @@ public sealed class TremoloBuildReportTest
     {
         var (lifts, builds) = (0, 0);
         var rates = Enumerable.Range(0, 4).Select(_ => new List<double>()).ToArray();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             lifts += song.Map.Sections.Length - 1;
             builds += song.Trace.Count(x => x.Point == TracePoints.TremoloBuild);

@@ -70,7 +70,7 @@ public sealed class MediantTest
     public async Task AMinorMediant_IsAThirdFromHomeTurnedMinor_BlackMetals()
     {
         var minors = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.ChordScales))
         {
             var roots = (ImmutableArray<int>)song.Trace.Last(x => x.Point == TracePoints.Progression && x.Section == entry.Section).Value!;

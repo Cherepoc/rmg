@@ -32,7 +32,7 @@ public sealed class HarmonyIntervalTest
         var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
             .Add("doubling", ImmutableDictionary<string, ByConvention>.Empty.Add("harmony", new(1, 1, 1))));
         var (weak, third) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             if (!song.Song.Notes!.TryGetValue(song.Track(TrackRole.CounterMelody), out var counter) || !song.Song.Notes.TryGetValue(song.Track(TrackRole.Chords), out var chords))
                 continue;

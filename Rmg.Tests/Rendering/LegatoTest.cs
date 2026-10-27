@@ -13,7 +13,7 @@ public sealed class LegatoTest
     public async Task ASlurredNote_StepsFromTheNoteBefore_WhichReachesIt_AndAPlainSongSlursNone()
     {
         int slurred = 0, lineNotes = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Sound(0.5))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Sound(0.5))))
         foreach (var track in new[] { song.Track(TrackRole.Melody), song.Track(TrackRole.CounterMelody), song.Track(TrackRole.Riff) })
         {
             if (!song.Song.Notes!.TryGetValue(track, out var notes))
@@ -33,7 +33,7 @@ public sealed class LegatoTest
         Console.WriteLine($"{slurred} of {lineNotes} line notes slurred");
         // measured: 11% to 20% at offsets 0 and a million
         await Assert.That(slurred).IsGreaterThan(lineNotes / 50);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(0))))
             await Assert.That(song.Song.Notes!.Values.SelectMany(x => x).All(x => x.Value.State.GetStateValue(CompositionStateKinds.Legato) == 0)).IsTrue();
     }
 }

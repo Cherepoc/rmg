@@ -113,7 +113,7 @@ public sealed class DroneAndQuieterFormTest
     public async Task AHeavySection_DrivesItsCleanGuitars_ItsChordsStruck()
     {
         var heavy = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("rock", GenreChoices.LouderForms, "guitars")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("rock", GenreChoices.LouderForms, "guitars")))))
         {
             var heavyIds = song.Trace.Where(t => t.Point == TracePoints.SectionForm && (SectionFormKind)t.Value! == SectionFormKind.Heavy).Select(t => t.Section).ToHashSet();
             foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { InstrumentCode: 26 or 27 or 28, Role: TrackRole.Chords or TrackRole.Rhythm or TrackRole.Riff or TrackRole.RiffTwin }))

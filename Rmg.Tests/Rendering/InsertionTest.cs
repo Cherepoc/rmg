@@ -34,7 +34,7 @@ public sealed class InsertionTest
     public async Task AFunkSongsWah_IsOnAGuitarOrAClavinetComping_EveryChannelOfItsPartAssigned()
     {
         var played = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))))
         {
             var messages = GsMessages(song.Rendered);
             if (song.Song.Draws!.Insertion is not { } insertion)

@@ -17,7 +17,7 @@ public sealed class RubatoTest
     {
         var breathing = GenrePresets.With("filmPiano", GenreChoices.Rubato, ("returns", 1), ("changes", 1));
         var (songs, lines) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: breathing))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: breathing))))
         {
             var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
             songs += (bool)song.Trace.Single(x => x.Point == TracePoints.Rubato).Value! ? 1 : 0;
@@ -35,7 +35,7 @@ public sealed class RubatoTest
 
         Console.WriteLine($"{songs} of 32 songs bending, {lines} breaths into a section in its own tempo");
         await Assert.That(lines).IsGreaterThan(20);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed)))
             await Assert.That((bool)song.Trace.Single(x => x.Point == TracePoints.Rubato).Value!).IsFalse().Because($"seed {song.Seed}");
     }
 }

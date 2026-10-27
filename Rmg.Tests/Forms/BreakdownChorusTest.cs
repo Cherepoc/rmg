@@ -23,7 +23,7 @@ public sealed class BreakdownChorusTest
                 .SetItem(GenreChoices.Ending.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("ringOut", new(1, 1, 1)))
         };
         var (breakdowns, built, voiced) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             if (!(bool)song.Trace.Single(x => x.Point == TracePoints.BreakdownChorus).Value!)
                 continue;

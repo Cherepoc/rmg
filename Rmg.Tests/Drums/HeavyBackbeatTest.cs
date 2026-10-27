@@ -15,7 +15,7 @@ public sealed class HeavyBackbeatTest
     {
         var (bars, bare, crossStick, snareNotes) = (0, 0, 0, 0);
         var snares = DrumGroups.Snare.Tracks.ToHashSet();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             var heavy = song.Trace.Where(t => t.Point == TracePoints.Figures && ((ImmutableDictionary<FigurePlayer, string>)t.Value!).TryGetValue(FigurePlayer.Ground, out var f)
                                               && f is "doubleKick" or "blast" or "withRiff").Select(t => t.Section).ToHashSet();

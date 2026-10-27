@@ -81,7 +81,7 @@ public sealed class ShapeTimingTest
     public async Task AVibrato_ShakesOnItsSectionsGrid_WheneverItsNoteStarts()
     {
         var (checkedSamples, notesChecked) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed)))
         {
             var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
             foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack))

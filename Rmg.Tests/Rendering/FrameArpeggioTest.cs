@@ -13,7 +13,7 @@ public sealed class FrameArpeggioTest
     {
         var genre = GenrePresets.With("chiptune", GenreChoices.Articulation, ("frames", 1), ("legato", 0), ("roll", 0));
         var cycled = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var chords = song.Song.Track(TrackRole.Chords);
             if (!song.Song.Notes!.TryGetValue(chords, out var notes))
@@ -55,7 +55,7 @@ public sealed class FrameArpeggioTest
     public async Task AChipsChords_NeverOverlapThemselves_AndACycledNoteNeverEchoes()
     {
         var checkedNotes = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("chiptune")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("chiptune")))))
         {
             if (!song.Song.Notes!.TryGetValue(song.Track(TrackRole.Chords), out var notes))
                 continue;
@@ -80,7 +80,7 @@ public sealed class FrameArpeggioTest
     public async Task ABrokenChordsNote_OnAHeldSound_EndsWhereItsPartsNextStarts(string? genre)
     {
         var broken = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
         foreach (var (track, definition) in song.Song.TrackDefinitions.Where(x => x.Value is PitchInstrumentTrack && song.Song.Notes!.ContainsKey(x.Key)))
         {
             var notes = song.Song.Notes![track].ToArray();

@@ -106,7 +106,7 @@ public sealed class FillTest
     public async Task Fills_InTwelveBars_ByLine()
     {
         var (inner, outer) = (new List<FillDecision>(), new List<FillDecision>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
         {
             var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).Select(x => (FillDecision)x.Value!).ToArray();
             var lines = song.FillLines();

@@ -22,7 +22,7 @@ public sealed class MutationsTest
         var checkedSections = 0;
         // a groove supplied at the middle, which each section still strays from a little: a section at the middle or plainer
         // never mutates, one a hair wilder may
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Groove, 0.5))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Groove, 0.5))))))
         foreach (var (index, made) in song.Trace.Where(x => x.Point == TracePoints.Mutations).Select(x => ((int, int))x.Value!))
         {
             var section = song.Map.Sections[index].SectionId;

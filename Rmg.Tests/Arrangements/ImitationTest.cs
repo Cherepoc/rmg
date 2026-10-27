@@ -16,7 +16,7 @@ public sealed class ImitationTest
     {
         var genre = GenrePresets.With("chamber", GenreChoices.Doubling, ("imitation", 1));
         var (sections, matched, notes) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Imitation))
         {
             sections++;
@@ -47,7 +47,7 @@ public sealed class ImitationTest
     {
         var genre = GenrePresets.With("chamber", GenreChoices.Doubling, ("imitation", 1));
         var (notes, rubbing) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             // the appearances imitated, by their places, which a section's other appearances need not be
             var imitated = song.Trace.Where(x => x.Point == TracePoints.Imitation).Select(x => (((int Index, TrackRole, int))x.Value!).Index).ToHashSet();

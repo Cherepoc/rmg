@@ -22,7 +22,7 @@ public sealed class TextureEnergyReportTest
     public async Task Report(string? genre)
     {
         var appearances = new List<(double Energy, TextureKind Kind, double FirstPhrase)>();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
         {
             var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).DistinctBy(x => x.Section).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             var roles = song.Song.TrackDefinitions.Values.Select(x => x.Role).Where(x => x != TrackRole.Drum).ToHashSet();

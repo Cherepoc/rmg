@@ -18,7 +18,7 @@ public sealed class TomGrooveTest
     {
         var tom = DrumGroups.GetTrackNumber(DrumDefinitions.Tom);
         var (sections, led) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         foreach (var (section, kit) in Kits(song))
         {
             sections++;
@@ -42,7 +42,7 @@ public sealed class TomGrooveTest
     [Test]
     public async Task ThePlainestSongs_KeepNoTimeOnTheTom()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
         foreach (var (section, kit) in Kits(song))
             await Assert.That(kit.Leads.GetValueOrDefault(DrumRole.Time) == DrumDefinitions.Tom).IsFalse().Because($"seed {song.Seed}, section {section}");
     }

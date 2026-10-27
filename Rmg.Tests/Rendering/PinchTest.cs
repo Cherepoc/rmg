@@ -15,7 +15,7 @@ public sealed class PinchTest
     public async Task APinch_IsAHeldSingleNotesHighlight_NeverAChordOrInARun_OneAPartAPhrase_WaveringWhereItHolds(string genre)
     {
         var (pinches, shaken, length) = (0, 0, 0.0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         foreach (var (track, notes) in song.Song.Notes!)
         {
             var phrases = new HashSet<(double, int)>();
@@ -57,7 +57,7 @@ public sealed class PinchTest
     public async Task ADive_IsTheRiffsLastHeldNoteBeforeALouderSection()
     {
         var (dives, songs, beats, reaching, louder) = (0, 0, 0.0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("nuMetal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("nuMetal")))))
         {
             var any = false;
             var energies = song.Trace.Where(x => x.Point == TracePoints.Octave).Select(x => ((int Index, TrackRole, double Energy, bool))x.Value!)

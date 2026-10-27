@@ -15,7 +15,7 @@ public sealed class LateEntryTest
     public async Task AHeldPart_PlaysNothingBeforeItsEntry_AndComesInThere()
     {
         var (held, heard) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, Form(0.5))).Where(x => !Entries(x).IsEmpty))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, Form(0.5))).Where(x => !Entries(x).IsEmpty))
         foreach (var (part, entry) in Entries(song))
         {
             var sections = song.Map.Sections;

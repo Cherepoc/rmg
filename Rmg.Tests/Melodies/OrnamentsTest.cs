@@ -20,7 +20,7 @@ public sealed class OrnamentsTest
     [Test]
     public async Task ThePlainestSongs_PlayNoOrnaments()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
             await Assert.That(Played(song).IsEmpty).IsTrue().Because($"seed {song.Seed}");
     }
 
@@ -28,7 +28,7 @@ public sealed class OrnamentsTest
     public async Task AnOrnamentsNotes_AreTheNotesNeighbours_ATrillsAStepOfTheKey_WithinItsLength_OnTheLinesAlone_InOctavesToo()
     {
         var (ornaments, octaves) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ornamenting))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Ornamenting))))
         {
             await Assert.That(Played(song).Length).IsEqualTo(Ornaments.All.Length);
             // a pitched part's, a drum's flams and drags its own (DrumOrnamentsTest)

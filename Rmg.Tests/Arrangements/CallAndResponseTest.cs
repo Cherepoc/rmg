@@ -16,7 +16,7 @@ public sealed class CallAndResponseTest
         var blues = GenrePresets.Genre("blues");
         // the same songs never calling, whose melody sings where the calling song's was cut
         var never = new Genre(blues.Choices.SetItem(GenreChoices.CallAndResponse.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("sections", new ByConvention(0, 0, 0))));
-        foreach (var (song, uncut) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => (TestCorpus.Get(seed, new SongOverrides(Genre: blues)), TestCorpus.Get(seed, new SongOverrides(Genre: never)))))
+        foreach (var (song, uncut) in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => (TestCorpus.Get(seed, new SongOverrides(Genre: blues)), TestCorpus.Get(seed, new SongOverrides(Genre: never)))))
         {
             var calling = song.Trace.Where(t => t.Point == TracePoints.CallAndResponse && (bool)t.Value!).Select(t => t.Section).ToHashSet();
             var notes = song.Song.Notes!;

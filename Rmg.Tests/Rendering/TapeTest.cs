@@ -14,7 +14,7 @@ public sealed class TapeTest
     public async Task ATapesSong_DriftsEveryPitchedPartAlike_AndNoDrum_ALineADetuneAFewCents()
     {
         var (taped, lines, detuned) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("idm")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("idm")))))
         {
             if (Wows(song).Length == 0)
                 continue;

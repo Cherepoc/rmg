@@ -13,7 +13,7 @@ public sealed class DelayTest
     public async Task AnEchoingSong_SendsItsEchoingPartsToTheDelay()
     {
         var echoing = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("reggae")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("reggae")))))
         {
             var echoes = song.Song.Notes!.Values.Any(x => x.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0));
             await Assert.That(song.Rendered.Echo is not null).IsEqualTo(echoes).Because($"seed {song.Seed}");
@@ -55,7 +55,7 @@ public sealed class DelayTest
     {
         var dub = GenrePresets.With("dub", GenreChoices.Echo, (GenreChoices.Name(kind.ToString()), 1));
         var echoing = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: dub))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: dub))))
         {
             if (song.Rendered.Echo is null)
                 continue;

@@ -12,7 +12,7 @@ public sealed class SungEighthsTest
     public async Task ThePlainestSong_SingsEverySectionInEighths()
     {
         var sections = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.SungEighths))
         {
             sections++;

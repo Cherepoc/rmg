@@ -81,7 +81,7 @@ public sealed class SongPartsTest
         // all but the riff given out, which draws itself out in about half the songs
         var parts = SongParts.All.Where(x => x is not (TrackRole.Riff or TrackRole.RiffTwin)).ToImmutableDictionary(x => x, _ => false);
         var riffs = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Parts: parts))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Parts: parts))))
         {
             // the riff where the seed drew it out, its part playing as it comes in
             var riff = song.Track(TrackRole.Riff);

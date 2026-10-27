@@ -13,7 +13,7 @@ public sealed class ExpressionTest
     [Test]
     public async Task ThePlainestSongs_PlayAReverbAlone()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(0))))
         {
             await Assert.That(PartEffects(song).Sum(x => x.Count(has => has))).IsEqualTo(0);
             await Assert.That(song.Rendered.Tracks.All(x => x.Controllers.Any(c => c.Controller == ExpressionRender.ReverbController))).IsTrue();
@@ -27,7 +27,7 @@ public sealed class ExpressionTest
     [Test]
     public async Task ThePlainestSoundAndForm_PlayNoneOfTheirDevices()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Sound, 0), (Facet.Form, 0))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Sound, 0), (Facet.Form, 0))))))
         {
             var notes = song.Song.Notes!.SelectMany(x => x.Value.Select(n => (Track: x.Key, Note: n.Value))).ToArray();
             await Assert.That(notes.All(x => x.Note.State.GetStateValue(CompositionStateKinds.Tone) == 0 && x.Note.State.GetStateValue(CompositionStateKinds.Wow) == 0
@@ -77,7 +77,7 @@ public sealed class ExpressionTest
     public async Task ATremolo_PlaysAWholeSectionOfHeldNotes_OrNone()
     {
         var trembling = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Trembling))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Trembling))))
         foreach (var (track, span, notes) in TremoloSections(song).Where(x => x.Notes.Any(n => n.Trembles)))
         {
             trembling++;
@@ -140,7 +140,7 @@ public sealed class ExpressionTest
     public async Task ABend_StartsAndEndsOnTheScale_AStepOrTwoAway()
     {
         var bent = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var note in song.Song.Notes!.Values.SelectMany(x => x))
         {
             var kind = (BendKind)note.Value.State.GetStateValue(CompositionStateKinds.Bend);
@@ -191,7 +191,7 @@ public sealed class ExpressionTest
     public async Task ASlide_IsFromTheNoteBefore_HeardAMomentBefore_AndAPitchBendAway()
     {
         var slides = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var notes in song.Song.Notes!.Values)
             for (var i = 0; i < notes.Count; i++)
             {
@@ -317,7 +317,7 @@ public sealed class ExpressionTest
         await Assert.That(plain.Sum(x => x.Song.Notes!.Values.Sum(n => n.Count(note => IsWide(note.Value))))).IsEqualTo(0);
 
         var wide = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var (track, notes) in song.Song.Notes!)
         foreach (var note in notes.Where(x => IsWide(x.Value)))
         {
@@ -336,7 +336,7 @@ public sealed class ExpressionTest
     public async Task AMelodysSwell_IsOnItsPhrasesHeldLastNote_OfASoundThatHolds()
     {
         var swelled = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var role in new[] { TrackRole.Melody, TrackRole.CounterMelody })
         {
             if (!song.Song.Notes!.TryGetValue(song.Track(role), out var notes))
@@ -359,7 +359,7 @@ public sealed class ExpressionTest
     public async Task OnlyALineOfAnInstrumentThatBends_Bends_InOctavesToo()
     {
         var bent = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var (track, notes) in song.Song.Notes!)
         foreach (var note in notes.Where(x => Has(CompositionStateKinds.Bend, CompositionStateKinds.Vibrato, CompositionStateKinds.WideVibrato)(x.Value.State)))
         {

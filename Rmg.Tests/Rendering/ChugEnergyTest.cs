@@ -16,7 +16,7 @@ public sealed class ChugEnergyTest
     public async Task AQuieterSection_ChugsOftener(string preset)
     {
         var (quiet, loud) = (new List<bool>(), new List<bool>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))))
         {
             var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).DistinctBy(x => x.Section).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             var chugs = song.Trace.Where(x => x.Point == TracePoints.Chugs).DistinctBy(x => x.Section).ToDictionary(x => x.Section, x => (bool)x.Value!);

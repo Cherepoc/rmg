@@ -16,7 +16,7 @@ public sealed class StripEndingTest
     {
         var songs = 0;
         var drummed = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Stripping))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Stripping))))
         {
             await Assert.That(song.Map.Ending.Kind).IsEqualTo(EndingKind.Strip);
             var end = song.Map.Ending.Start;

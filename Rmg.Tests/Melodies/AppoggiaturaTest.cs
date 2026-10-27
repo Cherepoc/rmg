@@ -49,7 +49,7 @@ public sealed class AppoggiaturaTest
     [Test]
     public async Task ThePlainestMelodies_NeitherLeanNorCall()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Melody, 0))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Melody, 0))))))
         {
             foreach (var role in new[] { TrackRole.Melody, TrackRole.CounterMelody })
                 if (song.Song.Notes!.TryGetValue(song.Track(role), out var notes))

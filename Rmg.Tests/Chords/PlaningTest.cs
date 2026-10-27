@@ -15,7 +15,7 @@ public sealed class PlaningTest
     public async Task APlanedSectionsChords_AreItsHomesShape_MovedBySmallStepsOrAFourth_NeverFarFromHome_TheLastEndingHome()
     {
         var (planed, lastPlaned) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Progression(1))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Progression(1))))
         {
             var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => (x.Section, Roots: (ImmutableArray<int>)x.Value!)).ToArray();
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Planing && x.Value is not null))
@@ -53,7 +53,7 @@ public sealed class PlaningTest
     public async Task APlanedSectionsChords_KeepTheHomesStructure_OrEachTakeAModeOfItsOwn()
     {
         var (planed, inModes, chords, changed) = (0, 0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre("fusion")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre("fusion")))))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Planing && x.Value is not null))
         {
             planed++;
@@ -111,7 +111,7 @@ public sealed class PlaningTest
     [Test]
     public async Task AMiddlingSong_NeverPlanes()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Progression(0.5))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Progression(0.5))))
             await Assert.That(song.Trace.Where(x => x.Point == TracePoints.Planing).All(x => x.Value is null)).IsTrue();
     }
 }

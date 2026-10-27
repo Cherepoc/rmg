@@ -28,7 +28,7 @@ public sealed class RiffSectionReportTest
     {
         var returning = 0;
         foreach (var genre in new[] { "metal", "rock" })
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             var form = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var ids = form.SectionIds;
@@ -43,7 +43,7 @@ public sealed class RiffSectionReportTest
         }
 
         await Assert.That(returning).IsGreaterThan(20);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed)))
         {
             var form = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             await Assert.That(form.SectionIds.GroupBy(x => x).Any(x => form.Roles[x.Key] == SectionRole.Intro && x.Count() > 1)).IsFalse().Because($"seed {song.Seed}");
@@ -60,7 +60,7 @@ public sealed class RiffSectionReportTest
         var over = 0;
         var bars = new List<(bool Rhythm, int Kept, int Notes)>();
         foreach (var genre in new[] { "metal", "rock", "thrash" })
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             // and its riff as heard the intro's, bar by bar
             bars.AddRange(Rmg.Tests.Melodies.LoopLineReportTest.Bars(song, TrackRole.Riff));

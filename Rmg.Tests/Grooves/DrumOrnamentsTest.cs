@@ -20,7 +20,7 @@ public sealed class DrumOrnamentsTest
     [Test]
     public async Task ThePlainestSongs_NeitherFlamNorDrag()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
         {
             await Assert.That(Played(song)).IsEqualTo((false, false)).Because($"seed {song.Seed}");
             await Assert.That(song.Song.Notes!.Where(x => song.IsDrum(x.Key)).SelectMany(x => x.Value).Any(x => StrokesOf(x.Value) > 0)).IsFalse();
@@ -35,7 +35,7 @@ public sealed class DrumOrnamentsTest
     public async Task ADrumsOrnament_IsTheSnaresHead_ItsStrokesSofterBeforeIt()
     {
         int flams = 0, drags = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rudimental))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rudimental))))
         {
             await Assert.That(Played(song)).IsEqualTo((true, true));
             var map = song.Song.Map!;

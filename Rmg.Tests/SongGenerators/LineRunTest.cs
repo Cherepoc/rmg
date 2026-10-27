@@ -13,7 +13,7 @@ public sealed class LineRunTest
     {
         var genre = GenrePresets.With("disco", GenreChoices.LineRun, ("counterMelody", 1));
         var (runs, traced, songs) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var counter = song.Song.Track(TrackRole.CounterMelody);
             if (!song.Song.Notes!.TryGetValue(counter, out var notes))

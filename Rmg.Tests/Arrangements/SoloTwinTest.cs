@@ -24,7 +24,7 @@ public sealed class SoloTwinTest
     public async Task ATwinnedSolo_IsTwoPartsTogetherAThirdApart_TheSecondOnTheHeldNotes()
     {
         var twins = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always("metal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always("metal")))))
         foreach (var (index, solo) in song.Solos.Where(x => !x.Value.IsDrumSolo && !x.Value.TradesWithDrums && x.Value.Soloists.Length > 1))
         {
             var because = $"seed {song.Seed} section {index}";
@@ -60,7 +60,7 @@ public sealed class SoloTwinTest
     {
         Genre Thrash(double twins) => GenrePresets.With("thrash", GenreChoices.Solos, ("sections", 1), ("twins", twins), ("trades", 0));
         var duels = 0;
-        foreach (var (without, with) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => (TestCorpus.Get(seed, new SongOverrides(Genre: Thrash(0))), TestCorpus.Get(seed, new SongOverrides(Genre: Thrash(1))))))
+        foreach (var (without, with) in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => (TestCorpus.Get(seed, new SongOverrides(Genre: Thrash(0))), TestCorpus.Get(seed, new SongOverrides(Genre: Thrash(1))))))
         foreach (var (index, solo) in without.Solos.Where(x => !x.Value.IsDrumSolo && x.Value.Soloists.Length > 1))
         {
             duels++;

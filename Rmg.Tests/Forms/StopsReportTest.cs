@@ -37,7 +37,7 @@ public sealed class StopsReportTest
     public async Task ASongThatDoesNotStop_PlaysNoStopTime_NorHits()
     {
         var kept = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))))
         {
             if ((bool)song.Trace.Single(x => x.Point == TracePoints.Stops).Value!)
                 continue;
@@ -81,7 +81,7 @@ public sealed class StopsReportTest
     public async Task AStopTimeSection_ThatNeverStopsAgain_StopsInItsFirstAppearanceAlone()
     {
         var stopped = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Stopping(0)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Stopping(0)))))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.StopTime))
         {
             var starts = (ImmutableArray<double>)entry.Value!;

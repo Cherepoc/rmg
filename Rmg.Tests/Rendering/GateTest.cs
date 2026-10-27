@@ -16,7 +16,7 @@ public sealed class GateTest
     public async Task AGatedPart_SoundsAndFallsSilentOnlyOnTheSwungGrid_AndSoundsOnEveryBarsFirst16th()
     {
         var gated = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
         {
             // a part's own track, not its double's, which a driven guitar's second take copies the gate to
             var chopped = song.Rendered.Tracks.Where(x => !x.IsDouble && x.Expression.Any(e => e.Value == 0)).ToArray();
@@ -57,7 +57,7 @@ public sealed class GateTest
     public async Task AGatedPart_ChangesItsHeldChords_OnlyOnTheBarsBeats_AnArpeggioPlayingAsItFalls()
     {
         var gated = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
         foreach (var timeline in song.Song.Notes!.Values.Where(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
         foreach (var section in song.Map.Sections)
         foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
@@ -102,7 +102,7 @@ public sealed class GateTest
     public async Task AGatedChord_OnADecayingInstrument_IsStruckAgainOnEveryBarLine()
     {
         var (restruck, held) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
         foreach (var (track, timeline) in song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
         foreach (var section in song.Map.Sections)
         foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))

@@ -23,7 +23,7 @@ public sealed class GenreOnlyDevicesTest
     public async Task Stabs_StrikeTheChordsShort()
     {
         var stabbed = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("reggae", GenreChoices.Articulation, Only("stabs"))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("reggae", GenreChoices.Articulation, Only("stabs"))))))
         foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role is TrackRole.Chords or TrackRole.Rhythm))
         foreach (var note in notes.Where(x => x.Position < song.Map.Ending.Start - 1e-9))
         {

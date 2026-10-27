@@ -28,7 +28,7 @@ public sealed class TextureTest
     public async Task APartATextureLeavesOutOfAPhrase_StrikesNoNoteInIt()
     {
         var (checkedPhrases, wrong) = (0, new List<string>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
         foreach (var (span, index) in song.Map.Sections.Select((x, i) => (x, i)).Where(x => !(song.Solos.TryGetValue(x.i, out var solo) && solo.IsDrumSolo)))
         {
             var silent = song.Texture(span).PhraseSilent;
@@ -51,7 +51,7 @@ public sealed class TextureTest
     public async Task DrumsMarkingTheForm_NeverPlayASectionAlone_APitchedPartPlayingWithThem()
     {
         var alone = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre("medieval")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre("medieval")))))
         {
             if ((DrumJob)song.Trace.Single(t => t.Point == TracePoints.DrumJob).Value! != DrumJob.Marks)
                 continue;
@@ -130,7 +130,7 @@ public sealed class TextureTest
     {
         var preChoruses = 0;
         // in songs in one of the forms, a pre-chorus's among them, every texture drawn now and then
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 0.5))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 0.5))))))
         {
             var form = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Texture && form.Roles[x.Section] == SectionRole.PreChorus))
@@ -148,7 +148,7 @@ public sealed class TextureTest
     public async Task DrumsABuildBringsInLate_PlayNothingBefore_ButTheFillTheyComeInOn()
     {
         var late = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 1))))))
         foreach (var (span, index) in song.Map.Sections.Select((x, i) => (x, i)))
         {
             var from = song.DrumsFrom(index);

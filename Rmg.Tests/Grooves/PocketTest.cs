@@ -35,7 +35,7 @@ public sealed class PocketTest
     [Test]
     public async Task ThePlainestFeel_PlaysNoNoteOffItsPlace()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Feel, 0))))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Feel, 0))))))
             await Assert.That(song.Song.Notes!.Values.SelectMany(x => x).All(x => x.Value.State.GetStateValue(CompositionStateKinds.TimingOffset) == 0)).IsTrue().Because($"seed {song.Seed}");
     }
 

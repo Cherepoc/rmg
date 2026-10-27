@@ -38,7 +38,7 @@ public sealed class EnsembleHitsTest
     {
         var bars = 0;
         var stopping = GenrePresets.With(genre, GenreChoices.Stops, ("songs", 1));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: stopping))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: stopping))))
         foreach (var (start, end, kick) in Struck(song))
         {
             bars++;
@@ -66,7 +66,7 @@ public sealed class EnsembleHitsTest
     [Test]
     public async Task ThePlainestSongs_StrikeNoBar()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0))))
             await Assert.That(Struck(song).Any()).IsFalse().Because($"seed {song.Seed}");
     }
 

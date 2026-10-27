@@ -26,7 +26,7 @@ public sealed class DrumMarksTest
     public async Task MarkingDrums_StrikeOnlyWhereTheFormMoves_OrRollIntoASection_OrSwellThroughItsStart_OneOrTwoOfThem()
     {
         var marked = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Marking()))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Marking()))))
         {
             await Assert.That(Job(song)).IsEqualTo(DrumJob.Marks);
             var drums = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PercussionInstrumentTrack && x.Value.Count > 0).ToArray();
@@ -53,9 +53,9 @@ public sealed class DrumMarksTest
     {
         var withBrushes = new Genre(Marking().Choices.Add(GenreChoices.Kit.Name, ImmutableDictionary<string, ByConvention>.Empty
             .Add("room", new ByConvention(1, 1, 1)).Add("brush", new ByConvention(1, 1, 1))));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Marking()))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Marking()))))
             await Assert.That(song.Song.Draws!.Kit).IsEqualTo(DrumMarks.Kits[0]).Because($"seed {song.Seed}");
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: withBrushes))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: withBrushes))))
             await Assert.That(song.Song.Draws!.Kit).IsEqualTo(40).Because($"seed {song.Seed}");
     }
 

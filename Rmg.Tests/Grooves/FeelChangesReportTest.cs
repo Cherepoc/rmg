@@ -31,7 +31,7 @@ public sealed class FeelChangesReportTest
     public async Task ASongKeepingItsTime_LeavesItNowhere()
     {
         var kept = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("metal")))))
         {
             if ((bool)song.Trace.Single(x => x.Point == TracePoints.TimeChanges).Value!)
                 continue;

@@ -26,7 +26,7 @@ public sealed class ReharmonisationTest
     public async Task AReharmonisedAppearance_KeepsItsMelody_EveryNote()
     {
         var reharmonised = 0;
-        foreach (var (seed, with, substitutes, without) in TestCorpus.InParallel(Enumerable.Range(0, 32), seed =>
+        foreach (var (seed, with, substitutes, without) in TestCorpus.Streamed(Enumerable.Range(0, 32), seed =>
                  {
                      var (with, substitutes) = Generate(seed);
                      return (Seed: seed, With: with, Substitutes: substitutes, Without: substitutes is null ? null : Generate(seed, "Reharmonisation").Song);
@@ -90,7 +90,7 @@ public sealed class ReharmonisationTest
         // every song reharmonising
         genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.HarmonyDevices.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("reharmonised", new(1, 1, 1))) };
         var dominants = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             if (song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is not (int, ImmutableArray<double> at))
                 continue;
@@ -120,7 +120,7 @@ public sealed class ReharmonisationTest
     public async Task ASubstitute_IsTheSame_AtEveryPassOfThePattern()
     {
         var (passes, places, faded, ends, all) = (0, 0, 0, 0, 0);
-        foreach (var (seed, with, substitutes, without) in TestCorpus.InParallel(Enumerable.Range(0, 64), seed =>
+        foreach (var (seed, with, substitutes, without) in TestCorpus.Streamed(Enumerable.Range(0, 64), seed =>
                  {
                      var (with, substitutes) = Generate(seed);
                      return (Seed: seed, With: with, Substitutes: substitutes, Without: substitutes is null ? null : Generate(seed, "Reharmonisation").Song);
@@ -159,7 +159,7 @@ public sealed class ReharmonisationTest
             genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.HarmonyDevices.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("reharmonised", new(1, 1, 1))) };
             var shapes = new List<string>();
             var others = new List<string>();
-            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+            foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
             {
                 if (song.Trace.Single(x => x.Point == TracePoints.Reharmonisation).Value is not (int index, ImmutableArray<double> at))
                     continue;

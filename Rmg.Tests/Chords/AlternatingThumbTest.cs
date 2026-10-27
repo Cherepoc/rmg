@@ -36,7 +36,7 @@ public sealed class AlternatingThumbTest
         var (groups, triple) = (0, 0);
         // Folk's songs, and some of them given 6/8, so that a meter of dotted pulses is met whatever the songs draw
         var folk = GenrePresets.Genre("folk");
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: folk)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: folk)))
                      .Concat(TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: folk, Meter: Meter.SixEight)))))
         {
             var changes = song.ChordChanges;

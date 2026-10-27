@@ -28,7 +28,7 @@ public sealed class InstrumentRolesTest
         // the plainest sound, its instruments those its plain end weighs, a switch's too
         var plain = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Sound, 0)));
         var checkedPrograms = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, plain)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, plain)))
         foreach (var (track, definition) in song.Song.TrackDefinitions)
         {
             if (definition is not PitchInstrumentTrack part || InstrumentsOverTime.RoleOf(part.Role) is not { } role)

@@ -72,7 +72,7 @@ public sealed class DropTest
         var genre = GenrePresets.With("electronic", GenreChoices.Drop, ("lifts", 1), ("rolls", 0));
         genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.DropKind.Name, GenrePresets.With("electronic", GenreChoices.DropKind, ("silent", 1), ("filtered", 0)).Choices[GenreChoices.DropKind.Name]) };
         var drops = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var snare = FormLayers.BuildRollDrums.Select(DrumGroups.GetTrackNumber).FirstOrDefault(song.Song.Notes!.ContainsKey, -1);
             foreach (var at in song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!))

@@ -16,7 +16,7 @@ public sealed class SurfReportTest
     public async Task ASurfDrop_SlidesDownItsBar_ToASemitoneAboveTheSectionsFirstNote()
     {
         var drops = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("surf")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("surf")))))
         foreach (var (from, to) in song.Trace.Where(x => x.Point == TracePoints.SurfDrop).Select(x => ((double From, double To))x.Value!))
         {
             drops++;

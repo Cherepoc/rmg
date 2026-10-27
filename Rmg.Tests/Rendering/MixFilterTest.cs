@@ -18,7 +18,7 @@ public sealed class MixFilterTest
     public async Task AnOpeningSong_IsClosed_EveryPartAndTheDrums_OverItsOpeningsFirstHalf()
     {
         var opening = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trance")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trance")))))
         {
             if (!Plan(song).Opening)
                 continue;
@@ -43,7 +43,7 @@ public sealed class MixFilterTest
     public async Task ADip_ClosesTheMixBeforeASection_AndOpensItAsTheSectionStarts()
     {
         var dips = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trance")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trance")))))
         {
             var drums = song.Rendered.Tracks.FirstOrDefault(x => x.IsPercussionInstrument);
             if (drums is null)

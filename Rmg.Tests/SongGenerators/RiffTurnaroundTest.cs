@@ -15,7 +15,7 @@ public sealed class RiffTurnaroundTest
     public async Task ARiffsTurnaround_WalksItsLastBeat_IntoItsNextCycle()
     {
         var (walks, restarts, stepping) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed)))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed)))
         {
             var riff = song.Song.Track(TrackRole.Riff);
             if (!song.Song.Notes!.TryGetValue(riff, out var notes) || notes.Count == 0)

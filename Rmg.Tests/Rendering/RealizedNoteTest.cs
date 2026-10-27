@@ -76,7 +76,7 @@ public sealed class RealizedNoteTest
     public async Task ANoteAStageAdds_KeepsItsLoudnessInItsState(string preset, string point)
     {
         var added = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(preset)))))
         {
             added += song.Trace.Count(x => x.Point == point);
             foreach (var (track, note) in song.Song.Notes!.SelectMany(t => t.Value.Select(x => (t.Key, x))))

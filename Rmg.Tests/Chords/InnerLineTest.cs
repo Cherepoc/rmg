@@ -12,7 +12,7 @@ public sealed class InnerLineTest
     public async Task ALinesNotes_FallFromTheChordsRoot_ASemitoneAQuarter()
     {
         var lined = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
                      new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Chords, 0.8))))))
         foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Chords)].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) > 0))
         {
@@ -34,7 +34,7 @@ public sealed class InnerLineTest
     [Test]
     public async Task APlainSong_MovesNoLine()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed,
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed,
                      new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Chords, 0))))))
             await Assert.That(song.Song.Notes!.Values.SelectMany(x => x).All(x => x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) == 0)).IsTrue();
     }

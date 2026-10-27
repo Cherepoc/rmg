@@ -16,7 +16,7 @@ public sealed class StopTimeTest
     public async Task InStopTime_TheBandHitsOnceABar_UnderAPartThatGoesOn()
     {
         int bars = 0, stopped = 0, timed = 0, melodyNotes = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))))
         {
             var all = song.Song.Notes!.Values.SelectMany(x => x).ToArray();
             bool IsLine(int track) => song.Song.TrackDefinitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo;
@@ -71,7 +71,7 @@ public sealed class StopTimeTest
         foreach (var name in new[] { "blues", "rock" })
         {
             var (bars, silent, rest, sounding) = (0, 0, 0.0, 0.0);
-            foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))))
+            foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))))
             {
                 var notes = song.Song.Notes!.Values.SelectMany(x => x).ToArray();
                 foreach (var (start, end, bar) in StopTimeSpans(song))
@@ -124,7 +124,7 @@ public sealed class StopTimeTest
         var fills = new[] { DrumGroups.Toms, DrumGroups.Snare }.SelectMany(x => x.Drums).Select(DrumGroups.GetTrackNumber).ToHashSet();
         var (ends, filled) = (0, 0);
         foreach (var name in new[] { "blues", "rock" })
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))))
         foreach (var (_, end, _) in StopTimeSpans(song).Where(x => song.Song.Map!.Sections.Any(s => x.End > s.Start + 1e-9 && x.End < s.End - 1e-9)))
         {
             ends++;

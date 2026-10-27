@@ -17,7 +17,7 @@ public sealed class DeadNoteTest
     {
         var genre = GenrePresets.With("funk", GenreChoices.Articulation, ("deadNotes", 1), ("legato", 0), ("stabs", 0), ("roll", 0));
         var dead = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         foreach (var role in new[] { TrackRole.Bass, TrackRole.Riff, TrackRole.Rhythm })
         {
             if (!song.Song.Notes!.TryGetValue(song.Track(role), out var notes))
@@ -47,7 +47,7 @@ public sealed class DeadNoteTest
     public async Task AFunkGuitarsChords_RingOpen_ItsDeadNotesMuted(string genre)
     {
         var (dead, open) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         foreach (var (track, definition) in song.Song.TrackDefinitions.Where(x => x.Value is PitchInstrumentTrack { Role: TrackRole.Rhythm or TrackRole.Riff }))
         foreach (var note in song.Song.Notes!.GetValueOrDefault(track)?.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0) ?? [])
         {
@@ -76,7 +76,7 @@ public sealed class DeadNoteTest
     public async Task TheSongsOwn_MuteOnlyAChugsNotes()
     {
         var chugged = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without("metal", GenreChoices.Articulation.Name)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Without("metal", GenreChoices.Articulation.Name)))))
         {
             var chugs = song.Trace.Where(x => x.Point == TracePoints.Chugs).ToDictionary(x => x.Section, x => (bool)x.Value!);
             foreach (var role in new[] { TrackRole.Bass, TrackRole.Riff, TrackRole.RiffTwin, TrackRole.Rhythm, TrackRole.Chords })

@@ -12,7 +12,7 @@ public sealed class DoubleTimeTest
     {
         var timekeepers = DrumGroups.Timekeepers.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var (gaps, sixteenths) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("thrash")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("thrash")))))
         foreach (var feel in song.Trace.Where(t => t.Point == TracePoints.TimeFeel && (int)t.Value! == -1))
         foreach (var span in song.Map.Sections.Where(x => x.SectionId == feel.Section))
         foreach (var track in timekeepers.Where(song.Song.Notes!.ContainsKey))

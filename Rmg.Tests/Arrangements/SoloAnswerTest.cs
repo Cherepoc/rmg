@@ -22,7 +22,7 @@ public sealed class SoloAnswerTest
     public async Task AnAnswer_PlaysInTheMelodysGaps_UnderIt()
     {
         var (answers, louder, sections) = (0, 0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Melody(0.5))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Melody(0.5))))
         {
             var (answerNotes, melody) = Notes(song);
             var onsets = melody.Select(x => x.Position).ToArray();

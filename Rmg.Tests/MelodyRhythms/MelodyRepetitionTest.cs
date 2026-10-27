@@ -150,7 +150,7 @@ public sealed class MelodyRepetitionTest
         // of the first phrase's onsets in a section's first play, the share the second phrase keeps and the third, and of
         // those kept, the share whose step to the next note is the first phrase's, its contour
         int onsets = 0, keptSecond = 0, keptThird = 0, contourSecond = 0, contourThird = 0, sameSecond = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
         {
             var notes = song.Notes(song.Track(TrackRole.Melody)).OrderBy(x => x.Position).ToArray();
             var at = notes.Select((x, i) => (Position: Math.Round(x.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
@@ -191,7 +191,7 @@ public sealed class MelodyRepetitionTest
     public async Task ARestatedPhrase_KeepsTheBassLandingOnItsChordsRoots()
     {
         int changes = 0, roots = 0, middleChanges = 0, middleRoots = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
         {
             if (song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Bass)) is not { } bass)
                 continue;

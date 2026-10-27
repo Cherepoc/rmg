@@ -22,7 +22,7 @@ public sealed class RhythmRiffReportTest
     {
         var (sections, doubling, doubled, unison, octave) = (0, 0, 0, 0, 0);
         var (rhythmLows, riffLows) = (new List<int>(), new List<int>());
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         {
             sections += song.Map.Sections.Length;
             doubling += song.Trace.Count(x => x.Point == TracePoints.LineDoubling && x.Value is (int, TrackRole.Riff, TrackRole.Rhythm, int));

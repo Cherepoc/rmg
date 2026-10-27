@@ -98,7 +98,7 @@ public sealed class GivenTempoKeyMeterTest
     public async Task ADrawnMood_LiesWithinItsGenresSpan()
     {
         foreach (var (id, genre) in new[] { ("songs", (Genre?)null), ("darkJazz", Genres.GenrePresets.Genre("darkJazz")), ("trance", Genres.GenrePresets.Genre("trance")) })
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         {
             var mood = (Mood)song.Trace.Single(x => x.Point == TracePoints.Mood).Value!;
             var at = ((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!).Base;

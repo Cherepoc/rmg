@@ -16,7 +16,7 @@ public sealed class SectionPedalTest
     public async Task APedalledPhrase_HoldsOneNoteInTheBass_UnderChangingChords(string? genre)
     {
         int phrases = 0, held = 0, drones = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed,
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed,
                      new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0.9)), Genre: genre is null ? null : Rmg.Tests.Genres.GenrePresets.Genre(genre)))))
         {
             var pedalling = song.Trace.Where(x => x.Point == TracePoints.SectionPedal && x.Value is not null).ToDictionary(x => x.Section, x => (PedalPlace)x.Value!);
@@ -52,7 +52,7 @@ public sealed class SectionPedalTest
     public async Task NoPedal_IsHeldUnderOneChord()
     {
         var (pedalled, unchanging) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("djent")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("djent")))))
         {
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             var pedalling = song.Trace.Where(x => x.Point == TracePoints.SectionPedal && x.Value is not null).ToDictionary(x => x.Section, x => (PedalPlace)x.Value!);

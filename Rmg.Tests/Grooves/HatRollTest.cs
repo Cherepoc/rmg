@@ -95,7 +95,7 @@ public sealed class HatRollTest
     {
         var hipHop = GenrePresets.With("hipHop", GenreChoices.HatRolls, ("bars", 1));
         var (rolls, swung) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: hipHop))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: hipHop))))
         foreach (var (track, realized) in song.Song.Notes!.Where(x => song.IsDrum(x.Key)))
         {
             foreach (var roll in realized.Select(x => (From: x.Value.State.GetStateValue(CompositionStateKinds.EvenFrom), To: x.Value.State.GetStateValue(CompositionStateKinds.EvenTo), Sound: x.Value.Pitches[0]))
@@ -142,7 +142,7 @@ public sealed class HatRollTest
     {
         var (rolls, other) = (0, 0);
         foreach (var genre in new[] { "trap", "idm" })
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))))
         // a song with no drum keeping time rolling none
         foreach (var (_, to, _) in song.Trace.SingleOrDefault(x => x.Point == TracePoints.HatRolls)?.Value as System.Collections.Immutable.ImmutableArray<(double, double, int)>? ?? [])
         {

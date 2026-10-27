@@ -55,7 +55,7 @@ public sealed class BassLeadingTest
             .Add(GenreChoices.Name(nameof(ChordArrival.Root)), new ByConvention(1, 1, 1))
             .Add(GenreChoices.Name(nameof(ChordArrival.Fifth)), new ByConvention(1, 1, 1)));
         var landings = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))))
         foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Bass)])
         {
             var arrival = (ChordArrival)note.Value.State.GetStateValue(StateKinds.ChordArrival);
@@ -71,7 +71,7 @@ public sealed class BassLeadingTest
     public async Task ABassInversion_LandsOnANoteOfItsChord()
     {
         var (landings, sus) = (0, 0);
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("chamber")))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("chamber")))))
         foreach (var note in song.Song.Notes![song.Song.Track(TrackRole.Bass)].Where(x => (ChordArrival)x.Value.State.GetStateValue(StateKinds.ChordArrival) is ChordArrival.Third or ChordArrival.Fifth
                                                                                       && song.ChordChanges.Any(c => Math.Abs(c - x.Position) < 1e-9)
                                                                                       && x.Value.State.GetStateValue(CompositionStateKinds.BassPedal) == 0

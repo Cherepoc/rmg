@@ -28,7 +28,7 @@ public sealed class OpeningAloneTest
     public async Task ASongOpeningOnOnePart_PlaysItAloneInItsFirstBar(string preset)
     {
         var opened = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always(preset)))))
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Always(preset)))))
         {
             if (OpensOn(song) is not { } part)
                 continue;
