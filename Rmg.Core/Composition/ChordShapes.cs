@@ -45,7 +45,8 @@ internal static class ChordShapes
     [
         new("Triad", 0, 1, [0, Third, 7]) { Description = "Root, third and fifth: the plain chord." },
 
-        new("Power chord", 1, 0.8, [0, 7]) { Description = "Root and fifth, no third: neither major nor minor, as rock plays it." },
+        // its root at the bottom, never inverted, as a guitar plays it on its low strings, a fourth being no power chord
+        new("Power chord", 1, 0.8, [0, 7], true) { Description = "Root and fifth, no third: neither major nor minor, as rock plays it." },
         new("Sus2", 1, 0.6, [0, 2, 7]) { Darkness = -0.3, Description = "The second for the third: open and unresolved." },
         new("Sus4", 1, 0.6, [0, 5, 7]) { Description = "The fourth for the third: leaning to fall back to the third." },
         new("Seventh", 1, 1, [0, Third, 7, Seventh]) { Description = "A triad with the seventh: fuller, and on the fifth the pull home." },
