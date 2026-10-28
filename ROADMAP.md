@@ -107,7 +107,10 @@ notes muted, against the part on the muted guitar as it was, and a Funk bass sla
   build into a louder appearance (`postrock-build`, 8 to 2, drawn only where it picks two steps faster); and of its
   seventh round (27 October 2026), a song's energy following its intensity as the songs have it, in Pop and Metal at
   the fiercest and the calmest (`pop-fierce`, `pop-calm`, `metal-fierce`, `metal-calm`, 6 to none each), and Jazz's
-  darker tone (`jazz-tone`, 4 to none, two the same).
+  darker tone (`jazz-tone`, 4 to none, two the same); and of its eighth round (27 and 28 October 2026), the metal
+  family's rhythm part an octave down (`metal-rhythm-low`, 5 to 1 with its chords full, and 5 to 1 again in power
+  chords alone) and Djent's guitars and bass tuned down (`djent-tuning`, 6 to none at B, and 6 to none again drawn from
+  E to an octave down).
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
@@ -315,24 +318,24 @@ Built on 27 October 2026: a power chord never inverted, its root at the bottom a
 of the metal family's rhythm notes to 2-3%, its distorted power chords 17-25%, `TuningReportTest`'s shapes), and the
 rhythm part an octave down (`register.rhythm` 0 in Metal, Thrash, Doom, Nu metal and Djent, its median 63-70 to 52-56
 over the riff's 47-50, Djent's 47 to 46, its notes within two of the guitar's low E 0-3% to 5-8%), asked as
-`metal-rhythm-low`; on 28 October its chords open down there, root and fifth, no third nor colour (`OpenChords`, set
+`metal-rhythm-low` (5 to 1); on 28 October its chords open down there, root and fifth, no third nor colour (`OpenChords`, set
 where a genre moves a chord part down), its full chords 10-25% of its notes to none, and a fixed shape a section starts
-on moved whole rather than its fifth folded under into a fourth (`VoiceLeader`), the fourths 1-11% to none. Left:
+on moved whole rather than its fifth folded under into a fourth (`VoiceLeader`), the fourths 1-11% to none, heard 5 to
+1 again. Left:
 
 1. **A rhythm guitar on the low string**, if listening asks for more than the doubling and the lower rhythm part: between, the second guitar chugs
    single palm-muted notes on the open low string under the first's power chords, or holds a low note ringing under a
    clean verse or a lead: a section's rhythm part on the low string, each chord its root in the riff's register, its own rhythm kept, the
    chugs' rule muting its weak repeats and an accent a power chord (Metal, Thrash, Djent, Nu metal, Doom). The register is
    the risk: two guitars and the bass in one octave.
-2. **A genre's tuning**, built on 27 October 2026 for Djent alone, to be asked (`djent-tuning`) before any other preset
-   takes one: `tuning` by role (riff, rhythm, bass), a semitone every 4 or so below 50, a part's range and its own
+2. **A genre's tuning**, built on 27 October 2026 for Djent alone and heard to work (`djent-tuning`, 6 to none twice),
+   the other presets' next: `tuning` by role (riff, rhythm, bass), a semitone every 4 or so below 50, a part's range and its own
    instrument's moved by it as its frets' notes are (`Registers.Tuned`, `Realizer.RangeOf`), a chord's voicing kept in its
    octaves. Djent tuned by the song's sound from E at its plain end through A# to E an octave down at its wild ([50, 25,
    0], 28 October 2026; first B, a seven-string's, 29): its riff's floor G1 to D2 over 64 songs, mostly A#1, its bass
    with it but no lower than B0 (`Registers.LowestTuned`), a drone in C to D# back on the low string. General
-   MIDI's guitars below E2 are their lowest sample transposed, which the question asks of the owner's ear. Heard to work,
-   the rest by the measure (`TuningReportTest`): Doom and Nu metal to C or D, Metal to D or as it is, Thrash and Black
-   metal as they are.
+   MIDI's guitars below E2 are their lowest sample transposed, which the owner's ear took. Left, the rest by the measure
+   (`TuningReportTest`): Doom and Nu metal to C or D, Metal to D or as it is, Thrash and Black metal as they are.
 
 ### From the review of 22 October 2026
 

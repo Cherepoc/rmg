@@ -166,3 +166,5 @@ rejected while fixing: the place, what was decided, why.
   again under the same id from the plain hearing (`ROADMAP.md`, *A tremolo through the song*). Its round 4 answers say
   nothing of that device.
 - A part's darker tone (`effects.tone`, #28) kept on listening, 4 to none, two the same (`jazz-tone`, 27 October 2026): not a cut candidate again.
+- The metal family's rhythm part an octave down in power chords (`register.rhythm` 0, `OpenChords`) kept on listening, 5 to 1 twice (`metal-rhythm-low`, 27 and 28 October 2026): not a cut candidate again.
+- A genre's tuning (`tuning`, Djent's drawn from E to an octave down) kept on listening, 6 to none twice (`djent-tuning`, 27 and 28 October 2026): not a cut candidate again.
