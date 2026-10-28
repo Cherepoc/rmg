@@ -6,8 +6,8 @@ is removed once it is built, its leftovers kept under *Open work*.
 
 ## Priorities
 
-1. **The rules on the other corpora** (P1, *Older rule failures*): none failing at five offsets (19 October 2026); the
-   suite at another offset now and then.
+1. **The rules on the other corpora** (P1, *Older rule failures*): none failing at five offsets (19 October 2026), and
+   at 2300000000 four traced and fixed (28 October); the suite at another offset now and then.
 2. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
@@ -518,7 +518,17 @@ line on an instrument its section switches to placed in the part's range and mov
 counter-melody's run on a violin no longer folded at the range's edge (the run into a note above its range, seed 29 at
 942000000, among them); four rules reading too much (a dominant in the section before a reharmonised one, a drum
 solo's hits, the silent start's held opening, the mix's closing filter over a swell, a solo over no melody); and three
-counts widened. The suite's memory there fixed by its fresh songs read a few at a time (`TestCorpus.Streamed`). Left:
+counts widened. The suite's memory there fixed by its fresh songs read a few at a time (`TestCorpus.Streamed`).
+
+Run at 2300000000 on 28 October 2026, after the guitars' tunings (4 failing of 1828, each failing the same before the
+tunings, at b66548de, every one traced): a section looping the first's riff and bass, a verse over the intro's riff,
+playing them on the first section's instrument rather than its own form's, a heavy verse's clean riff left clean (the
+line's program now its own section's, `SectionGenerator.PlayedOn`); a secondary dominant counted from the next chord's
+step where that chord is a passing chord's or in a scale of its own, leading into a chord it is not the dominant of (no
+dominant into such a chord now, as none across a key change); a solo's run crossing a change into a chord of raised or
+lowered steps snapped to the nearest, a step skipped and its neighbour struck twice (the run's planned step taken up in
+the new chord's scale, 40 of 256 songs); and a rule reading too much, a pushing section's crash struck an eighth early
+in the bar where it sits out. Left:
 
 - **Two at 924000000, older than the review of 16 October:** a drum doubling a lead off the lead's beats (seed 26,
   section 9 at 672, a tambourine on the kick at 682 and 698, `DoublingTest`; traced on 23 October 2026 to `Polymeter`,

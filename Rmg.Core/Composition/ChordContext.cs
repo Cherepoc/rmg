@@ -11,6 +11,9 @@ internal sealed class ChordContext(Func<int, int> getPitch, int rootIndex)
 
     public int Root => GetPitch(0);
 
+    /// <summary>The root's step in the scale, counted from its first note.</summary>
+    public int RootIndex => rootIndex;
+
     /// <summary>The pitch of the scale's first note, the key's tonic in the section's mode, as many steps below the root as the root is above it.</summary>
     public int Tonic => GetPitch(-rootIndex);
 }

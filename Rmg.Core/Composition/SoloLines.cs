@@ -490,6 +490,15 @@ internal static class SoloLines
                         cursor = null;
                     }
 
+                    // a note past a change of chord in the key it set out in taking up the new chord's scale there, the step of the
+                    // scale it was planned on, so that a run goes on by step over an applied or a borrowed chord's raised or
+                    // lowered steps rather than strike the nearest twice
+                    var from = Chord(MelodyAt(start).Value, start);
+                    var key = MelodyAt(start).Value.GetStateValue(StateKinds.KeyOffset);
+                    for (var i = 0; i < positions.Length; i++)
+                        if (MelodyAt(positions[i]).Value is var sung && sung.GetStateValue(StateKinds.KeyOffset) == key && Chord(sung, positions[i]) is var at)
+                            pitches[i] = Nearest(ScaleNotes(positions[i]), at.GetPitch(LinePlacement.GetScaleStep(from, pitches[i]) + from.RootIndex - at.RootIndex));
+
                     // a run, too fast to play in octaves, alone; and a ghosting soloist's lick at 16ths or slower, not on a
                     // pedal, an unaccented note of it muted now and then, by its own key's draw
                     var ghosting = gesture == SoloGesture.Lick && soloist.Ghosts && shape != SoloShape.Pedal && (positions.Length < 2 || positions[1] - positions[0] >= 0.25 - 1e-9);

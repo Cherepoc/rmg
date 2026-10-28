@@ -712,11 +712,19 @@ internal sealed class SectionGenerator
                 var line = new SectionLine(trackNumber, profile, bars.Timeline.Repeat(2), Rebuilt, trackRhythm.Scheme.Across(meter.Phrases).Letters, harmonicRhythm, approaches, landings,
                     profile.RegisterFreedom, StreamSeed(sectionId, improvisation), role == TrackRole.Riff && riffHook);
                 // and a loop's riff and bass the first section's line, its bars as made and its leading, over the same chords,
-                // so that a looping song is one groove, its sections told apart by the rest
+                // so that a looping song is one groove, its sections told apart by the rest, played on the instrument its own
+                // section's form plays it on
                 if (role is TrackRole.Bass or TrackRole.Riff && isFirst)
                     _firstLines[trackNumber] = (bars, line);
                 else if (role is TrackRole.Bass or TrackRole.Riff && looped)
-                    (bars, line) = _firstLines[trackNumber];
+                {
+                    var (first, own) = (_firstLines[trackNumber], line.Bars);
+                    (bars, line) = (first.Bars, first.Line with
+                    {
+                        Bars = PlayedOn(first.Line.Bars, own, trackNumber),
+                        BuildBars = rhythmKeys => PlayedOn(first.Line.BuildBars(rhythmKeys), own, trackNumber)
+                    });
+                }
                 yield return (trackNumber, bars with { Timeline = line.Appear(0, 0).Trim(meter.PatternDuration) }, line);
                 continue;
             }
@@ -766,6 +774,17 @@ internal sealed class SectionGenerator
     ///     busyness, the melody's and the riff's line scales, the riff in power chords, the chords broken now and then, and
     ///     its fullness by the section's energy, over the section's state.
     /// </summary>
+    /// <summary>A line's bars played on the program another section's bars of the track play it on, the line's state otherwise kept.</summary>
+    private static TrackEventStateTimelineMap<StateMap> PlayedOn(TrackEventStateTimelineMap<StateMap> line, TrackEventStateTimelineMap<StateMap> own, int trackNumber)
+    {
+        var played = line.TrackTimelineMap[trackNumber];
+        var program = own.TrackTimelineMap.GetValueOrDefault(trackNumber)?.StateTimelineMap.GetStateTimeline(CompositionStateKinds.Program)
+                      ?? CompositionStateKinds.Program.CreateDefaultTimeline(played.Duration);
+        var state = StateTimelineMap.Create(played.Duration, [..played.StateTimelineMap.Except([CompositionStateKinds.Program]).StateTimelines, program]);
+        return TrackEventStateTimelineMap<StateMap>.Create(line.Duration, line.TrackTimelineMap.SetItem(trackNumber, EventStateTimelineMap<StateMap>.Create(played.Duration, played.EventTimeline, state)),
+            line.CommonStateTimelineMap);
+    }
+
     private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords, bool pedal, bool drone, bool twinLead, SectionForm form)
     {
         // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
