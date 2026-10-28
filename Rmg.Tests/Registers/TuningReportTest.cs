@@ -31,9 +31,9 @@ public sealed class TuningReportTest
                         var low = note.Value.Pitches.Min();
                         lows.Add(low);
                         all++;
-                        // on the part's own instrument as it tunes it
+                        // on the instrument as the part tunes it, any of its own's family
                         var program = InstrumentsOverTime.ProgramOf(note.Value.State, part.InstrumentCode);
-                        var bottom = (program == part.InstrumentCode ? Rmg.Core.Composition.Registers.RangeOf(part) : InstrumentRanges.Of(program)).Low;
+                        var bottom = InstrumentRanges.Of(program).Low + Rmg.Core.Composition.Registers.TuningOn(part, program);
                         floor += low - bottom <= 2 ? 1 : 0;
                         below += low < bottom ? 1 : 0;
                     }

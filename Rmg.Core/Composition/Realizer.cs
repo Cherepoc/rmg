@@ -82,20 +82,18 @@ internal static class Realizer
         RangeOf(track.MinOctaveOffset, track.MaxOctaveOffset, track.InstrumentCode, track.StateMap.GetStateValue(CompositionStateKinds.Tuning));
 
     /// <summary>
-    ///     A line's range: its octaves' notes within its instrument's (<see cref="InstrumentRanges" />), moved by as many
-    ///     octaves as a genre's register moved the part past the instrument's own, as a guitar tuned down plays lower
-    ///     (<see cref="Registers.WithinInstrument(PitchInstrumentTrack, int, Genre)" />), as far as an octave's width is left,
-    ///     which a line needs to sound every note: a bass in an octave half below its strings plays those below them an octave
-    ///     up, as a bassist does below the low E; and the whole of it moved by as many semitones as the instrument is tuned, as
-    ///     its frets' notes are (<see cref="Registers.Tuned" />).
+    ///     A line's range: its octaves' notes within its instrument's (<see cref="InstrumentRanges" />), its top moved by as
+    ///     many octaves as a genre's register moved the part past the instrument's own, as a bass plays up high, but its floor
+    ///     the instrument's, a guitar going lower only as it is tuned down (<see cref="Registers.WithinInstrument(PitchInstrumentTrack, int, Genre)" />),
+    ///     as far as an octave's width is left, which a line needs to sound every note: a bass in an octave half below its
+    ///     strings plays those below them an octave up, as a bassist does below the low E; and the whole of it moved by as many
+    ///     semitones as the instrument is tuned, as its frets' notes are (<see cref="Registers.Tuned" />).
     /// </summary>
     internal static (int Low, int High) RangeOf(int minOctave, int maxOctave, int program, int tuning)
     {
         var (low, high) = ((minOctave + ZeroOctaveOffset) * OctaveNoteCount + tuning, (maxOctave + ZeroOctaveOffset + 1) * OctaveNoteCount - 1 + tuning);
-        var (lowestOctave, highestOctave) = Registers.OctavesOf(program);
-        var (lowest, highest) = InstrumentRanges.Of(program) is var (l, h)
-            ? (l + tuning - OctaveNoteCount * Math.Max(0, lowestOctave - minOctave), h + tuning + OctaveNoteCount * Math.Max(0, maxOctave - highestOctave))
-            : default;
+        var highestOctave = Registers.OctavesOf(program).High;
+        var (lowest, highest) = InstrumentRanges.Of(program) is var (l, h) ? (l + tuning, h + tuning + OctaveNoteCount * Math.Max(0, maxOctave - highestOctave)) : default;
         var (from, top) = (Math.Min(Math.Max(low, lowest), high - OctaveNoteCount + 1), Math.Min(high, highest));
         // an octave's width down from the instrument's top where it cuts the octaves short, as an oboe's line high in its
         // range keeps below its top note
@@ -204,7 +202,7 @@ internal static class Realizer
         // the chords are placed in order, each following from the one before on the same instrument, in its octaves: the
         // instrument the part plays there, but a note a section's form gives an instrument of its own and a solo's, which
         // play on the part's
-        var leaders = new Dictionary<(int, int), VoiceLeader>();
+        var leaders = new Dictionary<(int, int, int), VoiceLeader>();
         var home = GetRange(track);
         ((int Low, int High) Line, VoiceLeader Leader, (int Low, int High) Home, int Shift) On(StateMap state)
         {
@@ -214,19 +212,19 @@ internal static class Realizer
             var (min, max, program) = switched
                 ? (playing.Value.MinOctave, playing.Value.MaxOctave, playing.Value.Program)
                 : (track.MinOctaveOffset, track.MaxOctaveOffset, track.InstrumentCode);
-            // a chord voiced in its octaves, led on through a change of instrument in them, a line placed in its range within
-            // the instrument's
-            if (!leaders.TryGetValue((min, max), out var leader))
-            {
-                var (absoluteMinOctave, octaveCount) = (min + ZeroOctaveOffset, max - min + 1);
-                var range = (absoluteMinOctave * OctaveNoteCount, (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1);
-                leaders[(min, max)] = leader = new VoiceLeader(range.Item1, range.Item2, notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes));
-            }
+            // the part's own instrument's family tuned as it tunes it, another as it is
+            var tuning = Registers.TuningOn(track, program);
+            // a chord voiced in its octaves above the instrument's lowest note as tuned, an octave's width at least, led on
+            // through a change of instrument in them, a line placed in its range within the instrument's
+            var (absoluteMinOctave, octaveCount) = (min + ZeroOctaveOffset, max - min + 1);
+            var top = (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1;
+            var floor = Math.Min(Math.Max(absoluteMinOctave * OctaveNoteCount, InstrumentRanges.Of(program).Low + tuning), top - OctaveNoteCount + 1);
+            if (!leaders.TryGetValue((min, max, floor), out var leader))
+                leaders[(min, max, floor)] = leader = new VoiceLeader(floor, top, notes => [..FitChordIntoRange(absoluteMinOctave, octaveCount, notes).Select(x => IntoRange(x, floor, top)).Distinct().Order()]);
 
-            // the part's own instrument tuned as it tunes it, another as it is; a line on an instrument its section switches
-            // to placed in the part's range first and moved by the octaves between their octaves, so that it keeps its shape,
-            // a run whole, a note's own placed in its register already
-            var line = RangeOf(min, max, program, program == track.InstrumentCode ? track.StateMap.GetStateValue(CompositionStateKinds.Tuning) : 0);
+            // a line on an instrument its section switches to placed in the part's range first and moved by the octaves
+            // between their octaves, so that it keeps its shape, a run whole, a note's own placed in its register already
+            var line = RangeOf(min, max, program, tuning);
             return switched && playing.Depth != StateDepths.Note
                 ? (line, leader, home, OctaveNoteCount * (min - track.MinOctaveOffset))
                 : (line, leader, line, 0);

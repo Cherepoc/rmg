@@ -321,7 +321,11 @@ over the riff's 47-50, Djent's 47 to 46, its notes within two of the guitar's lo
 `metal-rhythm-low` (5 to 1); on 28 October its chords open down there, root and fifth, no third nor colour (`OpenChords`, set
 where a genre moves a chord part down), its full chords 10-25% of its notes to none, and a fixed shape a section starts
 on moved whole rather than its fifth folded under into a fourth (`VoiceLeader`), the fourths 1-11% to none, heard 5 to
-1 again. Left:
+1 again; and a guitar tuned wherever the part plays one, a tuning its own's family's (`Registers.TuningOn`), a
+register moving a part down only within its instrument as tuned, the tuning the one way below its low E, its floor a
+chord's too, and moved once on an instrument a section switches to, not again: the metal family's notes below their
+guitar's floor, up to 6176 a part over 64 songs (Thrash's riff, Metal's 2435, Djent's 2067, most on a guitar switched
+to), to none, a rule of it, the songs' notes outside their instrument 403 to 254 and 42 to 20 on one switched to. Left:
 
 1. **A rhythm guitar on the low string**, if listening asks for more than the doubling and the lower rhythm part: between, the second guitar chugs
    single palm-muted notes on the open low string under the first's power chords, or holds a low note ringing under a
@@ -337,16 +341,7 @@ on moved whole rather than its fifth folded under into a fourth (`VoiceLeader`),
    in C to D# back on the low string. General
    MIDI's guitars below E2 are their lowest sample transposed, which the owner's ear took. Left, the rest by the measure
    (`TuningReportTest`): Doom and Nu metal to C or D, Metal to D or as it is, Thrash and Black metal as they are.
-3. **A guitar tuned wherever the part plays one**, before another preset is tuned: a part's tuning moves its own
-   instrument alone (`Realizer.RangeOf`), so that a section switching the riff from a distortion guitar to an overdriven
-   one, or the rhythm part doubling the riff on the riff's guitar, plays it in standard tuning, its line placed in the
-   tuned range and so below the instrument's floor (28 October 2026, `TuningReportTest`'s count below it: Djent's riff
-   2067 notes, its rhythm part 1319, nearly all on a guitar switched to). The tuning a guitar's or a bass's of the
-   part's family, every program of it the part plays. With it the register: an octave down was how a guitar was taken
-   below its low E before tuning was (`RangeOf`'s floor an octave under the instrument's), so that Metal's untuned riff
-   plays 2435 notes under E2 on a switched guitar, and Djent's rhythm part, tuned an octave and moved an octave, has its
-   range's floor at E0 (16); a register under its instrument's tuned floor kept to it, the tuning the one way down.
-4. **No third low in any part**, should listening find a chord blurred outside the metal family: a chord part's notes
+3. **No third low in any part**, should listening find a chord blurred outside the metal family: a chord part's notes
    below about E3 kept to its root, fifth and octave wherever it sits, the chords moved under the melody
    (`Registers.Apart`) and a low key's among them, rather than only a part its genre moves down (`OpenChords`); how often
    such a third sounds unmeasured.

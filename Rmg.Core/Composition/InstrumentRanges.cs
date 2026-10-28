@@ -7,6 +7,9 @@ namespace Rmg.Core.Composition;
 /// </summary>
 public static class InstrumentRanges
 {
+    /// <summary>How many programs a General MIDI family holds.</summary>
+    public const int FamilySize = 8;
+
     /// <summary>A family's range, by its first program.</summary>
     private static readonly (int First, int Low, int High)[] Families =
     [

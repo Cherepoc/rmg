@@ -8,7 +8,9 @@ namespace Rmg.Tests.Registers;
 ///     and the melody under the chords (measured over 128 songs on 26 October 2026, a switched instrument's notes placed in
 ///     the part's own octaves: 507 of 14940 outside its range, 3.4%; within the octaves it plays there: 256, 1.7%, as a part's
 ///     own instrument's 2.2%, its bass's 8% the most; a line's range then cut to its instrument's, the bass's below its low E
-///     an octave up: 48 of 15102 on a switched instrument, 0.3%, 488 of 157963 on a part's own, 0.3%, the chords' 1% the most).
+///     an octave up: 48 of 15102 on a switched instrument, 0.3%, 488 of 157963 on a part's own, 0.3%, the chords' 1% the most;
+///     on 28 October a line kept under its instrument's top 42 and 403, and a register moved once on an instrument switched to,
+///     a chord's floor its instrument's as tuned and a guitar tuned on every guitar: 20, 0.1%, and 254, 0.2%).
 /// </summary>
 public sealed class RegisterReportTest
 {

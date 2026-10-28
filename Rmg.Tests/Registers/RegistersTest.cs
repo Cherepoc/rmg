@@ -82,6 +82,32 @@ public sealed class RegistersTest
     }
 
     /// <summary>
+    ///     A rule: no note of a part a genre tunes or moves down, the riff, its twin, the rhythm part and the bass, below its
+    ///     instrument's lowest as the part tunes it, on its own instrument or on
+    ///     any it switches to, a guitar of its family tuned as its own (<see cref="Rmg.Core.Composition.Registers.TuningOn" />),
+    ///     a register moving a part down only within it: the songs' and the metal family's, tuned and moved down.
+    /// </summary>
+    [Test]
+    public async Task NoNote_IsBelowItsInstrumentAsTuned()
+    {
+        var seeds = Enumerable.Range(0, 64).Select(x => (Seed: x, Genre: (string?)null))
+            .Concat(new[] { "metal", "thrash", "djent" }.SelectMany(g => Enumerable.Range(0, 16).Select(x => (Seed: x, Genre: (string?)g)))).ToArray();
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, seeds.Length), i => seeds[i].Genre is { } genre ? TestCorpus.Get(seeds[i].Seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre(genre))) : TestCorpus.Get(seeds[i].Seed)))
+        foreach (var (track, notes) in song.Song.Notes!)
+        {
+            if (song.Song.TrackDefinitions[track] is not PitchInstrumentTrack part || part.Role.Source() is not (TrackRole.Riff or TrackRole.Rhythm or TrackRole.Bass))
+                continue;
+            foreach (var note in notes)
+            {
+                var program = InstrumentsOverTime.ProgramOf(note.Value.State, part.InstrumentCode);
+                var floor = InstrumentRanges.Of(program).Low + Rmg.Core.Composition.Registers.TuningOn(part, program);
+                await Assert.That(note.Value.Pitches.Min()).IsGreaterThanOrEqualTo(floor)
+                    .Because($"seed {song.Seed}, {part.Role} on {GeneralMidi.Programs[program]} at {note.Position}: {string.Join(" ", note.Value.Pitches)}");
+            }
+        }
+    }
+
+    /// <summary>
     ///     A rule: a chord part a genre moves an octave down, the metal rhythm part, plays its chords open, every note of a
     ///     chord its root's unison, fifth or octave, no third nor colour (<see cref="CompositionStateKinds.OpenChords" />); a
     ///     note doubling the riff's line plays the riff's.

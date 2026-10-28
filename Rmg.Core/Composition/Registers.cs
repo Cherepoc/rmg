@@ -40,15 +40,21 @@ public static class Registers
     public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, Genre genre) => WithinInstrument(
         part.Role.PlaysChords() && OctavesOf(genre, part.Role) < 0
             ? new PitchInstrumentTrack(part.StateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.OpenChords.CreateState(1)])), part.InstrumentCode, part.MinOctaveOffset, part.MaxOctaveOffset, part.Role, part.Pan)
-            : part, part.InstrumentCode, genre);
+            : part, part.InstrumentCode, genre, OctavesOf(genre, part.Role));
 
-    /// <summary>A part's octaves, as it has them, moved within another instrument's, one it switches to (<see cref="InstrumentsOverTime" />).</summary>
-    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, int program, Genre genre)
+    /// <summary>
+    ///     A part's octaves, as it has them, its genre's register moved already, kept within another instrument's, one it
+    ///     switches to, as the register moves that instrument's (<see cref="InstrumentsOverTime" />).
+    /// </summary>
+    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, int program, Genre genre) => WithinInstrument(part, program, genre, 0);
+
+    /// <param name="by">How many octaves the part's own are moved first: its register's for its drawn octaves, none for its own moved.</param>
+    private static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, int program, Genre genre, int by)
     {
         var moved = OctavesOf(genre, part.Role);
         var (low, high) = OctavesOf(program) is var (l, h) ? (l + moved, h + moved) : default;
         var width = part.MaxOctaveOffset - part.MinOctaveOffset;
-        var min = Math.Clamp(part.MinOctaveOffset + moved, low, high);
+        var min = Math.Clamp(part.MinOctaveOffset + by, low, high);
         var max = Math.Clamp(min + width, min, high);
         return Moved(part, Math.Max(low, max - width), max);
     }
@@ -72,6 +78,13 @@ public static class Registers
     public static PitchInstrumentTrack Tuned(PitchInstrumentTrack part, Genre genre) => Math.Max(TuningOf(genre, part.Role), LowestTuned - InstrumentRanges.Of(part.InstrumentCode).Low) is var tuning and not 0
         ? new PitchInstrumentTrack(part.StateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.Tuning.CreateState(tuning)])), part.InstrumentCode, part.MinOctaveOffset, part.MaxOctaveOffset, part.Role, part.Pan)
         : part;
+
+    /// <summary>
+    ///     How many semitones a part tunes an instrument it plays: its own's tuning on any of its family, a guitar's on every
+    ///     guitar and a bass's on every bass, as a band tuned down is on whichever it picks up; none on another.
+    /// </summary>
+    public static int TuningOn(PitchInstrumentTrack part, int program) =>
+        program / InstrumentRanges.FamilySize == part.InstrumentCode / InstrumentRanges.FamilySize ? part.StateMap.GetStateValue(CompositionStateKinds.Tuning) : 0;
 
     /// <summary>A part's own instrument's range, as the part tunes it.</summary>
     public static (int Low, int High) RangeOf(PitchInstrumentTrack part) =>
