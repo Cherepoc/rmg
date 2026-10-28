@@ -331,11 +331,25 @@ on moved whole rather than its fifth folded under into a fourth (`VoiceLeader`),
 2. **A genre's tuning**, built on 27 October 2026 for Djent alone and heard to work (`djent-tuning`, 6 to none twice),
    the other presets' next: `tuning` by role (riff, rhythm, bass), a semitone every 4 or so below 50, a part's range and its own
    instrument's moved by it as its frets' notes are (`Registers.Tuned`, `Realizer.RangeOf`), a chord's voicing kept in its
-   octaves. Djent tuned by the song's sound from E at its plain end through A# to E an octave down at its wild ([50, 25,
-   0], 28 October 2026; first B, a seven-string's, 29): its riff's floor G1 to D2 over 64 songs, mostly A#1, its bass
-   with it but no lower than B0 (`Registers.LowestTuned`), a drone in C to D# back on the low string. General
+   octaves. Djent tuned by the song's sound from E at its plain end to E an octave down from the middle on ([50, 0, 0],
+   28 October 2026; first B, a seven-string's, 29): its riff's floor E1 in 41 of 64 songs, F1 to C2 in the rest, its
+   median 38, its bass with it but no lower than B0 (`Registers.LowestTuned`), its median 37 beside the riff's, a drone
+   in C to D# back on the low string. General
    MIDI's guitars below E2 are their lowest sample transposed, which the owner's ear took. Left, the rest by the measure
    (`TuningReportTest`): Doom and Nu metal to C or D, Metal to D or as it is, Thrash and Black metal as they are.
+3. **A guitar tuned wherever the part plays one**, before another preset is tuned: a part's tuning moves its own
+   instrument alone (`Realizer.RangeOf`), so that a section switching the riff from a distortion guitar to an overdriven
+   one, or the rhythm part doubling the riff on the riff's guitar, plays it in standard tuning, its line placed in the
+   tuned range and so below the instrument's floor (28 October 2026, `TuningReportTest`'s count below it: Djent's riff
+   2067 notes, its rhythm part 1319, nearly all on a guitar switched to). The tuning a guitar's or a bass's of the
+   part's family, every program of it the part plays. With it the register: an octave down was how a guitar was taken
+   below its low E before tuning was (`RangeOf`'s floor an octave under the instrument's), so that Metal's untuned riff
+   plays 2435 notes under E2 on a switched guitar, and Djent's rhythm part, tuned an octave and moved an octave, has its
+   range's floor at E0 (16); a register under its instrument's tuned floor kept to it, the tuning the one way down.
+4. **No third low in any part**, should listening find a chord blurred outside the metal family: a chord part's notes
+   below about E3 kept to its root, fifth and octave wherever it sits, the chords moved under the melody
+   (`Registers.Apart`) and a low key's among them, rather than only a part its genre moves down (`OpenChords`); how often
+   such a third sounds unmeasured.
 
 ### From the review of 22 October 2026
 
@@ -352,7 +366,8 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   Cinematic piano, Chamber), four and six verses into a strophic `v+` (Folk, Celtic, Blues, Bluegrass, Dungeon, Medieval,
   Soul, Country), Folk, Medieval and Country given lengths for them (a cycle played once where none is given, a rule of
   it), their free forms the fewer where a cycle fits the length (Blues' 23% from 30%, Dungeon's 44% from 59%,
-  `FormFoldReportTest`). Left: the length's chance of a free form left to the form facet.
+  `FormFoldReportTest`); the length's chance of a free form the form facet's, leaned by how near the nearest form
+  comes and exact at either end (`SongLength.FormChance`).
 - **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, to be asked): an
   `EndingKind` holding the last dominant as a stop while the lead runs alone over it, should the breath be heard to
   work.

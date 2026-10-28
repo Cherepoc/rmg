@@ -40,7 +40,7 @@ public sealed class RegistersTest
 
     /// <summary>
     ///     A rule: a genre's tuning moves its parts' ranges by its semitones, Djent's guitars by the song's sound from E down to
-    ///     E an octave below, its bass with them as far as B0 (<see cref="Rmg.Core.Composition.Registers.LowestTuned" />), and
+    ///     E an octave below from the middle on, its bass with them as far as B0 (<see cref="Rmg.Core.Composition.Registers.LowestTuned" />), and
     ///     every note of their lines on their own instruments within the tuned range, the same seeds' parts in standard tuning
     ///     otherwise.
     /// </summary>
