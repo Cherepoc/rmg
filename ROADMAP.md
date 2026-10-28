@@ -74,11 +74,13 @@ would be without them since, a chord keeping its own where a strong note of the 
 tune note for note the song's without, asked again. The
 third round (24 October 2026) asks those two beside two cuts, each against none: a Cinematic piano melody's double
 stops on its downbeats (`piano-double-stops`, #64) and a Funk part's articulation variants (`funk-articulation`, #59),
-each a genre's choice since (`lineChords`, `articulationModes`), the songs as they were. To ask once built: a riff's
-or a lead's long notes tremolo-picked (`articulation.tremolo`, #352), the riff's tremolo figure folded into it on 26 October
-2026 (its share of the riff's pool given to the picking in Metal, Thrash, Symphonic, Surf and Black metal), and in Surf
-rock against none; Funk's guitar, its chords open and its dead
-notes muted, against the part on the muted guitar as it was, and a Funk bass slapping its accents against its own.
+each a genre's choice since (`lineChords`, `articulationModes`), the songs as they were. The tremolo-picked note
+(`articulation.tremolo`, #352) was heard in Surf as `surf-tremolo`, 6 to none, and in Black metal, both kept. The ninth
+round of 22 October's review (29 October 2026) asks Funk's guitar, its chords open on the clean guitar and its dead notes
+muted, against the part on the muted guitar as it was (`funk-guitar`, 0.82), a Funk bass slapping its accents against
+never (`funk-slap`, 0.07, a device of its accents' places, heard from them, its places a section's that slaps its accents
+and not one switched to a slap bass), and Cinematic piano's tempo at a phrase's edges against steady time
+(`film-rubato`, 1.19, every note after a breath moved by it); Jazz's cadenza (#365) waits on the last.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
@@ -307,7 +309,7 @@ Reviewed against how the idioms are played, in the order to build:
 
 Built on 24 October 2026: Funk's mute (the rhythm part's muted guitar out of the funk family's pools, a clean guitar's
 dead notes on the muted guitar, the bar-muting variants gone, a bass slapping its accents in Funk, Funk rock and Djent,
-Disco's and Djent's dead notes) and the tremolo-picked note (#352), each to be asked. Left, in the order to build:
+Disco's and Djent's dead notes), asked in the ninth round (`funk-guitar`, `funk-slap`), and the tremolo-picked note (#352), heard and kept (`surf-tremolo`). Left, in the order to build:
 
 Built on 26 October 2026: the rhythm part playing the riff in unison now and then (`doubling.rhythm`, the metal
 family's), a pair of the doubling's on the riff's onsets, its notes played as the riff's line in the riff's register on
@@ -363,7 +365,7 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   it), their free forms the fewer where a cycle fits the length (Blues' 23% from 30%, Dungeon's 44% from 59%,
   `FormFoldReportTest`); the length's chance of a free form the form facet's, leaned by how near the nearest form
   comes and exact at either end (`SongLength.FormChance`).
-- **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, to be asked): an
+- **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, asked as `film-rubato`): an
   `EndingKind` holding the last dominant as a stop while the lead runs alone over it, should the breath be heard to
   work.
 - **Put off:** the game loop (#369), the body replayed from its loop point into the fade as `PlayAt` plays a source:

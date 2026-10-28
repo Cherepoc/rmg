@@ -1,1 +1,229 @@
-[]
+[
+  {
+    "id": "funk-guitar",
+    "question": "A Funk rhythm guitar's chords ringing open, a muted scratch between them now and then, against the part on the muted guitar throughout: the funk comp, or thinner?",
+    "decides": "Whether Funk's rhythm guitar plays its chords open on the clean guitar, its dead notes on the muted one (instrument.rhythm, the muted guitar out of the funk family's pools), against the part on the muted guitar as it was; heard thinner, the muted guitar back in the pools.",
+    "genre": "funk",
+    "with": {
+      "genre": {
+        "instrument.rhythm": {
+          "clavinet": 0
+        }
+      },
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "instrument.rhythm": {
+          "electricGuitarMuted": 100,
+          "electricGuitarClean": 0,
+          "clavinet": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 8.4,
+        "from": 6.3,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 19.4,
+        "from": 17,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 186.4,
+        "from": 184.1,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "F",
+        "at": 160,
+        "from": 157.7,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 143.6,
+        "from": 141.3,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "L",
+        "at": 41,
+        "from": 39,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "funk-slap",
+    "question": "A Funk finger bass slapping its accents, against played with the fingers throughout: the funk bass's pop, or a jarring change of sound?",
+    "decides": "Whether a part plays its instrument's other sound on its accents (articulationModes.accents, Funk's 0-25-60), a finger bass slapped, against never; heard jarring, none in the funk family.",
+    "genre": "funk",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "articulationModes": {
+          "accents": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "c",
+        "at": 212.3,
+        "from": 210,
+        "listen": [
+          "Bass (Slap Bass 2)"
+        ]
+      },
+      {
+        "seed": "19",
+        "at": 192,
+        "from": 189.6,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "1n",
+        "at": 149.5,
+        "from": 147.4,
+        "listen": [
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "1o",
+        "at": 244.5,
+        "from": 242.3,
+        "listen": [
+          "Bass (Slap Bass 2)"
+        ]
+      },
+      {
+        "seed": "20",
+        "at": 12.9,
+        "from": 10.7,
+        "listen": [
+          "Bass (Slap Bass 2)"
+        ]
+      },
+      {
+        "seed": "22",
+        "at": 9.3,
+        "from": 7,
+        "listen": [
+          "Bass (Slap Bass 2)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "film-rubato",
+    "question": "A Cinematic piano piece slowing over a section's last bar into the next, or its opening part alone pushing and easing its phrases, against steady time: breathing, or unsteady?",
+    "decides": "Whether a genre bends its tempo at its phrases' edges (rubato, Cinematic piano's openings 40-50-60, returns 30-40-50, changes 0-10-20, and Chamber's, Orchestral's, Ballad's and Lyrical guitar's), against never; heard unsteady, none.",
+    "genre": "filmPiano",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "rubato": {
+          "openings": 0,
+          "returns": 0,
+          "changes": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 23,
+        "from": 20,
+        "listen": [
+          "Melody (Flute)",
+          "Bass (Cello)",
+          "Chords (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "1",
+        "at": 61.9,
+        "from": 59.3,
+        "listen": [
+          "Melody (Violin)",
+          "Pad (String Ensemble 2)",
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "5",
+        "at": 23.8,
+        "from": 20.5,
+        "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Counter-melody (Violin)",
+          "Bass (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 44.6,
+        "from": 41.7,
+        "listen": [
+          "Pad (String Ensemble 2)",
+          "Melody (Flute)",
+          "Bass (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 38.8,
+        "from": 36.3,
+        "listen": [
+          "Pad (String Ensemble 2)",
+          "Melody (Acoustic Grand Piano)",
+          "Bass (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 50.8,
+        "from": 47.8,
+        "listen": [
+          "Melody (Acoustic Grand Piano)",
+          "Chords (Acoustic Grand Piano)",
+          "Bass (Cello)"
+        ]
+      }
+    ]
+  }
+]
