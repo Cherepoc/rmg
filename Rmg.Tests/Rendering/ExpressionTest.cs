@@ -355,6 +355,24 @@ public sealed class ExpressionTest
         await Assert.That(swelled).IsGreaterThan(0);
     }
 
+    /// <summary>A bass never swells, its attack the beat it holds the band to, where the song's other parts swell.</summary>
+    [Test]
+    public async Task ABass_NeverSwells()
+    {
+        var others = 0;
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var (track, notes) in song.Song.Notes!)
+        {
+            var swelled = notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Swell) == 1).ToArray();
+            if (song.Song.TrackDefinitions[track].Role == TrackRole.Bass)
+                await Assert.That(swelled).IsEmpty().Because($"seed {song.Seed}, track {track}");
+            else
+                others += swelled.Length;
+        }
+
+        await Assert.That(others).IsGreaterThan(0);
+    }
+
     [Test]
     public async Task OnlyALineOfAnInstrumentThatBends_Bends_InOctavesToo()
     {

@@ -57,46 +57,7 @@ public sealed class ListeningQuestionsTest
         Func<CorpusSong, double?>? Contrast = null
     );
 
-    private static readonly Question[] Questions =
-    [
-        new("funk-guitar", "A Funk rhythm guitar's chords ringing open, a muted scratch between them now and then, against the part on the muted guitar throughout: the funk comp, or thinner?",
-            "Whether Funk's rhythm guitar plays its chords open on the clean guitar, its dead notes on the muted one (instrument.rhythm, the muted guitar out of the funk family's pools), against the part on the muted guitar as it was; heard thinner, the muted guitar back in the pools.", "funk", [],
-            new() { ["instrument.rhythm"] = new() { ["electricGuitarMuted"] = 100, ["electricGuitarClean"] = 0, ["clavinet"] = 0 } },
-            x => Notes(x, TrackRole.Rhythm).Select(n => (double?)n.Position).FirstOrDefault(),
-            In: (x, span) => Notes(x, TrackRole.Rhythm).Any(n => span.IsWithin(n.Position)),
-            WithPatch: new() { ["instrument.rhythm"] = new() { ["clavinet"] = 0 } }),
-        new("funk-slap", "A Funk finger bass slapping its accents, against played with the fingers throughout: the funk bass's pop, or a jarring change of sound?",
-            "Whether a part plays its instrument's other sound on its accents (articulationModes.accents, Funk's 0-25-60), a finger bass slapped, against never; heard jarring, none in the funk family.", "funk", [],
-            new() { ["articulationModes"] = new() { ["accents"] = 0 } },
-            x => Slapped(x).Select(v => (double?)v).FirstOrDefault(), Places: Slapped),
-        new("film-rubato", "A Cinematic piano piece slowing over a section's last bar into the next, or its opening part alone pushing and easing its phrases, against steady time: breathing, or unsteady?",
-            "Whether a genre bends its tempo at its phrases' edges (rubato, Cinematic piano's openings 40-50-60, returns 30-40-50, changes 0-10-20, and Chamber's, Orchestral's, Ballad's and Lyrical guitar's), against never; heard unsteady, none.", "filmPiano", [],
-            new() { ["rubato"] = new() { ["openings"] = 0, ["returns"] = 0, ["changes"] = 0 } },
-            x => (bool)x.Trace.Single(t => t.Point == TracePoints.Rubato).Value! ? Bent(x).Select(v => (double?)v).FirstOrDefault() : null, Places: Bent)
-    ];
-
-    /// <summary>A song's notes of a role's parts, in order.</summary>
-    private static IEnumerable<TimelineItem<RealizedNote>> Notes(CorpusSong song, TrackRole role) =>
-        song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role).SelectMany(x => x.Value).OrderBy(x => x.Position);
-
-    /// <summary>Where a song's bass is slapped on its accents, in the sections that play its variant so, in beats; not a section switched to a slap bass.</summary>
-    private static double[] Slapped(CorpusSong song) =>
-    [
-        ..song.Trace.Where(x => x.Point == TracePoints.InstrumentOverTime && song.Song.TrackDefinitions[x.Track].Role == TrackRole.Bass)
-            .Select(x => (x.Track, Played: ((int Index, TrackRole, int, ArticulationMode Mode, int Variant))x.Value!))
-            .Where(x => x.Played is { Mode: ArticulationMode.Accents, Variant: 36 or 37 })
-            .SelectMany(x => song.Song.Notes![x.Track].Where(n => song.Map.PlayingAt(n.Position)?.Index == x.Played.Index
-                                                                  && InstrumentsOverTime.ProgramOf(n.Value.State, -1) == x.Played.Variant))
-            .Select(x => x.Position).Order()
-    ];
-
-    /// <summary>Where a song's tempo bends inside a section, a breath's steps or a phrase's push, but its last section's, its ending's, in beats.</summary>
-    private static double[] Bent(CorpusSong song)
-    {
-        var starts = song.Map.Sections.Select(x => x.Start).ToArray();
-        return [..song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).Select(x => x.Position)
-            .Where(x => x < starts[^1] - 1e-9 && !starts.Any(s => Math.Abs(s - x) < 1e-6)).Order()];
-    }
+    private static readonly Question[] Questions = [];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

@@ -727,7 +727,8 @@ internal static class Expression
             var part = partStreams(track);
             var vibrates = part.TestProbability(VibratoChance.At(songSound)) & songVibrato;
             var isSung = role is TrackRole.Melody or TrackRole.CounterMelody;
-            var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : isSung ? LineSwellChance : SwellChance).At(songSound)) & songSwell;
+            // but a bass, whose attack is the beat it holds the band to, as a slapped or a plucked note's is
+            var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : isSung ? LineSwellChance : SwellChance).At(songSound)) & songSwell && role != TrackRole.Bass;
             var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
             // a riff's twin as its riff
             bool Carries(StrongEffect effect) => carriers.TryGetValue(effect, out var carrier) && carrier == drawsAs(track);

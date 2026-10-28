@@ -168,3 +168,6 @@ rejected while fixing: the place, what was decided, why.
 - A part's darker tone (`effects.tone`, #28) kept on listening, 4 to none, two the same (`jazz-tone`, 27 October 2026): not a cut candidate again.
 - The metal family's rhythm part an octave down in power chords (`register.rhythm` 0, `OpenChords`) kept on listening, 5 to 1 twice (`metal-rhythm-low`, 27 and 28 October 2026): not a cut candidate again.
 - A genre's tuning (`tuning`, Djent's drawn from E to an octave down) kept on listening, 6 to none twice (`djent-tuning`, 27 and 28 October 2026): not a cut candidate again.
+- Funk's rhythm guitar open on the clean guitar, its dead notes on the muted one (the muted guitar out of the funk family's rhythm pools) kept on listening, 6 to none (`funk-guitar`, 29 October 2026): not a cut candidate again.
+- A part's other sound on its accents (`articulationModes.accents`, a Funk bass slapped) kept on listening, 5 to none, one unsure on a swelling bass (`funk-slap`, 29 October 2026): not a cut candidate again.
+- The tempo at a phrase's edges (`rubato`, Cinematic piano's) kept on listening, 6 to none (`film-rubato`, 29 October 2026): not a cut candidate again.

@@ -80,7 +80,7 @@ round of 22 October's review (29 October 2026) asks Funk's guitar, its chords op
 muted, against the part on the muted guitar as it was (`funk-guitar`, 0.82), a Funk bass slapping its accents against
 never (`funk-slap`, 0.07, a device of its accents' places, heard from them, its places a section's that slaps its accents
 and not one switched to a slap bass), and Cinematic piano's tempo at a phrase's edges against steady time
-(`film-rubato`, 1.19, every note after a breath moved by it); Jazz's cadenza (#365) waits on the last.
+(`film-rubato`, 1.19, every note after a breath moved by it); answered the same day, each kept, and retired.
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
@@ -112,7 +112,10 @@ and not one switched to a slap bass), and Cinematic piano's tempo at a phrase's 
   darker tone (`jazz-tone`, 4 to none, two the same); and of its eighth round (27 and 28 October 2026), the metal
   family's rhythm part an octave down (`metal-rhythm-low`, 5 to 1 with its chords full, and 5 to 1 again in power
   chords alone) and Djent's guitars and bass tuned down (`djent-tuning`, 6 to none at B, and 6 to none again drawn from
-  E to an octave down).
+  E to an octave down); and of its ninth round (29 October 2026), Funk's rhythm guitar open on the clean guitar, its dead
+  notes muted (`funk-guitar`, 6 to none), a Funk bass slapping its accents (`funk-slap`, 5 to none, one unsure on a
+  song whose bass swelled into its notes, its attack lost, a bass never swelling since) and Cinematic piano's tempo at a
+  phrase's edges (`film-rubato`, 6 to none).
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
@@ -309,7 +312,7 @@ Reviewed against how the idioms are played, in the order to build:
 
 Built on 24 October 2026: Funk's mute (the rhythm part's muted guitar out of the funk family's pools, a clean guitar's
 dead notes on the muted guitar, the bar-muting variants gone, a bass slapping its accents in Funk, Funk rock and Djent,
-Disco's and Djent's dead notes), asked in the ninth round (`funk-guitar`, `funk-slap`), and the tremolo-picked note (#352), heard and kept (`surf-tremolo`). Left, in the order to build:
+Disco's and Djent's dead notes), heard and kept (`funk-guitar` 6 to none, `funk-slap` 5 to none), and the tremolo-picked note (#352), heard and kept (`surf-tremolo`). Left, in the order to build:
 
 Built on 26 October 2026: the rhythm part playing the riff in unison now and then (`doubling.rhythm`, the metal
 family's), a pair of the doubling's on the riff's onsets, its notes played as the riff's line in the riff's register on
@@ -365,7 +368,7 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   it), their free forms the fewer where a cycle fits the length (Blues' 23% from 30%, Dungeon's 44% from 59%,
   `FormFoldReportTest`); the length's chance of a free form the form facet's, leaned by how near the nearest form
   comes and exact at either end (`SongLength.FormChance`).
-- **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, asked as `film-rubato`): an
+- **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, heard and kept as `film-rubato`, 6 to none): an
   `EndingKind` holding the last dominant as a stop while the lead runs alone over it, should the breath be heard to
   work.
 - **Put off:** the game loop (#369), the body replayed from its loop point into the fade as `PlayAt` plays a source:
