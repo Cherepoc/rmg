@@ -1010,7 +1010,28 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   chord snapped through a sorted set (`Realizer.SnapChordToScale`), each made plain, and a state map's search asking a
   state its key in one call (`IState.Key`): 61 GB allocated to 54, 5.5% less CPU (142.7 s against 151.1), the suite
   8m 40s. Left: the state maps' own arrays and states (the most of what is allocated, a fifth of it `IState[]`), and
-  a state read, most of it rendering's twenty reads a note. Next, keeping the fingerprint:
+  a state read, most of it rendering's twenty reads a note. The state maps are 12 of the 54 GB (arrays 6.8, states
+  2.3, timelines of maps 1.6, maps 1.2), two sites the most: a note's state made by merging its own map with the
+  timeline's read at it (`Realizer.NoteStates`: `ReadAt` a new map, `MergeWith` another and a state for each kind in
+  both, some 40% of the arrays), and `With` copying a whole map to set one kind (some 19%). Counted over the 719 songs:
+  of 192 million reads 122 million find no state of the kind; of 16.2 million `With`s 2.3 million set the value the
+  map has, 6.2 million a default it lacks (no copy already), 6.6 million a kind it lacks; of 4.43 million note merges
+  the timeline's map is the note before's in 2.78 million, the note's own map too in 62 thousand. In the order to
+  build, each keeping the fingerprint and timed in pairs:
+  1. **`With` keeping the map where the value is the same**: 2.3 million copies of a map and a state each.
+  2. **A map's kinds as a mask** (a bit of each kind's key, a `long` a map, 8 bytes): a read of a kind whose bit is
+     clear answers its default without a search, some three in four of the 122 million misses at 20 states a map.
+  3. **The timeline's map read once a span** (`ToMappedEventTimeline`): read where its next change comes, and kept for
+     the notes before it, 2.78 million `ReadAt`s and their arrays, maps and states.
+  4. **Two states aggregated without an array** (`AggregateStates`): a pair's value folded as the kind's own function
+     folds it (`(zero + a) + b` for a sum), not through a `T[]` and `IEnumerable`, `double[]` 4.7% of all bytes in part.
+  5. **A note's kinds set together** (`Expression.Apply`'s thirty `With`s, a note's velocity, its effects): one copy of
+     its map for the kinds a stage sets, not one each.
+  Weighed and left: a merge cached by its pair (the same pair 1.4% of the time); a note's state as its own map over the
+  timeline's, merged when read (no array a note, and the notes sharing the timeline's, but every read two searches
+  and an aggregation, and `RealizedNote.State` read as one map everywhere); every read of a render cached by kind
+  (rendering's reads are mostly misses, which the mask answers).
+  Then, keeping the fingerprint:
   1. **A state map made compact**: a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
      `double`, objects for the 28 generic ones, arrays and layers; a `State` made only when asked for, and the
      contributions an explaining trace records kept as now. The building's and the timelines' 48 s and 16 GB its
