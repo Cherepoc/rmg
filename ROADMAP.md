@@ -994,10 +994,10 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   their building (`FromStates`, `MergeWith`, `Aggregate`, a filter) 34.5 s, 61.8 million calls and 9.7 GB, reading a
   value 23.5 s over 192 million, and the timelines' maps 14.1 s and 6.1 GB, some 60 s of 167 once the probe's own
   cost (25 s) is taken out, and 23% of the 69 GB allocated. A read is a binary search comparing kinds by name, names
-  that share long beginnings ("Composition..."). In the order to build, each keeping the fingerprint:
-  1. **A kind found by a number**: every kind its ordinal among the kinds by name, so that a map keeps its order and a
-     read compares integers, not strings. Reads the most of their 23.5 s, maybe; unmeasured until built.
-  2. **A state map made compact**: a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
+  that share long beginnings ("Composition..."). A kind is now found by a number, a hash of its name (`IStateKind.Key`),
+  a map and a timeline map ordering their kinds by it: 3.6% less CPU making the 719 songs (167.5 s against 174, the
+  same songs), the suite 10m 29s. Next, keeping the fingerprint:
+  1. **A state map made compact**: a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
      `double`, objects for the 28 generic ones, arrays and layers; a `State` made only when asked for, and the
      contributions an explaining trace records kept as now. The building's and the timelines' 48 s and 16 GB its
      stake, the notes' 1.80 MB toward their 0.29 without states; the representation is `StateMap`'s alone (`.States`

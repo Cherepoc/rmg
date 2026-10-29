@@ -15,7 +15,8 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
         Duration = duration;
         _stateTimelineDictionary = stateTimelineDictionary;
 
-        StateTimelines = [..stateTimelineDictionary.Values.OrderBy(x => x.StateKind.Name, StringComparer.Ordinal)];
+        // in the order a state map keeps its kinds (IStateKind.Key), so that the states read at a place are a map as they come
+        StateTimelines = [..stateTimelineDictionary.Values.OrderBy(x => x.StateKind.Key)];
     }
 
     public ImmutableArray<IStateTimeline> StateTimelines { get; }

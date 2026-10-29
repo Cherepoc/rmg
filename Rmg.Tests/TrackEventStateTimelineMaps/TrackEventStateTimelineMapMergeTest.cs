@@ -82,7 +82,7 @@ public sealed class TrackEventStateTimelineMapMergeTest
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(trackTimelineMap, CollectionOrdering.Matching))
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(commonStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
+                assert => assert.IsEquivalentTo(commonStateTimelines.OrderBy(t => t.StateKind.Key), CollectionOrdering.Matching));
     }
 
     [Test]
@@ -394,7 +394,7 @@ public sealed class TrackEventStateTimelineMapMergeTest
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(expectedTrackTimelineMap, CollectionOrdering.Matching))
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
+                assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Key), CollectionOrdering.Matching));
     }
 
     /// <summary>A map's common state merged with another, after its own, an order-sensitive kind's values its own first, and trimmed to the map's duration.</summary>

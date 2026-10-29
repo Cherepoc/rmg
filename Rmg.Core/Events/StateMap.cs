@@ -5,8 +5,9 @@ using System.Runtime.InteropServices;
 namespace Rmg.Core.Events;
 
 /// <summary>
-///     States of different kinds, at most one of each and none with its kind's default value, ordered by kind name. The
-///     order lets two maps be merged in one pass and a kind be found by binary search.
+///     States of different kinds, at most one of each and none with its kind's default value, ordered by their kinds'
+///     keys (<see cref="IStateKind.Key" />). The order lets two maps be merged in one pass and a kind be found by binary
+///     search, comparing numbers rather than names.
 /// </summary>
 public sealed class StateMap
 {
@@ -276,13 +277,10 @@ public sealed class StateMap
         };
     }
 
-    /// <summary>
-    ///     Kinds in order of name, which is a kind's identity, compared by ordinal so that the order is the same
-    ///     whatever the culture.
-    /// </summary>
+    /// <summary>Kinds in order of their keys, which are their own, so that the order is the same in every run.</summary>
     private static int CompareKinds(IStateKind first, IStateKind second)
     {
-        return ReferenceEquals(first, second) ? 0 : string.CompareOrdinal(first.Name, second.Name);
+        return ReferenceEquals(first, second) ? 0 : first.Key.CompareTo(second.Key);
     }
 
     /// <summary>Sorts the states by kind, keeping those of the same kind in the order they come in.</summary>

@@ -75,9 +75,9 @@ public sealed class StateTimelineMapTest
     private static readonly StateKind<int> LowerCaseKind = StateKinds.CreateAdditive<int>("StateTimelineMapTest.a");
     private static readonly StateKind<int> UpperCaseKind = StateKinds.CreateAdditive<int>("StateTimelineMapTest.B");
 
-    /// <summary>The timelines in their kinds' names' ordinal order, upper case first whatever the culture, as a map read from them needs.</summary>
+    /// <summary>The timelines in their kinds' keys' order, as a map read from them needs.</summary>
     [Test]
-    public async Task Create_TimelinesAreOrderedByKindName_Ordinally()
+    public async Task Create_TimelinesAreOrderedByTheirKindsKeys()
     {
         var result = StateTimelineMap.Create(
             2,
@@ -87,9 +87,8 @@ public sealed class StateTimelineMapTest
             ]
         );
 
-        var names = result.StateTimelines.Select(x => x.StateKind.Name).ToArray();
-        await Assert.That(names).IsEquivalentTo(names.Order(StringComparer.Ordinal).ToArray(), CollectionOrdering.Matching);
-        await Assert.That(names[0]).IsEqualTo(UpperCaseKind.Name);
+        // as a state map orders its states, so that the states read at a place are a map as they come
+        await Assert.That(result.StateTimelines.Select(x => x.StateKind.Key)).IsEquivalentTo(new[] { LowerCaseKind.Key, UpperCaseKind.Key }.Order(), CollectionOrdering.Matching);
     }
 
     /// <summary>A map's state read at a place, as a note reads it, is its effective state there: before the first change, at and between changes, and at its end.</summary>

@@ -306,13 +306,12 @@ public sealed class StateMapTest
     }
 
     [Test]
-    public async Task FromStates_StatesAreOrderedByKindName_Ordinally()
+    public async Task FromStates_StatesAreOrderedByTheirKindsKeys()
     {
         var result = Map(LowerCaseKind.CreateState(1), UpperCaseKind.CreateState(1));
 
-        // "StateMapTest.B..." before "StateMapTest.a...": ordinal order puts upper case first, whatever the culture
-        await Assert.That(result.Kinds[0]).IsSameReferenceAs(UpperCaseKind);
-        await Assert.That(result.Kinds[1]).IsSameReferenceAs(LowerCaseKind);
+        // whichever comes first, the kind of the lesser key: a number from the name, the same whatever the culture
+        await Assert.That(result.Kinds.Select(x => x.Key)).IsEquivalentTo(new[] { LowerCaseKind.Key, UpperCaseKind.Key }.Order(), CollectionOrdering.Matching);
     }
 
     [Test]

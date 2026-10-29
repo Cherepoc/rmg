@@ -35,8 +35,7 @@ public sealed class StateKind<T> : IStateKind
         bool isShared = false
     )
     {
-        StateKindNames.Register(name);
-
+        Key = StateKindNames.Register(name);
         Name = name;
         Scope = scope;
         IsShared = isShared;
@@ -56,6 +55,8 @@ public sealed class StateKind<T> : IStateKind
     public State<T> DefaultState { get; }
 
     public string Name { get; }
+
+    public long Key { get; }
 
     public StateScope Scope { get; }
 
@@ -178,22 +179,34 @@ public sealed class StateKind<T> : IStateKind
 }
 
 /// <summary>
-///     The names of all state kinds, of whatever value type. A kind's name is its identity, so no two kinds share one.
+///     The names of all state kinds, of whatever value type, and their keys. A kind's name is its identity, so no two
+///     kinds share one, nor a key.
 /// </summary>
 internal static class StateKindNames
 {
-    private static readonly ConcurrentDictionary<string, bool> Names = new();
+    private static readonly ConcurrentDictionary<long, string> Keys = new();
 
-    public static void Register(string name)
+    /// <summary>The kind's key, a hash of its name the same in every run (FNV-1a), which a state map orders its states by.</summary>
+    public static long Register(string name)
     {
-        if (!Names.TryAdd(name, true))
-            throw new ArgumentException($"A state kind named '{name}' already exists.", nameof(name));
+        var hash = 14695981039346656037UL;
+        foreach (var c in name)
+            hash = (hash ^ c) * 1099511628211UL;
+        var key = unchecked((long)hash);
+        if (!Keys.TryAdd(key, name))
+            throw new ArgumentException(Keys[key] == name
+                ? $"A state kind named '{name}' already exists."
+                : $"The state kind '{name}' has the key of '{Keys[key]}'.", nameof(name));
+        return key;
     }
 }
 
 public interface IStateKind
 {
     string Name { get; }
+
+    /// <summary>A number of the kind's own, from its name, by which a state map orders and finds its states (<see cref="StateKindNames.Register" />).</summary>
+    long Key { get; }
 
     StateScope Scope { get; }
 

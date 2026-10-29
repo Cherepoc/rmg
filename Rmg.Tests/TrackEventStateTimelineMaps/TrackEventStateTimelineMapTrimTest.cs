@@ -179,6 +179,6 @@ public sealed class TrackEventStateTimelineMapTrimTest
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(expectedTrackTimelineMap, CollectionOrdering.Matching))
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
+                assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Key), CollectionOrdering.Matching));
     }
 }

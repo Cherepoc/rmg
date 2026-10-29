@@ -125,7 +125,7 @@ public sealed class TrackEventStateTimelineMapShiftTest
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
+                assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Key), CollectionOrdering.Matching));
     }
 
     [Test]
@@ -311,6 +311,6 @@ public sealed class TrackEventStateTimelineMapShiftTest
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(expectedTrackTimelineMap, CollectionOrdering.Matching))
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
-                assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Name), CollectionOrdering.Matching));
+                assert => assert.IsEquivalentTo(expectedCommonStateTimelines.OrderBy(t => t.StateKind.Key), CollectionOrdering.Matching));
     }
 }
