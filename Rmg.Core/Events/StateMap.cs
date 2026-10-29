@@ -186,6 +186,9 @@ public sealed class StateMap
         if (!of.CheckStateIsAggregated(state))
             state = of.AggregateStates([state]);
         var index = IndexOf(kind);
+        // the map as it is where it has the state already, but while a trace explains, as a state set records its parts anew
+        if (index >= 0 && !StateTrace.IsExplaining && _states[index].Equals(state))
+            return this;
         if (state.IsDefault)
         {
             if (index < 0)
