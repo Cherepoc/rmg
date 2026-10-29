@@ -1016,23 +1016,26 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   both, some 40% of the arrays), and `With` copying a whole map to set one kind (some 19%). Counted over the 719 songs:
   of 192 million reads 122 million find no state of the kind; of 16.2 million `With`s 2.3 million set the value the
   map has, 6.2 million a default it lacks (no copy already), 6.6 million a kind it lacks; of 4.43 million note merges
-  the timeline's map is the note before's in 2.78 million, the note's own map too in 62 thousand. In the order to
-  build, each keeping the fingerprint and timed in pairs:
-  `With` keeps the map where the value is the same (2.3 million copies of a map and a state): 1.8% less CPU over six
+  the timeline's map is the note before's in 2.78 million, the note's own map too in 62 thousand. Built since, each
+  keeping the fingerprint and timed in pairs: `With` keeps the map where the value is the same (2.3 million copies of a map and a state): 1.8% less CPU over six
   pairs. The timeline's map is read once a span (`ToMappedEventTimeline`, `StateTimelineMap.GetStateMapAt` giving
   where it next changes): 3.7% less over six pairs, all six, the suite 8m 35s.
-  1. **A note's kinds set together** (`Expression.Apply`'s thirty `With`s, a note's velocity, its effects): one copy of
-     its map for the kinds a stage sets, not one each.
   Weighed and left: a map's kinds as a mask, a read of a kind whose bit is clear answering without a search (built,
   1.3% less CPU over twelve pairs, faster in eight, within their spread: a search costs little since a state gives its
   key itself); states aggregated without an array, a sum or a product folded from its seed as its function folds it
   (built, 0.8% less over six pairs, within their spread: its arrays some 1% of the bytes, the states it makes kept); a
-  merge cached by its pair (the same pair 1.4% of the time); a note's state as its own map over the
+  merge cached by its pair (the same pair 1.4% of the time); a note's kinds set together in `Expression.Apply` (an
+  edit of its map, the kinds set kept in order and merged into the map once): built twice, a list sorted at the end
+  and then an array kept in order, 1.5% and 1% slower over six pairs each, a note setting a few kinds where `With`
+  copies its map in one pass and keeps it where unchanged, the edit's own array and object costing as much; a note's
+  state as its own map over the
   timeline's, merged when read (no array a note, and the notes sharing the timeline's, but every read two searches
   and an aggregation, and `RealizedNote.State` read as one map everywhere); every read of a render cached by kind
-  (rendering's reads are mostly misses, which the mask answers).
-  Then, keeping the fingerprint:
-  1. **A state map made compact**: a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
+  (rendering's reads are mostly misses, which a search answers cheaply).
+  Then, keeping the fingerprint, if a profile still asks for it:
+  1. **A state map made compact** (its stake less than reckoned here: a map's states are shared references, which a
+     slot of a value would cost as much as, the states come to `FromStates` made by their callers, and a merge's cost
+     is its aggregation, which a compact map does too; the notes' memory about what sharing equal states gives): a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
      `double`, objects for the 28 generic ones, arrays and layers; a `State` made only when asked for, and the
      contributions an explaining trace records kept as now. The building's and the timelines' 48 s and 16 GB its
      stake, the notes' 1.80 MB toward their 0.29 without states; the representation is `StateMap`'s alone (`.States`
