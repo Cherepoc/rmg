@@ -124,7 +124,7 @@ internal static class TestCorpus
                 // times slower to generate: a test that explains a state traces a song of its own
                 using var trace = StateTrace.Start(explains: false);
                 var song = SongGenerator.GenerateSong(seed, overrides, CancellationToken.None);
-                return new CorpusSong(corpusSeed, song, Render.RenderSong(song), [..trace.Entries]);
+                return new CorpusSong(corpusSeed, song, [..trace.Entries]);
             }
         );
     }
@@ -141,8 +141,11 @@ internal static class SongRoles
 }
 
 /// <summary>A song of the corpus, its rendering, and what its generation's trace recorded.</summary>
-internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, ImmutableArray<StateTraceEntry> Trace)
+internal sealed record CorpusSong(int Seed, Song Song, ImmutableArray<StateTraceEntry> Trace)
 {
+    /// <summary>Its rendering, made when first read, as many tests read the song's state alone.</summary>
+    public RenderedSong Rendered => field ??= Render.RenderSong(Song);
+
     public SongMap Map => Song.Map!;
 
     /// <summary>

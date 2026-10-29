@@ -969,13 +969,11 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   searched by every candidate's name split anew (`Genre.AtMood` 41 s of 130), are looked up, the suite 13m 50s after
   (28% less CPU making 719 songs, the songs the same). The allocation after it is no cost to chase: a timeline profile
   of the 719 songs (69 GB allocated) found the collector 5.7 s and the songs' threads waiting on it 8.9 s of 230 s
-  running, about 4%, and no place allocating more than 4% of the bytes. In the order to build:
-  1. **A preset's songs kept as the plain corpus is** (`TestCorpus.Get(seed, preset)`, cached by the preset's name,
-     never by an overrides' hash, which a genre without value equality could collide): the 15 most repeated overrides at
-     seeds under 64 hold 928 songs, about 3.1 GB, and save 22% of the songs' time, the 7 most 1.5 GB and 14%. Which
-     of them are plain presets is checked first; a cache of any song, least recently used, saved 13% at 2 GB and 21%
-     at 6.6 GB, the repeats too far apart in the run.
-  2. **The render made when read** (`CorpusSong.Rendered` lazy): 5% of a song's time, paid by every song.
+  running, about 4%, and no place allocating more than 4% of the bytes. A corpus song's render is made when first read
+  (13m 3s, 8,881 CPU-seconds against 9,394). A preset's songs kept do not fit: the suite peaks at 6.7 GB of its 8 without them, and of 10,075 preset
+  songs asked through `TestCorpus`, 7,691 repeats (3,870 thread-seconds), kept at seeds under 64 ran out of memory,
+  under 16 (784 songs) too, and held weakly saved 3.5%, the collector letting them go before they were asked again.
+  The suite's own peak is what to bring down before any cache: what its tests hold at once.
   Let go of: fewer songs per test (the accuracy asked to keep), stages skipped for tests that do not read them (the
   songs then not the songs), scheduling (the cores already busy), the trace off (nothing to save), a cache on disk
   across runs (every change to `Rmg.Core` invalidates it, and a song's serialisation is a project of its own), and tests
