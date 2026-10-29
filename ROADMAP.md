@@ -986,6 +986,21 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   songs then not the songs), scheduling (the cores already busy), the trace off (nothing to save), a cache on disk
   across runs (every change to `Rmg.Core` invalidates it, and a song's serialisation is a project of its own), and tests
   merged to share a pass (a failure no longer names its rule).
+- **Smaller songs** (P2, measured 29 October 2026): a song with its trace holds 2.89 MB, its notes 1.80, the state
+  timeline from before the notes 0.71, its trace 0.58, its map 0.05. A song's 3,048 notes each keep a state map of some
+  20 states, 59,787 states in all, 20,429 objects of 2,116 values, the maps 3,040 objects of 1,442 values; states compare
+  exactly. The notes held 1.06 MB with their equal states one object, 0.72 with their equal maps one too, 0.29 with no
+  states. In the order to build:
+  1. **Equal states and maps one object** in a corpus song (`TestCorpus`), its notes', its timeline's and its trace's,
+     the songs the same objects' worth: some 1.1 MB a song from the notes, the timeline and the trace unmeasured. Test
+     code alone; the pass's CPU measured before it is kept. The plain corpus then about 1.9 GB, not 2.9, and more of a
+     preset's songs kept.
+  2. **Moved into `Rmg.Core`**, if the pass is cheap: a song made shares its states as it ends, the app's songs too.
+  Weighed and left: the states no stage or test reads after the notes dropped from them (up to 1.5 MB, but every kind
+  audited, and a note's state is the song's record of what decided it, `CLAUDE.md`'s state deciding); a state map made
+  compact, slots of unboxed values and no object a state (the most, and the generation's allocation with it, but the
+  event system rewritten, for a collector measured at 4%: overengineering); states shared as they are made, in a table
+  of every song's (the allocation cut too, but a hash on the hottest path and a table that grows).
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
   cache them; a corpus song keeps about 3 MB, every note's state the most of it, and its making allocates 47 MB
   more for a moment.
