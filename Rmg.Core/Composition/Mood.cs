@@ -45,7 +45,7 @@ public readonly record struct Mood(double Darkness, double Intensity)
     // built when first asked, as the choices it names take the songs' span of a mood from here
     public static ImmutableArray<(GenreChoice Choice, Func<string, (double Darkness, double Intensity)> Lean, bool AsSongs)> Leans => field.IsDefault ? field =
     [
-        (GenreChoices.Scale, name => (Scales.All.Single(x => GenreChoices.Name(x.Name) == name).Darkness, 0), true),
+        (GenreChoices.Scale, ByName(Scales.All, x => x.Name, x => (x.Darkness, 0)), true),
         (GenreChoices.Kit, name => (0, name switch { "power" => 1, "room" => -0.3, "jazz" => -0.7, "brush" => -1, _ => 0 }), false),
         (GenreChoices.FeelChances, name => (0, name switch { "doubleTime" => 1, "halfTime" => -0.5, _ => 0 }), true),
         (GenreChoices.Riff, name => (0, name switch { "chugs" => 1, "powerChords" => 0.5, _ => 0 }), true),
@@ -56,18 +56,24 @@ public readonly record struct Mood(double Darkness, double Intensity)
         (GenreChoices.Fills, name => (0, 1), true),
         // the chord shapes by their darkness, a Phrygian or a diminished chord the darker and a Lydian or a six-nine the
         // brighter, where a genre names its pool, as the songs draw theirs by levels first
-        (GenreChoices.ChordShape, name => (ChordShapes.All.Single(x => GenreChoices.Name(x.Name) == name).Darkness, 0), false),
+        (GenreChoices.ChordShape, ByName(ChordShapes.All, x => x.Name, x => (x.Darkness, 0)), false),
         // a chord's own mode by its darkness, as the scales are, where a genre names its pool
-        (GenreChoices.OwnMode, name => (ChordScales.OwnModes.Single(x => GenreChoices.Name(x.Mode.Name) == name).Mode.Darkness, 0), false),
+        (GenreChoices.OwnMode, ByName(ChordScales.OwnModes, x => x.Mode.Name, x => (x.Mode.Darkness, 0)), false),
         // the drums' energy, the more the fiercer, where a genre names it: rolls on the hi-hat, ghost notes, builds to a drop
         (GenreChoices.HatRolls, _ => (0, 1), false),
         (GenreChoices.Ghosts, _ => (0, 1), false),
         (GenreChoices.Drop, name => (0, name == "lifts" ? 1 : 0), false),
         // every part's instruments, a driven one the fiercer
         ..GenreChoices.InstrumentPools.Select(x => (GenreChoices.Instruments[x.Role],
-            (Func<string, (double, double)>)(name => (0, InstrumentTraits.Has(x.Pool.Everything.First(i => GenreChoices.Name(i.Name) == name).Program, InstrumentTrait.Driven) ? 1 : 0)),
-            true))
+            ByName(x.Pool.Everything, i => i.Name, i => (0, InstrumentTraits.Has(i.Program, InstrumentTrait.Driven) ? 1 : 0)), true))
     ] : field;
+
+    // an option's lean by its name, as the choice names it (GenreChoices.Name), the options named once
+    private static Func<string, (double Darkness, double Intensity)> ByName<T>(IEnumerable<T> options, Func<T, string> name, Func<T, (double, double)> lean)
+    {
+        var leans = options.ToDictionary(x => GenreChoices.Name(name(x)), lean);
+        return x => leans[x];
+    }
 
     /// <summary>How far this mood leans an option of a lean, its darkness's and its intensity's together, from -1 to 1 at its ends.</summary>
     public double Lean((double Darkness, double Intensity) lean) => lean.Darkness * Darkness + lean.Intensity * Intensity;

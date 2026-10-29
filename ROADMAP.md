@@ -965,22 +965,19 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   `TestCorpus` (and more through `GenerateSong` directly), a song 0.2-0.3 CPU-seconds, its render 5% of that and its
   trace nothing measurable. A song allocates 250 MB, 202 MB of it and 137 of its 220 ms in its decisions, sections and
   assembly before the first stage (`AllocationReportTest`). A third of the songs' time went to songs made again, the same
-  seed with the same overrides (a preset's seed 0 up to 29 times), most of it across classes. In the order to build,
-  each keeping the fingerprint where it is a refactor:
-  1. **The mood's leans looked up, not searched**: `Genre.AtMood` took 41 s of the 130 s of making 719 songs in a
-     sampling profile, half of it `GenreChoices.Name` splitting every candidate's name inside `Mood.Leans`' lookups
-     (`Single`/`First` over a scale's, a shape's, a mode's or an instrument pool's names on every call), the rest
-     `ImmutableDictionary` rebuilt per choice. A name to its lean as a dictionary built once, and the weights gathered
-     before they are made immutable. The app's songs as much faster as the tests'.
-  2. **The decisions' and sections' allocation**, then: 202 MB a song, a timeline profile first to name what (the
+  seed with the same overrides (a preset's seed 0 up to 29 times), most of it across classes. The mood's leans, once
+  searched by every candidate's name split anew (`Genre.AtMood` 41 s of 130), are looked up, the suite 13m 50s after
+  (28% less CPU making 719 songs, the songs the same). In the order to build, each keeping the fingerprint where it is
+  a refactor:
+  1. **The decisions' and sections' allocation**, then: 202 MB a song, a timeline profile first to name what (the
      sampling profile spent much of its time outside the songs' threads, the collector's likeliest). Server GC is
      already the best setting (23 s against 67 s on workstation GC), a larger young generation slower (35-37 s).
-  3. **A preset's songs kept as the plain corpus is** (`TestCorpus.Get(seed, preset)`, cached by the preset's name,
+  2. **A preset's songs kept as the plain corpus is** (`TestCorpus.Get(seed, preset)`, cached by the preset's name,
      never by an overrides' hash, which a genre without value equality could collide): the 15 most repeated overrides at
      seeds under 64 hold 928 songs, about 3.1 GB, and save 22% of the songs' time, the 7 most 1.5 GB and 14%. Which
      of them are plain presets is checked first; a cache of any song, least recently used, saved 13% at 2 GB and 21%
      at 6.6 GB, the repeats too far apart in the run.
-  4. **The render made when read** (`CorpusSong.Rendered` lazy): 5% of a song's time, paid by every song.
+  3. **The render made when read** (`CorpusSong.Rendered` lazy): 5% of a song's time, paid by every song.
   Let go of: fewer songs per test (the accuracy asked to keep), stages skipped for tests that do not read them (the
   songs then not the songs), scheduling (the cores already busy), the trace off (nothing to save), a cache on disk
   across runs (every change to `Rmg.Core` invalidates it, and a song's serialisation is a project of its own), and tests
