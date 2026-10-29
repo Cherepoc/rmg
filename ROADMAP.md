@@ -868,6 +868,10 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   the tempo easing a little over the last bar before a louder section now and then, a ritardando back to tempo on its
   downbeat, where a riff dives into it. The tempo is decided before the notes (`SectionTempo`) and the dive after them
   (`Expression`), so the dive's section would be decided with the tempo.
+- **The funk family's swell** (P3, the owner's question of 29 October 2026): Funk, Funk rock, Jazz funk and Disco name
+  no `effects`, so a held electric piano's or clavinet's chord swells in where the song's parts do (the songs' own
+  swell 0-35-100; Soul's 20-30-50), its attack lost as the bass's was (`funk-slap`, a bass never swelling since). Their own effects
+  pool, the swell low, a pad's strings swelling still (`PadSwellChance`), each pool's other effects named whole.
 - **The playing following the articulation** (P3; palm-muted chugs done): octaves popped in slap, short notes muted,
   without which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`Pocket`).
@@ -956,6 +960,31 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   them alone, when the songs are redrawn for another reason, as it changes every song's draws (#100).
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
+- **A faster suite** (P1, measured 29 October 2026): 1829 tests in 16m 43s on 12 cores, 11.3 of them busy throughout
+  (sampled every 15 s, no tail), so the work, not the scheduling, is the cost. The tests made 33,972 songs through
+  `TestCorpus` (and more through `GenerateSong` directly), a song 0.2-0.3 CPU-seconds, its render 5% of that and its
+  trace nothing measurable. A song allocates 250 MB, 202 MB of it and 137 of its 220 ms in its decisions, sections and
+  assembly before the first stage (`AllocationReportTest`). A third of the songs' time went to songs made again, the same
+  seed with the same overrides (a preset's seed 0 up to 29 times), most of it across classes. In the order to build,
+  each keeping the fingerprint where it is a refactor:
+  1. **The mood's leans looked up, not searched**: `Genre.AtMood` took 41 s of the 130 s of making 719 songs in a
+     sampling profile, half of it `GenreChoices.Name` splitting every candidate's name inside `Mood.Leans`' lookups
+     (`Single`/`First` over a scale's, a shape's, a mode's or an instrument pool's names on every call), the rest
+     `ImmutableDictionary` rebuilt per choice. A name to its lean as a dictionary built once, and the weights gathered
+     before they are made immutable. The app's songs as much faster as the tests'.
+  2. **The decisions' and sections' allocation**, then: 202 MB a song, a timeline profile first to name what (the
+     sampling profile spent much of its time outside the songs' threads, the collector's likeliest). Server GC is
+     already the best setting (23 s against 67 s on workstation GC), a larger young generation slower (35-37 s).
+  3. **A preset's songs kept as the plain corpus is** (`TestCorpus.Get(seed, preset)`, cached by the preset's name,
+     never by an overrides' hash, which a genre without value equality could collide): the 15 most repeated overrides at
+     seeds under 64 hold 928 songs, about 3.1 GB, and save 22% of the songs' time, the 7 most 1.5 GB and 14%. Which
+     of them are plain presets is checked first; a cache of any song, least recently used, saved 13% at 2 GB and 21%
+     at 6.6 GB, the repeats too far apart in the run.
+  4. **The render made when read** (`CorpusSong.Rendered` lazy): 5% of a song's time, paid by every song.
+  Let go of: fewer songs per test (the accuracy asked to keep), stages skipped for tests that do not read them (the
+  songs then not the songs), scheduling (the cores already busy), the trace off (nothing to save), a cache on disk
+  across runs (every change to `Rmg.Core` invalidates it, and a song's serialisation is a project of its own), and tests
+  merged to share a pass (a failure no longer names its rule).
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
   cache them; a corpus song keeps about 3 MB, every note's state the most of it, and its making allocates 47 MB
   more for a moment.
