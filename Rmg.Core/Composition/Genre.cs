@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Collections.Immutable;
 using Rmg.Core.Probabilities;
 
@@ -77,8 +78,12 @@ public sealed record GenreChoice(string Name, string Label, GenreChoiceKind Kind
     public string Description => GenreChoiceDescriptions.Of(Name, Label);
 
     /// <summary>The option of the name; one the choice does not have is a mistake.</summary>
-    public GenreOption this[string name] => Options.FirstOrDefault(x => x.Name == name)
+    public GenreOption this[string name] => OptionsByName.GetValue(this, static x => x.Options.DistinctBy(o => o.Name).ToFrozenDictionary(o => o.Name)).GetValueOrDefault(name)
                                             ?? throw new ArgumentOutOfRangeException(nameof(name), name, $"The choice {Name} has no option {name}.");
+
+    // every choice's options by their names, the first of a name, made when first asked, as a pool reads its options by
+    // name on every draw; kept beside the choice rather than in it, which would make it unequal to an equal one
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<GenreChoice, FrozenDictionary<string, GenreOption>> OptionsByName = new();
 }
 
 /// <summary>

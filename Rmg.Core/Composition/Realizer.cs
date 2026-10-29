@@ -517,20 +517,29 @@ internal static class Realizer
         double Distance(int step, double target) =>
             Math.Abs(GetScalePitch(scaleOffsets, rootIndex + step) - rootPitch - target);
 
-        var steps = new SortedSet<int>();
-        foreach (var target in targets.Order())
+        // a chord's few notes, so a list looked through rather than a sorted set, and put in order at the end
+        var ordered = targets.ToArray();
+        Array.Sort(ordered);
+        var steps = new List<int>(ordered.Length);
+        foreach (var target in ordered)
         {
             var nearest = FindNearestStep(scaleOffsets, rootIndex, rootPitch, target);
-            if (steps.Add(nearest))
+            if (!steps.Contains(nearest))
+            {
+                steps.Add(nearest);
                 continue;
+            }
 
             var (closer, further) = Distance(nearest - 1, target) <= Distance(nearest + 1, target)
                 ? (nearest - 1, nearest + 1)
                 : (nearest + 1, nearest - 1);
-            if (!steps.Add(closer))
+            if (!steps.Contains(closer))
+                steps.Add(closer);
+            else if (!steps.Contains(further))
                 steps.Add(further);
         }
 
+        steps.Sort();
         return [..steps];
     }
 

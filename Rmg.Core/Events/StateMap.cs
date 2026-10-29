@@ -231,7 +231,7 @@ public sealed class StateMap
         int i = 0, j = 0;
         while (i < first.Length && j < second.Length)
         {
-            var comparison = CompareKinds(first[i].Kind, second[j].Kind);
+            var comparison = first[i].Key.CompareTo(second[j].Key);
             if (comparison < 0)
             {
                 result[count++] = first[i++];
@@ -342,12 +342,13 @@ public sealed class StateMap
     // the kind's index, or the bitwise complement of where it would go
     private int IndexOf(IStateKind kind)
     {
+        var key = kind.Key;
         var low = 0;
         var high = _states.Length - 1;
         while (low <= high)
         {
             var middle = (low + high) / 2;
-            var comparison = CompareKinds(_states[middle].Kind, kind);
+            var comparison = _states[middle].Key.CompareTo(key);
             if (comparison == 0)
                 return middle;
             if (comparison < 0)

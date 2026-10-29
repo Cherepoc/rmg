@@ -25,6 +25,8 @@ public sealed class State<T> : IState, IEquatable<State<T>>
 
     public StateKind<T> Kind { get; }
 
+    public long Key => Kind.Key;
+
     public T Value { get; }
 
     public bool IsDefault => Kind.CheckValueIsDefault(Value);
@@ -87,6 +89,9 @@ public static class State
 public interface IState
 {
     public IStateKind Kind { get; }
+
+    /// <summary>Its kind's key (<see cref="IStateKind.Key" />), asked of the state itself, as a map's search asks it of every state it passes.</summary>
+    public long Key { get; }
 
     public object Value { get; }
 

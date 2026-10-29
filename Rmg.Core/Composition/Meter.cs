@@ -140,7 +140,17 @@ public sealed record Meter(ImmutableArray<int> Groups)
     public const double ReferenceBar = 4;
 
     /// <summary>How many 16ths a bar has.</summary>
-    public int Sixteenths => Groups.Sum();
+    public int Sixteenths
+    {
+        get
+        {
+            // summed by hand, as a bar's length is asked for at every note and the sum's enumerator is an object
+            var sum = 0;
+            foreach (var group in Groups)
+                sum += group;
+            return sum;
+        }
+    }
 
     /// <summary>How long a bar is, in beats.</summary>
     public double BarDuration => Sixteenths / 4.0;

@@ -119,12 +119,7 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
 
         var duration = timelineArray.Max(x => x.Duration);
 
-        var positions = timelineArray
-            .SelectMany(x => x.Positions)
-            .Where(x => x < duration)
-            .Distinct()
-            .Order()
-            .ToArray();
+        var positions = PositionsOf(timelineArray, duration);
 
         var items = new List<TimelineItem<T>>(positions.Length);
         var previousValue = stateKind.DefaultValue;
@@ -156,6 +151,26 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
             null,
             StateTrace.IsExplaining ? [..timelineArray.SelectMany(x => x.Layer is null && !x._sources.IsEmpty ? x._sources : [x])] : []
         );
+    }
+
+    /// <summary>Every timeline's positions before the duration, in order, each once.</summary>
+    private static double[] PositionsOf(StateTimeline<T>[] timelines, double duration)
+    {
+        var count = 0;
+        foreach (var timeline in timelines)
+            count += timeline.Positions.Length;
+        var positions = new double[count];
+        count = 0;
+        foreach (var timeline in timelines)
+        foreach (var position in timeline.Positions)
+            if (position < duration)
+                positions[count++] = position;
+        Array.Sort(positions, 0, count);
+        var distinct = 0;
+        for (var i = 0; i < count; i++)
+            if (distinct == 0 || positions[i] != positions[distinct - 1])
+                positions[distinct++] = positions[i];
+        return positions[..distinct];
     }
 
     public double Duration { get; }

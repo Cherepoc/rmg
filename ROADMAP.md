@@ -1001,10 +1001,16 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   one does: it is one pass now, 7% less CPU (153 s against 165), the suite 9m 43s. A genre choice's name is made once
   (`GenreChoices.Name`, its separators an array built on every call 4.3% of the running samples): 2.7% less over six
   pairs, the suite 9m 23s. Tried and let go: timelines put one after another merged by reading the one a position falls
-  in (`StateTimeline.Merge`), no faster, `Unroll`'s share being the bars it generates as it reads them. Left in the
-  profile: the finalizer thread's 14% (the shared array pools trimmed after every full collection, a thread of its own),
-  copies and allocation some 16%, a state read (`GetStateValue`) 5.5%, most of it rendering. Next, keeping the
-  fingerprint:
+  in (`StateTimeline.Merge`), no faster, `Unroll`'s share being the bars it generates as it reads them. The finalizer
+  thread the profile put at 14% used 0.05 CPU-seconds by the threads' own counts (`/proc`), the sampler's error; the
+  collector's threads used a fifth of the CPU (24.7 s of 122 at the run's 12th second), not the 4% the songs' threads
+  waited on it, so allocation is worth its while. Allocation samples by site, then: a merge's positions gathered
+  through a hash set (`StateTimeline.Merge`), a bar's length summed through an enumerator object (`Meter.Sixteenths`),
+  an option looked up by a closure over the options (`GenreChoice`'s indexer, now a table beside the choice), and a
+  chord snapped through a sorted set (`Realizer.SnapChordToScale`), each made plain, and a state map's search asking a
+  state its key in one call (`IState.Key`): 61 GB allocated to 54, 5.5% less CPU (142.7 s against 151.1), the suite
+  8m 40s. Left: the state maps' own arrays and states (the most of what is allocated, a fifth of it `IState[]`), and
+  a state read, most of it rendering's twenty reads a note. Next, keeping the fingerprint:
   1. **A state map made compact**: a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
      `double`, objects for the 28 generic ones, arrays and layers; a `State` made only when asked for, and the
      contributions an explaining trace records kept as now. The building's and the timelines' 48 s and 16 GB its
