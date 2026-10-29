@@ -973,7 +973,11 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   (13m 3s, 8,881 CPU-seconds against 9,394). A preset's songs kept do not fit: the suite peaks at 6.7 GB of its 8 without them, and of 10,075 preset
   songs asked through `TestCorpus`, 7,691 repeats (3,870 thread-seconds), kept at seeds under 64 ran out of memory,
   under 16 (784 songs) too, and held weakly saved 3.5%, the collector letting them go before they were asked again.
-  The suite's own peak is what to bring down before any cache: what its tests hold at once.
+  Nor did a cache of the first 300 asked (simulated a third of their repeats' time) with the heap let to 85% of the 8 GB,
+  not the runtime's 75%: 3% less CPU but 13m 30s, the heap peaking at 7.45 GB and the collector's pauses taking back
+  what the songs saved (and a preset changed by `Without`, its id the same, served the preset's songs till fixed). The
+  suite's own peak is what to bring down before any cache: what its tests hold at once, the plain corpus kept to its
+  1024th seed (`TestCorpus.Measure(1024)`) the likeliest, some 2.5 GB.
   Let go of: fewer songs per test (the accuracy asked to keep), stages skipped for tests that do not read them (the
   songs then not the songs), scheduling (the cores already busy), the trace off (nothing to save), a cache on disk
   across runs (every change to `Rmg.Core` invalidates it, and a song's serialisation is a project of its own), and tests
