@@ -942,10 +942,18 @@ public static class GenreChoices
     ///     A name as a genre gives it: in camel case, its words run together, "harmonicMinor", "electricBassFinger",
     ///     "counterMelody".
     /// </summary>
-    public static string Name(string text)
+    public static string Name(string text) => Names.Of.GetOrAdd(text, static x =>
     {
-        var words = text.Split([' ', '-', '(', ')', '.', '/'], StringSplitOptions.RemoveEmptyEntries);
+        var words = x.Split(Names.Separators, StringSplitOptions.RemoveEmptyEntries);
         return string.Concat(words.Select((word, i) => (i == 0 ? char.ToLowerInvariant(word[0]) : char.ToUpperInvariant(word[0])) + word[1..]));
+    });
+
+    // every text's name, made once, as a pool reads its options' names on every draw; a class of its own, as the choices'
+    // own initialisers above ask for names before the fields after them are made
+    private static class Names
+    {
+        public static readonly char[] Separators = [' ', '-', '(', ')', '.', '/'];
+        public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> Of = new();
     }
 
     /// <summary>The name of a drum setup's option.</summary>

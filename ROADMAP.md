@@ -998,7 +998,13 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   a map and a timeline map ordering their kinds by it: 3.6% less CPU making the 719 songs (167.5 s against 174, the
   same songs), the suite 10m 29s. A profile of the running samples alone (dotnet-trace's thread time, the threads
   parked for the collector or the sampler left out) then put `StateMap.With` at 7.7%, three passes and a closure where
-  one does: it is one pass now, 7% less CPU (153 s against 165), the suite 9m 43s. Next, keeping the fingerprint:
+  one does: it is one pass now, 7% less CPU (153 s against 165), the suite 9m 43s. A genre choice's name is made once
+  (`GenreChoices.Name`, its separators an array built on every call 4.3% of the running samples): 2.7% less over six
+  pairs, the suite 9m 23s. Tried and let go: timelines put one after another merged by reading the one a position falls
+  in (`StateTimeline.Merge`), no faster, `Unroll`'s share being the bars it generates as it reads them. Left in the
+  profile: the finalizer thread's 14% (the shared array pools trimmed after every full collection, a thread of its own),
+  copies and allocation some 16%, a state read (`GetStateValue`) 5.5%, most of it rendering. Next, keeping the
+  fingerprint:
   1. **A state map made compact**: a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
      `double`, objects for the 28 generic ones, arrays and layers; a `State` made only when asked for, and the
      contributions an explaining trace records kept as now. The building's and the timelines' 48 s and 16 GB its
