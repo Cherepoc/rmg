@@ -1021,13 +1021,13 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   `With` keeps the map where the value is the same (2.3 million copies of a map and a state): 1.8% less CPU over six
   pairs. The timeline's map is read once a span (`ToMappedEventTimeline`, `StateTimelineMap.GetStateMapAt` giving
   where it next changes): 3.7% less over six pairs, all six, the suite 8m 35s.
-  1. **Two states aggregated without an array** (`AggregateStates`): a pair's value folded as the kind's own function
-     folds it (`(zero + a) + b` for a sum), not through a `T[]` and `IEnumerable`, `double[]` 4.7% of all bytes in part.
-  2. **A note's kinds set together** (`Expression.Apply`'s thirty `With`s, a note's velocity, its effects): one copy of
+  1. **A note's kinds set together** (`Expression.Apply`'s thirty `With`s, a note's velocity, its effects): one copy of
      its map for the kinds a stage sets, not one each.
   Weighed and left: a map's kinds as a mask, a read of a kind whose bit is clear answering without a search (built,
   1.3% less CPU over twelve pairs, faster in eight, within their spread: a search costs little since a state gives its
-  key itself); a merge cached by its pair (the same pair 1.4% of the time); a note's state as its own map over the
+  key itself); states aggregated without an array, a sum or a product folded from its seed as its function folds it
+  (built, 0.8% less over six pairs, within their spread: its arrays some 1% of the bytes, the states it makes kept); a
+  merge cached by its pair (the same pair 1.4% of the time); a note's state as its own map over the
   timeline's, merged when read (no array a note, and the notes sharing the timeline's, but every read two searches
   and an aggregation, and `RealizedNote.State` read as one map everywhere); every read of a render cached by kind
   (rendering's reads are mostly misses, which the mask answers).
