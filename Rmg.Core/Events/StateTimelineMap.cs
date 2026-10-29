@@ -123,6 +123,25 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
         return ReadAt(position);
     }
 
+    /// <summary>
+    ///     The state at a position, as <see cref="GetStateMapAt(double)" /> has it, and where it next changes: the first of
+    ///     its timelines' positions after it, or the map's end, until which a later place reads the same.
+    /// </summary>
+    internal StateMap GetStateMapAt(double position, out double until)
+    {
+        until = position >= Duration ? double.PositiveInfinity : Duration;
+        foreach (var timeline in StateTimelines)
+        {
+            var positions = timeline.Positions;
+            var next = positions.BinarySearch(position);
+            next = next >= 0 ? next + 1 : ~next;
+            if (next < positions.Length && positions[next] < until)
+                until = positions[next];
+        }
+
+        return GetStateMapAt(position);
+    }
+
     /// <summary>The state at a position, read from every timeline there.</summary>
     private StateMap ReadAt(double position)
     {

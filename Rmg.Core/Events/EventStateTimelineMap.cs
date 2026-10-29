@@ -98,10 +98,15 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
             return Events.EventTimeline.Create<TDest>(Duration);
 
         var newEventItems = new TimelineItem<TDest>[EventTimeline.Count];
+        // the state read once a span, the events in order, until it next changes; while a trace explains, at every event,
+        // as it records each layer's part at the event's own place
+        StateMap? effectiveState = null;
+        var until = double.NegativeInfinity;
         for (var i = 0; i < EventTimeline.Count; i++)
         {
             var item = EventTimeline[i];
-            var effectiveState = StateTimelineMap.GetStateMapAt(item.Position);
+            if (effectiveState is null || item.Position >= until || StateTrace.IsExplaining)
+                effectiveState = StateTimelineMap.GetStateMapAt(item.Position, out until);
             var newValue = map(item.Value, effectiveState);
             newEventItems[i] = new TimelineItem<TDest>(item.Position, newValue);
         }

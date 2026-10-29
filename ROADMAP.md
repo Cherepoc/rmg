@@ -1019,12 +1019,11 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   the timeline's map is the note before's in 2.78 million, the note's own map too in 62 thousand. In the order to
   build, each keeping the fingerprint and timed in pairs:
   `With` keeps the map where the value is the same (2.3 million copies of a map and a state): 1.8% less CPU over six
-  pairs.
-  1. **The timeline's map read once a span** (`ToMappedEventTimeline`): read where its next change comes, and kept for
-     the notes before it, 2.78 million `ReadAt`s and their arrays, maps and states.
-  2. **Two states aggregated without an array** (`AggregateStates`): a pair's value folded as the kind's own function
+  pairs. The timeline's map is read once a span (`ToMappedEventTimeline`, `StateTimelineMap.GetStateMapAt` giving
+  where it next changes): 3.7% less over six pairs, all six, the suite 8m 35s.
+  1. **Two states aggregated without an array** (`AggregateStates`): a pair's value folded as the kind's own function
      folds it (`(zero + a) + b` for a sum), not through a `T[]` and `IEnumerable`, `double[]` 4.7% of all bytes in part.
-  3. **A note's kinds set together** (`Expression.Apply`'s thirty `With`s, a note's velocity, its effects): one copy of
+  2. **A note's kinds set together** (`Expression.Apply`'s thirty `With`s, a note's velocity, its effects): one copy of
      its map for the kinds a stage sets, not one each.
   Weighed and left: a map's kinds as a mask, a read of a kind whose bit is clear answering without a search (built,
   1.3% less CPU over twelve pairs, faster in eight, within their spread: a search costs little since a state gives its
