@@ -1020,15 +1020,15 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   build, each keeping the fingerprint and timed in pairs:
   `With` keeps the map where the value is the same (2.3 million copies of a map and a state): 1.8% less CPU over six
   pairs.
-  1. **A map's kinds as a mask** (a bit of each kind's key, a `long` a map, 8 bytes): a read of a kind whose bit is
-     clear answers its default without a search, some three in four of the 122 million misses at 20 states a map.
-  2. **The timeline's map read once a span** (`ToMappedEventTimeline`): read where its next change comes, and kept for
+  1. **The timeline's map read once a span** (`ToMappedEventTimeline`): read where its next change comes, and kept for
      the notes before it, 2.78 million `ReadAt`s and their arrays, maps and states.
-  3. **Two states aggregated without an array** (`AggregateStates`): a pair's value folded as the kind's own function
+  2. **Two states aggregated without an array** (`AggregateStates`): a pair's value folded as the kind's own function
      folds it (`(zero + a) + b` for a sum), not through a `T[]` and `IEnumerable`, `double[]` 4.7% of all bytes in part.
-  4. **A note's kinds set together** (`Expression.Apply`'s thirty `With`s, a note's velocity, its effects): one copy of
+  3. **A note's kinds set together** (`Expression.Apply`'s thirty `With`s, a note's velocity, its effects): one copy of
      its map for the kinds a stage sets, not one each.
-  Weighed and left: a merge cached by its pair (the same pair 1.4% of the time); a note's state as its own map over the
+  Weighed and left: a map's kinds as a mask, a read of a kind whose bit is clear answering without a search (built,
+  1.3% less CPU over twelve pairs, faster in eight, within their spread: a search costs little since a state gives its
+  key itself); a merge cached by its pair (the same pair 1.4% of the time); a note's state as its own map over the
   timeline's, merged when read (no array a note, and the notes sharing the timeline's, but every read two searches
   and an aggregation, and `RealizedNote.State` read as one map everywhere); every read of a render cached by kind
   (rendering's reads are mostly misses, which the mask answers).
