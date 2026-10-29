@@ -979,8 +979,9 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   suite holds 6.0-6.6 GB from its fourth minute to its end, a plateau, half of it the plain corpus kept to its 1024th
   seed (`TestCorpus.Measure(1024)`): 2.9 GB, 2.85 MB a song, 3.2 GB rendered. That is the better cache already, its
   songs past 256 asked by 26 tests (some 11 times a song, a preset's 3), and letting them go would make some 12,800
-  songs again. A preset's songs kept want either smaller songs (every note's state, the most of a song) or more than
-  8 GB for the suite.
+  songs again. With the suite given 16 GB, the first 800 of a preset's songs asked are kept (`TestCorpus.Get`): 10m 53s
+  against 12m 41s at 16 GB without them, 16% less CPU, peaking at 12.8 GB. A preset changed by `Without` keeps its id,
+  so a preset's genre is known by the very object read from the list (`GenrePresets.IdOf`), never by its id.
   Let go of: fewer songs per test (the accuracy asked to keep), stages skipped for tests that do not read them (the
   songs then not the songs), scheduling (the cores already busy), the trace off (nothing to save), a cache on disk
   across runs (every change to `Rmg.Core` invalidates it, and a song's serialisation is a project of its own), and tests

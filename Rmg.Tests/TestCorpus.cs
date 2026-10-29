@@ -4,6 +4,7 @@ using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
+using Rmg.Tests.Genres;
 
 namespace Rmg.Tests;
 
@@ -62,8 +63,32 @@ internal static class TestCorpus
         return MeterSongs.GetOrAdd((seed, meter), x => new Lazy<CorpusSong>(() => Generate(x.Item1, new SongOverrides(Meter: x.Item2)))).Value;
     }
 
-    /// <summary>The song of the seed with what the overrides set in place of its own draws, made afresh every time.</summary>
-    public static CorpusSong Get(int seed, SongOverrides overrides) => Generate(seed, overrides);
+    /// <summary>
+    ///     The song of the seed with what the overrides set in place of its own draws: a preset's song, its genre and
+    ///     nothing else given, kept and shared as the plain corpus's are, the first <see cref="PresetSongsKept" /> asked;
+    ///     any other made afresh every time.
+    /// </summary>
+    public static CorpusSong Get(int seed, SongOverrides overrides)
+    {
+        if (overrides.Genre is not { } genre || overrides != new SongOverrides(Genre: genre) || GenrePresets.IdOf(genre) is not { } preset)
+            return Generate(seed, overrides);
+        if (PresetSongs.TryGetValue((seed, preset), out var kept))
+            return kept.Value;
+        if (Interlocked.Increment(ref _presetSongsKept) > PresetSongsKept)
+            return Generate(seed, overrides);
+        return PresetSongs.GetOrAdd((seed, preset), x => new Lazy<CorpusSong>(() => Generate(x.Item1, overrides))).Value;
+    }
+
+    /// <summary>
+    ///     How many of the presets' songs are kept, some 2.3 GB beside the plain corpus's 3 in the suite's 16: the tests ask
+    ///     7,691 of their 10,075 again, and the first 800 kept save some 70% of the repeats' time, 1,600 hardly more
+    ///     (29 October 2026).
+    /// </summary>
+    private const int PresetSongsKept = 800;
+
+    private static int _presetSongsKept;
+
+    private static readonly ConcurrentDictionary<(int, string), Lazy<CorpusSong>> PresetSongs = new();
 
     /// <summary>Facets given a song, as <see cref="SongOverrides.Facets" /> takes them.</summary>
     public static ImmutableDictionary<Facet, double> FacetsOf(params (Facet Facet, double Value)[] facets) => facets.ToImmutableDictionary(x => x.Facet, x => x.Value);
