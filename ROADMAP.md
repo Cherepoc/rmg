@@ -996,7 +996,9 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   cost (25 s) is taken out, and 23% of the 69 GB allocated. A read is a binary search comparing kinds by name, names
   that share long beginnings ("Composition..."). A kind is now found by a number, a hash of its name (`IStateKind.Key`),
   a map and a timeline map ordering their kinds by it: 3.6% less CPU making the 719 songs (167.5 s against 174, the
-  same songs), the suite 10m 29s. Next, keeping the fingerprint:
+  same songs), the suite 10m 29s. A profile of the running samples alone (dotnet-trace's thread time, the threads
+  parked for the collector or the sampler left out) then put `StateMap.With` at 7.7%, three passes and a closure where
+  one does: it is one pass now, 7% less CPU (153 s against 165), the suite 9m 43s. Next, keeping the fingerprint:
   1. **A state map made compact**: a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
      `double`, objects for the 28 generic ones, arrays and layers; a `State` made only when asked for, and the
      contributions an explaining trace records kept as now. The building's and the timelines' 48 s and 16 GB its

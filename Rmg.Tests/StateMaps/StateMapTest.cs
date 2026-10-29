@@ -19,6 +19,30 @@ public sealed class StateMapTest
 
     private static StateMap Map(params IState[] states) => StateMap.FromStates(states);
 
+    /// <summary>
+    ///     A state set in a map is as the map without its kind merged with the state alone: replacing it, put among the
+    ///     others in their order, or taken out where the value is the kind's default.
+    /// </summary>
+    [Test]
+    public async Task With_IsTheMapWithoutTheKind_MergedWithTheStateAlone()
+    {
+        StateMap[] maps =
+        [
+            StateMap.Default,
+            Map(KeyOffset.CreateState(2)),
+            Map(KeyOffset.CreateState(2), OctaveOffset.CreateState(1), Tempo.CreateState(1.5)),
+            Map(LowerCaseKind.CreateState(1), UpperCaseKind.CreateState(3), Pool.CreateState([[1, 2]])),
+        ];
+        foreach (var map in maps)
+        {
+            foreach (var value in new[] { 0, 1, 5 })
+            foreach (var kind in new[] { KeyOffset, OctaveOffset, LowerCaseKind, UpperCaseKind })
+                await Assert.That(map.With(kind, value)).IsEqualTo(map.Except([kind]).MergeWith(Map(kind.CreateState(value))));
+            foreach (var value in new ImmutableArray<ImmutableArray<int>>[] { [], [[3]], [[1], [2]] })
+                await Assert.That(map.With(Pool, value)).IsEqualTo(map.Except([Pool]).MergeWith(Map(Pool.CreateState(value))));
+        }
+    }
+
     [Test]
     public async Task Default_IsDefault_AndHasNoStates()
     {

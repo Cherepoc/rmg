@@ -174,11 +174,43 @@ public sealed class StateMap
         return Filter(x => Array.IndexOf(kinds, x.Kind) < 0);
     }
 
-    /// <summary>The map with the kind's state set to the value, in place of any it had.</summary>
+    /// <summary>
+    ///     The map with the kind's state set to the value, in place of any it had: as <see cref="FromStates" /> of the
+    ///     one state merged into the map without the kind, in one pass, the map's array copied once.
+    /// </summary>
     public StateMap With<T>(StateKind<T> kind, T value)
         where T : notnull
     {
-        return Except([kind]).MergeWith(FromStates([kind.CreateState(value)]));
+        IStateKind of = kind;
+        IState state = kind.CreateState(value);
+        if (!of.CheckStateIsAggregated(state))
+            state = of.AggregateStates([state]);
+        var index = IndexOf(kind);
+        if (state.IsDefault)
+        {
+            if (index < 0)
+                return this;
+            if (_states.Length == 1)
+                return Default;
+            var removed = new IState[_states.Length - 1];
+            _states.AsSpan()[..index].CopyTo(removed);
+            _states.AsSpan()[(index + 1)..].CopyTo(removed.AsSpan(index));
+            return new StateMap(ImmutableCollectionsMarshal.AsImmutableArray(removed));
+        }
+
+        if (index >= 0)
+        {
+            var replaced = _states.ToArray();
+            replaced[index] = state;
+            return new StateMap(ImmutableCollectionsMarshal.AsImmutableArray(replaced));
+        }
+
+        var at = ~index;
+        var inserted = new IState[_states.Length + 1];
+        _states.AsSpan()[..at].CopyTo(inserted);
+        inserted[at] = state;
+        _states.AsSpan()[at..].CopyTo(inserted.AsSpan(at + 1));
+        return new StateMap(ImmutableCollectionsMarshal.AsImmutableArray(inserted));
     }
 
     /// <summary>
@@ -307,6 +339,7 @@ public sealed class StateMap
         }
     }
 
+    // the kind's index, or the bitwise complement of where it would go
     private int IndexOf(IStateKind kind)
     {
         var low = 0;
@@ -323,7 +356,7 @@ public sealed class StateMap
                 high = middle - 1;
         }
 
-        return -1;
+        return ~low;
     }
 
     /// <summary>The states that pass, which are already ordered, aggregated and none of them default.</summary>
