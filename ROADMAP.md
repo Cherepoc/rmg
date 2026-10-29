@@ -990,17 +990,22 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   timeline from before the notes 0.71, its trace 0.58, its map 0.05. A song's 3,048 notes each keep a state map of some
   20 states, 59,787 states in all, 20,429 objects of 2,116 values, the maps 3,040 objects of 1,442 values; states compare
   exactly. The notes held 1.06 MB with their equal states one object, 0.72 with their equal maps one too, 0.29 with no
-  states. In the order to build:
-  1. **Equal states and maps one object** in a corpus song (`TestCorpus`), its notes', its timeline's and its trace's,
-     the songs the same objects' worth: some 1.1 MB a song from the notes, the timeline and the trace unmeasured. Test
-     code alone; the pass's CPU measured before it is kept. The plain corpus then about 1.9 GB, not 2.9, and more of a
-     preset's songs kept.
-  2. **Moved into `Rmg.Core`**, if the pass is cheap: a song made shares its states as it ends, the app's songs too.
-  Weighed and left: the states no stage or test reads after the notes dropped from them (up to 1.5 MB, but every kind
-  audited, and a note's state is the song's record of what decided it, `CLAUDE.md`'s state deciding); a state map made
-  compact, slots of unboxed values and no object a state (the most, and the generation's allocation with it, but the
-  event system rewritten, for a collector measured at 4%: overengineering); states shared as they are made, in a table
-  of every song's (the allocation cut too, but a hash on the hottest path and a table that grows).
+  states. The state maps are also a third of making a song: a probe of 719 songs (167 CPU-seconds unprobed) counted
+  their building (`FromStates`, `MergeWith`, `Aggregate`, a filter) 34.5 s, 61.8 million calls and 9.7 GB, reading a
+  value 23.5 s over 192 million, and the timelines' maps 14.1 s and 6.1 GB, some 60 s of 167 once the probe's own
+  cost (25 s) is taken out, and 23% of the 69 GB allocated. A read is a binary search comparing kinds by name, names
+  that share long beginnings ("Composition..."). In the order to build, each keeping the fingerprint:
+  1. **A kind found by a number**: every kind its ordinal among the kinds by name, so that a map keeps its order and a
+     read compares integers, not strings. Reads the most of their 23.5 s, maybe; unmeasured until built.
+  2. **A state map made compact**: a map's values in slots by kind, unboxed for the 114 kinds of an `int` or a
+     `double`, objects for the 28 generic ones, arrays and layers; a `State` made only when asked for, and the
+     contributions an explaining trace records kept as now. The building's and the timelines' 48 s and 16 GB its
+     stake, the notes' 1.80 MB toward their 0.29 without states; the representation is `StateMap`'s alone (`.States`
+     read in five places, `FromStates` in 65), so its callers stay. Measured on a branch of the map before the rest.
+  Weighed and left: equal states and maps made one object in a corpus song (measured: the notes 1.80 MB to 0.72, but
+  memory alone, the making as slow, and moot once the map is compact); the states no stage or test reads after the
+  notes dropped (every kind audited, and a note's state is the song's record of what decided it); states shared as
+  they are made, in a table of every song's (a hash on the hottest path and a table that grows).
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
   cache them; a corpus song keeps about 3 MB, every note's state the most of it, and its making allocates 47 MB
   more for a moment.
