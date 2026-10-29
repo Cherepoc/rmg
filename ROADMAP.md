@@ -1005,7 +1005,10 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   Weighed and left: equal states and maps made one object in a corpus song (measured: the notes 1.80 MB to 0.72, but
   memory alone, the making as slow, and moot once the map is compact); the states no stage or test reads after the
   notes dropped (every kind audited, and a note's state is the song's record of what decided it); states shared as
-  they are made, in a table of every song's (a hash on the hottest path and a table that grows).
+  they are made, in a table of every song's (a hash on the hottest path and a table that grows); values kept narrower,
+  a float for a double or a byte or a short for an int (some 0.1 MB a song each, reckoned from the states' counts:
+  a float changes every song and is no quicker, and a narrow int wants every kind's range declared and checked, where
+  the compact map's own slots of ints and of doubles keep an int in 4 bytes already).
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
   cache them; a corpus song keeps about 3 MB, every note's state the most of it, and its making allocates 47 MB
   more for a moment.
