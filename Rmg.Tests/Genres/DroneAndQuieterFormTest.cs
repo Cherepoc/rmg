@@ -108,25 +108,25 @@ public sealed class DroneAndQuieterFormTest
         await Assert.That(drumsCalm).IsLessThan(drumsOwn * 0.75);
     }
 
-    /// <summary>A heavy section turns a louder section's clean guitars driven, its chords struck, not broken.</summary>
+    /// <summary>A heavy section turns the clean guitars of its appearances louder than the song driven, their chords struck, not broken.</summary>
     [Test]
     public async Task AHeavySection_DrivesItsCleanGuitars_ItsChordsStruck()
     {
-        var heavy = 0;
+        var heavyNotes = 0;
         foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("rock", GenreChoices.LouderForms, "guitars")))))
         {
-            var heavyIds = song.Trace.Where(t => t.Point == TracePoints.SectionForm && (SectionFormKind)t.Value! == SectionFormKind.Heavy).Select(t => t.Section).ToHashSet();
+            var heavy = song.Trace.Single(t => t.Point == TracePoints.HeavyAppearances).Value is ImmutableArray<int> indices ? indices.ToHashSet() : [];
             foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { InstrumentCode: 26 or 27 or 28, Role: TrackRole.Chords or TrackRole.Rhythm or TrackRole.Riff or TrackRole.RiffTwin }))
-            foreach (var note in notes.Where(n => song.Map.SectionAt(n.Position) is { } span && heavyIds.Contains(span.SectionId)))
+            foreach (var note in notes.Where(n => song.Map.PlayingAt(n.Position) is { IsEnding: false, Index: var index } && heavy.Contains(index)))
             {
-                heavy++;
+                heavyNotes++;
                 // or a pinch's harmonic (Expression)
                 await Assert.That(SectionForm.HeavyPrograms.Append(Expression.GuitarHarmonics)).Contains(InstrumentsOverTime.ProgramOf(note.Value.State, 0)).Because($"seed {song.Seed}, track {track} at {note.Position}");
                 await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value).IsEqualTo(0).Because($"seed {song.Seed}, track {track} at {note.Position}");
             }
         }
 
-        await Assert.That(heavy).IsGreaterThan(100);
+        await Assert.That(heavyNotes).IsGreaterThan(100);
     }
 
     /// <summary>How often the presets drone and play a calm section.</summary>

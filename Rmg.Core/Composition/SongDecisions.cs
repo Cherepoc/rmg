@@ -464,6 +464,7 @@ internal sealed record SongDecisions(
                 SongMap.TimesBefore(played, index),
                 Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),
                 energyStep,
+                energies[index] > songStateMap.GetStateValue(CompositionStateKinds.Energy) + 1e-9,
                 restedBefore.GetValueOrDefault(id, []),
                 // an intro of entries builds the first section's parts up itself, and an intro a verse plays over plays steady;
                 // and a stripped song's appearances added for its ending, whose parts leave one by one as their texture
@@ -491,6 +492,8 @@ internal sealed record SongDecisions(
             StateTrace.RecordSection(TracePoints.Texture, SectionGenerator.SectionTrace, id, $"{section.TextureKind}", (index, section.TextureKind, section.PhraseSilent));
             sections.Add(section);
         }
+        ImmutableArray<int> heavy = [..sections.Select((x, i) => (x, i)).Where(x => x.x.Form.Kind == SectionFormKind.Heavy).Select(x => x.i)];
+        StateTrace.RecordSong(TracePoints.HeavyAppearances, string.Join(", ", heavy), heavy);
 
         // every part that solos a soloist of its own, whose solos sound like one player's, and the solo part wherever it plays,
         // whose answers are in its solos' vocabulary, each from a sequence of its own, by the melody facet, and the drummer by

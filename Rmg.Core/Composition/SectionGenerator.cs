@@ -839,18 +839,17 @@ internal sealed class SectionGenerator
         AddLine(CompositionStateKinds.LineAppoggiatura, LinePattern.Appoggiaturas, GenreChoices.Appoggiatura);
         // its phrases ending on a goal, the genres' as the songs'
         AddLine(CompositionStateKinds.LineGoal, LinePattern.Goals, null);
-        // a guitar the section's form turns, played on the form's program
-        if (form.Guitars.Contains(trackNumber))
+        // a guitar a calm section turns, played on the form's program, and a heavy one's turned by its louder appearances
+        var calmGuitar = form.Kind == SectionFormKind.Calm && form.Guitars.Contains(trackNumber);
+        if (calmGuitar)
             sectionTrackLayer.Add(CompositionStateKinds.Program, form.Program + 1);
         // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
         if (_tracks.Definitions[trackNumber].Role.PlaysChords())
         {
             var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Chords ? SectionStream.Arpeggio : SectionStream.RhythmArpeggio;
             var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre, _tracks.Definitions[trackNumber].Role.Source());
-            // a heavy section's guitars striking their chords, and a calm one's breaking them, 8ths or slower, in a pattern of
-            // its own where the section's drew none, as its genre allows
-            if (form.Kind == SectionFormKind.Heavy && form.Guitars.Contains(trackNumber))
-                arpeggio = ArpeggioPattern.None;
+            // a calm section's guitar breaking them, 8ths or slower, in a pattern of its own where the section's drew none, as
+            // its genre allows
             if (form.Breaker == trackNumber)
             {
                 if (arpeggio == ArpeggioPattern.None)
@@ -864,7 +863,7 @@ internal sealed class SectionGenerator
                 sectionTrackLayer.Add(CompositionStateKinds.ArpeggioOrder, (long)Stream(sectionId, SectionStream.ArpeggioOrder, trackNumber).GenerateSeed());
             // and the colour it lays on its broken chord, from a sequence of its own, by the instrument it plays here
             var colour = Arpeggios.DrawColour(Stream(sectionId, SectionStream.Colour, trackNumber), sectionRhythm.Facets[Facet.Chords], _genre,
-                form.Guitars.Contains(trackNumber) ? form.Program : ((PitchInstrumentTrack)_tracks.Definitions[trackNumber]).InstrumentCode);
+                calmGuitar ? form.Program : ((PitchInstrumentTrack)_tracks.Definitions[trackNumber]).InstrumentCode);
             if (arpeggio != ArpeggioPattern.None && colour != ChordColour.None)
                 sectionTrackLayer.Add(CompositionStateKinds.Colour, (int)colour);
         }
@@ -1042,6 +1041,7 @@ internal sealed record GeneratedSection(
     ///     section comes back.
     /// </summary>
     /// <param name="energyStep">How far the appearance's energy is from the section's, such as more for a later one.</param>
+    /// <param name="louder">Whether the appearance's energy is over the song's, where a heavy section plays heavy (<see cref="SectionFormKind.Heavy" />).</param>
     /// <param name="before">The parts that rested the time before, of which it may leave out no more.</param>
     /// <param name="keepsTexture">Whether it plays steady, whatever its texture draws, as the song's first section after an intro that brings its parts in, or the appearances a stripped ending leaves one by one.</param>
     /// <param name="solo">The appearance's solo, whose soloists, and for a pitched solo the melody, play it throughout.</param>
@@ -1051,6 +1051,7 @@ internal sealed record GeneratedSection(
         int appearance,
         double improvisation,
         double energyStep,
+        bool louder,
         ImmutableHashSet<TrackRole> before,
         bool keepsTexture,
         SoloPlan? solo,
@@ -1059,6 +1060,9 @@ internal sealed record GeneratedSection(
         bool breakdownChorus
     )
     {
+        // a heavy section played as its own where the appearance is no louder than the song, so that it comes back heavy
+        if (Form.Kind == SectionFormKind.Heavy && !louder)
+            return (this with { Form = SectionForm.Own }).Appear(appearance, improvisation, energyStep, louder, before, keepsTexture, solo, held, entering, breakdownChorus);
         // the appearance's energy, the section's and its step, leaning its rests and its texture
         var tilt = SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling);
         var drawn = appearance == 0
@@ -1156,6 +1160,19 @@ internal sealed record GeneratedSection(
                 [VelocityLayers.LoneLift(alone).ToTimelineItem(from), 0.0.ToTimelineItem(to)])]);
             timeline = TrackEventStateTimelineMap.Create(timeline.Duration, timeline.TrackTimelineMap.Select(x => Roles[x.Key] == alone
                 ? new KeyValuePair<int, EventStateTimelineMap<StateMap>>(x.Key, x.Value.MergeStateTimelineMap(lift))
+                : x), timeline.CommonStateTimelineMap);
+        }
+
+        // and a heavy appearance's guitars driven, their chords struck, over the section's own layer of them
+        if (Form.Kind == SectionFormKind.Heavy)
+        {
+            var heavy = StateMap.FromStates([
+                CompositionStateKinds.Program.CreateState(Form.Program + 1),
+                CompositionStateKinds.Arpeggio.CreateState(new LayerValue<int>(StateDepths.Section, (int)ArpeggioPattern.None))
+            ]);
+            timeline = TrackEventStateTimelineMap.Create(timeline.Duration, timeline.TrackTimelineMap.Select(x => Form.Guitars.Contains(x.Key)
+                ? new KeyValuePair<int, EventStateTimelineMap<StateMap>>(x.Key, EventStateTimelineMap<StateMap>.Create(x.Value.Duration, x.Value.EventTimeline,
+                    x.Value.StateTimelineMap.Except([CompositionStateKinds.Arpeggio]).MergeStateMap(heavy)))
                 : x), timeline.CommonStateTimelineMap);
         }
 

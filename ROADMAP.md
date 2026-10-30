@@ -1105,10 +1105,12 @@ Post-rock, asked for by the owner, built on 26 October 2026 as data of the devic
 songs building from near silence (their thirds' loudness 0.04, 0.30, 0.46, 62 of 64 loudest after their start), clean
 guitars ringing and arpeggiated, driven where a louder section turns heavy, the tremolo following the energy and
 carried through its rests in half the songs, a delay and a hall, ringing out or fading; asked as `postrock-tremolo` and
-`postrock-heavy`. Its gaps, measured (`PostRockReportTest`): a section's form is its every appearance's, so that a
-section heavy at its loud return is heavy in its quiet first one too, the guitars driven in 44% of the quieter half's
-notes against 45% of the louder's; a form drawn by the appearance, its energy's step with it, as the appearance's
-parts are, would let a section come back heavy.
+`postrock-heavy`. A section drawn heavy is heavy only in its appearances louder than the song (30 October 2026), so
+that a section heard clean comes back heavy (`GeneratedSection.Appear`): of 266 Post-rock sections drawn heavy, 42 clean
+and later heavy, 119 heavy every time and 105 never louder than the song, the guitars driven in 44% of the quieter half's
+notes against 52% of the louder's, from 45%; to be asked. A calm section is still its every appearance's, as it makes
+its notes otherwise (its drums in half time, its guitars resting), taken up should a calm section be heard to want its
+loud return.
 
 ## Genres
 

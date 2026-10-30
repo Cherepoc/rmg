@@ -75,6 +75,9 @@ internal static class TracePoints
     /// <summary>What a section's guitars play as, calm, heavy or their own (a <see cref="SectionFormKind" />; <see cref="Composition.SectionForm" />).</summary>
     public const string SectionForm = "Section form";
 
+    /// <summary>The appearances whose guitars play a heavy section's form, louder than the song (an <c>ImmutableArray&lt;int&gt;</c> of their indices; <see cref="Composition.SectionForm" />).</summary>
+    public const string HeavyAppearances = "Heavy appearances";
+
     /// <summary>What the song's drums do, keep time or mark its form (a <see cref="Composition.DrumJob" />).</summary>
     public const string DrumJob = "Drum job";
 

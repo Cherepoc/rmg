@@ -17,13 +17,16 @@ public enum SectionFormKind
     /// </summary>
     Calm,
 
-    /// <summary>A louder section turned heavy, as a band kicks in the distortion for the chorus: its clean guitars driven, its broken chords struck.</summary>
+    /// <summary>
+    ///     A louder section turned heavy, as a band kicks in the distortion for the chorus: its clean guitars driven, its broken
+    ///     chords struck, in each appearance louder than the song, so that a section heard clean comes back heavy.
+    /// </summary>
     Heavy
 }
 
 /// <summary>
 ///     A section's form, decided with the section, before its parts play, so that they play as the form has them: calm in a
-///     quieter section of a song with a driven guitar, heavy in a louder one of a song with a clean guitar, the guitars
+///     quieter section of a song with a driven guitar, heavy in a louder appearance of one with a clean guitar, the guitars
 ///     always together. By the sound facet: never in the plainest songs; a genre's (<see cref="GenreChoices.LouderForms" />).
 /// </summary>
 /// <param name="Program">The program the section's guitars play: an acoustic or clean one in a calm section, a driven one in a heavy one.</param>
@@ -61,7 +64,8 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
 
     /// <summary>
     ///     A section's form, from a sequence of its own, every draw made whatever the section is: calm where its energy is
-    ///     under the song's, heavy where it is over, its own where its guitars have no such form or it breaks down.
+    ///     under the song's, its own where its guitars have no such form or it breaks down, and else heavy where it draws so,
+    ///     which its appearances louder than the song play.
     /// </summary>
     /// <param name="energy">The section's energy against the song's, below 0 the quieter.</param>
     /// <param name="parts">The pitched parts the song plays, by their tracks, with their roles and programs.</param>
@@ -83,7 +87,7 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
             return new SectionForm(SectionFormKind.Calm, CalmPrograms[(int)(programDraw * CalmPrograms.Length)], [..driven.Select(x => x.Key)], broken,
                 [..strung.Where(x => x.Key != broken).Select(x => x.Value.Role), ..drumsRest ? [TrackRole.Drum] : Array.Empty<TrackRole>()], [parts[broken].Role]);
 
-        return energy > 1e-9 && heavies && clean.Length > 0
+        return heavies && clean.Length > 0
             ? new SectionForm(SectionFormKind.Heavy, HeavyPrograms[(int)(programDraw * HeavyPrograms.Length)], [..clean.Select(x => x.Key)], null, [], [])
             : Own;
     }

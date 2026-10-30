@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 
@@ -14,7 +15,9 @@ public sealed class PostRockReportTest
     ///     2026: 8.5 minutes the median, 5.9 to 11.2; the thirds' loudness 0.04, 0.30 and 0.46, their notes 9.5, 13.8 and
     ///     17.9 a second; 62 songs loudest after their start, 56 quietest at it; 18131 of 27564 picked notes in the louder half;
     ///     the guitars driven in 44% of the quieter half's notes and 45% of the louder's, a section heavy every time it plays
-    ///     however quiet its first appearance; 43 songs ringing out, 21 fading).
+    ///     however quiet its first appearance; 43 songs ringing out, 21 fading); and on 30 October 2026, a heavy section heavy
+    ///     only in its appearances louder than the song: 44% and 52%, of 266 sections drawn heavy 119 heavy every time, 42 clean
+    ///     and later heavy and 105 never louder than the song.
     /// </summary>
     [Test]
     [Explicit]
@@ -26,8 +29,19 @@ public sealed class PostRockReportTest
             thirds[k] = new double[2];
         var (peakLate, quietStart, pickedLoud, picked, drivenQuiet, guitarsQuiet, drivenLoud, guitarsLoud) = (0, 0, 0, 0, 0, 0, 0, 0);
         var minutes = new List<double>();
+        var (heavyEvery, heavyLater, heavyNever) = (0, 0, 0);
         foreach (var song in songs)
         {
+            // each heavy section's appearances, heavy every time, heard clean and later heavy, or never louder than the song
+            var heavy = (ImmutableArray<int>)song.Trace.Single(t => t.Point == TracePoints.HeavyAppearances).Value!;
+            foreach (var id in song.Trace.Where(t => t.Point == TracePoints.SectionForm && (SectionFormKind)t.Value! == SectionFormKind.Heavy).Select(t => t.Section).Distinct())
+            {
+                int[] appearances = [..song.Map.Sections.Select((x, i) => (x, i)).Where(x => x.x.SectionId == id).Select(x => x.i)];
+                var count = appearances.Count(heavy.Contains);
+                (heavyEvery, heavyLater, heavyNever) = count == appearances.Length ? (heavyEvery + 1, heavyLater, heavyNever)
+                    : count > 0 ? (heavyEvery, heavyLater + 1, heavyNever) : (heavyEvery, heavyLater, heavyNever + 1);
+            }
+
             minutes.Add(song.Rendered.Seconds / 60);
             var notes = song.Song.Notes!.SelectMany(x => x.Value).ToArray();
             var end = song.Map.Sections[^1].End;
@@ -67,6 +81,7 @@ public sealed class PostRockReportTest
         Console.WriteLine($"songs loudest later than their start {peakLate}, quietest at their start {quietStart}, of {songs.Length}");
         Console.WriteLine($"tremolo-picked notes in the louder half of the sections {pickedLoud} of {picked}");
         Console.WriteLine($"driven guitars' share: quieter half {drivenQuiet / (double)Math.Max(1, guitarsQuiet):P0}, louder half {drivenLoud / (double)Math.Max(1, guitarsLoud):P0}");
+        Console.WriteLine($"heavy sections: heavy every time {heavyEvery}, clean and later heavy {heavyLater}, never louder than the song {heavyNever}");
         Console.WriteLine($"endings: {string.Join(", ", songs.GroupBy(x => x.Map.Ending.Kind).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))}");
         await Task.CompletedTask;
     }
