@@ -68,7 +68,7 @@ $S/scripts/runs.sh <repo> $R
 
 It builds and runs the reports' smoke test first, stopping where it fails: the review measures with the reports, and
 one that has rotted is fixed before any reviewer reads its numbers (a review once spent its first package mending
-them). Then the suite at the review's offsets and the four preset reports (the fourth, `sounding.txt`, how the parts sound together), one at a time under the memory cap, every
+them). Then the suite at the review's offsets and the four preset reports (the fourth, `sounding.txt`, how the parts sound together), one at a time under the memory cap (the suite in 16 GB, as its corpus keeps a preset's songs, on twelve cores), every
 failure run again alone at its offset, and every failure a finding (`findings/run-<offset>.json`) with its seed and
 offset: category `run` for the verifiers to trace, or `flaky` where it passed alone, a test racing under the suite's
 load rather than a song breaking it. Then the device ledger, from the reports:
@@ -216,7 +216,11 @@ package's commit with `status.py $R package <package> <commit> "<songs changed>"
 - A finding of **taste** is not a fix: it becomes a listening question (`ListeningQuestionsTest`, `?listen=`), its
   change made only once the user has heard it. A question's song without changes the device alone: a patch on an option
   no other device shares (one switching the band's dead notes off asks nothing of a soloist's), never a pool emptied
-  (refused) nor its weights made even (most songs then draw the same), so that what is heard apart is the device.
+  (refused) nor its weights made even (most songs then draw the same), so that what is heard apart is the device. A
+  patch of a pool replaces only the options it names, the others kept as the preset has them, so a without on an
+  instrument names every instrument it zeroes; and a variant whose instrument has no weight in the part's pool is left
+  out of the song, so a without keeps the genre's own pool and switches the device off instead (a Funk bass forced to
+  a finger bass slapped nowhere, 22 October's round 9).
   `Write` prints how far its songs differ; one under about 0.1 is not asked, as listeners have not told such apart,
   but a device of a few places (a bar's slide into a section, a note in a run, a roll at a bar's end) is asked whatever
   its measure, its songs heard from its places: the measure takes 16 s around a moment of it, and a small place is
@@ -233,7 +237,9 @@ package's commit with `status.py $R package <package> <commit> "<songs changed>"
   again tremolo-picked, a reprise) hears both sides in its one song, from before the first: a device drawn alike for
   every time a section plays cannot be asked so, its songs differing by a note or two (`blackmetal-tremolo` was asked
   so, its first song differing in its last note alone, on 25 October 2026). Before a question is asked its song is
-  looked at where it starts: what differs there against what the question says. A question answered "can't tell" twice is not asked again, nor its device changed,
+  looked at where it starts: what differs there against what the question says, and what else plays there that could
+  hide it, another device of the part covering what is asked (a swell on a bass hid the slap's attack it was asked of,
+  one listener unsure, round 9), the song given another seed or the device fixed rather than asked through it. A question answered "can't tell" twice is not asked again, nor its device changed,
   until its songs are looked at: what the device plays there against what the question says it does (two such
   questions failed for causes found only by looking at the songs, neither the device's amount). Ask the first-ranked first, a round of ten at most, the answers
   collected from the test instance's dashboard (`/admin/api/summary`, its `verdicts`) before the next; a question
