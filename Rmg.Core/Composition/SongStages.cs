@@ -388,9 +388,7 @@ internal static class SongStages
                 (index, role) => draft.Figures.GetValueOrDefault(song.Form.Map.Sections[index].SectionId)?.Keys.Any(x => Figures.RoleOf(x) == role) == true,
                 // as the section's form plays it, a heavy section's guitars driven and a calm one's clean
                 index => song.Tracks.Definitions.Any(x => x.Value is PitchInstrumentTrack { Role: TrackRole.Riff } riff
-                                                          && (song.Sections[index].Form.Guitars.Contains(x.Key)
-                                                              ? song.Sections[index].Form.Kind == SectionFormKind.Heavy
-                                                              : InstrumentTraits.Has(riff.InstrumentCode, InstrumentTrait.Driven))),
+                                                          && InstrumentTraits.Has(song.Sections[index].Form.Programs.GetValueOrDefault(x.Key, riff.InstrumentCode), InstrumentTrait.Driven)),
                 (index, phrase) => song.Sections[index].PhraseSilent is var silent && phrase < silent.Length && silent[phrase].Contains(TrackRole.Bass),
                 Math.Max(0, -Registers.OctavesOf(song.Genre, TrackRole.Riff)),
                 song.Genre,

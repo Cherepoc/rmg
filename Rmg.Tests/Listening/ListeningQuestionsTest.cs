@@ -57,7 +57,55 @@ public sealed class ListeningQuestionsTest
         Func<CorpusSong, double?>? Contrast = null
     );
 
-    private static readonly Question[] Questions = [];
+    private static readonly Question[] Questions =
+    [
+        new("postrock-heavy-return", "A Post-rock section heard clean, then coming back louder with its guitars driven: the release, or a different band?",
+            "Whether a heavy section's clean guitars turn driven where it comes back louder than the song (louderForms.guitars, Post-rock's 80-90-90), against never.", "postRock", [],
+            new() { ["louderForms"] = new() { ["guitars"] = 0 } },
+            x => Returned(x, Driven)?.Turned, Places: x => Returned(x, Driven) is { } r ? [r.Turned] : [], Contrast: x => Returned(x, Driven)?.Plain),
+        new("film-bowed", "A Cinematic piano section's strings held, then coming back louder bowed in tremolo: the climax, or a shiver for nothing?",
+            "How often a heavy section's held strings, the pad's or the chords' string ensemble, are bowed in tremolo where it comes back louder than the song (louderForms.strings, Cinematic piano's 40-60-70), against never.", "filmPiano", [],
+            new() { ["louderForms"] = new() { ["strings"] = 0 } },
+            x => Returned(x, Bowed)?.Turned, Places: x => Returned(x, Bowed) is { } r ? [r.Turned] : [], Contrast: x => Returned(x, Bowed)?.Plain)
+    ];
+
+    /// <summary>How many bars at most a contrast's later side follows its first, so that a listener hears them as one.</summary>
+    private const int ContrastBars = 16;
+
+    /// <summary>Whether a note is a driven guitar's on a part a heavy section drives, the chords', the rhythm part's or the riff's.</summary>
+    private static bool Driven(CorpusSong song, int track, PitchInstrumentTrack part, RealizedNote note) =>
+        part.Role is TrackRole.Chords or TrackRole.Rhythm or TrackRole.Riff && InstrumentTraits.Has(InstrumentsOverTime.ProgramOf(note.State, part.InstrumentCode), InstrumentTrait.Driven);
+
+    /// <summary>Whether a note is held strings' bowed in tremolo, the pad's or the chords'.</summary>
+    private static bool Bowed(CorpusSong song, int track, PitchInstrumentTrack part, RealizedNote note) =>
+        part.Role is TrackRole.Pad or TrackRole.Chords && InstrumentsOverTime.ProgramOf(note.State, part.InstrumentCode) == SectionForm.TremoloStrings;
+
+    /// <summary>
+    ///     Where a heavy section plays as it is and then comes back turned nearest together: the start of the plain
+    ///     appearance's last phrase, and the first turned note of a later, heavy appearance of the same section, in beats,
+    ///     within <see cref="ContrastBars" /> of the plain one's end, so that the two are heard together; none where it plays
+    ///     none so near.
+    /// </summary>
+    private static (double Plain, double Turned)? Returned(CorpusSong song, Func<CorpusSong, int, PitchInstrumentTrack, RealizedNote, bool> turned)
+    {
+        var heavy = song.Trace.Single(x => x.Point == TracePoints.HeavyAppearances).Value is ImmutableArray<int> indices ? indices.ToHashSet() : [];
+        var sections = song.Map.Sections;
+        var pairs = new List<(double Plain, double Turned, double Gap)>();
+        foreach (var index in heavy.Order())
+        {
+            var plain = Enumerable.Range(0, index).LastOrDefault(i => sections[i].SectionId == sections[index].SectionId && !heavy.Contains(i), -1);
+            if (plain < 0)
+                continue;
+            var first = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
+                .SelectMany(x => x.Value.Where(n => song.Map.PlayingAt(n.Position) is { IsEnding: false, Index: var at } && at == index
+                                                     && turned(song, x.Key, (PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key], n.Value)))
+                .Select(x => (double?)x.Position).Min();
+            if (first is { } at && at - sections[plain].End <= ContrastBars * sections[plain].Meter.BarDuration + 1e-9)
+                pairs.Add((sections[plain].Phrases.Last().Start, at, at - sections[plain].End));
+        }
+
+        return pairs.Count == 0 ? null : pairs.MinBy(x => x.Gap) is var (plainAt, turnedAt, _) ? (plainAt, turnedAt) : null;
+    }
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>
     private static string QuestionsFile()

@@ -1,1 +1,143 @@
-[]
+[
+  {
+    "id": "postrock-heavy-return",
+    "question": "A Post-rock section heard clean, then coming back louder with its guitars driven: the release, or a different band?",
+    "decides": "Whether a heavy section's clean guitars turn driven where it comes back louder than the song (louderForms.guitars, Post-rock's 80-90-90), against never.",
+    "genre": "postRock",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "guitars": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "S",
+        "at": 573.5,
+        "from": 557.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "d",
+        "at": 170.1,
+        "from": 130.6,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "18",
+        "at": 128.6,
+        "from": 83.6,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Rhythm part (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "1F",
+        "at": 471.8,
+        "from": 469.5,
+        "listen": [
+          "Chords (Electric Guitar (clean))",
+          "Riff (Electric Guitar (clean))",
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1d",
+        "at": 494.2,
+        "from": 485.3,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1n",
+        "at": 122.8,
+        "from": 80,
+        "listen": [
+          "Rhythm part (Distortion Guitar)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "film-bowed",
+    "question": "A Cinematic piano section's strings held, then coming back louder bowed in tremolo: the climax, or a shiver for nothing?",
+    "decides": "How often a heavy section's held strings, the pad's or the chords' string ensemble, are bowed in tremolo where it comes back louder than the song (louderForms.strings, Cinematic piano's 40-60-70), against never.",
+    "genre": "filmPiano",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "strings": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "X",
+        "at": 165.4,
+        "from": 111.2,
+        "listen": [
+          "Pad (Tremolo Strings)"
+        ]
+      },
+      {
+        "seed": "z",
+        "at": 53.7,
+        "from": 36.7,
+        "listen": [
+          "Pad (Tremolo Strings)"
+        ]
+      },
+      {
+        "seed": "1S",
+        "at": 38.2,
+        "from": 26.1,
+        "listen": [
+          "Pad (Tremolo Strings)"
+        ]
+      },
+      {
+        "seed": "1Y",
+        "at": 42,
+        "from": 28.7,
+        "listen": [
+          "Pad (Tremolo Strings)"
+        ]
+      },
+      {
+        "seed": "1k",
+        "at": 35.1,
+        "from": 24.1,
+        "listen": [
+          "Pad (Tremolo Strings)"
+        ]
+      },
+      {
+        "seed": "1t",
+        "at": 98.5,
+        "from": 33.8,
+        "listen": [
+          "Pad (Tremolo Strings)"
+        ]
+      }
+    ]
+  }
+]

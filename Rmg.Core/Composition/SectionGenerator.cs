@@ -839,10 +839,10 @@ internal sealed class SectionGenerator
         AddLine(CompositionStateKinds.LineAppoggiatura, LinePattern.Appoggiaturas, GenreChoices.Appoggiatura);
         // its phrases ending on a goal, the genres' as the songs'
         AddLine(CompositionStateKinds.LineGoal, LinePattern.Goals, null);
-        // a guitar a calm section turns, played on the form's program, and a heavy one's turned by its louder appearances
-        var calmGuitar = form.Kind == SectionFormKind.Calm && form.Guitars.Contains(trackNumber);
-        if (calmGuitar)
-            sectionTrackLayer.Add(CompositionStateKinds.Program, form.Program + 1);
+        // a guitar a calm section turns, played on the form's program, and a heavy one's parts turned by its louder appearances
+        int? calm = form.Kind == SectionFormKind.Calm && form.Programs.TryGetValue(trackNumber, out var turned) ? turned : null;
+        if (calm is { } calmProgram)
+            sectionTrackLayer.Add(CompositionStateKinds.Program, calmProgram + 1);
         // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
         if (_tracks.Definitions[trackNumber].Role.PlaysChords())
         {
@@ -863,7 +863,7 @@ internal sealed class SectionGenerator
                 sectionTrackLayer.Add(CompositionStateKinds.ArpeggioOrder, (long)Stream(sectionId, SectionStream.ArpeggioOrder, trackNumber).GenerateSeed());
             // and the colour it lays on its broken chord, from a sequence of its own, by the instrument it plays here
             var colour = Arpeggios.DrawColour(Stream(sectionId, SectionStream.Colour, trackNumber), sectionRhythm.Facets[Facet.Chords], _genre,
-                calmGuitar ? form.Program : ((PitchInstrumentTrack)_tracks.Definitions[trackNumber]).InstrumentCode);
+                calm ?? ((PitchInstrumentTrack)_tracks.Definitions[trackNumber]).InstrumentCode);
             if (arpeggio != ArpeggioPattern.None && colour != ChordColour.None)
                 sectionTrackLayer.Add(CompositionStateKinds.Colour, (int)colour);
         }
@@ -1163,18 +1163,16 @@ internal sealed record GeneratedSection(
                 : x), timeline.CommonStateTimelineMap);
         }
 
-        // and a heavy appearance's guitars driven, their chords struck, over the section's own layer of them
+        // and a heavy appearance's parts turned, its guitars driven and its strings bowed in tremolo, their chords struck, over
+        // the section's own layer of them
         if (Form.Kind == SectionFormKind.Heavy)
-        {
-            var heavy = StateMap.FromStates([
-                CompositionStateKinds.Program.CreateState(Form.Program + 1),
-                CompositionStateKinds.Arpeggio.CreateState(new LayerValue<int>(StateDepths.Section, (int)ArpeggioPattern.None))
-            ]);
-            timeline = TrackEventStateTimelineMap.Create(timeline.Duration, timeline.TrackTimelineMap.Select(x => Form.Guitars.Contains(x.Key)
+            timeline = TrackEventStateTimelineMap.Create(timeline.Duration, timeline.TrackTimelineMap.Select(x => Form.Programs.TryGetValue(x.Key, out var program)
                 ? new KeyValuePair<int, EventStateTimelineMap<StateMap>>(x.Key, EventStateTimelineMap<StateMap>.Create(x.Value.Duration, x.Value.EventTimeline,
-                    x.Value.StateTimelineMap.Except([CompositionStateKinds.Arpeggio]).MergeStateMap(heavy)))
+                    x.Value.StateTimelineMap.Except([CompositionStateKinds.Arpeggio]).MergeStateMap(StateMap.FromStates([
+                        CompositionStateKinds.Program.CreateState(program + 1),
+                        CompositionStateKinds.Arpeggio.CreateState(new LayerValue<int>(StateDepths.Section, (int)ArpeggioPattern.None))
+                    ]))))
                 : x), timeline.CommonStateTimelineMap);
-        }
 
         return this with { Timeline = timeline, Lines = [..Lines.Where(x => !silent.Contains(x.Track))] };
     }

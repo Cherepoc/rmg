@@ -5,7 +5,7 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Genres;
 
-/// <summary>Djent's riff on an open string's drone, and Black metal's driven guitar acoustic or clean in its calm sections between the storms.</summary>
+/// <summary>Djent's riff on an open string's drone, Black metal's driven guitar acoustic or clean in its calm sections between the storms, and a heavy section's guitars driven and strings bowed.</summary>
 public sealed class DroneAndQuieterFormTest
 {
     private static Genre With(string preset, GenreChoice choice, string option)
@@ -127,6 +127,84 @@ public sealed class DroneAndQuieterFormTest
         }
 
         await Assert.That(heavyNotes).IsGreaterThan(100);
+    }
+
+    /// <summary>
+    ///     A heavy section bows the string ensembles holding its chords in tremolo in its appearances louder than the song,
+    ///     held whole.
+    /// </summary>
+    [Test]
+    public async Task AHeavySection_BowsItsHeldStrings_InItsLouderAppearances()
+    {
+        var (bowed, plain) = (0, 0);
+        foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: With("orchestral", GenreChoices.LouderForms, "strings")))))
+        {
+            var heavy = song.Trace.Single(t => t.Point == TracePoints.HeavyAppearances).Value is ImmutableArray<int> indices ? indices.ToHashSet() : [];
+            var heavyIds = song.Trace.Where(t => t.Point == TracePoints.SectionForm && (SectionFormKind)t.Value! == SectionFormKind.Heavy).Select(t => t.Section).ToHashSet();
+            foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { InstrumentCode: 48 or 49, Role: TrackRole.Pad or TrackRole.Chords }))
+            foreach (var note in notes)
+            {
+                if (song.Map.PlayingAt(note.Position) is not { IsEnding: false, Index: var index, Span.SectionId: var id } || !heavyIds.Contains(id))
+                    continue;
+                var program = InstrumentsOverTime.ProgramOf(note.Value.State, song.Song.TrackDefinitions[track] is PitchInstrumentTrack part ? part.InstrumentCode : -1);
+                if (heavy.Contains(index))
+                {
+                    bowed++;
+                    await Assert.That(program).IsEqualTo(SectionForm.TremoloStrings).Because($"seed {song.Seed}, track {track} at {note.Position}");
+                    await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Arpeggio).Value).IsEqualTo(0).Because($"seed {song.Seed}, track {track} at {note.Position}");
+                }
+                else
+                    plain++;
+            }
+        }
+
+        Console.WriteLine($"{bowed} held strings' notes bowed in the louder appearances of heavy sections, {plain} in their others as they are");
+        await Assert.That(bowed).IsGreaterThan(100);
+    }
+
+    /// <summary>
+    ///     Over 64 songs of each preset that bows its strings, with it and with its strings never bowed: the songs with an
+    ///     appearance bowed, and the share of their held strings' notes bowed in the louder half of the sections, by their
+    ///     energy, and in the quieter (measured on 30 October 2026: Orchestral 38 songs, 54% and 28%, against 15, 6% and 10%
+    ///     from its pool's tremolo strings; Cinematic piano 23, 37% and 14%; Symphonic 13, 49% and 43%, its sections mostly
+    ///     louder than the song; Post-rock 12, 59% and 13%; each none without).
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task BowedReport()
+    {
+        foreach (var name in new[] { "orchestral", "filmPiano", "symphonic", "postRock" })
+        foreach (var off in new[] { false, true })
+        {
+            var genre = GenrePresets.Genre(name);
+            if (off)
+                genre = genre with { Choices = genre.Choices.SetItem(GenreChoices.LouderForms.Name, genre.Choices[GenreChoices.LouderForms.Name].SetItem("strings", new ByConvention(0, 0, 0))) };
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))).ToArray();
+            var (withBowed, loud, loudAll, quiet, quietAll) = (0, 0, 0, 0, 0);
+            foreach (var song in songs)
+            {
+                var energies = song.Trace.Where(t => t.Point == TracePoints.SectionEnergy).GroupBy(t => t.Section).ToDictionary(x => x.Key, x => ((SectionEnergyTrace)x.First().Value!).Energy);
+                var median = song.Map.Sections.Select(x => energies.GetValueOrDefault(x.SectionId)).Order().ElementAt(song.Map.Sections.Length / 2);
+                var any = false;
+                foreach (var (_, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { InstrumentCode: 48 or 49, Role: TrackRole.Pad or TrackRole.Chords }))
+                foreach (var note in notes)
+                {
+                    if (song.Map.PlayingAt(note.Position) is not { IsEnding: false, Span.SectionId: var id })
+                        continue;
+                    var isBowed = InstrumentsOverTime.ProgramOf(note.Value.State, 0) == SectionForm.TremoloStrings ? 1 : 0;
+                    any |= isBowed == 1;
+                    if (energies.GetValueOrDefault(id) >= median)
+                        (loud, loudAll) = (loud + isBowed, loudAll + 1);
+                    else
+                        (quiet, quietAll) = (quiet + isBowed, quietAll + 1);
+                }
+                withBowed += any ? 1 : 0;
+            }
+
+            Console.WriteLine($"{name}{(off ? " never bowed" : "")}: songs with strings bowed {withBowed} of {songs.Length}, held strings' notes bowed in the louder half {loud / (double)Math.Max(1, loudAll):P0}, the quieter {quiet / (double)Math.Max(1, quietAll):P0}");
+        }
+
+        await Task.CompletedTask;
     }
 
     /// <summary>How often the presets drone and play a calm section.</summary>

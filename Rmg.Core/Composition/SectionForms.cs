@@ -18,8 +18,9 @@ public enum SectionFormKind
     Calm,
 
     /// <summary>
-    ///     A louder section turned heavy, as a band kicks in the distortion for the chorus: its clean guitars driven, its broken
-    ///     chords struck, in each appearance louder than the song, so that a section heard clean comes back heavy.
+    ///     A louder section turned heavy, as a band kicks in the distortion for the chorus and an orchestra's strings go into
+    ///     tremolo for the climax: its clean guitars driven, its held strings bowed in tremolo, their broken chords struck, in
+    ///     each appearance louder than the song, so that a section heard plain comes back heavy.
     /// </summary>
     Heavy
 }
@@ -29,17 +30,31 @@ public enum SectionFormKind
 ///     quieter section of a song with a driven guitar, heavy in a louder appearance of one with a clean guitar, the guitars
 ///     always together. By the sound facet: never in the plainest songs; a genre's (<see cref="GenreChoices.LouderForms" />).
 /// </summary>
-/// <param name="Program">The program the section's guitars play: an acoustic or clean one in a calm section, a driven one in a heavy one.</param>
-/// <param name="Guitars">The parts the form turns, by their tracks: the driven guitars for a calm section, the clean ones for a heavy one.</param>
+/// <param name="Programs">
+///     The parts the form turns and the program each plays, by their tracks: a calm section's driven guitars an acoustic or
+///     clean one, a heavy one's clean guitars a driven one and its held strings the tremolo strings.
+/// </param>
 /// <param name="Breaker">The calm section's part that breaks its chords, the chords' or the rhythm part's that a guitar plays; none but in a calm section.</param>
 /// <param name="Leaves">The parts the section leaves out wherever it plays: a calm section's guitars but the one breaking its chords.</param>
 /// <param name="Plays">The part a calm section keeps playing whatever its appearance draws, its guitar breaking the chords.</param>
-internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableHashSet<int> Guitars, int? Breaker, ImmutableHashSet<TrackRole> Leaves, ImmutableHashSet<TrackRole> Plays)
+internal sealed record SectionForm(SectionFormKind Kind, ImmutableDictionary<int, int> Programs, int? Breaker, ImmutableHashSet<TrackRole> Leaves, ImmutableHashSet<TrackRole> Plays)
 {
-    public static SectionForm Own { get; } = new(SectionFormKind.Own, 0, [], null, [], []);
+    public static SectionForm Own { get; } = new(SectionFormKind.Own, ImmutableDictionary<int, int>.Empty, null, [], []);
 
     /// <summary>The chance a louder section's clean guitars turn driven, by the sound facet.</summary>
     public static ByConvention HeavyChance { get; } = new(0, 0.1, 0.25);
+
+    /// <summary>The chance a louder section's held strings are bowed in tremolo, by the sound facet.</summary>
+    public static ByConvention BowedChance { get; } = new(0, 0.1, 0.25);
+
+    /// <summary>The program held strings are bowed in tremolo on, General MIDI's tremolo strings.</summary>
+    public const int TremoloStrings = 44;
+
+    /// <summary>The strings a heavy section bows in tremolo: the string ensembles, not a synth's.</summary>
+    private static readonly ImmutableHashSet<int> Bowed = [48, 49];
+
+    /// <summary>The parts whose strings hold the chords, which a heavy section bows in tremolo: the pad and the chords, not a line, whose tune it would blur.</summary>
+    private static readonly ImmutableArray<TrackRole> HeldParts = [TrackRole.Pad, TrackRole.Chords];
 
     /// <summary>The chance a quieter section of a song with a driven guitar turns calm, a genre's that the songs never play.</summary>
     public static ByConvention CalmChance { get; } = new(0, 0, 0);
@@ -64,8 +79,8 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
 
     /// <summary>
     ///     A section's form, from a sequence of its own, every draw made whatever the section is: calm where its energy is
-    ///     under the song's, its own where its guitars have no such form or it breaks down, and else heavy where it draws so,
-    ///     which its appearances louder than the song play.
+    ///     under the song's, its own where its parts have no such form or it breaks down, and else heavy where it draws its
+    ///     guitars or its strings so, which its appearances louder than the song play.
     /// </summary>
     /// <param name="energy">The section's energy against the song's, below 0 the quieter.</param>
     /// <param name="parts">The pitched parts the song plays, by their tracks, with their roles and programs.</param>
@@ -75,6 +90,7 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
         var heavies = context.TestProbability(HeavyChance.At(sound, genre.Chance(GenreChoices.LouderForms, "guitars")));
         var programDraw = context.GenerateDouble();
         var drumsRest = context.TestProbability(CalmDrumsRest);
+        var bows = context.TestProbability(BowedChance.At(sound, genre.Chance(GenreChoices.LouderForms, "strings")));
         var guitars = parts.Where(x => GuitarParts.Contains(x.Value.Role)).ToArray();
         var driven = guitars.Where(x => InstrumentTraits.Has(x.Value.Program, InstrumentTrait.Driven)).ToArray();
         var clean = guitars.Where(x => Clean.Contains(x.Value.Program)).ToArray();
@@ -84,11 +100,13 @@ internal sealed record SectionForm(SectionFormKind Kind, int Program, ImmutableH
         var strung = guitars.Where(x => InstrumentTraits.IsGuitar(x.Value.Program)).ToArray();
         var breaker = strung.Where(x => x.Value.Role is TrackRole.Chords or TrackRole.Rhythm).OrderBy(x => x.Value.Role != TrackRole.Chords).Select(x => (int?)x.Key).FirstOrDefault();
         if (!breakdown && energy < -1e-9 && calms && driven.Length > 0 && breaker is { } broken)
-            return new SectionForm(SectionFormKind.Calm, CalmPrograms[(int)(programDraw * CalmPrograms.Length)], [..driven.Select(x => x.Key)], broken,
+            return new SectionForm(SectionFormKind.Calm, driven.ToImmutableDictionary(x => x.Key, _ => CalmPrograms[(int)(programDraw * CalmPrograms.Length)]), broken,
                 [..strung.Where(x => x.Key != broken).Select(x => x.Value.Role), ..drumsRest ? [TrackRole.Drum] : Array.Empty<TrackRole>()], [parts[broken].Role]);
 
-        return heavies && clean.Length > 0
-            ? new SectionForm(SectionFormKind.Heavy, HeavyPrograms[(int)(programDraw * HeavyPrograms.Length)], [..clean.Select(x => x.Key)], null, [], [])
-            : Own;
+        // the clean guitars driven and the held strings bowed, together where the section draws both
+        var heavy = (heavies ? clean.ToDictionary(x => x.Key, _ => HeavyPrograms[(int)(programDraw * HeavyPrograms.Length)]) : [])
+            .Concat(bows ? parts.Where(x => HeldParts.Contains(x.Value.Role) && Bowed.Contains(x.Value.Program)).ToDictionary(x => x.Key, _ => TremoloStrings) : [])
+            .ToImmutableDictionary();
+        return heavy.IsEmpty ? Own : new SectionForm(SectionFormKind.Heavy, heavy, null, [], []);
     }
 }

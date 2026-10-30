@@ -80,7 +80,12 @@ round of 22 October's review (29 October 2026) asks Funk's guitar, its chords op
 muted, against the part on the muted guitar as it was (`funk-guitar`, 0.82), a Funk bass slapping its accents against
 never (`funk-slap`, 0.07, a device of its accents' places, heard from them, its places a section's that slaps its accents
 and not one switched to a slap bass), and Cinematic piano's tempo at a phrase's edges against steady time
-(`film-rubato`, 1.19, every note after a breath moved by it); answered the same day, each kept, and retired.
+(`film-rubato`, 1.19, every note after a breath moved by it); answered the same day, each kept, and retired. The tenth
+round (30 October 2026) asks a heavy section heard as it is and then coming back louder turned, each against none: Post-rock's
+guitars driven at the return (`postrock-heavy-return`, 0.72) and Cinematic piano's held strings bowed in tremolo
+(`film-bowed`, 0.30, `louderForms.strings`: a heavy appearance's string ensembles on the pad and the chords on General
+MIDI's tremolo strings, held whole, Orchestral's and Cinematic piano's 40-60-70, Symphonic's 30-50-60, Post-rock's
+30-40-50, the songs' own 0-10-25; a line left as it is, whose tune a tremolo would blur).
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
@@ -1092,12 +1097,9 @@ louder appearance now and then (`articulation.tremoloBuild`, Post-rock's 30-50-6
 last bar held through and picked faster each quarter of it, an 8th to the song's finest under the hand's cap (Post-rock's
 strokes 3.5, 6.9, 9.7 and 12.8 a second by quarter), heard 8 to 2 (`postrock-build`). Left, in the order to build:
 
-1. **A bowed tremolo**: a strings part's theme coming back louder on General MIDI's tremolo strings (44) rather than
-   re-struck, the orchestral and the film presets' climax; an instrument switch for the appearance
-   (`InstrumentsOverTime`), not a stroke.
-2. **A swell under a picked chord**, the strokes of a held power chord growing louder, Black metal's; a velocity curve
+1. **A swell under a picked chord**, the strokes of a held power chord growing louder, Black metal's; a velocity curve
    at the play-out, minor.
-3. **A genre's own following**, should listening find Surf's lead picking too seldom in its quieter verses: how far a
+2. **A genre's own following**, should listening find Surf's lead picking too seldom in its quieter verses: how far a
    genre's tremolo follows the energy as a genre's shift rather than one lean for all; and the appearances ranked by
    their energy within the song should a song of sections alike in energy pick none apart.
 

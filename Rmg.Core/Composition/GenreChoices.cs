@@ -404,10 +404,12 @@ public static class GenreChoices
 
     /// <summary>
     ///     The chances a louder section turns heavy, its clean guitars driven, as a band kicks in the distortion for the
-    ///     chorus, and a quieter one calm, its driven guitars acoustic or clean, breaking the chords (<see cref="SectionForm" />).
+    ///     chorus, or its held strings bowed in tremolo, as an orchestra's climax, and a quieter one calm, its driven guitars
+    ///     acoustic or clean, breaking the chords (<see cref="SectionForm" />).
     /// </summary>
     public static GenreChoice LouderForms { get; } = Chances("louderForms", "Louder forms",
-        [("guitars", "A louder section heavy, its guitars driven", SectionForm.HeavyChance), ("quieter", "A quieter section calm, its guitars acoustic or clean", SectionForm.CalmChance)]);
+        [("guitars", "A louder section heavy, its guitars driven", SectionForm.HeavyChance), ("strings", "A louder section's held strings bowed in tremolo", SectionForm.BowedChance),
+            ("quieter", "A quieter section calm, its guitars acoustic or clean", SectionForm.CalmChance)]);
 
     /// <summary>
     ///     The interval a line harmonised plays apart from it, the melody's by the counter-melody and the riff's by its twin,
