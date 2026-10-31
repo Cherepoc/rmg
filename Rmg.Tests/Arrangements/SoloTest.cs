@@ -186,12 +186,14 @@ public sealed class SoloTest
     private static Genre Spaced(double space) => GenrePresets.With("blues", GenreChoices.SoloStyle, ("pickups", 0.5), ("space", space));
 
     /// <summary>
-    ///     A solo's notes, the solo part's, in each of its solos of its own, with the solo's span, the soloist's vocabulary
-    ///     played; a solo on the melody plays the tune whole instead.
+    ///     A solo's notes, its first soloist's, whose plan the trace records, in each of its solos of its own, with the
+    ///     solo's span, the soloist's vocabulary played; in a trade the first's turns alone, as the others play lines of
+    ///     their own plans; a solo on the melody plays the tune whole instead.
     /// </summary>
     private static IEnumerable<(SectionSpan Span, TimelineItem<RealizedNote>[] Notes, SoloLines.Segment[] Plan)> SolosNotes(CorpusSong song) =>
-        Plans(song).Where(x => x.IsOwn).Select(x => (Span: song.Map.Sections[x.Index], x.Plan))
-            .Select(x => (x.Span, song.Song.Notes!.GetValueOrDefault(song.Track(TrackRole.Solo))?.Where(n => n.Position >= x.Span.Start - 1e-9 && n.Position < x.Span.End - 1e-9).ToArray() ?? [], x.Plan));
+        Plans(song).Where(x => x.IsOwn).Select(x => (Span: song.Map.Sections[x.Index], Solo: song.Solos[x.Index], x.Plan))
+            .Select(x => (x.Span, song.Song.Notes!.GetValueOrDefault(song.Song.Track(x.Solo.Soloists[0]))?
+                .Where(n => n.Position >= x.Span.Start - 1e-9 && n.Position < x.Span.End - 1e-9 && (x.Solo.Mode != SoloMode.Trading || x.Solo.TurnAt(x.Span, n.Position) == 0)).ToArray() ?? [], x.Plan));
 
     /// <summary>
     ///     A spacious soloist rests each line's last bar, the band's, but for a pickup into the next line, and plays no run
@@ -336,7 +338,7 @@ public sealed class SoloTest
     /// <summary>
     ///     A soloist riffing on the band's rhythm strikes its notes on the band's own onsets there, the rhythm part's or the chords', short, a
     ///     moment either way as the parts' timing has them; and a Funk solo's notes fall on the band's onsets oftener than
-    ///     with none riffing, the same songs (seen 45% against 38% of 64 songs).
+    ///     with none riffing, the same songs (seen 54% against 44% of 64 songs).
     /// </summary>
     [Test]
     public async Task ARiff_StrikesTheBandsOnsets()
