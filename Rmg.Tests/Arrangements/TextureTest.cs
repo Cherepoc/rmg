@@ -124,7 +124,10 @@ public sealed class TextureTest
         }
     }
 
-    /// <summary>A pre-chorus, which builds into the chorus, never thins nor plays one part alone.</summary>
+    /// <summary>
+    ///     A pre-chorus, which builds into the chorus, never thins nor plays one part alone, but one played as a solo, which
+    ///     plays through as its solo has it, a drum solo the drums alone.
+    /// </summary>
     [Test]
     public async Task APreChorus_NeverThins()
     {
@@ -133,7 +136,8 @@ public sealed class TextureTest
         foreach (var song in TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Form, 0.5))))))
         {
             var form = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
-            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Texture && form.Roles[x.Section] == SectionRole.PreChorus))
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Texture && form.Roles[x.Section] == SectionRole.PreChorus
+                                                         && !song.Solos.ContainsKey(((ValueTuple<int, TextureKind, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableHashSet<TrackRole>>>)x.Value!).Item1)))
             {
                 preChoruses++;
                 await Assert.That(((ValueTuple<int, TextureKind, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableHashSet<TrackRole>>>)entry.Value!).Item2)
