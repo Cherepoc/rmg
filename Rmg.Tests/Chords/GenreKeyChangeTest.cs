@@ -27,12 +27,13 @@ public sealed class GenreKeyChangeTest
 
     /// <summary>
     ///     Symphonic's last section lifted by a third now and then, its own pool's (`keyLift`), where the songs' lifts are a
-    ///     half or a whole step at the middle: each song lifting its last section, its sections in the song's key.
+    ///     half or a whole step at the middle: each song lifting its last section, its sections in the song's key (seen 17% to
+    ///     33% of 128 songs' lifts, at two offsets; 64 songs saw 4% at one).
     /// </summary>
     [Test]
     public async Task ASymphonicLift_RisesByAThirdNowAndThen_TheSongsNever()
     {
-        int[] Lifts(Genre genre) => [..TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Scale, 0.5)), Genre: genre)))
+        int[] Lifts(Genre genre) => [..TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Scale, 0.5)), Genre: genre)))
             .SelectMany(x => (ImmutableArray<KeyChange>)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!)
             .Select(x => ((x.Semitones % 12) + 12) % 12)];
         Genre Lifting(Genre genre) => genre with { Choices = genre.Choices.SetItem(GenreChoices.KeyChanges.Name, GenrePresets.With("symphonic", GenreChoices.KeyChanges, ("lastSection", 1), ("sections", 0), ("patterns", 0)).Choices[GenreChoices.KeyChanges.Name]) };

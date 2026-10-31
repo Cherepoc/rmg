@@ -9,10 +9,13 @@ namespace Rmg.Tests.Chords;
 /// <summary>A later appearance reharmonised: some of its chords a third away from the chords they replace, the rest of the song as it was.</summary>
 public sealed class ReharmonisationTest
 {
-    private static (Song Song, (int Appearance, ImmutableArray<double> At)? Substitutes) Generate(int seed, params string[] skipped)
+    private static (Song Song, (int Appearance, ImmutableArray<double> At)? Substitutes) Generate(int seed, params string[] skipped) => Generate(seed, null, skipped);
+
+    /// <summary>The song of the seed in the genre given, the songs' own where none is, its chords as middling, with its substitutes.</summary>
+    private static (Song Song, (int Appearance, ImmutableArray<double> At)? Substitutes) Generate(int seed, Genre? genre, params string[] skipped)
     {
         using var trace = StateTrace.Start(explains: false);
-        var overrides = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0.5)));
+        var overrides = new SongOverrides(Facets: TestCorpus.FacetsOf((Facet.Progression, 0.5)), Genre: genre);
         var song = SongGenerator.GenerateSong(TestCorpus.SongSeed(seed), overrides, skipped.ToImmutableHashSet(), (_, _) => { }, CancellationToken.None);
         return (song, ((int, ImmutableArray<double>)?)trace.Entries.SingleOrDefault(x => x.Point == TracePoints.Reharmonisation)?.Value);
     }
@@ -115,35 +118,47 @@ public sealed class ReharmonisationTest
         await Assert.That(dominants).IsGreaterThan(10);
     }
 
-    /// <summary>A pattern's chord substituted is substituted alike at every pass of the pattern, a fade's passes after it too, as a band keeps the changes it learned.</summary>
+    /// <summary>
+    ///     A pattern's chord substituted is substituted alike at every pass of the pattern, a fade's passes after it too, as a
+    ///     band keeps the changes it learned: the songs' own, and songs that always fade for the fade's passes, as few songs
+    ///     both fade and reharmonise the appearance their fade plays on (none of 256 at one offset, 8 at another).
+    /// </summary>
     [Test]
     public async Task ASubstitute_IsTheSame_AtEveryPassOfThePattern()
     {
         var (passes, places, faded, ends, all) = (0, 0, 0, 0, 0);
-        foreach (var (seed, with, substitutes, without) in TestCorpus.Streamed(Enumerable.Range(0, 128), seed =>
+        var fading = TestCorpus.Always(GenreChoices.Ending, GenreChoices.Name(nameof(EndingKind.Fade)));
+        foreach (var (seed, with, substitutes, without, fades) in TestCorpus.Streamed(Enumerable.Range(0, 256), i =>
                  {
-                     var (with, substitutes) = Generate(seed);
-                     return (Seed: seed, With: with, Substitutes: substitutes, Without: substitutes is null ? null : Generate(seed, "Reharmonisation").Song);
+                     // each of 128 seeds the songs' own and fading
+                     var (seed, fades) = (i / 2, i % 2 == 1);
+                     var genre = fades ? fading : null;
+                     var (with, substitutes) = Generate(seed, genre);
+                     return (Seed: seed, With: with, Substitutes: substitutes, Without: substitutes is null ? null : Generate(seed, genre, "Reharmonisation").Song, Fades: fades);
                  }))
         {
             if (substitutes is not { } found || without is null)
                 continue;
             int Root(Song song, double position) => song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
             var span = with.Map!.Sections[found.Appearance];
-            // a fade's passes after the appearance playing its changes on, and those in a phrase's last bar, where an arranger
-            // reharmonises
-            faded += found.At.Count(x => x >= span.End - 1e-9);
-            ends += found.At.Count(x => (x - span.Start) % span.Meter.PhraseDuration >= span.Meter.PhraseDuration - span.Meter.BarDuration - 1e-9);
-            all += found.At.Length;
+            // a fade's passes after the appearance playing its changes on, the fading songs', and the songs' own in a phrase's
+            // last bar, where an arranger reharmonises
+            if (fades)
+                faded += found.At.Count(x => x >= span.End - 1e-9);
+            else
+            {
+                ends += found.At.Count(x => (x - span.Start) % span.Meter.PhraseDuration >= span.Meter.PhraseDuration - span.Meter.BarDuration - 1e-9);
+                all += found.At.Length;
+            }
             foreach (var place in found.At.GroupBy(x => Math.Round((x - span.Start) % span.Meter.PatternDuration, 6)))
             {
-                places++;
-                passes += place.Count() > 1 ? 1 : 0;
-                await Assert.That(place.Select(x => Root(with, x) - Root(without, x)).Distinct().Count()).IsEqualTo(1).Because($"seed {seed} at {place.Key}");
+                places += fades ? 0 : 1;
+                passes += !fades && place.Count() > 1 ? 1 : 0;
+                await Assert.That(place.Select(x => Root(with, x) - Root(without, x)).Distinct().Count()).IsEqualTo(1).Because($"seed {seed}{(fades ? ", fading" : "")} at {place.Key}");
             }
         }
 
-        Console.WriteLine($"{passes} of {places} substituted places played at more than one pass, {faded} substitutes in a fade's passes, {ends} of {all} substitutes in a phrase's last bar");
+        Console.WriteLine($"{passes} of {places} substituted places played at more than one pass, {faded} substitutes in a fade's passes of 128 fading songs, {ends} of {all} substitutes in a phrase's last bar");
         await Assert.That(passes).IsGreaterThan(0);
         await Assert.That(faded).IsGreaterThan(0);
     }

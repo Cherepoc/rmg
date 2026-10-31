@@ -23,14 +23,16 @@ public sealed class SongEndingTest
     private static int Tonic(CorpusSong song) =>
         song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset).GetEffectiveValueAt(song.Map.Ending.Start).Mod(12);
 
+    /// <summary>A song's closed ending lands its bass and its melody on the tonic, the key it ends in (seen 44 to 49 of 64 songs closed, at two offsets).</summary>
     [Test]
     public async Task ClosedEndings_LandOnTheTonic()
     {
-        var closed = Songs.Where(x => FormLayers.HasFinalChord(Ending(x).Kind)).ToArray();
+        var closed = TestCorpus.Range(64).Where(x => FormLayers.HasFinalChord(Ending(x).Kind)).ToArray();
+        Console.WriteLine($"{closed.Length} of 64 songs closed");
         var bassOnTonic = closed.Count(x => x.Notes(x.Track(TrackRole.Bass))[^1].Value.Offset.Mod(12) == Tonic(x));
         var melodyOnTonic = closed.Count(x => x.Notes(x.Track(TrackRole.Melody))[^1].Value.Offset.Mod(12) == Tonic(x));
 
-        await Assert.That(closed.Length).IsGreaterThan(20);
+        await Assert.That(closed.Length).IsGreaterThan(32);
         await Assert.That(bassOnTonic).IsEqualTo(closed.Length);
         await Assert.That(melodyOnTonic).IsEqualTo(closed.Length);
     }
