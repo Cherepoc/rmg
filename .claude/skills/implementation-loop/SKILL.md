@@ -48,7 +48,7 @@ every step with its commit, its measurements, and whatever was postponed or left
 - Build: `dotnet build Rmg.slnx -c Release --nologo -v quiet`.
 - Songs changed: `dotnet Rmg/bin/Release/net10.0/Rmg.dll --fingerprint-songs > before.txt` before the change and
   again after it, the lines that differ the songs it changed, of 256.
-- Page tests: `dotnet run --project Rmg.Tests.Page -c Release --no-build`, about 15 s, after a build of the solution.
+- Page tests: `./test.sh --page`, about 40 s, after a build of the solution.
 - A second corpus: `RMG_CORPUS_OFFSET=1000000` before the tests runs them on other songs, a seed a test names then
   the corpus's moved by it; for a change that redraws many songs, or now and then, each failure a bug to fix or a
   calibration to give a wider sample, checked against the committed code first.

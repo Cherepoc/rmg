@@ -11,7 +11,8 @@ namespace Rmg.Tests.Page;
 /// <summary>
 ///     The server as it is published, started once for every test on a port of its own, with its analytics in a
 ///     directory of their own and the small soundfont, and a headless Chromium to drive its pages: Playwright's own,
-///     its headless shell installed on the first run, so that a test does not depend on what browser the machine has.
+///     its headless shell installed on the first run, so that a test does not depend on what browser the machine has,
+///     and its sans-serif font Liberation Sans, so that it does not depend on the machine's fonts either.
 /// </summary>
 public sealed class Site : IAsyncInitializer, IAsyncDisposable
 {
@@ -36,7 +37,25 @@ public sealed class Site : IAsyncInitializer, IAsyncDisposable
         await WaitForServer();
 
         _playwright = await Playwright.CreateAsync();
-        Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+        Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true, Env = Fonts() });
+    }
+
+    /// <summary>
+    ///     The browser's environment, the tests' own with fonts.conf as its fonts: the page's sans-serif and system-ui
+    ///     Liberation Sans, as wide as Arial, rather than the machine's default, which on Ubuntu is DejaVu Sans, wide
+    ///     enough to wrap the phone's lines that a phone's Roboto keeps whole.
+    /// </summary>
+    private static Dictionary<string, string> Fonts()
+    {
+        var config = Path.Combine(AppContext.BaseDirectory, "fonts.conf");
+        var check = Process.Start(new ProcessStartInfo("fc-list", ["Liberation Sans"]) { RedirectStandardOutput = true, Environment = { ["FONTCONFIG_FILE"] = config } })!;
+        var found = check.StandardOutput.ReadToEnd();
+        check.WaitForExit();
+        if (string.IsNullOrWhiteSpace(found))
+            throw new InvalidOperationException("The page tests want Liberation Sans (fonts-liberation on Debian and Ubuntu), the browser's sans-serif font.");
+        var environment = Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().ToDictionary(x => (string)x.Key, x => (string)x.Value!);
+        environment["FONTCONFIG_FILE"] = config;
+        return environment;
     }
 
     public async ValueTask DisposeAsync()

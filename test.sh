@@ -9,6 +9,7 @@
 #   ./test.sh --treenode-filter "/*/*/SoloTest/*" --output detailed   # one class, its reports included
 #   RMG_TEST_MEMORY=8G ./test.sh                                  # a larger cap, the corpus keeping songs in it
 #   RMG_CORPUS_OFFSET=1000000 ./test.sh                           # other songs
+#   ./test.sh --page                                              # the page's tests (Rmg.Tests.Page), some 40 s
 #
 # Built first: dotnet build Rmg.slnx -c Release (or ./test.sh --build to build the tests, capped too).
 set -eu
@@ -21,5 +22,10 @@ if [ "${1:-}" = --build ]; then
   systemd-run --user --scope --quiet -p MemoryMax=3G -p MemorySwapMax=0 -p AllowedCPUs=$cpus -- \
     dotnet build Rmg.Tests -c Release --nologo -v quiet
 fi
-exec systemd-run --user --scope --quiet -p MemoryMax=$memory -p MemorySwapMax=0 -p AllowedCPUs=$cpus -- \
-  dotnet run --project Rmg.Tests -c Release --no-build -- --maximum-parallel-tests 4 "$@"
+run() { exec systemd-run --user --scope --quiet -p MemoryMax=$memory -p MemorySwapMax=0 -p AllowedCPUs=$cpus -- "$@"; }
+# the page's tests, the server and the browser among them, peak at some 1.6 GB, as many at a time as they set (Parallelism)
+if [ "${1:-}" = --page ]; then
+  shift
+  run dotnet run --project Rmg.Tests.Page -c Release --no-build -- "$@"
+fi
+run dotnet run --project Rmg.Tests -c Release --no-build -- --maximum-parallel-tests 4 "$@"

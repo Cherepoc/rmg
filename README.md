@@ -250,11 +250,14 @@ included, with:
 
 The page is tested as it is used: `Rmg.Tests.Page` starts the server as it is built, on a port and with analytics of
 its own, and drives its pages in Playwright's headless Chromium, which its first run installs into
-`~/.cache/ms-playwright`. The page loads its synthesizer from the CDN, so the tests want the network. They take about
-30 s:
+`~/.cache/ms-playwright`. The page loads its synthesizer from the CDN, so the tests want the network. The browser
+wants the system's libraries for it (on Ubuntu `libnspr4 libnss3 libasound2t64`), Liberation Sans as its sans-serif
+font, so that a layout measures the same everywhere (`fonts-liberation`), and the small soundfont,
+`TimGM6mb.sf2`, in `Rmg.WebApi/wwwroot/soundfonts` (from the Debian package `deploy.sh` fetches). They take about
+40 s:
 
 ```
-dotnet run --project Rmg.Tests.Page -c Release
+./test.sh --page
 ```
 
 ## Settings
