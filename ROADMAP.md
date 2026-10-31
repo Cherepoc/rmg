@@ -987,6 +987,12 @@ Their code, as planned and reviewed on 19 October 2026 (each item's numbers to i
   songs again. With the suite given 16 GB, the first 800 of a preset's songs asked are kept (`TestCorpus.Get`): 10m 53s
   against 12m 41s at 16 GB without them, 16% less CPU, peaking at 12.8 GB. A preset changed by `Without` keeps its id,
   so a preset's genre is known by the very object read from the list (`GenrePresets.IdOf`), never by its id.
+  On a machine of 16 cores and 6 GB shared with other work (31 October 2026) the suite runs in 3 GB through `test.sh`,
+  on all the cores but two and four tests at a time, its corpus keeping songs only in what a cap leaves beyond the
+  tests' own work (`TestCorpus.SongsKept`), none in 3 GB: 12m 51s, peaking at 3.08 GB. Its tests at once, keeping
+  nothing, ran out of 3 GB, as did four and two at a time while some 300 songs were held in tests' statics
+  (`DrumSoloTest`'s 128 wild ones, `SongIntroTest`'s, `SongEndingTest`'s) and every 12/8 song kept; without them four
+  passed in 3 GB, and in 2 ran out. The heap is let to 85% of the cap, not the runtime's 75%.
   Let go of: fewer songs per test (the accuracy asked to keep), stages skipped for tests that do not read them (the
   songs then not the songs), scheduling (the cores already busy), the trace off (nothing to save), a cache on disk
   across runs (every change to `Rmg.Core` invalidates it, and a song's serialisation is a project of its own), and tests

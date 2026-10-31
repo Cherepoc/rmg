@@ -9,7 +9,7 @@ namespace Rmg.Tests.Forms;
 
 public sealed class SongIntroTest
 {
-    private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(64).ToArray();
+    private static CorpusSong[] Songs => TestCorpus.Range(64);
 
     private static CorpusSong[] Of(IntroKind intro) => Songs.Where(x => x.Map.Intro.Kind == intro).ToArray();
 

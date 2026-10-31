@@ -26,10 +26,31 @@ internal static class TestCorpus
 
     private static readonly ConcurrentDictionary<int, Lazy<CorpusSong>> Songs = new();
 
-    public static CorpusSong Get(int seed)
-    {
-        return Songs.GetOrAdd(seed, x => new Lazy<CorpusSong>(() => Generate(x))).Value;
-    }
+    /// <summary>The song of the seed, kept and shared where its seed is below <see cref="PlainSeedsKept" />, made afresh past it.</summary>
+    public static CorpusSong Get(int seed) =>
+        seed < PlainSeedsKept ? Songs.GetOrAdd(seed, x => new Lazy<CorpusSong>(() => Generate(x))).Value : Generate(seed);
+
+    /// <summary>
+    ///     How many songs the corpus keeps, in what the run's heap may hold (the runtime's limit, a share of the memory cap
+    ///     the run is given, or of the machine's memory without one, as test.sh gives it) beyond the tests' own work, a
+    ///     kept song some 3.1 MB with its rendering. The tests' work, four at a time, passed in 3 GB with no song kept and
+    ///     not in 2 (31 October 2026, on 16 cores, the suite 12m 39s): kept songs save making them again, which the cores
+    ///     do cheaply, and are given only memory to spare.
+    /// </summary>
+    private static readonly int SongsKept = (int)(Math.Max(0, GC.GetGCMemoryInfo().TotalAvailableMemoryBytes - TestsWorkBytes) / KeptSongBytes);
+
+    private const long TestsWorkBytes = 2_750_000_000;
+
+    private const double KeptSongBytes = 3.1e6;
+
+    /// <summary>The largest plain corpus the tests measure (<see cref="Measure{T}" /> of 1024 songs).</summary>
+    private const int LargestCorpus = 1024;
+
+    /// <summary>
+    ///     The plain corpus's seeds kept, first of the songs kept, as the tests ask a plain song some 11 times and a
+    ///     preset's 3 (29 October 2026).
+    /// </summary>
+    private static readonly int PlainSeedsKept = Math.Min(SongsKept, LargestCorpus);
 
     /// <summary>The songs of seeds 0 to <paramref name="count" /> - 1, in order, those not yet made made in parallel.</summary>
     public static CorpusSong[] Range(int count) => InParallel(Enumerable.Range(0, count), Get);
@@ -50,18 +71,13 @@ internal static class TestCorpus
     /// <summary>
     ///     The work of every seed, in the seeds' order, as <see cref="InParallel{T}" /> does it, but handed over a core's
     ///     worth at a time as it is read, so that a test reading songs made afresh once holds a few of them rather than all:
-    ///     a song with its trace is some 3 MB, and the suite's tests run eight at a time.
+    ///     a song with its trace is some 3 MB, and the suite's tests run four at a time (test.sh).
     /// </summary>
     public static IEnumerable<T> Streamed<T>(IEnumerable<int> seeds, Func<int, T> work) =>
         seeds.Chunk(Environment.ProcessorCount).SelectMany(chunk => InParallel(chunk, work));
 
-    private static readonly ConcurrentDictionary<(int, Meter), Lazy<CorpusSong>> MeterSongs = new();
-
-    /// <summary>The song of the seed with its bars in the meter given instead of its own.</summary>
-    public static CorpusSong Get(int seed, Meter meter)
-    {
-        return MeterSongs.GetOrAdd((seed, meter), x => new Lazy<CorpusSong>(() => Generate(x.Item1, new SongOverrides(Meter: x.Item2)))).Value;
-    }
+    /// <summary>The song of the seed with its bars in the meter given instead of its own, made afresh, as the suite asks each once.</summary>
+    public static CorpusSong Get(int seed, Meter meter) => Generate(seed, new SongOverrides(Meter: meter));
 
     /// <summary>
     ///     The song of the seed with what the overrides set in place of its own draws: a preset's song, its genre and
@@ -80,11 +96,10 @@ internal static class TestCorpus
     }
 
     /// <summary>
-    ///     How many of the presets' songs are kept, some 2.3 GB beside the plain corpus's 3 in the suite's 16: the tests ask
-    ///     7,691 of their 10,075 again, and the first 800 kept save some 70% of the repeats' time, 1,600 hardly more
-    ///     (29 October 2026).
+    ///     How many of the presets' songs are kept, the first asked, once the plain corpus is: the tests ask 7,691 of their
+    ///     10,075 again, and the first 800 kept save some 70% of the repeats' time, 1,600 hardly more (29 October 2026).
     /// </summary>
-    private const int PresetSongsKept = 800;
+    private static readonly int PresetSongsKept = SongsKept - PlainSeedsKept;
 
     private static int _presetSongsKept;
 

@@ -22,7 +22,11 @@ public sealed class DrumSoloTest
     private static (SectionSpan Span, SoloLines.Segment[] Plan, bool Feet, DrumSolo Solo)[] KitSolos(CorpusSong song) =>
         [..DrumSolos(song).Where(x => x.Solo.Soloists.SequenceEqual([0]) && x.Solo.Keepers.Length == 0)];
 
-    private static readonly CorpusSong[] Songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild));
+    /// <summary>
+    ///     The wild solos' songs, made afresh for each test and read a few at a time, as the corpus keeps no song with values
+    ///     given and 128 of them held through the suite took some 400 MB.
+    /// </summary>
+    private static IEnumerable<CorpusSong> Songs => TestCorpus.Streamed(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild));
 
     /// <summary>Songs of wild solos with the kit and percussion, their groove the plainest and the wildest.</summary>
     private static CorpusSong[] WithPercussion(double groove) =>
@@ -465,7 +469,7 @@ public sealed class DrumSoloTest
     {
         var solos = Songs.SelectMany(song => DrumSolos(song).Select(x => (Song: song, x.Span, x.Plan, x.Feet, x.Solo))).ToArray();
         var segments = solos.SelectMany(x => x.Plan).ToArray();
-        Console.WriteLine($"  {solos.Length} drum solos of {Songs.Length} songs, {segments.Length} segments: " +
+        Console.WriteLine($"  {solos.Length} drum solos of {Songs.Count()} songs, {segments.Length} segments: " +
                           string.Join(", ", segments.GroupBy(x => x.Gesture).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)segments.Length:P0}")));
         var runs = segments.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick).ToArray();
         Console.WriteLine($"  runs and licks: shapes {string.Join(", ", runs.GroupBy(x => x.Shape).Select(x => $"{x.Key} {x.Count() / (double)runs.Length:P0}"))}; " +

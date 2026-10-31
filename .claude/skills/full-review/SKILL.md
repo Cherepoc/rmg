@@ -68,7 +68,7 @@ $S/scripts/runs.sh <repo> $R
 
 It builds and runs the reports' smoke test first, stopping where it fails: the review measures with the reports, and
 one that has rotted is fixed before any reviewer reads its numbers (a review once spent its first package mending
-them). Then the suite at the review's offsets and the four preset reports (the fourth, `sounding.txt`, how the parts sound together), one at a time under the memory cap (the suite in 16 GB, as its corpus keeps a preset's songs, on twelve cores), every
+them). Then the suite at the review's offsets and the four preset reports (the fourth, `sounding.txt`, how the parts sound together), one at a time under the memory cap (`test.sh`'s: 3 GB on all the cores but two, the suite four tests at a time), every
 failure run again alone at its offset, and every failure a finding (`findings/run-<offset>.json`) with its seed and
 offset: category `run` for the verifiers to trace, or `flaky` where it passed alone, a test racing under the suite's
 load rather than a song breaking it. Then the device ledger, from the reports:

@@ -18,9 +18,10 @@ mkdir -p "$R/holdout"
 step="$R/holdout/bisect-step.sh"
 cat > "$step" <<STEP
 #!/bin/bash
-export PATH=\$HOME/.dotnet:\$PATH
-cap() { systemd-run --user --scope --quiet -p MemoryMax=8G -p MemorySwapMax=0 -p AllowedCPUs=0-11 -E RMG_CORPUS_OFFSET=$offset -- "\$@"; }
-systemd-run --user --scope --quiet -p MemoryMax=8G -p MemorySwapMax=0 -p AllowedCPUs=0-\$(( \$(nproc) - 3 )) -- dotnet build Rmg.Tests -c Release --nologo -v quiet > /dev/null 2>&1 || exit 125
+# test.sh's settings, which a step's commit may be older than: 3 GB on all the cores but two, the heap 85% of it
+export PATH=\$HOME/.dotnet:\$PATH DOTNET_GCHeapHardLimitPercent=0x55 RMG_CORPUS_OFFSET=$offset
+cap() { systemd-run --user --scope --quiet -p MemoryMax=3G -p MemorySwapMax=0 -p AllowedCPUs=0-\$(( \$(nproc) - 3 )) -- "\$@"; }
+cap dotnet build Rmg.Tests -c Release --nologo -v quiet > /dev/null 2>&1 || exit 125
 out=\$(cap dotnet run --project Rmg.Tests -c Release --no-build -- --treenode-filter "/*/*/*/$test" 2>&1)
 echo "\$(git log --oneline -1 | cut -c1-70): \$(echo "\$out" | grep -E 'failed:|succeeded:' | tr -s ' \n' ' ')" >> "$log"
 echo "\$out" | grep -q 'failed: 0' && echo "\$out" | grep -q 'succeeded: [1-9]' && exit 0

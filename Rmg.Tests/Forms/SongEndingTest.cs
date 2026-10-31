@@ -15,7 +15,7 @@ public sealed class SongEndingTest
     private const int MelodyTrack = 5;
     private const int BassTrack = 6;
 
-    private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(32).ToArray();
+    private static CorpusSong[] Songs => TestCorpus.Range(32);
 
     private static EndingSpan Ending(CorpusSong song) => song.Map.Ending;
 

@@ -232,17 +232,20 @@ from the CDN as before.
 ## Tests
 
 ```
-dotnet run --project Rmg.Tests -c Release
+dotnet build Rmg.slnx -c Release
+./test.sh
 ```
 
-Tests that look at whole songs share them: `TestCorpus` generates each seed once, with its rendering and the trace of
-its generation. A song's `Map` says where its intro, sections and ending are, so tests read positions from it, and
+`test.sh` runs the tests in a memory cap of their own (3 GB, or `RMG_TEST_MEMORY`), on all the cores but two and four
+tests at a time, as the machine runs other work beside them; it passes its arguments on to the tests. Tests that look
+at whole songs share them: `TestCorpus` generates each seed once and keeps it, with its rendering and the trace of its
+generation, as far as the cap leaves memory beyond the tests' own work, and makes it again otherwise. A song's `Map` says where its intro, sections and ending are, so tests read positions from it, and
 the trace's values (`StateTraceEntry.Value`), not its words. Explicit tests report what the corpus measures, such as
 how the solos play (`SoloTest`) or how the sections differ (`SectionDynamicsTest`); run one class, its reports
 included, with:
 
 ```
-dotnet run --project Rmg.Tests -c Release -- --treenode-filter "/*/*/SoloTest/*" --output Detailed
+./test.sh --treenode-filter "/*/*/SoloTest/*" --output Detailed
 ```
 
 The page is tested as it is used: `Rmg.Tests.Page` starts the server as it is built, on a port and with analytics of

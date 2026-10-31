@@ -8,12 +8,12 @@
 set -u
 repo=$(realpath "$1"); R=$(realpath "$2"); mode=${3:-}
 S=$(dirname "$(realpath "$0")")
-export PATH=$HOME/.dotnet:$PATH
-# a build on all the cores but two, a report or a test alone in 8 GB on twelve, and the suite in 16 GB, as its corpus
-# keeps a preset's songs (TestCorpus.Get), on twelve
-build() { systemd-run --user --scope --quiet -p MemoryMax=8G -p MemorySwapMax=0 -p AllowedCPUs=0-$(( $(nproc) - 3 )) -- "$@"; }
-cap() { systemd-run --user --scope --quiet -p MemoryMax=8G -p MemorySwapMax=0 -p AllowedCPUs=0-11 -- "$@"; }
-suite() { systemd-run --user --scope --quiet -p MemoryMax=16G -p MemorySwapMax=0 -p AllowedCPUs=0-11 -- "$@"; }
+# test.sh's settings, as the machine runs other work beside the review: everything on all the cores but two and in
+# 3 GB, the heap 85% of it, the corpus keeping no song in it (TestCorpus.SongsKept), the suite four tests at a time
+export PATH=$HOME/.dotnet:$PATH DOTNET_GCHeapHardLimitPercent=0x55
+cap() { systemd-run --user --scope --quiet -p MemoryMax=3G -p MemorySwapMax=0 -p AllowedCPUs=0-$(( $(nproc) - 3 )) -- "$@"; }
+build() { cap "$@"; }
+suite() { cap "$@"; }
 mkdir -p "$R/run"
 cd "$repo"
 build dotnet build Rmg.slnx -c Release --nologo -v quiet > "$R/run/build.txt" 2>&1 || { echo "build failed: $R/run/build.txt"; exit 1; }
@@ -29,7 +29,7 @@ else
   offsets=$(python3 -c "import json; print(' '.join(map(str, json.load(open('$R/review.json'))['offsets'])))")
 fi
 for o in $offsets; do
-  suite env RMG_CORPUS_OFFSET=$o dotnet run --project Rmg.Tests -c Release --no-build > "$R/run/offset-$o.txt" 2>&1
+  suite env RMG_CORPUS_OFFSET=$o dotnet run --project Rmg.Tests -c Release --no-build -- --maximum-parallel-tests 4 > "$R/run/offset-$o.txt" 2>&1
   # each failure run again alone at the same offset: one passing alone fails only under the suite's load, a flake
   : > "$R/run/flaky-$o.txt"
   for t in $(grep -oP '^failed \K\w+' "$R/run/offset-$o.txt" | sort -u); do

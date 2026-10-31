@@ -52,7 +52,9 @@ every step with its commit, its measurements, and whatever was postponed or left
 - A second corpus: `RMG_CORPUS_OFFSET=1000000` before the tests runs them on other songs, a seed a test names then
   the corpus's moved by it; for a change that redraws many songs, or now and then, each failure a bug to fix or a
   calibration to give a wider sample, checked against the committed code first.
-- Tests: `dotnet run --project Rmg.Tests -c Release --no-build`; one class, explicit report tests included:
-  `-- --treenode-filter "/*/*/ClassName/*" --output detailed`.
+- Tests: `./test.sh`, after a build, in 3 GB on all the cores but two, as the machine runs other work: never
+  `dotnet run --project Rmg.Tests` bare, whose corpus then counts the machine's whole memory as its own; one class,
+  explicit report tests included: `./test.sh --treenode-filter "/*/*/ClassName/*" --output detailed`. `./test.sh --build ...`
+  builds the tests in the cap first.
 - The corpus: `TestCorpus.Range(n)`, `TestCorpus.Measure(n, song => ...)` and `TestCorpus.InParallel`, with song counts
   in powers of two.
