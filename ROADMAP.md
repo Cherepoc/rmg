@@ -7,7 +7,9 @@ is removed once it is built, its leftovers kept under *Open work*.
 ## Priorities
 
 1. **The rules on the other corpora** (P1, *Older rule failures*): none failing at five offsets (19 October 2026), and
-   at 2300000000 four traced and fixed (28 October); the suite at another offset now and then.
+   at 2300000000 four traced and fixed (28 October), at 3141000000 seven (1 November): a drum solo's first hit clearing
+   the fill's kick before it, three tests reading what their rule is not about (a trade's other soloist, a pre-chorus
+   played as a drum solo, a gated part's held chords) and three samples widened; the suite at another offset now and then.
 2. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
