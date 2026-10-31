@@ -710,12 +710,13 @@ internal static class DrumSolos
 
             // the band's hits under a kit's solo caught with them, as a drummer catches each with the kick and a crash and
             // solos between: the hands' strokes within a 16th of a hit given up, and the hit struck as loud as the solo's
-            // accent there, up to its build, which rolls over them
+            // accent there, up to its build, which rolls over them; the kick, which strikes the hit too, keeping its strokes, as
+            // a fill's double kick runs into it
             if (solo.HitEvery > 0 && kitSolos)
                 for (var at = whole.Start; at < span.End - 1e-9; at += whole.Meter.BarDuration * solo.HitEvery)
                 {
                     var level = playing.FirstOrDefault(x => at >= x.Start - 1e-9 && at < x.End - 1e-9)?.Intensity ?? 0;
-                    foreach (var track in tracks.Where(x => !feetTracks.Contains(x)))
+                    foreach (var track in tracks.Where(x => !feetTracks.Contains(x) && x != kick?.Track))
                         edits.Leave(track, at - HitClearance, at + HitClearance);
                     foreach (var sound in new[] { kick, crash }.OfType<RunSound>())
                     {
