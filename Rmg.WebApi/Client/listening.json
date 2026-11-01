@@ -1,9 +1,9 @@
 [
   {
-    "id": "postrock-heavy-return",
-    "question": "A Post-rock section heard clean, then coming back louder with its guitars driven: the release, or a different band?",
-    "decides": "Whether a heavy section's clean guitars turn driven where it comes back louder than the song (louderForms.guitars, Post-rock's 80-90-90), against never.",
-    "genre": "postRock",
+    "id": "doom-tuning",
+    "question": "Two Doom songs, one with its guitars and bass tuned down to C, four semitones under the other's: the weight Doom wants, or only muddier?",
+    "decides": "Whether Doom tunes its parts down (tuning, its riff, rhythm and bass at 42-33-25, D at its plain end, C at its middle, B♭ at its wild), against the standard tuning; heard muddier, back towards E.",
+    "genre": "doom",
     "with": {
       "genre": {},
       "settings": {}
@@ -11,70 +11,140 @@
     "without": {
       "skip": [],
       "genre": {
-        "louderForms": {
-          "guitars": 0
+        "tuning": {
+          "riff": 50,
+          "rhythm": 50,
+          "bass": 50
         }
       },
       "settings": {}
     },
     "seeds": [
       {
-        "seed": "S",
-        "at": 573.5,
-        "from": 557.9,
+        "seed": "8",
+        "at": 343.4,
+        "from": 341.1,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))"
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "d",
-        "at": 170.1,
-        "from": 130.6,
+        "seed": "9",
+        "at": 99.3,
+        "from": 95.2,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))"
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))"
         ]
       },
       {
-        "seed": "18",
-        "at": 128.6,
-        "from": 83.6,
+        "seed": "F",
+        "at": 260.9,
+        "from": 255.7,
         "listen": [
-          "Chords (Electric Guitar (clean))",
-          "Rhythm part (Distortion Guitar)"
+          "Riff (Overdriven Guitar)"
         ]
       },
       {
-        "seed": "1F",
-        "at": 471.8,
-        "from": 469.5,
+        "seed": "J",
+        "at": 21.2,
+        "from": 15.9,
         "listen": [
-          "Chords (Electric Guitar (clean))",
-          "Riff (Electric Guitar (clean))",
-          "Rhythm part (Electric Guitar (clean))"
+          "Bass (Electric Bass (pick))"
         ]
       },
       {
-        "seed": "1d",
-        "at": 494.2,
-        "from": 485.3,
+        "seed": "L",
+        "at": 384,
+        "from": 381,
         "listen": [
-          "Riff (Electric Guitar (clean))"
+          "Riff (Distortion Guitar)"
         ]
       },
       {
-        "seed": "1n",
-        "at": 122.8,
-        "from": 80,
+        "seed": "M",
+        "at": 267.5,
+        "from": 263.6,
         "listen": [
-          "Rhythm part (Distortion Guitar)"
+          "Bass (Electric Bass (finger))"
         ]
       }
     ]
   },
   {
-    "id": "film-bowed",
-    "question": "A Cinematic piano section's strings held, then coming back louder bowed in tremolo: the climax, or a shiver for nothing?",
-    "decides": "How often a heavy section's held strings, the pad's or the chords' string ensemble, are bowed in tremolo where it comes back louder than the song (louderForms.strings, Cinematic piano's 40-60-70), against never.",
+    "id": "jazz-walk",
+    "question": "A Jazz bass walking in quarters, passing between the chord's notes on 2 and 4, against its own line: the walk, or a bass that won't sit still?",
+    "decides": "Whether Jazz's bass walks (figure.bass's walk, a quarter on every beat, the backbeats passing by step between its chord's notes), against the bass's own line and its halves; heard restless, the walk's weight lowered.",
+    "genre": "jazz",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "walk": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 129.2,
+        "from": 126.2,
+        "listen": [
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "6",
+        "at": 424.7,
+        "from": 421.6,
+        "listen": [
+          "Solo (Tenor Sax)",
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "8",
+        "at": 50.6,
+        "from": 48.5,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "J",
+        "at": 277.7,
+        "from": 275.2,
+        "listen": [
+          "Bass (Contrabass)"
+        ]
+      },
+      {
+        "seed": "O",
+        "at": 43.2,
+        "from": 41.4,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      },
+      {
+        "seed": "Q",
+        "at": 103.8,
+        "from": 100.5,
+        "listen": [
+          "Bass (Acoustic Bass)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "film-cadenza",
+    "question": "A Cinematic piano piece ending with the band holding its last chord while the tune runs alone over it, slowing into the last hit, against its ending as it was: a flourish, or a detour before the end?",
+    "decides": "Whether a genre ends now and then on a cadenza (ending's cadenza, Cinematic piano's 20-30-40, Jazz's, Orchestral's and Chamber's 10-20-30), against the genre's other endings; heard a detour, none.",
     "genre": "filmPiano",
     "with": {
       "genre": {},
@@ -83,59 +153,147 @@
     "without": {
       "skip": [],
       "genre": {
-        "louderForms": {
-          "strings": 0
+        "ending": {
+          "cadenza": 0
         }
       },
       "settings": {}
     },
     "seeds": [
       {
-        "seed": "X",
-        "at": 165.4,
-        "from": 111.2,
+        "seed": "i",
+        "at": 217,
+        "from": 214,
         "listen": [
+          "Chords (Acoustic Grand Piano)",
+          "Melody (Acoustic Grand Piano)",
+          "Bass (Cello)"
+        ]
+      },
+      {
+        "seed": "m",
+        "at": 185.5,
+        "from": 182.6,
+        "listen": [
+          "Melody (Flute)",
+          "Chords (Acoustic Grand Piano)",
           "Pad (Tremolo Strings)"
         ]
       },
       {
-        "seed": "z",
-        "at": 53.7,
-        "from": 36.7,
+        "seed": "1A",
+        "at": 252.2,
+        "from": 248.7,
         "listen": [
-          "Pad (Tremolo Strings)"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "1S",
-        "at": 38.2,
-        "from": 26.1,
+        "seed": "1C",
+        "at": 205.8,
+        "from": 203.2,
         "listen": [
-          "Pad (Tremolo Strings)"
+          "Pad (String Ensemble 1)",
+          "Chords (Acoustic Grand Piano)",
+          "Melody (Violin)"
         ]
       },
       {
-        "seed": "1Y",
-        "at": 42,
-        "from": 28.7,
+        "seed": "1G",
+        "at": 202.2,
+        "from": 199,
         "listen": [
-          "Pad (Tremolo Strings)"
+          "Bass (Acoustic Grand Piano)",
+          "Pad (Tremolo Strings)",
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "1k",
-        "at": 35.1,
-        "from": 24.1,
+        "seed": "1b",
+        "at": 295.7,
+        "from": 292.9,
         "listen": [
-          "Pad (Tremolo Strings)"
+          "Melody (Flute)",
+          "Chords (Acoustic Grand Piano)",
+          "Pad (String Ensemble 1)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rock-loop",
+    "question": "A Rock section looping I–♭VII–IV–I, against its chords drawn as before: the classic rock loop, or a cliché?",
+    "decides": "Whether Rock plays its named progression (progression's rockLoop, I–♭VII–IV–I over a Mixolydian, Dorian or Aeolian section, 40-35-25), against its chords drawn; heard a cliché, lowered.",
+    "genre": "rock",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "progression": {
+          "rockLoop": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "6",
+        "at": 132.9,
+        "from": 131.9,
+        "listen": [
+          "Riff (Distortion Guitar)"
         ]
       },
       {
-        "seed": "1t",
-        "at": 98.5,
-        "from": 33.8,
+        "seed": "C",
+        "at": 33.8,
+        "from": 32.1,
         "listen": [
-          "Pad (Tremolo Strings)"
+          "Riff (Distortion Guitar)",
+          "Bass (Electric Bass (finger))",
+          "Melody (Harmonica)"
+        ]
+      },
+      {
+        "seed": "I",
+        "at": 131.5,
+        "from": 129.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))",
+          "Bass (Electric Bass (pick))",
+          "Chords (Distortion Guitar)"
+        ]
+      },
+      {
+        "seed": "b",
+        "at": 120.8,
+        "from": 119.2,
+        "listen": [
+          "Pad (Choir Aahs)",
+          "Chords (Distortion Guitar)",
+          "Rhythm part (Overdriven Guitar)"
+        ]
+      },
+      {
+        "seed": "h",
+        "at": 156.1,
+        "from": 154.1,
+        "listen": [
+          "Riff (Overdriven Guitar)",
+          "Bass (Electric Bass (pick))"
+        ]
+      },
+      {
+        "seed": "k",
+        "at": 66,
+        "from": 64.1,
+        "listen": [
+          "Bass (Electric Bass (pick))",
+          "Melody (Electric Guitar (clean))",
+          "Chords (Overdriven Guitar)"
         ]
       }
     ]

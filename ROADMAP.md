@@ -87,7 +87,10 @@ round (30 October 2026) asks a heavy section heard as it is and then coming back
 guitars driven at the return (`postrock-heavy-return`, 0.72) and Cinematic piano's held strings bowed in tremolo
 (`film-bowed`, 0.30, `louderForms.strings`: a heavy appearance's string ensembles on the pad and the chords on General
 MIDI's tremolo strings, held whole, Orchestral's and Cinematic piano's 40-60-70, Symphonic's 30-50-60, Post-rock's
-30-40-50, the songs' own 0-10-25; a line left as it is, whose tune a tremolo would blur).
+30-40-50, the songs' own 0-10-25; a line left as it is, whose tune a tremolo would blur); answered on 1 November 2026, each kept, and retired. The eleventh round (1 November
+2026) asks the four devices built the same day, each against none: Doom tuned down to C (`doom-tuning`, 0.86, against E),
+Jazz's walking bass (`jazz-walk`, 0.43, against its own line and its halves), Cinematic piano's cadenza (`film-cadenza`,
+1.03, against its other endings) and Rock's I–♭VII–IV–I (`rock-loop`, 0.58, against its chords drawn).
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
@@ -122,7 +125,9 @@ MIDI's tremolo strings, held whole, Orchestral's and Cinematic piano's 40-60-70,
   E to an octave down); and of its ninth round (29 October 2026), Funk's rhythm guitar open on the clean guitar, its dead
   notes muted (`funk-guitar`, 6 to none), a Funk bass slapping its accents (`funk-slap`, 5 to none, one unsure on a
   song whose bass swelled into its notes, its attack lost, a bass never swelling since) and Cinematic piano's tempo at a
-  phrase's edges (`film-rubato`, 6 to none).
+  phrase's edges (`film-rubato`, 6 to none); and of its tenth round (1 November 2026), a heavy section heard as it is and then coming back
+  louder turned: Post-rock's guitars driven at the return (`postrock-heavy-return`, 6 to none) and Cinematic piano's
+  held strings bowed in tremolo (`film-bowed`, 5 to none, one the same).
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
