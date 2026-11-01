@@ -397,8 +397,11 @@ internal sealed class SectionGenerator
         StateTrace.RecordSection(TracePoints.Turnaround, SectionTrace, sectionId, $"{turnaround}", (Turns: turnaround, Changes: !progression.SequenceEqual(untouched)));
         // the cadence raising the seventh for a major chord on the fifth, where the scale allows it, by the progression
         // facet, from a sequence of its own
-        var raisable = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
-        var raisedStep = raisable is not null && Stream(sectionId, SectionStream.CadenceRaise).TestProbability(Progressions.CadenceRaise.At(facets[Facet.Progression], _genre.Chance(GenreChoices.CadenceRaise, "sections")))
+        // a named progression's major fifth raised wherever it plays, every time, though a turnaround moves its last chord
+        // (ProgressionTemplate.MajorFifth)
+        var majorFifths = named is not null && Progressions.Templates.Single(x => x.Name == name).MajorFifth;
+        var raisable = Progressions.GetCadenceRaisedStep(scale.Offsets, home, majorFifths ? 4 : progression[^1]);
+        var raisedStep = raisable is not null && (majorFifths || Stream(sectionId, SectionStream.CadenceRaise).TestProbability(Progressions.CadenceRaise.At(facets[Facet.Progression], _genre.Chance(GenreChoices.CadenceRaise, "sections"))))
             ? raisable
             : null;
         // every chord's scale: the cadence's raise, and the others' applied or borrowed now and then, from a sequence of
@@ -407,7 +410,7 @@ internal sealed class SectionGenerator
         var dominants = Stream(sectionId, SectionStream.DominantChords)
             .TestProbability(ChordScales.Dominant.At(facets[Facet.Progression], _genre.Chance(GenreChoices.ChordScales, "dominant")));
         var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), Stream(sectionId, SectionStream.ChordOwnScales), Stream(sectionId, SectionStream.Mediants),
-            Stream(sectionId, SectionStream.MinorMediants), scale, home, progression, raisedStep,
+            Stream(sectionId, SectionStream.MinorMediants), scale, home, progression, raisedStep, majorFifths,
             dominants, facets[Facet.Progression], _genre);
         // the home held over the first two bars now and then, the first two chords where each lasts a bar or less, a slower
         // start, the rest changing as they were, from a sequence of its own; drawn all the same where chords last longer,

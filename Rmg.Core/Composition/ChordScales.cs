@@ -129,11 +129,12 @@ public static class ChordScales
     /// <param name="dominants">Whether the section plays every chord but its home as its own dominant (<see cref="Dominant" />).</param>
     /// <param name="progression">The chords' roots, in steps above the home.</param>
     /// <param name="cadenceRaised">The step the cadence raises, none for a cadence that keeps the scale.</param>
+    /// <param name="raisesFifths">Whether every chord on the fifth takes the cadence's raise, a named progression's major V (<see cref="ProgressionTemplate.MajorFifth" />), not the last alone.</param>
     /// <param name="ownContext">The sequence a chord's own scale is drawn from, apart from the rest, so that a song that plays none draws as it did.</param>
     /// <param name="mediantContext">The sequence a chromatic mediant is drawn from, apart from the rest.</param>
     internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, IGenerationContext ownContext, IGenerationContext mediantContext,
         IGenerationContext minorMediantContext, Scale scale, int home,
-        ImmutableArray<int> progression, int? cadenceRaised, bool dominants, double unconventionality, Genre genre)
+        ImmutableArray<int> progression, int? cadenceRaised, bool raisesFifths, bool dominants, double unconventionality, Genre genre)
     {
         var mediant = Mediant.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "mediant"));
         var minorMediant = MinorMediant.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "minorMediant"));
@@ -182,7 +183,7 @@ public static class ChordScales
                 if (dominants && !(onHome[2] == 3 && Mod(root) == 3)
                     && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant), home + root) is { } dominant)
                     return dominant;
-                if (chord == progression.Length - 1 && cadenceRaised is { } raised)
+                if ((raisesFifths ? Mod(root) == 4 : chord == progression.Length - 1) && cadenceRaised is { } raised)
                     return new ChordScale(ChordScaleKind.Cadence, StepAlterations.Of([raised], []));
                 // the next chord's dominant, where it has a fifth to resolve to
                 if (chord < progression.Length - 1 && Mod(progression[chord + 1] - root) == 3 && !IsDiminished(scale, home, progression[chord + 1], ChordScale.Section)

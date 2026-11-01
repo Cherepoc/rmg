@@ -76,11 +76,14 @@ internal static class Progressions
     ///     The progressions a genre names, which its sections play as named rather than drawn (<see cref="GenreChoices.Progression" />):
     ///     each its roots in steps from the section's home and the semitones each lies above it, which the section's scale must
     ///     make, so that rock's ♭VII is a ♭VII, played over Mixolydian's I, Dorian's and Aeolian's i, and never over a major
-    ///     scale's vii°; the songs' own drawn (<see cref="Drawn" />).
+    ///     scale's vii°, and every chord of it major or minor, never diminished; the songs' own drawn (<see cref="Drawn" />).
     /// </summary>
-    public static ImmutableArray<(string Name, string Label, ImmutableArray<int> Steps, ImmutableArray<int> Semitones)> Templates { get; } =
+    public static ImmutableArray<ProgressionTemplate> Templates { get; } =
     [
-        ("rockLoop", "I–♭VII–IV–I, rock's loop", [0, 6, 3, 0], [0, 10, 5, 0])
+        new("rockLoop", "I–♭VII–IV–I, rock's loop", [0, 6, 3, 0], [0, 10, 5, 0], false),
+        new("axis", "I–V–vi–IV, pop's axis", [0, 4, 5, 3], [0, 7, 9, 5], false),
+        new("minorAxis", "i–♭VI–♭III–♭VII, the axis in minor", [0, 5, 2, 6], [0, 8, 3, 10], false),
+        new("andalusian", "i–♭VII–♭VI–V, the Andalusian cadence", [0, 6, 5, 4], [0, 10, 8, 7], true)
     ];
 
     /// <summary>A progression drawn as the songs draw theirs, by its motions and its roots' places, a pool's name for none of the templates.</summary>
@@ -100,7 +103,9 @@ internal static class Progressions
         if (name == Drawn)
             return null;
         var template = Templates.Single(x => x.Name == name);
-        if (count % template.Steps.Length != 0 || template.Steps.Zip(template.Semitones).Any(x => GetInterval(scale.Offsets, home, home + x.First) != x.Second))
+        // its fifth major where it names it so, raised as a cadence raises it, every chord else as the scale makes it, never diminished
+        bool Plays(int step) => template.MajorFifth && Mod(step) == 4 ? GetCadenceRaisedStep(scale.Offsets, home, step) is not null : GetQuality(scale.Offsets, home + step) != TriadQuality.Other;
+        if (count % template.Steps.Length != 0 || template.Steps.Zip(template.Semitones).Any(x => GetInterval(scale.Offsets, home, home + x.First) != x.Second || !Plays(x.First)))
             return null;
         return [..Enumerable.Range(0, count).Select(i => Normalize(template.Steps[i % template.Steps.Length]))];
     }
@@ -414,3 +419,14 @@ internal static class Progressions
         return Mod(step + 3) - 3;
     }
 }
+
+/// <summary>A progression a genre names (<see cref="Progressions.Templates" />).</summary>
+/// <param name="Name">How a genre's pool names it.</param>
+/// <param name="Label">How a page shows it.</param>
+/// <param name="Steps">Its roots, in steps above the section's home, played over and over.</param>
+/// <param name="Semitones">The semitones each root lies above the home, which the section's scale must make.</param>
+/// <param name="MajorFifth">
+///     Whether its chord on the fifth is major wherever it plays, raised as a cadence raises it, as the Andalusian's V,
+///     where a minor scale makes it minor; it plays only where the raise makes it major.
+/// </param>
+internal sealed record ProgressionTemplate(string Name, string Label, ImmutableArray<int> Steps, ImmutableArray<int> Semitones, bool MajorFifth);

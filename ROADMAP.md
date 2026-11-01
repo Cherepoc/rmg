@@ -362,7 +362,7 @@ to), to none, a rule of it, the songs' notes outside their instrument 403 to 254
    floor C2 in 50 songs, B1 and C#2 in 7 each, its median 49 to 45, its bass's 39 to 35; Nu metal from D through C to B
    ([42, 33, 29]), C2 in 55, its riff's median 47 to 44, its bass's 40 to 35; Heavy metal as it is to the middle and D
    at its wild end ([50, 50, 42]), E in 59 and E♭ in 5, its median as it was; Thrash and Black metal as they are. Left:
-   asking it in the round after the tenth, Doom's tuned against E (`doom-tuning`).
+   Doom's tuned against E asked in the eleventh round (`doom-tuning`, 1 November 2026).
 3. **No third low in any part**, should listening find a chord blurred outside the metal family: a chord part's notes
    below about E3 kept to its root, fifth and octave wherever it sits, the chords moved under the melody
    (`Registers.Apart`) and a low key's among them, rather than only a part its genre moves down (`OpenChords`); how often
@@ -417,8 +417,15 @@ each moved). Put off, each its own plan:
   each lies above it, which the section's scale must make, so that it plays over Mixolydian's I, Dorian's and Aeolian's
   i and never a major scale's vii°, a pattern of four chords or eight, from a stream of its own, the held home leaving
   it be. Rock's `rockLoop` (I–♭VII–IV–I) 40-35-25 against the drawn's 100: over 64 songs (`NamedProgressionTest`), named
-  in 13% of its sections, 22% of the Mixolydian ones, ♭VII–IV–I heard in 15% from 4%, ♭VII–I in 37% from 43%. Left:
-  the other named progressions as data, the Andalusian i–♭VII–♭VI–V and the axis among them, should a genre want one.
+  in 13% of its sections, 22% of the Mixolydian ones, ♭VII–IV–I heard in 15% from 4%, ♭VII–I in 37% from 43%. On 2
+  November 2026 the others as data, every chord of a template major or minor where it plays, never diminished: the axis
+  I–V–vi–IV (Pop's 70-50-30, Ballad's 30-25-20, Punk's 40-30-20), the axis in minor i–♭VI–♭III–♭VII (Pop's and
+  Synthwave's 40-30-20, Ballad's 30-25-20, Trance's 50-40-30) and the Andalusian i–♭VII–♭VI–V, its V major wherever it
+  plays, raised as a cadence raises it (`ProgressionTemplate.MajorFifth`), so over a natural minor alone (Surf's
+  70-50-40, Latin's 30-25-20, Metal's 20-15-10, Dungeon's 20-20-15). Over 64 songs each, none of them heard before:
+  the axis in 18% of Pop's major sections and 14-16% of Punk's, the axis in minor in 9-13% of Trance's and Synthwave's
+  minor ones, the Andalusian in 20% of Surf's, 7% of Metal's and Latin's and 2% of Dungeon's, whose harmonic minor and
+  Phrygian it never plays over. Left: Phrygian dominant's own iv–♭III–♭II–I, should Surf or Latin want it.
 - **A key change's preparation as a genre's choice** (`KeyChange.PrepareChance`, 0.5 for every song): Black metal's
   jumps; put off until its key changes, named without a lift on 19 October, are heard.
 
