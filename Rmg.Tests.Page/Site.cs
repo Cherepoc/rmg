@@ -37,15 +37,18 @@ public sealed class Site : IAsyncInitializer, IAsyncDisposable
         await WaitForServer();
 
         _playwright = await Playwright.CreateAsync();
-        Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true, Env = Fonts() });
+        Browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true, Env = BrowserEnvironment() });
     }
 
     /// <summary>
     ///     The browser's environment, the tests' own with fonts.conf as its fonts: the page's sans-serif and system-ui
     ///     Liberation Sans, as wide as Arial, rather than the machine's default, which on Ubuntu is DejaVu Sans, wide
-    ///     enough to wrap the phone's lines that a phone's Roboto keeps whole.
+    ///     enough to wrap the phone's lines that a phone's Roboto keeps whole. And Vulkan's implicit layers off, Mesa's
+    ///     device selection among them, which looks through every GPU the machine has, under WSL the host's too: there
+    ///     the browser's GPU process, which a page's first canvas waits for, started 60 to 95 s late in half the
+    ///     launches, so that a run's first page timed out (1 November 2026), where without the layers it starts at once.
     /// </summary>
-    private static Dictionary<string, string> Fonts()
+    private static Dictionary<string, string> BrowserEnvironment()
     {
         var config = Path.Combine(AppContext.BaseDirectory, "fonts.conf");
         var check = Process.Start(new ProcessStartInfo("fc-list", ["Liberation Sans"]) { RedirectStandardOutput = true, Environment = { ["FONTCONFIG_FILE"] = config } })!;
@@ -55,6 +58,8 @@ public sealed class Site : IAsyncInitializer, IAsyncDisposable
             throw new InvalidOperationException("The page tests want Liberation Sans (fonts-liberation on Debian and Ubuntu), the browser's sans-serif font.");
         var environment = Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>().ToDictionary(x => (string)x.Key, x => (string)x.Value!);
         environment["FONTCONFIG_FILE"] = config;
+        environment["VK_LOADER_LAYERS_DISABLE"] = "~implicit~";
+        environment["NODEVICE_SELECT"] = "1";
         return environment;
     }
 
