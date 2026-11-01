@@ -351,8 +351,12 @@ to), to none, a rule of it, the songs' notes outside their instrument 403 to 254
    28 October 2026; first B, a seven-string's, 29): its riff's floor E1 in 41 of 64 songs, F1 to C2 in the rest, its
    median 38, its bass with it but no lower than B0 (`Registers.LowestTuned`), its median 37 beside the riff's, a drone
    in C to D# back on the low string. General
-   MIDI's guitars below E2 are their lowest sample transposed, which the owner's ear took. Left, the rest by the measure
-   (`TuningReportTest`): Doom and Nu metal to C or D, Metal to D or as it is, Thrash and Black metal as they are.
+   MIDI's guitars below E2 are their lowest sample transposed, which the owner's ear took. On 1 November 2026 the others by
+   the measure (`TuningReportTest`, 64 songs each): Doom from D at its plain end through C to B♭ ([42, 33, 25]), its riff's
+   floor C2 in 50 songs, B1 and C#2 in 7 each, its median 49 to 45, its bass's 39 to 35; Nu metal from D through C to B
+   ([42, 33, 29]), C2 in 55, its riff's median 47 to 44, its bass's 40 to 35; Heavy metal as it is to the middle and D
+   at its wild end ([50, 50, 42]), E in 59 and E♭ in 5, its median as it was; Thrash and Black metal as they are. Left:
+   asking it in the round after the tenth, Doom's tuned against E (`doom-tuning`).
 3. **No third low in any part**, should listening find a chord blurred outside the metal family: a chord part's notes
    below about E3 kept to its root, fifth and octave wherever it sits, the chords moved under the melody
    (`Registers.Apart`) and a low key's among them, rather than only a part its genre moves down (`OpenChords`); how often
