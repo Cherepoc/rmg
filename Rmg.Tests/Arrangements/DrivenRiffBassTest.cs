@@ -28,7 +28,7 @@ public sealed class DrivenRiffBassTest
     public async Task UnderADrivenRiff_TheBass_PlaysEveryPhraseItPlays_ButInTheOpening_AndInASectionItSitsOut()
     {
         var phrases = 0;
-        foreach (var song in Genres.SelectMany(Songs).Where(IsDriven))
+        foreach (var (genre, song) in Genres.SelectMany(x => Songs(x).Select(song => (x, song))).Where(x => IsDriven(x.song)))
         {
             var events = song.Song.TrackEventStateTimelineMap.TrackTimelineMap;
             if (!events.ContainsKey(song.Track(TrackRole.Bass)))
@@ -43,7 +43,7 @@ public sealed class DrivenRiffBassTest
                     if (!Plays(song.Track(TrackRole.Riff), start, end) || phrase < silent.Length && silent[phrase].Contains(TrackRole.Bass))
                         continue;
                     phrases++;
-                    await Assert.That(Plays(song.Track(TrackRole.Bass), start, end)).IsTrue().Because($"seed {song.Seed}, phrase at {start}");
+                    await Assert.That(Plays(song.Track(TrackRole.Bass), start, end)).IsTrue().Because($"{genre} seed {song.Seed}, phrase at {start}");
                 }
             }
         }

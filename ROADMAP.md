@@ -9,7 +9,8 @@ is removed once it is built, its leftovers kept under *Open work*.
 1. **The rules on the other corpora** (P1, *Older rule failures*): none failing at five offsets (19 October 2026), and
    at 2300000000 four traced and fixed (28 October), at 3141000000 seven (1 November): a drum solo's first hit clearing
    the fill's kick before it, three tests reading what their rule is not about (a trade's other soloist, a pre-chorus
-   played as a drum solo, a gated part's held chords) and three samples widened; the suite at another offset now and then.
+   played as a drum solo, a gated part's held chords) and three samples widened, at 4200000000 two (2 November), a
+   doubling cut at its last note and a sample widened; the suite at another offset now and then.
 2. **Listening** (P1, alongside): every deployed question answered or let go of before the next round, the rounds
    built by the rules of the full review's skill (a song without that changes the device alone, a difference measured
    before it is asked). The review of 16 October's queue (`rmg-reviews/2026-10-16/plan`, the package `listening`):
@@ -565,7 +566,14 @@ step where that chord is a passing chord's or in a scale of its own, leading int
 dominant into such a chord now, as none across a key change); a solo's run crossing a change into a chord of raised or
 lowered steps snapped to the nearest, a step skipped and its neighbour struck twice (the run's planned step taken up in
 the new chord's scale, 40 of 256 songs); and a rule reading too much, a pushing section's crash struck an eighth early
-in the bar where it sits out. Left:
+in the bar where it sits out.
+
+Run at 4200000000 on 2 November 2026 (2 failing of 1834, each failing the same at 56fcc7fa, both traced): a doubling
+playing its source only up to its own last note's onset, the source playing on in the phrase that note is held over, so
+that the bass under a Nu metal riff the verse's call and response answers with was left out of the answer's phrase
+(seed 2, the phrase at 88), each doubling now to the end of its last note's phrase (104 of 256 corpus and 104 of 463
+other songs changed); and a louder section's riff in power chords oftener measured over 256 songs, 64 there giving Nu
+metal's 71% against 65%. Left:
 
 - **Two at 924000000, older than the review of 16 October:** a drum doubling a lead off the lead's beats (seed 26,
   section 9 at 672, a tambourine on the kick at 682 and 698, `DoublingTest`; traced on 23 October 2026 to `Polymeter`,

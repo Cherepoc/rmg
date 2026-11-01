@@ -233,10 +233,11 @@ internal static class LineDoubling
                     StateTrace.RecordSection(TracePoints.LineDoubling, targetTrack, span.SectionId, $"{source} {step}", (index, source, target, step));
                 doubling.Add((sourceTrack, index));
                 doubling.Add((targetTrack, index));
-                // where the doubling part plays in the section, from its first note to its last, so that it joins no earlier
-                // than it would, as into an intro that brings it in
+                // where the doubling part plays in the section, from its first note to the end of its last's phrase, so that it
+                // joins no earlier than it would, as into an intro that brings it in, and plays the line through the phrase it
+                // holds its last note over
                 var own = events[isTwin ? sourceTrack : targetTrack].EventTimeline.Where(x => x.IsWithin(span.Start, span.End)).Select(x => x.Position).ToArray();
-                var (from, to) = (own.Min(), own.Max());
+                var (from, to) = (own.Min(), span.Phrases.ElementAt(span.PhraseOf(own.Max())).End);
                 // a counter-melody harmonising the melody in the melody's own sound now and then, as twin leads play, and in
                 // a block now and then, its notes stacking their chord's
                 var inTimbre = source == TrackRole.Melody && !isTwin && bars == 0 && timbres(index).TestProbability(TwinTimbreChance);
@@ -259,7 +260,7 @@ internal static class LineDoubling
                     .Select(x => x.Position).DefaultIfEmpty(double.MaxValue).Min();
                 // nor its first note where its walk from the section before leads into it, the note the walk was aimed at
                 var walkedInto = events[targetTrack].EventTimeline.Where(x => x.Position < span.Start - 1e-9).Select(x => x.Value.GetStateValue(CompositionStateKinds.Walk)).LastOrDefault() > 0;
-                bool Doubles(double position) => position >= from - 1e-9 && position <= to + 1e-9 && position < walk - 1e-9 && !(walkedInto && Math.Abs(position - from) < 1e-9)
+                bool Doubles(double position) => position >= from - 1e-9 && position < to - 1e-9 && position < walk - 1e-9 && !(walkedInto && Math.Abs(position - from) < 1e-9)
                                                  && phrases.Any(p => position >= p.Start - 1e-9 && position < p.End - 1e-9);
                 // in unison the source's alteration as it is, a chromatic riff's passing note too; a harmony a step away on the
                 // scale, off a third its chord leaves out, but a twin's, which keeps its step all the way
