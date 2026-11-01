@@ -136,9 +136,18 @@ die() { printf '\n%sdeploy: %s%s\n' "$RED" "$1" "$PLAIN" >&2; exit 1; }
 
 [[ -n "$HOST" ]] || die "no host. Pass --host user@host, or set RMG_HOST in deploy.env."
 
-for tool in dotnet rsync ssh git; do
+# the SDK where its installer puts it for one user, when it is not on the path already
+if ! command -v dotnet >/dev/null && [[ -x $HOME/.dotnet/dotnet ]]; then
+    export PATH="$HOME/.dotnet:$PATH" DOTNET_ROOT="$HOME/.dotnet"
+fi
+
+for tool in dotnet rsync ssh git systemd-run; do
     command -v "$tool" >/dev/null || die "$tool is not installed."
 done
+
+# The build, the fingerprint and the publish in a memory cap of their own, on all the cores but two, as the tests are
+# (test.sh): the machine runs other work beside a deploy, and a compiler counts the whole machine's memory as its own.
+capped() { systemd-run --user --scope --quiet -p MemoryMax=3G -p MemorySwapMax=0 -p AllowedCPUs=0-$(( $(nproc) - 3 )) -- "$@"; }
 
 step "Reaching $HOST"
 ssh -o BatchMode=yes -o ConnectTimeout=10 "$HOST" true \
@@ -155,7 +164,7 @@ step "Checking the working tree"
 note "clean, at $(git -C "$ROOT" rev-parse --short HEAD)"
 
 step "Building"
-dotnet build "$ROOT/Rmg.slnx" -c Release --nologo -v quiet || die "the build failed."
+capped dotnet build "$ROOT/Rmg.slnx" -c Release --nologo -v quiet || die "the build failed."
 
 # The songs' version goes up when the songs change: the fingerprint of the corpus's songs and the page's genres against the one VERSION
 # was last bumped for. A bump is a commit of its own, and the build is done again to stamp the new number.
@@ -164,7 +173,7 @@ readonly VERSION_FILE="$ROOT/VERSION"
 version="$(sed -n 's/^version //p' "$VERSION_FILE")"
 recorded="$(sed -n 's/^fingerprint //p' "$VERSION_FILE")"
 [[ $version =~ ^([0-9]+)\.([0-9]+)\.([0-9]{3,})$ ]] || die "VERSION has no line 'version 0.5.000', but '$version'."
-fingerprint="$(dotnet "$ROOT/Rmg/bin/Release/net10.0/Rmg.dll" --fingerprint)" || die "the songs' fingerprint failed."
+fingerprint="$(capped dotnet "$ROOT/Rmg/bin/Release/net10.0/Rmg.dll" --fingerprint)" || die "the songs' fingerprint failed."
 # and the page's genres, whose songs the corpus does not play
 fingerprint="$fingerprint-$(sha256sum "$ROOT/Rmg.WebApi/Client/genres.json" | cut -c1-8)"
 
@@ -178,13 +187,14 @@ else
     git -C "$ROOT" commit -q -m "Songs $bumped" -- VERSION || die "could not commit the songs' version $bumped."
     note "the songs changed: $version is now $bumped, committed"
 
-    dotnet build "$ROOT/Rmg.slnx" -c Release --nologo -v quiet || die "the build of $bumped failed."
+    capped dotnet build "$ROOT/Rmg.slnx" -c Release --nologo -v quiet || die "the build of $bumped failed."
 fi
 
 if $run_tests; then
     step "Running tests"
-    # the suite runs on Microsoft.Testing.Platform, so it is a program of its own and runs as one, on the build above
-    dotnet run --project "$ROOT/Rmg.Tests" -c Release --no-build || die "the tests failed. Nothing was deployed."
+    # the suite runs on Microsoft.Testing.Platform, so it is a program of its own and runs as one, on the build above, in
+    # its memory cap (test.sh)
+    "$ROOT/test.sh" || die "the tests failed. Nothing was deployed."
 else
     note "skipped, as asked"
 fi
@@ -198,15 +208,18 @@ trap 'rm -rf "$STAGE"' EXIT
 # cannot go in: wwwroot, which is served from disk, and the native SQLite library, which a single file
 # would otherwise unpack to a temporary directory on every start, and the service may have none to use.
 # Compressed, it is half the size, for a moment's decompression on start. Compiled ahead of time (ReadyToRun), the
-# first songs after a restart are made in a third of the time, 0.4 s rather than 1 s, for 15 MB more to send.
+# first songs after a restart are made in a third of the time, 0.4 s rather than 1 s, for 15 MB more to send. Its
+# compiler on four threads: on every core it took the cap's 3 GB and was still compiling after ten minutes, where on
+# four it is done in about one (1 November 2026).
 step "Publishing a single self-contained file for $RUNTIME"
-dotnet publish "$ROOT/Rmg.WebApi" \
+capped dotnet publish "$ROOT/Rmg.WebApi" \
     -c Release \
     -r "$RUNTIME" \
     --self-contained true \
     -p:PublishSingleFile=true \
     -p:EnableCompressionInSingleFile=true \
     -p:PublishReadyToRun=true \
+    -p:PublishReadyToRunCrossgen2ExtraArgs=--parallelism:4 \
     -p:DebugType=none \
     -o "$STAGE" \
     --nologo -v quiet \
