@@ -31,6 +31,7 @@
       "chordShape": { "powerChord": [100, 100, 70], "triad": [50, 35, 30], "sus4": [20, 30, 30], "sus2": [15, 25, 25], "seventh": [5, 12, 15], "add9": [5, 12, 15], "quartalTriad": [0, 0, 25], "tritoneStack": [0, 0, 10] },
       "rootMotion": { "fourthDown": 90, "thirdDown": 65, "stepUp": 65, "fifthDown": 60 },
       "rootDegree": { "seventh": 75, "sixth": 65, "fourth": 65 },
+      "progression": { "drawn": 100, "rockLoop": [40, 35, 25] },
       "chordScales": { "applied": [0, 20, 20], "borrowed": [20, 25, 30], "own": 0, "mediant": [0, 10, 15] },
       "harmonicRhythm": { "oneBar": 100, "twoBars": [40, 40, 40], "halfBar": [10, 15, 20] },
       "lineScale": { "pentatonic": [100, 100, 60], "blues": [25, 35, 45], "section": [30, 40, 40], "octatonic": [0, 0, 15], "union": [20, 30, 30] },

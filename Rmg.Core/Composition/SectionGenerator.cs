@@ -203,7 +203,7 @@ internal sealed class SectionGenerator
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);
         var tilt = SectionEnergy.Tilt(energy, rhythm.Coupling);
 
-        var ((scale, home, harmonicRhythm, progression, chordScales, shifts, _, _, planes), looped) = DrawHarmony(plan, facets, energy, tilt);
+        var ((scale, home, harmonicRhythm, progression, chordScales, shifts, _, _, planes, _), looped) = DrawHarmony(plan, facets, energy, tilt);
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
         var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel], _genre, GenreChoices.Feel);
@@ -378,6 +378,13 @@ internal sealed class SectionGenerator
         var progression = Progressions.Generate(Stream(sectionId, SectionStream.Progression), scale, home, Progressions.StrictnessOf(facets[Facet.Progression], _genre.Shift(GenreChoices.Strictness, "rules")), drawnCount, meter.Phrases,
             motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name), step => _genre.Shift(GenreChoices.RootDegrees, Progressions.Degrees[step].Name),
             step => _genre.Shift(GenreChoices.CadenceDegrees, Progressions.Degrees[step].Name), _genre.Mood);
+        // or a progression a genre names, where the section's scale plays it, from a sequence of its own, drawn all the same,
+        // so that a song in none draws as it did
+        var name = Stream(sectionId, SectionStream.NamedProgression).Pick(ByConvention.Weigh(Progressions.TemplateOptions.Select(x => (x.Name, x.Weight)),
+            facets[Facet.Progression], _genre.Pool<string>(GenreChoices.Progression, x => x)));
+        var named = Progressions.Named(name, scale, home, drawnCount);
+        if (named is { } template)
+            progression = template;
         if (extended)
             progression = PhraseLengths.Extend(progression, harmonicRhythm.Changes, meter);
         // a turnaround now and then, the pattern's last bar leading back to its start, by the progression facet and a genre's,
@@ -405,7 +412,8 @@ internal sealed class SectionGenerator
         // the home held over the first two bars now and then, the first two chords where each lasts a bar or less, a slower
         // start, the rest changing as they were, from a sequence of its own; drawn all the same where chords last longer,
         // whose second would hold the home over the question phrase's end
-        if (Stream(sectionId, SectionStream.HeldHome).TestProbability(Progressions.HeldHome.At(facets[Facet.Progression])) && progression.Length >= 4 && harmonicRhythm.Bars <= 1)
+        // but a named progression, whose second chord is its own
+        if (Stream(sectionId, SectionStream.HeldHome).TestProbability(Progressions.HeldHome.At(facets[Facet.Progression])) && progression.Length >= 4 && harmonicRhythm.Bars <= 1 && named is null)
             (progression, chordScales) = (progression.SetItem(1, progression[0]), chordScales.SetItem(1, chordScales[0]));
         // passing chords now and then, the next chord's dominant, by the progression facet, the energy and a genre's, from a
         // sequence of their own
@@ -447,7 +455,8 @@ internal sealed class SectionGenerator
         // (SongDecisions), a genre's, from a sequence of its own
         loops |= Stream(sectionId, SectionStream.VerseOverRiff).TestProbability(SongForms.VerseOverRiffChance.At(facets[Facet.Form], _genre.Chance(GenreChoices.RiffSection, "verses")))
                  && plan.Role == SectionRole.Verse && _firstRole == SectionRole.Intro && !_firstLeavesRiff;
-        var harmony = new SectionHarmony(scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, planes);
+        // the named progression it plays, none where it draws its own or vamps
+        var harmony = new SectionHarmony(scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, planes, named is not null && !vamps ? name : null);
         if (plan.KeepsSongScale)
             (_firstHarmony, _firstRole) = ((harmony, meter), plan.Role);
         // but the song's last, which must land the ending home, where the first's home is not the tonic, as its chords'
@@ -458,10 +467,11 @@ internal sealed class SectionGenerator
         StateTrace.RecordSection(TracePoints.Loop, SectionTrace, sectionId, $"{looped}", looped);
         if (looped)
             harmony = _firstHarmony!.Value.Harmony;
-        (scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, _) = harmony;
+        (scale, home, harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep, _, _) = harmony;
         StateTrace.RecordSection(TracePoints.SectionScale, SectionTrace, sectionId, scale.Name, scale);
         StateTrace.RecordSection(TracePoints.HarmonicRhythm, SectionTrace, sectionId, $"{harmonicRhythm.Span}", harmonicRhythm);
         StateTrace.RecordSection(TracePoints.Progression, SectionTrace, sectionId, string.Join(" ", progression), progression);
+        StateTrace.RecordSection(TracePoints.NamedProgression, SectionTrace, sectionId, harmony.Named ?? Progressions.Drawn, harmony.Named);
         StateTrace.RecordSection(TracePoints.CadenceRaise, SectionTrace, sectionId, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
         StateTrace.RecordSection(TracePoints.ChordScales, SectionTrace, sectionId, string.Join(" ", chordScales.Select(x => x.Kind)), chordScales);
         return (harmony, looped);
@@ -931,8 +941,8 @@ internal sealed class SectionGenerator
 
 /// <summary>
 ///     A section's harmony (<see cref="SectionGenerator" />): its scale, its home, how often its chords change, its progression,
-///     every chord's scale and its move by semitones, the step its cadence may raise and raises, and whether it planes,
-///     every chord the home's shape.
+///     every chord's scale and its move by semitones, the step its cadence may raise and raises, whether it planes,
+///     every chord the home's shape, and the progression a genre names that it plays, none for its own drawn.
 /// </summary>
 internal sealed record SectionHarmony(
     Scale Scale,
@@ -943,7 +953,8 @@ internal sealed record SectionHarmony(
     ImmutableArray<int> Shifts,
     int? Raisable,
     int? Raised,
-    bool Planes
+    bool Planes,
+    string? Named
 );
 
 /// <summary>A section's place in the song's form, which some of its draws keep to.</summary>
@@ -1265,5 +1276,6 @@ internal enum SectionStream
     SungEighths = 67,
     MinorMediants = 68,
     MelodyRhythms = 70,
-    VerseOverRiff = 71
+    VerseOverRiff = 71,
+    NamedProgression = 72
 }

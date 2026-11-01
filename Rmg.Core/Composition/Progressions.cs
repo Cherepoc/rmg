@@ -73,6 +73,39 @@ internal static class Progressions
     ];
 
     /// <summary>
+    ///     The progressions a genre names, which its sections play as named rather than drawn (<see cref="GenreChoices.Progression" />):
+    ///     each its roots in steps from the section's home and the semitones each lies above it, which the section's scale must
+    ///     make, so that rock's ♭VII is a ♭VII, played over Mixolydian's I, Dorian's and Aeolian's i, and never over a major
+    ///     scale's vii°; the songs' own drawn (<see cref="Drawn" />).
+    /// </summary>
+    public static ImmutableArray<(string Name, string Label, ImmutableArray<int> Steps, ImmutableArray<int> Semitones)> Templates { get; } =
+    [
+        ("rockLoop", "I–♭VII–IV–I, rock's loop", [0, 6, 3, 0], [0, 10, 5, 0])
+    ];
+
+    /// <summary>A progression drawn as the songs draw theirs, by its motions and its roots' places, a pool's name for none of the templates.</summary>
+    public const string Drawn = "drawn";
+
+    /// <summary>The progressions as a genre's pool names them: the songs' drawn, and the templates, a genre's alone.</summary>
+    public static IEnumerable<(string Name, string Label, ByConvention Weight)> TemplateOptions =>
+        [(Drawn, "Drawn by the motions", new ByConvention(1, 1, 1)), ..Templates.Select(x => (x.Name, x.Label, new ByConvention(0, 0, 0)))];
+
+    /// <summary>
+    ///     A section's chords as a template names them, every one of its roots in steps from home, the template played over
+    ///     and over, where the section's scale makes its roots' intervals above home and its pattern has a whole number of
+    ///     them; none for a progression drawn, or a template the section cannot play, which it draws.
+    /// </summary>
+    public static ImmutableArray<int>? Named(string name, Scale scale, int home, int count)
+    {
+        if (name == Drawn)
+            return null;
+        var template = Templates.Single(x => x.Name == name);
+        if (count % template.Steps.Length != 0 || template.Steps.Zip(template.Semitones).Any(x => GetInterval(scale.Offsets, home, home + x.First) != x.Second))
+            return null;
+        return [..Enumerable.Range(0, count).Select(i => Normalize(template.Steps[i % template.Steps.Length]))];
+    }
+
+    /// <summary>
     ///     How a phrase of a longer progression starts and ends by its place, by the root's step above home, the others as
     ///     a root out of its place weighs (<see cref="OutOfPlaceWeight" />): a middle phrase from IV, now and then from home;
     ///     the last from V, now and then from IV, but the second of two from home (<see cref="AnswerStarts" />); and every

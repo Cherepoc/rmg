@@ -406,8 +406,13 @@ each moved). Put off, each its own plan:
   45% and 24%. Left: the repeats, the line's landings and restatements rather than the walk's; and the pickup an 8th
   before the bar line, which the walk, a pulse played exactly, leaves out, the bass's own (`LinePickup`) playing where it
   does not walk, should listening ask for a skip.
-- **Rock's I–♭VII–IV loop,** a progression template of its own: the progression's home, away, preparation and cadence
-  come near it only through the cadence (Rock's ♭VII–I in 45% of sections).
+- **Rock's I–♭VII–IV loop,** built on 1 November 2026: a progression a genre names, played as named rather than drawn
+  (`GenreChoices.Progression`, `Progressions.Templates`, a genre's alone), its roots in steps from home and the semitones
+  each lies above it, which the section's scale must make, so that it plays over Mixolydian's I, Dorian's and Aeolian's
+  i and never a major scale's vii°, a pattern of four chords or eight, from a stream of its own, the held home leaving
+  it be. Rock's `rockLoop` (I–♭VII–IV–I) 40-35-25 against the drawn's 100: over 64 songs (`NamedProgressionTest`), named
+  in 13% of its sections, 22% of the Mixolydian ones, ♭VII–IV–I heard in 15% from 4%, ♭VII–I in 37% from 43%. Left:
+  the other named progressions as data, the Andalusian i–♭VII–♭VI–V and the axis among them, should a genre want one.
 - **A key change's preparation as a genre's choice** (`KeyChange.PrepareChance`, 0.5 for every song): Black metal's
   jumps; put off until its key changes, named without a lift on 19 October, are heard.
 

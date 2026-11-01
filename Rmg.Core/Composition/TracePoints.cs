@@ -90,6 +90,9 @@ internal static class TracePoints
     /// <summary>A section's home, its step above the song's tonic (an <c>int</c>, <see cref="Progressions.GenerateHome" />).</summary>
     public const string SectionHome = "Section home";
 
+    /// <summary>The progression a genre names that a section plays (a <c>string</c>, <see cref="Progressions.Templates" />), none for its own drawn.</summary>
+    public const string NamedProgression = "Named progression";
+
     /// <summary>Whether a section vamps on its home (a <c>bool</c>, <see cref="SectionGenerator.Vamp" />).</summary>
     public const string Vamp = "Vamp";
 
