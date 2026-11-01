@@ -55,7 +55,7 @@ internal sealed record SongDraft(
     /// <summary>
     ///     What the song holds, which a stage keeps out of by the kinds it names (<see cref="Hold" />): what the stages wrote
     ///     (<see cref="Held" />), a fill, a kick-out, a polymeter's sections, a drum solo's turns and a calling verse's call
-    ///     and answer; a drop's build, its stop time as played, its solos, and where the form stops a part
+    ///     and answer; a drop's build, its stop time as played, its solos, a cadenza's among them, and where the form stops a part
     ///     (<see cref="TimelineEdits.StopsOf" />).
     /// </summary>
     public Holds Holds(SongDecisions song) => new(
@@ -64,6 +64,8 @@ internal sealed record SongDraft(
         ..song.Form.Builds.Select(x => new HeldSpan(Hold.Build, x.From, x.To, null)),
         ..Stopped.Select(x => new HeldSpan(Hold.Stop, x.Start, x.End, null)),
         ..song.Solos.Keys.Select(x => song.Form.Map.Sections[x]).Select(x => new HeldSpan(Hold.Solo, x.Start, x.End, null)),
+        // a cadenza's hold, the melody's solo over the band's held chord
+        ..(song.Form.Map.Ending is { Kind: EndingKind.Cadenza } ending ? [new HeldSpan(Hold.Solo, ending.Start, ending.Start + ending.Held, null)] : Array.Empty<HeldSpan>()),
         ..song.Tracks.Definitions.Keys.SelectMany(track => song.Form.Edits.StopsOf(track).Select(x => new HeldSpan(Hold.Cut, x.From, x.To, track)))
     ]);
 }

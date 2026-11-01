@@ -36,7 +36,14 @@ public enum EndingKind
     ///     The home chord held for a bar or two while the drums roll round the toms, the kick and a crash on every beat,
     ///     louder as they go, then the whole band's last hit together, a button, as a rock band ends a show.
     /// </summary>
-    Big
+    Big,
+
+    /// <summary>
+    ///     The band holding the last chord it played, the cadence's dominant where it closes, for a bar or two, the drums
+    ///     out, while the melody runs alone over it, slowing, then the whole band's last hit together on the home chord, a
+    ///     button, as a soloist's cadenza before a jazz tune's or a concerto's last chord.
+    /// </summary>
+    Cadenza
 }
 
 /// <summary>How a song starts before its first section.</summary>
@@ -236,14 +243,15 @@ internal static class FormLayers
         new(0.15, EndingKind.Fade),
         // a genre's, which the songs never play
         new(0, EndingKind.Strip),
-        new(0, EndingKind.Big)
+        new(0, EndingKind.Big),
+        new(0, EndingKind.Cadenza)
     ];
 
     /// <summary>Whether an ending lands on a final chord, which it holds, after the last section.</summary>
-    public static bool HasFinalChord(EndingKind ending) => ending is EndingKind.Button or EndingKind.RingOut or EndingKind.Stop or EndingKind.Big;
+    public static bool HasFinalChord(EndingKind ending) => ending is EndingKind.Button or EndingKind.RingOut or EndingKind.Stop or EndingKind.Big or EndingKind.Cadenza;
 
-    /// <summary>Whether an ending holds its final chord for bars, the ring-out's and the big ending's.</summary>
-    public static bool HoldsFinalChord(EndingKind ending) => ending is EndingKind.RingOut or EndingKind.Big;
+    /// <summary>Whether an ending holds a chord for bars, the ring-out's, the big ending's and the cadenza's, the last before its hit.</summary>
+    public static bool HoldsFinalChord(EndingKind ending) => ending is EndingKind.RingOut or EndingKind.Big or EndingKind.Cadenza;
 
     /// <summary>A big ending's roll, the drums' step round the toms over the held chord, in beats: a 16th.</summary>
     public const double BigRollStep = 0.25;
@@ -261,7 +269,7 @@ internal static class FormLayers
     public const double GenreLiftReach = 4;
 
     /// <summary>The endings on a hit, the band's last chord struck together and let go, which a mix closing over it would muffle (<see cref="MixFilter" />).</summary>
-    public static ImmutableHashSet<EndingKind> HitEndings { get; } = [EndingKind.Button, EndingKind.Stop, EndingKind.Big];
+    public static ImmutableHashSet<EndingKind> HitEndings { get; } = [EndingKind.Button, EndingKind.Stop, EndingKind.Big, EndingKind.Cadenza];
 
     /// <summary>The endings that lean unconventional, likelier the further the song's form strays.</summary>
     public static ImmutableHashSet<EndingKind> AdventurousEndings { get; } = [EndingKind.Open, EndingKind.Stop];
@@ -289,6 +297,7 @@ internal static class FormLayers
         EndingKind.Fade => "A fade",
         EndingKind.Strip => "Parts dropping out",
         EndingKind.Big => "A big ending",
+        EndingKind.Cadenza => "A cadenza",
         _ => ending.ToString()
     };
 

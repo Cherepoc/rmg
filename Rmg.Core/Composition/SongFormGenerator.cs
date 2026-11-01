@@ -133,7 +133,8 @@ internal sealed class SongFormGenerator
                 held = FormLayers.ButtonLength;
             if (ending == EndingKind.Stop)
                 stop = _context.Pick(FormLayers.StopLengths);
-            slowsDown = FormLayers.HoldsFinalChord(ending) && _context.TestProbability(FormLayers.RitardandoChance);
+            // a cadenza's run in free time always, slowing as it goes
+            slowsDown = FormLayers.HoldsFinalChord(ending) && _context.TestProbability(FormLayers.RitardandoChance) || ending == EndingKind.Cadenza;
         }
 
         return new FormPlan(intro, window, halfCountIn, first, ending, held, ringOutBars, stop, slowsDown, sectionIds[^1]);
@@ -247,8 +248,8 @@ internal sealed class SongFormGenerator
         var endingDuration = plan.Ending switch
         {
             _ when !FormLayers.HasFinalChord(plan.Ending) => 0,
-            // a big ending's held chord and its last hit's bar
-            EndingKind.Big => held + last.BarDuration,
+            // a big ending's held chord, and a cadenza's, and its last hit's bar
+            EndingKind.Big or EndingKind.Cadenza => held + last.BarDuration,
             // a bar of the last section's meter at least, as the final chord's block is
             _ => Math.Max(held, last.BarDuration)
         };
@@ -313,10 +314,12 @@ internal sealed class SongFormGenerator
 
         if (FormLayers.HasFinalChord(plan.Ending))
         {
-            // a big ending's held chord, then its last hit, a button's
-            var big = plan.Ending == EndingKind.Big;
-            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), held, big ? held : endingDuration, _roles));
-            if (big)
+            // a big ending's held chord, or a cadenza's hold, then its last hit, a button's
+            var (big, cadenza) = (plan.Ending == EndingKind.Big, plan.Ending == EndingKind.Cadenza);
+            blocks.Add(cadenza
+                ? CreateCadenza(sections[^1], sections.Take(sections.Count - 1), held, _roles)
+                : CreateEnding(sections[^1], sections.Take(sections.Count - 1), held, big ? held : endingDuration, _roles));
+            if (big || cadenza)
                 blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), FormLayers.ButtonLength, last.BarDuration, _roles));
 
             if (plan.Ending == EndingKind.Stop)
@@ -328,10 +331,12 @@ internal sealed class SongFormGenerator
                     edits.Rest(track, role, stop, end);
             }
 
-            // the drums land on the final chord, where the song has them
+            // the drums land on the final chord, where the song has them, but a cadenza's, which they leave to the melody, on
+            // its hit after it, unfilled
             if (_hasDrums)
-                lines.Add(
-                    new FillLine(end, fillSections[^1], fillSections[^1], 0, plan.Ending != EndingKind.Stop, IsLandingForced: true)
+                lines.Add(cadenza
+                    ? new FillLine(end + held, fillSections[^1], fillSections[^1], 0, false, IsLandingForced: true)
+                    : new FillLine(end, fillSections[^1], fillSections[^1], 0, plan.Ending != EndingKind.Stop, IsLandingForced: true)
                 );
 
             // a big ending's roll over the held chord, round the toms from the highest, the kick and a crash on every beat,
@@ -358,8 +363,9 @@ internal sealed class SongFormGenerator
                 lines.Add(new FillLine(end + held, fillSections[^1], fillSections[^1], 0, false, IsLandingForced: true));
             }
 
+            // the bar before a ringing chord slowing, or a cadenza's run over its hold into its hit
             if (plan.SlowsDown)
-                songState = songState.MergeWith(CreateRitardando(end, end + held, last.BarDuration));
+                songState = songState.MergeWith(cadenza ? CreateRitardando(end + held, end + held, held) : CreateRitardando(end, end + held, last.BarDuration));
         }
 
         // a fading song plays its last section once more, as the song plans it, and fades out over it, over two plays of
@@ -664,6 +670,73 @@ internal sealed class SongFormGenerator
                 TrackEventStateTimelineMap.Create<StateMap>(duration)
             ]
         );
+    }
+
+    /// <summary>
+    ///     A cadenza's hold: the last chord of the song's last section held for its length by every pitched part that plays
+    ///     in it, each its last note struck once, whole, the bass on the chord's root; the drums' state with no notes,
+    ///     as they leave it; and the melody running over it alone, over the chord as the parts hold it, a note every 8th from its last, the section's or, where it
+    ///     rests all of it, the sections' before, each a note of
+    ///     its own, its key by its place in the run, that goes on from the one before by a step, a chord's note on the beat and
+    ///     its scale's between, going on the way the line goes, aiming along an arch from where the melody aimed to the
+    ///     far edge of its range and back, as the line places it (<see cref="LinePattern.Place" />), so that the run sweeps
+    ///     through the chord across the range and back into the hit's home chord. The chord's state is the section's at its last change, held throughout.
+    /// </summary>
+    /// <param name="length">How long the hold is, in beats.</param>
+    /// <param name="roles">What every track plays, by its number.</param>
+    internal static TrackEventStateTimelineMap<StateMap> CreateCadenza(GeneratedSection lastSection, IEnumerable<GeneratedSection> earlierSections, double length, IReadOnlyDictionary<int, TrackRole> roles)
+    {
+        GeneratedSection[] before = [..earlierSections.Reverse()];
+        var timeline = lastSection.Timeline;
+        var changes = timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange);
+        var lastChord = changes.Count > 0 ? changes.Last().Position : 0;
+        var common = timeline.CommonStateTimelineMap.GetEffectiveStateMapAt(lastChord).ToStateTimelineMap(length);
+        // the held chord's shape, as the parts that hold it play it from the last change, which the melody's run takes, its
+        // last note perhaps over the chord before or a section's before; its own where none plays it
+        IStateKind[] shapeKinds = [StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed];
+        var shape = timeline.TrackTimelineMap.Where(x => roles[x.Key] is not (TrackRole.Drum or TrackRole.Melody))
+            .SelectMany(x => x.Value.EventTimeline.Where(n => n.Position >= lastChord - 1e-9)).OrderBy(x => x.Position)
+            .Select(x => x.Value.Subset(shapeKinds)).FirstOrDefault();
+        // the 8ths of the hold, the beats of its meter strong, the 8ths between them weak, as the melody's line ranks them
+        var (weak, count) = (MelodyLayers.Line.StrongestWeakRank + 1, (int)Math.Round(length * 2));
+        // how far the run moves where its note aims, an arch from where the melody aimed, its note's aim and its layers' added,
+        // to the far edge of its range, the top from below its middle and the bottom from above it, and back
+        double Arch(double aimed, int i) => ((aimed > 0 ? -1 : 1) * MelodyLayers.Line.RangeWidth / 2.0 - aimed) * Math.Sin(Math.PI * (i + 1) / (count + 1));
+        var tracks = timeline.TrackTimelineMap
+            .Where(x => roles[x.Key] != TrackRole.Drum)
+            .Select(x =>
+            {
+                // the part's last note in the section, sounding at its end; none for a part that rests all of it, but the
+                // melody, which runs from its last note before it
+                var played = x.Value.EventTimeline.Concat(roles[x.Key] == TrackRole.Melody
+                    ? before.SelectMany(section => section.Timeline.TrackTimelineMap.TryGetValue(x.Key, out var timeline) ? timeline.EventTimeline.Reverse() : []).Take(1)
+                    : []).ToArray();
+                var last = played.Length > 0 ? (x.Value.EventTimeline.Count > 0 ? x.Value.EventTimeline[^1] : played[^1]) : default;
+                // where the melody aimed as it last played, its note's aim and its part's and the section's under it, which add
+                var aimed = played.Length == 0 ? 0
+                    : last.Value.GetStateValue(CompositionStateKinds.LineRegister) + x.Value.StateTimelineMap.GetEffectiveStateMapAt(lastChord).GetStateValue(CompositionStateKinds.LineRegister)
+                      + timeline.CommonStateTimelineMap.GetEffectiveStateMapAt(lastChord).GetStateValue(CompositionStateKinds.LineRegister);
+                IEnumerable<TimelineItem<StateMap>> notes = played.Length == 0 ? []
+                    : roles[x.Key] == TrackRole.Melody
+                        ? Enumerable.Range(0, count).Select(i => (Seeds.Derive((ulong)last.Value.GetStateValue(CompositionStateKinds.NoteKey), i + 1), i)).Select(x => (shape is null ? last.Value : last.Value.Except(shapeKinds).MergeWith(shape))
+                            .With(StateKinds.HeldDuration, 0)
+                            .With(CompositionStateKinds.BeatRank, x.i % 2 == 0 ? 0 : weak)
+                            .With(CompositionStateKinds.LineStep, 1)
+                            // going on the way the line goes, a run sweeping until its range turns it
+                            .With(CompositionStateKinds.LineTurn, 0.0)
+                            .With(CompositionStateKinds.LineRegister, last.Value.GetStateValue(CompositionStateKinds.LineRegister) + Arch(aimed, x.i))
+                            .With(CompositionStateKinds.NoteKey, (long)x.Item1)
+                            .With(CompositionStateKinds.LineLanding, (int)ChordArrival.Free)
+                            .With(CompositionStateKinds.LinePhraseStart, (int)PhraseStart.None)
+                            .With(CompositionStateKinds.LinePickup, 0)
+                            .ToTimelineItem(x.i * 0.5))
+                        : [LandOnRoot(last.Value.With(StateKinds.HeldDuration, length)
+                            .With(CompositionStateKinds.Arpeggio, new LayerValue<int>(StateDepths.Note, (int)ArpeggioPattern.None)).ToTimelineItem(0))];
+                // the part's own state as it plays at the last chord, held throughout
+                return new KeyValuePair<int, EventStateTimelineMap<StateMap>>(x.Key,
+                    EventStateTimelineMap.Create(length, EventTimeline.Create(length, notes), x.Value.StateTimelineMap.GetEffectiveStateMapAt(lastChord).ToStateTimelineMap(length)));
+            });
+        return TrackEventStateTimelineMap.Create(length, tracks, common);
     }
 
     /// <summary>

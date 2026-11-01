@@ -379,9 +379,15 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
   it), their free forms the fewer where a cycle fits the length (Blues' 23% from 30%, Dungeon's 44% from 59%,
   `FormFoldReportTest`); the length's chance of a free form the form facet's, leaned by how near the nearest form
   comes and exact at either end (`SongLength.FormChance`).
-- **The cadenza** (#365), after the tempo at a phrase's edges (`rubato`, built 24 October 2026, heard and kept as `film-rubato`, 6 to none): an
-  `EndingKind` holding the last dominant as a stop while the lead runs alone over it, should the breath be heard to
-  work.
+- **The cadenza** (#365), built on 1 November 2026 (`EndingKind.Cadenza`, `SongFormGenerator.CreateCadenza`): the band
+  holding the last chord it played for a bar or two, struck once, the drums out, while the melody runs alone over it in
+  8ths, a chord's note on the beat and its scale's between, sweeping on an arch of aims to the far edge of its range and
+  back, slowing into the band's last hit together, a button; its hold a solo (`Hold.Solo`), which the pushes keep out of.
+  A genre's alone: Jazz's, Orchestral's and Chamber's 10-20-30, Film piano's 20-30-40. Over 64 songs that always end so
+  (`CadenzaTest`): held 5.7 beats, the runs 11.3 notes, 66% on the chord, 32% of its scale, 66% by step. Left: the held
+  chord is the cadence's dominant in 28% of them, the section closing on IV, ii or home in the rest, over which it runs as
+  over a fermata; holding V7 itself would take a key change's dominant (`KeyChange.Prepare`), should listening find
+  the others weak.
 - **Put off:** the game loop (#369), the body replayed from its loop point into the fade as `PlayAt` plays a source:
   two presets, whose fade already replays their last section; taken up should listening ask for the loop.
 
