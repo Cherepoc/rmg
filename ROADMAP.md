@@ -391,10 +391,15 @@ The review of 16 October's unasked questions and every earlier verdict judged ag
 October 2026), its seven steps built, each decided without asking where convention was clear (their commits say what
 each moved). Put off, each its own plan:
 
-- **A walking bass's line** (from the review of 9 October 2026): its weak quarters keep to the chord's notes, so a ii–V
-  walks arpeggios; a walk takes scale steps and chromatic approaches on 2 and 4 (about 30-50% of Jazz's walking notes
-  outside the chord), and the bass's pickup an 8th before the bar line, leaned by convention, with it, as both are the
-  bass line's walks. Needs a report of the share first.
+- **A walking bass's line**, built on 1 November 2026: a bass figure that walks (`walk`, `Figure.Walks`), a quarter on
+  every beat of any meter, each a note of its own the line moves on at, passing on the meter's backbeats between the
+  chord's notes on the others (`Figures.Walked`); Jazz's (100 against its own rhythm's 10-25-40) and Ska's. Its bass had
+  played its own rhythm, more notes between the beats than on 2 and 4, every note a strong beat's, so that it arpeggiated:
+  in the sections that walk (`WalkingBassReportTest`, 64 songs), 2 and 4 off the chord 49% (11% chromatic), from 24%
+  over Jazz's whole bass, by step 44% from 17%, the same note again 17% from 39%, 1 and 3 on the chord 97%; Ska's 58%,
+  45% and 24%. Left: the repeats, the line's landings and restatements rather than the walk's; and the pickup an 8th
+  before the bar line, which the walk, a pulse played exactly, leaves out, the bass's own (`LinePickup`) playing where it
+  does not walk, should listening ask for a skip.
 - **Rock's I–♭VII–IV loop,** a progression template of its own: the progression's home, away, preparation and cadence
   come near it only through the cadence (Rock's ♭VII–I in 45% of sections).
 - **A key change's preparation as a genre's choice** (`KeyChange.PrepareChance`, 0.5 for every song): Black metal's

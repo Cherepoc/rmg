@@ -31,7 +31,12 @@ public enum FigurePlayer
 /// <param name="In">The meter of its bars, four's where none is given.</param>
 /// <param name="Exact">Whether it is played exactly at every end, as a clave, the swing ride or the waltz is, rather than as a player varies it (<see cref="Loose" />).</param>
 /// <param name="Heavy">Whether it is a ground heavy enough that the snare under it strikes its head, as the double kick, the blast and the kick with its riff are.</param>
-public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick, Meter? In = null, bool Exact = false, bool Heavy = false)
+/// <param name="Walks">
+///     Whether its line moves on at every onset, as a walking bass does, rather than striking its note again as a pulse:
+///     each onset a note of its own, passing on the meter's backbeats between the chord's notes on the others
+///     (<see cref="Figures.Walked" />).
+/// </param>
+public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, FigurePlayer? Follows, double EnergyLean, bool AnswersKick, Meter? In = null, bool Exact = false, bool Heavy = false, bool Walks = false)
 {
     /// <summary>
     ///     Whether it is played as a player varies it, its onsets and the player's own notes each by a chance, by how
@@ -171,6 +176,9 @@ internal static class Figures
         new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, null, 0, true),
         // a pulse, the root hammered in even 8ths or 16ths, a disco's, a synthwave's, a darksynth's
         new("halves", "The boom, on 1 and 3", FigurePlayer.Bass, [0, 8], 16, null, 0, false),
+        // a walking bass, a quarter on every beat of any meter, its line moving on at each, passing on 2 and 4 between
+        // the chord's notes on 1 and 3
+        new("walk", "Walking, a quarter on every beat", FigurePlayer.Bass, [0, 4, 8, 12], 16, null, 0, false, Walks: true),
         new("waltz", "The waltz, the oom on 1", FigurePlayer.Bass, [0], 12, null, 0, false, Meter.ThreeFour, Exact: true),
         new("eighths", "A pulse in even 8ths", FigurePlayer.Bass, [0, 2, 4, 6, 8, 10, 12, 14], 16, null, 0, false),
         new("sixteenths", "A pulse in even 16ths", FigurePlayer.Bass, [..Enumerable.Range(0, 16)], 16, null, 0, false),
@@ -356,7 +364,9 @@ internal static class Figures
                                 ? Loosen([..own.Select(x => x.Position)], [..onsets.Where(In)], Strictness.At(song.SectionOf(span.SectionId).Facets[Facet.Feel]),
                                     song.Stream(SongStream.LooseFigures, song.Form.Map.PlaceKey(bar), track))
                                 : [..onsets.Where(In)];
-                            played.AddRange(kept.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
+                            played.AddRange(kept.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last() is var source && figure.Walks
+                                ? Walked(source, at, bar, span.Meter).ToTimelineItem(at)
+                                : source.Value.ToTimelineItem(at)));
                         }
                     }
 
@@ -366,6 +376,22 @@ internal static class Figures
         }
 
         return Laid(song, draft, drawn, laid);
+    }
+
+    /// <summary>
+    ///     A walking figure's note at an onset, from the player's own note at or before it, which goes on from the note before
+    ///     by a step or a leap and never stays: a note of its own where it moves on from it, keyed by its own note's key and how far it lies from it, so that its line places it afresh rather than
+    ///     echoing its own note's pitch, and a section that comes back walks as it did; on the meter's backbeats a weak beat's,
+    ///     which the line passes on by its scale, and a strong beat's on the others, which takes the chord's notes
+    ///     (<see cref="LineProfile.StrongestWeakRank" />).
+    /// </summary>
+    internal static StateMap Walked(TimelineItem<StateMap> source, double at, double bar, Meter meter)
+    {
+        var isBackbeat = meter.Backbeats.Any(x => Math.Abs(bar + x - at) < 1e-6);
+        var note = source.Value.With(CompositionStateKinds.BeatRank, isBackbeat ? BassLeadingLayers.Line.StrongestWeakRank + 1 : 0)
+            .With(CompositionStateKinds.LineStep, Math.Max(1, source.Value.GetStateValue(CompositionStateKinds.LineStep)));
+        var offset = (long)Math.Round((at - source.Position) * 4);
+        return offset == 0 ? note : note.With(CompositionStateKinds.NoteKey, (long)Seeds.Derive((ulong)source.Value.GetStateValue(CompositionStateKinds.NoteKey), offset));
     }
 
     /// <summary>
