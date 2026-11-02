@@ -173,3 +173,6 @@ rejected while fixing: the place, what was decided, why.
 - The tempo at a phrase's edges (`rubato`, Cinematic piano's) kept on listening, 6 to none (`film-rubato`, 29 October 2026): not a cut candidate again.
 - A heavy appearance's clean guitars driven where it comes back louder (`louderForms.guitars`, Post-rock's) kept on listening, 6 to none (`postrock-heavy-return`, 1 November 2026): not a cut candidate again.
 - A heavy appearance's held strings bowed in tremolo (`louderForms.strings`, Cinematic piano's) kept on listening, 5 to none, one the same (`film-bowed`, 1 November 2026): not a cut candidate again.
+- Doom tuned down to C (`tuning`, Doom's 42-33-25) kept on listening, 6 to none (`doom-tuning`, 2 November 2026): not a cut candidate again.
+- Jazz's walking bass (`figure.bass`'s walk) kept on listening, 6 to none (`jazz-walk`, 2 November 2026): not a cut candidate again.
+- Rock's I–♭VII–IV–I (`progression`'s rockLoop) kept on listening, 6 to none (`rock-loop`, 2 November 2026): not a cut candidate again.

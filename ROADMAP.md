@@ -91,7 +91,14 @@ MIDI's tremolo strings, held whole, Orchestral's and Cinematic piano's 40-60-70,
 30-40-50, the songs' own 0-10-25; a line left as it is, whose tune a tremolo would blur); answered on 1 November 2026, each kept, and retired. The eleventh round (1 November
 2026) asks the four devices built the same day, each against none: Doom tuned down to C (`doom-tuning`, 0.86, against E),
 Jazz's walking bass (`jazz-walk`, 0.43, against its own line and its halves), Cinematic piano's cadenza (`film-cadenza`,
-1.03, against its other endings) and Rock's I–♭VII–IV–I (`rock-loop`, 0.58, against its chords drawn).
+1.03, against its other endings) and Rock's I–♭VII–IV–I (`rock-loop`, 0.58, against its chords drawn); answered on 2
+November 2026, `doom-tuning`, `jazz-walk` and `rock-loop` each kept 6 to none, and retired; `film-cadenza` liked as a
+device, but its last hit heard uneven, its bass cut short while the pad rang on: every ending's final chord, a pad's held
+to its next change and a phrase's held last note added their own hold to the ending's (`HeldDuration` additive), fixed,
+the cadenza's last chord then held its bar by the whole band rather than struck as a button, and asked again. The
+twelfth round (2 November 2026) asks it (`film-cadenza`) and three of the named progressions built the same day, each
+against its chords drawn: Pop's axis (`pop-axis`), Trance's axis in minor (`trance-minor-axis`) and Surf's Andalusian
+cadence (`surf-andalusian`).
 
 **Settled by listening**, so that no plan or review asks again unless the code it heard has changed:
 
@@ -128,7 +135,9 @@ Jazz's walking bass (`jazz-walk`, 0.43, against its own line and its halves), Ci
   song whose bass swelled into its notes, its attack lost, a bass never swelling since) and Cinematic piano's tempo at a
   phrase's edges (`film-rubato`, 6 to none); and of its tenth round (1 November 2026), a heavy section heard as it is and then coming back
   louder turned: Post-rock's guitars driven at the return (`postrock-heavy-return`, 6 to none) and Cinematic piano's
-  held strings bowed in tremolo (`film-bowed`, 5 to none, one the same).
+  held strings bowed in tremolo (`film-bowed`, 5 to none, one the same); and of its eleventh round (2 November 2026),
+  Doom tuned down to C (`doom-tuning`), Jazz's walking bass (`jazz-walk`) and Rock's I–♭VII–IV–I (`rock-loop`), each 6
+  to none.
 - **Taken out or lowered:** Disco's pump, Metal's turnaround, Trap's reharmonised last hook, Funk's swung 16ths and
   Folk's (their swing the songs' own, an 8ths' shuffle above about 107), Fusion's AABA, Ambient's swing,
   the riff's twin a third over a lowered riff (now an octave up), Techno's rolling 16ths bass (its offbeat figure
@@ -361,8 +370,8 @@ to), to none, a rule of it, the songs' notes outside their instrument 403 to 254
    the measure (`TuningReportTest`, 64 songs each): Doom from D at its plain end through C to B♭ ([42, 33, 25]), its riff's
    floor C2 in 50 songs, B1 and C#2 in 7 each, its median 49 to 45, its bass's 39 to 35; Nu metal from D through C to B
    ([42, 33, 29]), C2 in 55, its riff's median 47 to 44, its bass's 40 to 35; Heavy metal as it is to the middle and D
-   at its wild end ([50, 50, 42]), E in 59 and E♭ in 5, its median as it was; Thrash and Black metal as they are. Left:
-   Doom's tuned against E asked in the eleventh round (`doom-tuning`, 1 November 2026).
+   at its wild end ([50, 50, 42]), E in 59 and E♭ in 5, its median as it was; Thrash and Black metal as they are. Doom's
+   tuned against E kept on listening, 6 to none (`doom-tuning`, 2 November 2026).
 3. **No third low in any part**, should listening find a chord blurred outside the metal family: a chord part's notes
    below about E3 kept to its root, fifth and octave wherever it sits, the chords moved under the melody
    (`Registers.Apart`) and a low key's among them, rather than only a part its genre moves down (`OpenChords`); how often
@@ -388,7 +397,8 @@ The review's fixes are its plan (`rmg-reviews/2026-10-22/plan/plan.md`). Its pro
 - **The cadenza** (#365), built on 1 November 2026 (`EndingKind.Cadenza`, `SongFormGenerator.CreateCadenza`): the band
   holding the last chord it played for a bar or two, struck once, the drums out, while the melody runs alone over it in
   8ths, a chord's note on the beat and its scale's between, sweeping on an arch of aims to the far edge of its range and
-  back, slowing into the band's last hit together, a button; its hold a solo (`Hold.Solo`), which the pushes keep out of.
+  back, slowing into the band's last chord together, held its bar by every part (2 November 2026, the eleventh round
+  hearing its button's bass cut short under a pad ringing on); its hold a solo (`Hold.Solo`), which the pushes keep out of.
   A genre's alone: Jazz's, Orchestral's and Chamber's 10-20-30, Film piano's 20-30-40. Over 64 songs that always end so
   (`CadenzaTest`): held 5.7 beats, the runs 11.3 notes, 66% on the chord, 32% of its scale, 66% by step. Left: the held
   chord is the cadence's dominant in 28% of them, the section closing on IV, ii or home in the rest, over which it runs as
@@ -411,13 +421,14 @@ each moved). Put off, each its own plan:
   over Jazz's whole bass, by step 44% from 17%, the same note again 17% from 39%, 1 and 3 on the chord 97%; Ska's 58%,
   45% and 24%. Left: the repeats, the line's landings and restatements rather than the walk's; and the pickup an 8th
   before the bar line, which the walk, a pulse played exactly, leaves out, the bass's own (`LinePickup`) playing where it
-  does not walk, should listening ask for a skip.
+  does not walk, should listening ask for a skip. Kept on listening, 6 to none (`jazz-walk`, 2 November 2026).
 - **Rock's I–♭VII–IV loop,** built on 1 November 2026: a progression a genre names, played as named rather than drawn
   (`GenreChoices.Progression`, `Progressions.Templates`, a genre's alone), its roots in steps from home and the semitones
   each lies above it, which the section's scale must make, so that it plays over Mixolydian's I, Dorian's and Aeolian's
   i and never a major scale's vii°, a pattern of four chords or eight, from a stream of its own, the held home leaving
   it be. Rock's `rockLoop` (I–♭VII–IV–I) 40-35-25 against the drawn's 100: over 64 songs (`NamedProgressionTest`), named
-  in 13% of its sections, 22% of the Mixolydian ones, ♭VII–IV–I heard in 15% from 4%, ♭VII–I in 37% from 43%. On 2
+  in 13% of its sections, 22% of the Mixolydian ones, ♭VII–IV–I heard in 15% from 4%, ♭VII–I in 37% from 43%; kept on
+  listening, 6 to none (`rock-loop`, 2 November 2026). On 2
   November 2026 the others as data, every chord of a template major or minor where it plays, never diminished: the axis
   I–V–vi–IV (Pop's 70-50-30, Ballad's 30-25-20, Punk's 40-30-20), the axis in minor i–♭VI–♭III–♭VII (Pop's and
   Synthwave's 40-30-20, Ballad's 30-25-20, Trance's 50-40-30) and the Andalusian i–♭VII–♭VI–V, its V major wherever it

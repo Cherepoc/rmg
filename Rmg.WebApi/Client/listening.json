@@ -1,150 +1,8 @@
 [
   {
-    "id": "doom-tuning",
-    "question": "Two Doom songs, one with its guitars and bass tuned down to C, four semitones under the other's: the weight Doom wants, or only muddier?",
-    "decides": "Whether Doom tunes its parts down (tuning, its riff, rhythm and bass at 42-33-25, D at its plain end, C at its middle, B♭ at its wild), against the standard tuning; heard muddier, back towards E.",
-    "genre": "doom",
-    "with": {
-      "genre": {},
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "tuning": {
-          "riff": 50,
-          "rhythm": 50,
-          "bass": 50
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "8",
-        "at": 343.4,
-        "from": 341.1,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "9",
-        "at": 99.3,
-        "from": 95.2,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (finger))"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 260.9,
-        "from": 255.7,
-        "listen": [
-          "Riff (Overdriven Guitar)"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 21.2,
-        "from": 15.9,
-        "listen": [
-          "Bass (Electric Bass (pick))"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 384,
-        "from": 381,
-        "listen": [
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "M",
-        "at": 267.5,
-        "from": 263.6,
-        "listen": [
-          "Bass (Electric Bass (finger))"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "jazz-walk",
-    "question": "A Jazz bass walking in quarters, passing between the chord's notes on 2 and 4, against its own line: the walk, or a bass that won't sit still?",
-    "decides": "Whether Jazz's bass walks (figure.bass's walk, a quarter on every beat, the backbeats passing by step between its chord's notes), against the bass's own line and its halves; heard restless, the walk's weight lowered.",
-    "genre": "jazz",
-    "with": {
-      "genre": {},
-      "settings": {}
-    },
-    "without": {
-      "skip": [],
-      "genre": {
-        "figure.bass": {
-          "walk": 0
-        }
-      },
-      "settings": {}
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 129.2,
-        "from": 126.2,
-        "listen": [
-          "Bass (Contrabass)"
-        ]
-      },
-      {
-        "seed": "6",
-        "at": 424.7,
-        "from": 421.6,
-        "listen": [
-          "Solo (Tenor Sax)",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 50.6,
-        "from": 48.5,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "J",
-        "at": 277.7,
-        "from": 275.2,
-        "listen": [
-          "Bass (Contrabass)"
-        ]
-      },
-      {
-        "seed": "O",
-        "at": 43.2,
-        "from": 41.4,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "Q",
-        "at": 103.8,
-        "from": 100.5,
-        "listen": [
-          "Bass (Acoustic Bass)"
-        ]
-      }
-    ]
-  },
-  {
     "id": "film-cadenza",
-    "question": "A Cinematic piano piece ending with the band holding its last chord while the tune runs alone over it, slowing into the last hit, against its ending as it was: a flourish, or a detour before the end?",
-    "decides": "Whether a genre ends now and then on a cadenza (ending's cadenza, Cinematic piano's 20-30-40, Jazz's, Orchestral's and Chamber's 10-20-30), against the genre's other endings; heard a detour, none.",
+    "question": "A Cinematic piano piece ending with the band holding its last chord while the tune runs alone over it, slowing into a last chord the whole band holds, against its ending as it was: a flourish, or a detour before the end?",
+    "decides": "Whether a genre ends now and then on a cadenza (ending's cadenza, Cinematic piano's 20-30-40, Jazz's, Orchestral's and Chamber's 10-20-30), its last chord now held its bar by every part, against the genre's other endings; heard a detour, none.",
     "genre": "filmPiano",
     "with": {
       "genre": {},
@@ -221,10 +79,10 @@
     ]
   },
   {
-    "id": "rock-loop",
-    "question": "A Rock section looping I–♭VII–IV–I, against its chords drawn as before: the classic rock loop, or a cliché?",
-    "decides": "Whether Rock plays its named progression (progression's rockLoop, I–♭VII–IV–I over a Mixolydian, Dorian or Aeolian section, 40-35-25), against its chords drawn; heard a cliché, lowered.",
-    "genre": "rock",
+    "id": "pop-axis",
+    "question": "A Pop section looping I–V–vi–IV, against its chords drawn as before: pop's own four chords, or a cliché?",
+    "decides": "Whether Pop plays the axis progression (progression's axis, I–V–vi–IV where its scale makes every chord major or minor, 70-50-30), against its chords drawn; heard a cliché, lowered.",
+    "genre": "pop",
     "with": {
       "genre": {},
       "settings": {}
@@ -233,67 +91,220 @@
       "skip": [],
       "genre": {
         "progression": {
-          "rockLoop": 0
+          "axis": 0
         }
       },
       "settings": {}
     },
     "seeds": [
       {
-        "seed": "6",
-        "at": 132.9,
-        "from": 131.9,
+        "seed": "P",
+        "at": 152.9,
+        "from": 151.3,
         "listen": [
-          "Riff (Distortion Guitar)"
-        ]
-      },
-      {
-        "seed": "C",
-        "at": 33.8,
-        "from": 32.1,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Bass (Electric Bass (finger))",
-          "Melody (Harmonica)"
-        ]
-      },
-      {
-        "seed": "I",
-        "at": 131.5,
-        "from": 129.9,
-        "listen": [
-          "Rhythm part (Electric Guitar (clean))",
+          "Chords (Synth Brass 1)",
           "Bass (Electric Bass (pick))",
-          "Chords (Distortion Guitar)"
+          "Melody (Acoustic Grand Piano)"
         ]
       },
       {
-        "seed": "b",
-        "at": 120.8,
-        "from": 119.2,
+        "seed": "V",
+        "at": 14,
+        "from": 12.3,
         "listen": [
-          "Pad (Choir Aahs)",
-          "Chords (Distortion Guitar)",
-          "Rhythm part (Overdriven Guitar)"
+          "Chords (Synth Brass 1)",
+          "Melody (Lead 2 (sawtooth))",
+          "Bass (Synth Bass 1)"
         ]
       },
       {
-        "seed": "h",
-        "at": 156.1,
-        "from": 154.1,
+        "seed": "Y",
+        "at": 0,
+        "from": 0,
         "listen": [
-          "Riff (Overdriven Guitar)",
+          "Rhythm part (Electric Guitar (muted))",
+          "Chords (Electric Piano 1)",
           "Bass (Electric Bass (pick))"
         ]
       },
       {
-        "seed": "k",
-        "at": 66,
-        "from": 64.1,
+        "seed": "g",
+        "at": 53.6,
+        "from": 51.1,
         "listen": [
-          "Bass (Electric Bass (pick))",
+          "Chords (Electric Guitar (clean))",
+          "Bass (Synth Bass 2)",
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      },
+      {
+        "seed": "j",
+        "at": 145.2,
+        "from": 143.2,
+        "listen": [
+          "Chords (Electric Piano 1)",
+          "Riff (Electric Guitar (clean))",
+          "Melody (Acoustic Grand Piano)"
+        ]
+      },
+      {
+        "seed": "12",
+        "at": 138.3,
+        "from": 136.3,
+        "listen": [
+          "Melody (Acoustic Grand Piano)",
+          "Chords (Acoustic Guitar (steel))",
+          "Bass (Electric Bass (finger))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "trance-minor-axis",
+    "question": "A Trance section looping i–♭VI–♭III–♭VII, against its chords drawn as before: the anthem's minor loop, or a cliché?",
+    "decides": "Whether Trance plays the axis in minor (progression's minorAxis, i–♭VI–♭III–♭VII over a minor section, 50-40-30), against its chords drawn; heard a cliché, lowered.",
+    "genre": "trance",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "progression": {
+          "minorAxis": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "4",
+        "at": 227.6,
+        "from": 225.8,
+        "listen": [
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "G",
+        "at": 153,
+        "from": 151.3,
+        "listen": [
+          "Chords (Pad 2 (warm))",
+          "Bass (Synth Bass 1)"
+        ]
+      },
+      {
+        "seed": "V",
+        "at": 74.9,
+        "from": 73.2,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Melody (Lead 8 (bass and lead))",
+          "Bass (Synth Bass 2)"
+        ]
+      },
+      {
+        "seed": "r",
+        "at": 240,
+        "from": 238.2,
+        "listen": [
+          "Melody (Lead 8 (bass and lead))",
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "1E",
+        "at": 103.6,
+        "from": 101.9,
+        "listen": [
+          "Bass (Synth Bass 1)",
+          "Chords (Pad 3 (polysynth))"
+        ]
+      },
+      {
+        "seed": "1H",
+        "at": 112.1,
+        "from": 110.4,
+        "listen": [
+          "Chords (Pad 3 (polysynth))",
+          "Bass (Synth Bass 1)",
+          "Melody (Lead 2 (sawtooth))"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "surf-andalusian",
+    "question": "A Surf section descending i–♭VII–♭VI–V, its V major every time, against its chords drawn as before: the Andalusian cadence surf wants, or a cliché?",
+    "decides": "Whether Surf plays the Andalusian cadence (progression's andalusian, i–♭VII–♭VI–V over a natural minor, its V raised, 70-50-40), against its chords drawn; heard a cliché, lowered.",
+    "genre": "surf",
+    "with": {
+      "genre": {},
+      "settings": {}
+    },
+    "without": {
+      "skip": [],
+      "genre": {
+        "progression": {
+          "andalusian": 0
+        }
+      },
+      "settings": {}
+    },
+    "seeds": [
+      {
+        "seed": "3",
+        "at": 78.9,
+        "from": 77.3,
+        "listen": [
+          "Riff (Distortion Guitar)",
           "Melody (Electric Guitar (clean))",
-          "Chords (Overdriven Guitar)"
+          "Bass (Electric Bass (finger))"
+        ]
+      },
+      {
+        "seed": "s",
+        "at": 22.3,
+        "from": 20.9,
+        "listen": [
+          "Rhythm part (Electric Guitar (muted))",
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "u",
+        "at": 64.4,
+        "from": 62.9,
+        "listen": [
+          "Riff (Electric Guitar (clean))",
+          "Melody (Electric Guitar (clean))",
+          "Chords (Electric Guitar (muted))"
+        ]
+      },
+      {
+        "seed": "1H",
+        "at": 1.5,
+        "from": 0,
+        "listen": [
+          "Rhythm part (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1K",
+        "at": 66.8,
+        "from": 65.3,
+        "listen": [
+          "Melody (Electric Guitar (clean))"
+        ]
+      },
+      {
+        "seed": "1j",
+        "at": 79.5,
+        "from": 78.1,
+        "listen": [
+          "Riff (Electric Guitar (clean))"
         ]
       }
     ]

@@ -59,36 +59,28 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("doom-tuning", "Two Doom songs, one with its guitars and bass tuned down to C, four semitones under the other's: the weight Doom wants, or only muddier?",
-            "Whether Doom tunes its parts down (tuning, its riff, rhythm and bass at 42-33-25, D at its plain end, C at its middle, B♭ at its wild), against the standard tuning; heard muddier, back towards E.", "doom", [],
-            new() { ["tuning"] = new() { ["riff"] = 50, ["rhythm"] = 50, ["bass"] = 50 } },
-            x => x.Origin),
-        new("jazz-walk", "A Jazz bass walking in quarters, passing between the chord's notes on 2 and 4, against its own line: the walk, or a bass that won't sit still?",
-            "Whether Jazz's bass walks (figure.bass's walk, a quarter on every beat, the backbeats passing by step between its chord's notes), against the bass's own line and its halves; heard restless, the walk's weight lowered.", "jazz", [],
-            new() { ["figure.bass"] = new() { ["walk"] = 0 } },
-            x => Walking(x).Select(s => (double?)s.Start).FirstOrDefault(), In: (x, span) => Walking(x).Contains(span)),
-        new("film-cadenza", "A Cinematic piano piece ending with the band holding its last chord while the tune runs alone over it, slowing into the last hit, against its ending as it was: a flourish, or a detour before the end?",
-            "Whether a genre ends now and then on a cadenza (ending's cadenza, Cinematic piano's 20-30-40, Jazz's, Orchestral's and Chamber's 10-20-30), against the genre's other endings; heard a detour, none.", "filmPiano", [],
+        new("film-cadenza", "A Cinematic piano piece ending with the band holding its last chord while the tune runs alone over it, slowing into a last chord the whole band holds, against its ending as it was: a flourish, or a detour before the end?",
+            "Whether a genre ends now and then on a cadenza (ending's cadenza, Cinematic piano's 20-30-40, Jazz's, Orchestral's and Chamber's 10-20-30), its last chord now held its bar by every part, against the genre's other endings; heard a detour, none.", "filmPiano", [],
             new() { ["ending"] = new() { ["cadenza"] = 0 } },
             x => x.Map.Ending.Kind == EndingKind.Cadenza ? x.Map.Ending.Start : null, Places: x => x.Map.Ending.Kind == EndingKind.Cadenza ? [x.Map.Ending.Start] : []),
-        new("rock-loop", "A Rock section looping I–♭VII–IV–I, against its chords drawn as before: the classic rock loop, or a cliché?",
-            "Whether Rock plays its named progression (progression's rockLoop, I–♭VII–IV–I over a Mixolydian, Dorian or Aeolian section, 40-35-25), against its chords drawn; heard a cliché, lowered.", "rock", [],
-            new() { ["progression"] = new() { ["rockLoop"] = 0 } },
-            x => Looped(x).Select(s => (double?)s.Start).FirstOrDefault(), In: (x, span) => Looped(x).Contains(span))
+        new("pop-axis", "A Pop section looping I–V–vi–IV, against its chords drawn as before: pop's own four chords, or a cliché?",
+            "Whether Pop plays the axis progression (progression's axis, I–V–vi–IV where its scale makes every chord major or minor, 70-50-30), against its chords drawn; heard a cliché, lowered.", "pop", [],
+            new() { ["progression"] = new() { ["axis"] = 0 } },
+            x => Looped(x, "axis").Select(s => (double?)s.Start).FirstOrDefault(), In: (x, span) => Looped(x, "axis").Contains(span)),
+        new("trance-minor-axis", "A Trance section looping i–♭VI–♭III–♭VII, against its chords drawn as before: the anthem's minor loop, or a cliché?",
+            "Whether Trance plays the axis in minor (progression's minorAxis, i–♭VI–♭III–♭VII over a minor section, 50-40-30), against its chords drawn; heard a cliché, lowered.", "trance", [],
+            new() { ["progression"] = new() { ["minorAxis"] = 0 } },
+            x => Looped(x, "minorAxis").Select(s => (double?)s.Start).FirstOrDefault(), In: (x, span) => Looped(x, "minorAxis").Contains(span)),
+        new("surf-andalusian", "A Surf section descending i–♭VII–♭VI–V, its V major every time, against its chords drawn as before: the Andalusian cadence surf wants, or a cliché?",
+            "Whether Surf plays the Andalusian cadence (progression's andalusian, i–♭VII–♭VI–V over a natural minor, its V raised, 70-50-40), against its chords drawn; heard a cliché, lowered.", "surf", [],
+            new() { ["progression"] = new() { ["andalusian"] = 0 } },
+            x => Looped(x, "andalusian").Select(s => (double?)s.Start).FirstOrDefault(), In: (x, span) => Looped(x, "andalusian").Contains(span))
     ];
 
-    /// <summary>The sections whose bass walks (<see cref="TracePoints.Figures" />), in order.</summary>
-    private static SectionSpan[] Walking(CorpusSong song)
+    /// <summary>The sections that play the named progression (<see cref="TracePoints.NamedProgression" />), in order.</summary>
+    private static SectionSpan[] Looped(CorpusSong song, string name)
     {
-        var walking = song.Trace.Where(x => x.Point == TracePoints.Figures && ((ImmutableDictionary<FigurePlayer, string>)x.Value!).GetValueOrDefault(FigurePlayer.Bass) == "walk")
-            .Select(x => x.Section).ToHashSet();
-        return [..song.Map.Sections.Where(x => walking.Contains(x.SectionId))];
-    }
-
-    /// <summary>The sections that play a named progression (<see cref="TracePoints.NamedProgression" />), in order.</summary>
-    private static SectionSpan[] Looped(CorpusSong song)
-    {
-        var named = song.Trace.Where(x => x.Point == TracePoints.NamedProgression && x.Value is string).Select(x => x.Section).ToHashSet();
+        var named = song.Trace.Where(x => x.Point == TracePoints.NamedProgression && (string?)x.Value == name).Select(x => x.Section).ToHashSet();
         return [..song.Map.Sections.Where(x => named.Contains(x.SectionId))];
     }
 
