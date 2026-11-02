@@ -7,7 +7,7 @@ namespace Rmg.Tests.Forms;
 
 /// <summary>
 ///     The cadenza (<see cref="EndingKind.Cadenza" />): the band holding the last chord it played, the drums out, while
-///     the melody runs alone over it, then the band's last hit together.
+///     the melody runs alone over it, then the band's last chord together, held its bar.
 /// </summary>
 public sealed class CadenzaTest
 {
@@ -21,7 +21,8 @@ public sealed class CadenzaTest
 
     /// <summary>
     ///     A cadenza's drums are silent over its hold, the chords, the pad and the bass strike its chord once as it starts,
-    ///     the melody runs over it, and the band strikes the last hit together after it.
+    ///     the melody runs over it, and the band strikes its last chord together after it, every part holding it to the
+    ///     song's end.
     /// </summary>
     [Test]
     public async Task ACadenza_HoldsTheBand_WhileTheMelodyRunsAlone()
@@ -44,7 +45,9 @@ public sealed class CadenzaTest
 
             if (song.Song.TrackDefinitions.Values.Any(x => x.Role == TrackRole.Melody))
                 await Assert.That(song.Song.Notes![song.Track(TrackRole.Melody)].Count(x => Within(x.Position))).IsGreaterThan(2).Because($"seed {song.Seed}, the melody's run");
-            await Assert.That(song.Song.Notes!.Where(x => !song.IsDrum(x.Key)).Any(x => x.Value.Any(n => Math.Abs(n.Position - hit) < 1e-6))).IsTrue().Because($"seed {song.Seed}, its last hit at {hit}");
+            var last = song.Song.Notes!.Where(x => !song.IsDrum(x.Key)).SelectMany(x => x.Value).Where(n => Math.Abs(n.Position - hit) < 1e-6).ToArray();
+            await Assert.That(last).IsNotEmpty().Because($"seed {song.Seed}, its last chord at {hit}");
+            await Assert.That(last.All(n => Math.Abs(n.Position + n.Value.Duration - song.Song.Duration) < 1e-6)).IsTrue().Because($"seed {song.Seed}, its last chord held to the end");
         }
 
         await Assert.That(endings).IsEqualTo(SongCount);

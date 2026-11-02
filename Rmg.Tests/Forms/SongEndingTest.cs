@@ -117,6 +117,29 @@ public sealed class SongEndingTest
         await Assert.That(endings.Length).IsGreaterThan(8);
     }
 
+    /// <summary>
+    ///     The song's last chord held as long by every pitched part that strikes it, so that the band lets go of it together:
+    ///     a pad's, held to its next change, and a phrase's last note held, not held the longer for it.
+    /// </summary>
+    [Test]
+    [Arguments(null)]
+    [Arguments("filmPiano")]
+    [Arguments("jazz")]
+    public async Task TheLastChord_IsLetGoOfTogether_ByEveryPart(string? genre)
+    {
+        var overrides = new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre));
+        var endings = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, overrides)).Where(x => FormLayers.HasFinalChord(Ending(x).Kind)).ToArray();
+        foreach (var song in endings)
+        {
+            var notes = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value).ToArray();
+            var last = notes.Max(x => x.Position);
+            var ends = notes.Where(x => Math.Abs(x.Position - last) < 1e-6).Select(x => Math.Round(x.Position + x.Value.Duration, 6)).Distinct().ToArray();
+            await Assert.That(ends).HasSingleItem().Because($"{genre} seed {song.Seed}, {Ending(song).Kind}, ending at {string.Join(", ", ends)}");
+        }
+
+        await Assert.That(endings.Length).IsGreaterThan(8);
+    }
+
     [Test]
     public async Task Stops_SilenceTheBand_BeforeTheFinalChord()
     {

@@ -40,8 +40,8 @@ public enum EndingKind
 
     /// <summary>
     ///     The band holding the last chord it played, the cadence's dominant where it closes, for a bar or two, the drums
-    ///     out, while the melody runs alone over it, slowing, then the whole band's last hit together on the home chord, a
-    ///     button, as a soloist's cadenza before a jazz tune's or a concerto's last chord.
+    ///     out, while the melody runs alone over it, slowing, then the whole band's last chord together on the home chord,
+    ///     held its bar, as a soloist's cadenza before a jazz tune's or a concerto's last chord.
     /// </summary>
     Cadenza
 }

@@ -314,13 +314,14 @@ internal sealed class SongFormGenerator
 
         if (FormLayers.HasFinalChord(plan.Ending))
         {
-            // a big ending's held chord, or a cadenza's hold, then its last hit, a button's
+            // a big ending's held chord, then its last hit, a button's; or a cadenza's hold, then its last chord, held its
+            // bar by the whole band, as the run it slows into resolves rather than stops
             var (big, cadenza) = (plan.Ending == EndingKind.Big, plan.Ending == EndingKind.Cadenza);
             blocks.Add(cadenza
                 ? CreateCadenza(sections[^1], sections.Take(sections.Count - 1), held, _roles)
                 : CreateEnding(sections[^1], sections.Take(sections.Count - 1), held, big ? held : endingDuration, _roles));
             if (big || cadenza)
-                blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), FormLayers.ButtonLength, last.BarDuration, _roles));
+                blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), cadenza ? last.BarDuration : FormLayers.ButtonLength, last.BarDuration, _roles));
 
             if (plan.Ending == EndingKind.Stop)
             {
@@ -620,8 +621,9 @@ internal sealed class SongFormGenerator
     )
     {
         var homeBar = lastSection.Timeline.Trim(lastSection.Meter.BarDuration);
-        // the final chord struck whole, a broken chord's too, as the band hits it together
-        var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length), CompositionStateKinds.Arpeggio.CreateState(new LayerValue<int>(StateDepths.Note, (int)ArpeggioPattern.None))]);
+        // the final chord struck whole, a broken chord's too, as the band hits it together, and held as long by every part,
+        // in place of the hold its note had, a pad's to the next change or a phrase's last note's, which would add to it
+        var final = StateMap.FromStates([CompositionStateKinds.Arpeggio.CreateState(new LayerValue<int>(StateDepths.Note, (int)ArpeggioPattern.None))]);
         // every track plays the home bar's chord as its earliest note has it, the downbeat's, whichever note it takes its
         // own state from; where no part plays in the home bar, the home chord as the song last played it, a section's
         // before, rather than the shapes the parts last played, a cadence's among them
@@ -655,6 +657,7 @@ internal sealed class SongFormGenerator
                         // on the home chord itself
                         .Select(note => note.Value.Except(shapeKinds).MergeWith(homeShape)
                             .MergeWith(final)
+                            .With(StateKinds.HeldDuration, length)
                             .ToTimelineItem(0)
                         )
                         .Select(LandOnRoot);
