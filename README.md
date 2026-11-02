@@ -135,8 +135,9 @@ internet connection.
 - **Playing.** The page loads a song and a soundfont as it opens, so you only need to press play. When a random song
   ends it plays another, unless the autoplay switch beside **Generate Next** is off. **Previous** and **Next** walk the
   list of songs so far, Next past the latest making a new one, and a seed typed under the downloads plays that song.
-- **Song settings.** How experimental the song is and every facet, its mood (bright to dark, calm to fierce), the
-  tempo, key and meter, every part (as drawn, in or out) and the drums can be given or left to the song. Changing one remakes the song from the same seed, going on
+- **Composition and Parts.** How experimental the song is and every facet, its mood (bright to dark, calm to fierce),
+  the tempo, key and meter, under Composition, and every part (as drawn, in or out) and the drums, under Parts with the
+  mixer, can be given or left to the song. Changing one remakes the song from the same seed, going on
   from the same place. What changes only how it sounds (a part's instrument, volume and pan, the drum groups, the
   volume) is heard at once. What each setting does is shown under the pointer.
 - **Genres.** A genre picked leans the songs to its idioms, and Any genre draws a preset for every new song, named

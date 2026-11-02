@@ -135,46 +135,45 @@
         </section>
     </aside>
 
-    <details class="panel settings-panel" id="settings-panel">
+    <details class="panel" id="composition-panel">
         <summary>
-            <h2>Song settings</h2><span class="visually-hidden">: </span><span class="state" id="settings-state">All drawn</span>
+            <h2>Composition</h2><span class="visually-hidden">: </span><span class="state" id="composition-state">All drawn</span>
+        </summary>
+        <div class="settings-grid" id="song-settings"></div>
+    </details>
+
+    <details class="panel" id="parts-panel">
+        <summary>
+            <h2>Parts</h2><span class="visually-hidden">: </span><span class="state" id="parts-state">All drawn</span>
         </summary>
         <p class="warning" id="all-off" role="alert" hidden>
             Every part is off, so there is nothing to play. Turn a part on to generate again.
         </p>
-        <fieldset class="settings-group">
-            <legend>Composition</legend>
-            <div class="settings-grid" id="song-settings"></div>
-        </fieldset>
-
-        <fieldset class="settings-group">
-            <legend>Parts</legend>
-            <div class="row song-volume">
-                <label class="field volume">
-                    <span>Song volume</span>
-                    <input type="range" id="song-volume" min="0" max="61" step="1" value="61" data-default="61" />
-                    <output id="song-volume-value" class="percent">100%</output>
-                </label>
-            </div>
-            <div class="mixer-scroll">
-                <table class="mixer">
-                    <thead>
-                    <tr>
-                        <td class="given"></td>
-                        <th scope="col">Part</th>
-                        <th scope="col" class="on">On</th>
-                        <th scope="col">Instrument</th>
-                        <th scope="col" class="pan">Pan</th>
-                        <th scope="col" class="volume">Volume</th>
-                        <td class="listen"></td>
-                        <td class="listen"></td>
-                        <td class="pulse"></td>
-                    </tr>
-                    </thead>
-                    <tbody id="mixer"></tbody>
-                </table>
-            </div>
-        </fieldset>
+        <div class="row song-volume">
+            <label class="field volume">
+                <span>Song volume</span>
+                <input type="range" id="song-volume" min="0" max="61" step="1" value="61" data-default="61" />
+                <output id="song-volume-value" class="percent">100%</output>
+            </label>
+        </div>
+        <div class="mixer-scroll">
+            <table class="mixer">
+                <thead>
+                <tr>
+                    <td class="given"></td>
+                    <th scope="col">Part</th>
+                    <th scope="col" class="on">On</th>
+                    <th scope="col">Instrument</th>
+                    <th scope="col" class="pan">Pan</th>
+                    <th scope="col" class="volume">Volume</th>
+                    <td class="listen"></td>
+                    <td class="listen"></td>
+                    <td class="pulse"></td>
+                </tr>
+                </thead>
+                <tbody id="mixer"></tbody>
+            </table>
+        </div>
     </details>
 
     <details class="panel" id="soundfont-panel">

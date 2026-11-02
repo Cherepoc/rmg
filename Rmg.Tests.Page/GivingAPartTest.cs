@@ -25,7 +25,7 @@ public sealed class GivingAPartTest(Site site)
         await using var page = await SongPage.Open(site, phone: true);
         await page.FirstSong();
         await page.Generate();
-        await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
+        await page.Page.EvaluateAsync("() => document.getElementById('composition-panel').open = true");
         var slider = page.Page.Locator("input[data-setting='fills']");
         await slider.ScrollIntoViewIfNeededAsync();
         var before = (await slider.BoundingBoxAsync())!.Y;
@@ -121,6 +121,9 @@ public sealed class GivingAPartTest(Site site)
         var given = Melody(await Click(page, "td:first-child input"));
         await Assert.That(Has(given, "plays") && Has(given, "instrument") && Has(given, "pan")).IsTrue();
         await Assert.That(await IsDisabled(page, "select")).IsFalse();
+        // counted by the parts' panel, not the composition's
+        await Assert.That(await page.PartsGiven()).IsEqualTo("1 given");
+        await Assert.That(await page.Given()).IsEqualTo("All drawn");
 
         // the part switched to the other of in and out
         var switched = Melody(await Click(page, "td:nth-child(3) input"));
@@ -129,6 +132,7 @@ public sealed class GivingAPartTest(Site site)
         var released = Melody(await Click(page, "td:first-child input"));
         await Assert.That(Has(released, "plays") || Has(released, "instrument") || Has(released, "pan")).IsFalse();
         await Assert.That(await IsDisabled(page, "select")).IsTrue();
+        await Assert.That(await page.PartsGiven()).IsEqualTo("All drawn");
         // and its volume the song's own, the fullest, not to be moved
         await Assert.That(await IsDisabled(page, "input.fader")).IsTrue();
         await Assert.That(released.GetProperty("volume").GetInt32()).IsEqualTo(61);

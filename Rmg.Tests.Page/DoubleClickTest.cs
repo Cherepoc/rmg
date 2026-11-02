@@ -13,7 +13,7 @@ public sealed class DoubleClickTest(Site site)
     {
         var page = await SongPage.Open(site);
         await page.FirstSong();
-        await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
+        await page.Page.EvaluateAsync("() => { document.getElementById('composition-panel').open = true; document.getElementById('parts-panel').open = true; }");
         return page;
     }
 
@@ -57,7 +57,7 @@ public sealed class DoubleClickTest(Site site)
     {
         await using var page = await SongPage.Open(site, phone: true);
         await page.FirstSong();
-        await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
+        await page.Page.EvaluateAsync("() => { document.getElementById('composition-panel').open = true; document.getElementById('parts-panel').open = true; }");
         await page.SetSetting("feel", 10);
         var slider = Setting(page, "feel");
 

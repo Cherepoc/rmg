@@ -28,7 +28,7 @@ public sealed class GenreManagerTest(Site site)
         // the list and the window's button alone, seen with the settings folded away
         await Assert.That(await page.Page.Locator("#genre-row button").CountAsync()).IsEqualTo(1);
         await Assert.That(await genre.IsVisibleAsync()).IsTrue();
-        await Assert.That(await page.Page.Locator("#settings-panel select[aria-label='Genre']").CountAsync()).IsEqualTo(0);
+        await Assert.That(await page.Page.Locator("#composition-panel select[aria-label='Genre']").CountAsync()).IsEqualTo(0);
         var under = await page.Page.EvaluateAsync<bool>("() => document.querySelector('.transport').getBoundingClientRect().bottom <= document.getElementById('genre-row').getBoundingClientRect().top");
         await Assert.That(under).IsTrue();
 

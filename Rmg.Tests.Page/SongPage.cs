@@ -300,8 +300,11 @@ public sealed class SongPage : IAsyncDisposable
         return editor;
     }
 
-    /// <summary>How many of the settings are given, as the settings panel says.</summary>
-    public async Task<string> Given() => await Page.Locator("#settings-state").TextContentAsync() ?? "";
+    /// <summary>How many of the composition's values are given, as its panel says.</summary>
+    public async Task<string> Given() => await Page.Locator("#composition-state").TextContentAsync() ?? "";
+
+    /// <summary>How many of the parts are given, the drums' pieces among them, as their panel says.</summary>
+    public async Task<string> PartsGiven() => await Page.Locator("#parts-state").TextContentAsync() ?? "";
 
     /// <summary>Waits until the player can be stopped, which wants the soundfont as well as the song.</summary>
     public Task Playable() => Until(() => Page.Locator("#stop").IsEnabledAsync(), "the song and the soundfont being ready");

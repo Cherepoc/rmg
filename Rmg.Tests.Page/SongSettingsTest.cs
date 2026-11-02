@@ -9,7 +9,7 @@ public sealed class SongSettingsTest(Site site)
     {
         await using var page = await SongPage.Open(site);
         await page.FirstSong();
-        await page.Page.Locator("#settings-panel summary").ClickAsync();
+        await page.Page.Locator("#composition-panel summary").ClickAsync();
 
         await Assert.That(await page.Page.Locator(".setting .end").CountAsync()).IsGreaterThan(0);
         var over = await page.Page.EvaluateAsync<string[]>(
@@ -23,7 +23,7 @@ public sealed class SongSettingsTest(Site site)
     {
         await using var page = await SongPage.Open(site);
         await page.FirstSong();
-        await page.Page.Locator("#settings-panel summary").ClickAsync();
+        await page.Page.Locator("#composition-panel summary").ClickAsync();
         await page.Until(async () => await page.Page.Locator("select[aria-label='Genre']").IsEnabledAsync(), "the genres listed");
 
         // every row's name and control as far in as every other's, the genre's, which has no checkbox, among them

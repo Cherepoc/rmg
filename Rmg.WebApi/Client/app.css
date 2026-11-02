@@ -679,22 +679,6 @@ input[type="range"] {
 }
 
 
-/* the settings of the song: values given or drawn, a part's row of the mixer, and the drums' */
-.settings-group {
-    /* a fieldset is as wide as what it holds unless told otherwise, and the mixer scrolls within it instead */
-    min-width: 0;
-    margin: 14px 0 0;
-    padding: 10px 12px 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-}
-
-.settings-group legend {
-    padding: 0 6px;
-    font-size: 13px;
-    color: var(--muted);
-}
-
 .settings-grid {
     display: grid;
     gap: 8px;
@@ -1364,7 +1348,7 @@ html:has(dialog:modal) {
     font-size: 13px;
 }
 
-/* what a part not given shows the song drew, dimmed as the song settings' sliders are */
+/* what a part not given shows the song drew, dimmed as the composition's sliders are */
 .mixer select:disabled,
 .mixer input:disabled {
     opacity: 0.5;

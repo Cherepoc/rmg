@@ -104,6 +104,7 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(page.Requests[^1].Body.GetProperty("mode").GetInt32()).IsEqualTo(2);
         await page.Settled();
         await Assert.That(await page.Given()).IsEqualTo("2 given");
+        await Assert.That(await page.PartsGiven()).IsEqualTo("All drawn");
 
         // and the link, opened where nothing is kept, asks for both
         await page.Until(() => Task.FromResult(page.Page.Url.Contains("settings=")), "the link written");

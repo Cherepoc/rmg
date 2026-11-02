@@ -11,7 +11,7 @@ public sealed class MoodTest(Site site)
     {
         await using var page = await SongPage.Open(site);
         await page.FirstSong();
-        await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
+        await page.Page.EvaluateAsync("() => document.getElementById('composition-panel').open = true");
 
         // drawn, the song's own, as its settings answered it, and not asked for
         await page.Until(() => page.Requests[^1].Answered is not null, "the song's settings answered");

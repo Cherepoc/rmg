@@ -11,7 +11,7 @@ public sealed class LengthTest(Site site)
     {
         await using var page = await SongPage.Open(site);
         await page.FirstSong();
-        await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
+        await page.Page.EvaluateAsync("() => document.getElementById('composition-panel').open = true");
 
         // drawn, the length the song played, in minutes and seconds
         await page.Until(async () => System.Text.RegularExpressions.Regex.IsMatch(await Output(page).TextContentAsync() ?? "", @"^\d+:\d\d$"), "the length shown");

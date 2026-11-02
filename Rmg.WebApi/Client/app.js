@@ -74,7 +74,8 @@ const elements = {
     keep: document.getElementById("keep"),
     seed: document.getElementById("seed"),
     generate: document.getElementById("generate"),
-    settingsState: document.getElementById("settings-state"),
+    compositionState: document.getElementById("composition-state"),
+    partsState: document.getElementById("parts-state"),
     allOff: document.getElementById("all-off"),
     songSettings: document.getElementById("song-settings"),
     genreRow: document.getElementById("genre-row"),
@@ -334,7 +335,7 @@ function listen(player) {
 function advance() {
     if (!isAutoplayOn() || !isSongRandom || arrival !== null) return false;
     if (isEveryPartOff(settings)) {
-        setStatus("Every part is off, so no next song plays. Turn a part on in the song settings.", true);
+        setStatus("Every part is off, so no next song plays. Turn a part on in Parts.", true);
         return false;
     }
 
@@ -1174,7 +1175,7 @@ function updateGenerateButtons() {
 }
 
 /** Says, where the settings are and on the status line, that every part is off, and why nothing can be generated. */
-const EVERY_PART_OFF = "Every part is off, so there is nothing to play. Turn a part on in the song settings.";
+const EVERY_PART_OFF = "Every part is off, so there is nothing to play. Turn a part on in Parts.";
 
 function showEveryPartOff() {
     const isOff = isEveryPartOff(settings);
@@ -1250,12 +1251,15 @@ function keepCurrentSettings() {
     showGiven();
 }
 
-/** How many of the settings change the song, as the panel's heading says. */
+/** How many of the settings change the song, as each panel's heading says: the composition's values, and the parts'. */
 function showGiven() {
-    const given = givenCount(settings)
-        + PARTS.filter((part) => settings.parts[part].plays !== "random").length
-        + (settings.drumPieces.isGiven ? 1 : 0);
-    elements.settingsState.textContent = given === 0 ? "All drawn" : `${given} given`;
+    const parts = PARTS.filter((part) => settings.parts[part].plays !== "random").length + (settings.drumPieces.isGiven ? 1 : 0);
+    elements.compositionState.textContent = formatGiven(givenCount(settings));
+    elements.partsState.textContent = formatGiven(parts);
+}
+
+function formatGiven(given) {
+    return given === 0 ? "All drawn" : `${given} given`;
 }
 
 // --- the songs so far ------------------------------------------------------
@@ -1921,7 +1925,7 @@ let own = {};
 
 buildSettings();
 
-/** The settings panel: the values that change the song, every part's row of the mixer, and the drums'. */
+/** The Composition and Parts panels: the values that change the song, every part's row of the mixer, and the drums'. */
 function buildSettings() {
     // the genre first, then in the order they are named, the key, the mode and the meter chosen from a
     // list and every other on a slider
@@ -2466,7 +2470,7 @@ function evenDrumGroupRows() {
 }
 
 window.addEventListener("resize", evenDrumGroupRows);
-document.getElementById("settings-panel").addEventListener("toggle", evenDrumGroupRows);
+document.getElementById("parts-panel").addEventListener("toggle", evenDrumGroupRows);
 
 /** A table cell holding a control, or nothing, of the column its class names, where it has one. */
 function cellOf(content, column = "") {
@@ -2556,7 +2560,7 @@ document.addEventListener("pointerdown", (event) => {
     slider.addEventListener("pointercancel", () => ended.abort(), { signal: ended.signal });
 });
 
-/** Puts the settings, and what the song on the page drew and is made of, on the panel. */
+/** Puts the settings, and what the song on the page drew and is made of, on the panels. */
 function showSettings() {
     showGenre();
     for (const key of settingRows.keys()) showSetting(key);
